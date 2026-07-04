@@ -1,6 +1,7 @@
 package com.lextures.android.core.navigation
 
 import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.lms.ImmersiveReaderCapabilities
 import com.lextures.android.core.lms.PlatformFeatures
 import com.lextures.android.core.lms.TutorLogic
 import com.lextures.android.core.lms.isOfficeHoursEnabled
@@ -160,6 +161,13 @@ data class MobilePlatformFeatures(
     val ffMobileUniversalSearch: Boolean = false,
     val ffMobileProfileDepth: Boolean = false,
     val ffMobileLibraryEreserves: Boolean = true,
+    val ffMobileImmersiveReader: Boolean = true,
+    val readAloudEnabled: Boolean = false,
+    val ffReadAloud: Boolean = false,
+    val videoCaptionsEnabled: Boolean = false,
+    val autoCaptioningEnabled: Boolean = false,
+    val translationMemoryEnabled: Boolean = false,
+    val ffReadingPreferences: Boolean = false,
     val oerLibraryEnabled: Boolean = false,
     val customFieldsEnabled: Boolean = false,
     val ffDemographics: Boolean = false,
@@ -184,6 +192,20 @@ data class MobilePlatformFeatures(
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
 
+    val immersiveReader: ImmersiveReaderCapabilities
+        get() {
+            if (!ffMobileImmersiveReader) {
+                return ImmersiveReaderCapabilities(toolbarEnabled = false)
+            }
+            return ImmersiveReaderCapabilities(
+                toolbarEnabled = true,
+                readAloudEnabled = readAloudEnabled && ffReadAloud,
+                translationEnabled = translationMemoryEnabled,
+                captionsEnabled = videoCaptionsEnabled,
+                preferencesEnabled = ffReadingPreferences || (readAloudEnabled && ffReadAloud),
+            )
+        }
+
     companion object {
         fun from(features: PlatformFeatures?): MobilePlatformFeatures = MobilePlatformFeatures(
             ffLibrary = features?.ffLibrary == true,
@@ -193,6 +215,13 @@ data class MobilePlatformFeatures(
             ffMobileUniversalSearch = features?.ffMobileUniversalSearch == true,
             ffMobileProfileDepth = features?.ffMobileProfileDepth == true,
             ffMobileLibraryEreserves = features?.ffMobileLibraryEreserves != false,
+            ffMobileImmersiveReader = features?.ffMobileImmersiveReader != false,
+            readAloudEnabled = features?.readAloudEnabled == true,
+            ffReadAloud = features?.ffReadAloud == true,
+            videoCaptionsEnabled = features?.videoCaptionsEnabled == true || features?.autoCaptioningEnabled == true,
+            autoCaptioningEnabled = features?.autoCaptioningEnabled == true,
+            translationMemoryEnabled = features?.translationMemoryEnabled == true,
+            ffReadingPreferences = features?.ffReadingPreferences == true,
             oerLibraryEnabled = features?.oerLibraryEnabled == true,
             customFieldsEnabled = features?.customFieldsEnabled == true,
             ffDemographics = features?.ffDemographics == true,

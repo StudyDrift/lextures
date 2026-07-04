@@ -3,6 +3,7 @@ import SwiftUI
 /// Native content page reader with sticky title, offline cache, and completion (M3.1).
 struct ContentPageView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
 
@@ -38,9 +39,12 @@ struct ContentPageView: View {
                                 .padding(.vertical, 40)
                         } else if let markdown = detail?.markdown, !markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             LMSCard {
-                                ReadAloudButton(text: markdown)
-                                CourseMarkdownContentView(markdown: markdown)
-                                    .lexturesReadableText()
+                                readerToolbar(markdown: markdown)
+                                CourseMarkdownContentView(
+                                    markdown: markdown,
+                                    captionsEnabled: shell.platformFeatures.immersiveReader.captionsEnabled
+                                )
+                                .lexturesReadableText()
                             }
                             .accessibilityElement(children: .contain)
                         }
@@ -123,6 +127,23 @@ struct ContentPageView: View {
             }
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.modules.loadError")
+        }
+    }
+
+    @ViewBuilder
+    private func readerToolbar(markdown: String) -> some View {
+        let caps = shell.platformFeatures.immersiveReader
+        if caps.toolbarEnabled {
+            ReaderToolbar(
+                text: markdown,
+                courseCode: course.courseCode,
+                onContentReload: { await load() },
+                readAloudEnabled: caps.readAloudEnabled,
+                translationEnabled: caps.translationEnabled,
+                preferencesEnabled: caps.preferencesEnabled
+            )
+        } else {
+            ReadAloudButton(text: markdown)
         }
     }
 

@@ -3,6 +3,7 @@ import SwiftUI
 /// Activity detail: content body plus the settings "preview box" (parity with web).
 struct ItemDetailView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openURL) private var openURL
 
@@ -237,11 +238,27 @@ struct ItemDetailView: View {
 
     private func contentCard(_ markdown: String) -> some View {
         LMSCard {
-            ReadAloudButton(text: markdown)
+            readerToolbar(markdown: markdown)
             MarkdownTextView(markdown: markdown)
                 .lexturesReadableText()
         }
         .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder
+    private func readerToolbar(markdown: String) -> some View {
+        let caps = shell.platformFeatures.immersiveReader
+        if caps.toolbarEnabled {
+            ReaderToolbar(
+                text: markdown,
+                courseCode: courseCode,
+                readAloudEnabled: caps.readAloudEnabled,
+                translationEnabled: caps.translationEnabled,
+                preferencesEnabled: caps.preferencesEnabled
+            )
+        } else {
+            ReadAloudButton(text: markdown)
+        }
     }
 
     private func externalLinkCard(_ url: String) -> some View {

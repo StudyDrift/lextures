@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { ArrowRight, Check } from 'lucide-react'
 import { MarketingPageShell } from '../components/marketing-page-shell'
+import { WindLines } from '../components/home/wind-lines'
 import { SITE_LINKS } from '../lib/site-links'
 
 const SELF_HOST_FEATURES = [
@@ -88,23 +89,27 @@ type PricingCardProps = {
 function PricingCard({ label, price, description, features, cta, muted, badge }: PricingCardProps) {
   return (
     <div
-      className={`relative flex h-full flex-col border p-8 ${muted ? 'opacity-70' : ''}`}
+      className={`relative flex h-full flex-col rounded-[18px] p-8 ${muted ? 'opacity-70' : ''}`}
       style={{
         backgroundColor: muted ? 'var(--panel-sunken)' : 'var(--panel)',
-        borderColor: 'var(--line-card)',
-        borderRadius: 'var(--radius-card)',
-        boxShadow: muted ? undefined : 'var(--shadow-panel)',
+        border: '1px solid rgba(38,58,60,0.08)',
+        boxShadow: muted ? undefined : '0 14px 34px rgba(34,51,59,0.07)',
       }}
     >
       {badge && (
         <span
-          className="absolute right-6 top-6 rounded px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em]"
-          style={{ backgroundColor: '#ECE6D8', color: 'var(--muted)' }}
+          className="absolute right-6 top-6 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]"
+          style={{ backgroundColor: 'rgba(106,197,176,0.16)', color: '#4fa894' }}
         >
           {badge}
         </span>
       )}
-      <p className="section-label">{label}</p>
+      <span
+        className="text-[13px] font-semibold uppercase tracking-[0.06em]"
+        style={{ color: 'var(--coral)' }}
+      >
+        {label}
+      </span>
       <div className="mt-3">{price}</div>
       <p className="mt-4 text-[15px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
         {description}
@@ -127,24 +132,34 @@ function PricingCard({ label, price, description, features, cta, muted, badge }:
 export function PricingPage() {
   return (
     <MarketingPageShell>
-      <section className="border-b py-16 md:py-20" style={{ borderColor: 'var(--line)' }}>
-        <div className="mx-auto max-w-[1100px] px-5 text-center md:px-10 xl:px-14">
-          <p className="eyebrow-label">Pricing</p>
+      <section className="relative overflow-hidden">
+        <WindLines variant="hero" />
+        <div className="relative z-[2] mx-auto max-w-[1100px] px-5 py-16 text-center md:px-10 md:py-20 xl:px-14">
+          <span
+            className="inline-flex items-center rounded-full px-3.5 py-[7px] text-[13px] font-semibold uppercase tracking-[0.04em]"
+            style={{ color: '#4fa894', backgroundColor: 'rgba(106,197,176,0.14)' }}
+          >
+            Pricing
+          </span>
           <h1
-            className="font-display mt-4 text-[clamp(32px,4vw,44px)] font-semibold leading-tight tracking-[-0.02em]"
-            style={{ color: 'var(--ink)' }}
+            className="font-display mx-auto mt-5 max-w-[860px] font-semibold leading-[1.05] tracking-[-0.02em] text-balance"
+            style={{ color: '#22333b', fontSize: 'clamp(32px,4.4vw,52px)' }}
           >
             Self-host for free. Pay only for infrastructure you choose.
           </h1>
-          <p className="mx-auto mt-5 max-w-[680px] text-[18px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
+          <p className="mx-auto mt-5 max-w-[680px] text-[18px] leading-relaxed" style={{ color: '#4a5b5d' }}>
             Lextures is AGPL-3.0 open source. Run it yourself on Postgres, open a university or
             district account for production hosting and support, or sign up as an independent
             learner at self.lextures.com.
           </p>
         </div>
+        <div
+          className="h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(38,58,60,0.1), transparent)' }}
+        />
       </section>
 
-      <section className="border-b py-16 md:py-20" style={{ borderColor: 'var(--line)' }}>
+      <section className="py-16 md:py-20">
         <div className="mx-auto max-w-[1100px] px-5 md:px-10 xl:px-14">
           <div className="grid gap-8 lg:grid-cols-3">
             <PricingCard
@@ -179,7 +194,7 @@ export function PricingPage() {
               features={SELF_LEARNER_FEATURES}
               cta={
                 <a href={SITE_LINKS.selfLearner} className="btn-primary w-full justify-center">
-                  Sign up at self.lextures.com
+                  Sign up
                 </a>
               }
             />
@@ -202,11 +217,10 @@ export function PricingPage() {
           </div>
 
           <div
-            className="mt-10 border p-8"
+            className="mt-10 rounded-[18px] p-8"
             style={{
-              backgroundColor: 'var(--panel-sunken)',
-              borderColor: 'var(--line-card)',
-              borderRadius: 'var(--radius-card)',
+              backgroundColor: '#f1e5c6',
+              border: '1px solid rgba(201,168,106,0.35)',
             }}
           >
             <h2 className="font-display text-[clamp(22px,2.5vw,28px)] font-semibold" style={{ color: 'var(--ink)' }}>
@@ -233,9 +247,9 @@ export function PricingPage() {
         </div>
       </section>
 
-      <section className="border-b py-16 md:py-20" style={{ borderColor: 'var(--line)' }}>
+      <section className="py-16 md:py-20">
         <div className="mx-auto max-w-[720px] px-5 md:px-10 xl:px-14">
-          <h2 className="font-display text-[clamp(26px,3vw,34px)] font-semibold leading-tight" style={{ color: 'var(--ink)' }}>
+          <h2 className="font-display text-[clamp(26px,3vw,34px)] font-semibold leading-tight tracking-[-0.015em]" style={{ color: '#22333b' }}>
             Common questions
           </h2>
           <dl className="mt-8 divide-y" style={{ borderColor: 'var(--line)' }}>
@@ -253,21 +267,38 @@ export function PricingPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-20">
-        <div className="mx-auto max-w-[640px] px-5 text-center md:px-10">
-          <h2 className="font-display text-[clamp(26px,3vw,34px)] font-semibold leading-tight" style={{ color: 'var(--ink)' }}>
+      <section className="relative overflow-hidden" style={{ backgroundColor: '#4fa894', color: '#fff' }}>
+        <WindLines variant="teal" />
+        <div className="relative z-[2] mx-auto max-w-[720px] px-5 py-20 text-center md:px-10 md:py-24">
+          <h2
+            className="font-display font-semibold leading-[1.06] tracking-[-0.02em]"
+            style={{ fontSize: 'clamp(28px,3.6vw,44px)' }}
+          >
             Start with self-host, scale to your campus
           </h2>
-          <p className="mt-4 text-[16px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
+          <p className="mt-4 text-[17px] leading-[1.55]" style={{ color: 'rgba(255,255,255,0.9)' }}>
             Clone the repo and run a pilot on your Postgres today. When you need SSO, managed
             hosting, or district-wide rollout, request a university or district account.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
             <a href="/get-started" className="btn-primary gap-2">
               Get started
               <ArrowRight className="h-4 w-4" aria-hidden />
             </a>
-            <a href="/docs/self-hosting" className="btn-secondary">
+            <a
+              href="/docs/self-hosting"
+              className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-[16px] font-semibold text-white no-underline transition-colors duration-150"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.14)',
+                border: '1px solid rgba(255,255,255,0.3)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.22)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.14)'
+              }}
+            >
               Self-hosting guide
             </a>
           </div>

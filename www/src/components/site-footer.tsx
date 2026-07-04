@@ -41,46 +41,47 @@ const NAV_COLUMNS = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t" style={{ backgroundColor: 'var(--paper)', borderColor: 'var(--line)' }}>
+    <footer style={{ backgroundColor: '#22333b', color: '#b8c6c4' }}>
       <div className="mx-auto max-w-[1200px] px-5 py-14 md:px-10 xl:px-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <img
-                src="/assets/lextures-mark.svg"
+                src="/logo.svg"
                 alt=""
                 aria-hidden
-                className="h-7 w-7"
-                width={28}
-                height={28}
+                className="h-[34px] w-auto"
               />
-              <span
-                className="font-display text-[20px] font-semibold"
-                style={{ color: 'var(--ink-nav)' }}
-              >
+              <span className="font-display text-[20px] font-semibold" style={{ color: '#eef4f0' }}>
                 Lextures
               </span>
             </div>
-            <p className="mt-4 max-w-xs text-[15px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
-              Open-source LMS for courses, assessments, and the workflows that surround them.
+            <p className="mt-4 max-w-[24em] text-[14px] leading-[1.6]">
+              The learning environment that adapts — quizzing, lessons, grading, and rosters in one
+              place.
             </p>
           </div>
 
           {NAV_COLUMNS.map(({ heading, links }) => (
             <div key={heading}>
-              <p className="section-label">{heading}</p>
-              <ul className="mt-4 space-y-2.5">
+              <p
+                className="text-[14px] font-bold tracking-[0.03em]"
+                style={{ color: '#eef4f0' }}
+              >
+                {heading}
+              </p>
+              <ul className="mt-3.5 space-y-2.5">
                 {links.map(({ label, href }) => (
                   <li key={label}>
                     <a
                       href={href}
                       className="text-[14px] no-underline transition-colors"
-                      style={{ color: 'var(--text-soft)' }}
+                      style={{ color: '#b8c6c4' }}
                       onMouseEnter={e => {
-                        e.currentTarget.style.color = 'var(--ink-nav)'
+                        e.currentTarget.style.color = '#eef4f0'
                       }}
                       onMouseLeave={e => {
-                        e.currentTarget.style.color = 'var(--text-soft)'
+                        e.currentTarget.style.color = '#b8c6c4'
                       }}
                     >
                       {label}
@@ -91,13 +92,15 @@ export function SiteFooter() {
             </div>
           ))}
         </div>
+      </div>
 
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <div
-          className="mt-12 flex flex-col gap-2 border-t pt-6 text-[13px] sm:flex-row sm:items-center sm:justify-between"
-          style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}
+          className="mx-auto flex max-w-[1200px] flex-col gap-2 px-5 py-5 text-[13px] md:px-10 sm:flex-row sm:items-center sm:justify-between xl:px-14"
+          style={{ color: '#8ea09d' }}
         >
-          <p>© {new Date().getFullYear()} Lextures contributors. Released under AGPL-3.0.</p>
-          <p>Self-host on Postgres · LTI 1.3 · SCIM 2.0</p>
+          <span>© {new Date().getFullYear()} Lextures contributors. Released under AGPL-3.0.</span>
+          <span>Self-host on Postgres · LTI 1.3 · SCIM 2.0</span>
         </div>
       </div>
     </footer>

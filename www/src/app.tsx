@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Header } from './components/header'
 import { SiteFooter } from './components/site-footer'
-import { DocsCtaSection } from './components/home/docs-cta-section'
+import { CtaSection } from './components/home/cta-section'
 import { FeatureHighlights } from './components/home/feature-highlights'
 import { HeroSection } from './components/home/hero-section'
-import { VibeActivitiesSection } from './components/home/vibe-activities-section'
-import { WhoItsForSection } from './components/home/who-its-for-section'
+import { QuoteSection } from './components/home/quote-section'
 import { WorkflowSection } from './components/home/workflow-section'
 import { BlogIndex } from './pages/blog-index'
 import { BlogPost } from './pages/blog-post'
@@ -51,7 +50,7 @@ function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen antialiased" style={{ backgroundColor: 'var(--paper)', color: 'var(--text)' }}>
+    <div className="min-h-screen overflow-x-hidden antialiased" style={{ backgroundColor: 'var(--paper)', color: 'var(--text)' }}>
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded focus:px-4 focus:py-2 focus:text-sm"
@@ -66,9 +65,8 @@ function HomePage() {
         <HeroSection />
         <FeatureHighlights />
         <WorkflowSection />
-        <VibeActivitiesSection />
-        <WhoItsForSection />
-        <DocsCtaSection />
+        <QuoteSection />
+        <CtaSection />
       </main>
 
       <SiteFooter />

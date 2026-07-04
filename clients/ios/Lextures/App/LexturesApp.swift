@@ -14,6 +14,7 @@ struct LexturesApp: App {
                 .environment(authSession)
                 .environment(biometricGate)
                 .environment(AccessibilityPreferences.shared)
+                .environment(\.readingPreferencesStore, ReadingPreferencesStore.shared)
                 .environment(localePreferences)
                 .environment(themePreference)
                 .environment(\.locale, localePreferences.effectiveLocale)

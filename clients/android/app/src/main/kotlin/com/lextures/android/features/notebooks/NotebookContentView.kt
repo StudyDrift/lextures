@@ -59,6 +59,9 @@ import com.lextures.android.core.notebook.NotebookBlock
 import com.lextures.android.core.notebook.NotebookDrawing
 import com.lextures.android.core.notebook.NotebookMarkdown
 import com.lextures.android.core.notebook.ParsedNotebookTask
+import com.lextures.android.features.reader.CaptionedPlayer
+import com.lextures.android.features.reader.ContentVideoPlayer
+import com.lextures.android.features.reader.ReaderLogic
 import java.time.Instant
 
 /**
@@ -72,6 +75,7 @@ fun NotebookContentView(
     onEditTaskDue: (ParsedNotebookTask) -> Unit,
     modifier: Modifier = Modifier,
     accessToken: String? = null,
+    captionsEnabled: Boolean = false,
     onEditDrawing: ((index: Int, elementsJson: String) -> Unit)? = null,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -84,12 +88,29 @@ fun NotebookContentView(
                     modifier = Modifier.padding(top = if (block.level == 1) 6.dp else 2.dp),
                 )
 
-                is NotebookBlock.Paragraph -> Text(
-                    text = inlineMarkdown(block.text),
-                    fontSize = 14.sp,
-                    lineHeight = 21.sp,
-                    color = textPrimary(),
-                )
+                is NotebookBlock.Paragraph -> {
+                    val videoUrl = ReaderLogic.videoUrl(block.text)
+                    when {
+                        videoUrl != null && captionsEnabled && accessToken != null ->
+                            CaptionedPlayer(url = videoUrl, accessToken = accessToken)
+                        videoUrl != null && accessToken != null ->
+                            ContentVideoPlayer(url = videoUrl, accessToken = accessToken)
+                        videoUrl != null ->
+                            Text(
+                                text = inlineMarkdown(block.text),
+                                fontSize = 14.sp,
+                                lineHeight = 21.sp,
+                                color = textPrimary(),
+                            )
+                        else ->
+                            Text(
+                                text = inlineMarkdown(block.text),
+                                fontSize = 14.sp,
+                                lineHeight = 21.sp,
+                                color = textPrimary(),
+                            )
+                    }
+                }
 
                 is NotebookBlock.BulletItem -> Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),

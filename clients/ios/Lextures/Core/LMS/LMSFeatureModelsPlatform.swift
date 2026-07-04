@@ -13,6 +13,13 @@ struct PlatformFeatures: Decodable {
     var ffMobileUniversalSearch: Bool?
     var ffMobileProfileDepth: Bool?
     var ffMobileLibraryEreserves: Bool?
+    var ffMobileImmersiveReader: Bool?
+    var readAloudEnabled: Bool?
+    var ffReadAloud: Bool?
+    var videoCaptionsEnabled: Bool?
+    var autoCaptioningEnabled: Bool?
+    var translationMemoryEnabled: Bool?
+    var ffReadingPreferences: Bool?
     var oerLibraryEnabled: Bool?
     var customFieldsEnabled: Bool?
     var ffDemographics: Bool?

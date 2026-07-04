@@ -34,37 +34,87 @@
 
 # Lextures
 
-Open-source learning platform for running courses end to end: structured modules, calendars, grading, and enrollments—with AI hooks when you want them—so instructors and students spend less time on tooling and more on teaching and learning.
+Open-source learning platform for running courses end to end: structured modules, calendars, grading, and enrollments—with AI hooks when you want them—so instructors and students spend less time on tooling and more on teaching and learning. Ships a React web app, native iOS and Android clients, a Tauri desktop shell, a Go CLI, and an MCP server for AI agents.
 
 ## Features
 
-- **Adaptive delivery**: Quizzes that adjust difficulty in real time using Item Response Theory (IRT 2PL/3PL) to match learner mastery levels.
-- **Course workspace**: Build structured modules with TipTap-powered rich content, assignments, and drag-and-drop organization.
-- **Teaching & learning flows**: Integrated calendars, gradebooks, enrollment management, and an inbox for course communication.
+- **Adaptive learning**: Quizzes that adjust difficulty in real time using Item Response Theory (IRT 2PL/3PL), plus spaced-repetition review and mastery tracking.
+- **Course workspace**: Build structured modules with TipTap-powered rich content, assignments, vibe activities (interactive AI lessons), and drag-and-drop organization.
+- **Teaching & grading**: Calendars, gradebooks, Speed Grader, optional AI grading agent, enrollment management, and a 1:1 inbox.
 - **Standards-based grading**: Map assignments to NGSS, CCSS, or custom standards and track mastery by objective with full audit trails.
-- **Integrations**: LTI 1.3 provider/consumer support for Canvas, Moodle, and Blackboard; SAML 2.0, OIDC, and SCIM for enterprise identity; [MCP](#mcp-integrations) for Cursor, Claude Desktop, and other AI agents.
-- **AI-ready**: Optional OpenRouter integration for AI-assisted quiz generation, misconception detection, and automated hint scaffolding.
-- **14+ question types**: From multiple choice and essays to live code execution and audio/video responses.
-- **Fast, typed stack**: Go 1.25 API (Chi) + React 19 SPA (Vite, TypeScript, Tailwind CSS v4).
-- **Data layer**: PostgreSQL 16.
+- **Communication**: Course discussions, activity feed channels, and direct messaging between users.
+- **Notebooks**: Personal and per-course notebooks with markdown, drawings, tasks, and slash commands.
+- **Integrations**: LTI 1.3 provider/consumer (Canvas, Moodle, Blackboard); SAML 2.0, OIDC, and SCIM; Clever and ClassLink for K–12; Canvas course import and QTI; [MCP](#mcp-integrations) for Cursor, Claude Desktop, and other AI agents.
+- **AI (optional)**: OpenRouter-backed course-grounded tutor, quiz generation, misconception detection, and automated hint scaffolding.
+- **14 question types**: From multiple choice and essays to live code execution and audio/video responses.
+- **Cross-platform clients**: Web SPA, native iOS (SwiftUI) and Android (Jetpack Compose) apps, Tauri desktop, and a `lextures` CLI—all talking to the same REST API.
+- **Accessibility**: Immersive reader (read-aloud, captions, translation), accommodations engine, and WCAG-oriented UI work across web and mobile.
 
-## Tech stack 
+## Repository
 
+```
+lextures/
+├── server/              # Go API, migrations, background jobs
+├── clients/
+│   ├── web/             # React LMS (primary web app)
+│   ├── ios/             # Native iPhone app (SwiftUI)
+│   ├── android/         # Native Android app (Jetpack Compose)
+│   ├── desktop/         # Tauri 2 desktop shell (wraps web)
+│   ├── cli/             # lextures terminal client
+│   └── mcp/             # Model Context Protocol server
+├── www/                 # Marketing site (lextures.com)
+├── e2e/                 # Playwright end-to-end tests
+├── iac/                 # Terraform for self-hosting (AWS, Azure, GCP, Oracle, DigitalOcean)
+└── docs/                # Architecture, plans, and guides
+```
 
-| Layer             | Choices                                                                   |
-| ----------------- | ------------------------------------------------------------------------- |
-| **Web app**       | React 19, Vite, TypeScript, Tailwind CSS v4, React Router, TipTap, Vitest |
-| **API**           | Go 1.25, Chi, pgx, Argon2id passwords, JWT access tokens                  |
-| **MCP server**    | TypeScript stdio server in [`clients/mcp`](clients/mcp) ([Model Context Protocol](https://modelcontextprotocol.io/)) |
-| **Data**          | PostgreSQL 16                                                             |
-| **AI (optional)** | OpenRouter API key in **Settings → Intelligence → Models** (platform DB)   |
+## Tech stack
 
+| Layer | Choices |
+| ----- | ------- |
+| **Web app** | React 19, Vite 8, TypeScript 6, Tailwind CSS v4, React Router, TipTap, Vitest |
+| **Mobile** | SwiftUI (iOS 17+), Kotlin + Jetpack Compose (Android) |
+| **Desktop** | Tauri 2 (Rust + embedded web client) |
+| **CLI** | Go + Cobra |
+| **API** | Go 1.25, Chi, pgx, Argon2id passwords, JWT access tokens |
+| **MCP server** | TypeScript stdio server in [`clients/mcp`](clients/mcp) ([Model Context Protocol](https://modelcontextprotocol.io/)) |
+| **Marketing site** | React 19 + Vite in [`www/`](www/) |
+| **Data** | PostgreSQL 16 |
+| **Queue** | RabbitMQ (async jobs, e.g. Canvas import) |
+| **AI (optional)** | OpenRouter API key in **Settings → Intelligence → Models** (platform DB) |
 
 For architecture notes (Compose port layout, dev vs prod web, testing conventions), see [docs/ARCH.md](docs/ARCH.md).
 
 ## Getting started
 
-See **[Getting started](docs/getting-started.md)** for prerequisites, Docker commands, **first Global Admin setup** (`BOOTSTRAP_ADMIN_EMAIL`), and local development without full Docker. The marketing site also publishes [Self-hosting](https://lextures.com/docs/self-hosting) (source: [`www/src/docs/self-hosting.md`](www/src/docs/self-hosting.md)).
+**Quick start** (Docker, recommended):
+
+```bash
+# Set first Global Admin email before anyone signs up (repo root .env or shell export)
+export BOOTSTRAP_ADMIN_EMAIL=you@yourdomain.com
+
+make dev   # Postgres, RabbitMQ, API :8080, Vite :5173
+```
+
+Open [http://localhost:5173](http://localhost:5173) and sign up with the same email as `BOOTSTRAP_ADMIN_EMAIL`.
+
+See **[Getting started](docs/getting-started.md)** for prerequisites, production-style Compose, promoting an existing user to Global Admin, and local development without full Docker. The marketing site also publishes [Self-hosting](https://lextures.com/docs/self-hosting) (source: [`www/src/docs/self-hosting.md`](www/src/docs/self-hosting.md)). Terraform layouts for single-VM deploys live in [`iac/`](iac/).
+
+**Native mobile** (optional): copy `clients/mobile-dev.env.example` to `clients/mobile-dev.env`, run `bash clients/scripts/setup-mobile-dev.sh`, then open `clients/ios/Lextures.xcodeproj` or `clients/android` in Android Studio. See [`clients/ios/README.md`](clients/ios/README.md) and [`clients/android/README.md`](clients/android/README.md).
+
+## Development
+
+| Task | Command |
+| ---- | ------- |
+| Start dev stack | `make dev` |
+| Lint all apps | `make lint` |
+| E2E suite (Playwright) | `make e2e` |
+| E2E against running stack | `make e2e-run` |
+| Mobile lint + tests | `make mobile` |
+| Build desktop app | `make desktop` |
+| Build CLI | `make cli` |
+
+Contributor setup details, env vars, and gotchas: [AGENTS.md](AGENTS.md). Web client conventions (code splitting, bundle budgets): [clients/web/CONTRIBUTING.md](clients/web/CONTRIBUTING.md).
 
 ## MCP integrations
 
@@ -122,6 +172,8 @@ Contributions are welcome. Everyone who participates is expected to follow the *
 1. Fork the repository and create a branch for your change.
 2. Make focused commits with clear messages.
 3. Open a pull request describing what changed and why.
+
+Report security issues per [SECURITY.md](SECURITY.md) — do not open public issues for vulnerabilities.
 
 ## License
 

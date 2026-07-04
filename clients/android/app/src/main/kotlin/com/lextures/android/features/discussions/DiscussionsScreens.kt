@@ -48,6 +48,11 @@ import com.lextures.android.core.lms.DiscussionPost
 import com.lextures.android.core.lms.DiscussionPostsResponse
 import com.lextures.android.core.lms.DiscussionThreadDetail
 import com.lextures.android.core.lms.DiscussionThreadSummary
+import com.lextures.android.features.reader.ImmersiveReaderPreferencesSheet
+import com.lextures.android.features.reader.ReaderToolbarOrLegacy
+import com.lextures.android.features.reader.UgcTranslationTarget
+import com.lextures.android.features.reader.rememberImmersiveReaderState
+import java.util.Locale
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.core.notebook.NotebookStore
@@ -264,6 +269,8 @@ fun DiscussionThreadScreen(
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
     val scope = rememberCoroutineScope()
+    val readerState = rememberImmersiveReaderState(accessToken)
+    val targetLang = remember { Locale.getDefault().language }
 
     val backLabel = discussionsBack()
     val threadLabel = discussionsThread()
@@ -311,6 +318,7 @@ fun DiscussionThreadScreen(
     }
 
     LaunchedEffect(accessToken, threadId) { reload() }
+    ImmersiveReaderPreferencesSheet(readerState, accessToken)
 
     Column(
         modifier = Modifier
@@ -350,6 +358,19 @@ fun DiscussionThreadScreen(
                             fontWeight = FontWeight.SemiBold,
                         )
                         if (detail.bodyPlainText.isNotBlank()) {
+                            ReaderToolbarOrLegacy(
+                                text = detail.bodyPlainText,
+                                accessToken = accessToken,
+                                capabilities = readerState.capabilities,
+                                ugcTranslation = UgcTranslationTarget(
+                                    contentType = "discussion_post",
+                                    contentId = detail.id,
+                                    text = detail.bodyPlainText,
+                                    targetLang = targetLang,
+                                ),
+                                onOpenPreferences = readerState.onShowPreferences,
+                                ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
+                            )
                             Text(detail.bodyPlainText, color = textPrimary())
                         }
                     }
@@ -377,6 +398,19 @@ fun DiscussionThreadScreen(
                                 )
                                 Text(LmsDates.shortDateTime(post.createdAt), color = textSecondary())
                             }
+                            ReaderToolbarOrLegacy(
+                                text = post.bodyPlainText,
+                                accessToken = accessToken,
+                                capabilities = readerState.capabilities,
+                                ugcTranslation = UgcTranslationTarget(
+                                    contentType = "discussion_post",
+                                    contentId = post.id,
+                                    text = post.bodyPlainText,
+                                    targetLang = targetLang,
+                                ),
+                                onOpenPreferences = readerState.onShowPreferences,
+                                ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
+                            )
                             Text(post.bodyPlainText, color = textPrimary())
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 TextButton(onClick = {
