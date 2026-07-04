@@ -15,16 +15,16 @@ final class LiveMeetingsLogicTests: XCTestCase {
     }
 
     func testIsLiveOrSoonWithinThirtyMinutes() {
-        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let now = LMSDates.parse("2024-01-01T15:00:00Z")!
         let soon = makeMeeting(
             id: "soon",
             status: "scheduled",
-            start: "2099-06-01T15:10:00Z"
+            start: "2024-01-01T15:10:00Z"
         )
         let later = makeMeeting(
             id: "later",
             status: "scheduled",
-            start: "2099-06-01T17:00:00Z"
+            start: "2024-01-01T17:00:00Z"
         )
         XCTAssertTrue(LiveMeetingsLogic.isLiveOrSoon(soon, now: now))
         XCTAssertFalse(LiveMeetingsLogic.isLiveOrSoon(later, now: now))
@@ -83,9 +83,9 @@ final class LiveMeetingsLogicTests: XCTestCase {
             viewerEnrollmentRoles: ["student"],
             liveSessionsEnabled: true
         )
-        let live = makeMeeting(id: "live", status: "live", start: "2099-06-02T15:00:00Z")
-        let soon = makeMeeting(id: "soon", status: "scheduled", start: "2099-06-01T15:05:00Z")
-        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let live = makeMeeting(id: "live", status: "live", start: "2024-01-01T16:00:00Z")
+        let soon = makeMeeting(id: "soon", status: "scheduled", start: "2024-01-01T15:05:00Z")
+        let now = LMSDates.parse("2024-01-01T15:00:00Z")!
         let items = LiveMeetingsLogic.collectLiveAndUpcoming(
             courses: [course],
             meetingsByCourseCode: [course.courseCode: [live, soon]],
