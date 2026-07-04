@@ -16,25 +16,9 @@ export function QuoteSection() {
           className="font-display mt-2 font-medium italic tracking-[-0.01em] text-balance"
           style={{ color: '#3a3320', fontSize: 'clamp(24px, 3.2vw, 34px)', lineHeight: 1.34 }}
         >
-          Lextures turned our scattered courses into one clear voyage. Grading that used to eat my
-          weekends now takes minutes.
+          Consolidate many tools into one platform — one enrollment record, one gradebook, one place
+          to teach.
         </p>
-        <div className="mt-7 flex items-center justify-center gap-3">
-          <span
-            className="font-display flex h-[42px] w-[42px] items-center justify-center rounded-full font-bold text-white"
-            style={{ backgroundColor: '#6ac5b0' }}
-          >
-            M
-          </span>
-          <div className="text-left">
-            <div className="text-[15px] font-bold" style={{ color: '#3a3320' }}>
-              Dr. Maya Okonkwo
-            </div>
-            <div className="text-[14px]" style={{ color: '#8a7c56' }}>
-              Learning Design Lead, Northbay College
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   )
