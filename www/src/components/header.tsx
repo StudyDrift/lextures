@@ -124,8 +124,8 @@ export function Header() {
   return (
     <>
       <header
-        className="sticky top-0 z-50 border-b"
-        style={{ backgroundColor: 'var(--paper)', borderColor: 'var(--line)' }}
+        className="sticky top-0 z-50 border-b backdrop-blur-[10px]"
+        style={{ backgroundColor: 'rgba(251,246,236,0.82)', borderColor: 'rgba(38,58,60,0.08)' }}
       >
         <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-5 md:px-10 xl:px-14">
           <Logo />

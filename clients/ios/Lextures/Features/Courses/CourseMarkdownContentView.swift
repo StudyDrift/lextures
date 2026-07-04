@@ -6,6 +6,7 @@ struct CourseMarkdownContentView: View {
     @Environment(AuthSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
     let markdown: String
+    var captionsEnabled = false
 
     private var blocks: [NotebookBlock] {
         NotebookMarkdown.parseBlocks(markdown)
@@ -29,7 +30,11 @@ struct CourseMarkdownContentView: View {
                 .padding(.top, level == 1 ? 6 : 2)
         case .paragraph(let text):
             if let videoURL = ModuleContentMedia.videoURL(in: text) {
-                ContentVideoPlayer(url: videoURL)
+                if captionsEnabled {
+                    CaptionedPlayerView(url: videoURL)
+                } else {
+                    ContentVideoPlayer(url: videoURL)
+                }
             } else {
                 mathAwareText(text)
             }

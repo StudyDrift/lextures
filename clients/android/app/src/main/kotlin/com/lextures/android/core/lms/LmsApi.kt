@@ -2200,6 +2200,95 @@ object LmsApi {
             decode(body)
         }
 
+    // Immersive reader (M6.3)
+
+    suspend fun fetchReadingPreferences(accessToken: String): ReadingPreferencesRow =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request("/api/v1/me/reading-preferences", accessToken = accessToken)
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun patchReadingPreferences(
+        patch: ReadingPreferencesPatch,
+        accessToken: String,
+    ): ReadingPreferencesRow = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/me/reading-preferences",
+            method = "PATCH",
+            body = client.encodeBody(patch, ReadingPreferencesPatch.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchCaptions(objectId: String, accessToken: String): List<CaptionRecord> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/files/${encodePath(objectId)}/captions",
+                accessToken = accessToken,
+            )
+            if (code == 404) return@withContext emptyList()
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchCaptionVtt(objectId: String, captionId: String, accessToken: String): String =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/files/${encodePath(objectId)}/captions/${encodePath(captionId)}/vtt",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            body
+        }
+
+    suspend fun translateContent(
+        contentType: String,
+        contentId: String,
+        targetLang: String,
+        text: String,
+        accessToken: String,
+    ): TranslateContentResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/translate",
+            method = "POST",
+            body = client.encodeBody(
+                TranslateContentRequest(contentType, contentId, targetLang, text),
+                TranslateContentRequest.serializer(),
+            ),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchTranslationCoverage(courseCode: String, accessToken: String): List<TranslationCoverageLocale> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/translation-coverage",
+                accessToken = accessToken,
+            )
+            if (code == 404) return@withContext emptyList()
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            val decoded = decode<TranslationCoverageResponse>(body)
+            decoded.locales ?: decoded.targetLocale?.let { locale ->
+                decoded.percent?.let { percent -> listOf(TranslationCoverageLocale(locale, percent)) }
+            } ?: emptyList()
+        }
+
+    suspend fun patchMyContentLocale(courseCode: String, locale: String?, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val (_, code) = client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/me/content-locale",
+                method = "PATCH",
+                body = client.encodeBody(PatchContentLocaleBody(locale), PatchContentLocaleBody.serializer()),
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, null)
+        }
+
     suspend fun submitCourseReview(
         courseCode: String,
         rating: Int,

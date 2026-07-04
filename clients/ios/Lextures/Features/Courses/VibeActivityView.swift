@@ -3,6 +3,7 @@ import SwiftUI
 /// Native vibe activity reader (M3.5): parses instructor HTML into markdown + interactions.
 struct VibeActivityView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openURL) private var openURL
@@ -93,9 +94,12 @@ struct VibeActivityView: View {
             }
         case .paragraph(let text):
             LMSCard {
-                ReadAloudButton(text: text)
-                CourseMarkdownContentView(markdown: text)
-                    .lexturesReadableText()
+                readerToolbar(text: text)
+                CourseMarkdownContentView(
+                    markdown: text,
+                    captionsEnabled: shell.platformFeatures.immersiveReader.captionsEnabled
+                )
+                .lexturesReadableText()
             }
         case .bulletList(let items):
             LMSCard {
@@ -244,6 +248,22 @@ struct VibeActivityView: View {
             await onProgressChanged?()
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.modules.loadError")
+        }
+    }
+
+    @ViewBuilder
+    private func readerToolbar(text: String) -> some View {
+        let caps = shell.platformFeatures.immersiveReader
+        if caps.toolbarEnabled {
+            ReaderToolbar(
+                text: text,
+                courseCode: course.courseCode,
+                readAloudEnabled: caps.readAloudEnabled,
+                translationEnabled: caps.translationEnabled,
+                preferencesEnabled: caps.preferencesEnabled
+            )
+        } else {
+            ReadAloudButton(text: text)
         }
     }
 }

@@ -34,8 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lextures.android.core.accessibility.ReadAloudControls
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.lms.ImmersiveReaderCapabilities
 import com.lextures.android.core.design.AuthPrimaryButton
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
@@ -53,6 +53,10 @@ import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.notebooks.NotebookContentView
 import com.lextures.android.features.tutor.TutorChatMode
 import com.lextures.android.features.tutor.TutorChatScreen
+import com.lextures.android.features.reader.LocalReadingPreferencesStore
+import com.lextures.android.features.reader.ReaderToolbarOrLegacy
+import com.lextures.android.features.reader.ReadingPreferencesSheet
+import com.lextures.android.core.navigation.MobilePlatformFeatures
 import com.lextures.android.features.tutor.TutorFab
 import kotlinx.coroutines.launch
 
@@ -79,12 +83,22 @@ fun ContentPageScreen(
     var markingComplete by remember { mutableStateOf(false) }
     var isComplete by remember { mutableStateOf(false) }
     var showTutor by remember { mutableStateOf(false) }
+    var showReadingPrefs by remember { mutableStateOf(false) }
+    var readerCapabilities by remember { mutableStateOf(ImmersiveReaderCapabilities()) }
+    val readingStore = LocalReadingPreferencesStore.current
 
     val markDoneLabel = moduleMarkDoneLabel()
     val markingDoneLabel = moduleMarkingDoneLabel()
     val completeLabel = moduleCompleteLabel()
 
     BackHandler(onBack = onBack)
+
+    LaunchedEffect(accessToken) {
+        val token = accessToken ?: return@LaunchedEffect
+        val features = runCatching { LmsApi.fetchPlatformFeatures(token) }.getOrNull()
+        readerCapabilities = MobilePlatformFeatures.from(features).immersiveReader
+        readingStore.loadFromServer(token, readerCapabilities.preferencesEnabled)
+    }
 
     LaunchedEffect(accessToken, item.id) {
         val token = accessToken ?: return@LaunchedEffect
@@ -112,6 +126,13 @@ fun ContentPageScreen(
             loading = false
         }
     }
+
+    ReadingPreferencesSheet(
+        visible = showReadingPrefs,
+        store = readingStore,
+        accessToken = accessToken,
+        onDismiss = { showReadingPrefs = false },
+    )
 
     if (showTutor) {
         Dialog(
@@ -187,12 +208,32 @@ fun ContentPageScreen(
                 detail?.markdown?.trim()?.takeIf { it.isNotEmpty() }?.let { markdown ->
                     item {
                         LmsCard {
-                            ReadAloudControls(text = markdown)
+                            ReaderToolbarOrLegacy(
+                                text = markdown,
+                                accessToken = accessToken,
+                                capabilities = readerCapabilities,
+                                courseCode = course.courseCode,
+                                onContentReload = reload@{
+                                    val token = accessToken ?: return@reload
+                                    val result = offline.cachedFetch(
+                                        key = OfflineCacheKey.contentPage(course.courseCode, item.id),
+                                        accessToken = token,
+                                        serializer = ModuleItemDetail.serializer(),
+                                    ) {
+                                        LmsApi.fetchItemDetail(course.courseCode, item, token)
+                                            ?: throw IllegalStateException("missing content page")
+                                    }
+                                    detail = result.first
+                                },
+                                onOpenPreferences = { showReadingPrefs = true },
+                                ttsSpeed = readingStore.row.ttsSpeed.toFloat(),
+                            )
                             NotebookContentView(
                                 markdown = markdown,
                                 onToggleTask = {},
                                 onEditTaskDue = {},
                                 accessToken = accessToken,
+                                captionsEnabled = readerCapabilities.captionsEnabled,
                             )
                         }
                     }

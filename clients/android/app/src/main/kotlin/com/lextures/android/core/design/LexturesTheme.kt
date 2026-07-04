@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.sp
 import com.lextures.android.core.accessibility.AccessibilitySupport
 import com.lextures.android.core.accessibility.LocalAccessibilityPreferences
 import com.lextures.android.core.accessibility.rememberAccessibilityPreferences
+import com.lextures.android.features.reader.LocalReadingPreferencesStore
+import com.lextures.android.features.reader.rememberReadingPreferencesStore
 import com.lextures.android.core.i18n.LocalLocalePreferences
 import com.lextures.android.core.i18n.rememberLocalePreferences
 import kotlin.math.abs
@@ -194,6 +196,7 @@ fun coverBrush(key: String): Brush {
 @Composable
 fun LexturesTheme(content: @Composable () -> Unit) {
     val preferences = rememberAccessibilityPreferences()
+    val readingPreferences = rememberReadingPreferencesStore()
     val localePreferences = rememberLocalePreferences()
     val dark = isDarkTheme()
     val scheme = if (dark) {
@@ -228,6 +231,7 @@ fun LexturesTheme(content: @Composable () -> Unit) {
             val layoutDirection = if (localePreferences.isRTL) LayoutDirection.Rtl else LayoutDirection.Ltr
             CompositionLocalProvider(
                 LocalAccessibilityPreferences provides preferences,
+                LocalReadingPreferencesStore provides readingPreferences,
                 LocalLocalePreferences provides localePreferences,
                 LocalLayoutDirection provides layoutDirection,
             ) {

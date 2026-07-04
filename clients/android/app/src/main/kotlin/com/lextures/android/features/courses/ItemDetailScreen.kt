@@ -56,7 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
-import com.lextures.android.core.accessibility.ReadAloudControls
+import com.lextures.android.features.reader.ImmersiveReaderPreferencesSheet
+import com.lextures.android.features.reader.ReaderToolbarOrLegacy
+import com.lextures.android.features.reader.rememberImmersiveReaderState
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.AuthPrimaryButton
@@ -115,6 +117,7 @@ fun ItemDetailScreen(
 ) {
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
+    val readerState = rememberImmersiveReaderState(accessToken)
     val courseCode = course.courseCode
 
     var detail by remember { mutableStateOf<ModuleItemDetail?>(null) }
@@ -125,6 +128,7 @@ fun ItemDetailScreen(
     var loading by remember { mutableStateOf(true) }
 
     BackHandler(onBack = onBack)
+    ImmersiveReaderPreferencesSheet(readerState, accessToken)
 
     LaunchedEffect(accessToken, item.id) {
         val token = accessToken ?: return@LaunchedEffect
@@ -244,7 +248,14 @@ fun ItemDetailScreen(
             if (!markdown.isNullOrBlank()) {
                 item {
                     LmsCard {
-                        ReadAloudControls(text = markdown)
+                        ReaderToolbarOrLegacy(
+                            text = markdown,
+                            accessToken = accessToken,
+                            capabilities = readerState.capabilities,
+                            courseCode = courseCode,
+                            onOpenPreferences = readerState.onShowPreferences,
+                            ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
+                        )
                         MarkdownText(markdown)
                     }
                 }

@@ -43,8 +43,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import com.lextures.android.core.accessibility.ReadAloudControls
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.lms.ImmersiveReaderCapabilities
+import com.lextures.android.features.reader.ImmersiveReaderPreferencesSheet
+import com.lextures.android.features.reader.ReaderToolbarOrLegacy
+import com.lextures.android.features.reader.rememberImmersiveReaderState
 import com.lextures.android.core.config.AppConfiguration
 import com.lextures.android.core.design.AuthPrimaryButton
 import com.lextures.android.core.design.LexturesColors
@@ -80,6 +83,7 @@ fun VibeActivityScreen(
 ) {
     val context = LocalContext.current
     val accessToken by session.accessToken.collectAsState()
+    val readerState = rememberImmersiveReaderState(accessToken)
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
 
@@ -93,6 +97,7 @@ fun VibeActivityScreen(
     val freeResponses = remember { mutableStateMapOf<Int, String>() }
 
     BackHandler(onBack = onBack)
+    ImmersiveReaderPreferencesSheet(readerState, accessToken)
 
     LaunchedEffect(accessToken, item.id, nativeEnabled) {
         if (!nativeEnabled) {
@@ -195,6 +200,9 @@ fun VibeActivityScreen(
                         courseCode = course.courseCode,
                         itemId = item.id,
                         accessToken = accessToken,
+                        readerCapabilities = readerState.capabilities,
+                        onOpenPreferences = readerState.onShowPreferences,
+                        ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
                     )
                 }
             }
@@ -214,14 +222,36 @@ private fun VibeActivityBlockView(
     courseCode: String,
     itemId: String,
     accessToken: String?,
+    readerCapabilities: ImmersiveReaderCapabilities,
+    onOpenPreferences: () -> Unit,
+    ttsSpeed: Float,
 ) {
     when (val kind = block.kind) {
         is VibeActivityBlockKind.Heading -> LmsCard {
-            NotebookContentView(markdown = "${"#".repeat(kind.level.coerceAtMost(3))} ${kind.text}", onToggleTask = {}, onEditTaskDue = {}, accessToken = accessToken)
+            NotebookContentView(
+                markdown = "${"#".repeat(kind.level.coerceAtMost(3))} ${kind.text}",
+                onToggleTask = {},
+                onEditTaskDue = {},
+                accessToken = accessToken,
+                captionsEnabled = readerCapabilities.captionsEnabled,
+            )
         }
         is VibeActivityBlockKind.Paragraph -> LmsCard {
-            ReadAloudControls(text = kind.text)
-            NotebookContentView(markdown = kind.text, onToggleTask = {}, onEditTaskDue = {}, accessToken = accessToken)
+            ReaderToolbarOrLegacy(
+                text = kind.text,
+                accessToken = accessToken,
+                capabilities = readerCapabilities,
+                courseCode = courseCode,
+                onOpenPreferences = onOpenPreferences,
+                ttsSpeed = ttsSpeed,
+            )
+            NotebookContentView(
+                markdown = kind.text,
+                onToggleTask = {},
+                onEditTaskDue = {},
+                accessToken = accessToken,
+                captionsEnabled = readerCapabilities.captionsEnabled,
+            )
         }
         is VibeActivityBlockKind.BulletList -> LmsCard {
             NotebookContentView(
@@ -229,6 +259,7 @@ private fun VibeActivityBlockView(
                 onToggleTask = {},
                 onEditTaskDue = {},
                 accessToken = accessToken,
+                captionsEnabled = readerCapabilities.captionsEnabled,
             )
         }
         is VibeActivityBlockKind.OrderedList -> LmsCard {
@@ -237,6 +268,7 @@ private fun VibeActivityBlockView(
                 onToggleTask = {},
                 onEditTaskDue = {},
                 accessToken = accessToken,
+                captionsEnabled = readerCapabilities.captionsEnabled,
             )
         }
         is VibeActivityBlockKind.Reveal -> LmsCard {
@@ -246,7 +278,13 @@ private fun VibeActivityBlockView(
             }
             if (revealed && kind.body.isNotEmpty()) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                NotebookContentView(markdown = kind.body, onToggleTask = {}, onEditTaskDue = {}, accessToken = accessToken)
+                NotebookContentView(
+                    markdown = kind.body,
+                    onToggleTask = {},
+                    onEditTaskDue = {},
+                    accessToken = accessToken,
+                    captionsEnabled = readerCapabilities.captionsEnabled,
+                )
             }
         }
         is VibeActivityBlockKind.CheckButton -> LmsCard {
@@ -263,7 +301,13 @@ private fun VibeActivityBlockView(
         }
         is VibeActivityBlockKind.FreeResponse -> LmsCard {
             if (kind.prompt.isNotEmpty()) {
-                NotebookContentView(markdown = kind.prompt, onToggleTask = {}, onEditTaskDue = {}, accessToken = accessToken)
+                NotebookContentView(
+                    markdown = kind.prompt,
+                    onToggleTask = {},
+                    onEditTaskDue = {},
+                    accessToken = accessToken,
+                    captionsEnabled = readerCapabilities.captionsEnabled,
+                )
             }
             OutlinedTextField(
                 value = freeResponse,

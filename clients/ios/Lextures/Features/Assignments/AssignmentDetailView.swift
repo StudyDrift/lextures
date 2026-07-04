@@ -168,9 +168,25 @@ struct AssignmentDetailView: View {
 
     private func instructionsCard(_ markdown: String) -> some View {
         LMSCard {
-            ReadAloudButton(text: markdown)
+            readerToolbar(markdown: markdown)
             MarkdownTextView(markdown: markdown)
                 .lexturesReadableText()
+        }
+    }
+
+    @ViewBuilder
+    private func readerToolbar(markdown: String) -> some View {
+        let caps = shell.platformFeatures.immersiveReader
+        if caps.toolbarEnabled {
+            ReaderToolbar(
+                text: markdown,
+                courseCode: courseCode,
+                readAloudEnabled: caps.readAloudEnabled,
+                translationEnabled: caps.translationEnabled,
+                preferencesEnabled: caps.preferencesEnabled
+            )
+        } else {
+            ReadAloudButton(text: markdown)
         }
     }
 

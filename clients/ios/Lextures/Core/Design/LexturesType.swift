@@ -22,18 +22,63 @@ enum LexturesType {
 
 struct LexturesReadableText: ViewModifier {
     @Environment(\.accessibilityPreferences) private var preferences
+    @Environment(\.readingPreferencesStore) private var readingStore
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var allowMultiline: Bool
 
     func body(content: Content) -> some View {
+        let dyslexia = preferences.dyslexiaDisplayEnabled || readingStore.usesDyslexiaFont
+        let letterSpacing = ReaderTypography.letterSpacing(readingStore.prefs.letterSpacing, dyslexia: dyslexia)
+        let wordSpacing = ReaderTypography.wordSpacing(readingStore.prefs.wordSpacing)
+        let lineSpacing = ReaderTypography.lineSpacing(readingStore.prefs.lineHeight, dyslexia: dyslexia)
         content
-            .font(LexturesType.body(dyslexia: preferences.dyslexiaDisplayEnabled))
-            .tracking(preferences.dyslexiaDisplayEnabled ? LexturesType.dyslexiaTracking : 0)
-            .lineSpacing(preferences.dyslexiaDisplayEnabled ? LexturesType.dyslexiaLineSpacing : 2)
+            .font(ReaderTypography.font(face: readingStore.prefs.fontFace, dyslexia: dyslexia))
+            .tracking(letterSpacing)
+            .kerning(wordSpacing)
+            .lineSpacing(lineSpacing)
             .lineLimit(allowMultiline ? nil : dynamicTypeSize.isAccessibilitySize ? 6 : 3)
             .minimumScaleFactor(allowMultiline ? 1 : 0.85)
             .fixedSize(horizontal: false, vertical: allowMultiline)
+    }
+}
+
+enum ReaderTypography {
+    static func font(face: String, dyslexia: Bool) -> Font {
+        switch face {
+        case "open-dyslexic", "atkinson":
+            return .system(.body, design: .rounded)
+        case "system":
+            return .body
+        default:
+            return LexturesType.body(dyslexia: dyslexia)
+        }
+    }
+
+    static func letterSpacing(_ value: String, dyslexia: Bool) -> CGFloat {
+        if dyslexia { return LexturesType.dyslexiaTracking }
+        switch value {
+        case "wide": return 0.8
+        case "wider": return 1.6
+        default: return 0
+        }
+    }
+
+    static func wordSpacing(_ value: String) -> CGFloat {
+        switch value {
+        case "wide": return 1.0
+        case "wider": return 2.0
+        default: return 0
+        }
+    }
+
+    static func lineSpacing(_ value: String, dyslexia: Bool) -> CGFloat {
+        if dyslexia { return LexturesType.dyslexiaLineSpacing }
+        switch value {
+        case "tall": return 6
+        case "taller": return 10
+        default: return 2
+        }
     }
 }
 

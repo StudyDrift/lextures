@@ -81,6 +81,9 @@ import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.courses.detailRows
 import com.lextures.android.features.courses.ItemKind
 import com.lextures.android.features.courses.MarkdownText
+import com.lextures.android.features.reader.ImmersiveReaderPreferencesSheet
+import com.lextures.android.features.reader.ReaderToolbarOrLegacy
+import com.lextures.android.features.reader.rememberImmersiveReaderState
 import com.lextures.android.features.courses.RowHeader
 import com.lextures.android.features.files.FilePreviewScreen
 import com.lextures.android.features.grades.GradeFeedbackScreen
@@ -115,6 +118,7 @@ fun AssignmentDetailScreen(
     val queuedOfflineMessage = L.text(context, localePrefs, R.string.mobile_assignment_queuedOffline)
     val offlineJson = remember { Json { ignoreUnknownKeys = true } }
     val courseCode = course.courseCode
+    val readerState = rememberImmersiveReaderState(accessToken)
     val resubmissionEnabled = course.resubmissionWorkflowEnabled == true
     val draftKey = AssignmentLogic.draftStorageKey(courseCode, item.id)
 
@@ -137,6 +141,7 @@ fun AssignmentDetailScreen(
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
 
     BackHandler(onBack = onBack)
+    ImmersiveReaderPreferencesSheet(readerState, accessToken)
 
     LaunchedEffect(draftKey) {
         draftText = draftStore.load(draftKey)
@@ -394,7 +399,17 @@ fun AssignmentDetailScreen(
 
             detail?.markdown?.takeIf { it.isNotBlank() }?.let { markdown ->
                 item {
-                    LmsCard { MarkdownText(markdown) }
+                    LmsCard {
+                        ReaderToolbarOrLegacy(
+                            text = markdown,
+                            accessToken = accessToken,
+                            capabilities = readerState.capabilities,
+                            courseCode = courseCode,
+                            onOpenPreferences = readerState.onShowPreferences,
+                            ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
+                        )
+                        MarkdownText(markdown)
+                    }
                 }
             }
 

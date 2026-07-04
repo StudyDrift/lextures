@@ -336,6 +336,13 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileUniversalSearch = false
     var ffMobileProfileDepth = false
     var ffMobileLibraryEreserves = true
+    var ffMobileImmersiveReader = true
+    var readAloudEnabled = false
+    var ffReadAloud = false
+    var videoCaptionsEnabled = false
+    var autoCaptioningEnabled = false
+    var translationMemoryEnabled = false
+    var ffReadingPreferences = false
     var oerLibraryEnabled = false
     var customFieldsEnabled = false
     var ffDemographics = false
@@ -366,6 +373,13 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileUniversalSearch: features?.ffMobileUniversalSearch == true,
             ffMobileProfileDepth: features?.ffMobileProfileDepth == true,
             ffMobileLibraryEreserves: features?.ffMobileLibraryEreserves != false,
+            ffMobileImmersiveReader: features?.ffMobileImmersiveReader != false,
+            readAloudEnabled: features?.readAloudEnabled == true,
+            ffReadAloud: features?.ffReadAloud == true,
+            videoCaptionsEnabled: features?.videoCaptionsEnabled == true || features?.autoCaptioningEnabled == true,
+            autoCaptioningEnabled: features?.autoCaptioningEnabled == true,
+            translationMemoryEnabled: features?.translationMemoryEnabled == true,
+            ffReadingPreferences: features?.ffReadingPreferences == true,
             oerLibraryEnabled: features?.oerLibraryEnabled == true,
             customFieldsEnabled: features?.customFieldsEnabled == true,
             ffDemographics: features?.ffDemographics == true,
@@ -391,6 +405,19 @@ struct MobilePlatformFeatures: Equatable {
 
     var libraryBrowseEnabled: Bool {
         ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
+    }
+
+    var immersiveReader: ImmersiveReaderCapabilities {
+        guard ffMobileImmersiveReader else {
+            return ImmersiveReaderCapabilities(toolbarEnabled: false)
+        }
+        return ImmersiveReaderCapabilities(
+            toolbarEnabled: true,
+            readAloudEnabled: readAloudEnabled && ffReadAloud,
+            translationEnabled: translationMemoryEnabled,
+            captionsEnabled: videoCaptionsEnabled,
+            preferencesEnabled: ffReadingPreferences || (readAloudEnabled && ffReadAloud)
+        )
     }
 }
 

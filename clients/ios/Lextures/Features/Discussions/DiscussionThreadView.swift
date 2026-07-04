@@ -3,6 +3,7 @@ import SwiftUI
 /// Thread detail with nested replies, upvotes, and compose actions.
 struct DiscussionThreadView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
 
@@ -105,10 +106,16 @@ struct DiscussionThreadView: View {
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                 }
                 if !thread.bodyPlainText.isEmpty {
+                    discussionReaderToolbar(
+                        text: thread.bodyPlainText,
+                        contentId: thread.id,
+                        contentType: "discussion_post"
+                    )
                     Text(thread.bodyPlainText)
                         .font(.body)
                         .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                         .textSelection(.enabled)
+                        .lexturesReadableText()
                 }
             }
         }
@@ -128,10 +135,16 @@ struct DiscussionThreadView: View {
                         .font(.caption)
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                 }
+                discussionReaderToolbar(
+                    text: post.bodyPlainText,
+                    contentId: post.id,
+                    contentType: "discussion_post"
+                )
                 Text(post.bodyPlainText)
                     .font(.body)
                     .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                     .textSelection(.enabled)
+                    .lexturesReadableText()
                     .padding(.leading, CGFloat(min(nested.depth, 6)) * 12)
 
                 HStack(spacing: 12) {
@@ -162,6 +175,26 @@ struct DiscussionThreadView: View {
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func discussionReaderToolbar(text: String, contentId: String, contentType: String) -> some View {
+        let caps = shell.platformFeatures.immersiveReader
+        if caps.toolbarEnabled, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let targetLang = Locale.current.language.languageCode?.identifier ?? "en"
+            ReaderToolbar(
+                text: text,
+                ugcTranslation: .ugc(
+                    contentType: contentType,
+                    contentId: contentId,
+                    text: text,
+                    targetLang: targetLang
+                ),
+                readAloudEnabled: caps.readAloudEnabled,
+                translationEnabled: caps.translationEnabled,
+                preferencesEnabled: caps.preferencesEnabled
+            )
         }
     }
 
