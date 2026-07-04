@@ -14,6 +14,7 @@ struct PlatformFeatures: Decodable {
     var ffMobileProfileDepth: Bool?
     var ffMobileLibraryEreserves: Bool?
     var ffMobileImmersiveReader: Bool?
+    var ffMobileLiveMeetings: Bool?
     var readAloudEnabled: Bool?
     var ffReadAloud: Bool?
     var videoCaptionsEnabled: Bool?

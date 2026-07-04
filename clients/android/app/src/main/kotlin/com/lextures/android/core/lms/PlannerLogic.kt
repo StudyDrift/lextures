@@ -20,6 +20,7 @@ enum class PlannerCalendarEventKind {
     NotebookTask,
     Academic,
     OfficeHours,
+    LiveMeeting,
 }
 
 data class StudentTodoItem(
@@ -195,6 +196,7 @@ object PlannerLogic {
         notebookTasks: List<NotebookTask>,
         academicEvents: List<AcademicCalendarEvent>,
         officeHoursByCourseCode: Map<String, OfficeHoursAvailability> = emptyMap(),
+        liveMeetingsByCourseCode: Map<String, List<VirtualMeeting>> = emptyMap(),
     ): List<PlannerCalendarEvent> {
         val courseTitles = studentCourses.associate { it.courseCode to it.displayTitle }
         val events = mutableListOf<PlannerCalendarEvent>()
@@ -245,6 +247,7 @@ object PlannerLogic {
         }
 
         events += OfficeHoursLogic.collectCalendarEvents(studentCourses, officeHoursByCourseCode)
+        events += LiveMeetingsLogic.collectCalendarEvents(studentCourses, liveMeetingsByCourseCode)
 
         return events.sortedBy { it.startsAt }
     }

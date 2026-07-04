@@ -1162,12 +1162,81 @@ object LmsApi {
     }
 
     suspend fun fetchMeetingJoinUrl(meetingId: String, accessToken: String): String? = withContext(Dispatchers.IO) {
+        fetchMeetingJoinInfo(meetingId, accessToken)?.joinUrl
+    }
+
+    // Live meetings (M7.5)
+    suspend fun fetchCourseMeetings(courseCode: String, accessToken: String): List<VirtualMeeting> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/courses/${encodePath(courseCode)}/meetings",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<CourseMeetingsResponse>(body).meetings.orEmpty()
+        }
+
+    suspend fun fetchMeetingJoinInfo(meetingId: String, accessToken: String): MeetingJoinInfo? =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/meetings/${encodePath(meetingId)}/join",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) return@withContext null
+            val raw = decode<MeetingJoinResponse>(body)
+            val join = raw.joinUrl?.trim().orEmpty()
+            if (join.isEmpty()) return@withContext null
+            MeetingJoinInfo(
+                joinUrl = join,
+                hostUrl = raw.hostUrl?.trim()?.takeIf { it.isNotEmpty() },
+                meetingId = raw.meetingId ?: meetingId,
+                status = raw.status ?: "scheduled",
+            )
+        }
+
+    suspend fun patchMeeting(meetingId: String, status: String, accessToken: String): VirtualMeeting =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/meetings/${encodePath(meetingId)}",
+                method = "PATCH",
+                body = client.encodeBody(PatchMeetingBody(status = status), PatchMeetingBody.serializer()),
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchMeetingAttendance(meetingId: String, accessToken: String): List<MeetingAttendanceRecord> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/meetings/${encodePath(meetingId)}/attendance",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<MeetingAttendanceResponse>(body).attendance.orEmpty()
+        }
+
+    suspend fun fetchCourseWhiteboards(courseCode: String, accessToken: String): List<CourseWhiteboard> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/courses/${encodePath(courseCode)}/whiteboards",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<CourseWhiteboardsResponse>(body).whiteboards.orEmpty()
+        }
+
+    suspend fun fetchCourseWhiteboard(
+        courseCode: String,
+        boardId: String,
+        accessToken: String,
+    ): CourseWhiteboard = withContext(Dispatchers.IO) {
         val (body, code) = client.requestRaw(
-            "/api/v1/meetings/${encodePath(meetingId)}/join",
+            "/api/v1/courses/${encodePath(courseCode)}/whiteboards/${encodePath(boardId)}",
             accessToken = accessToken,
         )
-        if (code !in 200..299) return@withContext null
-        decode<MeetingJoinResponse>(body).joinUrl?.trim()?.takeIf { it.isNotEmpty() }
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
     }
 
     suspend fun fetchSearchIndex(accessToken: String): SearchIndexResponse = withContext(Dispatchers.IO) {

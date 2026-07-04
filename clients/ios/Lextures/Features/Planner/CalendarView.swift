@@ -174,6 +174,7 @@ struct CalendarView: View {
         case .notebookTask: return L.text("mobile.planner.kind.task")
         case .academic: return L.text("mobile.planner.kind.academic")
         case .officeHours: return L.text("mobile.planner.kind.officeHours")
+        case .liveMeeting: return L.text("mobile.planner.kind.liveMeeting")
         }
     }
 

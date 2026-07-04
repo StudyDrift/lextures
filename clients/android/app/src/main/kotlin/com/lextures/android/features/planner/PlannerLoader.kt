@@ -14,6 +14,7 @@ import com.lextures.android.core.lms.PlannerSnapshot
 import com.lextures.android.core.offline.fetchCoursesCached
 import com.lextures.android.core.lms.StudentTodoItem
 import com.lextures.android.core.lms.OfficeHoursAvailability
+import com.lextures.android.core.lms.VirtualMeeting
 import com.lextures.android.core.lms.isCalendarEnabled
 import com.lextures.android.core.lms.isOfficeHoursEnabled
 import com.lextures.android.core.offline.OfflineCacheKey
@@ -79,6 +80,7 @@ object PlannerLoader {
 
         val academic = mutableListOf<AcademicCalendarEvent>()
         val officeHoursByCourse = mutableMapOf<String, OfficeHoursAvailability>()
+        val liveMeetingsByCourse = mutableMapOf<String, List<VirtualMeeting>>()
         val seen = mutableSetOf<String>()
         for (course in studentCourses) {
             val orgId = course.orgId ?: continue
@@ -103,6 +105,20 @@ object PlannerLoader {
                 if (availability != null) officeHoursByCourse[code] = availability
             }
 
+        studentCourses
+            .filter { it.isLiveSessionsEnabled }
+            .map { course ->
+                async {
+                    course.courseCode to runCatching {
+                        LmsApi.fetchCourseMeetings(course.courseCode, accessToken)
+                    }.getOrNull()
+                }
+            }
+            .awaitAll()
+            .forEach { (code, meetings) ->
+                if (meetings != null) liveMeetingsByCourse[code] = meetings
+            }
+
         val todos = PlannerLogic.collectTodos(studentCourses, structures, notebookTasks, grades)
         val events = PlannerLogic.collectCalendarEvents(
             studentCourses,
@@ -110,6 +126,7 @@ object PlannerLoader {
             notebookTasks,
             academic,
             officeHoursByCourse,
+            liveMeetingsByCourse,
         )
         PlannerLogic.encodeSnapshot(todos, events)
     }

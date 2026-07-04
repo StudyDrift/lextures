@@ -30,6 +30,7 @@ final class DashboardModel {
     var staffBacklogs: [StaffBacklog] = []
     var announcements: [Broadcast] = []
     var reviewStats: ReviewStats?
+    var liveAndUpcoming: [LiveMeetingsLogic.LiveUpcomingItem] = []
     var errorMessage: String?
     var loading = false
     private var loadedOnce = false
@@ -76,6 +77,7 @@ final class DashboardModel {
             announcements = await broadcastsTask
             await loadStaffBacklogs(accessToken: accessToken)
             await loadReviewStats(accessToken: accessToken)
+            await loadLiveMeetings(accessToken: accessToken)
         } catch {
             errorMessage = L.text("mobile.dashboard.error.load")
         }
@@ -139,6 +141,33 @@ final class DashboardModel {
             .sorted { $0.total > $1.total }
     }
 
+    private func loadLiveMeetings(accessToken: String) async {
+        let liveCourses = courses.filter { $0.isLiveSessionsEnabled }
+        guard !liveCourses.isEmpty else {
+            liveAndUpcoming = []
+            return
+        }
+        var meetingsByCourse: [String: [VirtualMeeting]] = [:]
+        await withTaskGroup(of: (String, [VirtualMeeting]?).self) { group in
+            for course in liveCourses {
+                group.addTask {
+                    let meetings = try? await LMSAPI.fetchCourseMeetings(
+                        courseCode: course.courseCode,
+                        accessToken: accessToken
+                    )
+                    return (course.courseCode, meetings)
+                }
+            }
+            for await (code, meetings) in group {
+                if let meetings { meetingsByCourse[code] = meetings }
+            }
+        }
+        liveAndUpcoming = LiveMeetingsLogic.collectLiveAndUpcoming(
+            courses: liveCourses,
+            meetingsByCourseCode: meetingsByCourse
+        )
+    }
+
     private func loadReviewStats(accessToken: String) async {
         guard let userId = NotebookStore.jwtSubject(from: accessToken) else {
             reviewStats = nil
@@ -197,6 +226,9 @@ struct DashboardView: View {
                             LMSSkeletonList(count: 4)
                         } else {
                             announcementCard
+                            if shell.platformFeatures.ffMobileLiveMeetings, !model.liveAndUpcoming.isEmpty {
+                                LiveMeetingsRail(items: model.liveAndUpcoming, courses: model.courses)
+                            }
                             reviewCard
                             if shell.platformFeatures.selfReflectionEnabled {
                                 DashboardInsightsSection(onOpenInsights: { openInsights = true })

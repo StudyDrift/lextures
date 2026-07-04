@@ -87,6 +87,7 @@ import com.lextures.android.core.navigation.CourseWorkspaceContext
 import com.lextures.android.core.navigation.CourseWorkspaceSection
 import com.lextures.android.core.navigation.MobileDestinations
 import com.lextures.android.core.navigation.MobilePlatformFeatures
+import com.lextures.android.features.live.CourseLiveSection
 import com.lextures.android.features.home.HomeShellState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
@@ -463,7 +464,13 @@ fun CourseDetailScreen(
                     CourseWorkspaceSection.People -> item {
                         CoursePeopleSection(session = session, course = course)
                     }
-                    CourseWorkspaceSection.Live,
+                    CourseWorkspaceSection.Live -> item {
+                        CourseLiveSection(
+                            session = session,
+                            course = course,
+                            platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
+                        )
+                    }
                     CourseWorkspaceSection.Evaluations,
                     -> item { CourseDestinationPlaceholder(section = selectedSection) }
                     CourseWorkspaceSection.Modules -> {

@@ -769,11 +769,6 @@ struct BookOfficeHoursSlotBody: Encodable {
     var note: String?
 }
 
-struct MeetingJoinResponse: Decodable {
-    var joinUrl: String?
-    var hostUrl: String?
-}
-
 // MARK: - Planner (todos + calendar, M2.1)
 
 /// Row from GET `/api/v1/me/notebook-tasks`.

@@ -29,6 +29,7 @@ enum PlannerCalendarEventKind: String, Hashable {
     case notebookTask
     case academic
     case officeHours
+    case liveMeeting
 }
 
 struct StudentTodoItem: Identifiable, Hashable {
@@ -267,7 +268,8 @@ enum PlannerLogic {
         structureByCourseCode: [String: [CourseStructureItem]],
         notebookTasks: [NotebookTask],
         academicEvents: [AcademicCalendarEvent],
-        officeHoursByCourseCode: [String: OfficeHoursAvailability] = [:]
+        officeHoursByCourseCode: [String: OfficeHoursAvailability] = [:],
+        liveMeetingsByCourseCode: [String: [VirtualMeeting]] = [:]
     ) -> [PlannerCalendarEvent] {
         var events: [PlannerCalendarEvent] = []
         let courseTitles = Dictionary(uniqueKeysWithValues: studentCourses.map { ($0.courseCode, $0.displayTitle) })
@@ -340,6 +342,10 @@ enum PlannerLogic {
         events.append(contentsOf: OfficeHoursLogic.collectCalendarEvents(
             studentCourses: studentCourses,
             availabilityByCourseCode: officeHoursByCourseCode
+        ))
+        events.append(contentsOf: LiveMeetingsLogic.collectCalendarEvents(
+            studentCourses: studentCourses,
+            meetingsByCourseCode: liveMeetingsByCourseCode
         ))
 
         return events.sorted { $0.startsAt < $1.startsAt }

@@ -67,8 +67,11 @@ import com.lextures.android.core.lms.Broadcast
 import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.GradingBacklogItem
+import com.lextures.android.core.lms.LiveMeetingsLogic
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
+import com.lextures.android.core.lms.VirtualMeeting
+import com.lextures.android.features.live.LiveMeetingsRail
 import com.lextures.android.features.courses.CourseDetailScreen
 import com.lextures.android.features.courses.ItemDetailScreen
 import com.lextures.android.features.courses.ItemKind
@@ -150,6 +153,7 @@ fun DashboardTab(
     var openPathCourse by remember { mutableStateOf<CourseSummary?>(null) }
     var openRecommendedItem by remember { mutableStateOf<Pair<CourseSummary, CourseStructureItem>?>(null) }
     var reviewStats by remember { mutableStateOf<com.lextures.android.core.lms.ReviewStats?>(null) }
+    var liveAndUpcoming by remember { mutableStateOf<List<LiveMeetingsLogic.LiveUpcomingItem>>(emptyList()) }
     val context = LocalContext.current
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
@@ -225,6 +229,18 @@ fun DashboardTab(
                     ) { LmsApi.fetchLearnerReviewStats(id, token) }.first
                 }.getOrNull()
             }
+
+            val liveCourses = enriched.filter { it.isLiveSessionsEnabled }
+            val meetingsByCourse = coroutineScope {
+                liveCourses.map { course ->
+                    async {
+                        course.courseCode to runCatching {
+                            LmsApi.fetchCourseMeetings(course.courseCode, token)
+                        }.getOrNull()
+                    }
+                }.awaitAll()
+            }.mapNotNull { (code, meetings) -> meetings?.let { code to it } }.toMap()
+            liveAndUpcoming = LiveMeetingsLogic.collectLiveAndUpcoming(liveCourses, meetingsByCourse)
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
         } finally {
@@ -439,6 +455,22 @@ fun DashboardTab(
         if (loading && courses.isEmpty()) {
             item { LmsSkeletonList(count = 4) }
             return@LazyColumn
+        }
+
+        if (shell.platformFeatures.ffMobileLiveMeetings && liveAndUpcoming.isNotEmpty()) {
+            item {
+                LiveMeetingsRail(
+                    items = liveAndUpcoming,
+                    courses = courses,
+                    session = session,
+                    onOpenCourse = { course ->
+                        shell.activeCourse = course
+                        shell.activeCourseRoot = shell.rootDestination
+                        shell.activeCourseSection = com.lextures.android.core.navigation.CourseWorkspaceSection.Live
+                        shell.rootDestination = com.lextures.android.core.navigation.RootDestination.Courses
+                    },
+                )
+            }
         }
 
         announcements.firstOrNull()?.let { broadcast ->

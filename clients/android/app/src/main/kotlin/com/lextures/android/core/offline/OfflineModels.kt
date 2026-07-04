@@ -21,6 +21,7 @@ object OfflineCacheKey {
     fun notificationsPage(): String = "notifications:page"
     fun notificationPreferences(): String = "notifications:preferences"
     fun officeHours(courseCode: String): String = "course:$courseCode:office-hours"
+    fun liveMeetings(courseCode: String): String = "course:$courseCode:live-meetings"
     fun discussionForums(courseCode: String): String = "course:$courseCode:discussion-forums"
     fun discussionThreads(courseCode: String, forumId: String): String =
         "course:$courseCode:discussion-threads:$forumId"
