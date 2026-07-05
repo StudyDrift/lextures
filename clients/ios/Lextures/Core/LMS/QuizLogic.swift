@@ -50,10 +50,10 @@ struct QuizTypeConfig: Codable, Hashable {
     var pairs: [QuizMatchingPairConfig]?
     var starterCode: String?
     var language: String?
-    var languageId: Int?
-    var multiFile: Bool?
-    var files: [QuizCodeFileConfig]?
-    var testCases: [QuizCodeTestCaseConfig]?
+    var languageId: Int? = nil
+    var multiFile: Bool? = nil
+    var files: [QuizCodeFileConfig]? = nil
+    var testCases: [QuizCodeTestCaseConfig]? = nil
 }
 
 struct QuizCodeFileConfig: Codable, Hashable {
