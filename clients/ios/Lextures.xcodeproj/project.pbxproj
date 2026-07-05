@@ -336,6 +336,7 @@
 		8B513C2D3E4F5061728394 /* LMSAPIAdvising.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B513D3E4F5061728394A5 /* LMSAPIAdvising.swift */; };
 		8B514C2D3E4F5061728394 /* AdvisingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B514D3E4F5061728394A5 /* AdvisingView.swift */; };
 		8B515C2D3E4F5061728394 /* AdvisingLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B515D3E4F5061728394A5 /* AdvisingLogicTests.swift */; };
+		8B516C2D3E4F5061728394 /* AdvisingLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B516D3E4F5061728394A5 /* AdvisingLogic.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -683,6 +684,7 @@
 		8B513D3E4F5061728394A5 /* LMSAPIAdvising.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIAdvising.swift; sourceTree = "<group>"; };
 		8B514D3E4F5061728394A5 /* AdvisingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisingView.swift; sourceTree = "<group>"; };
 		8B515D3E4F5061728394A5 /* AdvisingLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisingLogicTests.swift; sourceTree = "<group>"; };
+		8B516D3E4F5061728394A5 /* AdvisingLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisingLogic.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1314,6 +1316,7 @@
 		EE4734853C3443449D42D6DC /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B516D3E4F5061728394A5 /* AdvisingLogic.swift */,
 				8B513D3E4F5061728394A5 /* LMSAPIAdvising.swift */,
 				8B512D3E4F5061728394A5 /* LMSFeatureModelsAdvising.swift */,
 				M750L02D3E4F5061728394A5 /* WhiteboardRenderer.swift */,
@@ -1594,6 +1597,7 @@
 			buildActionMask = 2147483647;
 			files = (
 
+				8B516C2D3E4F5061728394 /* AdvisingLogic.swift in Sources */,
 				8B514C2D3E4F5061728394 /* AdvisingView.swift in Sources */,
 				8B513C2D3E4F5061728394 /* LMSAPIAdvising.swift in Sources */,
 				8B512C2D3E4F5061728394 /* LMSFeatureModelsAdvising.swift in Sources */,				M750L06C2D3E4F5061728394 /* LiveMeetingsRail.swift in Sources */,
