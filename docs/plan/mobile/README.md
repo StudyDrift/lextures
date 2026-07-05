@@ -169,7 +169,7 @@ covered**, plus the navigation redesign needed to hold them. Added as stories:
 | [M3.5 Vibe activities](../completed/mobile/M3.5-vibe-activities.md) | `course-module-vibe-activity-page` (AI interactive content type) | `/courses/{c}/vibe-activities/{item}` | **Done** |
 | [M3.6 Library, e-reserves & OER](../completed/mobile/M3.6-library-ereserves-oer.md) | 14.10 e-reserves, OER, `library-catalog-page` | `/library/search`, `/oer/search`, `/courses/{c}/library-resources/*` | **Done** |
 | [M6.3 Immersive reader: read-aloud, captions & translation](../completed/mobile/M6.3-immersive-reader.md) ✅ | 12.x read-aloud/captions, 11.x translation, reading prefs | `/files/{o}/captions/*`, course-translation, reading-preferences | **Done** |
-| [M7.5 Live classes & virtual meetings](M7.5-live-classes-virtual-meetings.md) | `course-live-page`, virtual meetings, whiteboards | `/meetings/*`, `/courses/{c}/meetings`, `/courses/{c}/whiteboards/*` | **P1** |
+| [M7.5 Live classes & virtual meetings](../completed/mobile/M7.5-live-classes-virtual-meetings.md) ✅ | `course-live-page`, virtual meetings, whiteboards | `/meetings/*`, `/courses/{c}/meetings`, `/courses/{c}/whiteboards/*` | **Done** |
 | [M7.6 Course feed & channels (real-time)](../completed/mobile/M7.6-course-feed-channels.md) | `course-feed-page` (distinct from M7.1 discussions) | `/courses/{c}/feed/*`, `/feed/ws` | **Done** |
 | [M7.7 Course evaluations & surveys](M7.7-course-evaluations-surveys.md) | 14.7 course evaluations, surveys | `/courses/{c}/evaluations/status\|submit\|results` | **P1** |
 | [M7.8 Academic advising (student)](M7.8-academic-advising.md) | advising notes + appointments (HE) | `/me/advising-notes`, `/me/advising/config`, scheduler | **P2** |
@@ -208,7 +208,7 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
    Exit criteria: a student completes a full week of coursework with no browser.
 2. **Wave 2 — Breadth (P1).** Auth depth (M1.x ✅), interactive content (M3.3 ✅) +
    M3.5 vibe activities ✅ + M3.6 library/e-reserves ✅, standards/mastery (M6.2 ✅),
-   M6.3 immersive reader ✅, groups/office-hours (M7.3 ✅/M7.4 ✅) + M7.5 live classes +
+   M6.3 immersive reader ✅, groups/office-hours (M7.3 ✅/M7.4 ✅) + M7.5 live classes ✅ +
    M7.6 course feed ✅ + M7.7 evaluations, adaptive (M8.2 ✅/M8.3 ✅/M8.4 ✅), self-learner commerce
    (M9.1 ✅/M9.2 ✅/M9.3 ✅), parent (M10.1/M10.2), accessibility & i18n (M0.3 ✅/M0.4 ✅), settings (M1.4 ✅),
    instructor attendance (M11.1 ✅) + M11.3 instructor insights/at-risk + M11.4 course

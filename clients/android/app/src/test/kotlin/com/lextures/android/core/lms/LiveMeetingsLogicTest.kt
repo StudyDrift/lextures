@@ -30,6 +30,47 @@ class LiveMeetingsLogicTest {
     }
 
     @Test
+    fun canJoinLiveAndSoonMeetingsOnly() {
+        val now = Instant.parse("2024-01-01T15:00:00Z")
+        val live = meeting("live", "live")
+        val soon = meeting("soon", "scheduled", start = "2024-01-01T15:10:00Z")
+        val later = meeting("later", "scheduled", start = "2024-01-01T17:00:00Z")
+        val ended = meeting("ended", "ended")
+        val cancelled = meeting("cancelled", "cancelled")
+        assertTrue(LiveMeetingsLogic.canJoin(live, now))
+        assertTrue(LiveMeetingsLogic.canJoin(soon, now))
+        assertFalse(LiveMeetingsLogic.canJoin(later, now))
+        assertFalse(LiveMeetingsLogic.canJoin(ended, now))
+        assertFalse(LiveMeetingsLogic.canJoin(cancelled, now))
+    }
+
+    @Test
+    fun collectLiveAndUpcomingPrioritizesLive() {
+        val course = CourseSummary(
+            id = "1",
+            courseCode = "BIO101",
+            title = "Biology",
+            liveSessionsEnabled = true,
+            viewerEnrollmentRoles = listOf("student"),
+        )
+        val live = meeting("live", "live", start = "2024-01-01T16:00:00Z")
+        val soon = meeting("soon", "scheduled", start = "2024-01-01T15:05:00Z")
+        val now = Instant.parse("2024-01-01T15:00:00Z")
+        val items = LiveMeetingsLogic.collectLiveAndUpcoming(
+            courses = listOf(course),
+            meetingsByCourseCode = mapOf(course.courseCode to listOf(live, soon)),
+            now = now,
+        )
+        assertEquals(2, items.size)
+        assertEquals("live", items[0].meeting.id)
+    }
+
+    @Test
+    fun meetingIcalUrlUsesApiPath() {
+        assertTrue(LiveMeetingsLogic.meetingIcalUrl("abc-123").contains("/api/v1/meetings/abc-123/ical"))
+    }
+
+    @Test
     fun calendarEventsFromScheduledMeetings() {
         val course = CourseSummary(
             id = "1",

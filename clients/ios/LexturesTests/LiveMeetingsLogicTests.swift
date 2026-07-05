@@ -30,6 +30,20 @@ final class LiveMeetingsLogicTests: XCTestCase {
         XCTAssertFalse(LiveMeetingsLogic.isLiveOrSoon(later, now: now))
     }
 
+    func testCanJoinLiveAndSoonMeetingsOnly() {
+        let now = LMSDates.parse("2024-01-01T15:00:00Z")!
+        let live = makeMeeting(id: "live", status: "live")
+        let soon = makeMeeting(id: "soon", status: "scheduled", start: "2024-01-01T15:10:00Z")
+        let later = makeMeeting(id: "later", status: "scheduled", start: "2024-01-01T17:00:00Z")
+        let ended = makeMeeting(id: "ended", status: "ended")
+        let cancelled = makeMeeting(id: "cancelled", status: "cancelled")
+        XCTAssertTrue(LiveMeetingsLogic.canJoin(live, now: now))
+        XCTAssertTrue(LiveMeetingsLogic.canJoin(soon, now: now))
+        XCTAssertFalse(LiveMeetingsLogic.canJoin(later, now: now))
+        XCTAssertFalse(LiveMeetingsLogic.canJoin(ended, now: now))
+        XCTAssertFalse(LiveMeetingsLogic.canJoin(cancelled, now: now))
+    }
+
     func testCalendarEventsFromScheduledMeetings() {
         let course = CourseSummary(
             id: "1",
@@ -62,6 +76,23 @@ final class LiveMeetingsLogicTests: XCTestCase {
         XCTAssertEqual(events.count, 1)
         XCTAssertEqual(events[0].kind, .liveMeeting)
         XCTAssertEqual(events[0].meetingId, "m1")
+    }
+
+    func testMeetingIcalURLUsesApiPath() {
+        let url = LiveMeetingsLogic.meetingIcalURL(meetingId: "abc-123")
+        XCTAssertTrue(url?.absoluteString.contains("/api/v1/meetings/abc-123/ical") == true)
+    }
+
+    func testWhiteboardElementParsesStrokePoints() {
+        let element = WhiteboardElement(
+            type: "stroke",
+            color: "#ff0000",
+            width: 2,
+            pts: [[1, 2], [3, 4]]
+        )
+        XCTAssertEqual(element.points.count, 2)
+        XCTAssertEqual(element.points[0].x, 1)
+        XCTAssertEqual(element.points[1].y, 4)
     }
 
     func testCollectLiveAndUpcomingPrioritizesLive() {
