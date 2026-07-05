@@ -364,6 +364,8 @@ struct MobilePlatformFeatures: Equatable {
     var ffStripeBilling = false
     var ffPaymentsEnabled = false
     var ffTaxCollection = false
+    var ffAdvisingIntegration = false
+    var ffMobileAdvising = true
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -401,7 +403,9 @@ struct MobilePlatformFeatures: Equatable {
             ffGamification: features?.ffGamification == true,
             ffStripeBilling: features?.ffStripeBilling == true,
             ffPaymentsEnabled: features?.ffPaymentsEnabled == true,
-            ffTaxCollection: features?.ffTaxCollection == true
+            ffTaxCollection: features?.ffTaxCollection == true,
+            ffAdvisingIntegration: features?.ffAdvisingIntegration == true,
+            ffMobileAdvising: features?.ffMobileAdvising != false
         )
     }
 
@@ -545,13 +549,18 @@ enum MobileDestinations {
             if platform.libraryBrowseEnabled { out.append(.library) }
             if platform.ffCompletionCredentials { out.append(.credentials) }
             if platform.ffGamification { out.append(.gamification) }
-            out += [.portfolio, .advising, .settings]
+            out.append(.portfolio)
+            if AdvisingLogic.advisingEnabled(platform) { out.append(.advising) }
+            out.append(.settings)
         case .teaching:
             out += [.calendar, .planner]
             if platform.libraryBrowseEnabled { out.append(.library) }
-            out += [.advising, .settings]
+            if AdvisingLogic.advisingEnabled(platform) { out.append(.advising) }
+            out.append(.settings)
         case .parent:
-            out += [.calendar, .advising, .settings]
+            out += [.calendar]
+            if AdvisingLogic.advisingEnabled(platform) { out.append(.advising) }
+            out.append(.settings)
         }
         return out
     }

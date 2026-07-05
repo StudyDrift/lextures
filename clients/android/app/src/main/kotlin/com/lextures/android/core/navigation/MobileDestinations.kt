@@ -1,5 +1,6 @@
 package com.lextures.android.core.navigation
 
+import com.lextures.android.core.lms.AdvisingLogic
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.ImmersiveReaderCapabilities
 import com.lextures.android.core.lms.PlatformFeatures
@@ -189,6 +190,8 @@ data class MobilePlatformFeatures(
     val ffStripeBilling: Boolean = false,
     val ffPaymentsEnabled: Boolean = false,
     val ffTaxCollection: Boolean = false,
+    val ffAdvisingIntegration: Boolean = false,
+    val ffMobileAdvising: Boolean = true,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -244,6 +247,8 @@ data class MobilePlatformFeatures(
             ffStripeBilling = features?.ffStripeBilling == true,
             ffPaymentsEnabled = features?.ffPaymentsEnabled == true,
             ffTaxCollection = features?.ffTaxCollection == true,
+            ffAdvisingIntegration = features?.ffAdvisingIntegration == true,
+            ffMobileAdvising = features?.ffMobileAdvising != false,
         )
     }
 }
@@ -362,19 +367,19 @@ object MobileDestinations {
                 add(MoreDestination.Portfolio)
                 if (platform.ffCompletionCredentials) add(MoreDestination.Credentials)
                 if (platform.ffGamification) add(MoreDestination.Gamification)
-                add(MoreDestination.Advising)
+                if (AdvisingLogic.advisingEnabled(platform)) add(MoreDestination.Advising)
                 add(MoreDestination.Settings)
             }
             MobileRoleContext.Teaching -> {
                 add(MoreDestination.Calendar)
                 add(MoreDestination.Planner)
                 if (platform.libraryBrowseEnabled) add(MoreDestination.Library)
-                add(MoreDestination.Advising)
+                if (AdvisingLogic.advisingEnabled(platform)) add(MoreDestination.Advising)
                 add(MoreDestination.Settings)
             }
             MobileRoleContext.Parent -> {
                 add(MoreDestination.Calendar)
-                add(MoreDestination.Advising)
+                if (AdvisingLogic.advisingEnabled(platform)) add(MoreDestination.Advising)
                 add(MoreDestination.Settings)
             }
         }

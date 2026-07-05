@@ -462,6 +462,16 @@ fun ProfileTab(
                 } else {
                     MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
                 }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Advising) {
+                if (com.lextures.android.core.lms.AdvisingLogic.advisingEnabled(shell.platformFeatures)) {
+                    com.lextures.android.features.advising.AdvisingScreen(
+                        session = session,
+                        localePrefs = localePreferences,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
             } else {
                 MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
             }

@@ -460,6 +460,8 @@ data class PlatformFeatures(
     val ffStripeBilling: Boolean? = null,
     val ffPaymentsEnabled: Boolean? = null,
     val ffTaxCollection: Boolean? = null,
+    val ffAdvisingIntegration: Boolean? = null,
+    val ffMobileAdvising: Boolean? = null,
 )
 
 @Serializable

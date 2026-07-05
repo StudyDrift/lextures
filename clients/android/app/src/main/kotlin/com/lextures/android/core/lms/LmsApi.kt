@@ -2226,6 +2226,29 @@ object LmsApi {
     fun credentialPdfPath(credentialId: String): String =
         "/api/v1/credentials/${encodePath(credentialId)}/download"
 
+    // Academic advising (M7.8)
+
+    suspend fun fetchAdvisingNotes(accessToken: String): List<AdvisingNote> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/advising-notes", accessToken = accessToken)
+        if (code == 404) throw ApiError.HttpStatus(code, "Advising features are not enabled.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<AdvisingNotesResponse>(body).notes.orEmpty()
+    }
+
+    suspend fun fetchDegreeProgress(accessToken: String): DegreeProgress = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/degree-progress", accessToken = accessToken)
+        if (code == 404) throw ApiError.HttpStatus(code, "Advising features are not enabled.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchMyAdvisingConfig(accessToken: String): MyAdvisingConfig = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/advising/config", accessToken = accessToken)
+        if (code == 404) throw ApiError.HttpStatus(code, "Advising features are not enabled.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
     // Gamification (M9.3)
 
     suspend fun fetchGamificationProfile(accessToken: String): GamificationProfile = withContext(Dispatchers.IO) {

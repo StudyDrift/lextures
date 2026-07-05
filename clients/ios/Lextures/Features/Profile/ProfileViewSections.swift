@@ -205,6 +205,12 @@ struct ProfileMoreDestinationScreen: View {
             } else {
                 MoreDestinationPlaceholder(destination: destination)
             }
+        } else if destination == .advising {
+            if AdvisingLogic.advisingEnabled(shell.platformFeatures) {
+                AdvisingView()
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
         } else {
             MoreDestinationPlaceholder(destination: destination)
         }
