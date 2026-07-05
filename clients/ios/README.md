@@ -116,7 +116,7 @@ The `.github/workflows/ci-ios.yml` workflow runs on every PR that touches `clien
 2. **Build** — `xcodebuild build` targeting `generic/platform=iOS Simulator` (`CODE_SIGNING_ALLOWED=NO`)
 3. **Test** — `xcodebuild test` on the first available iPhone simulator (16 → 17 → 17 Pro → 15; `CODE_SIGNING_ALLOWED=NO`)
 
-No provisioning profile or Apple developer account is needed for simulator builds. CI boots the selected simulator before running tests.
+No provisioning profile or Apple developer account is needed for simulator builds. CI boots the selected simulator before running tests. Test output is logged without xcpretty so failures surface in the Actions log.
 
 ## Next features (planned)
 
