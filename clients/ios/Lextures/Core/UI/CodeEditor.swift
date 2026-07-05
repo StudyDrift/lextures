@@ -29,7 +29,7 @@ enum CodeSyntaxHighlighter {
         )
 
         let normalized = language.lowercased()
-        let keywords = keywordSets[normalized] ?? keywordSets["python3"] ?? []
+        let keywords = keywordSets[normalized] ?? keywordSets["python3"] ?? Set<String>()
         guard !keywords.isEmpty else { return attributed }
         let pattern = "\\b(" + keywords.sorted(by: { $0.count > $1.count }).joined(separator: "|") + ")\\b"
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return attributed }
@@ -108,7 +108,7 @@ private struct CodeEditorRepresentable: UIViewRepresentable {
         view.layer.cornerRadius = 12
         view.textContainerInset = UIEdgeInsets(top: 12, left: 10, bottom: 12, right: 10)
         view.delegate = context.coordinator
-        view.accessibilityLabel = L.text("mobile.quiz.code.editorA11y")
+        view.accessibilityLabel = "Code editor"
         return view
     }
 
