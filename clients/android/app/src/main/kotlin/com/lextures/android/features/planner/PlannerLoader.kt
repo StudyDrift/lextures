@@ -3,6 +3,7 @@ package com.lextures.android.features.planner
 import com.lextures.android.core.lms.AcademicCalendarEvent
 import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.lms.EvaluationStatus
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.MyGradesResponse
 import com.lextures.android.core.lms.NotebookTask
@@ -119,7 +120,26 @@ object PlannerLoader {
                 if (meetings != null) liveMeetingsByCourse[code] = meetings
             }
 
-        val todos = PlannerLogic.collectTodos(studentCourses, structures, notebookTasks, grades)
+        val evaluationStatusByCourse = mutableMapOf<String, EvaluationStatus>()
+        studentCourses.map { course ->
+            async {
+                course.courseCode to runCatching {
+                    LmsApi.fetchEvaluationStatus(course.courseCode, accessToken)
+                }.getOrNull()
+            }
+        }.awaitAll().forEach { (code, status) ->
+            if (status != null && (status.windowOpen || status.hasSubmitted)) {
+                evaluationStatusByCourse[code] = status
+            }
+        }
+
+        val todos = PlannerLogic.collectTodos(
+            studentCourses,
+            structures,
+            notebookTasks,
+            grades,
+            evaluationStatusByCourse,
+        )
         val events = PlannerLogic.collectCalendarEvents(
             studentCourses,
             structures,

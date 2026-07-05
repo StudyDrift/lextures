@@ -131,6 +131,7 @@ final class PlannerModel {
         var academic: [AcademicCalendarEvent] = []
         var officeHoursByCourse: [String: OfficeHoursAvailability] = [:]
         var liveMeetingsByCourse: [String: [VirtualMeeting]] = [:]
+        var evaluationStatusByCourse: [String: EvaluationStatus] = [:]
         var seenKeys = Set<String>()
         for course in studentCourses {
             guard let orgId = course.orgId else { continue }
@@ -174,11 +175,29 @@ final class PlannerModel {
             }
         }
 
+        await withTaskGroup(of: (String, EvaluationStatus?).self) { group in
+            for course in studentCourses {
+                group.addTask {
+                    let status = try? await LMSAPI.fetchEvaluationStatus(
+                        courseCode: course.courseCode,
+                        accessToken: accessToken
+                    )
+                    return (course.courseCode, status)
+                }
+            }
+            for await (code, status) in group {
+                if let status, status.windowOpen || status.hasSubmitted {
+                    evaluationStatusByCourse[code] = status
+                }
+            }
+        }
+
         let todos = PlannerLogic.collectTodos(
             studentCourses: studentCourses,
             structureByCourseCode: structures,
             notebookTasks: notebookTasks,
-            gradesByCourseCode: grades
+            gradesByCourseCode: grades,
+            evaluationStatusByCourseCode: evaluationStatusByCourse
         )
         let events = PlannerLogic.collectCalendarEvents(
             studentCourses: studentCourses,

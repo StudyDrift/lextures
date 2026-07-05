@@ -2,6 +2,8 @@ package com.lextures.android.core.navigation
 
 import com.lextures.android.core.lms.AdvisingLogic
 import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.lms.EvaluationLogic
+import com.lextures.android.core.lms.EvaluationStatus
 import com.lextures.android.core.lms.ImmersiveReaderCapabilities
 import com.lextures.android.core.lms.PlatformFeatures
 import com.lextures.android.core.lms.TutorLogic
@@ -157,6 +159,7 @@ data class RoleSnapshot(
 data class MobilePlatformFeatures(
     val ffLibrary: Boolean = false,
     val ffCourseEvaluations: Boolean = false,
+    val ffMobileCourseEvaluations: Boolean = true,
     val ffMobileIaRedesign: Boolean = false,
     val ffMobileVibeActivities: Boolean = true,
     val ffMobileUniversalSearch: Boolean = false,
@@ -214,6 +217,7 @@ data class MobilePlatformFeatures(
         fun from(features: PlatformFeatures?): MobilePlatformFeatures = MobilePlatformFeatures(
             ffLibrary = features?.ffLibrary == true,
             ffCourseEvaluations = features?.ffCourseEvaluations == true,
+            ffMobileCourseEvaluations = features?.ffMobileCourseEvaluations != false,
             ffMobileIaRedesign = features?.ffMobileIaRedesign == true,
             ffMobileVibeActivities = features?.ffMobileVibeActivities != false,
             ffMobileUniversalSearch = features?.ffMobileUniversalSearch == true,
@@ -257,6 +261,7 @@ data class CourseWorkspaceContext(
     val course: CourseSummary,
     val hasAttendanceSessions: Boolean = false,
     val hasLibraryResources: Boolean = false,
+    val evaluationStatus: EvaluationStatus? = null,
     val platformFeatures: MobilePlatformFeatures = MobilePlatformFeatures(),
 )
 
@@ -401,9 +406,11 @@ object MobileDestinations {
         if (ctx.course.isAttendanceEnabled && (ctx.course.viewerIsStaff || ctx.hasAttendanceSessions)) {
             add(CourseWorkspaceSection.Attendance)
         }
+        if (EvaluationLogic.shouldShowWorkspaceSection(ctx.course, ctx.evaluationStatus, ctx.platformFeatures)) {
+            add(CourseWorkspaceSection.Evaluations)
+        }
         if (ctx.course.viewerIsStaff) {
             add(CourseWorkspaceSection.Grading)
-            if (ctx.platformFeatures.ffCourseEvaluations) add(CourseWorkspaceSection.Evaluations)
         }
         if (ctx.platformFeatures.ffMobileLibraryEreserves &&
             ctx.platformFeatures.ffLibrary &&

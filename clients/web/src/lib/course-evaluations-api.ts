@@ -36,6 +36,7 @@ export type EvaluationStatus = {
   hasSubmitted: boolean
   opensAt?: string
   closesAt?: string
+  questions?: EvaluationQuestion[]
 }
 
 export type QuestionResult = {

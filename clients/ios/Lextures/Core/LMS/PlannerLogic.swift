@@ -5,6 +5,7 @@ import Foundation
 enum StudentTodoKind: String, Hashable {
     case dueItem
     case notebookTask
+    case evaluation
 }
 
 enum StudentTodoCompletion: String, Hashable {
@@ -44,6 +45,7 @@ struct StudentTodoItem: Identifiable, Hashable {
     let structureItemId: String?
     let notebookPageId: String?
     let notebookTaskId: String?
+    let evaluationWindowId: String?
     var completion: StudentTodoCompletion
 
     var isCompleted: Bool { completion == .completed || completion == .submitted }
@@ -119,6 +121,7 @@ struct CachedStudentTodoItem: Codable, Hashable {
     var structureItemId: String?
     var notebookPageId: String?
     var notebookTaskId: String?
+    var evaluationWindowId: String?
     var completion: String
 }
 
@@ -167,11 +170,16 @@ enum PlannerLogic {
         "notebook:\(taskId)"
     }
 
+    static func evaluationTodoKey(courseCode: String, windowId: String) -> String {
+        EvaluationLogic.evaluationTodoKey(courseCode: courseCode, windowId: windowId)
+    }
+
     static func collectTodos(
         studentCourses: [CourseSummary],
         structureByCourseCode: [String: [CourseStructureItem]],
         notebookTasks: [NotebookTask],
-        gradesByCourseCode: [String: MyGradesResponse]
+        gradesByCourseCode: [String: MyGradesResponse],
+        evaluationStatusByCourseCode: [String: EvaluationStatus] = [:]
     ) -> [StudentTodoItem] {
         let courseTitles = Dictionary(uniqueKeysWithValues: studentCourses.map { ($0.courseCode, $0.displayTitle) })
         let studentCodes = Set(studentCourses.map(\.courseCode))
@@ -192,6 +200,7 @@ enum PlannerLogic {
                     structureItemId: nil,
                     notebookPageId: task.notebookPageId,
                     notebookTaskId: task.id,
+                    evaluationWindowId: nil,
                     completion: task.completed ? .completed : .open
                 )
             )
@@ -220,10 +229,34 @@ enum PlannerLogic {
                         structureItemId: row.id,
                         notebookPageId: nil,
                         notebookTaskId: nil,
+                        evaluationWindowId: nil,
                         completion: completion
                     )
                 )
             }
+        }
+
+        for course in studentCourses {
+            guard let status = evaluationStatusByCourseCode[course.courseCode],
+                  status.windowOpen,
+                  !status.hasSubmitted,
+                  let windowId = status.windowId else { continue }
+            items.append(
+                StudentTodoItem(
+                    key: evaluationTodoKey(courseCode: course.courseCode, windowId: windowId),
+                    kind: .evaluation,
+                    title: L.text("mobile.evaluations.todoTitle"),
+                    courseCode: course.courseCode,
+                    courseTitle: course.displayTitle,
+                    dueAt: EvaluationLogic.parseClosesAt(status.closesAt),
+                    structureKind: nil,
+                    structureItemId: nil,
+                    notebookPageId: nil,
+                    notebookTaskId: nil,
+                    evaluationWindowId: windowId,
+                    completion: .open
+                )
+            )
         }
 
         return items.sorted { lhs, rhs in
@@ -454,6 +487,7 @@ enum PlannerLogic {
             structureItemId: item.structureItemId,
             notebookPageId: item.notebookPageId,
             notebookTaskId: item.notebookTaskId,
+            evaluationWindowId: item.evaluationWindowId,
             completion: item.completion.rawValue
         )
     }
@@ -470,6 +504,7 @@ enum PlannerLogic {
             structureItemId: cached.structureItemId,
             notebookPageId: cached.notebookPageId,
             notebookTaskId: cached.notebookTaskId,
+            evaluationWindowId: cached.evaluationWindowId,
             completion: StudentTodoCompletion(rawValue: cached.completion) ?? .open
         )
     }

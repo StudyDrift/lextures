@@ -26,12 +26,19 @@ func (d Deps) evaluationsFeatureOff(w http.ResponseWriter, r *http.Request) bool
 // handleGetCourseEvaluationStatus returns whether an evaluation window is open and
 // whether the current user has already submitted — no identity linkable to responses.
 func (d Deps) handleGetCourseEvaluationStatus() http.HandlerFunc {
+	type questionResp struct {
+		Type     string   `json:"type"`
+		Text     string   `json:"text"`
+		Options  []string `json:"options,omitempty"`
+		Required bool     `json:"required,omitempty"`
+	}
 	type resp struct {
-		WindowOpen   bool   `json:"windowOpen"`
-		WindowID     string `json:"windowId,omitempty"`
-		HasSubmitted bool   `json:"hasSubmitted"`
-		OpensAt      string `json:"opensAt,omitempty"`
-		ClosesAt     string `json:"closesAt,omitempty"`
+		WindowOpen   bool           `json:"windowOpen"`
+		WindowID     string         `json:"windowId,omitempty"`
+		HasSubmitted bool           `json:"hasSubmitted"`
+		OpensAt      string         `json:"opensAt,omitempty"`
+		ClosesAt     string         `json:"closesAt,omitempty"`
+		Questions    []questionResp `json:"questions,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if d.evaluationsFeatureOff(w, r) {
@@ -66,6 +73,13 @@ func (d Deps) handleGetCourseEvaluationStatus() http.HandlerFunc {
 				return
 			}
 			out.HasSubmitted = submitted
+
+			if !submitted {
+				tmpl, err := courseevaluations.GetTemplate(r.Context(), d.Pool, win.TemplateID)
+				if err == nil {
+					_ = json.Unmarshal(tmpl.Questions, &out.Questions)
+				}
+			}
 		}
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

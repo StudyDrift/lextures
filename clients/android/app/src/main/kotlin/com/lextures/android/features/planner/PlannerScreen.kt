@@ -19,7 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Button
-import com.lextures.android.R
+import androidx.activity.compose.BackHandler
+import com.lextures.android.features.evaluations.EvaluationFormScreen
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -105,6 +106,11 @@ fun PlannerScreen(
     }
 
     openTodo?.let { (item, course) ->
+        if (item.kind == com.lextures.android.core.lms.StudentTodoKind.Evaluation && course != null) {
+            BackHandler { openTodo = null }
+            EvaluationFormScreen(session = session, course = course)
+            return
+        }
         val structure = plannerStructureItem(item)
         if (course != null && structure != null) {
             ItemDetailScreen(session = session, course = course, item = structure, onBack = { openTodo = null })

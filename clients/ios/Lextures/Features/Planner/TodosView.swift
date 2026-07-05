@@ -112,6 +112,10 @@ struct TodosView: View {
     }
 
     private func plannerDestination(for item: StudentTodoItem) -> PlannerItemRoute {
+        if item.kind == .evaluation, let windowId = item.evaluationWindowId,
+           let course = model.courses.first(where: { $0.courseCode == item.courseCode }) {
+            return .evaluation(course: course, windowId: windowId)
+        }
         if item.kind == .notebookTask, let pageId = item.notebookPageId {
             return .notebook(
                 NotebookPageRoute(
@@ -167,6 +171,7 @@ struct TodosView: View {
     }
 
     private func rowIcon(_ item: StudentTodoItem) -> String {
+        if item.kind == .evaluation { return "star.bubble" }
         if item.kind == .notebookTask { return "checklist" }
         return ItemKind.icon(for: item.structureKind ?? "content_page")
     }
@@ -184,4 +189,5 @@ enum PlannerItemRoute: Hashable {
     case courseItem(course: CourseSummary, item: CourseStructureItem)
     case courseOnly(CourseSummary?)
     case notebook(NotebookPageRoute)
+    case evaluation(course: CourseSummary, windowId: String)
 }

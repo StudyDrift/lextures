@@ -337,6 +337,13 @@
 		8B514C2D3E4F5061728394 /* AdvisingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B514D3E4F5061728394A5 /* AdvisingView.swift */; };
 		8B515C2D3E4F5061728394 /* AdvisingLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B515D3E4F5061728394A5 /* AdvisingLogicTests.swift */; };
 		8B516C2D3E4F5061728394 /* AdvisingLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B516D3E4F5061728394A5 /* AdvisingLogic.swift */; };
+		8B517C2D3E4F5061728394 /* EvaluationLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B517D3E4F5061728394A5 /* EvaluationLogic.swift */; };
+		8B518C2D3E4F5061728394 /* LMSFeatureModelsEvaluations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B518D3E4F5061728394A5 /* LMSFeatureModelsEvaluations.swift */; };
+		8B519C2D3E4F5061728394 /* LMSAPIEvaluations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B519D3E4F5061728394A5 /* LMSAPIEvaluations.swift */; };
+		8B51AC2D3E4F5061728394 /* CourseEvaluationsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51AD3E4F5061728394A5 /* CourseEvaluationsSection.swift */; };
+		8B51BC2D3E4F5061728394 /* EvaluationFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51BD3E4F5061728394A5 /* EvaluationFormView.swift */; };
+		8B51CC2D3E4F5061728394 /* EvaluationResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51CD3E4F5061728394A5 /* EvaluationResultsView.swift */; };
+		8B51DC2D3E4F5061728394 /* EvaluationLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B51DD3E4F5061728394A5 /* EvaluationLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -685,6 +692,13 @@
 		8B514D3E4F5061728394A5 /* AdvisingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisingView.swift; sourceTree = "<group>"; };
 		8B515D3E4F5061728394A5 /* AdvisingLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisingLogicTests.swift; sourceTree = "<group>"; };
 		8B516D3E4F5061728394A5 /* AdvisingLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisingLogic.swift; sourceTree = "<group>"; };
+		8B517D3E4F5061728394A5 /* EvaluationLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationLogic.swift; sourceTree = "<group>"; };
+		8B518D3E4F5061728394A5 /* LMSFeatureModelsEvaluations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsEvaluations.swift; sourceTree = "<group>"; };
+		8B519D3E4F5061728394A5 /* LMSAPIEvaluations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIEvaluations.swift; sourceTree = "<group>"; };
+		8B51AD3E4F5061728394A5 /* CourseEvaluationsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseEvaluationsSection.swift; sourceTree = "<group>"; };
+		8B51BD3E4F5061728394A5 /* EvaluationFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationFormView.swift; sourceTree = "<group>"; };
+		8B51CD3E4F5061728394A5 /* EvaluationResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationResultsView.swift; sourceTree = "<group>"; };
+		8B51DD3E4F5061728394A5 /* EvaluationLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1001,6 +1015,7 @@
 		9675A7A45CC240A0A4F7B883 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B51EVA5C6D7E8F901234568 /* Evaluations */,
 				8B51ADV5C6D7E8F901234567 /* Advising */,
 				M750LGRP5C6D7E8F901234568 /* Live */,
 				8B6RGRP5C6D7E8F901234569 /* Reader */,
@@ -1197,6 +1212,7 @@
 		D177268EB0164406B86F0376 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B51DD3E4F5061728394A5 /* EvaluationLogicTests.swift */,
 				8B515D3E4F5061728394A5 /* AdvisingLogicTests.swift */,
 				M750L07D3E4F5061728394A5 /* LiveMeetingsLogicTests.swift */,
 				8B6R10D3E4F5061728394A5 /* ReaderLogicTests.swift */,
@@ -1316,6 +1332,9 @@
 		EE4734853C3443449D42D6DC /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B519D3E4F5061728394A5 /* LMSAPIEvaluations.swift */,
+				8B518D3E4F5061728394A5 /* LMSFeatureModelsEvaluations.swift */,
+				8B517D3E4F5061728394A5 /* EvaluationLogic.swift */,
 				8B516D3E4F5061728394A5 /* AdvisingLogic.swift */,
 				8B513D3E4F5061728394A5 /* LMSAPIAdvising.swift */,
 				8B512D3E4F5061728394A5 /* LMSFeatureModelsAdvising.swift */,
@@ -1508,6 +1527,17 @@
 			path = Advising;
 			sourceTree = "<group>";
 		};
+
+		8B51EVA5C6D7E8F901234568 /* Evaluations */ = {
+			isa = PBXGroup;
+			children = (
+				8B51AD3E4F5061728394A5 /* CourseEvaluationsSection.swift */,
+				8B51BD3E4F5061728394A5 /* EvaluationFormView.swift */,
+				8B51CD3E4F5061728394A5 /* EvaluationResultsView.swift */,
+			);
+			path = Evaluations;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1597,6 +1627,12 @@
 			buildActionMask = 2147483647;
 			files = (
 
+				8B51CC2D3E4F5061728394 /* EvaluationResultsView.swift in Sources */,
+				8B51BC2D3E4F5061728394 /* EvaluationFormView.swift in Sources */,
+				8B51AC2D3E4F5061728394 /* CourseEvaluationsSection.swift in Sources */,
+				8B519C2D3E4F5061728394 /* LMSAPIEvaluations.swift in Sources */,
+				8B518C2D3E4F5061728394 /* LMSFeatureModelsEvaluations.swift in Sources */,
+				8B517C2D3E4F5061728394 /* EvaluationLogic.swift in Sources */,
 				8B516C2D3E4F5061728394 /* AdvisingLogic.swift in Sources */,
 				8B514C2D3E4F5061728394 /* AdvisingView.swift in Sources */,
 				8B513C2D3E4F5061728394 /* LMSAPIAdvising.swift in Sources */,
@@ -1898,6 +1934,7 @@
 			buildActionMask = 2147483647;
 			files = (
 
+				8B51DC2D3E4F5061728394 /* EvaluationLogicTests.swift in Sources */,
 				8B515C2D3E4F5061728394 /* AdvisingLogicTests.swift in Sources */,				M750L07C2D3E4F5061728394 /* LiveMeetingsLogicTests.swift in Sources */,
 
 				8B6R10C2D3E4F5061728394 /* ReaderLogicTests.swift in Sources */,

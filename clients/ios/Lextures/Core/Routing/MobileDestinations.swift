@@ -331,6 +331,7 @@ struct RoleSnapshot: Equatable {
 struct MobilePlatformFeatures: Equatable {
     var ffLibrary = false
     var ffCourseEvaluations = false
+    var ffMobileCourseEvaluations = true
     var ffMobileIaRedesign = false
     var ffMobileVibeActivities = true
     var ffMobileUniversalSearch = false
@@ -371,6 +372,7 @@ struct MobilePlatformFeatures: Equatable {
         MobilePlatformFeatures(
             ffLibrary: features?.ffLibrary == true,
             ffCourseEvaluations: features?.ffCourseEvaluations == true,
+            ffMobileCourseEvaluations: features?.ffMobileCourseEvaluations != false,
             ffMobileIaRedesign: features?.ffMobileIaRedesign == true,
             ffMobileVibeActivities: features?.ffMobileVibeActivities != false,
             ffMobileUniversalSearch: features?.ffMobileUniversalSearch == true,
@@ -431,6 +433,7 @@ struct CourseWorkspaceContext: Equatable {
     var course: CourseSummary
     var hasAttendanceSessions = false
     var hasLibraryResources = false
+    var evaluationStatus: EvaluationStatus?
     var platformFeatures = MobilePlatformFeatures()
 }
 
@@ -584,9 +587,15 @@ enum MobileDestinations {
         if course.isAttendanceEnabled && (course.viewerIsStaff || ctx.hasAttendanceSessions) {
             out.append(.attendance)
         }
+        if EvaluationLogic.shouldShowWorkspaceSection(
+            course: course,
+            status: ctx.evaluationStatus,
+            features: ctx.platformFeatures
+        ) {
+            out.append(.evaluations)
+        }
         if course.viewerIsStaff {
             out.append(.grading)
-            if ctx.platformFeatures.ffCourseEvaluations { out.append(.evaluations) }
         }
         if ctx.platformFeatures.ffMobileLibraryEreserves,
            ctx.platformFeatures.ffLibrary,

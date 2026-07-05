@@ -427,6 +427,7 @@ data class PlatformFeatures(
     val feedbackMediaEnabled: Boolean? = null,
     val ffLibrary: Boolean? = null,
     val ffCourseEvaluations: Boolean? = null,
+    val ffMobileCourseEvaluations: Boolean? = null,
     val ffMobileIaRedesign: Boolean? = null,
     val ffMobileVibeActivities: Boolean? = null,
     val ffMobileUniversalSearch: Boolean? = null,
