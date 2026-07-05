@@ -145,7 +145,7 @@ fun MeetingListScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        if (grouped.live.size > 1) "${grouped.live.size} sessions are live" else "A live session is in progress",
+                        if (grouped.live.size > 1) liveBannerMultiple(grouped.live.size) else liveBannerSingle(),
                         fontWeight = FontWeight.SemiBold,
                         color = textPrimary(),
                     )
@@ -164,9 +164,9 @@ fun MeetingListScreen(
                 message = if (course.viewerIsStaff) liveEmptyStaffMessage() else liveEmptyMessage(),
             )
             else -> {
-                meetingSection("Live now", grouped.live, session, course, context, onError = { errorMessage = it }) { selectedMeeting = it }
-                meetingSection("Upcoming", grouped.upcoming, session, course, context, onError = { errorMessage = it }) { selectedMeeting = it }
-                meetingSection("Past", grouped.past, session, course, context, onError = { errorMessage = it }) { selectedMeeting = it }
+                meetingSection(liveSectionLiveNow(), grouped.live, session, course, context, onError = { errorMessage = it }) { selectedMeeting = it }
+                meetingSection(liveSectionUpcoming(), grouped.upcoming, session, course, context, onError = { errorMessage = it }) { selectedMeeting = it }
+                meetingSection(liveSectionPast(), grouped.past, session, course, context, onError = { errorMessage = it }) { selectedMeeting = it }
             }
         }
 
@@ -312,7 +312,7 @@ private fun MeetingDetailDialog(
                                         updating = false
                                     }
                                 },
-                            ) { Text("Start") }
+                            ) { Text(liveStartSession()) }
                         }
                         if (current.status == "live") {
                             OutlinedButton(
@@ -327,10 +327,10 @@ private fun MeetingDetailDialog(
                                         updating = false
                                     }
                                 },
-                            ) { Text("End") }
+                            ) { Text(liveEndSession()) }
                         }
                     }
-                    Text("${attendance.size} present", fontSize = 12.sp, color = textSecondary())
+                    Text(liveAttendanceCount(attendance.size), fontSize = 12.sp, color = textSecondary())
                     whiteboards.forEach { board ->
                         OutlinedButton(onClick = { onOpenWhiteboard(board) }) {
                             Text(board.title)
