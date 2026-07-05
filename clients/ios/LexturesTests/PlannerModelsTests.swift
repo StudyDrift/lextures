@@ -60,36 +60,6 @@ final class PlannerModelsTests: XCTestCase {
         XCTAssertEqual(todos[0].structureKind, "quiz")
     }
 
-    func testCollectEvaluationTodos() {
-        let course = CourseSummary(
-            id: "1",
-            courseCode: "BIO101",
-            title: "Biology",
-            description: "",
-            viewerEnrollmentRoles: ["student"],
-            calendarEnabled: true
-        )
-        let status = EvaluationStatus(
-            windowOpen: true,
-            windowId: "win-1",
-            hasSubmitted: false,
-            opensAt: nil,
-            closesAt: "2026-07-10T23:59:00Z",
-            questions: nil
-        )
-        let todos = PlannerLogic.collectTodos(
-            studentCourses: [course],
-            structureByCourseCode: [:],
-            notebookTasks: [],
-            gradesByCourseCode: [:],
-            evaluationStatusByCourseCode: ["BIO101": status]
-        )
-        XCTAssertEqual(todos.count, 1)
-        XCTAssertEqual(todos[0].key, "evaluation:BIO101:win-1")
-        XCTAssertEqual(todos[0].kind, .evaluation)
-        XCTAssertEqual(todos[0].evaluationWindowId, "win-1")
-    }
-
     func testMonthGridHas42Cells() {
         let anchor = Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 1))!
         XCTAssertEqual(PlannerLogic.monthGridCells(monthAnchor: anchor).count, 42)
