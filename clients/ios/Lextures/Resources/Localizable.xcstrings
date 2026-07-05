@@ -3134,31 +3134,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@%% complete"
+            "value": "%d%% complete"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@%% complete"
+            "value": "%d%% complete"
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@%% complete"
+            "value": "%d%% complete"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@%% complete"
+            "value": "%d%% complete"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@%% complete"
+            "value": "%d%% complete"
           }
         }
       }
@@ -3440,31 +3440,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ required courses remaining"
+            "value": "%d required courses remaining"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ required courses remaining"
+            "value": "%d required courses remaining"
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ required courses remaining"
+            "value": "%d required courses remaining"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ required courses remaining"
+            "value": "%d required courses remaining"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ required courses remaining"
+            "value": "%d required courses remaining"
           }
         }
       }
