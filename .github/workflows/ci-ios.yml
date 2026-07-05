@@ -48,22 +48,49 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty
 
+      # Pick an available iPhone simulator (macOS/Xcode images vary; iPhone 16 may be absent).
+      - name: Select iOS Simulator
+        id: sim
+        run: |
+          set -euo pipefail
+          for sim in "iPhone 16" "iPhone 17" "iPhone 17 Pro" "iPhone 15"; do
+            if xcrun simctl list devices available 2>/dev/null | grep -qF "    $sim ("; then
+              echo "name=$sim" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "No iOS Simulator found. Available devices:"
+          xcrun simctl list devices available || true
+          exit 1
+
+      - name: Boot iOS Simulator
+        run: |
+          set -euo pipefail
+          name="${{ steps.sim.outputs.name }}"
+          udid="$(xcrun simctl list devices available | grep -F "    $name (" | head -1 | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')"
+          echo "Booting $name ($udid)"
+          xcrun simctl boot "$udid" 2>/dev/null || true
+          xcrun simctl bootstatus "$udid" -b
+
       # Unit tests for accessibility helpers and future coverage.
       - name: Test
         run: |
           set -o pipefail
-          destination='platform=iOS Simulator,name=iPhone 16'
-          for sim in "iPhone 16" "iPhone 17" "iPhone 17 Pro" "iPhone 15"; do
-            if xcrun simctl list devices available 2>/dev/null | grep -qF "    $sim ("; then
-              destination="platform=iOS Simulator,name=$sim"
-              break
-            fi
-          done
-          echo "Running unit tests on: $destination"
+          log=/tmp/xcodebuild-test.log
+          echo "Running unit tests on: ${{ steps.sim.outputs.name }}"
           xcodebuild test \
             -project Lextures.xcodeproj \
             -scheme Lextures \
-            -destination "$destination" \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
-            | xcpretty
+            2>&1 | tee "$log" | xcpretty
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            echo "--- xcodebuild test failed; surfacing failing cases ---"
+            grep -E 'Test Case .* failed|TEST FAILED|Executed .* failures|error: ' "$log" | tail -40 || true
+            grep -E 'Test Case .* failed' "$log" | tail -10 | while read -r line; do
+              echo "::error::$line"
+            done || true
+            exit "$code"
+          fi

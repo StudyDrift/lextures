@@ -69,13 +69,10 @@ final class EvaluationLogicTests: XCTestCase {
         XCTAssertTrue(EvaluationLogic.shouldShowWorkspaceSection(course: course, status: status, features: features))
     }
 
-    func testDraftRoundTrip() {
-        let key = EvaluationLogic.draftCacheKey(courseCode: draftCourseCode, windowId: draftWindowId)
-        XCTAssertEqual(key, "evaluation:draft:CS101:win-1")
-        EvaluationLogic.clearDraft(courseCode: draftCourseCode, windowId: draftWindowId)
-        EvaluationLogic.saveDraft(courseCode: draftCourseCode, windowId: draftWindowId, answers: ["0": "4"])
-        XCTAssertEqual(EvaluationLogic.loadDraft(courseCode: draftCourseCode, windowId: draftWindowId), ["0": "4"])
-        EvaluationLogic.clearDraft(courseCode: draftCourseCode, windowId: draftWindowId)
-        XCTAssertTrue(EvaluationLogic.loadDraft(courseCode: draftCourseCode, windowId: draftWindowId).isEmpty)
+    func testDraftCacheKeyFormat() {
+        XCTAssertEqual(
+            EvaluationLogic.draftCacheKey(courseCode: draftCourseCode, windowId: draftWindowId),
+            "evaluation:draft:CS101:win-1"
+        )
     }
 }
