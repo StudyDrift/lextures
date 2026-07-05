@@ -3,6 +3,7 @@ package com.lextures.android.features.evaluations
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +34,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.StalenessChip
@@ -90,9 +92,13 @@ fun EvaluationFormScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var validationError by remember { mutableStateOf<String?>(null) }
     var staleLabel by remember { mutableStateOf<String?>(null) }
+    val loadErrorText = context.getString(R.string.mobile_evaluations_loadError)
+    val validationRequiredText = context.getString(R.string.mobile_evaluations_validationRequired)
+    val submitLabel = context.getString(R.string.mobile_evaluations_submit)
+    val submitErrorText = context.getString(R.string.mobile_evaluations_submitError)
 
-    suspend fun load() {
-        val token = accessToken ?: return
+    LaunchedEffect(accessToken) {
+        val token = accessToken ?: return@LaunchedEffect
         loading = true
         errorMessage = null
         runCatching {
@@ -113,12 +119,10 @@ fun EvaluationFormScreen(
             }
             staleLabel = result.second?.takeIf { it.isStale(offline.networkMonitor.isOnline.value) }?.lastUpdatedLabel()
         }.onFailure {
-            errorMessage = it.message ?: evaluationsLoadError()
+            errorMessage = it.message ?: loadErrorText
         }
         loading = false
     }
-
-    LaunchedEffect(accessToken) { load() }
 
     when {
         loading -> LmsSkeletonList(count = 3, modifier = modifier)
@@ -174,7 +178,7 @@ fun EvaluationFormScreen(
                     val windowId = current.windowId ?: return@Button
                     val questions = current.questions.orEmpty()
                     if (EvaluationLogic.missingRequiredIndices(questions, answers.toMap()).isNotEmpty()) {
-                        validationError = evaluationsValidationRequired()
+                        validationError = validationRequiredText
                         return@Button
                     }
                     scope.launch {
@@ -189,8 +193,8 @@ fun EvaluationFormScreen(
                                 offline.enqueueMutation(
                                     method = "POST",
                                     path = path,
-                                    bodyJson = offlineJson.encodeToString(body),
-                                    label = evaluationsSubmit(),
+                                    bodyJson = offlineJson.encodeToString(EvaluationSubmitBody.serializer(), body),
+                                    label = submitLabel,
                                     accessToken = token,
                                     preferQueue = true,
                                     idempotencyKey = EvaluationLogic.submitIdempotencyKey(course.courseCode, windowId),
@@ -200,7 +204,7 @@ fun EvaluationFormScreen(
                             submitted = true
                             status = current.copy(hasSubmitted = true, questions = null)
                         }.onFailure {
-                            errorMessage = it.message ?: evaluationsSubmitError()
+                            errorMessage = it.message ?: submitErrorText
                         }
                         submitting = false
                     }
@@ -228,10 +232,10 @@ private fun EvaluationQuestionField(
                 "${index + 1}. ${question.text}",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp,
-                color = if (hasError) LexturesColors.error else textPrimary(),
+                color = if (hasError) LexturesColors.Error else textPrimary(),
             )
             if (question.isRequired) {
-                Text(" *", color = LexturesColors.error)
+                Text(" *", color = LexturesColors.Error)
             }
         }
         when (question.type) {
@@ -298,6 +302,7 @@ fun EvaluationResultsScreen(
     var loading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var staleLabel by remember { mutableStateOf<String?>(null) }
+    val resultsLoadErrorText = context.getString(R.string.mobile_evaluations_resultsLoadError)
 
     LaunchedEffect(accessToken) {
         val token = accessToken ?: return@LaunchedEffect
@@ -313,7 +318,7 @@ fun EvaluationResultsScreen(
             results = result.first
             staleLabel = result.second?.takeIf { it.isStale(offline.networkMonitor.isOnline.value) }?.lastUpdatedLabel()
         }.onFailure {
-            errorMessage = it.message ?: evaluationsResultsLoadError()
+            errorMessage = it.message ?: resultsLoadErrorText
         }
         loading = false
     }

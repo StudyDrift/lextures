@@ -261,10 +261,11 @@ struct CourseDetailView: View {
                 courseCode: course.courseCode,
                 accessToken: token
             )) ?? []
-            async let evaluationTask: EvaluationStatus? = {
-                guard EvaluationLogic.evaluationsEnabled(shell.platformFeatures) else { return nil }
-                return try? await LMSAPI.fetchEvaluationStatus(courseCode: course.courseCode, accessToken: token)
-            }()
+            async let evaluationTask = fetchEvaluationStatusIfNeeded(
+                courseCode: course.courseCode,
+                accessToken: token,
+                features: shell.platformFeatures
+            )
             let result = try await offline.cachedFetch(
                 key: OfflineCacheKey.courseStructure(course.courseCode),
                 accessToken: token
@@ -283,6 +284,15 @@ struct CourseDetailView: View {
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load course content."
         }
+    }
+
+    private func fetchEvaluationStatusIfNeeded(
+        courseCode: String,
+        accessToken: String,
+        features: MobilePlatformFeatures
+    ) async -> EvaluationStatus? {
+        guard EvaluationLogic.evaluationsEnabled(features) else { return nil }
+        return try? await LMSAPI.fetchEvaluationStatus(courseCode: courseCode, accessToken: accessToken)
     }
 
     private func refreshProgress() async {

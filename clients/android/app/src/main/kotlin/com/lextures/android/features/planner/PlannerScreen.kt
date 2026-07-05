@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Button
 import androidx.activity.compose.BackHandler
+import com.lextures.android.R
 import com.lextures.android.features.evaluations.EvaluationFormScreen
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
