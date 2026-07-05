@@ -433,6 +433,14 @@ fun QuizTakerScreen(
                             answer = answers[question.id] ?: QuizAnswerState(),
                             saveState = saveStates[question.id] ?: QuizSaveState.Idle,
                             onChange = { answers[question.id] = it; saveStates[question.id] = QuizSaveState.Saved },
+                            codeRunContext = accessToken?.let { token ->
+                                CodeQuestionRunContext(
+                                    courseCode = course.courseCode,
+                                    itemId = item.id,
+                                    attemptId = start.attemptId,
+                                    accessToken = token,
+                                )
+                            },
                         )
                     }
                     Row(

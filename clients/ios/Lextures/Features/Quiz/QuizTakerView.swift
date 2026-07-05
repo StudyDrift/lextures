@@ -378,6 +378,14 @@ struct QuizTakerView: View {
                                 question: question,
                                 answer: model.answers[question.id] ?? QuizAnswerState(),
                                 saveState: model.saveStates[question.id] ?? .idle,
+                                codeRunContext: session.accessToken.map { token in
+                                    CodeQuestionRunContext(
+                                        courseCode: course.courseCode,
+                                        itemId: item.id,
+                                        attemptId: model.attemptId,
+                                        accessToken: token
+                                    )
+                                },
                                 onChange: { newAnswer in
                                     model.setAnswer(newAnswer, for: question.id)
                                 },

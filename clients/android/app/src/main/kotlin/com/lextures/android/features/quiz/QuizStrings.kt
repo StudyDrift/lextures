@@ -27,6 +27,18 @@ import com.lextures.android.core.i18n.L
 @Composable fun quizYourScoreLabel(): String = L.text(R.string.mobile_quiz_yourScore)
 @Composable fun quizPendingReviewLabel(): String = L.text(R.string.mobile_quiz_pendingReview)
 
+@Composable fun quizCodeRunLabel(): String = L.text(R.string.mobile_quiz_code_run)
+@Composable fun quizCodeRunningLabel(): String = L.text(R.string.mobile_quiz_code_running)
+@Composable fun quizCodeRunFailedLabel(): String = L.text(R.string.mobile_quiz_code_runFailed)
+@Composable fun quizCodeOversizedTitle(): String = L.text(R.string.mobile_quiz_code_oversizedTitle)
+@Composable fun quizCodeOversizedHint(): String = L.text(R.string.mobile_quiz_code_oversizedHint)
+@Composable fun quizCodeStatusPassLabel(): String = L.text(R.string.mobile_quiz_code_statusPass)
+@Composable fun quizCodeStatusFailLabel(): String = L.text(R.string.mobile_quiz_code_statusFail)
+@Composable fun quizCodeStatusTleLabel(): String = L.text(R.string.mobile_quiz_code_statusTle)
+@Composable fun quizCodeStatusMleLabel(): String = L.text(R.string.mobile_quiz_code_statusMle)
+@Composable fun quizCodeStatusReLabel(): String = L.text(R.string.mobile_quiz_code_statusRe)
+@Composable fun quizCodeStatusCeLabel(): String = L.text(R.string.mobile_quiz_code_statusCe)
+
 @Composable fun quizAttemptNumberLabel(number: Int): String =
     L.format(R.string.mobile_quiz_attemptNumber, number)
 

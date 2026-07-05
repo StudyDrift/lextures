@@ -100,4 +100,87 @@ final class QuizLogicTests: XCTestCase {
         XCTAssertEqual(payload[0].leftId, "l1")
         XCTAssertEqual(payload[0].rightId, "r1")
     }
+
+    func testIsAnsweredCode() {
+        let question = QuizQuestion(
+            id: "q1",
+            prompt: "Write code",
+            questionType: "code",
+            choices: nil,
+            choiceIds: nil,
+            typeConfig: nil,
+            correctChoiceIndex: nil,
+            multipleAnswer: nil,
+            answerWithImage: nil,
+            required: nil,
+            points: nil,
+            estimatedMinutes: nil
+        )
+        XCTAssertFalse(QuizLogic.isAnswered(question: question, answer: nil))
+        XCTAssertTrue(QuizLogic.isAnswered(question: question, answer: QuizAnswerState(text: "print(1)")))
+        XCTAssertFalse(QuizLogic.isAnswered(question: question, answer: QuizAnswerState(text: "   ")))
+    }
+
+    func testCodeQuestionOversized() {
+        let question = QuizQuestion(
+            id: "q1",
+            prompt: "Project",
+            questionType: "code",
+            choices: nil,
+            choiceIds: nil,
+            typeConfig: QuizTypeConfig(
+                items: nil,
+                pairs: nil,
+                starterCode: "a",
+                language: "python3",
+                languageId: nil,
+                multiFile: true,
+                files: nil,
+                testCases: nil
+            ),
+            correctChoiceIndex: nil,
+            multipleAnswer: nil,
+            answerWithImage: nil,
+            required: nil,
+            points: nil,
+            estimatedMinutes: nil
+        )
+        XCTAssertTrue(QuizLogic.isCodeQuestionOversized(question))
+    }
+
+    func testApplyAutoIndent() {
+        XCTAssertEqual(QuizLogic.applyAutoIndent(to: "if True:\n"), "if True:\n    ")
+    }
+
+    func testBuildResponseItemCode() {
+        let question = QuizQuestion(
+            id: "q1",
+            prompt: "Code",
+            questionType: "code",
+            choices: nil,
+            choiceIds: nil,
+            typeConfig: QuizTypeConfig(
+                items: nil,
+                pairs: nil,
+                starterCode: nil,
+                language: "python3",
+                languageId: nil,
+                multiFile: nil,
+                files: nil,
+                testCases: nil
+            ),
+            correctChoiceIndex: nil,
+            multipleAnswer: nil,
+            answerWithImage: nil,
+            required: nil,
+            points: nil,
+            estimatedMinutes: nil
+        )
+        let item = QuizLogic.buildResponseItem(
+            question: question,
+            answer: QuizAnswerState(text: "print(42)")
+        )
+        XCTAssertEqual(item.codeSubmission?.language, "python3")
+        XCTAssertEqual(item.codeSubmission?.code, "print(42)")
+    }
 }

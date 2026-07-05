@@ -55,6 +55,24 @@ data class QuizTypeConfig(
     val pairs: List<QuizMatchingPairConfig>? = null,
     val starterCode: String? = null,
     val language: String? = null,
+    val languageId: Int? = null,
+    val multiFile: Boolean? = null,
+    val files: List<QuizCodeFileConfig>? = null,
+    val testCases: List<QuizCodeTestCaseConfig>? = null,
+)
+
+@Serializable
+data class QuizCodeFileConfig(
+    val path: String? = null,
+    val content: String? = null,
+)
+
+@Serializable
+data class QuizCodeTestCaseConfig(
+    val id: String? = null,
+    val input: String? = null,
+    val expectedOutput: String? = null,
+    val isHidden: Boolean? = null,
 )
 
 @Serializable
@@ -183,6 +201,31 @@ data class QuizFocusLossRequest(
     val durationMs: Int? = null,
 )
 
+@Serializable
+data class QuizCodeRunRequest(
+    val code: String,
+    val languageId: Int? = null,
+)
+
+@Serializable
+data class QuizCodeRunResult(
+    val status: String,
+    val passed: Boolean,
+    val actualOutput: String,
+    val expectedOutput: String,
+    val stderr: String? = null,
+    val executionMs: Int? = null,
+    val memoryKb: Int? = null,
+)
+
+@Serializable
+data class QuizCodeRunResponse(
+    val questionId: String,
+    val results: List<QuizCodeRunResult> = emptyList(),
+    val pointsEarned: Double = 0.0,
+    val pointsPossible: Double = 0.0,
+)
+
 data class QuizAnswerState(
     var choice: Int? = null,
     var choices: Set<Int>? = null,
@@ -216,7 +259,7 @@ enum class QuizQuestionKind(val wire: String) {
 
     val supportsMobileInput: Boolean
         get() = when (this) {
-            Code, AudioResponse, VideoResponse, Hotspot, Unknown -> false
+            AudioResponse, VideoResponse, Hotspot, Unknown -> false
             else -> true
         }
 

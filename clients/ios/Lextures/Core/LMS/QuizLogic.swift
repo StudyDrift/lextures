@@ -50,6 +50,22 @@ struct QuizTypeConfig: Codable, Hashable {
     var pairs: [QuizMatchingPairConfig]?
     var starterCode: String?
     var language: String?
+    var languageId: Int?
+    var multiFile: Bool?
+    var files: [QuizCodeFileConfig]?
+    var testCases: [QuizCodeTestCaseConfig]?
+}
+
+struct QuizCodeFileConfig: Codable, Hashable {
+    var path: String?
+    var content: String?
+}
+
+struct QuizCodeTestCaseConfig: Codable, Hashable {
+    var id: String?
+    var input: String?
+    var expectedOutput: String?
+    var isHidden: Bool?
 }
 
 struct QuizMatchingPairConfig: Codable, Hashable {
@@ -170,6 +186,30 @@ struct QuizFocusLossRequest: Encodable {
     var durationMs: Int?
 }
 
+struct QuizCodeRunRequest: Encodable {
+    var code: String
+    var languageId: Int?
+}
+
+struct QuizCodeRunResult: Codable, Hashable, Identifiable {
+    var status: String
+    var passed: Bool
+    var actualOutput: String
+    var expectedOutput: String
+    var stderr: String?
+    var executionMs: Int?
+    var memoryKb: Int?
+
+    var id: String { "\(status)-\(expectedOutput)-\(actualOutput)" }
+}
+
+struct QuizCodeRunResponse: Codable, Hashable {
+    var questionId: String
+    var results: [QuizCodeRunResult]
+    var pointsEarned: Double
+    var pointsPossible: Double
+}
+
 // MARK: - Local answer state
 
 struct QuizAnswerState: Equatable {
@@ -213,7 +253,7 @@ enum QuizQuestionKind: String {
 
     var supportsMobileInput: Bool {
         switch self {
-        case .code, .audioResponse, .videoResponse, .hotspot, .unknown:
+        case .audioResponse, .videoResponse, .hotspot, .unknown:
             return false
         default:
             return true
@@ -385,7 +425,7 @@ enum QuizLogic {
         case .fileUpload, .audioResponse, .videoResponse:
             return !(answer.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
         case .code:
-            return false
+            return !(answer.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
         case .unknown:
             return false
         }
@@ -437,5 +477,61 @@ enum QuizLogic {
         if hasInProgress { return true }
         if unlimited { return true }
         return (remaining ?? 0) > 0
+    }
+
+    // MARK: - Code questions (M5.3)
+
+    static let codeMobileMaxBytes = 16_384
+
+    static let codeSymbolSnippets = [
+        "{", "}", "(", ")", "[", "]", ";", ":", ".", ",", "=", "+", "-", "*", "/", "<", ">", "\"", "'",
+        "    ", "\n",
+    ]
+
+    static func starterCode(for question: QuizQuestion) -> String {
+        let starter = question.typeConfig?.starterCode?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return starter
+    }
+
+    static func codeLanguageLabel(for question: QuizQuestion) -> String {
+        let language = question.typeConfig?.language?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if language.isEmpty { return "text" }
+        return language
+    }
+
+    static func isCodeQuestionOversized(_ question: QuizQuestion) -> Bool {
+        if question.typeConfig?.multiFile == true { return true }
+        let files = question.typeConfig?.files ?? []
+        if files.count > 1 { return true }
+        let starter = starterCode(for: question)
+        if starter.utf8.count > codeMobileMaxBytes { return true }
+        return false
+    }
+
+    static func initialCodeAnswer(for question: QuizQuestion, existing: QuizAnswerState?) -> QuizAnswerState {
+        if let text = existing?.text, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return existing ?? QuizAnswerState()
+        }
+        var next = existing ?? QuizAnswerState()
+        let starter = starterCode(for: question)
+        if !starter.isEmpty {
+            next.text = starter
+        }
+        return next
+    }
+
+    static func applyAutoIndent(to text: String) -> String {
+        guard text.hasSuffix("\n") else { return text }
+        let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+        guard let previous = lines.dropLast().last else { return text }
+        let trimmed = previous.trimmingCharacters(in: .whitespaces)
+        var indent = ""
+        for ch in previous {
+            if ch == " " || ch == "\t" { indent.append(ch) } else { break }
+        }
+        if trimmed.hasSuffix("{") || trimmed.hasSuffix(":") {
+            indent += "    "
+        }
+        return text + indent
     }
 }
