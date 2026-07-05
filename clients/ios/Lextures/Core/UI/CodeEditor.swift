@@ -3,10 +3,20 @@ import UIKit
 
 enum CodeSyntaxHighlighter {
     private static let keywordSets: [String: Set<String>] = [
-        "python": ["def", "return", "if", "elif", "else", "for", "while", "import", "from", "class", "pass", "break", "continue", "True", "False", "None", "in", "not", "and", "or"],
-        "python3": ["def", "return", "if", "elif", "else", "for", "while", "import", "from", "class", "pass", "break", "continue", "True", "False", "None", "in", "not", "and", "or"],
-        "javascript": ["function", "return", "if", "else", "for", "while", "const", "let", "var", "class", "import", "export", "true", "false", "null", "undefined", "new"],
-        "node": ["function", "return", "if", "else", "for", "while", "const", "let", "var", "class", "import", "export", "true", "false", "null", "undefined", "new"],
+        "python": pythonKeywords,
+        "python3": pythonKeywords,
+        "javascript": javascriptKeywords,
+        "node": javascriptKeywords,
+    ]
+
+    private static let pythonKeywords: Set<String> = [
+        "def", "return", "if", "elif", "else", "for", "while", "import", "from",
+        "class", "pass", "break", "continue", "True", "False", "None", "in", "not", "and", "or",
+    ]
+
+    private static let javascriptKeywords: Set<String> = [
+        "function", "return", "if", "else", "for", "while", "const", "let", "var", "class",
+        "import", "export", "true", "false", "null", "undefined", "new",
     ]
 
     static func highlighted(_ text: String, language: String) -> NSAttributedString {
