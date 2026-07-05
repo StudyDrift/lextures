@@ -6,6 +6,7 @@ struct QuizQuestionView: View {
     let question: QuizQuestion
     let answer: QuizAnswerState
     let saveState: QuizSaveState
+    let codeRunContext: CodeQuestionRunContext?
     let onChange: (QuizAnswerState) -> Void
     let isFlagged: Bool
     let onToggleFlag: () -> Void
@@ -106,6 +107,13 @@ struct QuizQuestionView: View {
             textInput(multiline: kind == .essay)
         case .fileUpload:
             fileUploadInput
+        case .code:
+            CodeQuestionView(
+                question: question,
+                answer: answer,
+                runContext: codeRunContext,
+                onChange: onChange
+            )
         default:
             textInput(multiline: false)
         }

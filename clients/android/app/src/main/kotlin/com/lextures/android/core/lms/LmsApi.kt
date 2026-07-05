@@ -619,6 +619,24 @@ object LmsApi {
         }
     }
 
+    suspend fun postQuizQuestionRun(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        questionId: String,
+        code: String,
+        languageId: Int?,
+        accessToken: String,
+    ): QuizCodeRunResponse = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}/attempts/${encodePath(attemptId)}/questions/${encodePath(questionId)}/run",
+            method = "POST",
+            body = client.encodeBody(QuizCodeRunRequest(code, languageId), QuizCodeRunRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<QuizCodeRunResponse>(body)
+    }
+
     suspend fun fetchGradingSubmissions(
         courseCode: String,
         backlogItem: GradingBacklogItem,

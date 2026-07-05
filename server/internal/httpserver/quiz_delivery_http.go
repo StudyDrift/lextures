@@ -27,6 +27,7 @@ func (d Deps) registerQuizDeliveryRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/focus-loss", d.handleQuizFocusLossPost())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/focus-loss-events", d.handleQuizFocusLossEventsGet())
 	d.registerQuizSubmitRoutes(r)
+	d.registerQuizCodeRunRoutes(r)
 	d.registerQuizGradingRoutes(r)
 	d.registerQuizGradeSyncRoutes(r)
 }

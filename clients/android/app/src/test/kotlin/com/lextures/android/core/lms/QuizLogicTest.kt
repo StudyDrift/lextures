@@ -47,4 +47,40 @@ class QuizLogicTest {
         assertEquals("2:05", QuizLogic.formatTimer(125))
         assertEquals("0:59", QuizLogic.formatTimer(59))
     }
+
+    @Test
+    fun isAnsweredCode() {
+        val question = QuizQuestion(id = "q1", questionType = "code")
+        assertFalse(QuizLogic.isAnswered(question, null))
+        assertTrue(QuizLogic.isAnswered(question, QuizAnswerState(text = "print(1)")))
+        assertFalse(QuizLogic.isAnswered(question, QuizAnswerState(text = "   ")))
+    }
+
+    @Test
+    fun starterCodeAndOversized() {
+        val question = QuizQuestion(
+            id = "q1",
+            questionType = "code",
+            typeConfig = QuizTypeConfig(starterCode = "def main():\n    pass", multiFile = true),
+        )
+        assertEquals("def main():\n    pass", QuizLogic.starterCode(question))
+        assertTrue(QuizLogic.isCodeQuestionOversized(question))
+    }
+
+    @Test
+    fun applyAutoIndentAfterBrace() {
+        assertEquals("if True:\n    ", QuizLogic.applyAutoIndent("if True:\n"))
+    }
+
+    @Test
+    fun buildResponseItemCode() {
+        val question = QuizQuestion(
+            id = "q1",
+            questionType = "code",
+            typeConfig = QuizTypeConfig(language = "python3"),
+        )
+        val item = QuizLogic.buildResponseItem(question, QuizAnswerState(text = "print(42)"))
+        assertEquals("python3", item.codeSubmission?.language)
+        assertEquals("print(42)", item.codeSubmission?.code)
+    }
 }

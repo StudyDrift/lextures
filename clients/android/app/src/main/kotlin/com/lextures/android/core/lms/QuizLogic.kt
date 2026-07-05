@@ -120,7 +120,8 @@ object QuizLogic {
             QuizQuestionKind.Hotspot -> answer.hotspot != null
             QuizQuestionKind.FileUpload, QuizQuestionKind.AudioResponse, QuizQuestionKind.VideoResponse ->
                 !answer.text.isNullOrBlank()
-            QuizQuestionKind.Code, QuizQuestionKind.Unknown -> false
+            QuizQuestionKind.Code -> !answer.text.isNullOrBlank()
+            QuizQuestionKind.Unknown -> false
         }
     }
 
@@ -146,5 +147,44 @@ object QuizLogic {
         "first" -> "Your first submitted attempt counts toward the course grade."
         "average" -> "The average of your attempts counts toward the course grade."
         else -> "Your instructor chose how multiple attempts are scored."
+    }
+
+    const val CODE_MOBILE_MAX_BYTES = 16_384
+
+    val codeSymbolSnippets = listOf(
+        "{", "}", "(", ")", "[", "]", ";", ":", ".", ",", "=", "+", "-", "*", "/", "<", ">", "\"", "'",
+        "    ", "\n",
+    )
+
+    fun starterCode(question: QuizQuestion): String =
+        question.typeConfig?.starterCode?.trim().orEmpty()
+
+    fun codeLanguageLabel(question: QuizQuestion): String =
+        question.typeConfig?.language?.trim().takeUnless { it.isNullOrEmpty() } ?: "text"
+
+    fun isCodeQuestionOversized(question: QuizQuestion): Boolean {
+        if (question.typeConfig?.multiFile == true) return true
+        if ((question.typeConfig?.files?.size ?: 0) > 1) return true
+        return starterCode(question).toByteArray().size > CODE_MOBILE_MAX_BYTES
+    }
+
+    fun initialCodeAnswer(question: QuizQuestion, existing: QuizAnswerState?): QuizAnswerState {
+        if (!existing?.text.isNullOrBlank()) return existing ?: QuizAnswerState()
+        val starter = starterCode(question)
+        return if (starter.isNotEmpty()) (existing ?: QuizAnswerState()).copy(text = starter) else existing ?: QuizAnswerState()
+    }
+
+    fun applyAutoIndent(text: String): String {
+        if (!text.endsWith("\n")) return text
+        val lastNewline = text.lastIndexOf('\n')
+        if (lastNewline <= 0) return text
+        val previousLine = text.substring(0, lastNewline).substringAfterLast('\n')
+        val trimmed = previousLine.trim()
+        val baseIndent = previousLine.takeWhile { it == ' ' || it == '\t' }
+        return if (trimmed.endsWith("{") || trimmed.endsWith(":")) {
+            text + baseIndent + "    "
+        } else {
+            text
+        }
     }
 }

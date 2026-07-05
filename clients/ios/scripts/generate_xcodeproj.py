@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import re
 import uuid
 from pathlib import Path
 
@@ -15,6 +16,13 @@ DEPLOYMENT_TARGET = "17.0"
 
 def gen_id() -> str:
     return uuid.uuid4().hex[:24].upper()
+
+
+def pbx_path_literal(path: str) -> str:
+    """Quote pbxproj path values when special characters break the plist parser."""
+    if re.search(r'[+ ]', path):
+        return f'"{path}"'
+    return path
 
 
 def collect_swift_files() -> list[str]:
@@ -117,7 +125,7 @@ def main() -> None:
     for path in swift_files + test_files:
         base = os.path.basename(path)
         w(
-            f"\t\t{file_refs[path]} /* {base} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = {base}; sourceTree = \"<group>\"; }};"
+            f"\t\t{file_refs[path]} /* {base} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = {pbx_path_literal(base)}; sourceTree = \"<group>\"; }};"
         )
     w(
         f"\t\t{assets_ref} /* Assets.xcassets */ = {{isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = \"<group>\"; }};"
