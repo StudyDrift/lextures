@@ -318,6 +318,7 @@ private struct QuizPreviewView: View {
                                 question: question,
                                 answer: answers[question.id] ?? QuizAnswerState(),
                                 saveState: .idle,
+                                codeRunContext: nil,
                                 onChange: { answers[question.id] = $0 },
                                 isFlagged: false,
                                 onToggleFlag: {}

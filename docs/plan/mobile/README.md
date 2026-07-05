@@ -149,7 +149,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 |---|---|---|
 | [M3.4 Conditional release & prerequisites UX](../completed/mobile/M3.4-conditional-release.md) ✅ | 1.11 conditional release polish | **Done** |
 | [M4.2 Lockdown / kiosk mode](M4.2-lockdown-kiosk.md) | 2.10 lockdown | **P2** |
-| [M5.3 Code-execution questions](M5.3-code-execution.md) | 2.4 code exec | **P2** |
+| [M5.3 Code-execution questions](../completed/mobile/M5.3-code-execution.md) ✅ | 2.4 code exec | **Done** |
 | [M10.3 Behavior/PBIS & hall pass](M10.3-behavior-hallpass.md) | 13.3 behavior, 13.9 hall pass | **P2** |
 | [M10.4 Age-appropriate UI mode](M10.4-age-appropriate-ui.md) | 13.11 age-appropriate UI | **P2** |
 | [M11.2 Post announcement / broadcast](M11.2-instructor-announce.md) | 13.10 broadcast, announcements compose | **P2** |

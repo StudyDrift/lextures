@@ -34,6 +34,7 @@ fun QuizQuestionContent(
     answer: QuizAnswerState,
     saveState: QuizSaveState,
     onChange: (QuizAnswerState) -> Unit,
+    codeRunContext: CodeQuestionRunContext? = null,
     modifier: Modifier = Modifier,
 ) {
     val kind = QuizQuestionKind.from(question.questionType)
@@ -89,6 +90,14 @@ fun QuizQuestionContent(
                         Text("${index + 1}. $item")
                     }
                 }
+            }
+            QuizQuestionKind.Code -> {
+                CodeQuestionView(
+                    question = question,
+                    answer = answer,
+                    runContext = codeRunContext,
+                    onChange = onChange,
+                )
             }
             QuizQuestionKind.Matching -> {
                 val pairs = QuizLogic.matchingPairs(question)
