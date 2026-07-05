@@ -108,6 +108,8 @@ struct PlannerView: View {
                     notebookTitle: pageRoute.notebookTitle,
                     pageId: pageRoute.pageId
                 )
+            case let .evaluation(course, _):
+                EvaluationFormView(course: course)
             }
         }
         .refreshable {

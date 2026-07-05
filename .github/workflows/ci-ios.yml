@@ -48,14 +48,43 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty
 
-      # Unit tests for accessibility helpers and future coverage.
+      - name: Select iOS Simulator
+        id: sim
+        run: |
+          set -euo pipefail
+          for sim in "iPhone 16" "iPhone 17" "iPhone 17 Pro" "iPhone 15"; do
+            if xcrun simctl list devices available 2>/dev/null | grep -qF "    $sim ("; then
+              echo "name=$sim" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          xcrun simctl list devices available || true
+          exit 1
+
+      - name: Boot iOS Simulator
+        run: |
+          set -euo pipefail
+          name="${{ steps.sim.outputs.name }}"
+          udid="$(xcrun simctl list devices available | grep -F "    $name (" | head -1 | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')"
+          xcrun simctl boot "$udid" 2>/dev/null || true
+          xcrun simctl bootstatus "$udid" -b
+
       - name: Test
         run: |
           set -o pipefail
+          log=/tmp/xcodebuild-test.log
           xcodebuild test \
             -project Lextures.xcodeproj \
             -scheme Lextures \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
-            | xcpretty
+            2>&1 | tee "$log" | xcpretty
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            grep -E 'Test Case .* failed|TEST FAILED|Executed .* failures' "$log" | tail -30 || true
+            grep -E 'Test Case .* failed' "$log" | while read -r line; do
+              echo "::error::$line"
+            done || true
+            exit "$code"
+          fi

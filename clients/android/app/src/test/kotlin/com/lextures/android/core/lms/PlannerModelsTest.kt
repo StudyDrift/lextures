@@ -87,6 +87,34 @@ class PlannerModelsTest {
         assertTrue(PlannerLogic.dueSoonItems(items, limit = 5).size <= 5)
     }
 
+    @Test
+    fun collectEvaluationTodos_addsOpenWindow() {
+        val course = CourseSummary(
+            id = "1",
+            courseCode = "BIO101",
+            title = "Biology",
+            description = "",
+            viewerEnrollmentRoles = listOf("student"),
+            calendarEnabled = true,
+        )
+        val status = EvaluationStatus(
+            windowOpen = true,
+            windowId = "win-1",
+            hasSubmitted = false,
+            closesAt = "2026-07-10T23:59:00Z",
+        )
+        val todos = PlannerLogic.collectTodos(
+            studentCourses = listOf(course),
+            structureByCourseCode = emptyMap(),
+            notebookTasks = emptyList(),
+            gradesByCourseCode = emptyMap(),
+            evaluationStatusByCourseCode = mapOf("BIO101" to status),
+        )
+        assertEquals(1, todos.size)
+        assertEquals(StudentTodoKind.Evaluation, todos[0].kind)
+        assertEquals("win-1", todos[0].evaluationWindowId)
+    }
+
     private fun todo(key: String, due: Instant) = StudentTodoItem(
         key = key,
         kind = StudentTodoKind.DueItem,

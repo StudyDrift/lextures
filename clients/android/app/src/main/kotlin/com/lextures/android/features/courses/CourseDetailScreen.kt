@@ -83,6 +83,9 @@ import com.lextures.android.features.discussions.CourseDiscussionsSection
 import com.lextures.android.features.feed.CourseFeedSection
 import com.lextures.android.features.groups.CourseCollabDocsSection
 import com.lextures.android.features.groups.CourseGroupsSection
+import com.lextures.android.features.evaluations.CourseEvaluationsSection
+import com.lextures.android.core.lms.EvaluationLogic
+import com.lextures.android.core.lms.EvaluationStatus
 import com.lextures.android.core.navigation.CourseWorkspaceContext
 import com.lextures.android.core.navigation.CourseWorkspaceSection
 import com.lextures.android.core.navigation.MobileDestinations
@@ -137,6 +140,7 @@ fun CourseDetailScreen(
     var progress by remember { mutableStateOf<ModulesProgressSnapshot?>(null) }
     var cacheLabel by remember { mutableStateOf<String?>(null) }
     var hasAttendanceSessions by remember { mutableStateOf(false) }
+    var evaluationStatus by remember { mutableStateOf<EvaluationStatus?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
 
@@ -240,6 +244,12 @@ fun CourseDetailScreen(
             hasAttendanceSessions = runCatching {
                 LmsApi.fetchAttendanceSessions(course.courseCode, token).isNotEmpty()
             }.getOrDefault(false)
+            val platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures()
+            evaluationStatus = if (EvaluationLogic.evaluationsEnabled(platformFeatures)) {
+                runCatching { LmsApi.fetchEvaluationStatus(course.courseCode, token) }.getOrNull()
+            } else {
+                null
+            }
             val result = offline.cachedFetch(
                 key = OfflineCacheKey.courseStructure(course.courseCode),
                 accessToken = token,
@@ -262,6 +272,7 @@ fun CourseDetailScreen(
         course = course,
         hasAttendanceSessions = hasAttendanceSessions,
         hasLibraryResources = LibraryResourceLogic.hasLibraryResources(items),
+        evaluationStatus = evaluationStatus,
         platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
     )
     val allSections = MobileDestinations.courseWorkspaceSections(workspaceContext)
@@ -471,8 +482,14 @@ fun CourseDetailScreen(
                             platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
                         )
                     }
-                    CourseWorkspaceSection.Evaluations,
-                    -> item { CourseDestinationPlaceholder(section = selectedSection) }
+                    CourseWorkspaceSection.Evaluations -> item {
+                        CourseEvaluationsSection(
+                            session = session,
+                            course = course,
+                            showResults = course.viewerIsStaff ||
+                                (selectedSection == CourseWorkspaceSection.Evaluations && deepLinkThreadId == "results"),
+                        )
+                    }
                     CourseWorkspaceSection.Modules -> {
                         if (loading && items.isEmpty()) {
                             item { LmsSkeletonList(count = 3) }

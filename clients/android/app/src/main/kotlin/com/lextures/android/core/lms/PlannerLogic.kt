@@ -7,7 +7,7 @@ import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 import kotlinx.serialization.Serializable
 
-enum class StudentTodoKind { DueItem, NotebookTask }
+enum class StudentTodoKind { DueItem, NotebookTask, Evaluation }
 
 enum class StudentTodoCompletion { Open, Submitted, Completed }
 
@@ -34,6 +34,7 @@ data class StudentTodoItem(
     val structureItemId: String? = null,
     val notebookPageId: String? = null,
     val notebookTaskId: String? = null,
+    val evaluationWindowId: String? = null,
     val completion: StudentTodoCompletion = StudentTodoCompletion.Open,
 ) {
     val isCompleted: Boolean
@@ -80,6 +81,7 @@ data class CachedStudentTodoItem(
     val structureItemId: String? = null,
     val notebookPageId: String? = null,
     val notebookTaskId: String? = null,
+    val evaluationWindowId: String? = null,
     val completion: String = StudentTodoCompletion.Open.name,
 )
 
@@ -119,6 +121,7 @@ object PlannerLogic {
         structureByCourseCode: Map<String, List<CourseStructureItem>>,
         notebookTasks: List<NotebookTask>,
         gradesByCourseCode: Map<String, MyGradesResponse>,
+        evaluationStatusByCourseCode: Map<String, EvaluationStatus> = emptyMap(),
     ): List<StudentTodoItem> {
         val courseTitles = studentCourses.associate { it.courseCode to it.displayTitle }
         val studentCodes = studentCourses.map { it.courseCode }.toSet()
@@ -159,6 +162,22 @@ object PlannerLogic {
                     completion = completionStatus(row.id, grades),
                 )
             }
+        }
+
+        for (course in studentCourses) {
+            val status = evaluationStatusByCourseCode[course.courseCode] ?: continue
+            if (!status.windowOpen || status.hasSubmitted) continue
+            val windowId = status.windowId ?: continue
+            items += StudentTodoItem(
+                key = EvaluationLogic.evaluationTodoKey(course.courseCode, windowId),
+                kind = StudentTodoKind.Evaluation,
+                title = "Course evaluation",
+                courseCode = course.courseCode,
+                courseTitle = course.displayTitle,
+                dueAt = LmsDates.parse(status.closesAt),
+                evaluationWindowId = windowId,
+                completion = StudentTodoCompletion.Open,
+            )
         }
 
         return items.sortedWith(compareBy(nullsLast()) { it.dueAt })
@@ -324,6 +343,7 @@ object PlannerLogic {
         structureItemId = item.structureItemId,
         notebookPageId = item.notebookPageId,
         notebookTaskId = item.notebookTaskId,
+        evaluationWindowId = item.evaluationWindowId,
         completion = item.completion.name,
     )
 
@@ -338,6 +358,7 @@ object PlannerLogic {
         structureItemId = cached.structureItemId,
         notebookPageId = cached.notebookPageId,
         notebookTaskId = cached.notebookTaskId,
+        evaluationWindowId = cached.evaluationWindowId,
         completion = runCatching { StudentTodoCompletion.valueOf(cached.completion) }
             .getOrDefault(StudentTodoCompletion.Open),
     )

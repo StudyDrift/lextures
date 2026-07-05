@@ -16,6 +16,7 @@ struct CourseDetailView: View {
     @State private var progress: ModulesProgressSnapshot?
     @State private var cacheLabel: String?
     @State private var hasAttendanceSessions = false
+    @State private var evaluationStatus: EvaluationStatus?
     @State private var errorMessage: String?
     @State private var loading = false
     @State private var linkedItem: CourseStructureItem?
@@ -47,6 +48,7 @@ struct CourseDetailView: View {
             course: course,
             hasAttendanceSessions: hasAttendanceSessions,
             hasLibraryResources: LibraryResourceLogic.hasLibraryResources(in: items),
+            evaluationStatus: evaluationStatus,
             platformFeatures: shell.platformFeatures
         )
     }
@@ -219,7 +221,10 @@ struct CourseDetailView: View {
         case .live:
             CourseLiveSection(course: course)
         case .evaluations:
-            CourseDestinationPlaceholder(section: section)
+            CourseEvaluationsSection(
+                course: course,
+                showResults: course.viewerIsStaff || initialSection == .evaluations && initialItemId == "results"
+            )
         }
     }
 
@@ -256,6 +261,11 @@ struct CourseDetailView: View {
                 courseCode: course.courseCode,
                 accessToken: token
             )) ?? []
+            async let evaluationTask = fetchEvaluationStatusIfNeeded(
+                courseCode: course.courseCode,
+                accessToken: token,
+                features: shell.platformFeatures
+            )
             let result = try await offline.cachedFetch(
                 key: OfflineCacheKey.courseStructure(course.courseCode),
                 accessToken: token
@@ -269,10 +279,20 @@ struct CourseDetailView: View {
                 cacheLabel = nil
             }
             hasAttendanceSessions = await !sessionsTask.isEmpty
+            evaluationStatus = await evaluationTask
             await refreshProgress()
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load course content."
         }
+    }
+
+    private func fetchEvaluationStatusIfNeeded(
+        courseCode: String,
+        accessToken: String,
+        features: MobilePlatformFeatures
+    ) async -> EvaluationStatus? {
+        guard EvaluationLogic.evaluationsEnabled(features) else { return nil }
+        return try? await LMSAPI.fetchEvaluationStatus(courseCode: courseCode, accessToken: accessToken)
     }
 
     private func refreshProgress() async {

@@ -99,6 +99,7 @@ final class PlannerModelsTests: XCTestCase {
             structureItemId: "a1",
             notebookPageId: nil,
             notebookTaskId: nil,
+            evaluationWindowId: nil,
             completion: .open
         )
     }

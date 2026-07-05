@@ -76,6 +76,8 @@ enum OfflineCacheKey {
     }
     static func advisingNotes() -> String { "advising:notes" }
     static func degreeProgress() -> String { "advising:degree-progress" }
+    static func evaluationStatus(_ courseCode: String) -> String { "evaluation:status:\(courseCode)" }
+    static func evaluationResults(_ courseCode: String) -> String { "evaluation:results:\(courseCode)" }
 }
 
 /// A cached value plus freshness metadata for read screens.

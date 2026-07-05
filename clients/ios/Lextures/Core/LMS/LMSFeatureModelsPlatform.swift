@@ -8,6 +8,7 @@ struct PlatformFeatures: Decodable {
     var feedbackMediaEnabled: Bool?
     var ffLibrary: Bool?
     var ffCourseEvaluations: Bool?
+    var ffMobileCourseEvaluations: Bool?
     var ffMobileIaRedesign: Bool?
     var ffMobileVibeActivities: Bool?
     var ffMobileUniversalSearch: Bool?

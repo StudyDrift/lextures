@@ -2267,6 +2267,46 @@ object LmsApi {
         decode(body)
     }
 
+    // Course evaluations (M7.7)
+
+    suspend fun fetchEvaluationStatus(courseCode: String, accessToken: String): EvaluationStatus =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/evaluations/status",
+                accessToken = accessToken,
+            )
+            if (code == 404) throw ApiError.HttpStatus(code, "Course evaluations are not enabled.")
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun submitEvaluation(
+        courseCode: String,
+        windowId: String,
+        answers: Map<String, String>,
+        accessToken: String,
+    ): Unit = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/evaluations/${encodePath(windowId)}/submit",
+            method = "POST",
+            body = client.encodeBody(EvaluationSubmitBody(answers), EvaluationSubmitBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code == 409) throw ApiError.HttpStatus(code, "You have already submitted this evaluation.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun fetchEvaluationResults(courseCode: String, accessToken: String): EvaluationResults =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/evaluations/results",
+                accessToken = accessToken,
+            )
+            if (code == 404) throw ApiError.HttpStatus(code, "No evaluation results found.")
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
     // Gamification (M9.3)
 
     suspend fun fetchGamificationProfile(accessToken: String): GamificationProfile = withContext(Dispatchers.IO) {

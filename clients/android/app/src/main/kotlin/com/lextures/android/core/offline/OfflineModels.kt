@@ -57,6 +57,8 @@ object OfflineCacheKey {
     fun gamificationLeaderboard(courseCode: String): String = "gamification:leaderboard:$courseCode"
     fun advisingNotes(): String = "advising:notes"
     fun degreeProgress(): String = "advising:degree-progress"
+    fun evaluationStatus(courseCode: String): String = "evaluation:status:$courseCode"
+    fun evaluationResults(courseCode: String): String = "evaluation:results:$courseCode"
 }
 
 data class Cached<T>(
