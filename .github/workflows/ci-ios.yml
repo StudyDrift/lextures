@@ -90,7 +90,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             -parallel-testing-enabled NO \
             -resultBundlePath /tmp/TestResults.xcresult \
-            2>&1 | tee "$log" | xcpretty
+            2>&1 | tee "$log"
           code=${PIPESTATUS[0]}
           if [ "$code" -ne 0 ]; then
             echo "--- xcodebuild test failed; surfacing failing cases ---"
