@@ -48,7 +48,6 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty
 
-      # Pick an available iPhone simulator (macOS/Xcode images vary; iPhone 16 may be absent).
       - name: Select iOS Simulator
         id: sim
         run: |
@@ -59,7 +58,6 @@ jobs:
               exit 0
             fi
           done
-          echo "No iOS Simulator found. Available devices:"
           xcrun simctl list devices available || true
           exit 1
 
@@ -68,52 +66,23 @@ jobs:
           set -euo pipefail
           name="${{ steps.sim.outputs.name }}"
           udid="$(xcrun simctl list devices available | grep -F "    $name (" | head -1 | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')"
-          echo "Booting $name ($udid)"
           xcrun simctl boot "$udid" 2>/dev/null || true
           xcrun simctl bootstatus "$udid" -b
 
-      # Unit tests for accessibility helpers and future coverage.
       - name: Test
         run: |
           set -o pipefail
           log=/tmp/xcodebuild-test.log
-          echo "Running unit tests on: ${{ steps.sim.outputs.name }}"
           xcodebuild test \
             -project Lextures.xcodeproj \
             -scheme Lextures \
             -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
-            -skip-testing:LexturesTests/EvaluationLogicTests \
-            -skip-testing:LexturesTests/PlannerModelsTests/testCollectEvaluationTodos \
             2>&1 | tee "$log" | xcpretty
           code=${PIPESTATUS[0]}
           if [ "$code" -ne 0 ]; then
-            echo "--- xcodebuild test failed; surfacing failing cases ---"
-            grep -E 'Test Case .* failed|TEST FAILED|Executed .* failures|error: ' "$log" | tail -40 || true
-            grep -E 'Test Case .* failed' "$log" | tail -10 | while read -r line; do
-              echo "::error::$line"
-            done || true
-            exit "$code"
-          fi
-
-      - name: Test (evaluation)
-        run: |
-          set -o pipefail
-          log=/tmp/xcodebuild-eval-test.log
-          xcodebuild test \
-            -project Lextures.xcodeproj \
-            -scheme Lextures \
-            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
-            -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO \
-            -only-testing:LexturesTests/EvaluationLogicTests \
-            -only-testing:LexturesTests/PlannerModelsTests/testCollectEvaluationTodos \
-            2>&1 | tee "$log"
-          code=${PIPESTATUS[0]}
-          if [ "$code" -ne 0 ]; then
-            echo "--- evaluation tests failed ---"
-            grep -E 'Test Case .* failed|TEST FAILED|error: |XCTAssert' "$log" | tail -40 || true
+            grep -E 'Test Case .* failed|TEST FAILED|Executed .* failures' "$log" | tail -30 || true
             grep -E 'Test Case .* failed' "$log" | while read -r line; do
               echo "::error::$line"
             done || true
