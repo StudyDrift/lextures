@@ -98,19 +98,7 @@ jobs:
             if [ -d /tmp/TestResults.xcresult ]; then
               xcrun xcresulttool get test-results tests --path /tmp/TestResults.xcresult --format json 2>/dev/null > /tmp/xcresult-tests.json || true
               if [ -s /tmp/xcresult-tests.json ]; then
-                python3 <<'PY'
-import json
-from pathlib import Path
-
-data = json.loads(Path("/tmp/xcresult-tests.json").read_text())
-for test in data.get("tests", []):
-    status = (test.get("testStatus") or {}).get("name", "")
-    if status != "Failure":
-        continue
-    ident = (test.get("identifier") or {}).get("identifier", "")
-    message = (test.get("failureSummaries") or [{}])[0].get("message", "")
-    print(f"::error::{status} {ident} {message}")
-PY
+                python3 -c 'import json, pathlib; data=json.loads(pathlib.Path("/tmp/xcresult-tests.json").read_text()); [print("::error::", (t.get("testStatus") or {}).get("name", ""), (t.get("identifier") or {}).get("identifier", ""), (t.get("failureSummaries") or [{}])[0].get("message", "")) for t in data.get("tests", []) if (t.get("testStatus") or {}).get("name") == "Failure"]' || true
               fi
             fi
             exit "$code"
