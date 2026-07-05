@@ -245,7 +245,7 @@ enum PlannerLogic {
                 StudentTodoItem(
                     key: evaluationTodoKey(courseCode: course.courseCode, windowId: windowId),
                     kind: .evaluation,
-                    title: L.text("mobile.evaluations.todoTitle"),
+                    title: L.dynamicText("mobile.evaluations.todoTitle"),
                     courseCode: course.courseCode,
                     courseTitle: course.displayTitle,
                     dueAt: EvaluationLogic.parseClosesAt(status.closesAt),
