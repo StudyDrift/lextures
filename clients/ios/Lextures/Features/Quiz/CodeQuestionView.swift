@@ -134,7 +134,13 @@ struct CodeQuestionView: View {
     @ViewBuilder
     private func resultsPanel(_ response: QuizCodeRunResponse) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(L.format("mobile.quiz.code.runScore", response.pointsEarned, response.pointsPossible))
+            Text(
+                L.format(
+                    "mobile.quiz.code.runScore",
+                    response.pointsEarned.formatted(),
+                    response.pointsPossible.formatted()
+                )
+            )
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
 
