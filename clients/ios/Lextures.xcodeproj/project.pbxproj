@@ -384,7 +384,7 @@
 		8A8EEAF36B304038A8FB13F8 /* DiscussionLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionLogic.swift; sourceTree = "<group>"; };
 		6086BFDE5D684E2CBBAF441E /* FileDownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDownloadManager.swift; sourceTree = "<group>"; };
 		64754FD1BAFE4F0895224E92 /* GamificationLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamificationLogic.swift; sourceTree = "<group>"; };
-		B8B02A9A8AA64BA68376E711 /* GradeCalculator+MyGrades.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeCalculator+MyGrades.swift; sourceTree = "<group>"; };
+		B8B02A9A8AA64BA68376E711 /* GradeCalculator+MyGrades.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GradeCalculator+MyGrades.swift"; sourceTree = "<group>"; };
 		1063DFEBF6FC4E8F8A610669 /* GradeCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeCalculator.swift; sourceTree = "<group>"; };
 		58DC9AAB93D54127A4E6DF94 /* GroupsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsLogic.swift; sourceTree = "<group>"; };
 		E238ABF3C99449DC9B0D71D9 /* InsightsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsLogic.swift; sourceTree = "<group>"; };
