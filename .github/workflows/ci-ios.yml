@@ -48,58 +48,22 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty
 
-      # Pick an available iPhone simulator (macOS/Xcode images vary; iPhone 16 may be absent).
-      - name: Select iOS Simulator
-        id: sim
-        run: |
-          set -euo pipefail
-          booted="$(xcrun simctl list devices booted 2>/dev/null | grep -E '^\s+iPhone' | head -1 | sed -E 's/^[[:space:]]+([^()]+)[[:space:]]*\(.*/\1/' | xargs || true)"
-          if [ -n "$booted" ]; then
-            echo "name=$booted" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          for sim in "iPhone 16" "iPhone 17" "iPhone 17 Pro" "iPhone 15"; do
-            if xcrun simctl list devices available 2>/dev/null | grep -qF "    $sim ("; then
-              echo "name=$sim" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-          done
-          echo "No iOS Simulator found. Available devices:"
-          xcrun simctl list devices available || true
-          exit 1
-
-      - name: Boot iOS Simulator
-        run: |
-          set -euo pipefail
-          name="${{ steps.sim.outputs.name }}"
-          udid="$(xcrun simctl list devices available | grep -F "    $name (" | head -1 | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')"
-          echo "Booting $name ($udid)"
-          xcrun simctl boot "$udid" 2>/dev/null || true
-          xcrun simctl bootstatus "$udid" -b
-
       # Unit tests for accessibility helpers and future coverage.
       - name: Test
         run: |
           set -o pipefail
-          log=/tmp/xcodebuild-test.log
+          destination='platform=iOS Simulator,name=iPhone 16'
+          for sim in "iPhone 16" "iPhone 17" "iPhone 17 Pro" "iPhone 15"; do
+            if xcrun simctl list devices available 2>/dev/null | grep -qF "    $sim ("; then
+              destination="platform=iOS Simulator,name=$sim"
+              break
+            fi
+          done
+          echo "Running unit tests on: $destination"
           xcodebuild test \
             -project Lextures.xcodeproj \
             -scheme Lextures \
-            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -destination "$destination" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
-            -parallel-testing-enabled NO \
-            -resultBundlePath /tmp/TestResults.xcresult \
-            2>&1 | tee "$log"
-          code=${PIPESTATUS[0]}
-          if [ "$code" -ne 0 ]; then
-            echo "--- xcodebuild test failed; surfacing failing cases ---"
-            grep -E 'Test Case .* failed|TEST FAILED|Assertion failed|error: ' "$log" | tail -40 || true
-            if [ -d /tmp/TestResults.xcresult ]; then
-              xcrun xcresulttool get test-results tests --path /tmp/TestResults.xcresult --format json 2>/dev/null > /tmp/xcresult-tests.json || true
-              if [ -s /tmp/xcresult-tests.json ]; then
-                python3 -c 'import json, pathlib; data=json.loads(pathlib.Path("/tmp/xcresult-tests.json").read_text()); [print("::error::", (t.get("testStatus") or {}).get("name", ""), (t.get("identifier") or {}).get("identifier", ""), (t.get("failureSummaries") or [{}])[0].get("message", "")) for t in data.get("tests", []) if (t.get("testStatus") or {}).get("name") == "Failure"]' || true
-              fi
-            fi
-            exit "$code"
-          fi
+            | xcpretty

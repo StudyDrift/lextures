@@ -2,6 +2,10 @@ import Foundation
 
 /// Course evaluation helpers (M7.7).
 enum EvaluationLogic {
+    private static let draftDefaults: UserDefaults = {
+        UserDefaults(suiteName: "com.lextures.evaluation-drafts") ?? .standard
+    }()
+
     static func evaluationsEnabled(_ features: MobilePlatformFeatures) -> Bool {
         features.ffCourseEvaluations && features.ffMobileCourseEvaluations
     }
@@ -76,7 +80,7 @@ enum EvaluationLogic {
 
     static func loadDraft(courseCode: String, windowId: String) -> [String: String] {
         let key = draftCacheKey(courseCode: courseCode, windowId: windowId)
-        guard let data = UserDefaults.standard.data(forKey: key),
+        guard let data = draftDefaults.data(forKey: key),
               let decoded = try? JSONDecoder().decode([String: String].self, from: data) else {
             return [:]
         }
@@ -86,10 +90,10 @@ enum EvaluationLogic {
     static func saveDraft(courseCode: String, windowId: String, answers: [String: String]) {
         let key = draftCacheKey(courseCode: courseCode, windowId: windowId)
         guard let data = try? JSONEncoder().encode(answers) else { return }
-        UserDefaults.standard.set(data, forKey: key)
+        draftDefaults.set(data, forKey: key)
     }
 
     static func clearDraft(courseCode: String, windowId: String) {
-        UserDefaults.standard.removeObject(forKey: draftCacheKey(courseCode: courseCode, windowId: windowId))
+        draftDefaults.removeObject(forKey: draftCacheKey(courseCode: courseCode, windowId: windowId))
     }
 }

@@ -4,6 +4,14 @@ import XCTest
 final class EvaluationLogicTests: XCTestCase {
     private let draftCourseCode = "CS101"
     private let draftWindowId = "win-1"
+    private let draftDefaultsSuiteName = "com.lextures.evaluation-drafts"
+
+    override func setUp() {
+        super.setUp()
+        EvaluationLogic.clearDraft(courseCode: draftCourseCode, windowId: draftWindowId)
+        UserDefaults(suiteName: draftDefaultsSuiteName)?
+            .removePersistentDomain(forName: draftDefaultsSuiteName)
+    }
 
     override func tearDown() {
         EvaluationLogic.clearDraft(courseCode: draftCourseCode, windowId: draftWindowId)
