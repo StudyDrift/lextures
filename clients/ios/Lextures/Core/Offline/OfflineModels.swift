@@ -74,6 +74,8 @@ enum OfflineCacheKey {
     static func gamificationLeaderboard(courseCode: String) -> String {
         "gamification:leaderboard:\(courseCode)"
     }
+    static func advisingNotes() -> String { "advising:notes" }
+    static func degreeProgress() -> String { "advising:degree-progress" }
 }
 
 /// A cached value plus freshness metadata for read screens.

@@ -41,4 +41,6 @@ struct PlatformFeatures: Decodable {
     var ffStripeBilling: Bool?
     var ffPaymentsEnabled: Bool?
     var ffTaxCollection: Bool?
+    var ffAdvisingIntegration: Bool?
+    var ffMobileAdvising: Bool?
 }
