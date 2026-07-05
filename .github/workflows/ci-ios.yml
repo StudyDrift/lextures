@@ -81,10 +81,26 @@ jobs:
       - name: Test
         run: |
           set -o pipefail
+          log=/tmp/xcodebuild-test.log
           xcodebuild test \
             -project Lextures.xcodeproj \
             -scheme Lextures \
             -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
-            | xcpretty
+            -parallel-testing-enabled NO \
+            -resultBundlePath /tmp/TestResults.xcresult \
+            2>&1 | tee "$log" | xcpretty
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            echo "--- xcodebuild test failed; surfacing failing cases ---"
+            grep -E 'Test Case .* failed|TEST FAILED|Assertion failed|error: ' "$log" | tail -40 || true
+            if [ -d /tmp/TestResults.xcresult ]; then
+              xcrun xcresulttool get test-results tests --path /tmp/TestResults.xcresult --format json 2>/dev/null \
+                | python3 -c "import json,sys; data=json.load(sys.stdin); \
+[print('::error::', (t.get('testStatus') or {}).get('name',''), (t.get('identifier') or {}).get('identifier',''), (t.get('failureSummaries') or [{}])[0].get('message','')) \
+ for t in data.get('tests',[]) if (t.get('testStatus') or {}).get('name')=='Failure']" \
+                || true
+            fi
+            exit "$code"
+          fi

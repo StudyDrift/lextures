@@ -85,6 +85,7 @@ final class PlannerModelsTests: XCTestCase {
             evaluationStatusByCourseCode: ["BIO101": status]
         )
         XCTAssertEqual(todos.count, 1)
+        XCTAssertEqual(todos[0].key, "evaluation:BIO101:win-1")
         XCTAssertEqual(todos[0].kind, .evaluation)
         XCTAssertEqual(todos[0].evaluationWindowId, "win-1")
     }

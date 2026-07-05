@@ -56,6 +56,7 @@ final class EvaluationLogicTests: XCTestCase {
         )
         var features = MobilePlatformFeatures()
         features.ffCourseEvaluations = true
+        features.ffMobileCourseEvaluations = true
         let status = EvaluationStatus(windowOpen: true, windowId: "w1", hasSubmitted: false, opensAt: nil, closesAt: nil, questions: nil)
         XCTAssertTrue(EvaluationLogic.shouldShowWorkspaceSection(course: course, status: status, features: features))
     }
