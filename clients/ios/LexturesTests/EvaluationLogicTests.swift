@@ -2,6 +2,14 @@ import XCTest
 @testable import Lextures
 
 final class EvaluationLogicTests: XCTestCase {
+    private let draftCourseCode = "CS101"
+    private let draftWindowId = "win-1"
+
+    override func tearDown() {
+        EvaluationLogic.clearDraft(courseCode: draftCourseCode, windowId: draftWindowId)
+        super.tearDown()
+    }
+
     func testEvaluationsEnabledRequiresBothFlags() {
         var features = MobilePlatformFeatures()
         XCTAssertFalse(EvaluationLogic.evaluationsEnabled(features))
@@ -53,11 +61,12 @@ final class EvaluationLogicTests: XCTestCase {
     }
 
     func testDraftRoundTrip() {
-        let key = EvaluationLogic.draftCacheKey(courseCode: "CS101", windowId: "win-1")
+        let key = EvaluationLogic.draftCacheKey(courseCode: draftCourseCode, windowId: draftWindowId)
         XCTAssertEqual(key, "evaluation:draft:CS101:win-1")
-        EvaluationLogic.saveDraft(courseCode: "CS101", windowId: "win-1", answers: ["0": "4"])
-        XCTAssertEqual(EvaluationLogic.loadDraft(courseCode: "CS101", windowId: "win-1"), ["0": "4"])
-        EvaluationLogic.clearDraft(courseCode: "CS101", windowId: "win-1")
-        XCTAssertTrue(EvaluationLogic.loadDraft(courseCode: "CS101", windowId: "win-1").isEmpty)
+        EvaluationLogic.clearDraft(courseCode: draftCourseCode, windowId: draftWindowId)
+        EvaluationLogic.saveDraft(courseCode: draftCourseCode, windowId: draftWindowId, answers: ["0": "4"])
+        XCTAssertEqual(EvaluationLogic.loadDraft(courseCode: draftCourseCode, windowId: draftWindowId), ["0": "4"])
+        EvaluationLogic.clearDraft(courseCode: draftCourseCode, windowId: draftWindowId)
+        XCTAssertTrue(EvaluationLogic.loadDraft(courseCode: draftCourseCode, windowId: draftWindowId).isEmpty)
     }
 }
