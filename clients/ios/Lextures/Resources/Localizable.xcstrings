@@ -23976,7 +23976,7 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hi %1$@,\n\nI noticed %2$@ in our course and wanted to check in. Let me know if you need help.\n"
+            "value": "Hi %@,\n\nI noticed %@ in our course and wanted to check in. Let me know if you need help.\n"
           }
         },
         "en": {
@@ -23988,19 +23988,19 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hi %1$@,\n\nI noticed %2$@ in our course and wanted to check in. Let me know if you need help.\n"
+            "value": "Hi %@,\n\nI noticed %@ in our course and wanted to check in. Let me know if you need help.\n"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hi %1$@,\n\nI noticed %2$@ in our course and wanted to check in. Let me know if you need help.\n"
+            "value": "Hi %@,\n\nI noticed %@ in our course and wanted to check in. Let me know if you need help.\n"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hi %1$@,\n\nI noticed %2$@ in our course and wanted to check in. Let me know if you need help.\n"
+            "value": "Hi %@,\n\nI noticed %@ in our course and wanted to check in. Let me know if you need help.\n"
           }
         }
       }
