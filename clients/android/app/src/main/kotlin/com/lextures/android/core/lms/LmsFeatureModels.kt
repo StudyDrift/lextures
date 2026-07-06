@@ -204,6 +204,18 @@ data class BroadcastsResponse(
     val broadcasts: List<Broadcast> = emptyList(),
 )
 
+@Serializable
+data class CreateBroadcastRequest(
+    val type: String,
+    val subject: String,
+    val body: String,
+)
+
+@Serializable
+data class CreateBroadcastResponse(
+    val broadcast: Broadcast,
+)
+
 // endregion
 
 // region My grades
@@ -466,6 +478,7 @@ data class PlatformFeatures(
     val ffParentPortal: Boolean? = null,
     val ffConferenceScheduling: Boolean? = null,
     val ffClassroomSignals: Boolean? = null,
+    val ffBroadcasts: Boolean? = null,
 )
 
 @Serializable

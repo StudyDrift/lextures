@@ -168,6 +168,49 @@ extension LMSAPI {
         )
     }
 
+    static func createBroadcast(
+        orgId: String,
+        type: String,
+        subject: String,
+        body: String,
+        accessToken: String
+    ) async throws -> Broadcast {
+        let (data, response) = try await client.request(
+            path: "/api/v1/orgs/\(encodePath(orgId))/broadcasts",
+            method: "POST",
+            body: CreateBroadcastRequest(type: type, subject: subject, body: body),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(CreateBroadcastResponse.self, from: data).broadcast
+    }
+
+    static func createCourseAnnouncement(
+        courseCode: String,
+        channelId: String,
+        title: String,
+        body: String,
+        sectionName: String?,
+        mentionsEveryone: Bool,
+        accessToken: String
+    ) async throws -> String {
+        let text = AnnouncementLogic.formatAnnouncementBody(
+            title: title,
+            body: body,
+            sectionName: sectionName,
+            mentionsEveryone: mentionsEveryone
+        )
+        return try await postFeedMessage(
+            courseCode: courseCode,
+            channelId: channelId,
+            body: text,
+            accessToken: accessToken
+        )
+    }
+
     // MARK: - My grades (student)
 
     static func fetchMyGrades(courseCode: String, accessToken: String) async throws -> MyGradesResponse {

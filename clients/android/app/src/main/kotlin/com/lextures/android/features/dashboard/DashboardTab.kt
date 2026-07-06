@@ -384,6 +384,7 @@ fun DashboardTab(
     if (showAnnouncements) {
         AnnouncementsScreen(
             session = session,
+            platformFeatures = shell.platformFeatures,
             onBack = { showAnnouncements = false },
             modifier = modifier,
         )

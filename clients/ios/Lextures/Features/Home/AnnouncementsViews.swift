@@ -79,11 +79,23 @@ struct AnnouncementCard: View {
 /// Full announcement history ("See all" from the dashboard banner).
 struct AnnouncementsListView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var broadcasts: [Broadcast] = []
+    @State private var permissions: [String] = []
+    @State private var courses: [CourseSummary] = []
     @State private var errorMessage: String?
     @State private var loading = true
+    @State private var showBroadcastComposer = false
+
+    private var canComposeBroadcast: Bool {
+        AnnouncementLogic.canComposeBroadcast(permissions: permissions, features: shell.platformFeatures)
+    }
+
+    private var broadcastOrgId: String? {
+        AnnouncementLogic.resolveOrgId(courses: courses)
+    }
 
     var body: some View {
         ZStack {
@@ -100,8 +112,8 @@ struct AnnouncementsListView: View {
                     } else if broadcasts.isEmpty {
                         LMSEmptyState(
                             systemImage: "megaphone",
-                            title: "No announcements",
-                            message: "School-wide announcements will appear here."
+                            title: L.text("mobile.announcements.empty.title"),
+                            message: L.text("mobile.announcements.empty.message")
                         )
                     } else {
                         ForEach(broadcasts) { broadcast in
@@ -126,8 +138,27 @@ struct AnnouncementsListView: View {
             }
             .refreshable { await load() }
         }
-        .navigationTitle("Announcements")
+        .navigationTitle(L.text("mobile.announcements.listTitle"))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if canComposeBroadcast, broadcastOrgId != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showBroadcastComposer = true
+                    } label: {
+                        Image(systemName: "square.and.pencil")
+                    }
+                    .accessibilityLabel(L.text("mobile.broadcast.compose.navTitle"))
+                }
+            }
+        }
+        .sheet(isPresented: $showBroadcastComposer) {
+            if let orgId = broadcastOrgId {
+                BroadcastComposerView(orgId: orgId) { created in
+                    broadcasts.insert(created, at: 0)
+                }
+            }
+        }
         .task { await load() }
     }
 
@@ -137,9 +168,14 @@ struct AnnouncementsListView: View {
         errorMessage = nil
         defer { loading = false }
         do {
-            broadcasts = try await LMSAPI.fetchMyBroadcasts(accessToken: token)
+            async let broadcastsTask = LMSAPI.fetchMyBroadcasts(accessToken: token)
+            async let permissionsTask = try? LMSAPI.fetchMyPermissions(accessToken: token)
+            async let coursesTask = try? LMSAPI.fetchCourses(accessToken: token)
+            broadcasts = try await broadcastsTask
+            permissions = await permissionsTask ?? permissions
+            courses = await coursesTask ?? courses
         } catch {
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load announcements."
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.announcements.loadError")
         }
     }
 }

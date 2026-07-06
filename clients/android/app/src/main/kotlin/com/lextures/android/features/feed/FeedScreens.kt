@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Send
@@ -97,6 +98,7 @@ fun FeedChannelsScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
     var showNewChannel by remember { mutableStateOf(false) }
+    var showAnnouncementComposer by remember { mutableStateOf(false) }
     var openChannel by remember { mutableStateOf<FeedChannel?>(null) }
 
     suspend fun load() {
@@ -135,6 +137,16 @@ fun FeedChannelsScreen(
     }
     LaunchedEffect(channelsRevision) { if (channelsRevision > 0) load() }
 
+    if (showAnnouncementComposer) {
+        com.lextures.android.features.home.AnnouncementComposerScreen(
+            session = session,
+            course = course,
+            onDone = { showAnnouncementComposer = false },
+            modifier = modifier,
+        )
+        return
+    }
+
     openChannel?.let { channel ->
         FeedChannelScreen(
             session = session,
@@ -153,7 +165,16 @@ fun FeedChannelsScreen(
         errorMessage?.let { LmsErrorBanner(message = it) }
 
         if (course.viewerIsStaff && groupContext == null) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                if (com.lextures.android.core.lms.AnnouncementLogic.canComposeCourseAnnouncement(course)) {
+                    TextButton(onClick = { showAnnouncementComposer = true }) {
+                        Icon(Icons.Default.Campaign, contentDescription = null)
+                        Text(com.lextures.android.core.i18n.L.text(com.lextures.android.R.string.mobile_announcement_compose_short_action))
+                    }
+                }
                 TextButton(onClick = { showNewChannel = true }) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Text(feedNewChannel())

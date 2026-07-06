@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
@@ -48,6 +49,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.i18n.L
+import com.lextures.android.features.home.BroadcastComposerScreen
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.isDarkTheme
@@ -342,14 +345,24 @@ private fun iconFor(eventType: String): ImageVector = when (NotificationLogic.ca
 @Composable
 fun AnnouncementsScreen(
     session: AuthSession,
+    platformFeatures: com.lextures.android.core.navigation.MobilePlatformFeatures,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
 
     var broadcasts by remember { mutableStateOf<List<Broadcast>>(emptyList()) }
+    var permissions by remember { mutableStateOf<List<String>>(emptyList()) }
+    var courses by remember { mutableStateOf<List<com.lextures.android.core.lms.CourseSummary>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
+    var showBroadcastComposer by remember { mutableStateOf(false) }
+
+    val canComposeBroadcast = com.lextures.android.core.lms.AnnouncementLogic.canComposeBroadcast(
+        permissions,
+        platformFeatures,
+    )
+    val broadcastOrgId = com.lextures.android.core.lms.AnnouncementLogic.resolveOrgId(courses)
 
     BackHandler(onBack = onBack)
 
@@ -359,11 +372,28 @@ fun AnnouncementsScreen(
         errorMessage = null
         try {
             broadcasts = LmsApi.fetchMyBroadcasts(token)
+            permissions = LmsApi.fetchMyPermissions(token)
+            courses = LmsApi.fetchCourses(token)
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
         } finally {
             loading = false
         }
+    }
+
+    if (showBroadcastComposer && broadcastOrgId != null) {
+        BroadcastComposerScreen(
+            session = session,
+            orgId = broadcastOrgId,
+            onDone = { created ->
+                showBroadcastComposer = false
+                if (created != null) {
+                    broadcasts = listOf(created) + broadcasts
+                }
+            },
+            modifier = modifier,
+        )
+        return
     }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -377,11 +407,17 @@ fun AnnouncementsScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
             }
             Text(
-                text = "Announcements",
+                text = L.text(com.lextures.android.R.string.mobile_announcements_list_title),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = textPrimary(),
+                modifier = Modifier.weight(1f),
             )
+            if (canComposeBroadcast && broadcastOrgId != null) {
+                IconButton(onClick = { showBroadcastComposer = true }) {
+                    Icon(Icons.Default.Edit, contentDescription = L.text(com.lextures.android.R.string.mobile_broadcast_compose_nav_title), tint = textPrimary())
+                }
+            }
         }
 
         LazyColumn(
@@ -399,8 +435,8 @@ fun AnnouncementsScreen(
                 item {
                     LmsEmptyState(
                         icon = Icons.Default.Campaign,
-                        title = "No announcements",
-                        message = "School-wide announcements will appear here.",
+                        title = L.text(com.lextures.android.R.string.mobile_announcements_empty_title),
+                        message = L.text(com.lextures.android.R.string.mobile_announcements_empty_message),
                     )
                 }
             } else {

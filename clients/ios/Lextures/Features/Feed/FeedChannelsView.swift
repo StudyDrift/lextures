@@ -17,6 +17,7 @@ struct FeedChannelsView: View {
     @State private var newChannelName = ""
     @State private var creating = false
     @State private var openChannel: FeedChannelRoute?
+    @State private var showAnnouncementComposer = false
     @State private var socket = FeedSocket()
 
     var body: some View {
@@ -32,8 +33,16 @@ struct FeedChannelsView: View {
             }
 
             if course.viewerIsStaff && groupContext == nil {
-                HStack {
+                HStack(spacing: 12) {
                     Spacer()
+                    if AnnouncementLogic.canComposeCourseAnnouncement(course: course) {
+                        Button {
+                            showAnnouncementComposer = true
+                        } label: {
+                            Label(L.text("mobile.announcement.compose.shortAction"), systemImage: "megaphone")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                    }
                     Button {
                         showNewChannel = true
                     } label: {
@@ -80,6 +89,9 @@ struct FeedChannelsView: View {
                     GroupFeedContext(groupId: $0, groupName: route.groupName ?? "")
                 }
             )
+        }
+        .sheet(isPresented: $showAnnouncementComposer) {
+            AnnouncementComposerView(course: course)
         }
         .alert(L.text("mobile.feed.newChannel"), isPresented: $showNewChannel) {
             TextField(L.text("mobile.feed.channelNamePlaceholder"), text: $newChannelName)

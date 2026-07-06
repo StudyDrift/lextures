@@ -202,6 +202,7 @@ data class MobilePlatformFeatures(
     val ffParentPortal: Boolean = false,
     val ffConferenceScheduling: Boolean = false,
     val ffClassroomSignals: Boolean = false,
+    val ffBroadcasts: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -263,6 +264,7 @@ data class MobilePlatformFeatures(
             ffParentPortal = features?.ffParentPortal == true,
             ffConferenceScheduling = features?.ffConferenceScheduling == true,
             ffClassroomSignals = features?.ffClassroomSignals == true,
+            ffBroadcasts = features?.ffBroadcasts == true,
         )
     }
 }

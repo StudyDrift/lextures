@@ -378,6 +378,7 @@ struct MobilePlatformFeatures: Equatable {
     var ffParentPortal = false
     var ffConferenceScheduling = false
     var ffClassroomSignals = false
+    var ffBroadcasts = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -421,7 +422,8 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileAdvising: features?.ffMobileAdvising != false,
             ffParentPortal: features?.ffParentPortal == true,
             ffConferenceScheduling: features?.ffConferenceScheduling == true,
-            ffClassroomSignals: features?.ffClassroomSignals == true
+            ffClassroomSignals: features?.ffClassroomSignals == true,
+            ffBroadcasts: features?.ffBroadcasts == true
         )
     }
 
