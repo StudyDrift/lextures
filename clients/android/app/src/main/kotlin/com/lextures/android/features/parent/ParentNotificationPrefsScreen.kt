@@ -80,7 +80,7 @@ fun ParentNotificationPrefsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(L.text(context, localePrefs, R.string.mobile_parent_notification_prefs)) },
+                title = { Text(L.text(context, localePrefs, R.string.mobile_parent_notificationPrefs)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -95,22 +95,22 @@ fun ParentNotificationPrefsScreen(
             Column(Modifier.padding(padding).padding(16.dp)) {
                 errorMessage?.let { Text(it, color = androidx.compose.ui.graphics.Color.Red) }
                 savedMessage?.let { Text(it, color = accentColor()) }
-                PrefRow(L.text(context, localePrefs, R.string.mobile_parent_prefs_grade_posted), gradePosted) {
+                PrefRow(L.text(context, localePrefs, R.string.mobile_parent_prefs_gradePosted), gradePosted) {
                     gradePosted = it
                 }
-                PrefRow(L.text(context, localePrefs, R.string.mobile_parent_prefs_missing_assignment), missingAssignment) {
+                PrefRow(L.text(context, localePrefs, R.string.mobile_parent_prefs_missingAssignment), missingAssignment) {
                     missingAssignment = it
                 }
-                PrefRow(L.text(context, localePrefs, R.string.mobile_parent_prefs_attendance_event), attendanceEvent) {
+                PrefRow(L.text(context, localePrefs, R.string.mobile_parent_prefs_attendanceEvent), attendanceEvent) {
                     attendanceEvent = it
                 }
-                PrefRow(L.text(context, localePrefs, R.string.mobile_parent_prefs_low_grade_enabled), lowGradeEnabled) {
+                PrefRow(L.text(context, localePrefs, R.string.mobile_parent_prefs_lowGradeEnabled), lowGradeEnabled) {
                     lowGradeEnabled = it
                 }
                 if (lowGradeEnabled) {
                     Text(
                         localePrefs.localizedContext(context).getString(
-                            R.string.mobile_parent_prefs_low_grade_value,
+                            R.string.mobile_parent_prefs_lowGradeValue,
                             lowGradeThreshold,
                         ),
                     )

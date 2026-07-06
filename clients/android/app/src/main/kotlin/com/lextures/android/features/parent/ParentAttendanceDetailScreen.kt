@@ -99,7 +99,7 @@ fun ParentAttendanceDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    localePrefs.localizedContext(context).getString(R.string.mobile_parent_read_only, childName),
+                    localePrefs.localizedContext(context).getString(R.string.mobile_parent_readOnly, childName),
                     fontSize = 12.sp,
                     color = textSecondary(),
                 )

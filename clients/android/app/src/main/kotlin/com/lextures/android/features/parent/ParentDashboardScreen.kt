@@ -191,7 +191,7 @@ fun ParentDashboardScreen(
                     if (children.isEmpty()) {
                         LmsCard {
                             Text(
-                                L.text(context, localePrefs, R.string.mobile_parent_no_children),
+                                L.text(context, localePrefs, R.string.mobile_parent_noChildren),
                                 color = textSecondary(),
                             )
                         }
@@ -215,7 +215,7 @@ fun ParentDashboardScreen(
                             LmsCard(accent = androidx.compose.ui.graphics.Color(0xFFF59E0B)) {
                                 Text(
                                     localePrefs.localizedContext(context).getString(
-                                        R.string.mobile_parent_read_only,
+                                        R.string.mobile_parent_readOnly,
                                         ParentLogic.childLabel(child),
                                     ),
                                     color = textPrimary(),
@@ -388,11 +388,11 @@ private fun ParentActionLinks(
     onConferences: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        ParentLink(L.text(context, localePrefs, R.string.mobile_parent_view_grades), onGrades)
-        ParentLink(L.text(context, localePrefs, R.string.mobile_parent_view_attendance), onAttendance)
-        ParentLink(L.text(context, localePrefs, R.string.mobile_parent_notification_prefs), onPrefs)
+        ParentLink(L.text(context, localePrefs, R.string.mobile_parent_viewGrades), onGrades)
+        ParentLink(L.text(context, localePrefs, R.string.mobile_parent_viewAttendance), onAttendance)
+        ParentLink(L.text(context, localePrefs, R.string.mobile_parent_notificationPrefs), onPrefs)
         if (conferenceEnabled) {
-            ParentLink(L.text(context, localePrefs, R.string.mobile_parent_book_conferences), onConferences)
+            ParentLink(L.text(context, localePrefs, R.string.mobile_parent_bookConferences), onConferences)
         }
     }
 }

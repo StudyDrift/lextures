@@ -118,7 +118,7 @@ def main() -> None:
         if group_id not in LEAF_FEATURE_GROUPS:
             text = insert_into_children(text, group_id, f"{ref_id} /* {name} */")
         phase_id = TEST_SOURCES if is_test else APP_SOURCES
-        text = insert_into_sources(text, phase_id, f"{build_id} /* {name} in Sources */,")
+        text = insert_into_sources(text, phase_id, f"{build_id} /* {name} in Sources */,\n")
 
     PBX.write_text(text)
     print(f"Patched {len(missing)} files into {PBX}")

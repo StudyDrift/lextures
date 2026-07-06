@@ -15,7 +15,7 @@ object ParentLogic {
     fun teacherLabel(context: Context, teacher: ConferenceTeacher): String {
         val name = teacher.displayName?.trim().orEmpty()
         if (name.isNotEmpty()) return name
-        return L.text(context, R.string.mobile_parent_conferences_teacher_fallback)
+        return L.text(context, R.string.mobile_parent_conferences_teacherFallback)
     }
 
     fun resolveSelectedChildId(

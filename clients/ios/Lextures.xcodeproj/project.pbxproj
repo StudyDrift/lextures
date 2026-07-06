@@ -1568,6 +1568,7 @@
 			isa = PBXGroup;
 			children = (
 				8B605D3E4F5061728394A5 /* ParentDashboardView.swift */,
+				8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */,
 				8B606D3E4F5061728394A5 /* ParentGradesDetailView.swift */,
 				8B607D3E4F5061728394A5 /* ParentAttendanceDetailView.swift */,
 				8B608D3E4F5061728394A5 /* ParentNotificationPrefsView.swift */,
@@ -1693,7 +1694,8 @@
 				8B604C2D3E4F5061728394 /* LMSAPIParent.swift in Sources */,
 				8B603C2D3E4F5061728394 /* LMSFeatureModelsParent.swift in Sources */,
 				8B602C2D3E4F5061728394 /* ConferenceLogic.swift in Sources */,
-				8B601C2D3E4F5061728394 /* ParentLogic.swift in Sources */,				D4B42B04673648F18A17A9C0 /* AppDelegate.swift in Sources */,
+				8B601C2D3E4F5061728394 /* ParentLogic.swift in Sources */,
+				D4B42B04673648F18A17A9C0 /* AppDelegate.swift in Sources */,
 				D2718BBD8A464F77B6DE8F93 /* LexturesApp.swift in Sources */,
 				1960155E08094E87BF05950C /* RootView.swift in Sources */,
 				E08244BDA3E343F5A35D7C3C /* AccessibilityPreferences.swift in Sources */,
@@ -2002,7 +2004,8 @@
 			files = (
 
 				8B60BC2D3E4F5061728394 /* ConferenceLogicTests.swift in Sources */,
-				8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */,				F1F331DA9F4F488E8BA76DB5 /* AccessibilitySupportTests.swift in Sources */,
+				8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */,
+				F1F331DA9F4F488E8BA76DB5 /* AccessibilitySupportTests.swift in Sources */,
 				8D89993DD95847D0A7495CD6 /* AdvisingLogicTests.swift in Sources */,
 				3DCBF000B6174C60A0DC8D28 /* AssignmentLogicTests.swift in Sources */,
 				1254B5FFC1B64785928A4CD9 /* AuthCallbackParserTests.swift in Sources */,

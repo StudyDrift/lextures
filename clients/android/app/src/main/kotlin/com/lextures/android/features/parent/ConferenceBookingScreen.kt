@@ -104,7 +104,7 @@ fun ConferenceBookingScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(L.text(context, localePrefs, R.string.mobile_parent_book_conferences)) },
+                title = { Text(L.text(context, localePrefs, R.string.mobile_parent_bookConferences)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -131,7 +131,7 @@ fun ConferenceBookingScreen(
                 errorMessage?.let { LmsErrorBanner(it) }
                 successMessage?.let { LmsCard { Text(it) } }
                 if (teachers.isEmpty()) {
-                    Text(L.text(context, localePrefs, R.string.mobile_parent_conferences_no_teachers), color = textSecondary())
+                    Text(L.text(context, localePrefs, R.string.mobile_parent_conferences_noTeachers), color = textSecondary())
                 } else {
                     Text(L.text(context, localePrefs, R.string.mobile_parent_conferences_teacher), fontWeight = FontWeight.Bold)
                     teachers.forEach { teacher ->
@@ -153,7 +153,7 @@ fun ConferenceBookingScreen(
                     if (slotsLoading) {
                         CircularProgressIndicator()
                     } else if (ConferenceLogic.upcomingAvailableSlots(slots).isEmpty()) {
-                        Text(L.text(context, localePrefs, R.string.mobile_parent_conferences_no_slots), color = textSecondary())
+                        Text(L.text(context, localePrefs, R.string.mobile_parent_conferences_noSlots), color = textSecondary())
                     } else {
                         ConferenceLogic.upcomingAvailableSlots(slots).forEach { slot ->
                             LmsCard {
@@ -190,7 +190,7 @@ fun ConferenceBookingScreen(
                     }
                     val booked = ConferenceLogic.myBookedSlots(slots, null, studentId)
                     if (booked.isNotEmpty()) {
-                        Text(L.text(context, localePrefs, R.string.mobile_parent_conferences_my_bookings), fontWeight = FontWeight.Bold)
+                        Text(L.text(context, localePrefs, R.string.mobile_parent_conferences_myBookings), fontWeight = FontWeight.Bold)
                         booked.forEach { slot ->
                             LmsCard {
                                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

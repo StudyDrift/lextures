@@ -97,7 +97,7 @@ fun ParentGradesDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    localePrefs.localizedContext(context).getString(R.string.mobile_parent_read_only, childName),
+                    localePrefs.localizedContext(context).getString(R.string.mobile_parent_readOnly, childName),
                     fontSize = 12.sp,
                     color = textSecondary(),
                 )
@@ -110,7 +110,7 @@ fun ParentGradesDetailScreen(
                             Text(course.courseCode, fontSize = 12.sp, color = textSecondary())
                             if (course.grades.isEmpty()) {
                                 Text(
-                                    L.text(context, localePrefs, R.string.mobile_parent_grades_no_scores),
+                                    L.text(context, localePrefs, R.string.mobile_parent_grades_noScores),
                                     modifier = Modifier.padding(top = 8.dp),
                                 )
                             } else {
