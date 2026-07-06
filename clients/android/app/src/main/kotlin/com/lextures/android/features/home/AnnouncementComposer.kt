@@ -145,12 +145,12 @@ fun AnnouncementComposerScreen(
                                     } ?: throw IllegalStateException("could not read image")
                                     val upload = LmsApi.uploadFeedImage(
                                         courseCode = course.courseCode,
-                                        imageData = bytes,
+                                        imageBytes = bytes,
                                         fileName = "photo.jpg",
                                         mimeType = "image/jpeg",
                                         accessToken = token,
                                     )
-                                    val markdown = "![image](${upload.contentPath})"
+                                    val markdown = "![image](${upload.content_path})"
                                     composedBody = if (composedBody.trim().isEmpty()) {
                                         markdown
                                     } else {
