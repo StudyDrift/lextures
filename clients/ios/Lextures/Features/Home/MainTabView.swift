@@ -77,7 +77,16 @@ final class AppShellModel {
     var rootNavigationTransition: RootNavigationTransition?
 
     var globalDrawerGroups: [DrawerGroup] {
-        MobileDestinations.globalDrawerGroups(context: activeRoleContext, platform: platformFeatures)
+        let uiMode = UIModeStore.shared.effectiveMode(roleContext: activeRoleContext)
+        return MobileDestinations.globalDrawerGroups(
+            context: activeRoleContext,
+            platform: platformFeatures,
+            uiMode: uiMode
+        )
+    }
+
+    var effectiveUIMode: UIMode {
+        UIModeStore.shared.effectiveMode(roleContext: activeRoleContext)
     }
 
     /// Selects a top-level destination and dismisses any open drawer.
@@ -312,6 +321,7 @@ final class AppShellModel {
         if let page = await notifications { unreadNotifications = page.unreadCount }
         let features = MobilePlatformFeatures.from(await platform)
         platformFeatures = features
+        await UIModeStore.shared.syncReadingPreferencesIfNeeded(accessToken: token, features: features)
         if features.ffMobileIaRedesign {
             iaRedesignEnabled = true
             MobileIaPreferences.isRedesignEnabled = true
@@ -333,6 +343,7 @@ final class AppShellModel {
             courses: courseList
         )
         activeRoleContext = roleSnapshot.resolvedContext(stored: MobileIaPreferences.loadRoleContext())
+        _ = UIModeStore.shared.effectiveMode(roleContext: activeRoleContext)
         if iaRedesignEnabled {
             let tabs = MobileDestinations.shellTabs(context: activeRoleContext)
             if !tabs.contains(selectedShellTab) {

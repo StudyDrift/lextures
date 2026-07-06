@@ -197,6 +197,7 @@ fun coverBrush(key: String): Brush {
 fun LexturesTheme(content: @Composable () -> Unit) {
     val preferences = rememberAccessibilityPreferences()
     val readingPreferences = rememberReadingPreferencesStore()
+    val uiModeStore = rememberUIModeStore()
     val localePreferences = rememberLocalePreferences()
     val dark = isDarkTheme()
     val scheme = if (dark) {
@@ -232,6 +233,7 @@ fun LexturesTheme(content: @Composable () -> Unit) {
             CompositionLocalProvider(
                 LocalAccessibilityPreferences provides preferences,
                 LocalReadingPreferencesStore provides readingPreferences,
+                LocalUIModeStore provides uiModeStore,
                 LocalLocalePreferences provides localePreferences,
                 LocalLayoutDirection provides layoutDirection,
             ) {

@@ -43,6 +43,10 @@ import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.resolvedInitials
+import com.lextures.android.core.design.LocalUIModeStore
+import com.lextures.android.core.design.UIMode
+import com.lextures.android.core.design.UIModeLogic
+import com.lextures.android.core.navigation.MobileDestinations
 import com.lextures.android.features.home.CourseHeroImage
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsAvatarChip
@@ -53,6 +57,8 @@ import com.lextures.android.features.home.LmsAvatarChip
  */
 @Composable
 fun GlobalDrawer(shell: HomeShellState, accessToken: String?, modifier: Modifier = Modifier) {
+    val uiModeStore = LocalUIModeStore.current
+    val uiMode = uiModeStore.effectiveMode(shell.activeRoleContext)
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -82,24 +88,25 @@ fun GlobalDrawer(shell: HomeShellState, accessToken: String?, modifier: Modifier
             )
         }
 
-        // Search entry.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(cardBackground())
-                .border(1.dp, fieldBorder(), RoundedCornerShape(12.dp))
-                .clickable {
-                    shell.closeDrawer()
-                    shell.showUniversalSearch = true
-                }
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Icon(Icons.Default.Search, contentDescription = null, tint = textSecondary(), modifier = Modifier.size(18.dp))
-            Text(L.text(R.string.mobile_ia_search), color = textSecondary(), fontSize = 14.sp)
+        if (MobileDestinations.showsUniversalSearch(uiMode)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(cardBackground())
+                    .border(1.dp, fieldBorder(), RoundedCornerShape(12.dp))
+                    .clickable {
+                        shell.closeDrawer()
+                        shell.showUniversalSearch = true
+                    }
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Icon(Icons.Default.Search, contentDescription = null, tint = textSecondary(), modifier = Modifier.size(18.dp))
+                Text(L.text(R.string.mobile_ia_search), color = textSecondary(), fontSize = 14.sp)
+            }
         }
         // (pinned courses rendered inside the grouped list below)
 
@@ -127,11 +134,12 @@ fun GlobalDrawer(shell: HomeShellState, accessToken: String?, modifier: Modifier
                 group.titleRes?.let { DrawerGroupHeader(drawerString(it)) }
                 group.items.forEach { item ->
                     DrawerRow(
-                        label = drawerString(item.labelRes),
+                        label = UIModeLogic.drawerLabel(item, uiMode),
                         icon = rootDestinationIcon(item),
                         selected = shell.rootDestination == item,
                         onClick = { shell.select(item) },
                         badge = if (item.showsInboxBadge) shell.unreadInbox else 0,
+                        uiMode = uiMode,
                     )
                 }
             }

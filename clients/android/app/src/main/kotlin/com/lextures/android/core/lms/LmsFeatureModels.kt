@@ -479,6 +479,7 @@ data class PlatformFeatures(
     val ffConferenceScheduling: Boolean? = null,
     val ffClassroomSignals: Boolean? = null,
     val ffBroadcasts: Boolean? = null,
+    val ffUiMode: Boolean? = null,
 )
 
 @Serializable

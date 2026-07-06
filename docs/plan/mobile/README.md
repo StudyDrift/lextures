@@ -153,7 +153,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M4.2 Lockdown / kiosk mode](../completed/mobile/M4.2-lockdown-kiosk.md) ✅ | 2.10 lockdown | **DONE** |
 | [M5.3 Code-execution questions](../completed/mobile/M5.3-code-execution.md) ✅ | 2.4 code exec | **Done** |
 | [M10.3 Behavior/PBIS & hall pass](M10.3-behavior-hallpass.md) | 13.3 behavior, 13.9 hall pass | **P2** |
-| [M10.4 Age-appropriate UI mode](M10.4-age-appropriate-ui.md) | 13.11 age-appropriate UI | **P2** |
+| [M10.4 Age-appropriate UI mode](../completed/mobile/M10.4-age-appropriate-ui.md) | 13.11 age-appropriate UI | **DONE** |
 | [M11.2 Post announcement / broadcast](../completed/mobile/M11.2-instructor-announce.md) | 13.10 broadcast, announcements compose | **Done** |
 | [M12.1 e-Portfolio & artifacts](M12.1-eportfolio.md) | 14.12 e-portfolio, portfolios pages | **P2** |
 | [M12.2 Credentials wallet & transcripts](M12.2-credentials-transcripts.md) | 14.13 CCR, transcripts, 15.6 LinkedIn share | **P2** |

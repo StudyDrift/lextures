@@ -40,8 +40,13 @@ fun MoreHubScreen(
     val context = LocalContext.current
     val localePrefs = LocalLocalePreferences.current
     var query by remember { mutableStateOf("") }
-    val destinations = remember(shell.activeRoleContext, shell.platformFeatures) {
-        MobileDestinations.moreDestinations(shell.activeRoleContext, shell.platformFeatures)
+    val uiModeStore = com.lextures.android.core.design.LocalUIModeStore.current
+    val destinations = remember(shell.activeRoleContext, shell.platformFeatures, uiModeStore.localPreference, uiModeStore.serverEffectiveMode) {
+        MobileDestinations.moreDestinations(
+            shell.activeRoleContext,
+            shell.platformFeatures,
+            uiModeStore.effectiveMode(shell.activeRoleContext),
+        )
     }
     val filtered = remember(destinations, query) {
         val q = query.trim().lowercase()

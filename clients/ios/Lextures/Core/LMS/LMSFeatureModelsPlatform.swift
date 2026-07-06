@@ -48,4 +48,5 @@ struct PlatformFeatures: Decodable {
     var ffConferenceScheduling: Bool?
     var ffClassroomSignals: Bool?
     var ffBroadcasts: Bool?
+    var ffUiMode: Bool?
 }

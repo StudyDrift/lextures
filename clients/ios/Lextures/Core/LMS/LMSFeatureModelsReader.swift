@@ -17,6 +17,8 @@ struct ReadingPreferencesRow: Codable, Equatable {
     var dyslexiaDisplayEnabled: Bool = false
     var highContrastEnabled: Bool = false
     var reducedMotionEnabled: Bool = false
+    var uiModeOverride: String?
+    var effectiveUiMode: String?
     var updatedAt: String?
 }
 
@@ -35,6 +37,8 @@ struct ReadingPreferencesPatch: Encodable {
     var dyslexiaDisplayEnabled: Bool?
     var highContrastEnabled: Bool?
     var reducedMotionEnabled: Bool?
+    var uiModeOverride: String?
+    var effectiveUiMode: String?
 }
 
 // MARK: - Captions
