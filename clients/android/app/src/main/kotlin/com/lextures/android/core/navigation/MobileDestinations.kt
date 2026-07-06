@@ -1,6 +1,6 @@
 package com.lextures.android.core.navigation
 
-import com.lextures.android.core.lms.AdvisingLogic
+import com.lextures.android.core.design.UIMode
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.EvaluationLogic
 import com.lextures.android.core.lms.EvaluationStatus
@@ -202,6 +202,7 @@ data class MobilePlatformFeatures(
     val ffParentPortal: Boolean = false,
     val ffConferenceScheduling: Boolean = false,
     val ffClassroomSignals: Boolean = false,
+    val ffUiMode: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -263,6 +264,7 @@ data class MobilePlatformFeatures(
             ffParentPortal = features?.ffParentPortal == true,
             ffConferenceScheduling = features?.ffConferenceScheduling == true,
             ffClassroomSignals = features?.ffClassroomSignals == true,
+            ffUiMode = features?.ffUiMode == true,
         )
     }
 }
@@ -308,14 +310,19 @@ object MobileDestinations {
     fun globalDrawerGroups(
         context: MobileRoleContext,
         platform: MobilePlatformFeatures,
+        uiMode: UIMode = UIMode.Standard,
     ): List<DrawerGroup> = when (context) {
-        MobileRoleContext.Learning -> listOf(
-            DrawerGroup(null, listOf(RootDestination.Dashboard, RootDestination.Courses, RootDestination.Calendar, RootDestination.Todos)),
-            DrawerGroup("mobile_drawer_group_learning", learningDrawerItems(platform)),
-            DrawerGroup("mobile_drawer_group_notes", listOf(RootDestination.Notebooks, RootDestination.GlobalNotebook)),
-            DrawerGroup("mobile_drawer_group_administration", listOf(RootDestination.Accommodations)),
-            DrawerGroup("mobile_drawer_group_account", listOf(RootDestination.Inbox, RootDestination.Settings)),
-        )
+        MobileRoleContext.Learning -> when (uiMode) {
+            UIMode.K2 -> youngK2DrawerGroups()
+            UIMode.Elementary -> youngElementaryDrawerGroups(platform)
+            UIMode.Standard -> listOf(
+                DrawerGroup(null, listOf(RootDestination.Dashboard, RootDestination.Courses, RootDestination.Calendar, RootDestination.Todos)),
+                DrawerGroup("mobile_drawer_group_learning", learningDrawerItems(platform)),
+                DrawerGroup("mobile_drawer_group_notes", listOf(RootDestination.Notebooks, RootDestination.GlobalNotebook)),
+                DrawerGroup("mobile_drawer_group_administration", listOf(RootDestination.Accommodations)),
+                DrawerGroup("mobile_drawer_group_account", listOf(RootDestination.Inbox, RootDestination.Settings)),
+            )
+        }
         MobileRoleContext.Teaching -> listOf(
             DrawerGroup(null, listOf(RootDestination.Dashboard, RootDestination.Courses, RootDestination.Calendar)),
             DrawerGroup("mobile_drawer_group_teaching", listOf(RootDestination.Teach)),
@@ -369,12 +376,41 @@ object MobileDestinations {
         if (platform.selfReflectionEnabled) add(RootDestination.Insights)
     }
 
+    private fun youngK2DrawerGroups(): List<DrawerGroup> = listOf(
+        DrawerGroup(null, listOf(RootDestination.Dashboard, RootDestination.Courses, RootDestination.Todos)),
+        DrawerGroup("mobile_drawer_group_account", listOf(RootDestination.Inbox, RootDestination.Settings)),
+    )
+
+    private fun youngElementaryDrawerGroups(platform: MobilePlatformFeatures): List<DrawerGroup> = listOf(
+        DrawerGroup(null, listOf(RootDestination.Dashboard, RootDestination.Courses, RootDestination.Calendar, RootDestination.Todos)),
+        DrawerGroup("mobile_drawer_group_learning", learningDrawerItems(platform)),
+        DrawerGroup("mobile_drawer_group_account", listOf(RootDestination.Inbox, RootDestination.Settings)),
+    )
+
+    fun showsUniversalSearch(uiMode: UIMode): Boolean = uiMode == UIMode.Standard
+
     fun moreDestinations(
         context: MobileRoleContext,
         platform: MobilePlatformFeatures,
+        uiMode: UIMode = UIMode.Standard,
     ): List<MoreDestination> = buildList {
         when (context) {
             MobileRoleContext.Learning -> {
+                when (uiMode) {
+                    UIMode.K2 -> {
+                        if (platform.ffLibrary) add(MoreDestination.Reading)
+                        add(MoreDestination.Settings)
+                        return@buildList
+                    }
+                    UIMode.Elementary -> {
+                        add(MoreDestination.ReportCards)
+                        if (platform.ffLibrary) add(MoreDestination.Reading)
+                        add(MoreDestination.Calendar)
+                        add(MoreDestination.Settings)
+                        return@buildList
+                    }
+                    UIMode.Standard -> Unit
+                }
                 if (TutorLogic.askAiEnabled(platform)) add(MoreDestination.AskAi)
                 if (platform.ffPeerReview) add(MoreDestination.PeerReviews)
                 add(MoreDestination.ReportCards)

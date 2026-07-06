@@ -139,6 +139,7 @@ fun ProfileTab(
     val outboxItems by offline.outboxItems.collectAsState()
     val scope = rememberCoroutineScope()
     val accessibilityState = rememberAccessibilityPreferencesState()
+    val uiModeStore = com.lextures.android.core.design.LocalUIModeStore.current
     val localePreferences = LocalLocalePreferences.current
     var localeExpanded by remember { mutableStateOf(false) }
     var localeError by remember { mutableStateOf<String?>(null) }
@@ -811,6 +812,48 @@ fun ProfileTab(
             }
             localeError?.let {
                 Text(text = it, fontSize = 12.sp, color = LexturesColors.Error)
+            }
+        }
+
+        if (uiModeStore.featureEnabled) {
+            LmsCard {
+                Text(text = L.text(R.string.mobile_uiMode_title), style = LexturesType.display(17), color = textPrimary())
+                Text(
+                    text = L.text(R.string.mobile_uiMode_description),
+                    fontSize = 12.sp,
+                    color = textSecondary(),
+                )
+                if (uiModeStore.hasAdminOverride) {
+                    Text(
+                        text = L.text(R.string.mobile_uiMode_adminOverride),
+                        fontSize = 12.sp,
+                        color = textSecondary(),
+                    )
+                }
+                var expanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+                    OutlinedTextField(
+                        value = L.text(uiModeStore.localPreference.labelRes),
+                        onValueChange = {},
+                        readOnly = true,
+                        enabled = !uiModeStore.hasAdminOverride,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                    )
+                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        com.lextures.android.core.design.UIModePreference.entries.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(L.text(option.labelRes)) },
+                                onClick = {
+                                    expanded = false
+                                    uiModeStore.setLocalPreference(option)
+                                },
+                            )
+                        }
+                    }
+                }
             }
         }
 

@@ -28,13 +28,15 @@ struct ProfileIaContextCard: View {
 
 struct ProfileMoreHubCard: View {
     @Environment(AppShellModel.self) private var shell
+    @Environment(UIModeStore.self) private var uiModeStore
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Group {
             if !MobileDestinations.moreDestinations(
                 context: shell.activeRoleContext,
-                platform: shell.platformFeatures
+                platform: shell.platformFeatures,
+                uiMode: uiModeStore.effectiveMode(roleContext: shell.activeRoleContext)
             ).isEmpty {
                 LMSCard {
                     NavigationLink(value: MoreHubRoute()) {

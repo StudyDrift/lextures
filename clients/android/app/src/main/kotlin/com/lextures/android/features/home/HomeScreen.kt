@@ -66,7 +66,8 @@ import com.lextures.android.core.lms.AccountProfile
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.MeProfile
 import com.lextures.android.core.lms.CourseSummary
-import com.lextures.android.core.navigation.CourseWorkspaceSection
+import com.lextures.android.core.design.UIMode
+import com.lextures.android.core.design.UIModeStore
 import com.lextures.android.core.navigation.DrawerGroup
 import com.lextures.android.core.navigation.DrawerState
 import com.lextures.android.core.navigation.RootDestination
@@ -153,8 +154,13 @@ class HomeShellState {
     /** Active root-pane push (outgoing screen + whether progress tracks drawer close). */
     var rootNavigationTransition by mutableStateOf<RootNavigationTransition?>(null)
 
+    var uiModeStore: UIModeStore? = null
+
     val globalDrawerGroups: List<DrawerGroup>
-        get() = MobileDestinations.globalDrawerGroups(activeRoleContext, platformFeatures)
+        get() {
+            val uiMode = uiModeStore?.effectiveMode(activeRoleContext) ?: UIMode.Standard
+            return MobileDestinations.globalDrawerGroups(activeRoleContext, platformFeatures, uiMode)
+        }
 
     /** Whether the course drawer is reachable (course open and its host pane visible). */
     val courseAvailable: Boolean
@@ -349,7 +355,7 @@ class HomeShellState {
     var selectedTabOverride by mutableStateOf<String?>(null)
     lateinit var androidContext: android.content.Context
 
-    suspend fun refresh(accessToken: String?) {
+    suspend fun refresh(accessToken: String?, uiModeStore: UIModeStore? = null) {
         val token = accessToken ?: return
         runCatching { LmsApi.fetchMe(token) }.getOrNull()?.let { profile = it }
         runCatching { LmsApi.fetchAccountProfile(token) }.getOrNull()?.let { accountProfile = it }
@@ -359,6 +365,19 @@ class HomeShellState {
         }
         val features = MobilePlatformFeatures.from(runCatching { LmsApi.fetchPlatformFeatures(token) }.getOrNull())
         platformFeatures = features
+        this.uiModeStore = uiModeStore
+        uiModeStore?.updatePlatform(features.ffUiMode)
+        val readingApiEnabled = features.ffReadingPreferences ||
+            (features.readAloudEnabled && features.ffReadAloud)
+        if (features.ffUiMode || readingApiEnabled) {
+            runCatching { LmsApi.fetchReadingPreferences(token) }.getOrNull()?.let { prefs ->
+                uiModeStore?.applyReadingPreferences(
+                    effectiveUiMode = prefs.effectiveUiMode,
+                    uiModeOverride = prefs.uiModeOverride,
+                    featureEnabled = features.ffUiMode,
+                )
+            }
+        }
         if (features.ffMobileIaRedesign) {
             iaRedesignEnabled = true
             MobileIaPreferences.setRedesignEnabled(androidContext, true)
@@ -382,6 +401,7 @@ class HomeShellState {
         val permissions = runCatching { LmsApi.fetchMyPermissions(token) }.getOrDefault(emptyList())
         roleSnapshot = MobileDestinations.buildRoleSnapshot(permissions, courses)
         activeRoleContext = roleSnapshot.resolvedContext(MobileIaPreferences.loadRoleContext(androidContext))
+        uiModeStore?.effectiveMode(activeRoleContext)
     }
 }
 
@@ -393,6 +413,7 @@ fun HomeScreen(
     initialDeepLink: DeepLinkDestination? = null,
 ) {
     val shell = remember { HomeShellState() }
+    val uiModeStore = com.lextures.android.core.design.LocalUIModeStore.current
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val pushManager = remember { PushManager.getInstance(context) }
@@ -407,7 +428,7 @@ fun HomeScreen(
     }
 
     LaunchedEffect(accessToken) {
-        shell.refresh(accessToken)
+        shell.refresh(accessToken, uiModeStore)
         if (accessToken != null) {
             pushManager.requestTokenSync()
             RealtimeManager.configure { session.accessToken.value }
@@ -421,7 +442,7 @@ fun HomeScreen(
     val realtimeRevisionSum = mailboxRevision + coursesRevision + enrollmentsRevision + notificationsRevision
     LaunchedEffect(realtimeRevisionSum) {
         if (realtimeRevisionSum > 0) {
-            shell.refresh(accessToken)
+            shell.refresh(accessToken, uiModeStore)
         }
     }
 

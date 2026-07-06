@@ -5,13 +5,15 @@ struct MoreHubRoute: Hashable {}
 /// Searchable grid of secondary destinations gated by role and platform flags.
 struct MoreHubView: View {
     @Environment(AppShellModel.self) private var shell
+    @Environment(UIModeStore.self) private var uiModeStore
     @Environment(\.colorScheme) private var colorScheme
     @State private var query = ""
 
     private var destinations: [MoreDestination] {
         MobileDestinations.moreDestinations(
             context: shell.activeRoleContext,
-            platform: shell.platformFeatures
+            platform: shell.platformFeatures,
+            uiMode: uiModeStore.effectiveMode(roleContext: shell.activeRoleContext)
         )
     }
 

@@ -2,6 +2,8 @@ import SwiftUI
 
 struct QuizQuestionView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(UIModeStore.self) private var uiModeStore
+    @Environment(AppShellModel.self) private var shell
 
     let question: QuizQuestion
     let answer: QuizAnswerState
@@ -147,18 +149,20 @@ struct QuizQuestionView: View {
     }
 
     private func choiceButton(index: Int, label: String, selected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        let uiMode = uiModeStore.effectiveMode(roleContext: shell.activeRoleContext)
+        return Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: uiMode.drawerIconPointSize))
                     .foregroundStyle(selected ? LexturesTheme.primary : LexturesTheme.textSecondary(for: colorScheme))
                 Text(label)
-                    .font(.subheadline)
+                    .font(.system(size: uiMode.baseBodyPointSize))
                     .multilineTextAlignment(.leading)
                     .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                 Spacer(minLength: 0)
             }
-            .padding(12)
-            .frame(minHeight: 44)
+            .padding(uiMode.isYoung ? 16 : 12)
+            .frame(minHeight: uiMode.choiceButtonMinHeight)
             .background(selected ? LexturesTheme.primary.opacity(0.12) : LexturesTheme.sceneBackground(for: colorScheme))
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }

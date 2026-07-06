@@ -8,6 +8,7 @@ struct ProfileView: View {
     @Environment(LocalePreferences.self) private var localePreferences
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityPreferences) private var accessibilityPreferences
+    @Environment(UIModeStore.self) private var uiModeStore
     @State private var confirmingSignOut = false
     @State private var confirmingClearCache = false
     @State private var confirmingClearSearchHistory = false
@@ -35,6 +36,9 @@ struct ProfileView: View {
                         offlineStorageCard
                         ProfileAppearanceCard()
                         localeCard
+                        if uiModeStore.featureEnabled {
+                            uiModeCard
+                        }
                         accessibilityCard
                         ProfileSecurityCard()
                         accountCard
@@ -180,6 +184,32 @@ struct ProfileView: View {
                     .font(.caption)
                     .foregroundStyle(LexturesTheme.error)
             }
+        }
+    }
+
+    private var uiModeCard: some View {
+        LMSCard {
+            Text(L.text("mobile.uiMode.title"))
+                .font(LexturesTheme.displayFont(17))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            Text(L.text("mobile.uiMode.description"))
+                .font(.caption)
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            if uiModeStore.hasAdminOverride {
+                Text(L.text("mobile.uiMode.adminOverride"))
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            }
+            Picker(L.text("mobile.uiMode.title"), selection: Binding(
+                get: { uiModeStore.localPreference },
+                set: { uiModeStore.localPreference = $0 }
+            )) {
+                ForEach(UIModePreference.allCases) { option in
+                    Text(option.label).tag(option)
+                }
+            }
+            .pickerStyle(.menu)
+            .disabled(uiModeStore.hasAdminOverride)
         }
     }
 

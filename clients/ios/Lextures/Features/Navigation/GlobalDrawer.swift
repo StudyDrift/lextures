@@ -4,14 +4,21 @@ import SwiftUI
 /// search, and grouped destinations. Selecting a row switches the top-level pane.
 struct GlobalDrawer: View {
     @Environment(AppShellModel.self) private var shell
+    @Environment(UIModeStore.self) private var uiModeStore
     @Environment(\.colorScheme) private var colorScheme
+
+    private var uiMode: UIMode {
+        uiModeStore.effectiveMode(roleContext: shell.activeRoleContext)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            searchButton
-                .padding(.horizontal, 14)
-                .padding(.bottom, 8)
+            if MobileDestinations.showsUniversalSearch(uiMode: uiMode) {
+                searchButton
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 8)
+            }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 4) {
@@ -23,10 +30,11 @@ struct GlobalDrawer: View {
                         }
                         ForEach(group.items) { item in
                             DrawerRow(
-                                label: item.label,
+                                label: UIModeLogic.drawerLabel(for: item, mode: uiMode),
                                 systemImage: item.systemImage,
                                 selected: shell.rootDestination == item,
-                                badge: item.showsInboxBadge ? shell.unreadInbox : 0
+                                badge: item.showsInboxBadge ? shell.unreadInbox : 0,
+                                uiMode: uiMode
                             ) {
                                 shell.select(item)
                             }
@@ -149,21 +157,22 @@ struct DrawerRow: View {
     let systemImage: String
     var selected: Bool = false
     var badge: Int = 0
+    var uiMode: UIMode = .standard
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: systemImage)
-                    .font(.system(size: 16, weight: .medium))
-                    .frame(width: 24, alignment: .center)
+                    .font(.system(size: uiMode.drawerIconPointSize, weight: .medium))
+                    .frame(width: uiMode.drawerIconPointSize + 8, alignment: .center)
                     .foregroundStyle(
                         selected
                             ? LexturesTheme.accent(for: colorScheme)
                             : LexturesTheme.textSecondary(for: colorScheme)
                     )
                 Text(label)
-                    .font(.subheadline.weight(selected ? .semibold : .regular))
+                    .font(.system(size: uiMode.baseBodyPointSize, weight: selected ? .semibold : .regular))
                     .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                 Spacer(minLength: 0)
                 if badge > 0 {
@@ -177,7 +186,8 @@ struct DrawerRow: View {
                 }
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 11)
+            .padding(.vertical, uiMode.drawerRowVerticalPadding)
+            .frame(minHeight: uiMode.minimumTapTarget)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(selected

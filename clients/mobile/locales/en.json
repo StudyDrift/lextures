@@ -1494,7 +1494,24 @@
         "mobile.drawer.pinned": "Pinned",
         "mobile.drawer.insights": "Study insights",
         "mobile.drawer.review": "Review practice",
-        "mobile.drawer.todos": "Todos"
+        "mobile.drawer.todos": "Todos",
+        "mobile.uiMode.title": "Interface mode",
+        "mobile.uiMode.description": "Use a simpler layout with bigger buttons for younger learners.",
+        "mobile.uiMode.adminOverride": "Your teacher set this mode for you.",
+        "mobile.uiMode.preference.auto": "Automatic (from grade level)",
+        "mobile.uiMode.preference.k2": "Young learners (K–2)",
+        "mobile.uiMode.preference.elementary": "Elementary (3–5)",
+        "mobile.uiMode.preference.standard": "Standard",
+        "mobile.uiMode.young.dashboard": "My home",
+        "mobile.uiMode.young.courses": "My classes",
+        "mobile.uiMode.young.todos": "My to-dos",
+        "mobile.uiMode.young.calendar": "Calendar",
+        "mobile.uiMode.young.inbox": "Messages",
+        "mobile.uiMode.young.settings": "Settings",
+        "mobile.uiMode.young.reading": "My reading",
+        "mobile.uiMode.elementary.dashboard": "Home",
+        "mobile.uiMode.elementary.courses": "My courses",
+        "mobile.uiMode.elementary.todos": "To-dos"
     },
     "plurals": {
         "mobile.pendingSync.waiting": {

@@ -378,6 +378,7 @@ struct MobilePlatformFeatures: Equatable {
     var ffParentPortal = false
     var ffConferenceScheduling = false
     var ffClassroomSignals = false
+    var ffUiMode = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -421,7 +422,8 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileAdvising: features?.ffMobileAdvising != false,
             ffParentPortal: features?.ffParentPortal == true,
             ffConferenceScheduling: features?.ffConferenceScheduling == true,
-            ffClassroomSignals: features?.ffClassroomSignals == true
+            ffClassroomSignals: features?.ffClassroomSignals == true,
+            ffUiMode: features?.ffUiMode == true
         )
     }
 
@@ -474,10 +476,17 @@ enum MobileDestinations {
     /// Role-aware grouped destinations for the global drawer, mirroring the web sidebar.
     static func globalDrawerGroups(
         context: MobileRoleContext,
-        platform: MobilePlatformFeatures
+        platform: MobilePlatformFeatures,
+        uiMode: UIMode = .standard
     ) -> [DrawerGroup] {
         switch context {
         case .learning:
+            if uiMode == .k2 {
+                return youngK2DrawerGroups(platform: platform)
+            }
+            if uiMode == .elementary {
+                return youngElementaryDrawerGroups(platform: platform)
+            }
             return [
                 DrawerGroup(titleKey: nil, items: [.dashboard, .courses, .calendar, .todos]),
                 DrawerGroup(
@@ -539,6 +548,26 @@ enum MobileDestinations {
         return items
     }
 
+    private static func youngK2DrawerGroups(platform: MobilePlatformFeatures) -> [DrawerGroup] {
+        _ = platform
+        return [
+            DrawerGroup(titleKey: nil, items: [.dashboard, .courses, .todos]),
+            DrawerGroup(titleKey: "mobile.drawer.group.account", items: [.inbox, .settings]),
+        ]
+    }
+
+    private static func youngElementaryDrawerGroups(platform: MobilePlatformFeatures) -> [DrawerGroup] {
+        [
+            DrawerGroup(titleKey: nil, items: [.dashboard, .courses, .calendar, .todos]),
+            DrawerGroup(titleKey: "mobile.drawer.group.learning", items: learningDrawerItems(platform: platform)),
+            DrawerGroup(titleKey: "mobile.drawer.group.account", items: [.inbox, .settings]),
+        ]
+    }
+
+    static func showsUniversalSearch(uiMode: UIMode) -> Bool {
+        uiMode == .standard
+    }
+
     static func legacyTab(from shell: ShellTab) -> AppTab? {
         switch shell {
         case .home: return .home
@@ -552,11 +581,24 @@ enum MobileDestinations {
 
     static func moreDestinations(
         context: MobileRoleContext,
-        platform: MobilePlatformFeatures
+        platform: MobilePlatformFeatures,
+        uiMode: UIMode = .standard
     ) -> [MoreDestination] {
         var out: [MoreDestination] = []
         switch context {
         case .learning:
+            if uiMode == .k2 {
+                if platform.ffLibrary { out.append(.reading) }
+                out.append(.settings)
+                return out
+            }
+            if uiMode == .elementary {
+                out.append(.reportCards)
+                if platform.ffLibrary { out.append(.reading) }
+                out.append(.calendar)
+                out.append(.settings)
+                return out
+            }
             if TutorLogic.askAiEnabled(platform: platform) { out.append(.askAi) }
             if platform.ffPeerReview { out.append(.peerReviews) }
             out.append(.reportCards)

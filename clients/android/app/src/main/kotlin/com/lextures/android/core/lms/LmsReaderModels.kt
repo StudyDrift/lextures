@@ -19,6 +19,8 @@ data class ReadingPreferencesRow(
     val dyslexiaDisplayEnabled: Boolean = false,
     val highContrastEnabled: Boolean = false,
     val reducedMotionEnabled: Boolean = false,
+    val uiModeOverride: String? = null,
+    val effectiveUiMode: String? = null,
     val updatedAt: String? = null,
 )
 

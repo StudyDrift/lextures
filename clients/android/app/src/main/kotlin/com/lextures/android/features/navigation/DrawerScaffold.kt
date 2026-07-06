@@ -17,7 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
+import com.lextures.android.core.design.UIMode
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -178,6 +179,7 @@ fun DrawerRow(
     selected: Boolean,
     onClick: () -> Unit,
     badge: Int = 0,
+    uiMode: UIMode = UIMode.Standard,
 ) {
     val dark = isDarkTheme()
     Row(
@@ -188,7 +190,8 @@ fun DrawerRow(
             .background(if (selected) LexturesColors.BrandTeal.copy(alpha = if (dark) 0.22f else 0.16f) else Color.Transparent)
             .clickable(onClick = onClick)
             .semantics { contentDescription = label }
-            .padding(horizontal = 12.dp, vertical = 11.dp),
+            .padding(horizontal = 12.dp, vertical = uiMode.drawerRowVerticalPadding)
+            .heightIn(min = uiMode.minimumTapTarget),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -196,12 +199,12 @@ fun DrawerRow(
             icon,
             contentDescription = null,
             tint = if (selected) accentColor() else textSecondary(),
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(uiMode.drawerIconDp),
         )
         Text(
             label,
             color = textPrimary(),
-            fontSize = 15.sp,
+            fontSize = uiMode.baseBodySp,
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             modifier = Modifier.weight(1f),
         )
