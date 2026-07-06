@@ -168,16 +168,16 @@ struct CourseGeneralSettingsView: View {
             Picker("", selection: $form.courseHomeLanding) {
                 Text(L.text("mobile.courseSettings.home.dashboard")).tag(CourseSettingsLogic.CourseHomeLanding.data)
                 Text(L.text("mobile.courseSettings.home.calendar")).tag(CourseSettingsLogic.CourseHomeLanding.calendar)
-                Text(L.text("mobile.courseSettings.home.contentPage")).tag(CourseSettingsLogic.CourseHomeLanding.content_page)
+                Text(L.text("mobile.courseSettings.home.contentPage")).tag(CourseSettingsLogic.CourseHomeLanding.contentPage)
             }
             .pickerStyle(.segmented)
             .onChange(of: form.courseHomeLanding) { _, landing in
-                if landing != .content_page {
+                if landing != .contentPage {
                     form.courseHomeContentItemId = ""
                 }
             }
 
-            if form.courseHomeLanding == .content_page {
+            if form.courseHomeLanding == .contentPage {
                 Button {
                     showContentPagePicker = true
                 } label: {
@@ -452,10 +452,10 @@ private struct TimezonePickerSheet: View {
     @State private var query = ""
 
     private var filtered: [String] {
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let all = CourseSettingsLogic.timezoneOptions()
-        guard !q.isEmpty else { return all.prefix(100).map { $0 } }
-        return all.filter { $0.lowercased().contains(q) }.prefix(100).map { $0 }
+        guard !needle.isEmpty else { return all.prefix(100).map { $0 } }
+        return all.filter { $0.lowercased().contains(needle) }.prefix(100).map { $0 }
     }
 
     var body: some View {
@@ -481,9 +481,9 @@ private struct ContentPagePickerSheet: View {
     @State private var query = ""
 
     private var filtered: [CourseStructureItem] {
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return pages }
-        return pages.filter { $0.title.lowercased().contains(q) }
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !needle.isEmpty else { return pages }
+        return pages.filter { $0.title.lowercased().contains(needle) }
     }
 
     var body: some View {

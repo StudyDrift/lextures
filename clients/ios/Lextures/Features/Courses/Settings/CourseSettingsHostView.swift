@@ -31,7 +31,7 @@ struct CourseSettingsHostView: View {
                 settingsContent
             }
         }
-        .navigationTitle(L.text("mobile.courseSettings.title"))
+        .navigationTitle(L.text("mobile.courseSettings.screenTitle"))
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadPermissions() }
     }

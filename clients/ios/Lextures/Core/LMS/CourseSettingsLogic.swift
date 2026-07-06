@@ -116,11 +116,15 @@ enum CourseSettingsLogic {
     static let fontFamilies: [String] = ["sans", "serif"]
 
     enum RelativeDurationUnit: String, CaseIterable {
-        case D, W, M, Y
+        case days = "D"
+        case weeks = "W"
+        case months = "M"
+        case years = "Y"
     }
 
     enum CourseHomeLanding: String, CaseIterable {
-        case data, calendar, content_page
+        case data, calendar
+        case contentPage = "content_page"
     }
 
     enum ScheduleMode: String, CaseIterable {
@@ -145,7 +149,7 @@ enum CourseSettingsLogic {
         if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             error.title = L.text("mobile.courseSettings.validation.titleRequired")
         }
-        if courseHomeLanding == .content_page,
+        if courseHomeLanding == .contentPage,
            courseHomeContentItemId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             error.courseHome = L.text("mobile.courseSettings.validation.contentPageRequired")
         }
@@ -155,7 +159,7 @@ enum CourseSettingsLogic {
 
     static func normalizeCourseHomeLanding(_ value: String?) -> CourseHomeLanding {
         if value == CourseHomeLanding.calendar.rawValue { return .calendar }
-        if value == CourseHomeLanding.content_page.rawValue { return .content_page }
+        if value == CourseHomeLanding.contentPage.rawValue { return .contentPage }
         return .data
     }
 
@@ -163,23 +167,23 @@ enum CourseSettingsLogic {
         iso: String?
     ) -> (amount: String, unit: RelativeDurationUnit) {
         guard let iso, !iso.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return ("", .M)
+            return ("", .months)
         }
         let pattern = /^P(\d+)([DWMY])$/
         guard let match = iso.trimmingCharacters(in: .whitespacesAndNewlines).wholeMatch(of: pattern) else {
-            return ("", .M)
+            return ("", .months)
         }
         let amount = String(match.output.1)
         let unitChar = String(match.output.2).uppercased()
-        let unit = RelativeDurationUnit(rawValue: unitChar) ?? .M
+        let unit = RelativeDurationUnit(rawValue: unitChar) ?? .months
         return (amount, unit)
     }
 
     static func partsToIsoDuration(amount: String, unit: RelativeDurationUnit) -> String? {
-        guard let n = Int(amount.trimmingCharacters(in: .whitespacesAndNewlines)), n >= 1 else {
+        guard let parsedAmount = Int(amount.trimmingCharacters(in: .whitespacesAndNewlines)), parsedAmount >= 1 else {
             return nil
         }
-        return "P\(n)\(unit.rawValue)"
+        return "P\(parsedAmount)\(unit.rawValue)"
     }
 
     static func isoToLocalDateString(_ iso: String?) -> String {
@@ -214,9 +218,9 @@ enum CourseSettingsLogic {
         guard let match = pos.trimmingCharacters(in: .whitespacesAndNewlines).wholeMatch(of: pattern) else {
             return (50, 50)
         }
-        let x = min(100, max(0, Double(match.output.1) ?? 50))
-        let y = min(100, max(0, Double(match.output.2) ?? 50))
-        return (x, y)
+        let posX = min(100, max(0, Double(match.output.1) ?? 50))
+        let posY = min(100, max(0, Double(match.output.2) ?? 50))
+        return (posX, posY)
     }
 
     static func formatHeroObjectPosition(x: Double, y: Double) -> String? {
@@ -249,6 +253,13 @@ enum CourseSettingsLogic {
     }
 
     static func isGeneralFormDirty(form: CourseGeneralFormState, course: CourseSummary) -> Bool {
+        isBasicInfoDirty(form: form, course: course)
+            || isCourseHomeDirty(form: form, course: course)
+            || isScheduleDirty(form: form, course: course)
+            || isMarkdownThemeDirty(form: form, course: course)
+    }
+
+    private static func isBasicInfoDirty(form: CourseGeneralFormState, course: CourseSummary) -> Bool {
         if form.title.trimmingCharacters(in: .whitespacesAndNewlines) != course.title { return true }
         if form.description.trimmingCharacters(in: .whitespacesAndNewlines) != course.description { return true }
         if form.published != (course.published ?? false) { return true }
@@ -261,15 +272,18 @@ enum CourseSettingsLogic {
                 ?? defaultTimezone().nilIfEmpty) {
             return true
         }
+        return false
+    }
 
+    private static func isCourseHomeDirty(form: CourseGeneralFormState, course: CourseSummary) -> Bool {
         let normHome = normalizeCourseHomeLanding(course.courseHomeLanding)
         if form.courseHomeLanding != normHome { return true }
         let origHomeId = (course.courseHomeContentItemId ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        if form.courseHomeLanding == .content_page,
-           form.courseHomeContentItemId.trimmingCharacters(in: .whitespacesAndNewlines) != origHomeId {
-            return true
-        }
+        return form.courseHomeLanding == .contentPage
+            && form.courseHomeContentItemId.trimmingCharacters(in: .whitespacesAndNewlines) != origHomeId
+    }
 
+    private static func isScheduleDirty(form: CourseGeneralFormState, course: CourseSummary) -> Bool {
         let mode = course.scheduleMode == ScheduleMode.relative.rawValue ? ScheduleMode.relative : .fixed
         if form.scheduleMode != mode { return true }
         if form.scheduleMode == .fixed {
@@ -277,27 +291,27 @@ enum CourseSettingsLogic {
             if localDateStringToIso(form.endsAt) != normalizeIso(course.endsAt) { return true }
             if localDateStringToIso(form.visibleFrom) != normalizeIso(course.visibleFrom) { return true }
             if localDateStringToIso(form.hiddenAt) != normalizeIso(course.hiddenAt) { return true }
-        } else {
-            let currentEnd = partsToIsoDuration(amount: form.relEndAmount, unit: form.relEndUnit)
-            if currentEnd != (course.relativeEndAfter?.nilIfEmpty) { return true }
-            let currentHidden = partsToIsoDuration(amount: form.relHiddenAmount, unit: form.relHiddenUnit)
-            if currentHidden != (course.relativeHiddenAfter?.nilIfEmpty) { return true }
+            return false
         }
+        let currentEnd = partsToIsoDuration(amount: form.relEndAmount, unit: form.relEndUnit)
+        if currentEnd != (course.relativeEndAfter?.nilIfEmpty) { return true }
+        let currentHidden = partsToIsoDuration(amount: form.relHiddenAmount, unit: form.relHiddenUnit)
+        return currentHidden != (course.relativeHiddenAfter?.nilIfEmpty)
+    }
 
+    private static func isMarkdownThemeDirty(form: CourseGeneralFormState, course: CourseSummary) -> Bool {
         if (course.markdownThemePreset ?? "default") != form.markdownThemePreset { return true }
-        if form.markdownThemePreset == "custom" {
-            let seed = MarkdownThemeCustom.seed
-            let orig = course.markdownThemeCustom ?? seed
-            let draft = form.customDraft
-            if (draft.headingColor ?? seed.headingColor) != (orig.headingColor ?? seed.headingColor) { return true }
-            if (draft.bodyColor ?? seed.bodyColor) != (orig.bodyColor ?? seed.bodyColor) { return true }
-            if (draft.linkColor ?? seed.linkColor) != (orig.linkColor ?? seed.linkColor) { return true }
-            if (draft.codeBackground ?? seed.codeBackground) != (orig.codeBackground ?? seed.codeBackground) { return true }
-            if (draft.blockquoteBorder ?? seed.blockquoteBorder) != (orig.blockquoteBorder ?? seed.blockquoteBorder) { return true }
-            if (draft.articleWidth ?? seed.articleWidth) != (orig.articleWidth ?? seed.articleWidth) { return true }
-            if (draft.fontFamily ?? seed.fontFamily) != (orig.fontFamily ?? seed.fontFamily) { return true }
-        }
-        return false
+        guard form.markdownThemePreset == "custom" else { return false }
+        let seed = MarkdownThemeCustom.seed
+        let orig = course.markdownThemeCustom ?? seed
+        let draft = form.customDraft
+        if (draft.headingColor ?? seed.headingColor) != (orig.headingColor ?? seed.headingColor) { return true }
+        if (draft.bodyColor ?? seed.bodyColor) != (orig.bodyColor ?? seed.bodyColor) { return true }
+        if (draft.linkColor ?? seed.linkColor) != (orig.linkColor ?? seed.linkColor) { return true }
+        if (draft.codeBackground ?? seed.codeBackground) != (orig.codeBackground ?? seed.codeBackground) { return true }
+        if (draft.blockquoteBorder ?? seed.blockquoteBorder) != (orig.blockquoteBorder ?? seed.blockquoteBorder) { return true }
+        if (draft.articleWidth ?? seed.articleWidth) != (orig.articleWidth ?? seed.articleWidth) { return true }
+        return (draft.fontFamily ?? seed.fontFamily) != (orig.fontFamily ?? seed.fontFamily)
     }
 
     static func applyCourseToForm(_ course: CourseSummary) -> CourseGeneralFormState {
@@ -346,7 +360,7 @@ enum CourseSettingsLogic {
             relativeEndAfter: mode == .relative ? partsToIsoDuration(amount: form.relEndAmount, unit: form.relEndUnit) : nil,
             relativeHiddenAfter: mode == .relative ? partsToIsoDuration(amount: form.relHiddenAmount, unit: form.relHiddenUnit) : nil,
             courseHomeLanding: form.courseHomeLanding.rawValue,
-            courseHomeContentItemId: form.courseHomeLanding == .content_page
+            courseHomeContentItemId: form.courseHomeLanding == .contentPage
                 ? form.courseHomeContentItemId.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
                 : nil,
             courseTimezone: form.courseTimezone.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
@@ -403,9 +417,9 @@ struct CourseGeneralFormState: Equatable {
     var visibleFrom: String = ""
     var hiddenAt: String = ""
     var relEndAmount: String = ""
-    var relEndUnit: CourseSettingsLogic.RelativeDurationUnit = .M
+    var relEndUnit: CourseSettingsLogic.RelativeDurationUnit = .months
     var relHiddenAmount: String = ""
-    var relHiddenUnit: CourseSettingsLogic.RelativeDurationUnit = .M
+    var relHiddenUnit: CourseSettingsLogic.RelativeDurationUnit = .months
     var markdownThemePreset: String = "default"
     var customDraft: MarkdownThemeCustom = .seed
 }

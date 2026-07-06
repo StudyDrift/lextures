@@ -1702,71 +1702,9 @@
         "mobile.uiMode.young.reading": "My reading",
         "mobile.uiMode.elementary.dashboard": "Home",
         "mobile.uiMode.elementary.courses": "My courses",
-        "mobile.uiMode.elementary.todos": "To-dos"
-    },
-    "plurals": {
-        "mobile.pendingSync.waiting": {
-            "one": "%d change waiting to upload",
-            "other": "%d changes waiting to upload"
-        },
-        "mobile.dashboard.dueThisWeek.count": {
-            "one": "%d assignment due this week",
-            "other": "%d assignments due this week"
-        },
-        "mobile.grading.submissionCount": {
-            "one": "%d submission waiting",
-            "other": "%d submissions waiting"
-        },
-        "mobile.planner.calendar.eventCount": {
-            "one": "%d event",
-            "other": "%d events"
-        },
-        "mobile.ia.teach.ungraded": {
-            "one": "%d ungraded",
-            "other": "%d ungraded"
-        },
-        "mobile.instructorInsights.snapshot.atRiskCount": {
-            "one": "%d student",
-            "other": "%d students"
-        },
-        "mobile.instructorInsights.snapshot.ungradedCount": {
-            "one": "%d item",
-            "other": "%d items"
-        },
-        "mobile.instructorInsights.snapshot.engagementCount": {
-            "one": "%d insight",
-            "other": "%d insights"
-        },
-        "mobile.instructorInsights.progress.missingCount": {
-            "one": "%d missing item",
-            "other": "%d missing items"
-        },
-        "mobile.review.dueCount": {
-            "one": "%d review due today",
-            "other": "%d reviews due today"
-        },
-        "mobile.insights.streak": {
-            "one": "%d-day study streak",
-            "other": "%d-day study streak"
-        },
-        "mobile.insights.streakAccessibility": {
-            "one": "%d-day study streak",
-            "other": "%d-day study streak"
-        },
-        "mobile.reading.streakDays": {
-            "one": "%d day",
-            "other": "%d days"
-        },
-        "mobile.review.streak": {
-            "one": "%d-day streak",
-            "other": "%d-day streak"
-        },
-        "mobile.review.summaryReviewed": {
-            "one": "You reviewed %d item",
-            "other": "You reviewed %d items"
-        },
+        "mobile.uiMode.elementary.todos": "To-dos",
         "mobile.ia.course.settings": "Settings",
-        "mobile.courseSettings.title": "Course settings",
+        "mobile.courseSettings.screenTitle": "Course settings",
         "mobile.courseSettings.loading": "Loading settings…",
         "mobile.courseSettings.accessDeniedTitle": "Settings unavailable",
         "mobile.courseSettings.accessDeniedMessage": "You do not have permission to edit this course.",
@@ -1838,5 +1776,67 @@
         "mobile.courseSettings.hero.saveLabel": "Save hero image",
         "mobile.courseSettings.hero.positionLabel": "Save hero position",
         "mobile.courseSettings.hero.savePosition": "Save position"
+    },
+    "plurals": {
+        "mobile.pendingSync.waiting": {
+            "one": "%d change waiting to upload",
+            "other": "%d changes waiting to upload"
+        },
+        "mobile.dashboard.dueThisWeek.count": {
+            "one": "%d assignment due this week",
+            "other": "%d assignments due this week"
+        },
+        "mobile.grading.submissionCount": {
+            "one": "%d submission waiting",
+            "other": "%d submissions waiting"
+        },
+        "mobile.planner.calendar.eventCount": {
+            "one": "%d event",
+            "other": "%d events"
+        },
+        "mobile.ia.teach.ungraded": {
+            "one": "%d ungraded",
+            "other": "%d ungraded"
+        },
+        "mobile.instructorInsights.snapshot.atRiskCount": {
+            "one": "%d student",
+            "other": "%d students"
+        },
+        "mobile.instructorInsights.snapshot.ungradedCount": {
+            "one": "%d item",
+            "other": "%d items"
+        },
+        "mobile.instructorInsights.snapshot.engagementCount": {
+            "one": "%d insight",
+            "other": "%d insights"
+        },
+        "mobile.instructorInsights.progress.missingCount": {
+            "one": "%d missing item",
+            "other": "%d missing items"
+        },
+        "mobile.review.dueCount": {
+            "one": "%d review due today",
+            "other": "%d reviews due today"
+        },
+        "mobile.insights.streak": {
+            "one": "%d-day study streak",
+            "other": "%d-day study streak"
+        },
+        "mobile.insights.streakAccessibility": {
+            "one": "%d-day study streak",
+            "other": "%d-day study streak"
+        },
+        "mobile.reading.streakDays": {
+            "one": "%d day",
+            "other": "%d days"
+        },
+        "mobile.review.streak": {
+            "one": "%d-day streak",
+            "other": "%d-day streak"
+        },
+        "mobile.review.summaryReviewed": {
+            "one": "You reviewed %d item",
+            "other": "You reviewed %d items"
+        }
     }
 }

@@ -27,7 +27,7 @@ final class CourseSettingsLogicTests: XCTestCase {
     func testValidateContentPageRequired() {
         let error = CourseSettingsLogic.validateGeneralForm(
             title: "Course",
-            courseHomeLanding: .content_page,
+            courseHomeLanding: .contentPage,
             courseHomeContentItemId: ""
         )
         XCTAssertNotNil(error?.courseHome)
@@ -36,8 +36,8 @@ final class CourseSettingsLogicTests: XCTestCase {
     func testIsoDurationRoundTrip() {
         let parts = CourseSettingsLogic.isoDurationToParts(iso: "P3M")
         XCTAssertEqual(parts.amount, "3")
-        XCTAssertEqual(parts.unit, .M)
-        XCTAssertEqual(CourseSettingsLogic.partsToIsoDuration(amount: "3", unit: .M), "P3M")
+        XCTAssertEqual(parts.unit, .months)
+        XCTAssertEqual(CourseSettingsLogic.partsToIsoDuration(amount: "3", unit: .months), "P3M")
     }
 
     func testHeroPositionFormatCenterIsNil() {

@@ -159,9 +159,9 @@ struct CourseHeroImageEditor: View {
                     .gesture(
                         DragGesture(minimumDistance: 0)
                             .onChanged { value in
-                                let x = min(100, max(0, value.location.x / geo.size.width * 100))
-                                let y = min(100, max(0, value.location.y / geo.size.height * 100))
-                                positionDraft = (x, y)
+                                let posX = min(100, max(0, value.location.x / geo.size.width * 100))
+                                let posY = min(100, max(0, value.location.y / geo.size.height * 100))
+                                positionDraft = (posX, posY)
                             }
                     )
                 }
