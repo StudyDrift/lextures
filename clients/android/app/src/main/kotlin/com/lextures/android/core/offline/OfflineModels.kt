@@ -58,6 +58,8 @@ object OfflineCacheKey {
     fun readingLog(): String = "reading:log"
     fun libraryBooks(orgId: String, gradeBand: String): String = "reading:library:$orgId:$gradeBand"
     fun credentialsList(): String = "credentials:list"
+    fun portfolioList(): String = "portfolio:list"
+    fun portfolioDetail(id: String): String = "portfolio:$id"
     fun gamificationProfile(): String = "gamification:profile"
     fun gamificationLeaderboard(courseCode: String): String = "gamification:leaderboard:$courseCode"
     fun advisingNotes(): String = "advising:notes"

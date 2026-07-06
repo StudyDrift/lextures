@@ -469,6 +469,7 @@ data class PlatformFeatures(
     val ffSelfPacedMode: Boolean? = null,
     val ffCourseReviews: Boolean? = null,
     val ffCompletionCredentials: Boolean? = null,
+    val ffEportfolio: Boolean? = null,
     val ffGamification: Boolean? = null,
     val ffStripeBilling: Boolean? = null,
     val ffPaymentsEnabled: Boolean? = null,
@@ -1136,6 +1137,21 @@ data class FilePreviewTarget(
             byteSize = null,
             source = CourseFileContentSource.DirectPath,
             sourceId = contentPath,
+        )
+
+        fun portfolioArtifact(
+            portfolioId: String,
+            artifactId: String,
+            fileName: String,
+            mimeType: String?,
+        ) = FilePreviewTarget(
+            courseCode = "portfolio",
+            displayName = fileName,
+            mimeType = mimeType,
+            byteSize = null,
+            source = CourseFileContentSource.DirectPath,
+            sourceId = "/api/v1/me/portfolios/${CourseFileLogic.encodePath(portfolioId)}" +
+                "/artifacts/${CourseFileLogic.encodePath(artifactId)}/content",
         )
     }
 }
