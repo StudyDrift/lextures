@@ -33,7 +33,10 @@ final class BehaviorLogicTests: XCTestCase {
     }
 
     func testHallPassCountdownUsesApprovedAt() {
-        let approved = ISO8601DateFormatter().string(from: Date().addingTimeInterval(-120))
+        let approved = "2026-07-06T12:00:00.000Z"
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let now = formatter.date(from: "2026-07-06T12:02:00.000Z")!
         let pass = HallPass(
             id: "p1",
             sectionId: "s1",
@@ -47,9 +50,9 @@ final class BehaviorLogicTests: XCTestCase {
             approvedBy: nil,
             overdue: false
         )
-        let countdown = BehaviorLogic.hallPassCountdown(pass: pass)
+        let countdown = BehaviorLogic.hallPassCountdown(pass: pass, now: now)
         XCTAssertNotNil(countdown)
-        XCTAssertTrue((countdown?.remainingSeconds ?? 0) <= 180)
+        XCTAssertEqual(countdown?.remainingSeconds, 180)
     }
 
     func testIsActiveHallPass() {

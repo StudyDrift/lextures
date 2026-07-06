@@ -119,7 +119,7 @@ final class MobileDestinationsTests: XCTestCase {
         XCTAssertEqual(split.overflow, [.live])
     }
 
-    fun testDeepLinkMapsToWorkspaceSection() {
+    func testDeepLinkMapsToWorkspaceSection() {
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .feed), .feed)
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .attendance), .attendance)
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .behavior), .behavior)
