@@ -19,14 +19,31 @@ jobs:
     defaults:
       run:
         working-directory: clients/ios
+    env:
+      DERIVED_DATA_PATH: ${{ github.workspace }}/.cache/DerivedData
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show Xcode version
-        run: xcodebuild -version
+      - name: Cache Xcode DerivedData
+        uses: actions/cache@v4
+        with:
+          path: .cache/DerivedData
+          key: xcode-deriveddata-${{ runner.os }}-${{ hashFiles('clients/ios/Lextures.xcodeproj/project.pbxproj', 'clients/ios/Lextures.xcodeproj/xcshareddata/**') }}
+          restore-keys: |
+            xcode-deriveddata-${{ runner.os }}-
+
+      - name: Cache SwiftLint
+        id: swiftlint-cache
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/swiftlint
+          key: swiftlint-${{ runner.os }}-0.58.2
 
       - name: Install SwiftLint
-        run: brew install swiftlint
+        if: steps.swiftlint-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL "https://github.com/realm/SwiftLint/releases/download/0.58.2/portable_swiftlint.zip" -o /tmp/swiftlint.zip
+          unzip -q -o /tmp/swiftlint.zip -d /usr/local/bin
 
       - name: Lint
         run: swiftlint lint --reporter github-actions-logging
@@ -36,17 +53,6 @@ jobs:
 
       - name: I18n artifacts
         run: ../../scripts/check-mobile-i18n.sh
-
-      - name: Build (simulator)
-        run: |
-          set -o pipefail
-          xcodebuild build \
-            -project Lextures.xcodeproj \
-            -scheme Lextures \
-            -destination 'generic/platform=iOS Simulator' \
-            -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO \
-            | xcpretty
 
       - name: Select iOS Simulator
         id: sim
@@ -61,15 +67,7 @@ jobs:
           xcrun simctl list devices available || true
           exit 1
 
-      - name: Boot iOS Simulator
-        run: |
-          set -euo pipefail
-          name="${{ steps.sim.outputs.name }}"
-          udid="$(xcrun simctl list devices available | grep -F "    $name (" | head -1 | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')"
-          xcrun simctl boot "$udid" 2>/dev/null || true
-          xcrun simctl bootstatus "$udid" -b
-
-      - name: Test
+      - name: Build and test
         run: |
           set -o pipefail
           log=/tmp/xcodebuild-test.log
@@ -78,8 +76,11 @@ jobs:
             -scheme Lextures \
             -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
             -configuration Debug \
+            -derivedDataPath "$DERIVED_DATA_PATH" \
             CODE_SIGNING_ALLOWED=NO \
-            2>&1 | tee "$log" | xcpretty
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            ONLY_ACTIVE_ARCH=YES \
+            2>&1 | tee "$log"
           code=${PIPESTATUS[0]}
           if [ "$code" -ne 0 ]; then
             grep -E 'Test Case .* failed|TEST FAILED|Executed .* failures' "$log" | tail -30 || true

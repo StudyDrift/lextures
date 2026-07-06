@@ -27,15 +27,10 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
+      - uses: gradle/actions/setup-gradle@v4
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('clients/android/**/*.gradle.kts', 'clients/android/gradle/libs.versions.toml', 'clients/android/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
+          build-root-directory: clients/android
+          cache-read-only: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork }}
 
       - name: Accessibility artifacts
         run: ../../scripts/check-mobile-a11y.sh
@@ -43,8 +38,8 @@ jobs:
       - name: I18n artifacts
         run: ../../scripts/check-mobile-i18n.sh
 
-      - name: Lint
-        run: ./gradlew lint --no-daemon
+      - name: Lint, test, and build
+        run: ./gradlew lint test assembleDebug --build-cache --parallel
 
       - name: Upload lint report
         uses: actions/upload-artifact@v4
@@ -53,9 +48,3 @@ jobs:
           name: android-lint-report
           path: clients/android/app/build/reports/lint-results-debug.html
           retention-days: 7
-
-      - name: Test
-        run: ./gradlew test --no-daemon
-
-      - name: Build (debug)
-        run: ./gradlew assembleDebug --no-daemon
