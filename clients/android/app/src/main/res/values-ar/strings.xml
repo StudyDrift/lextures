@@ -615,6 +615,7 @@
     <string name="mobile_ia_course_grading">Grading</string>
     <string name="mobile_ia_course_groups">Groups</string>
     <string name="mobile_ia_course_hallPass">Hall pass</string>
+    <string name="mobile_ia_course_insights">Insights</string>
     <string name="mobile_ia_course_library">Library</string>
     <string name="mobile_ia_course_live">Live</string>
     <string name="mobile_ia_course_mastery">Mastery</string>
@@ -694,6 +695,49 @@
     <string name="mobile_insights_title">Study insights</string>
     <string name="mobile_insights_weeklyGoal">Weekly study goal: %s hours</string>
     <string name="mobile_insights_weeklyGoalAccessibility">Weekly study goal hours</string>
+    <string name="mobile_instructorInsights_atRisk_empty">No active at-risk alerts</string>
+    <string name="mobile_instructorInsights_atRisk_emptyHint">When the system flags students, they will appear here.</string>
+    <string name="mobile_instructorInsights_atRisk_reason">Top signal: %1$s</string>
+    <string name="mobile_instructorInsights_atRisk_subtitle">See who may need help and why</string>
+    <string name="mobile_instructorInsights_atRisk_title">At-risk students</string>
+    <string name="mobile_instructorInsights_error_atRisk">Could not load at-risk alerts.</string>
+    <string name="mobile_instructorInsights_error_backlog">Could not load ungraded backlog.</string>
+    <string name="mobile_instructorInsights_error_insights">Could not load engagement insights.</string>
+    <string name="mobile_instructorInsights_error_progress">Could not load student progress.</string>
+    <string name="mobile_instructorInsights_message_action">Message student</string>
+    <string name="mobile_instructorInsights_message_body">Hi %1$s,
+
+I noticed %2$s in our course and wanted to check in. Let me know if you need help.
+</string>
+    <string name="mobile_instructorInsights_message_subject">Checking in — %1$s</string>
+    <string name="mobile_instructorInsights_predictedNotice">Risk scores are predicted from course signals — not a final determination.</string>
+    <string name="mobile_instructorInsights_progress_activityTitle">Recent activity</string>
+    <string name="mobile_instructorInsights_progress_assignments">Assignments submitted</string>
+    <string name="mobile_instructorInsights_progress_assignmentsTitle">Recent assignments</string>
+    <string name="mobile_instructorInsights_progress_avgGrade">Average grade</string>
+    <string name="mobile_instructorInsights_progress_checkIn">a check-in</string>
+    <string name="mobile_instructorInsights_progress_missingTitle">Missing work</string>
+    <string name="mobile_instructorInsights_progress_missingWork">missing work</string>
+    <string name="mobile_instructorInsights_progress_modules">Modules viewed</string>
+    <string name="mobile_instructorInsights_progress_summary">Progress summary</string>
+    <string name="mobile_instructorInsights_severity_accessibility">Predicted %1$s, score %2$d</string>
+    <string name="mobile_instructorInsights_severity_high">High risk</string>
+    <string name="mobile_instructorInsights_severity_label">%1$s (%2$d)</string>
+    <string name="mobile_instructorInsights_severity_moderate">Moderate risk</string>
+    <string name="mobile_instructorInsights_snapshot_atRisk">At-risk students</string>
+    <string name="mobile_instructorInsights_snapshot_engagement">Engagement highlights</string>
+    <string name="mobile_instructorInsights_snapshot_ungraded">Ungraded backlog</string>
+    <string name="mobile_instructorInsights_webReports">View full reports on web</string>
+    <string name="mobile_instructorInsights_webReportsHint">Best on a larger screen</string>
+    <string name="mobile_instructorInsights_whatsWorking_attention">Needs attention</string>
+    <string name="mobile_instructorInsights_whatsWorking_avgScore">Avg %1$s</string>
+    <string name="mobile_instructorInsights_whatsWorking_completion">Completion %1$s</string>
+    <string name="mobile_instructorInsights_whatsWorking_empty">No insights yet</string>
+    <string name="mobile_instructorInsights_whatsWorking_emptyHint">Insights appear after enough class activity is recorded.</string>
+    <string name="mobile_instructorInsights_whatsWorking_engagement">Engagement %1$d s</string>
+    <string name="mobile_instructorInsights_whatsWorking_subtitle">Engagement trends for this course</string>
+    <string name="mobile_instructorInsights_whatsWorking_title">What\'s working</string>
+    <string name="mobile_instructorInsights_whatsWorking_working">Working well</string>
     <string name="mobile_item_details">التفاصيل</string>
     <string name="mobile_item_quiz_questions">%1$d أسئلة</string>
     <string name="mobile_item_quiz_summary">نظرة سريعة على إعداد هذا الاختبار.</string>
@@ -1650,6 +1694,38 @@
         <item quantity="few">%1$d-day study streak</item>
         <item quantity="many">%1$d-day study streak</item>
         <item quantity="other">%1$d-day study streak</item>
+    </plurals>
+    <plurals name="mobile_instructorInsights_progress_missingCount">
+        <item quantity="zero">%1$d missing items</item>
+        <item quantity="one">%1$d missing item</item>
+        <item quantity="two">%1$d missing items</item>
+        <item quantity="few">%1$d missing items</item>
+        <item quantity="many">%1$d missing items</item>
+        <item quantity="other">%1$d missing items</item>
+    </plurals>
+    <plurals name="mobile_instructorInsights_snapshot_atRiskCount">
+        <item quantity="zero">%1$d students</item>
+        <item quantity="one">%1$d student</item>
+        <item quantity="two">%1$d students</item>
+        <item quantity="few">%1$d students</item>
+        <item quantity="many">%1$d students</item>
+        <item quantity="other">%1$d students</item>
+    </plurals>
+    <plurals name="mobile_instructorInsights_snapshot_engagementCount">
+        <item quantity="zero">%1$d insights</item>
+        <item quantity="one">%1$d insight</item>
+        <item quantity="two">%1$d insights</item>
+        <item quantity="few">%1$d insights</item>
+        <item quantity="many">%1$d insights</item>
+        <item quantity="other">%1$d insights</item>
+    </plurals>
+    <plurals name="mobile_instructorInsights_snapshot_ungradedCount">
+        <item quantity="zero">%1$d items</item>
+        <item quantity="one">%1$d item</item>
+        <item quantity="two">%1$d items</item>
+        <item quantity="few">%1$d items</item>
+        <item quantity="many">%1$d items</item>
+        <item quantity="other">%1$d items</item>
     </plurals>
     <plurals name="mobile_pendingSync_waiting">
         <item quantity="zero">%1$d تغييرات في انتظار الرفع</item>

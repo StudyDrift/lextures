@@ -128,6 +128,20 @@ struct CourseDetailView: View {
         .navigationDestination(for: GradingBacklogItem.self) { backlogItem in
             SubmissionsListView(course: course, backlogItem: backlogItem)
         }
+        .navigationDestination(for: InstructorInsightsRoute.self) { route in
+            switch route {
+            case .atRiskList:
+                AtRiskListView(course: course, features: shell.platformFeatures)
+            case .whatsWorking:
+                WhatsWorkingView(course: course, features: shell.platformFeatures)
+            case let .studentProgress(enrollmentId, displayName):
+                StudentProgressDetailView(
+                    course: course,
+                    enrollmentId: enrollmentId,
+                    displayName: displayName
+                )
+            }
+        }
         .navigationDestination(item: $linkedItem) { item in
             ModuleItemRouteView(course: course, item: item, onProgressChanged: refreshProgress)
         }
@@ -203,6 +217,8 @@ struct CourseDetailView: View {
             )
         case .grading:
             GradingBacklogSection(course: course)
+        case .instructorInsights:
+            CourseInsightsSection(course: course)
         case .library:
             CourseLibraryView(course: course, items: items, onSelectItem: { linkedItem = $0 })
         case .discussions:

@@ -36,6 +36,10 @@ object OfflineCacheKey {
     fun feedMessages(courseCode: String, channelId: String): String =
         "course:$courseCode:feed-messages:$channelId"
     fun courseEnrollments(courseCode: String): String = "course:$courseCode:enrollments"
+    fun courseAtRisk(courseCode: String): String = "course:$courseCode:at-risk"
+    fun courseInstructorInsights(courseCode: String): String = "course:$courseCode:instructor-insights"
+    fun studentProgress(courseCode: String, enrollmentId: String): String =
+        "course:$courseCode:student-progress:$enrollmentId"
     fun myGroups(courseCode: String): String = "course:$courseCode:my-groups"
     fun groupFeedChannels(courseCode: String, groupId: String): String =
         "course:$courseCode:group:$groupId:feed-channels"

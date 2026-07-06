@@ -87,6 +87,7 @@ private fun sectionLabel(
         CourseWorkspaceSection.Groups -> R.string.mobile_ia_course_groups
         CourseWorkspaceSection.CollabDocs -> R.string.mobile_ia_course_collabDocs
         CourseWorkspaceSection.Grading -> R.string.mobile_ia_course_grading
+        CourseWorkspaceSection.InstructorInsights -> R.string.mobile_ia_course_insights
         CourseWorkspaceSection.Behavior -> R.string.mobile_ia_course_behavior
         CourseWorkspaceSection.HallPass -> R.string.mobile_ia_course_hallPass
     }

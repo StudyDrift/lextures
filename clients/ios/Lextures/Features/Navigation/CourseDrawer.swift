@@ -88,6 +88,7 @@ func courseSectionIcon(_ section: CourseWorkspaceSection) -> String {
     case .mastery: return "chart.bar"
     case .people: return "person.2"
     case .grading: return "checkmark.rectangle.stack"
+    case .instructorInsights: return "chart.bar.doc.horizontal"
     case .attendance: return "calendar.badge.checkmark"
     case .evaluations: return "star.bubble"
     case .groups: return "person.3"
