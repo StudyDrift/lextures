@@ -62,6 +62,7 @@
 		F84106555B304E7B8F45ED06 /* LMSAPIEvaluations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F34631010A44663A56670A0 /* LMSAPIEvaluations.swift */; };
 		F92D5747CBCA4C83AA82872B /* LMSAPIFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5600EDE053C4E7E99E854F4 /* LMSAPIFeatures.swift */; };
 		3AE85242D6C345D48DD769B0 /* LMSAPIFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86809022FC3D419C81004C9A /* LMSAPIFeed.swift */; };
+		F5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift */; };
 		32D61C5FD68E4BA49ADC9C32 /* LMSAPIGamification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C083220C1AD046F498269C66 /* LMSAPIGamification.swift */; };
 		DBB5B1920D86401496C5079A /* LMSAPIGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C91F089DDA4F10901AC904 /* LMSAPIGroups.swift */; };
 		8BE81F542EB6436E82CF15FD /* LMSAPIInsights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838E560A28D840B6B48B4023 /* LMSAPIInsights.swift */; };
@@ -434,6 +435,7 @@
 		9F34631010A44663A56670A0 /* LMSAPIEvaluations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIEvaluations.swift; sourceTree = "<group>"; };
 		A5600EDE053C4E7E99E854F4 /* LMSAPIFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIFeatures.swift; sourceTree = "<group>"; };
 		86809022FC3D419C81004C9A /* LMSAPIFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIFeed.swift; sourceTree = "<group>"; };
+		E5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIAnnouncements.swift; sourceTree = "<group>"; };
 		C083220C1AD046F498269C66 /* LMSAPIGamification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIGamification.swift; sourceTree = "<group>"; };
 		B3C91F089DDA4F10901AC904 /* LMSAPIGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIGroups.swift; sourceTree = "<group>"; };
 		838E560A28D840B6B48B4023 /* LMSAPIInsights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIInsights.swift; sourceTree = "<group>"; };
@@ -1009,6 +1011,7 @@
 				9F34631010A44663A56670A0 /* LMSAPIEvaluations.swift */,
 				A5600EDE053C4E7E99E854F4 /* LMSAPIFeatures.swift */,
 				86809022FC3D419C81004C9A /* LMSAPIFeed.swift */,
+				E5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift */,
 				C083220C1AD046F498269C66 /* LMSAPIGamification.swift */,
 				B3C91F089DDA4F10901AC904 /* LMSAPIGroups.swift */,
 				838E560A28D840B6B48B4023 /* LMSAPIInsights.swift */,
@@ -1817,6 +1820,7 @@
 				F84106555B304E7B8F45ED06 /* LMSAPIEvaluations.swift in Sources */,
 				F92D5747CBCA4C83AA82872B /* LMSAPIFeatures.swift in Sources */,
 				3AE85242D6C345D48DD769B0 /* LMSAPIFeed.swift in Sources */,
+				F5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift in Sources */,
 				32D61C5FD68E4BA49ADC9C32 /* LMSAPIGamification.swift in Sources */,
 				DBB5B1920D86401496C5079A /* LMSAPIGroups.swift in Sources */,
 				8BE81F542EB6436E82CF15FD /* LMSAPIInsights.swift in Sources */,
