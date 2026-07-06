@@ -202,7 +202,7 @@ class UIModeStore(context: android.content.Context) {
         this.featureEnabled = featureEnabled
     }
 
-    fun setLocalPreference(preference: UIModePreference) {
+    fun updateLocalPreference(preference: UIModePreference) {
         localPreference = preference
         prefs.edit().putString(KEY_PREFERENCE, preference.name).apply()
     }

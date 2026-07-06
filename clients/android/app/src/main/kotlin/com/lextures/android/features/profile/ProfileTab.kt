@@ -848,7 +848,7 @@ fun ProfileTab(
                                 text = { Text(L.text(option.labelRes)) },
                                 onClick = {
                                     expanded = false
-                                    uiModeStore.setLocalPreference(option)
+                                    uiModeStore.updateLocalPreference(option)
                                 },
                             )
                         }
