@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/lextures/lextures/clients/cli/internal/auth"
+	"github.com/lextures/lextures/clients/cli/internal/client"
 	"github.com/lextures/lextures/clients/cli/internal/config"
 	"github.com/spf13/cobra"
 )
@@ -64,6 +65,7 @@ file values.`,
 			return err
 		}
 		Cfg = cfg
+		client.DefaultUserAgent = "lextures-cli/" + Version
 
 		if commandNeedsAuth(cmd) && Cfg.APIKey == "" {
 			mgr := auth.New(Cfg.Server)

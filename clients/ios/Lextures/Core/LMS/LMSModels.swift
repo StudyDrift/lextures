@@ -7,8 +7,20 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var title: String
     var description: String
     var heroImageUrl: String?
+    var heroImageObjectPosition: String?
     var startsAt: String?
     var endsAt: String?
+    var visibleFrom: String?
+    var hiddenAt: String?
+    var scheduleMode: String?
+    var relativeEndAfter: String?
+    var relativeHiddenAfter: String?
+    var courseHomeLanding: String?
+    var courseHomeContentItemId: String?
+    var courseTimezone: String?
+    var gradeLevel: String?
+    var markdownThemePreset: String?
+    var markdownThemeCustom: MarkdownThemeCustom?
     var published: Bool?
     var catalogNickname: String?
     var catalogPinned: Bool?

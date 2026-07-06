@@ -65,6 +65,7 @@ import com.lextures.android.core.i18n.LocalLocalePreferences
 import com.lextures.android.core.lms.AccountProfile
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.MeProfile
+import com.lextures.android.core.lms.WalletLogic
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.design.UIMode
 import com.lextures.android.core.design.UIModeStore
@@ -151,6 +152,7 @@ class HomeShellState {
 
     /** Courses the user pinned on web/mobile — surfaced in the global drawer. */
     var pinnedCourses by mutableStateOf<List<CourseSummary>>(emptyList())
+    var permissions by mutableStateOf<List<String>>(emptyList())
 
     /** Active root-pane push (outgoing screen + whether progress tracks drawer close). */
     var rootNavigationTransition by mutableStateOf<RootNavigationTransition?>(null)
@@ -238,7 +240,11 @@ class HomeShellState {
                     RootDestination.Profile
                 }
                 DeepLinkDestination.Credentials -> {
-                    pendingMoreDestination = com.lextures.android.core.navigation.MoreDestination.Credentials
+                    pendingMoreDestination = if (WalletLogic.walletEnabled(platformFeatures)) {
+                        com.lextures.android.core.navigation.MoreDestination.Wallet
+                    } else {
+                        com.lextures.android.core.navigation.MoreDestination.Credentials
+                    }
                     RootDestination.Profile
                 }
                 is DeepLinkDestination.CheckoutSuccess -> {
@@ -401,6 +407,7 @@ class HomeShellState {
         pinnedCourses = courses.filter { it.isPinned }
         val permissions = runCatching { LmsApi.fetchMyPermissions(token) }.getOrDefault(emptyList())
         roleSnapshot = MobileDestinations.buildRoleSnapshot(permissions, courses)
+        this.permissions = permissions
         activeRoleContext = roleSnapshot.resolvedContext(MobileIaPreferences.loadRoleContext(androidContext))
         uiModeStore?.effectiveMode(activeRoleContext)
     }

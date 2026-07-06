@@ -117,4 +117,4 @@ LTI 1.3 tool registration, deployment configuration, and developer API keys are 
 ## 19. References
 
 - `registerLTIHTTPRoutes`, `saml_lti.go`, developer-key handlers.
-- Related: [C05](C05-content-extras.md), [C25](C25-integrations-webhooks-bots.md).
+- Related: [C05](../completed/cli/C05-content-extras.md), [C25](C25-integrations-webhooks-bots.md).

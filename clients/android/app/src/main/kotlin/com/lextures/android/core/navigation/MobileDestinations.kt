@@ -2,6 +2,7 @@ package com.lextures.android.core.navigation
 
 import com.lextures.android.core.design.UIMode
 import com.lextures.android.core.lms.AdvisingLogic
+import com.lextures.android.core.lms.CourseSettingsLogic
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.EvaluationLogic
 import com.lextures.android.core.lms.EvaluationStatus
@@ -9,6 +10,7 @@ import com.lextures.android.core.lms.ImmersiveReaderCapabilities
 import com.lextures.android.core.lms.InstructorInsightsLogic
 import com.lextures.android.core.lms.PlatformFeatures
 import com.lextures.android.core.lms.TutorLogic
+import com.lextures.android.core.lms.WalletLogic
 import com.lextures.android.core.lms.isOfficeHoursEnabled
 import com.lextures.android.core.routing.CourseDeepLinkSection
 
@@ -86,6 +88,7 @@ enum class MoreDestination(val labelRes: String) {
     Reading("mobile_ia_more_reading"),
     Portfolio("mobile_ia_more_portfolio"),
     Credentials("mobile_ia_more_credentials"),
+    Wallet("mobile_ia_more_wallet"),
     Gamification("mobile_ia_more_gamification"),
     Advising("mobile_ia_more_advising"),
     Settings("mobile_ia_more_settings"),
@@ -114,6 +117,7 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
     CollabDocs("mobile_ia_course_collabDocs", "collab-docs"),
     Grading("mobile_ia_course_grading", "grading"),
     InstructorInsights("mobile_ia_course_insights", "insights"),
+    Settings("mobile_ia_course_settings", "settings"),
     Behavior("mobile_ia_course_behavior", "behavior"),
     HallPass("mobile_ia_course_hallPass", "hall-pass"),
     ;
@@ -197,6 +201,9 @@ data class MobilePlatformFeatures(
     val ffSelfPacedMode: Boolean = false,
     val ffCourseReviews: Boolean = false,
     val ffCompletionCredentials: Boolean = false,
+    val ffCoCurricularTranscript: Boolean = false,
+    val ffTranscripts: Boolean = false,
+    val ffCeuTracking: Boolean = false,
     val ffEportfolio: Boolean = false,
     val ffGamification: Boolean = false,
     val ffStripeBilling: Boolean = false,
@@ -213,6 +220,10 @@ data class MobilePlatformFeatures(
     val instructorInsightsEnabled: Boolean = false,
     val studentProgressEnabled: Boolean = true,
     val ffMobileInstructorInsights: Boolean = true,
+    val ffMobileCourseSettings: Boolean = false,
+    val graderAgentEnabled: Boolean = false,
+    val ffPlagiarismChecks: Boolean = false,
+    val altTextEnforcementEnabled: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -265,6 +276,9 @@ data class MobilePlatformFeatures(
             ffSelfPacedMode = features?.ffSelfPacedMode == true,
             ffCourseReviews = features?.ffCourseReviews == true,
             ffCompletionCredentials = features?.ffCompletionCredentials == true,
+            ffCoCurricularTranscript = features?.ffCoCurricularTranscript == true,
+            ffTranscripts = features?.ffTranscripts == true,
+            ffCeuTracking = features?.ffCeuTracking == true,
             ffEportfolio = features?.ffEportfolio == true,
             ffGamification = features?.ffGamification == true,
             ffStripeBilling = features?.ffStripeBilling == true,
@@ -281,12 +295,17 @@ data class MobilePlatformFeatures(
             instructorInsightsEnabled = features?.instructorInsightsEnabled == true,
             studentProgressEnabled = features?.studentProgressEnabled != false,
             ffMobileInstructorInsights = features?.ffMobileInstructorInsights != false,
+            ffMobileCourseSettings = features?.ffMobileCourseSettings == true,
+            graderAgentEnabled = features?.graderAgentEnabled == true,
+            ffPlagiarismChecks = features?.ffPlagiarismChecks == true,
+            altTextEnforcementEnabled = features?.altTextEnforcementEnabled == true,
         )
     }
 }
 
 data class CourseWorkspaceContext(
     val course: CourseSummary,
+    val permissions: List<String> = emptyList(),
     val hasAttendanceSessions: Boolean = false,
     val hasLibraryResources: Boolean = false,
     val evaluationStatus: EvaluationStatus? = null,
@@ -379,6 +398,7 @@ object MobileDestinations {
                 listOf(
                     CourseWorkspaceSection.Grading,
                     CourseWorkspaceSection.InstructorInsights,
+                    CourseWorkspaceSection.Settings,
                     CourseWorkspaceSection.Attendance,
                     CourseWorkspaceSection.Evaluations,
                     CourseWorkspaceSection.Behavior,
@@ -439,7 +459,11 @@ object MobileDestinations {
                 if (platform.ffLibrary) add(MoreDestination.Reading)
                 if (platform.libraryBrowseEnabled) add(MoreDestination.Library)
                 if (platform.ffEportfolio) add(MoreDestination.Portfolio)
-                if (platform.ffCompletionCredentials) add(MoreDestination.Credentials)
+                if (WalletLogic.walletEnabled(platform)) {
+                    add(MoreDestination.Wallet)
+                } else if (platform.ffCompletionCredentials) {
+                    add(MoreDestination.Credentials)
+                }
                 if (platform.ffGamification) add(MoreDestination.Gamification)
                 if (AdvisingLogic.advisingEnabled(platform)) add(MoreDestination.Advising)
                 add(MoreDestination.Settings)
@@ -483,6 +507,9 @@ object MobileDestinations {
         }
         if (InstructorInsightsLogic.shouldShowWorkspaceSection(ctx.course, ctx.platformFeatures)) {
             add(CourseWorkspaceSection.InstructorInsights)
+        }
+        if (CourseSettingsLogic.shouldShowWorkspaceSection(ctx.course, ctx.permissions, ctx.platformFeatures)) {
+            add(CourseWorkspaceSection.Settings)
         }
         if (ctx.platformFeatures.ffClassroomSignals && ctx.course.viewerIsStaff) {
             add(CourseWorkspaceSection.Behavior)

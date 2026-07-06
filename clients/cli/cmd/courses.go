@@ -18,19 +18,26 @@ import (
 
 // coursePublic mirrors the server's CoursePublic struct for JSON decoding.
 type coursePublic struct {
-	ID         string     `json:"id"`
-	CourseCode string     `json:"courseCode"`
-	Title      string     `json:"title"`
-	Published  bool       `json:"published"`
-	Archived   bool       `json:"archived"`
-	CourseType string     `json:"courseType"`
-	CreatedAt  time.Time  `json:"createdAt"`
-	UpdatedAt  time.Time  `json:"updatedAt"`
-	StartsAt   *time.Time `json:"startsAt"`
-	EndsAt     *time.Time `json:"endsAt"`
-	OrgID      *string    `json:"orgId"`
-	OrgUnitID  *string    `json:"orgUnitId"`
-	TermID     *string    `json:"termId"`
+	ID                  string     `json:"id"`
+	CourseCode          string     `json:"courseCode"`
+	Title               string     `json:"title"`
+	Description         string     `json:"description"`
+	Published           bool       `json:"published"`
+	Archived            bool       `json:"archived"`
+	CourseType          string     `json:"courseType"`
+	ScheduleMode        string     `json:"scheduleMode"`
+	CreatedAt           time.Time  `json:"createdAt"`
+	UpdatedAt           time.Time  `json:"updatedAt"`
+	StartsAt            *time.Time `json:"startsAt"`
+	EndsAt              *time.Time `json:"endsAt"`
+	VisibleFrom         *time.Time `json:"visibleFrom"`
+	HiddenAt            *time.Time `json:"hiddenAt"`
+	RelativeEndAfter    *string    `json:"relativeEndAfter"`
+	RelativeHiddenAfter *string    `json:"relativeHiddenAfter"`
+	OrgID               *string    `json:"orgId"`
+	OrgUnitID           *string    `json:"orgUnitId"`
+	TermID              *string    `json:"termId"`
+	IsBlueprint         bool       `json:"isBlueprint"`
 }
 
 type coursesListBody struct {
@@ -335,19 +342,24 @@ func runCoursesDelete(cmd *cobra.Command, args []string) error {
 // The caller should exit with the given code for API errors.
 func apiError(resp *http.Response, _ int) error {
 	body, _ := io.ReadAll(resp.Body)
+	return apiErrorBody(resp.StatusCode, body)
+}
+
+// apiErrorBody formats an API error from an already-read response body.
+func apiErrorBody(status int, body []byte) error {
 	var apiResp struct {
 		Message string `json:"message"`
 		Error   string `json:"error"`
 	}
 	if json.Unmarshal(body, &apiResp) == nil {
 		if apiResp.Message != "" {
-			return fmt.Errorf("server error (%d): %s", resp.StatusCode, apiResp.Message)
+			return fmt.Errorf("server error (%d): %s", status, apiResp.Message)
 		}
 		if apiResp.Error != "" {
-			return fmt.Errorf("server error (%d): %s", resp.StatusCode, apiResp.Error)
+			return fmt.Errorf("server error (%d): %s", status, apiResp.Error)
 		}
 	}
-	return fmt.Errorf("server error (%d)", resp.StatusCode)
+	return fmt.Errorf("server error (%d)", status)
 }
 
 // doWithRetry executes req, retrying once with exponential backoff on network errors.

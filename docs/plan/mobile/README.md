@@ -156,7 +156,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M10.4 Age-appropriate UI mode](../completed/mobile/M10.4-age-appropriate-ui.md) | 13.11 age-appropriate UI | **DONE** |
 | [M11.2 Post announcement / broadcast](../completed/mobile/M11.2-instructor-announce.md) | 13.10 broadcast, announcements compose | **Done** |
 | [M12.1 e-Portfolio & artifacts](M12.1-eportfolio.md) | 14.12 e-portfolio, portfolios pages | **P2** |
-| [M12.2 Credentials wallet & transcripts](M12.2-credentials-transcripts.md) | 14.13 CCR, transcripts, 15.6 LinkedIn share | **P2** |
+| [M12.2 Credentials wallet & transcripts](../completed/mobile/M12.2-credentials-transcripts.md) | 14.13 CCR, transcripts, 15.6 LinkedIn share | **Done** |
 
 ### Newly identified gap stories (2026-06-30 parity scan)
 
@@ -204,7 +204,7 @@ link-out to web for credential entry and deep authoring**, consistent with the d
 
 | Story | Web source (settings tab) | Disposition |
 |---|---|---|
-| [M13.1 Settings shell + General](./M13.1-course-settings-general.md) | `general` (basics, home, schedule, visibility, hero, theme, tz, publish) | **P1** (keystone) |
+| [M13.1 Settings shell + General](../completed/mobile/M13.1-course-settings-general.md) | `general` (basics, home, schedule, visibility, hero, theme, tz, publish) | **P1** (keystone) ✅ |
 | [M13.2 Features, tools & caption policy](./M13.2-course-features-tools.md) | `features` (+ caption policy, consortium) | **P1** |
 | [M13.3 Sections & cross-listing](./M13.3-course-sections-cross-listing.md) | `sections` (flag) | **P1** |
 | [M13.4 Grading settings](./M13.4-course-grading-settings.md) | `grading` (scale, weighted groups) | **P1** |
@@ -232,7 +232,7 @@ link-out to web for credential entry and deep authoring**, consistent with the d
 | [M14.9 Transcripts & advising config](./M14.9-transcripts-advising-config.md) | `transcripts`/`advising` (flags) | `rbac:manage` | **P2** |
 | [M14.10 Global archived courses](./M14.10-global-archived-courses.md) | `archive` | `rbac:manage` | **P2** |
 
-> **Sequencing note.** [M13.1](./M13.1-course-settings-general.md) is the keystone for M13 — it
+> **Sequencing note.** [M13.1](../completed/mobile/M13.1-course-settings-general.md) is the keystone for M13 — it
 > lands the course-settings shell (drawer entry, permission gate, save/unsaved-changes scaffold,
 > flag-aware section list) that M13.2–M13.12 plug into. For M14,
 > [M14.1](./M14.1-account-integrations-api-access.md) (user-facing) ships first; the admin views

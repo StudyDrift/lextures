@@ -1,5 +1,6 @@
 import { useId, useLayoutEffect, useRef, type RefObject } from 'react'
 import { Search, X } from 'lucide-react'
+import { CanvasAccessTokenSettingsLink } from '../../components/canvas/canvas-access-token-settings-link'
 import { CanvasImportProgressLog } from '../../components/canvas/canvas-import-progress-log'
 import { CanvasReadOnlyNotice } from '../../components/canvas/canvas-read-only-notice'
 import type { CanvasImportProgressEntry } from '../../hooks/use-canvas-import-progress-log'
@@ -235,6 +236,7 @@ export function CanvasImportCoursesPanel({
                 disabled={busy}
                 className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
               />
+              <CanvasAccessTokenSettingsLink canvasBaseUrl={canvasBaseUrl} className="mt-1.5" />
             </label>
             <label className="block">
               <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">

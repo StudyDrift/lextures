@@ -13,6 +13,7 @@ import { RunAgentPopover } from './run-agent-popover'
 import { ReviewInboxPanel } from './review-inbox-panel'
 import { RunHistoryPanel } from './run-history-panel'
 import { useGraderAgentReviewQueue } from './use-grader-agent-review-queue'
+import { ImportWorkflowMenu } from './import-workflow-menu'
 import { SaveWorkflowMenu } from './save-workflow-menu'
 import { useGraderAgentSubmissions } from './use-grader-agent-submissions'
 import {
@@ -141,6 +142,7 @@ export function GraderAgentWorkflowModal({
     statusMessage,
     handleDryRun,
     handleSave,
+    handleImportWorkflow,
     handleSaveAsTemplate,
     handleAccept,
     handleRun,
@@ -303,6 +305,13 @@ export function GraderAgentWorkflowModal({
               ) : null}
             </div>
           ) : null}
+          <ImportWorkflowMenu
+            courseCode={courseCode}
+            itemId={itemId}
+            itemKind={itemKind}
+            disabled={saving}
+            onImport={handleImportWorkflow}
+          />
           {isTemplateMode ? (
             <ActionErrorTooltip message={!runnable ? validationMsg : null}>
               <button

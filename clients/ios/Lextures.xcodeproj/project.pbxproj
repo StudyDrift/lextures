@@ -394,6 +394,22 @@
 		9047BDDDBD0048988CA1D917 /* VibeActivityLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16DC822F68EE4EBDA2413883 /* VibeActivityLogicTests.swift */; };
 		3A832D48E8E740929415B924 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CCD56D4FF877440CAB72BF79 /* Assets.xcassets */; };
 		E0EC17294CA448D6B5D3975A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2F9AE2BECCC24C5C9BBC9CFC /* Localizable.xcstrings */; };
+		8B701C2D3E4F5061728394 /* WalletLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B701D3E4F5061728394A5 /* WalletLogic.swift */; };
+		8B702C2D3E4F5061728394 /* LMSFeatureModelsWallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B702D3E4F5061728394A5 /* LMSFeatureModelsWallet.swift */; };
+		8B703C2D3E4F5061728394 /* LMSAPIWallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B703D3E4F5061728394A5 /* LMSAPIWallet.swift */; };
+		8B704C2D3E4F5061728394 /* WalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B704D3E4F5061728394A5 /* WalletView.swift */; };
+		8B705C2D3E4F5061728394 /* WalletCCRDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B705D3E4F5061728394A5 /* WalletCCRDetailView.swift */; };
+		8B706C2D3E4F5061728394 /* WalletCETranscriptDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B706D3E4F5061728394A5 /* WalletCETranscriptDetailView.swift */; };
+		8B707C2D3E4F5061728394 /* WalletOfficialTranscriptDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B707D3E4F5061728394A5 /* WalletOfficialTranscriptDetailView.swift */; };
+		8B708C2D3E4F5061728394 /* WalletLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B708D3E4F5061728394A5 /* WalletLogicTests.swift */; };
+		8B801C2D3E4F5061728394 /* CourseSettingsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B801D3E4F5061728394A5 /* CourseSettingsLogic.swift */; };
+		8B802C2D3E4F5061728394 /* LMSFeatureModelsCourseSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B802D3E4F5061728394A5 /* LMSFeatureModelsCourseSettings.swift */; };
+		8B803C2D3E4F5061728394 /* LMSAPICourseSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B803D3E4F5061728394A5 /* LMSAPICourseSettings.swift */; };
+		8B804C2D3E4F5061728394 /* UnsavedChangesBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B804D3E4F5061728394A5 /* UnsavedChangesBanner.swift */; };
+		8B805C2D3E4F5061728394 /* CourseSettingsHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B805D3E4F5061728394A5 /* CourseSettingsHostView.swift */; };
+		8B806C2D3E4F5061728394 /* CourseGeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B806D3E4F5061728394A5 /* CourseGeneralSettingsView.swift */; };
+		8B807C2D3E4F5061728394 /* CourseHeroImageEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B807D3E4F5061728394A5 /* CourseHeroImageEditor.swift */; };
+		8B808C2D3E4F5061728394 /* CourseSettingsLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B808D3E4F5061728394A5 /* CourseSettingsLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -788,6 +804,22 @@
 		2F9AE2BECCC24C5C9BBC9CFC /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		B6BB04B4DDA847BA9262CB91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E28125E44C46198024C855 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
+		8B701D3E4F5061728394A5 /* WalletLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletLogic.swift; sourceTree = "<group>"; };
+		8B702D3E4F5061728394A5 /* LMSFeatureModelsWallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsWallet.swift; sourceTree = "<group>"; };
+		8B703D3E4F5061728394A5 /* LMSAPIWallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIWallet.swift; sourceTree = "<group>"; };
+		8B704D3E4F5061728394A5 /* WalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletView.swift; sourceTree = "<group>"; };
+		8B705D3E4F5061728394A5 /* WalletCCRDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletCCRDetailView.swift; sourceTree = "<group>"; };
+		8B706D3E4F5061728394A5 /* WalletCETranscriptDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletCETranscriptDetailView.swift; sourceTree = "<group>"; };
+		8B707D3E4F5061728394A5 /* WalletOfficialTranscriptDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletOfficialTranscriptDetailView.swift; sourceTree = "<group>"; };
+		8B708D3E4F5061728394A5 /* WalletLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletLogicTests.swift; sourceTree = "<group>"; };
+		8B801D3E4F5061728394A5 /* CourseSettingsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSettingsLogic.swift; sourceTree = "<group>"; };
+		8B802D3E4F5061728394A5 /* LMSFeatureModelsCourseSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsCourseSettings.swift; sourceTree = "<group>"; };
+		8B803D3E4F5061728394A5 /* LMSAPICourseSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICourseSettings.swift; sourceTree = "<group>"; };
+		8B804D3E4F5061728394A5 /* UnsavedChangesBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnsavedChangesBanner.swift; sourceTree = "<group>"; };
+		8B805D3E4F5061728394A5 /* CourseSettingsHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSettingsHostView.swift; sourceTree = "<group>"; };
+		8B806D3E4F5061728394A5 /* CourseGeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseGeneralSettingsView.swift; sourceTree = "<group>"; };
+		8B807D3E4F5061728394A5 /* CourseHeroImageEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseHeroImageEditor.swift; sourceTree = "<group>"; };
+		8B808D3E4F5061728394A5 /* CourseSettingsLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSettingsLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -815,6 +847,8 @@
 		FB04F8A19314441A8AB2F273 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B808D3E4F5061728394A5 /* CourseSettingsLogicTests.swift */,
+				8B708D3E4F5061728394A5 /* WalletLogicTests.swift */,
 				E93E288F6AC04215953E9DE2 /* AccessibilitySupportTests.swift */,
 				B764DEC6B7D84D1489AB0068 /* AdvisingLogicTests.swift */,
 				60B9996E09C04DE4898B88F7 /* AnnouncementLogicTests.swift */,
@@ -902,6 +936,7 @@
 		88F34DDD6A74453E9D9C0FAA /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B70WALL5C6D7E8F901234567 /* Wallet */,
 				0A4E5608CA39450BB372BF7E /* Advising */,
 				25B048F84D4647EFA67B6FD0 /* Assignments */,
 				C4FE938468254D58ADFC45C2 /* Auth */,
@@ -993,6 +1028,7 @@
 		551D819CB69643C594BC15DC /* Design */ = {
 			isa = PBXGroup;
 			children = (
+				8B804D3E4F5061728394A5 /* UnsavedChangesBanner.swift */,
 				5D8FB9C6E37349C99318D53C /* AuthFieldRepresentable.swift */,
 				1CFBC51E4D2E4EDAB1690F34 /* BrandLogoView.swift */,
 				C5F1A8F1682C4944841958BE /* LexturesTheme.swift */,
@@ -1019,6 +1055,12 @@
 		0192C31B7A97444D9236A8A1 /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B803D3E4F5061728394A5 /* LMSAPICourseSettings.swift */,
+				8B802D3E4F5061728394A5 /* LMSFeatureModelsCourseSettings.swift */,
+				8B801D3E4F5061728394A5 /* CourseSettingsLogic.swift */,
+				8B703D3E4F5061728394A5 /* LMSAPIWallet.swift */,
+				8B702D3E4F5061728394A5 /* LMSFeatureModelsWallet.swift */,
+				8B701D3E4F5061728394A5 /* WalletLogic.swift */,
 				9F1D64524C1346B492F7060A /* AccountAccommodationModels.swift */,
 				8B9DAB24E88B4519B6364A46 /* AdvisingLogic.swift */,
 				A77DF575EBAB446A9CFC591B /* AnnouncementLogic.swift */,
@@ -1275,6 +1317,7 @@
 		FD10AEF33AA94E6FB2220EF0 /* Courses */ = {
 			isa = PBXGroup;
 			children = (
+				8B80SETT5C6D7E8F901234567 /* Settings */,
 				6DAF70A3230A46C5983DA051 /* ContentPageView.swift */,
 				919FF2B642F8411A9D3A594E /* CourseAttendanceView.swift */,
 				4616A5DED2244765AD7C1785 /* CourseBanner.swift */,
@@ -1702,6 +1745,29 @@
 			);
 			sourceTree = "<group>";
 		};
+
+		8B70WALL5C6D7E8F901234567 /* Wallet */ = {
+			isa = PBXGroup;
+			children = (
+				8B704D3E4F5061728394A5 /* WalletView.swift */,
+				8B705D3E4F5061728394A5 /* WalletCCRDetailView.swift */,
+				8B706D3E4F5061728394A5 /* WalletCETranscriptDetailView.swift */,
+				8B707D3E4F5061728394A5 /* WalletOfficialTranscriptDetailView.swift */,
+			);
+			path = Wallet;
+			sourceTree = "<group>";
+		};
+
+		8B80SETT5C6D7E8F901234567 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				8B805D3E4F5061728394A5 /* CourseSettingsHostView.swift */,
+				8B806D3E4F5061728394A5 /* CourseGeneralSettingsView.swift */,
+				8B807D3E4F5061728394A5 /* CourseHeroImageEditor.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1809,6 +1875,20 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				8B807C2D3E4F5061728394 /* CourseHeroImageEditor.swift in Sources */,
+				8B806C2D3E4F5061728394 /* CourseGeneralSettingsView.swift in Sources */,
+				8B805C2D3E4F5061728394 /* CourseSettingsHostView.swift in Sources */,
+				8B804C2D3E4F5061728394 /* UnsavedChangesBanner.swift in Sources */,
+				8B803C2D3E4F5061728394 /* LMSAPICourseSettings.swift in Sources */,
+				8B802C2D3E4F5061728394 /* LMSFeatureModelsCourseSettings.swift in Sources */,
+				8B801C2D3E4F5061728394 /* CourseSettingsLogic.swift in Sources */,
+				8B707C2D3E4F5061728394 /* WalletOfficialTranscriptDetailView.swift in Sources */,
+				8B706C2D3E4F5061728394 /* WalletCETranscriptDetailView.swift in Sources */,
+				8B705C2D3E4F5061728394 /* WalletCCRDetailView.swift in Sources */,
+				8B704C2D3E4F5061728394 /* WalletView.swift in Sources */,
+				8B703C2D3E4F5061728394 /* LMSAPIWallet.swift in Sources */,
+				8B702C2D3E4F5061728394 /* LMSFeatureModelsWallet.swift in Sources */,
+				8B701C2D3E4F5061728394 /* WalletLogic.swift in Sources */,
 				A912F9BD7CE942ECAB4B7C77 /* AppDelegate.swift in Sources */,
 				BA8350E4A24E485CB539839B /* LexturesApp.swift in Sources */,
 				5F5E77EA2A6B4CDBB8716415 /* RootView.swift in Sources */,
@@ -2155,6 +2235,8 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				8B808C2D3E4F5061728394 /* CourseSettingsLogicTests.swift in Sources */,
+				8B708C2D3E4F5061728394 /* WalletLogicTests.swift in Sources */,
 				685981A3C36648D1A4175DDE /* AccessibilitySupportTests.swift in Sources */,
 				99DEFC411FA44A06BF4D827E /* AdvisingLogicTests.swift in Sources */,
 				240CBAE7CF3D4FC2B56D942D /* AnnouncementLogicTests.swift in Sources */,

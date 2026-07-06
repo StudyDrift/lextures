@@ -51,7 +51,7 @@ object SearchPathNavigator {
             "library" -> SearchNavigationTarget.MoreTarget(MoreDestination.Library)
             "reading" -> SearchNavigationTarget.MoreTarget(MoreDestination.Reading)
             "review" -> SearchNavigationTarget.DeepLinkTarget(DeepLinkDestination.Review)
-            "credentials" -> SearchNavigationTarget.MoreTarget(MoreDestination.Credentials)
+            "credentials", "wallet" -> SearchNavigationTarget.MoreTarget(MoreDestination.Wallet)
             "advising" -> SearchNavigationTarget.MoreTarget(MoreDestination.Advising)
             "peer-reviews" -> SearchNavigationTarget.MoreTarget(MoreDestination.PeerReviews)
             "report-cards" -> SearchNavigationTarget.MoreTarget(MoreDestination.ReportCards)

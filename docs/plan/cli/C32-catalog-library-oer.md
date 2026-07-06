@@ -114,4 +114,4 @@ The public course catalog, institutional library, OER provider integrations and 
 ## 19. References
 
 - `registerCatalogRoutes`, `registerLibraryRoutes`, `registerOERRoutes`, `bookstore_textbook.go`.
-- Related: [C01](C01-courses.md), [C05](C05-content-extras.md), [C30](C30-billing-payments-tax.md).
+- Related: [C01](../completed/cli/C01-courses.md), [C05](../completed/cli/C05-content-extras.md), [C30](C30-billing-payments-tax.md).

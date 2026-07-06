@@ -10,7 +10,7 @@
 | **Section** | Assessment & grading |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL (list, get, create, submit) |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Platform / CLI |
 | **Depends on** | C01, C02, C40 |
@@ -86,7 +86,7 @@ The CLI can list/get/create/submit assignments but cannot update or delete them,
 ## 12. Integration Points
 
 - Server assignment/override/submission handlers.
-- Internal: `clients/cli/cmd/assignments.go`.
+- Internal: `clients/cli/cmd/assignments.go`, `assignments_extend.go`.
 
 ## 13. Dependencies & Sequencing
 
@@ -122,5 +122,5 @@ The CLI can list/get/create/submit assignments but cannot update or delete them,
 
 ## 19. References
 
-- `clients/cli/cmd/assignments.go`; `assignment_overrides_http.go`, `assignment_submissions_http.go`, `assignment_submission_annotations_http.go`.
-- Related: [C06](C06-gradebook-final-grades.md), [C09](C09-ai-grading-agents.md).
+- `clients/cli/cmd/assignments.go`, `assignments_extend.go`, `assignments_extend_test.go`; `assignment_overrides_http.go`, `assignment_submissions_http.go`, `assignment_submission_annotations_http.go`.
+- Related: [C06](../plan/cli/C06-gradebook-final-grades.md), [C09](../plan/cli/C09-ai-grading-agents.md).

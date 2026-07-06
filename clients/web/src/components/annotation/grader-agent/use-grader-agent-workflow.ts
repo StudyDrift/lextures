@@ -1125,6 +1125,27 @@ export function useGraderAgentWorkflow({
     setConfig(res.config)
   }
 
+  const handleImportWorkflow = useCallback(
+    (seed: GraderAgentWorkflowSeed) => {
+      const g = effectiveWorkflowGraph(
+        seed.workflowGraph as GraderWorkflowGraph | undefined,
+        seed.prompt,
+        seed.includeAssignmentContent,
+        seed.includeRubric,
+        itemKind,
+      )
+      setGraph(g)
+      setNavStack([])
+      setSelectedNodeId(null)
+      setHadDryRun(false)
+      setDryRunResult(null)
+      setDryRunError(null)
+      resetDryRunVisualState()
+      setStatusMessage(t('gradingAgent.import.success'))
+    },
+    [itemKind, resetDryRunVisualState, t],
+  )
+
   const handleSaveAsTemplate = async (name: string) => {
     if (!graph) return
     setSaving(true)
@@ -1201,6 +1222,7 @@ export function useGraderAgentWorkflow({
     handleDryRun,
     handleApply,
     handleSave,
+    handleImportWorkflow,
     handleSaveAsTemplate,
     handleAccept,
     handleRun,

@@ -643,7 +643,11 @@ func TestCoursesCmd_HasSubcommands(t *testing.T) {
 	for _, sub := range coursesCmd.Commands() {
 		names[sub.Name()] = true
 	}
-	for _, want := range []string{"list", "get", "create", "delete"} {
+	for _, want := range []string{
+		"list", "get", "create", "delete", "update", "publish", "unpublish",
+		"restore", "clone", "syllabus", "settings", "hero-image", "catalog-listing",
+		"blueprint", "storage-usage",
+	} {
 		if !names[want] {
 			t.Errorf("courses subcommand %q not registered", want)
 		}

@@ -73,6 +73,9 @@ final class AppShellModel {
     /// Courses the user pinned on web/mobile — surfaced in the global drawer.
     var pinnedCourses: [CourseSummary] = []
 
+    /// Cached permission strings from the last bootstrap refresh.
+    var permissions: [String] = []
+
     /// Active root-pane push (outgoing screen + whether progress tracks drawer close).
     var rootNavigationTransition: RootNavigationTransition?
 
@@ -201,7 +204,7 @@ final class AppShellModel {
             pendingBilling = true
         case .credentials:
             selectShellTab(.profile)
-            pendingMoreDestination = .credentials
+            pendingMoreDestination = WalletLogic.walletEnabled(platformFeatures) ? .wallet : .credentials
         case let .checkoutSuccess(courseId):
             checkoutReturnPhase = .success(courseId: courseId)
         case .checkoutCancel:
@@ -342,6 +345,7 @@ final class AppShellModel {
             permissions: await permissions ?? [],
             courses: courseList
         )
+        self.permissions = await permissions ?? []
         activeRoleContext = roleSnapshot.resolvedContext(stored: MobileIaPreferences.loadRoleContext())
         _ = UIModeStore.shared.effectiveMode(roleContext: activeRoleContext)
         if iaRedesignEnabled {

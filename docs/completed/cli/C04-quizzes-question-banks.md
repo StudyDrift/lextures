@@ -10,7 +10,7 @@
 | **Section** | Assessment & grading |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL (questions list/create/import only; no quizzes) |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Assessment / CLI |
 | **Depends on** | C02, C40 |
@@ -125,4 +125,5 @@ The CLI exposes only question-bank list/create/import — there is no way to cre
 ## 19. References
 
 - `clients/cli/cmd/questions.go`; quiz route groups in `server/internal/httpserver/server.go`.
-- Related: [C02](C02-modules-course-structure.md), [C06](C06-gradebook-final-grades.md), [C09](C09-ai-grading-agents.md).
+- `clients/cli/cmd/quizzes.go`, `quizzes_extend.go`, `quizzes_test.go`, `quizzes_extend_test.go`; `questions_extend.go`, `questions_extend_test.go`.
+- Related: [C02](C02-modules-course-structure.md), [C06](../plan/cli/C06-gradebook-final-grades.md), [C09](../plan/cli/C09-ai-grading-agents.md).

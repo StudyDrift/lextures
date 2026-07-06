@@ -10,7 +10,7 @@
 | **Section** | Course & content authoring |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Platform / CLI |
 | **Depends on** | C01, C40 |
@@ -126,5 +126,6 @@ A course's learning structure — modules, ordered items, content pages, prerequ
 
 ## 19. References
 
+- `clients/cli/cmd/structure.go`, `modules.go`, `pages.go`, `links.go`, `structure_test.go`.
 - `server/internal/httpserver` structure/modules/content-pages handlers; `registerConditionalReleaseRoutes`.
-- Related: [C01](C01-courses.md), [C03](C03-assignments.md), [C05](C05-content-extras.md), [C40](C40-cli-framework.md).
+- Related: [C01](C01-courses.md), [C03](C03-assignments.md), [C05](C05-content-extras.md), [C40](../plan/cli/C40-cli-framework.md).

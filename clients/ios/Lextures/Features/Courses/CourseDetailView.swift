@@ -46,6 +46,7 @@ struct CourseDetailView: View {
     private var workspaceContext: CourseWorkspaceContext {
         CourseWorkspaceContext(
             course: course,
+            permissions: shell.permissions,
             hasAttendanceSessions: hasAttendanceSessions,
             hasLibraryResources: LibraryResourceLogic.hasLibraryResources(in: items),
             evaluationStatus: evaluationStatus,
@@ -219,6 +220,10 @@ struct CourseDetailView: View {
             GradingBacklogSection(course: course)
         case .instructorInsights:
             CourseInsightsSection(course: course)
+        case .settings:
+            CourseSettingsHostView(course: course) { updated in
+                course = updated
+            }
         case .library:
             CourseLibraryView(course: course, items: items, onSelectItem: { linkedItem = $0 })
         case .discussions:
