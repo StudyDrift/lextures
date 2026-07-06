@@ -321,16 +321,7 @@ final class AppShellModel {
         if let page = await notifications { unreadNotifications = page.unreadCount }
         let features = MobilePlatformFeatures.from(await platform)
         platformFeatures = features
-        UIModeStore.shared.updatePlatform(featureEnabled: features.ffUiMode)
-        let readingApiEnabled = features.ffReadingPreferences
-            || (features.readAloudEnabled && features.ffReadAloud)
-        if features.ffUiMode || readingApiEnabled {
-            await ReadingPreferencesStore.shared.loadFromServer(
-                accessToken: token,
-                apiEnabled: readingApiEnabled || features.ffUiMode,
-                uiModeEnabled: features.ffUiMode
-            )
-        }
+        await UIModeStore.shared.syncReadingPreferencesIfNeeded(accessToken: token, features: features)
         if features.ffMobileIaRedesign {
             iaRedesignEnabled = true
             MobileIaPreferences.isRedesignEnabled = true

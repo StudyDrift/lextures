@@ -1,6 +1,8 @@
 package com.lextures.android.core.design
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import com.lextures.android.core.i18n.LocalLocalePreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -122,7 +124,7 @@ object UIModeLogic {
         if (mode == UIMode.Elementary) {
             elementaryDrawerLabelRes(destination)?.let { return L.text(it) }
         }
-        return L.text(destination.labelRes)
+        return resolveStringRes(destination.labelRes)
     }
 
     @Composable
@@ -130,7 +132,15 @@ object UIModeLogic {
         if (mode == UIMode.K2) {
             k2MoreLabelRes(destination)?.let { return L.text(it) }
         }
-        return L.text(destination.labelRes)
+        return resolveStringRes(destination.labelRes)
+    }
+
+    @Composable
+    private fun resolveStringRes(name: String): String {
+        val context = LocalContext.current
+        val prefs = LocalLocalePreferences.current
+        val id = context.resources.getIdentifier(name, "string", context.packageName)
+        return if (id != 0) prefs.localizedContext(context).getString(id) else name
     }
 
     private fun k2DrawerLabelRes(destination: RootDestination): Int? = when (destination) {

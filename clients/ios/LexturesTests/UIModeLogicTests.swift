@@ -1,6 +1,7 @@
 import XCTest
 @testable import Lextures
 
+// swiftlint:disable identifier_name
 final class UIModeLogicTests: XCTestCase {
     func testGradeToUIModeMapsKThroughTwo() {
         XCTAssertEqual(UIModeLogic.gradeToUIMode("K"), .k2)
@@ -72,3 +73,4 @@ final class UIModeLogicTests: XCTestCase {
         XCTAssertFalse(k2.contains(.gamification))
     }
 }
+// swiftlint:enable identifier_name

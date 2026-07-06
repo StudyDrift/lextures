@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
 import com.lextures.android.core.design.UIMode
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon

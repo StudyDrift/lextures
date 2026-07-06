@@ -68,6 +68,7 @@ import com.lextures.android.core.lms.MeProfile
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.design.UIMode
 import com.lextures.android.core.design.UIModeStore
+import com.lextures.android.core.navigation.CourseWorkspaceSection
 import com.lextures.android.core.navigation.DrawerGroup
 import com.lextures.android.core.navigation.DrawerState
 import com.lextures.android.core.navigation.RootDestination

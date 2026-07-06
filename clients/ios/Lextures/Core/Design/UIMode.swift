@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Age-appropriate UI mode (plan 13.11 / M10.4).
+// swiftlint:disable identifier_name
 enum UIMode: String, CaseIterable, Equatable, Identifiable {
     case standard
     case elementary
@@ -206,6 +207,18 @@ final class UIModeStore {
         self.featureEnabled = featureEnabled
     }
 
+    func syncReadingPreferencesIfNeeded(accessToken: String, features: MobilePlatformFeatures) async {
+        updatePlatform(featureEnabled: features.ffUiMode)
+        let readingApiEnabled = features.ffReadingPreferences
+            || (features.readAloudEnabled && features.ffReadAloud)
+        guard features.ffUiMode || readingApiEnabled else { return }
+        await ReadingPreferencesStore.shared.loadFromServer(
+            accessToken: accessToken,
+            apiEnabled: readingApiEnabled || features.ffUiMode,
+            uiModeEnabled: features.ffUiMode
+        )
+    }
+
     func applyReadingPreferences(
         effectiveUiMode: String?,
         uiModeOverride: String?,
@@ -227,6 +240,7 @@ final class UIModeStore {
 
     var hasAdminOverride: Bool { serverOverrideMode != nil }
 }
+// swiftlint:enable identifier_name
 
 private struct UIModeStoreKey: EnvironmentKey {
     static let defaultValue = UIModeStore.shared

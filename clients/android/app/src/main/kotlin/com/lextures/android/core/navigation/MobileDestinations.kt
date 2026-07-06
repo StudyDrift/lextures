@@ -1,6 +1,7 @@
 package com.lextures.android.core.navigation
 
 import com.lextures.android.core.design.UIMode
+import com.lextures.android.core.lms.AdvisingLogic
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.EvaluationLogic
 import com.lextures.android.core.lms.EvaluationStatus
