@@ -363,6 +363,13 @@
 		8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */; };
 		8B60CC3D3E4F5061728394 /* MyConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CE3E4F5061728394A5 /* MyConferencesView.swift */; };
 		8B60DC2D3E4F5061728394 /* ConferenceReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */; };
+		8B701C2D3E4F5061728394 /* BehaviorLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B701D3E4F5061728394A5 /* BehaviorLogic.swift */; };
+		8B702C2D3E4F5061728394 /* LMSFeatureModelsBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B702D3E4F5061728394A5 /* LMSFeatureModelsBehavior.swift */; };
+		8B703C2D3E4F5061728394 /* LMSAPIBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B703D3E4F5061728394A5 /* LMSAPIBehavior.swift */; };
+		8B704C2D3E4F5061728394 /* BehaviorRosterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B704D3E4F5061728394A5 /* BehaviorRosterView.swift */; };
+		8B705C2D3E4F5061728394 /* HallPassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B705D3E4F5061728394A5 /* HallPassView.swift */; };
+		8B706C2D3E4F5061728394 /* MyHallPassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B706D3E4F5061728394A5 /* MyHallPassView.swift */; };
+		8B707C2D3E4F5061728394 /* BehaviorLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B707D3E4F5061728394A5 /* BehaviorLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -726,6 +733,13 @@
 		8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentDashboardSections.swift; sourceTree = "<group>"; };
 		8B60CE3E4F5061728394A5 /* MyConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyConferencesView.swift; sourceTree = "<group>"; };
 		8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceReminderScheduler.swift; sourceTree = "<group>"; };
+		8B701D3E4F5061728394A5 /* BehaviorLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogic.swift; sourceTree = "<group>"; };
+		8B702D3E4F5061728394A5 /* LMSFeatureModelsBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsBehavior.swift; sourceTree = "<group>"; };
+		8B703D3E4F5061728394A5 /* LMSAPIBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIBehavior.swift; sourceTree = "<group>"; };
+		8B704D3E4F5061728394A5 /* BehaviorRosterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorRosterView.swift; sourceTree = "<group>"; };
+		8B705D3E4F5061728394A5 /* HallPassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HallPassView.swift; sourceTree = "<group>"; };
+		8B706D3E4F5061728394A5 /* MyHallPassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyHallPassView.swift; sourceTree = "<group>"; };
+		8B707D3E4F5061728394A5 /* BehaviorLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -753,6 +767,7 @@
 		C76648F9447549EBA4F966C1 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B707D3E4F5061728394A5 /* BehaviorLogicTests.swift */,
 				8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */,
 				8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */,
 				224E2F028BE14A74A564BE33 /* AccessibilitySupportTests.swift */,
@@ -835,6 +850,7 @@
 		660E34061B9749BA97FA683C /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B70BEH5C6D7E8F901234567 /* Behavior */,
 				8B60PAR5C6D7E8F901234567 /* Parent */,
 				9FEEC30CF8D74770A0ABAD7E /* Advising */,
 				E14A6B9F5A964974BCD89668 /* Assignments */,
@@ -948,6 +964,9 @@
 		D2384791A1E3420B9476C89D /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B703D3E4F5061728394A5 /* LMSAPIBehavior.swift */,
+				8B702D3E4F5061728394A5 /* LMSFeatureModelsBehavior.swift */,
+				8B701D3E4F5061728394A5 /* BehaviorLogic.swift */,
 				8B604D3E4F5061728394A5 /* LMSAPIParent.swift */,
 				8B603D3E4F5061728394A5 /* LMSFeatureModelsParent.swift */,
 				8B602D3E4F5061728394A5 /* ConferenceLogic.swift */,
@@ -1586,6 +1605,17 @@
 			path = Parent;
 			sourceTree = "<group>";
 		};
+
+		8B70BEH5C6D7E8F901234567 /* Behavior */ = {
+			isa = PBXGroup;
+			children = (
+				8B704D3E4F5061728394A5 /* BehaviorRosterView.swift */,
+				8B705D3E4F5061728394A5 /* HallPassView.swift */,
+				8B706D3E4F5061728394A5 /* MyHallPassView.swift */,
+			);
+			path = Behavior;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1693,6 +1723,18 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+
+				8B706C2D3E4F5061728394 /* MyHallPassView.swift in Sources */,
+
+				8B705C2D3E4F5061728394 /* HallPassView.swift in Sources */,
+
+				8B704C2D3E4F5061728394 /* BehaviorRosterView.swift in Sources */,
+
+				8B703C2D3E4F5061728394 /* LMSAPIBehavior.swift in Sources */,
+
+				8B702C2D3E4F5061728394 /* LMSFeatureModelsBehavior.swift in Sources */,
+
+				8B701C2D3E4F5061728394 /* BehaviorLogic.swift in Sources */,
 
 				8B60DC2D3E4F5061728394 /* ConferenceReminderScheduler.swift in Sources */,
 
@@ -2016,6 +2058,8 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+
+				8B707C2D3E4F5061728394 /* BehaviorLogicTests.swift in Sources */,
 
 				8B60BC2D3E4F5061728394 /* ConferenceLogicTests.swift in Sources */,
 				8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */,

@@ -111,6 +111,8 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
     Groups("mobile_ia_course_groups", "groups"),
     CollabDocs("mobile_ia_course_collabDocs", "collab-docs"),
     Grading("mobile_ia_course_grading", "grading"),
+    Behavior("mobile_ia_course_behavior", "behavior"),
+    HallPass("mobile_ia_course_hallPass", "hall-pass"),
     ;
 
     companion object {
@@ -129,6 +131,8 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
             CourseDeepLinkSection.Library -> Library
             CourseDeepLinkSection.Groups -> Groups
             CourseDeepLinkSection.CollabDocs -> CollabDocs
+            CourseDeepLinkSection.Behavior -> Behavior
+            CourseDeepLinkSection.HallPass -> HallPass
             null -> null
         }
     }
@@ -197,6 +201,7 @@ data class MobilePlatformFeatures(
     val ffMobileAdvising: Boolean = true,
     val ffParentPortal: Boolean = false,
     val ffConferenceScheduling: Boolean = false,
+    val ffClassroomSignals: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -257,6 +262,7 @@ data class MobilePlatformFeatures(
             ffMobileAdvising = features?.ffMobileAdvising != false,
             ffParentPortal = features?.ffParentPortal == true,
             ffConferenceScheduling = features?.ffConferenceScheduling == true,
+            ffClassroomSignals = features?.ffClassroomSignals == true,
         )
     }
 }
@@ -347,7 +353,13 @@ object MobileDestinations {
             ),
             "mobile_drawer_course_people" to filtered(listOf(CourseWorkspaceSection.People)),
             "mobile_drawer_course_manage" to filtered(
-                listOf(CourseWorkspaceSection.Grading, CourseWorkspaceSection.Attendance, CourseWorkspaceSection.Evaluations),
+                listOf(
+                    CourseWorkspaceSection.Grading,
+                    CourseWorkspaceSection.Attendance,
+                    CourseWorkspaceSection.Evaluations,
+                    CourseWorkspaceSection.Behavior,
+                    CourseWorkspaceSection.HallPass,
+                ),
             ),
         ).mapNotNull { (key, list) -> if (list.isEmpty()) null else CourseDrawerGroup(key, list) }
     }
@@ -415,6 +427,15 @@ object MobileDestinations {
         }
         if (ctx.course.viewerIsStaff) {
             add(CourseWorkspaceSection.Grading)
+        }
+        if (ctx.platformFeatures.ffClassroomSignals && ctx.course.viewerIsStaff) {
+            add(CourseWorkspaceSection.Behavior)
+        }
+        if (ctx.platformFeatures.ffClassroomSignals &&
+            ctx.course.isSectionsEnabled &&
+            (ctx.course.viewerIsStaff || ctx.course.viewerIsStudent)
+        ) {
+            add(CourseWorkspaceSection.HallPass)
         }
         if (ctx.platformFeatures.ffMobileLibraryEreserves &&
             ctx.platformFeatures.ffLibrary &&

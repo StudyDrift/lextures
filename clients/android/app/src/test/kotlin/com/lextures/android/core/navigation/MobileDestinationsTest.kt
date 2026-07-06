@@ -76,6 +76,25 @@ class MobileDestinationsTest {
         assertEquals(CourseWorkspaceSection.Attendance, CourseWorkspaceSection.from(CourseDeepLinkSection.Attendance))
         assertEquals(CourseWorkspaceSection.Groups, CourseWorkspaceSection.from(CourseDeepLinkSection.Groups))
         assertEquals(CourseWorkspaceSection.CollabDocs, CourseWorkspaceSection.from(CourseDeepLinkSection.CollabDocs))
+        assertEquals(CourseWorkspaceSection.Behavior, CourseWorkspaceSection.from(CourseDeepLinkSection.Behavior))
+        assertEquals(CourseWorkspaceSection.HallPass, CourseWorkspaceSection.from(CourseDeepLinkSection.HallPass))
+    }
+
+    @Test
+    fun courseWorkspaceShowsBehaviorForStaffWhenClassroomSignalsOn() {
+        val course = CourseSummary(
+            id = "1",
+            courseCode = "demo",
+            title = "Demo",
+            viewerEnrollmentRoles = listOf("teacher"),
+            sectionsEnabled = true,
+        )
+        val features = MobilePlatformFeatures(ffClassroomSignals = true)
+        val sections = MobileDestinations.courseWorkspaceSections(
+            CourseWorkspaceContext(course = course, platformFeatures = features),
+        )
+        assertTrue(sections.contains(CourseWorkspaceSection.Behavior))
+        assertTrue(sections.contains(CourseWorkspaceSection.HallPass))
     }
 
     @Test

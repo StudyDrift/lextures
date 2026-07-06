@@ -12,6 +12,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DynamicFeed
+import androidx.compose.material.icons.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.FamilyRestroom
@@ -78,6 +80,8 @@ fun courseSectionIcon(section: CourseWorkspaceSection): ImageVector = when (sect
     CourseWorkspaceSection.Grading -> Icons.Filled.FactCheck
     CourseWorkspaceSection.Attendance -> Icons.Filled.EventAvailable
     CourseWorkspaceSection.Evaluations -> Icons.Filled.RateReview
+    CourseWorkspaceSection.Behavior -> Icons.Filled.ThumbUp
+    CourseWorkspaceSection.HallPass -> Icons.Filled.DirectionsWalk
 }
 
 /** R.string id for a course section label (reuses the existing `mobile_ia_course_*` keys). */
@@ -98,4 +102,6 @@ fun courseSectionLabelRes(section: CourseWorkspaceSection): Int = when (section)
     CourseWorkspaceSection.Groups -> R.string.mobile_ia_course_groups
     CourseWorkspaceSection.CollabDocs -> R.string.mobile_ia_course_collabDocs
     CourseWorkspaceSection.Grading -> R.string.mobile_ia_course_grading
+    CourseWorkspaceSection.Behavior -> R.string.mobile_ia_course_behavior
+    CourseWorkspaceSection.HallPass -> R.string.mobile_ia_course_hallPass
 }

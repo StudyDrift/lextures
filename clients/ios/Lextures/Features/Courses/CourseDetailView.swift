@@ -225,6 +225,14 @@ struct CourseDetailView: View {
                 course: course,
                 showResults: course.viewerIsStaff || initialSection == .evaluations && initialItemId == "results"
             )
+        case .behavior:
+            BehaviorRosterView(course: course)
+        case .hallPass:
+            if course.viewerIsStaff {
+                HallPassView(course: course)
+            } else {
+                MyHallPassView(course: course)
+            }
         }
     }
 

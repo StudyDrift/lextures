@@ -46,4 +46,5 @@ struct PlatformFeatures: Decodable {
     var ffMobileAdvising: Bool?
     var ffParentPortal: Bool?
     var ffConferenceScheduling: Bool?
+    var ffClassroomSignals: Bool?
 }
