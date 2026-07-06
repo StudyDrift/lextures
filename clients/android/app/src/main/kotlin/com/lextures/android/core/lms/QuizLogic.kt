@@ -7,6 +7,15 @@ object QuizLogic {
     fun isServerLockdown(mode: String?): Boolean =
         mode == "one_at_a_time" || mode == "kiosk"
 
+    fun isKioskMode(mode: String?): Boolean = mode == "kiosk"
+
+    /** Pre-start consent for server-enforced delivery (web parity). */
+    fun needsLockdownConsent(mode: String?): Boolean = isServerLockdown(mode)
+
+    /** Platform lockdown (screen pinning / lock task, FLAG_SECURE, integrity signals). */
+    fun requiresDeviceLockdown(lockdownMode: String?, proctoringRequired: Boolean = false): Boolean =
+        isKioskMode(lockdownMode) || proctoringRequired
+
     fun visibleChoices(question: QuizQuestion): List<String> =
         question.choices.orEmpty()
             .map { it.trim() }

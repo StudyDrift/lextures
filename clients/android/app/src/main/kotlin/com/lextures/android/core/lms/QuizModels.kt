@@ -202,6 +202,15 @@ data class QuizFocusLossRequest(
 )
 
 @Serializable
+data class QuizProctoringConfig(
+    val id: String,
+    val quizItemId: String,
+    val externalToolId: String,
+    val vendor: String,
+    val required: Boolean = false,
+)
+
+@Serializable
 data class QuizCodeRunRequest(
     val code: String,
     val languageId: Int? = null,

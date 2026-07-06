@@ -619,6 +619,24 @@ object LmsApi {
         }
     }
 
+    suspend fun fetchQuizProctoringConfig(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): QuizProctoringConfig? = withContext(Dispatchers.IO) {
+        runCatching {
+            val (body, status) = client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}/proctoring-config",
+                accessToken = accessToken,
+            )
+            when (status) {
+                204 -> null
+                in 200..299 -> decode<QuizProctoringConfig>(body)
+                else -> null
+            }
+        }.getOrNull()
+    }
+
     suspend fun postQuizQuestionRun(
         courseCode: String,
         itemId: String,

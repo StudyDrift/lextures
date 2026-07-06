@@ -66,6 +66,15 @@ final class QuizLogicTests: XCTestCase {
         XCTAssertFalse(QuizLogic.isServerLockdown("standard"))
     }
 
+    func testKioskAndDeviceLockdown() {
+        XCTAssertTrue(QuizLogic.isKioskMode("kiosk"))
+        XCTAssertFalse(QuizLogic.isKioskMode("one_at_a_time"))
+        XCTAssertTrue(QuizLogic.needsLockdownConsent("kiosk"))
+        XCTAssertTrue(QuizLogic.requiresDeviceLockdown(lockdownMode: "kiosk"))
+        XCTAssertFalse(QuizLogic.requiresDeviceLockdown(lockdownMode: "one_at_a_time"))
+        XCTAssertTrue(QuizLogic.requiresDeviceLockdown(lockdownMode: "standard", proctoringRequired: true))
+    }
+
     func testFormatTimer() {
         XCTAssertEqual(QuizLogic.formatTimer(125), "2:05")
         XCTAssertEqual(QuizLogic.formatTimer(59), "0:59")

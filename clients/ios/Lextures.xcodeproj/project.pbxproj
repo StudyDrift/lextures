@@ -69,6 +69,7 @@
 		C4A2B2AB47F54D27B4E931F6 /* LMSAPIMobileWave.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D84565E80E4E0795C38D7D /* LMSAPIMobileWave.swift */; };
 		7A6C09E92FDB4DF6AE400789 /* LMSAPIPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4A84F1B602423498384469 /* LMSAPIPaths.swift */; };
 		8D13D9E7370B4CA6A870C05E /* LMSAPIPeerReview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3880F988ACEF4208923E5BEE /* LMSAPIPeerReview.swift */; };
+		B3C4D5E6F7A84901B2C3D4E5 /* LMSAPIProctoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4B5C6D7E8F94012A3B4C5D6 /* LMSAPIProctoring.swift */; };
 		2D0F44A0470049FDA14382F1 /* LMSAPIQuizCodeRun.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1F069E275E44318AC0700A /* LMSAPIQuizCodeRun.swift */; };
 		7AFACF8F7A754412A5C5E40B /* LMSAPIReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2559073A5F0C4468BB9F2F42 /* LMSAPIReader.swift */; };
 		1EA89251F1FD4E98BE4999EC /* LMSAPIReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D503E80F054E6EB3D5FACF /* LMSAPIReading.swift */; };
@@ -280,6 +281,7 @@
 		2F6B3095ED434FCC92A4B497 /* ProfileViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC7FA07D30414AFEB4445750 /* ProfileViewSections.swift */; };
 		50AEA297401A4F10AA380AEB /* ResearchStudiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5223616B74C46DAAFC9B287 /* ResearchStudiesView.swift */; };
 		D3F91B0F679E4B72B2F5C37B /* CodeQuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E390EE6D5CC049CDBCF7FA17 /* CodeQuestionView.swift */; };
+		F1A2B3C4D5E6478990ABCDEF /* LockdownController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6478990123456 /* LockdownController.swift */; };
 		CA5154D276C34A20B572597B /* QuizIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8253651D1F2344A4B1518061 /* QuizIntroView.swift */; };
 		DD9A6313FDF3429496D524B2 /* QuizQuestionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F9AFD5BCAAE44539D8EEE30 /* QuizQuestionViews.swift */; };
 		5FBBB7D3BB4D405C97C7E269 /* QuizResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B24458FE0964AD08A2BAC6E /* QuizResultsView.swift */; };
@@ -414,6 +416,7 @@
 		30D84565E80E4E0795C38D7D /* LMSAPIMobileWave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIMobileWave.swift; sourceTree = "<group>"; };
 		DD4A84F1B602423498384469 /* LMSAPIPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIPaths.swift; sourceTree = "<group>"; };
 		3880F988ACEF4208923E5BEE /* LMSAPIPeerReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIPeerReview.swift; sourceTree = "<group>"; };
+		A4B5C6D7E8F94012A3B4C5D6 /* LMSAPIProctoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIProctoring.swift; sourceTree = "<group>"; };
 		CF1F069E275E44318AC0700A /* LMSAPIQuizCodeRun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIQuizCodeRun.swift; sourceTree = "<group>"; };
 		2559073A5F0C4468BB9F2F42 /* LMSAPIReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIReader.swift; sourceTree = "<group>"; };
 		F6D503E80F054E6EB3D5FACF /* LMSAPIReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIReading.swift; sourceTree = "<group>"; };
@@ -625,6 +628,7 @@
 		DC7FA07D30414AFEB4445750 /* ProfileViewSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewSections.swift; sourceTree = "<group>"; };
 		E5223616B74C46DAAFC9B287 /* ResearchStudiesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchStudiesView.swift; sourceTree = "<group>"; };
 		E390EE6D5CC049CDBCF7FA17 /* CodeQuestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeQuestionView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6478990123456 /* LockdownController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockdownController.swift; sourceTree = "<group>"; };
 		8253651D1F2344A4B1518061 /* QuizIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizIntroView.swift; sourceTree = "<group>"; };
 		8F9AFD5BCAAE44539D8EEE30 /* QuizQuestionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizQuestionViews.swift; sourceTree = "<group>"; };
 		9B24458FE0964AD08A2BAC6E /* QuizResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizResultsView.swift; sourceTree = "<group>"; };
@@ -949,6 +953,7 @@
 				30D84565E80E4E0795C38D7D /* LMSAPIMobileWave.swift */,
 				DD4A84F1B602423498384469 /* LMSAPIPaths.swift */,
 				3880F988ACEF4208923E5BEE /* LMSAPIPeerReview.swift */,
+				A4B5C6D7E8F94012A3B4C5D6 /* LMSAPIProctoring.swift */,
 				CF1F069E275E44318AC0700A /* LMSAPIQuizCodeRun.swift */,
 				2559073A5F0C4468BB9F2F42 /* LMSAPIReader.swift */,
 				F6D503E80F054E6EB3D5FACF /* LMSAPIReading.swift */,
@@ -1433,6 +1438,7 @@
 			isa = PBXGroup;
 			children = (
 				E390EE6D5CC049CDBCF7FA17 /* CodeQuestionView.swift */,
+				A1B2C3D4E5F6478990123456 /* LockdownController.swift */,
 				8253651D1F2344A4B1518061 /* QuizIntroView.swift */,
 				8F9AFD5BCAAE44539D8EEE30 /* QuizQuestionViews.swift */,
 				9B24458FE0964AD08A2BAC6E /* QuizResultsView.swift */,
@@ -1698,6 +1704,7 @@
 				C4A2B2AB47F54D27B4E931F6 /* LMSAPIMobileWave.swift in Sources */,
 				7A6C09E92FDB4DF6AE400789 /* LMSAPIPaths.swift in Sources */,
 				8D13D9E7370B4CA6A870C05E /* LMSAPIPeerReview.swift in Sources */,
+				B3C4D5E6F7A84901B2C3D4E5 /* LMSAPIProctoring.swift in Sources */,
 				2D0F44A0470049FDA14382F1 /* LMSAPIQuizCodeRun.swift in Sources */,
 				7AFACF8F7A754412A5C5E40B /* LMSAPIReader.swift in Sources */,
 				1EA89251F1FD4E98BE4999EC /* LMSAPIReading.swift in Sources */,
@@ -1909,6 +1916,7 @@
 				2F6B3095ED434FCC92A4B497 /* ProfileViewSections.swift in Sources */,
 				50AEA297401A4F10AA380AEB /* ResearchStudiesView.swift in Sources */,
 				D3F91B0F679E4B72B2F5C37B /* CodeQuestionView.swift in Sources */,
+				F1A2B3C4D5E6478990ABCDEF /* LockdownController.swift in Sources */,
 				CA5154D276C34A20B572597B /* QuizIntroView.swift in Sources */,
 				DD9A6313FDF3429496D524B2 /* QuizQuestionViews.swift in Sources */,
 				5FBBB7D3BB4D405C97C7E269 /* QuizResultsView.swift in Sources */,

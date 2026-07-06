@@ -27,6 +27,18 @@ import com.lextures.android.core.i18n.L
 @Composable fun quizYourScoreLabel(): String = L.text(R.string.mobile_quiz_yourScore)
 @Composable fun quizPendingReviewLabel(): String = L.text(R.string.mobile_quiz_pendingReview)
 
+@Composable fun quizLockdownConfirmLabel(): String = L.text(R.string.mobile_quiz_lockdown_confirm)
+@Composable fun quizLockdownCancelLabel(): String = L.text(R.string.mobile_quiz_lockdown_cancel)
+@Composable fun quizLockdownKioskTitle(): String = L.text(R.string.mobile_quiz_lockdown_kioskTitle)
+@Composable fun quizLockdownOneAtATimeTitle(): String = L.text(R.string.mobile_quiz_lockdown_oneAtATimeTitle)
+@Composable fun quizLockdownKioskBulletBack(): String = L.text(R.string.mobile_quiz_lockdown_kioskBulletBack)
+@Composable fun quizLockdownKioskBulletHints(): String = L.text(R.string.mobile_quiz_lockdown_kioskBulletHints)
+@Composable fun quizLockdownKioskBulletFocus(): String = L.text(R.string.mobile_quiz_lockdown_kioskBulletFocus)
+@Composable fun quizLockdownOneAtATimeBulletBack(): String = L.text(R.string.mobile_quiz_lockdown_oneAtATimeBulletBack)
+@Composable fun quizLockdownOneAtATimeBulletHints(): String = L.text(R.string.mobile_quiz_lockdown_oneAtATimeBulletHints)
+@Composable fun quizLockdownKioskBanner(): String = L.text(R.string.mobile_quiz_lockdown_kioskBanner)
+@Composable fun quizLockdownFocusLossBanner(): String = L.text(R.string.mobile_quiz_lockdown_focusLossBanner)
+
 @Composable fun quizCodeRunLabel(): String = L.text(R.string.mobile_quiz_code_run)
 @Composable fun quizCodeRunningLabel(): String = L.text(R.string.mobile_quiz_code_running)
 @Composable fun quizCodeRunFailedLabel(): String = L.text(R.string.mobile_quiz_code_runFailed)
