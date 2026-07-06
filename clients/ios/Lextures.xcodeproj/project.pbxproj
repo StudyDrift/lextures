@@ -29,6 +29,7 @@
 		6E76873611464491A72A2F2B /* ProfileAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AC65DCFD58497293A02944 /* ProfileAvatarView.swift */; };
 		64E237EB75D74AC9A318D441 /* SyncStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF46A4DBAE394907891F6F89 /* SyncStatusView.swift */; };
 		D063DB7AB1DD4B53808D3995 /* ThemePreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0A8299A9104A2F971AF4AC /* ThemePreference.swift */; };
+		M104UIMODE01BUILD0000000001 /* UIMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = M104UIMODE01FILEREF000001 /* UIMode.swift */; };
 		0B0D882084E142EF96145E2B /* DateFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5722DEC169554E2D9581507F /* DateFormatting.swift */; };
 		1D58A1FB48D84048A101CDEA /* LocaleAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01546D9D51343A4BD8762C5 /* LocaleAPI.swift */; };
 		135522345E814CC2A2091E3E /* LocalePreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AED94AFE044E1A8D2BBE4A /* LocalePreferences.swift */; };
@@ -306,6 +307,7 @@
 		21AEB0B803D2426A91F3CD5F /* TutorFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = F88C9F79EDEC467591AE2F57 /* TutorFlowLayout.swift */; };
 		F5AF6DA586ED449996C655EB /* TutorLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 626A2FC45CE042E497C49C1E /* TutorLauncher.swift */; };
 		F1F331DA9F4F488E8BA76DB5 /* AccessibilitySupportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224E2F028BE14A74A564BE33 /* AccessibilitySupportTests.swift */; };
+		M104UIMODETESTBUILD0000001 /* UIModeLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M104UIMODETESTFILEREF01 /* UIModeLogicTests.swift */; };
 		8D89993DD95847D0A7495CD6 /* AdvisingLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E0908417F457F86FEB948 /* AdvisingLogicTests.swift */; };
 		3DCBF000B6174C60A0DC8D28 /* AssignmentLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D216306AB4EE4145BC47C246 /* AssignmentLogicTests.swift */; };
 		1254B5FFC1B64785928A4CD9 /* AuthCallbackParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCE43C8215F4FC0B50BB92A /* AuthCallbackParserTests.swift */; };
@@ -397,6 +399,7 @@
 		A3AC65DCFD58497293A02944 /* ProfileAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatarView.swift; sourceTree = "<group>"; };
 		BF46A4DBAE394907891F6F89 /* SyncStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusView.swift; sourceTree = "<group>"; };
 		3B0A8299A9104A2F971AF4AC /* ThemePreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePreference.swift; sourceTree = "<group>"; };
+		M104UIMODE01FILEREF000001 /* UIMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIMode.swift; sourceTree = "<group>"; };
 		5722DEC169554E2D9581507F /* DateFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatting.swift; sourceTree = "<group>"; };
 		F01546D9D51343A4BD8762C5 /* LocaleAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocaleAPI.swift; sourceTree = "<group>"; };
 		21AED94AFE044E1A8D2BBE4A /* LocalePreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalePreferences.swift; sourceTree = "<group>"; };
@@ -674,6 +677,7 @@
 		F88C9F79EDEC467591AE2F57 /* TutorFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorFlowLayout.swift; sourceTree = "<group>"; };
 		626A2FC45CE042E497C49C1E /* TutorLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorLauncher.swift; sourceTree = "<group>"; };
 		224E2F028BE14A74A564BE33 /* AccessibilitySupportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilitySupportTests.swift; sourceTree = "<group>"; };
+		M104UIMODETESTFILEREF01 /* UIModeLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIModeLogicTests.swift; sourceTree = "<group>"; };
 		068E0908417F457F86FEB948 /* AdvisingLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisingLogicTests.swift; sourceTree = "<group>"; };
 		D216306AB4EE4145BC47C246 /* AssignmentLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignmentLogicTests.swift; sourceTree = "<group>"; };
 		FDCE43C8215F4FC0B50BB92A /* AuthCallbackParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthCallbackParserTests.swift; sourceTree = "<group>"; };
@@ -771,6 +775,7 @@
 				8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */,
 				8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */,
 				224E2F028BE14A74A564BE33 /* AccessibilitySupportTests.swift */,
+				M104UIMODETESTFILEREF01 /* UIModeLogicTests.swift */,
 				068E0908417F457F86FEB948 /* AdvisingLogicTests.swift */,
 				D216306AB4EE4145BC47C246 /* AssignmentLogicTests.swift */,
 				FDCE43C8215F4FC0B50BB92A /* AuthCallbackParserTests.swift */,
@@ -946,6 +951,7 @@
 				A3AC65DCFD58497293A02944 /* ProfileAvatarView.swift */,
 				BF46A4DBAE394907891F6F89 /* SyncStatusView.swift */,
 				3B0A8299A9104A2F971AF4AC /* ThemePreference.swift */,
+				M104UIMODE01FILEREF000001 /* UIMode.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -1772,6 +1778,7 @@
 				6E76873611464491A72A2F2B /* ProfileAvatarView.swift in Sources */,
 				64E237EB75D74AC9A318D441 /* SyncStatusView.swift in Sources */,
 				D063DB7AB1DD4B53808D3995 /* ThemePreference.swift in Sources */,
+				M104UIMODE01BUILD0000000001 /* UIMode.swift in Sources */,
 				0B0D882084E142EF96145E2B /* DateFormatting.swift in Sources */,
 				1D58A1FB48D84048A101CDEA /* LocaleAPI.swift in Sources */,
 				135522345E814CC2A2091E3E /* LocalePreferences.swift in Sources */,
@@ -2064,6 +2071,7 @@
 				8B60BC2D3E4F5061728394 /* ConferenceLogicTests.swift in Sources */,
 				8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */,
 				F1F331DA9F4F488E8BA76DB5 /* AccessibilitySupportTests.swift in Sources */,
+				M104UIMODETESTBUILD0000001 /* UIModeLogicTests.swift in Sources */,
 				8D89993DD95847D0A7495CD6 /* AdvisingLogicTests.swift in Sources */,
 				3DCBF000B6174C60A0DC8D28 /* AssignmentLogicTests.swift in Sources */,
 				1254B5FFC1B64785928A4CD9 /* AuthCallbackParserTests.swift in Sources */,

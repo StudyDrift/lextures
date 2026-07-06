@@ -23,6 +23,40 @@ struct ProfilePersonalCard: View {
     }
 }
 
+/// Device override for age-appropriate UI mode (M10.4).
+struct ProfileUIModeCard: View {
+    @Environment(UIModeStore.self) private var uiModeStore
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        if uiModeStore.featureEnabled {
+            LMSCard {
+                Text(L.text("mobile.uiMode.title"))
+                    .font(LexturesTheme.displayFont(17))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                Text(L.text("mobile.uiMode.description"))
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                if uiModeStore.hasAdminOverride {
+                    Text(L.text("mobile.uiMode.adminOverride"))
+                        .font(.caption)
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                }
+                Picker(L.text("mobile.uiMode.title"), selection: Binding(
+                    get: { uiModeStore.localPreference },
+                    set: { uiModeStore.localPreference = $0 }
+                )) {
+                    ForEach(UIModePreference.allCases) { option in
+                        Text(option.label).tag(option)
+                    }
+                }
+                .pickerStyle(.menu)
+                .disabled(uiModeStore.hasAdminOverride)
+            }
+        }
+    }
+}
+
 /// Theme override (system / light / dark) — a device-only preference.
 struct ProfileAppearanceCard: View {
     @Environment(ThemePreference.self) private var themePreference

@@ -35,6 +35,7 @@ struct ProfileView: View {
                         offlineStorageCard
                         ProfileAppearanceCard()
                         localeCard
+                        ProfileUIModeCard()
                         accessibilityCard
                         ProfileSecurityCard()
                         accountCard

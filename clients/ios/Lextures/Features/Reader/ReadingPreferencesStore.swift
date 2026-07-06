@@ -24,7 +24,7 @@ final class ReadingPreferencesStore {
         syncDyslexiaToAccessibility()
     }
 
-    func loadFromServer(accessToken: String, apiEnabled: Bool) async {
+    func loadFromServer(accessToken: String, apiEnabled: Bool, uiModeEnabled: Bool = false) async {
         serverSyncEnabled = apiEnabled
         guard apiEnabled else { return }
         loading = true
@@ -34,6 +34,13 @@ final class ReadingPreferencesStore {
             prefs = ReaderLogic.mergeReadingPreferences(local: prefs, server: server)
             persistLocal()
             syncDyslexiaToAccessibility()
+            if uiModeEnabled {
+                UIModeStore.shared.applyReadingPreferences(
+                    effectiveUiMode: server.effectiveUiMode,
+                    uiModeOverride: server.uiModeOverride,
+                    featureEnabled: true
+                )
+            }
         } catch {
             // Keep local prefs when offline or API unavailable.
         }

@@ -83,9 +83,12 @@ enum ReaderTypography {
 }
 
 struct MinimumTapTargetModifier: ViewModifier {
+    @Environment(UIModeStore.self) private var uiModeStore
+
     func body(content: Content) -> some View {
+        let target = uiModeStore.resolvedMode.minimumTapTarget
         content
-            .frame(minWidth: AccessibilitySupport.minimumTapTarget, minHeight: AccessibilitySupport.minimumTapTarget)
+            .frame(minWidth: target, minHeight: target)
             .contentShape(Rectangle())
     }
 }
