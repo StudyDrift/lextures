@@ -10,7 +10,7 @@
 | **Section** | Assessment & grading |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL (list, update, export) |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Assessment / CLI |
 | **Depends on** | C03, C04, C40 |

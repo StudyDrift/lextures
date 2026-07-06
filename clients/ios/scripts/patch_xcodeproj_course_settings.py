@@ -18,6 +18,10 @@ ENTRIES: list[tuple[str, str, str, str, bool]] = [
     ("CourseGeneralSettingsView.swift", "8B806C2D3E4F5061728394", "8B806D3E4F5061728394A5", "8B80SETT5C6D7E8F901234567", False),
     ("CourseHeroImageEditor.swift", "8B807C2D3E4F5061728394", "8B807D3E4F5061728394A5", "8B80SETT5C6D7E8F901234567", False),
     ("CourseSettingsLogicTests.swift", "8B808C2D3E4F5061728394", "8B808D3E4F5061728394A5", "FB04F8A19314441A8AB2F273", True),
+    ("CourseImportExportLogic.swift", "8B809C2D3E4F5061728394", "8B809D3E4F5061728394A5", "0192C31B7A97444D9236A8A1", False),
+    ("LMSAPICourseImportExport.swift", "8B80AC2D3E4F5061728394", "8B80AD3E4F5061728394A5", "0192C31B7A97444D9236A8A1", False),
+    ("CourseImportExportView.swift", "8B80BC2D3E4F5061728394", "8B80BD3E4F5061728394A5", "8B80SETT5C6D7E8F901234567", False),
+    ("CourseImportExportLogicTests.swift", "8B80CC2D3E4F5061728394", "8B80CD3E4F5061728394A5", "FB04F8A19314441A8AB2F273", True),
 ]
 
 NEW_GROUPS = """
@@ -27,6 +31,7 @@ NEW_GROUPS = """
 \t\t\t\t8B805D3E4F5061728394A5 /* CourseSettingsHostView.swift */,
 \t\t\t\t8B806D3E4F5061728394A5 /* CourseGeneralSettingsView.swift */,
 \t\t\t\t8B807D3E4F5061728394A5 /* CourseHeroImageEditor.swift */,
+\t\t\t\t8B80BD3E4F5061728394A5 /* CourseImportExportView.swift */,
 \t\t\t);
 \t\t\tpath = Settings;
 \t\t\tsourceTree = "<group>";
@@ -38,7 +43,8 @@ TEST_SOURCES = "CBC24580FE1340BCBAAB8A18"
 COURSES_GROUP = "FD10AEF33AA94E6FB2220EF0"
 LMS_GROUP = "0192C31B7A97444D9236A8A1"
 DESIGN_GROUP = "551D819CB69643C594BC15DC"
-SETTINGS_SUBGROUP = "8B80SETT5C6D7E8F901234567 /* Settings */"
+SETTINGS_SUBGROUP = "8B80SETT5C6D7E8F901234567"
+SETTINGS_SUBGROUP_LABEL = "8B80SETT5C6D7E8F901234567 /* Settings */"
 TESTS_GROUP = "FB04F8A19314441A8AB2F273"
 
 
@@ -90,10 +96,12 @@ def main() -> None:
             text = insert_into_children(text, LMS_GROUP, f"{file_id} /* {name} */")
         elif group_id == DESIGN_GROUP:
             text = insert_into_children(text, DESIGN_GROUP, f"{file_id} /* {name} */")
+        elif group_id == SETTINGS_SUBGROUP:
+            text = insert_into_children(text, SETTINGS_SUBGROUP, f"{file_id} /* {name} */")
 
     if "8B80SETT5C6D7E8F901234567 /* Settings */" not in text:
         text = insert_before(text, "/* End PBXGroup section */", NEW_GROUPS)
-        text = insert_into_children(text, COURSES_GROUP, SETTINGS_SUBGROUP)
+        text = insert_into_children(text, COURSES_GROUP, SETTINGS_SUBGROUP_LABEL)
 
     PBX.write_text(text)
     print("patched", PBX)

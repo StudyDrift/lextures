@@ -16,10 +16,14 @@ import (
 
 // gradeColumn is a column in the gradebook grid (assignment or quiz item).
 type gradeColumn struct {
-	ID        string `json:"id"`
-	Kind      string `json:"kind"`
-	Title     string `json:"title"`
-	MaxPoints *int   `json:"maxPoints"`
+	ID                string  `json:"id"`
+	Kind              string  `json:"kind"`
+	Title             string  `json:"title"`
+	MaxPoints         *int    `json:"maxPoints"`
+	AssignmentGroupID *string `json:"assignmentGroupId,omitempty"`
+	DueAt             *string `json:"dueAt,omitempty"`
+	NeverDrop         bool    `json:"neverDrop"`
+	ReplaceWithFinal  bool    `json:"replaceWithFinal"`
 }
 
 // gradeStudent is a student row in the gradebook grid.
@@ -30,9 +34,11 @@ type gradeStudent struct {
 
 // gradebookGrid is the response envelope for GET .../gradebook/grid.
 type gradebookGrid struct {
-	Students []gradeStudent              `json:"students"`
-	Columns  []gradeColumn               `json:"columns"`
-	Grades   map[string]map[string]string `json:"grades"`
+	Students      []gradeStudent               `json:"students"`
+	Columns       []gradeColumn                `json:"columns"`
+	Grades        map[string]map[string]string `json:"grades"`
+	GradeHeld     map[string]map[string]bool     `json:"gradeHeld,omitempty"`
+	ExcusedGrades map[string]map[string]bool   `json:"excusedGrades,omitempty"`
 }
 
 var gradesCmd = &cobra.Command{
@@ -345,6 +351,14 @@ func fetchGradebookGrid(courseCode string) (*gradebookGrid, error) {
 }
 
 func init() {
-	gradesCmd.AddCommand(gradesListCmd, gradesUpdateCmd, gradesExportCmd)
-	rootCmd.AddCommand(gradesCmd)
+	gradesCmd.AddCommand(
+		gradesListCmd,
+		gradesUpdateCmd,
+		gradesExportCmd,
+		gradesSchemeCmd,
+		gradesCurveCmd,
+		gradesWhatIfCmd,
+		gradesHistoryCmd,
+	)
+	rootCmd.AddCommand(gradesCmd, gradebookCmd, finalGradesCmd, gradingBacklogCmd)
 }
