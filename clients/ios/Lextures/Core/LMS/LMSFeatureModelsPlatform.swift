@@ -44,4 +44,6 @@ struct PlatformFeatures: Decodable {
     var ffTaxCollection: Bool?
     var ffAdvisingIntegration: Bool?
     var ffMobileAdvising: Bool?
+    var ffParentPortal: Bool?
+    var ffConferenceScheduling: Bool?
 }

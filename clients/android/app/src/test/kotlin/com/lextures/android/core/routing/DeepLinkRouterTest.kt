@@ -58,4 +58,20 @@ class DeepLinkRouterTest {
     fun resolvesCredentialsPath() {
         assertTrue(DeepLinkRouter.resolve("/me/credentials") is DeepLinkDestination.Credentials)
     }
+
+    @Test
+    fun resolvesParentDashboardPath() {
+        val destination = DeepLinkRouter.resolve("/parent?student=child-1")
+        assertTrue(destination is DeepLinkDestination.Parent)
+        destination as DeepLinkDestination.Parent
+        assertEquals("child-1", destination.studentId)
+        assertEquals(ParentDeepLinkSection.Dashboard, destination.section)
+    }
+
+    @Test
+    fun resolvesParentConferencesPath() {
+        val destination = DeepLinkRouter.resolve("/parent/conferences")
+        assertTrue(destination is DeepLinkDestination.Parent)
+        assertEquals(ParentDeepLinkSection.Conferences, (destination as DeepLinkDestination.Parent).section)
+    }
 }

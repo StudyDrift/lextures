@@ -26,4 +26,14 @@ enum MobileIaPreferences {
     static func saveRoleContext(_ context: MobileRoleContext) {
         UserDefaults.standard.set(context.rawValue, forKey: roleContextKey)
     }
+
+    private static let selectedChildKey = "mobile_parent_selected_child"
+
+    static func loadSelectedChildId() -> String? {
+        UserDefaults.standard.string(forKey: selectedChildKey)
+    }
+
+    static func saveSelectedChildId(_ studentId: String) {
+        UserDefaults.standard.set(studentId, forKey: selectedChildKey)
+    }
 }

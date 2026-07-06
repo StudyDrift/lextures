@@ -11,6 +11,15 @@ enum DeepLinkDestination: Equatable {
     case checkoutSuccess(courseId: String?)
     case checkoutCancel
     case course(code: String, section: CourseDeepLinkSection?, itemId: String?)
+    case parent(studentId: String?, section: ParentDeepLinkSection)
+}
+
+enum ParentDeepLinkSection: Equatable {
+    case dashboard
+    case grades
+    case attendance
+    case conferences
+    case notificationPrefs
 }
 
 enum CourseDeepLinkSection: String, Equatable {
@@ -39,6 +48,9 @@ enum DeepLinkRouter {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if let checkout = resolveCheckout(from: trimmed) {
             return checkout
+        }
+        if let parent = resolveParent(from: trimmed) {
+            return parent
         }
         if let path = extractPath(from: trimmed) {
             return resolvePath(path)
@@ -93,12 +105,52 @@ enum DeepLinkRouter {
         }
     }
 
+    private static func resolveParent(from raw: String) -> DeepLinkDestination? {
+        let urlString = raw.hasPrefix("/") ? "https://lextures.com\(raw)" : raw
+        guard let url = URL(string: urlString),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        let path = components.path
+        guard path == "/parent" || path.hasPrefix("/parent/") else { return nil }
+        let studentId = components.queryItems?.first(where: { $0.name == "student" })?.value
+        let section: ParentDeepLinkSection
+        if path.contains("conferences") {
+            section = .conferences
+        } else if path.contains("notification") {
+            section = .notificationPrefs
+        } else if path.contains("grades") {
+            section = .grades
+        } else if path.contains("attendance") {
+            section = .attendance
+        } else {
+            section = .dashboard
+        }
+        return .parent(studentId: studentId, section: section)
+    }
+
     private static func resolveNonCoursePath(_ segments: [String]) -> DeepLinkDestination {
         switch segments.first?.lowercased() {
         case "inbox":
             return .inbox
         case "review":
             return .review
+        case "parent":
+            if segments.count >= 2 {
+                switch segments[1].lowercased() {
+                case "conferences":
+                    return .parent(studentId: nil, section: .conferences)
+                case "notification-prefs":
+                    return .parent(studentId: nil, section: .notificationPrefs)
+                case "grades":
+                    return .parent(studentId: nil, section: .grades)
+                case "attendance":
+                    return .parent(studentId: nil, section: .attendance)
+                default:
+                    break
+                }
+            }
+            return .parent(studentId: nil, section: .dashboard)
         default:
             if segments.count >= 2, segments[0].lowercased() == "me" {
                 switch segments[1].lowercased() {

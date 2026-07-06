@@ -127,6 +127,16 @@ class HomeShellState {
     var pendingCheckout by mutableStateOf<com.lextures.android.core.lms.PendingCheckoutContext?>(null)
     var checkoutReturnPhase by mutableStateOf<com.lextures.android.core.lms.CheckoutReturnPhase?>(null)
     var pendingBilling by mutableStateOf(false)
+    var pendingParentStudentId by mutableStateOf<String?>(null)
+    var pendingParentSubRoute by mutableStateOf<com.lextures.android.features.parent.ParentSubRoute?>(null)
+
+    fun consumePendingParentNavigation(): Pair<String?, com.lextures.android.features.parent.ParentSubRoute?>? {
+        val studentId = pendingParentStudentId
+        val route = pendingParentSubRoute
+        pendingParentStudentId = null
+        pendingParentSubRoute = null
+        return if (studentId != null || route != null) studentId to route else null
+    }
 
     // Drawer navigation (web-parity sidebar)
     var drawerState by mutableStateOf(DrawerState.None)
@@ -234,8 +244,46 @@ class HomeShellState {
                     RootDestination.Dashboard
                 }
                 is DeepLinkDestination.Course -> RootDestination.Courses
+                is DeepLinkDestination.Parent -> {
+                    if (roleSnapshot.hasParentDashboard) {
+                        setRoleContext(MobileRoleContext.Parent)
+                    }
+                    destination.studentId?.let {
+                        MobileIaPreferences.saveSelectedChildId(androidContext, it)
+                        pendingParentStudentId = it
+                    }
+                    pendingParentSubRoute = parentSubRoute(destination.studentId, destination.section)
+                    RootDestination.Children
+                }
             },
         )
+    }
+
+    private fun parentSubRoute(
+        studentId: String?,
+        section: com.lextures.android.core.routing.ParentDeepLinkSection,
+    ): com.lextures.android.features.parent.ParentSubRoute? {
+        val resolvedStudentId = studentId
+            ?: pendingParentStudentId
+            ?: MobileIaPreferences.loadSelectedChildId(androidContext)
+        if (resolvedStudentId == null) {
+            return when (section) {
+                com.lextures.android.core.routing.ParentDeepLinkSection.NotificationPrefs ->
+                    com.lextures.android.features.parent.ParentSubRoute.NotificationPrefs
+                else -> null
+            }
+        }
+        return when (section) {
+            com.lextures.android.core.routing.ParentDeepLinkSection.Dashboard -> null
+            com.lextures.android.core.routing.ParentDeepLinkSection.Grades ->
+                com.lextures.android.features.parent.ParentSubRoute.Grades
+            com.lextures.android.core.routing.ParentDeepLinkSection.Attendance ->
+                com.lextures.android.features.parent.ParentSubRoute.Attendance
+            com.lextures.android.core.routing.ParentDeepLinkSection.Conferences ->
+                com.lextures.android.features.parent.ParentSubRoute.Conferences
+            com.lextures.android.core.routing.ParentDeepLinkSection.NotificationPrefs ->
+                com.lextures.android.features.parent.ParentSubRoute.NotificationPrefs
+        }
     }
 
     fun consumePendingBilling(): Boolean {
@@ -536,12 +584,22 @@ private fun RootPane(
     modifier: Modifier = Modifier,
 ) {
     when (destination) {
-        RootDestination.Dashboard -> DashboardTab(
-            session = session,
-            shell = shell,
-            onOpenProfile = { shell.select(RootDestination.Profile) },
-            modifier = modifier,
-        )
+        RootDestination.Dashboard -> if (shell.activeRoleContext == MobileRoleContext.Parent) {
+            com.lextures.android.features.parent.ParentDashboardScreen(
+                session = session,
+                shell = shell,
+                initialStudentId = shell.pendingParentStudentId,
+                initialRoute = shell.pendingParentSubRoute,
+                modifier = modifier,
+            )
+        } else {
+            DashboardTab(
+                session = session,
+                shell = shell,
+                onOpenProfile = { shell.select(RootDestination.Profile) },
+                modifier = modifier,
+            )
+        }
         RootDestination.Courses -> CoursesTab(session = session, shell = shell, modifier = modifier)
         RootDestination.Notebooks -> NotebooksTab(session = session, modifier = modifier)
         RootDestination.GlobalNotebook -> NotebooksTab(
@@ -557,7 +615,13 @@ private fun RootPane(
         RootDestination.Profile, RootDestination.Settings ->
             ProfileTab(session = session, shell = shell, modifier = modifier)
         RootDestination.Teach -> TeachHubScreen(session = session, shell = shell, modifier = modifier)
-        RootDestination.Children -> ChildrenPlaceholderScreen(modifier = modifier)
+        RootDestination.Children -> com.lextures.android.features.parent.ParentDashboardScreen(
+            session = session,
+            shell = shell,
+            initialStudentId = shell.pendingParentStudentId,
+            initialRoute = shell.pendingParentSubRoute,
+            modifier = modifier,
+        )
         RootDestination.Calendar -> PlannerScreen(
             session = session,
             offline = offline,

@@ -463,6 +463,8 @@ data class PlatformFeatures(
     val ffTaxCollection: Boolean? = null,
     val ffAdvisingIntegration: Boolean? = null,
     val ffMobileAdvising: Boolean? = null,
+    val ffParentPortal: Boolean? = null,
+    val ffConferenceScheduling: Boolean? = null,
 )
 
 @Serializable
