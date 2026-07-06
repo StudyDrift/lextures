@@ -89,7 +89,7 @@ fun PlannerScreen(
         loading = true
         errorMessage = null
         try {
-            val result = PlannerLoader.load(token, offline, isOnline)
+            val result = PlannerLoader.load(token, offline, isOnline, context)
             courses = result.courses
             courseFilters = result.courseFilters
             todos = result.todos

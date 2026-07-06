@@ -159,7 +159,7 @@ struct ConferenceSlot: Codable, Identifiable, Hashable {
     var bookedAt: String?
 }
 
-struct ConferenceSlotsResponse: Decodable {
+struct ConferenceSlotsResponse: Codable {
     var availability: ConferenceAvailability?
     var slots: [ConferenceSlot]?
 }

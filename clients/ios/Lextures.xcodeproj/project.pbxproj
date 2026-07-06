@@ -109,6 +109,7 @@
 		B13B2B9D3DC8484495C8A7E7 /* PathsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0B0DC9B735439DBE82A641 /* PathsLogic.swift */; };
 		EDE4DD7BA925460D92AF9556 /* PeerReviewLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503CE5620AE24E6091706DFF /* PeerReviewLogic.swift */; };
 		9CA6404C060D448EB0BA2DF7 /* PlannerLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EB6FE5BD5C54725980B99F0 /* PlannerLogic.swift */; };
+		8B60EC2D3E4F5061728394 /* PlannerSnapshotCoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60ED3E4F5061728394A5 /* PlannerSnapshotCoding.swift */; };
 		A0FF003AF72A42ABADBAA42C /* ProfileDepthLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98A5473FEEC5441090086C8B /* ProfileDepthLogic.swift */; };
 		B67821BFB4A642B4BF91CA4C /* ProfileDepthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90DD0EE181114F0084AF7167 /* ProfileDepthModels.swift */; };
 		EF801C68BF324186BE1E07EF /* QuizLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC352E88D204709B0961C68 /* QuizLogic.swift */; };
@@ -360,6 +361,8 @@
 		8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */; };
 		8B60BC2D3E4F5061728394 /* ConferenceLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */; };
 		8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */; };
+		8B60CC3D3E4F5061728394 /* MyConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CE3E4F5061728394A5 /* MyConferencesView.swift */; };
+		8B60DC2D3E4F5061728394 /* ConferenceReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -467,6 +470,7 @@
 		7E0B0DC9B735439DBE82A641 /* PathsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathsLogic.swift; sourceTree = "<group>"; };
 		503CE5620AE24E6091706DFF /* PeerReviewLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerReviewLogic.swift; sourceTree = "<group>"; };
 		8EB6FE5BD5C54725980B99F0 /* PlannerLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerLogic.swift; sourceTree = "<group>"; };
+		8B60ED3E4F5061728394A5 /* PlannerSnapshotCoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerSnapshotCoding.swift; sourceTree = "<group>"; };
 		98A5473FEEC5441090086C8B /* ProfileDepthLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDepthLogic.swift; sourceTree = "<group>"; };
 		90DD0EE181114F0084AF7167 /* ProfileDepthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDepthModels.swift; sourceTree = "<group>"; };
 		9AC352E88D204709B0961C68 /* QuizLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizLogic.swift; sourceTree = "<group>"; };
@@ -720,6 +724,8 @@
 		8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentLogicTests.swift; sourceTree = "<group>"; };
 		8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceLogicTests.swift; sourceTree = "<group>"; };
 		8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentDashboardSections.swift; sourceTree = "<group>"; };
+		8B60CE3E4F5061728394A5 /* MyConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyConferencesView.swift; sourceTree = "<group>"; };
+		8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceReminderScheduler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1022,6 +1028,7 @@
 				7E0B0DC9B735439DBE82A641 /* PathsLogic.swift */,
 				503CE5620AE24E6091706DFF /* PeerReviewLogic.swift */,
 				8EB6FE5BD5C54725980B99F0 /* PlannerLogic.swift */,
+				8B60ED3E4F5061728394A5 /* PlannerSnapshotCoding.swift */,
 				98A5473FEEC5441090086C8B /* ProfileDepthLogic.swift */,
 				90DD0EE181114F0084AF7167 /* ProfileDepthModels.swift */,
 				9AC352E88D204709B0961C68 /* QuizLogic.swift */,
@@ -1433,6 +1440,7 @@
 			children = (
 				9CEB62AB01A045DDAEA7B5E4 /* CalendarSubscribeSheet.swift */,
 				F388290B4F2441588160BA66 /* CalendarView.swift */,
+				8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */,
 				4A99A307AB3D424B9336121D /* DueReminderScheduler.swift */,
 				C96DFA8D559A4637897D73AD /* OfficeHoursReminderScheduler.swift */,
 				1776EDB62E274D0AA1FC3A00 /* PlannerModel.swift */,
@@ -1573,6 +1581,7 @@
 				8B607D3E4F5061728394A5 /* ParentAttendanceDetailView.swift */,
 				8B608D3E4F5061728394A5 /* ParentNotificationPrefsView.swift */,
 				8B609D3E4F5061728394A5 /* ConferenceBookingView.swift */,
+				8B60CE3E4F5061728394A5 /* MyConferencesView.swift */,
 			);
 			path = Parent;
 			sourceTree = "<group>";
@@ -1684,6 +1693,10 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+
+				8B60DC2D3E4F5061728394 /* ConferenceReminderScheduler.swift in Sources */,
+
+				8B60CC3D3E4F5061728394 /* MyConferencesView.swift in Sources */,
 
 				8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */,
 				8B609C2D3E4F5061728394 /* ConferenceBookingView.swift in Sources */,
@@ -1797,6 +1810,7 @@
 				B13B2B9D3DC8484495C8A7E7 /* PathsLogic.swift in Sources */,
 				EDE4DD7BA925460D92AF9556 /* PeerReviewLogic.swift in Sources */,
 				9CA6404C060D448EB0BA2DF7 /* PlannerLogic.swift in Sources */,
+				8B60EC2D3E4F5061728394 /* PlannerSnapshotCoding.swift in Sources */,
 				A0FF003AF72A42ABADBAA42C /* ProfileDepthLogic.swift in Sources */,
 				B67821BFB4A642B4BF91CA4C /* ProfileDepthModels.swift in Sources */,
 				EF801C68BF324186BE1E07EF /* QuizLogic.swift in Sources */,

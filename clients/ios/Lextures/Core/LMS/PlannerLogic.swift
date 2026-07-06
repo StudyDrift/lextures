@@ -31,6 +31,7 @@ enum PlannerCalendarEventKind: String, Hashable {
     case academic
     case officeHours
     case liveMeeting
+    case conference
 }
 
 struct StudentTodoItem: Identifiable, Hashable {
@@ -65,6 +66,8 @@ struct PlannerCalendarEvent: Identifiable, Hashable {
     let notebookPageId: String?
     let officeHoursSlotId: String?
     let meetingId: String?
+    let conferenceSlotId: String?
+    let videoLink: String?
 
     init(
         id: String,
@@ -79,7 +82,9 @@ struct PlannerCalendarEvent: Identifiable, Hashable {
         structureItemId: String?,
         notebookPageId: String?,
         officeHoursSlotId: String? = nil,
-        meetingId: String? = nil
+        meetingId: String? = nil,
+        conferenceSlotId: String? = nil,
+        videoLink: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -94,6 +99,8 @@ struct PlannerCalendarEvent: Identifiable, Hashable {
         self.notebookPageId = notebookPageId
         self.officeHoursSlotId = officeHoursSlotId
         self.meetingId = meetingId
+        self.conferenceSlotId = conferenceSlotId
+        self.videoLink = videoLink
     }
 }
 
@@ -139,6 +146,8 @@ struct CachedPlannerCalendarEvent: Codable, Hashable {
     var notebookPageId: String?
     var officeHoursSlotId: String?
     var meetingId: String?
+    var conferenceSlotId: String?
+    var videoLink: String?
 }
 
 enum DueReminderLeadTime: Int, CaseIterable, Identifiable {
@@ -302,7 +311,8 @@ enum PlannerLogic {
         notebookTasks: [NotebookTask],
         academicEvents: [AcademicCalendarEvent],
         officeHoursByCourseCode: [String: OfficeHoursAvailability] = [:],
-        liveMeetingsByCourseCode: [String: [VirtualMeeting]] = [:]
+        liveMeetingsByCourseCode: [String: [VirtualMeeting]] = [:],
+        parentConferenceBookings: [ParentConferenceBooking] = []
     ) -> [PlannerCalendarEvent] {
         var events: [PlannerCalendarEvent] = []
         let courseTitles = Dictionary(uniqueKeysWithValues: studentCourses.map { ($0.courseCode, $0.displayTitle) })
@@ -380,6 +390,7 @@ enum PlannerLogic {
             studentCourses: studentCourses,
             meetingsByCourseCode: liveMeetingsByCourseCode
         ))
+        events.append(contentsOf: ConferenceLogic.calendarEvents(from: parentConferenceBookings))
 
         return events.sorted { $0.startsAt < $1.startsAt }
     }
@@ -429,21 +440,6 @@ enum PlannerLogic {
             .map { $0 }
     }
 
-    static func encodeSnapshot(todos: [StudentTodoItem], events: [PlannerCalendarEvent], fetchedAt: Date = Date()) -> PlannerSnapshot {
-        PlannerSnapshot(
-            fetchedAt: fetchedAt,
-            todos: todos.map(cachedTodo),
-            events: events.map(cachedEvent)
-        )
-    }
-
-    static func decodeSnapshot(_ snapshot: PlannerSnapshot) -> (todos: [StudentTodoItem], events: [PlannerCalendarEvent]) {
-        (
-            snapshot.todos.map(decodedTodo),
-            snapshot.events.map(decodedEvent)
-        )
-    }
-
     // MARK: - Private
 
     private static func isDueStructureItem(_ item: CourseStructureItem) -> Bool {
@@ -473,75 +469,5 @@ enum PlannerLogic {
     private static func courseTitle(for courseCode: String, titles: [String: String]) -> String {
         if courseCode == "__global__" { return "Notebook" }
         return titles[courseCode] ?? courseCode
-    }
-
-    private static func cachedTodo(_ item: StudentTodoItem) -> CachedStudentTodoItem {
-        CachedStudentTodoItem(
-            key: item.key,
-            kind: item.kind.rawValue,
-            title: item.title,
-            courseCode: item.courseCode,
-            courseTitle: item.courseTitle,
-            dueAt: item.dueAt.map { ISO8601DateFormatter().string(from: $0) },
-            structureKind: item.structureKind,
-            structureItemId: item.structureItemId,
-            notebookPageId: item.notebookPageId,
-            notebookTaskId: item.notebookTaskId,
-            evaluationWindowId: item.evaluationWindowId,
-            completion: item.completion.rawValue
-        )
-    }
-
-    private static func decodedTodo(_ cached: CachedStudentTodoItem) -> StudentTodoItem {
-        StudentTodoItem(
-            key: cached.key,
-            kind: StudentTodoKind(rawValue: cached.kind) ?? .dueItem,
-            title: cached.title,
-            courseCode: cached.courseCode,
-            courseTitle: cached.courseTitle,
-            dueAt: LMSDates.parse(cached.dueAt),
-            structureKind: cached.structureKind,
-            structureItemId: cached.structureItemId,
-            notebookPageId: cached.notebookPageId,
-            notebookTaskId: cached.notebookTaskId,
-            evaluationWindowId: cached.evaluationWindowId,
-            completion: StudentTodoCompletion(rawValue: cached.completion) ?? .open
-        )
-    }
-
-    private static func cachedEvent(_ event: PlannerCalendarEvent) -> CachedPlannerCalendarEvent {
-        CachedPlannerCalendarEvent(
-            id: event.id,
-            title: event.title,
-            courseCode: event.courseCode,
-            courseTitle: event.courseTitle,
-            startsAt: ISO8601DateFormatter().string(from: event.startsAt),
-            endsAt: event.endsAt.map { ISO8601DateFormatter().string(from: $0) },
-            allDay: event.allDay,
-            kind: event.kind.rawValue,
-            structureKind: event.structureKind,
-            structureItemId: event.structureItemId,
-            notebookPageId: event.notebookPageId,
-            officeHoursSlotId: event.officeHoursSlotId,
-            meetingId: event.meetingId
-        )
-    }
-
-    private static func decodedEvent(_ cached: CachedPlannerCalendarEvent) -> PlannerCalendarEvent {
-        PlannerCalendarEvent(
-            id: cached.id,
-            title: cached.title,
-            courseCode: cached.courseCode,
-            courseTitle: cached.courseTitle,
-            startsAt: LMSDates.parse(cached.startsAt) ?? Date(),
-            endsAt: cached.endsAt.flatMap { LMSDates.parse($0) },
-            allDay: cached.allDay,
-            kind: PlannerCalendarEventKind(rawValue: cached.kind) ?? .academic,
-            structureKind: cached.structureKind,
-            structureItemId: cached.structureItemId,
-            notebookPageId: cached.notebookPageId,
-            officeHoursSlotId: cached.officeHoursSlotId,
-            meetingId: cached.meetingId
-        )
     }
 }

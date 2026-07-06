@@ -1,6 +1,8 @@
 package com.lextures.android.features.planner
 
+import android.content.Context
 import com.lextures.android.core.lms.AcademicCalendarEvent
+import com.lextures.android.core.lms.ConferenceLogic
 import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.EvaluationStatus
@@ -29,6 +31,7 @@ object PlannerLoader {
         accessToken: String,
         offline: OfflineService,
         isOnline: Boolean,
+        context: Context,
     ): PlannerLoadResult {
         val coursesResult = offline.fetchCoursesCached(accessToken) {
             LmsApi.fetchCourses(accessToken)
@@ -44,7 +47,7 @@ object PlannerLoader {
             key = OfflineCacheKey.plannerSnapshot(),
             accessToken = accessToken,
             serializer = PlannerSnapshot.serializer(),
-            fetch = { fetchSnapshot(students, accessToken) },
+            fetch = { fetchSnapshot(students, accessToken, context) },
         )
         val (todos, events) = PlannerLogic.decodeSnapshot(snapshotResult.first)
         val staleLabel = snapshotResult.second
@@ -63,6 +66,7 @@ object PlannerLoader {
     private suspend fun fetchSnapshot(
         studentCourses: List<CourseSummary>,
         accessToken: String,
+        context: Context,
     ): PlannerSnapshot = coroutineScope {
         val notebookTasks = runCatching { NotebookTasksApi.fetch(accessToken) }.getOrDefault(emptyList())
         val structures = mutableMapOf<String, List<CourseStructureItem>>()
@@ -133,6 +137,22 @@ object PlannerLoader {
             }
         }
 
+        val parentConferenceEvents = runCatching {
+            val children = LmsApi.fetchParentChildren(accessToken)
+            if (children.isEmpty()) {
+                emptyList()
+            } else {
+                val childTuples = children.map { child ->
+                    val name = child.displayName?.trim().takeUnless { it.isNullOrEmpty() } ?: child.email
+                    child.studentUserId to name
+                }
+                ConferenceLogic.calendarEvents(
+                    context,
+                    ConferenceLogic.loadParentBookings(childTuples, accessToken),
+                )
+            }
+        }.getOrDefault(emptyList())
+
         val todos = PlannerLogic.collectTodos(
             studentCourses,
             structures,
@@ -147,6 +167,7 @@ object PlannerLoader {
             academic,
             officeHoursByCourse,
             liveMeetingsByCourse,
+            parentConferenceEvents,
         )
         PlannerLogic.encodeSnapshot(todos, events)
     }
