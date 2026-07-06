@@ -122,5 +122,25 @@ final class MobileDestinationsTests: XCTestCase {
     func testDeepLinkMapsToWorkspaceSection() {
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .feed), .feed)
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .attendance), .attendance)
+        XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .behavior), .behavior)
+        XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .hallPass), .hallPass)
+    }
+
+    func testCourseWorkspaceShowsBehaviorForStaffWhenClassroomSignalsOn() {
+        var features = MobilePlatformFeatures()
+        features.ffClassroomSignals = true
+        let course = CourseSummary(
+            id: "1",
+            courseCode: "demo",
+            title: "Demo",
+            description: "",
+            viewerEnrollmentRoles: ["teacher"],
+            sectionsEnabled: true
+        )
+        let sections = MobileDestinations.courseWorkspaceSections(
+            CourseWorkspaceContext(course: course, platformFeatures: features)
+        )
+        XCTAssertTrue(sections.contains(.behavior))
+        XCTAssertTrue(sections.contains(.hallPass))
     }
 }

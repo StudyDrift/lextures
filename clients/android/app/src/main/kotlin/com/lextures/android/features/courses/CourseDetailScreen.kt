@@ -16,6 +16,9 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import com.lextures.android.R
 import com.lextures.android.core.i18n.L
+import com.lextures.android.features.behavior.BehaviorRosterScreen
+import com.lextures.android.features.behavior.HallPassScreen
+import com.lextures.android.features.behavior.MyHallPassScreen
 import com.lextures.android.features.navigation.courseSectionLabelRes
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -489,6 +492,16 @@ fun CourseDetailScreen(
                             showResults = course.viewerIsStaff ||
                                 (selectedSection == CourseWorkspaceSection.Evaluations && deepLinkThreadId == "results"),
                         )
+                    }
+                    CourseWorkspaceSection.Behavior -> item {
+                        BehaviorRosterScreen(session = session, course = course)
+                    }
+                    CourseWorkspaceSection.HallPass -> item {
+                        if (course.viewerIsStaff) {
+                            HallPassScreen(session = session, course = course)
+                        } else {
+                            MyHallPassScreen(session = session, course = course)
+                        }
                     }
                     CourseWorkspaceSection.Modules -> {
                         if (loading && items.isEmpty()) {

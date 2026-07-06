@@ -37,6 +37,8 @@ enum CourseDeepLinkSection: String, Equatable {
     case library
     case groups
     case collabDocs
+    case behavior
+    case hallPass
 }
 
 /// Maps web-style action URLs and `lextures://` links to native navigation intents.
@@ -215,6 +217,10 @@ enum DeepLinkRouter {
             return .library
         case "groups":
             return .groups
+        case "behavior":
+            return .behavior
+        case "hall-pass":
+            return .hallPass
         default:
             return .overview
         }

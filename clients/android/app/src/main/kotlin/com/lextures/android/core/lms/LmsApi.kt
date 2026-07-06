@@ -2605,4 +2605,94 @@ object LmsApi {
     }
 
     // endregion
+
+    // Behavior / PBIS and hall pass (M10.3)
+
+    suspend fun listBehaviorCategories(orgId: String, accessToken: String): List<BehaviorCategory> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/admin/orgs/${encodePath(orgId)}/behavior/categories",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<BehaviorCategoriesResponse>(body).categories
+        }
+
+    suspend fun awardPbisPoints(awards: List<PbisAwardInput>, accessToken: String): PbisAwardsResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/pbis/awards",
+                method = "POST",
+                body = client.encodeBody(PbisAwardsBody(awards), PbisAwardsBody.serializer()),
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fileBehaviorReferral(body: BehaviorReferralBody, accessToken: String): BehaviorReferral =
+        withContext(Dispatchers.IO) {
+            val (responseBody, code) = client.request(
+                path = "/api/v1/behavior/referrals",
+                method = "POST",
+                body = client.encodeBody(body, BehaviorReferralBody.serializer()),
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+            decode(responseBody)
+        }
+
+    suspend fun fetchStudentBehavior(studentId: String, accessToken: String): StudentBehaviorResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/students/${encodePath(studentId)}/behavior",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun requestHallPass(
+        sectionId: String,
+        destination: String,
+        estimatedMins: Int,
+        accessToken: String,
+    ): HallPass = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/sections/${encodePath(sectionId)}/hall-passes",
+            method = "POST",
+            body = client.encodeBody(
+                RequestHallPassBody(destination = destination, estimatedMins = estimatedMins),
+                RequestHallPassBody.serializer(),
+            ),
+            accessToken = accessToken,
+        )
+        if (code == 501) throw ApiError.HttpStatus(501, "Classroom signals disabled")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<HallPassResponse>(body).pass ?: throw ApiError.Decoding(IllegalStateException("Missing pass"))
+    }
+
+    suspend fun fetchActiveHallPasses(sectionId: String, accessToken: String): List<HallPass> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/sections/${encodePath(sectionId)}/hall-passes/active",
+                accessToken = accessToken,
+            )
+            if (code == 501) throw ApiError.HttpStatus(501, "Classroom signals disabled")
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<ActiveHallPassesResponse>(body).passes
+        }
+
+    suspend fun updateHallPass(passId: String, status: String, accessToken: String): HallPass =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/hall-passes/${encodePath(passId)}",
+                method = "PATCH",
+                body = client.encodeBody(UpdateHallPassBody(status = status), UpdateHallPassBody.serializer()),
+                accessToken = accessToken,
+            )
+            if (code == 501) throw ApiError.HttpStatus(501, "Classroom signals disabled")
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<HallPassResponse>(body).pass ?: throw ApiError.Decoding(IllegalStateException("Missing pass"))
+        }
 }
