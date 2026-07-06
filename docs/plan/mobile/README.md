@@ -93,6 +93,8 @@ Android unless noted. Epics:
 | **M10** | K-12 & Parent — parent portal, attendance-taking, behavior/PBIS, report cards, conference booking, hall pass, age-appropriate UI |
 | **M11** | Instructor on Mobile — grading depth, take attendance, post announcement, quick authoring caps |
 | **M12** | Portfolios & Credentials — e-portfolio, co-curricular transcript, CCR, certificates wallet |
+| **M13** | Course Settings & Configuration — the full `/courses/{code}/settings/*` area: general, features, sections, grading, outcomes, grading agents, plagiarism, accessibility, translations, import/export, blueprint, archived |
+| **M14** | Platform, Org & Account Administration — the global `/settings/*` area (permission-gated): integrations/API access, roles, people, orgs/units/terms, branding & AI governance, platform config, AI models/prompts/reports, integrations/provisioning, transcripts/advising, archived courses |
 
 ## 5. Full backlog (every web feature → mobile disposition)
 
@@ -184,6 +186,58 @@ covered**, plus the navigation redesign needed to hold them. Added as stories:
 > now hosts it — plus a **More** hub and a header **search** entry. Every story above plugs into
 > that destination-registry contract.
 
+### Newly identified gap stories (2026-07-05 settings parity scan)
+
+A scan of the web **settings** surfaces — the course settings area
+(`pages/lms/course-settings.tsx` + `side-nav-course-settings-links.tsx`) and the global
+settings area (`pages/lms/settings.tsx`) — against the mobile app found that **none of the
+course-settings sections and none of the admin/global-settings views exist on mobile**. Only
+account/profile ([M1.4](../completed/mobile/M1.4-settings-accommodations.md)) and notification
+prefs ([M2.2](../completed/mobile/M2.2-notification-center.md)) were covered. This adds two
+epics. Every course-settings server endpoint already exists (no backend work); global-settings
+endpoints exist and are permission-gated (`rbac:manage` / `tenant:org-units:admin`) plus feature
+flags. Admin-heavy consoles are scoped as **status/review + guarded light actions natively, with
+link-out to web for credential entry and deep authoring**, consistent with the doctrine below.
+
+**M13 — Course Settings & Configuration** (instructor/course-admin; gated by
+`courseItemCreatePermission`; all endpoints exist):
+
+| Story | Web source (settings tab) | Disposition |
+|---|---|---|
+| [M13.1 Settings shell + General](./M13.1-course-settings-general.md) | `general` (basics, home, schedule, visibility, hero, theme, tz, publish) | **P1** (keystone) |
+| [M13.2 Features, tools & caption policy](./M13.2-course-features-tools.md) | `features` (+ caption policy, consortium) | **P1** |
+| [M13.3 Sections & cross-listing](./M13.3-course-sections-cross-listing.md) | `sections` (flag) | **P1** |
+| [M13.4 Grading settings](./M13.4-course-grading-settings.md) | `grading` (scale, weighted groups) | **P1** |
+| [M13.5 Outcomes settings](./M13.5-course-outcomes-settings.md) | `outcomes` | **P1** |
+| [M13.6 Grading agents](./M13.6-course-grading-agents.md) | `grading-agents` (flag) | **P2** |
+| [M13.7 Plagiarism & AI-authorship](./M13.7-course-plagiarism-settings.md) | `plagiarism` (flag) | **P2** |
+| [M13.8 Accessibility (alt-text) review](./M13.8-course-accessibility-review.md) | `accessibility` (flag) | **P2** |
+| [M13.9 Translations & localization](./M13.9-course-translations-localization.md) | `translations` (flag) | **P2** |
+| [M13.10 Import / export & backup](./M13.10-course-import-export.md) | `import-export` | **P2** |
+| [M13.11 Blueprint (curriculum sync)](./M13.11-course-blueprint-sync.md) | `blueprint` | **P2** |
+| [M13.12 Archived content](./M13.12-course-archived-content.md) | `archive` | **P2** |
+
+**M14 — Platform, Org & Account Administration** (global `/settings/*`; permission-gated):
+
+| Story | Web source (settings view) | Permission | Disposition |
+|---|---|---|---|
+| [M14.1 Account integrations & API access](./M14.1-account-integrations-api-access.md) | `integrations` (keys, calendar subs, MCP, service tokens) | user (service tokens: `rbac:manage`) | **P1** (user-facing) |
+| [M14.2 Roles & permissions](./M14.2-roles-permissions-admin.md) | `roles` | `rbac:manage` | **P2** (read + guarded assign) |
+| [M14.3 People / user management](./M14.3-people-user-management.md) | `people` | `rbac:manage` | **P2** |
+| [M14.4 Organizations, units & terms](./M14.4-organizations-units-terms.md) | `organizations`/`org-units`/`terms` | `rbac:manage` / `tenant:org-units:admin` | **P2** |
+| [M14.5 Branding, AI governance & provider](./M14.5-org-branding-ai-governance.md) | `org-branding` | `rbac:manage` / `tenant:org-units:admin` | **P2** |
+| [M14.6 Global platform config](./M14.6-global-platform-config.md) | `platform` | `rbac:manage` | **P2** (read + guarded flag toggle) |
+| [M14.7 AI models, prompts & reports](./M14.7-ai-models-prompts-reports.md) | `ai-models`/`ai-prompts`/`ai-reports` | `rbac:manage` | **P2** |
+| [M14.8 Integrations & provisioning admin](./M14.8-integrations-provisioning-admin.md) | `lti-tools`/`scim-provisioning`/`cloud-providers`/`lrs-integrations`/`oer-providers` (flags) | `rbac:manage` | **P2** (status + link-out) |
+| [M14.9 Transcripts & advising config](./M14.9-transcripts-advising-config.md) | `transcripts`/`advising` (flags) | `rbac:manage` | **P2** |
+| [M14.10 Global archived courses](./M14.10-global-archived-courses.md) | `archive` | `rbac:manage` | **P2** |
+
+> **Sequencing note.** [M13.1](./M13.1-course-settings-general.md) is the keystone for M13 — it
+> lands the course-settings shell (drawer entry, permission gate, save/unsaved-changes scaffold,
+> flag-aware section list) that M13.2–M13.12 plug into. For M14,
+> [M14.1](./M14.1-account-integrations-api-access.md) (user-facing) ships first; the admin views
+> (M14.2–M14.10) share a `mobile_admin_settings` flag and lead with read/status before edit.
+
 ### Stays web-only (reachable via in-app web view)
 
 Authoring and admin surfaces that are desktop-bound and out of scope for native:
@@ -194,6 +248,13 @@ grid editing & curving/CSV (3.11, 3.17 instructor), org/admin consoles (5.x admi
 authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
 (14.9), evaluation/template authoring (14.7). Mobile links out to these with a
 "best on a larger screen" affordance rather than reimplementing them.
+
+> **Updated by the 2026-07-05 settings scan.** The *settings/config* surfaces themselves are no
+> longer treated as pure web-only: **M13** brings the course-settings area to mobile natively, and
+> **M14** brings the permission-gated global settings to mobile as review/status + guarded light
+> actions. What stays web-only is the **deep authoring and credential entry** behind those
+> settings — SIS/SCIM/cloud/LTI secret entry, custom-domain DNS, permission-matrix authoring,
+> QTI/Common Cartridge import, and template authoring — which M14 links out to.
 
 ## 6. Sequencing / roadmap
 
@@ -212,10 +273,16 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
    M7.6 course feed ✅ + M7.7 evaluations, adaptive (M8.2 ✅/M8.3 ✅/M8.4 ✅), self-learner commerce
    (M9.1 ✅/M9.2 ✅/M9.3 ✅), parent (M10.1 ✅/M10.2), accessibility & i18n (M0.3 ✅/M0.4 ✅), settings (M1.4 ✅),
    instructor attendance (M11.1 ✅) + M11.3 instructor insights/at-risk + M11.4 course
-   people/roster.
+   people/roster. **Course settings (M13):** the settings shell + General (M13.1) lands as the
+   keystone, then the high-value instructor sections — Features (M13.2), Sections (M13.3),
+   Grading (M13.4), Outcomes (M13.5). **Account integrations (M14.1)** ships here too (user-facing).
 3. **Wave 3 — Situational (P2).** Lockdown, code exec, behavior/hall-pass,
    age-appropriate UI, e-portfolio/credentials, instructor broadcast, M7.8 advising,
-   M1.5 profile depth (demographics/custom fields/research consent).
+   M1.5 profile depth (demographics/custom fields/research consent). **Remaining course settings
+   (M13.6–M13.12):** grading agents, plagiarism, accessibility, translations, import/export,
+   blueprint, archived. **Admin/global settings (M14.2–M14.10):** roles, people, orgs/units/terms,
+   branding & AI governance, platform config, AI models/prompts/reports, integrations/provisioning,
+   transcripts/advising, archived courses — all behind `mobile_admin_settings`, read/status first.
 
 Each wave ships behind staged store releases (TestFlight / Play internal track →
 pilot cohort → GA). Per-feature server flags gate anything risky.
