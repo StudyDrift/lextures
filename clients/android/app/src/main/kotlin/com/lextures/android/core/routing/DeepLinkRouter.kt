@@ -15,6 +15,19 @@ sealed class DeepLinkDestination {
         val section: CourseDeepLinkSection? = null,
         val itemId: String? = null,
     ) : DeepLinkDestination()
+
+    data class Parent(
+        val studentId: String? = null,
+        val section: ParentDeepLinkSection = ParentDeepLinkSection.Dashboard,
+    ) : DeepLinkDestination()
+}
+
+enum class ParentDeepLinkSection {
+    Dashboard,
+    Grades,
+    Attendance,
+    Conferences,
+    NotificationPrefs,
 }
 
 enum class CourseDeepLinkSection {
@@ -40,8 +53,9 @@ object DeepLinkRouter {
         val trimmed = raw?.trim().orEmpty()
         if (trimmed.isEmpty()) return DeepLinkDestination.Home
         resolveCheckout(trimmed)?.let { return it }
+        resolveParent(trimmed)?.let { return it }
         val path = extractPath(trimmed) ?: return DeepLinkDestination.Home
-        return resolvePath(path)
+        return resolvePath(path, trimmed)
     }
 
     private fun extractPath(value: String): String? {
@@ -70,12 +84,42 @@ object DeepLinkRouter {
         return null
     }
 
-    private fun resolvePath(path: String): DeepLinkDestination {
+    private fun resolveParent(raw: String): DeepLinkDestination? {
+        val urlString = if (raw.startsWith("/")) "https://lextures.com$raw" else raw
+        val uri = runCatching { java.net.URI(urlString) }.getOrNull() ?: return null
+        val path = uri.path.orEmpty()
+        if (path != "/parent" && !path.startsWith("/parent/")) return null
+        val studentId = uri.rawQuery.orEmpty().split("&")
+            .map { it.split("=", limit = 2) }
+            .firstOrNull { it.getOrNull(0) == "student" }
+            ?.getOrNull(1)
+        val section = when {
+            path.contains("conferences") -> ParentDeepLinkSection.Conferences
+            path.contains("notification") -> ParentDeepLinkSection.NotificationPrefs
+            path.contains("grades") -> ParentDeepLinkSection.Grades
+            path.contains("attendance") -> ParentDeepLinkSection.Attendance
+            else -> ParentDeepLinkSection.Dashboard
+        }
+        return DeepLinkDestination.Parent(studentId = studentId, section = section)
+    }
+
+    private fun resolvePath(path: String, raw: String = path): DeepLinkDestination {
         val segments = path.trim('/').split('/').filter { it.isNotEmpty() }
         if (segments.firstOrNull()?.lowercase() != "courses" || segments.size < 2) {
             return when {
                 segments.firstOrNull()?.lowercase() == "inbox" -> DeepLinkDestination.Inbox
                 segments.firstOrNull()?.lowercase() == "review" -> DeepLinkDestination.Review
+                segments.firstOrNull()?.lowercase() == "parent" -> {
+                    val studentId = runCatching { android.net.Uri.parse(raw) }.getOrNull()?.getQueryParameter("student")
+                    val section = when (segments.getOrNull(1)?.lowercase()) {
+                        "conferences" -> ParentDeepLinkSection.Conferences
+                        "notification-prefs" -> ParentDeepLinkSection.NotificationPrefs
+                        "grades" -> ParentDeepLinkSection.Grades
+                        "attendance" -> ParentDeepLinkSection.Attendance
+                        else -> ParentDeepLinkSection.Dashboard
+                    }
+                    DeepLinkDestination.Parent(studentId = studentId, section = section)
+                }
                 segments.size >= 2 && segments[0].equals("me", ignoreCase = true) -> when {
                     segments[1].equals("study-insights", ignoreCase = true) -> DeepLinkDestination.Insights
                     segments[1].equals("credentials", ignoreCase = true) -> DeepLinkDestination.Credentials

@@ -2480,5 +2480,129 @@ object LmsApi {
         decode(body)
     }
 
+    // Parent portal (M10.1) and conference booking (M10.2)
+
+    suspend fun fetchParentChildren(accessToken: String): List<ParentChildSummary> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/parent/children", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<ParentChildrenResponse>(body).children
+    }
+
+    suspend fun fetchParentStudentGrades(studentId: String, accessToken: String): List<ParentCourseGradesRow> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/parent/students/${encodePath(studentId)}/grades",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<ParentGradesResponse>(body).courses
+        }
+
+    suspend fun fetchParentStudentAssignments(studentId: String, accessToken: String): List<ParentAssignmentRow> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/parent/students/${encodePath(studentId)}/assignments",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<ParentAssignmentsResponse>(body).assignments
+        }
+
+    suspend fun fetchParentStudentAttendance(studentId: String, accessToken: String): List<ParentAttendanceRecord> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/parent/students/${encodePath(studentId)}/attendance",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<ParentAttendanceResponse>(body).records
+        }
+
+    suspend fun fetchParentStudentBehavior(studentId: String, accessToken: String): ParentBehaviorResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/parent/students/${encodePath(studentId)}/behavior",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchParentWeeklySummary(accessToken: String): ParentWeeklySummaryResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/parent/weekly-summary", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchParentNotificationPrefs(accessToken: String): ParentNotificationPrefs = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/parent/notification-prefs", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun patchParentNotificationPrefs(
+        body: PatchParentNotificationPrefsBody,
+        accessToken: String,
+    ): ParentNotificationPrefs = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/parent/notification-prefs",
+            method = "PATCH",
+            body = client.encodeBody(body, PatchParentNotificationPrefsBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun fetchParentConferenceTeachers(studentId: String, accessToken: String): List<ConferenceTeacher> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/parent/conference-teachers?studentId=${encodePath(studentId)}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<ConferenceTeachersResponse>(body).teachers
+        }
+
+    suspend fun fetchConferenceSlots(
+        teacherId: String,
+        date: String,
+        accessToken: String,
+    ): ConferenceSlotsResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            "/api/v1/teachers/${encodePath(teacherId)}/conference-slots?date=${encodePath(date)}",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun bookConferenceSlot(
+        slotId: String,
+        studentId: String,
+        accessToken: String,
+        conflictMessage: String,
+    ): ConferenceSlot = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/conference-slots/${encodePath(slotId)}/book",
+            method = "POST",
+            body = client.encodeBody(BookConferenceSlotBody(studentId), BookConferenceSlotBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code == 409) throw ApiError.HttpStatus(code, conflictMessage)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<ConferenceSlotResponse>(body).slot ?: throw ApiError.Decoding(IllegalStateException("Missing slot"))
+    }
+
+    suspend fun cancelConferenceBooking(slotId: String, accessToken: String): ConferenceSlot = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/conference-slots/${encodePath(slotId)}/book",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<ConferenceSlotResponse>(body).slot ?: throw ApiError.Decoding(IllegalStateException("Missing slot"))
+    }
+
     // endregion
 }

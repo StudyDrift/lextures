@@ -220,7 +220,6 @@
 		9E2EB7B8FC7D43D0994349F6 /* CourseGroupsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB2475247D641378E222A19 /* CourseGroupsSection.swift */; };
 		B346D5F498414EC1ACF94EFD /* GroupSpaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685C557E3B444B2686341A25 /* GroupSpaceView.swift */; };
 		0F3180CE6AF54A5A861FF7B9 /* AnnouncementsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF7364ED115A492FA4C84082 /* AnnouncementsViews.swift */; };
-		D6B10E66C06341D68B0A8DFB /* ChildrenPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7222A9AC597E4B74B543E776 /* ChildrenPlaceholderView.swift */; };
 		BDD9548103E84E8A9B999797 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D35DF2E7344F18BE7BE6C4 /* MainTabView.swift */; };
 		77CB7C5C3F374E03BA2BDC06 /* MoreHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4D00ED5523441CB26C4D43 /* MoreHubView.swift */; };
 		7D7CD68178504072AC8101FE /* ShellHeaderBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C617A3566E74FF58194EB21 /* ShellHeaderBar.swift */; };
@@ -349,6 +348,18 @@
 		197379A9CCDE42FBA3509618 /* VibeActivityLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F7C4E5B29D4D9B86606947 /* VibeActivityLogicTests.swift */; };
 		1661CD891F7A421BA44555AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5C8F791AFB704172AFCC83FB /* Assets.xcassets */; };
 		2A46B40A58694D6D96BD3AA4 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0487E2BCC8642249EDBE395 /* Localizable.xcstrings */; };
+		8B601C2D3E4F5061728394 /* ParentLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B601D3E4F5061728394A5 /* ParentLogic.swift */; };
+		8B602C2D3E4F5061728394 /* ConferenceLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B602D3E4F5061728394A5 /* ConferenceLogic.swift */; };
+		8B603C2D3E4F5061728394 /* LMSFeatureModelsParent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B603D3E4F5061728394A5 /* LMSFeatureModelsParent.swift */; };
+		8B604C2D3E4F5061728394 /* LMSAPIParent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B604D3E4F5061728394A5 /* LMSAPIParent.swift */; };
+		8B605C2D3E4F5061728394 /* ParentDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B605D3E4F5061728394A5 /* ParentDashboardView.swift */; };
+		8B606C2D3E4F5061728394 /* ParentGradesDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B606D3E4F5061728394A5 /* ParentGradesDetailView.swift */; };
+		8B607C2D3E4F5061728394 /* ParentAttendanceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B607D3E4F5061728394A5 /* ParentAttendanceDetailView.swift */; };
+		8B608C2D3E4F5061728394 /* ParentNotificationPrefsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B608D3E4F5061728394A5 /* ParentNotificationPrefsView.swift */; };
+		8B609C2D3E4F5061728394 /* ConferenceBookingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B609D3E4F5061728394A5 /* ConferenceBookingView.swift */; };
+		8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */; };
+		8B60BC2D3E4F5061728394 /* ConferenceLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */; };
+		8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -567,7 +578,6 @@
 		FBB2475247D641378E222A19 /* CourseGroupsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseGroupsSection.swift; sourceTree = "<group>"; };
 		685C557E3B444B2686341A25 /* GroupSpaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSpaceView.swift; sourceTree = "<group>"; };
 		BF7364ED115A492FA4C84082 /* AnnouncementsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementsViews.swift; sourceTree = "<group>"; };
-		7222A9AC597E4B74B543E776 /* ChildrenPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChildrenPlaceholderView.swift; sourceTree = "<group>"; };
 		27D35DF2E7344F18BE7BE6C4 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		8E4D00ED5523441CB26C4D43 /* MoreHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreHubView.swift; sourceTree = "<group>"; };
 		7C617A3566E74FF58194EB21 /* ShellHeaderBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellHeaderBar.swift; sourceTree = "<group>"; };
@@ -698,6 +708,18 @@
 		B0487E2BCC8642249EDBE395 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		E9CF1F39819A4A49BFDF0E87 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		724C2F02EE20441AA01E9979 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
+		8B601D3E4F5061728394A5 /* ParentLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentLogic.swift; sourceTree = "<group>"; };
+		8B602D3E4F5061728394A5 /* ConferenceLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceLogic.swift; sourceTree = "<group>"; };
+		8B603D3E4F5061728394A5 /* LMSFeatureModelsParent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsParent.swift; sourceTree = "<group>"; };
+		8B604D3E4F5061728394A5 /* LMSAPIParent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIParent.swift; sourceTree = "<group>"; };
+		8B605D3E4F5061728394A5 /* ParentDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentDashboardView.swift; sourceTree = "<group>"; };
+		8B606D3E4F5061728394A5 /* ParentGradesDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentGradesDetailView.swift; sourceTree = "<group>"; };
+		8B607D3E4F5061728394A5 /* ParentAttendanceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentAttendanceDetailView.swift; sourceTree = "<group>"; };
+		8B608D3E4F5061728394A5 /* ParentNotificationPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentNotificationPrefsView.swift; sourceTree = "<group>"; };
+		8B609D3E4F5061728394A5 /* ConferenceBookingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceBookingView.swift; sourceTree = "<group>"; };
+		8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentLogicTests.swift; sourceTree = "<group>"; };
+		8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceLogicTests.swift; sourceTree = "<group>"; };
+		8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentDashboardSections.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -725,6 +747,8 @@
 		C76648F9447549EBA4F966C1 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */,
+				8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */,
 				224E2F028BE14A74A564BE33 /* AccessibilitySupportTests.swift */,
 				068E0908417F457F86FEB948 /* AdvisingLogicTests.swift */,
 				D216306AB4EE4145BC47C246 /* AssignmentLogicTests.swift */,
@@ -805,6 +829,7 @@
 		660E34061B9749BA97FA683C /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B60PAR5C6D7E8F901234567 /* Parent */,
 				9FEEC30CF8D74770A0ABAD7E /* Advising */,
 				E14A6B9F5A964974BCD89668 /* Assignments */,
 				6BECF390833D42509F302BE9 /* Auth */,
@@ -917,6 +942,10 @@
 		D2384791A1E3420B9476C89D /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B604D3E4F5061728394A5 /* LMSAPIParent.swift */,
+				8B603D3E4F5061728394A5 /* LMSFeatureModelsParent.swift */,
+				8B602D3E4F5061728394A5 /* ConferenceLogic.swift */,
+				8B601D3E4F5061728394A5 /* ParentLogic.swift */,
 				D4E04DDCE89B45D58BF91622 /* AccountAccommodationModels.swift */,
 				0291FDD1FCF44DB2A579A6C4 /* AdvisingLogic.swift */,
 				AB4E3BEB88724B0AA6B2C7DE /* AssignmentLogic.swift */,
@@ -1279,7 +1308,6 @@
 			isa = PBXGroup;
 			children = (
 				BF7364ED115A492FA4C84082 /* AnnouncementsViews.swift */,
-				7222A9AC597E4B74B543E776 /* ChildrenPlaceholderView.swift */,
 				27D35DF2E7344F18BE7BE6C4 /* MainTabView.swift */,
 				8E4D00ED5523441CB26C4D43 /* MoreHubView.swift */,
 				7C617A3566E74FF58194EB21 /* ShellHeaderBar.swift */,
@@ -1535,6 +1563,20 @@
 			);
 			sourceTree = "<group>";
 		};
+
+		8B60PAR5C6D7E8F901234567 /* Parent */ = {
+			isa = PBXGroup;
+			children = (
+				8B605D3E4F5061728394A5 /* ParentDashboardView.swift */,
+				8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */,
+				8B606D3E4F5061728394A5 /* ParentGradesDetailView.swift */,
+				8B607D3E4F5061728394A5 /* ParentAttendanceDetailView.swift */,
+				8B608D3E4F5061728394A5 /* ParentNotificationPrefsView.swift */,
+				8B609D3E4F5061728394A5 /* ConferenceBookingView.swift */,
+			);
+			path = Parent;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1642,6 +1684,17 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+
+				8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */,
+				8B609C2D3E4F5061728394 /* ConferenceBookingView.swift in Sources */,
+				8B608C2D3E4F5061728394 /* ParentNotificationPrefsView.swift in Sources */,
+				8B607C2D3E4F5061728394 /* ParentAttendanceDetailView.swift in Sources */,
+				8B606C2D3E4F5061728394 /* ParentGradesDetailView.swift in Sources */,
+				8B605C2D3E4F5061728394 /* ParentDashboardView.swift in Sources */,
+				8B604C2D3E4F5061728394 /* LMSAPIParent.swift in Sources */,
+				8B603C2D3E4F5061728394 /* LMSFeatureModelsParent.swift in Sources */,
+				8B602C2D3E4F5061728394 /* ConferenceLogic.swift in Sources */,
+				8B601C2D3E4F5061728394 /* ParentLogic.swift in Sources */,
 				D4B42B04673648F18A17A9C0 /* AppDelegate.swift in Sources */,
 				D2718BBD8A464F77B6DE8F93 /* LexturesApp.swift in Sources */,
 				1960155E08094E87BF05950C /* RootView.swift in Sources */,
@@ -1855,7 +1908,6 @@
 				9E2EB7B8FC7D43D0994349F6 /* CourseGroupsSection.swift in Sources */,
 				B346D5F498414EC1ACF94EFD /* GroupSpaceView.swift in Sources */,
 				0F3180CE6AF54A5A861FF7B9 /* AnnouncementsViews.swift in Sources */,
-				D6B10E66C06341D68B0A8DFB /* ChildrenPlaceholderView.swift in Sources */,
 				BDD9548103E84E8A9B999797 /* MainTabView.swift in Sources */,
 				77CB7C5C3F374E03BA2BDC06 /* MoreHubView.swift in Sources */,
 				7D7CD68178504072AC8101FE /* ShellHeaderBar.swift in Sources */,
@@ -1950,6 +2002,9 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+
+				8B60BC2D3E4F5061728394 /* ConferenceLogicTests.swift in Sources */,
+				8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */,
 				F1F331DA9F4F488E8BA76DB5 /* AccessibilitySupportTests.swift in Sources */,
 				8D89993DD95847D0A7495CD6 /* AdvisingLogicTests.swift in Sources */,
 				3DCBF000B6174C60A0DC8D28 /* AssignmentLogicTests.swift in Sources */,

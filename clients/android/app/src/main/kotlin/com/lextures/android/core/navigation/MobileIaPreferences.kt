@@ -50,4 +50,19 @@ object MobileIaPreferences {
             .putString(KEY_ROLE_CONTEXT, roleContext.name)
             .apply()
     }
+
+    private const val KEY_SELECTED_CHILD = "mobile_parent_selected_child"
+
+    fun loadSelectedChildId(context: Context): String? =
+        context.applicationContext
+            .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getString(KEY_SELECTED_CHILD, null)
+
+    fun saveSelectedChildId(context: Context, studentId: String) {
+        context.applicationContext
+            .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_SELECTED_CHILD, studentId)
+            .apply()
+    }
 }

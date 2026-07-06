@@ -367,6 +367,8 @@ struct MobilePlatformFeatures: Equatable {
     var ffTaxCollection = false
     var ffAdvisingIntegration = false
     var ffMobileAdvising = true
+    var ffParentPortal = false
+    var ffConferenceScheduling = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -407,7 +409,9 @@ struct MobilePlatformFeatures: Equatable {
             ffPaymentsEnabled: features?.ffPaymentsEnabled == true,
             ffTaxCollection: features?.ffTaxCollection == true,
             ffAdvisingIntegration: features?.ffAdvisingIntegration == true,
-            ffMobileAdvising: features?.ffMobileAdvising != false
+            ffMobileAdvising: features?.ffMobileAdvising != false,
+            ffParentPortal: features?.ffParentPortal == true,
+            ffConferenceScheduling: features?.ffConferenceScheduling == true
         )
     }
 

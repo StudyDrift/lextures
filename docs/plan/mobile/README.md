@@ -136,7 +136,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M9.1 Catalog browse & enroll](../completed/mobile/M9.1-catalog-enroll.md) ✅ | 15.1 catalog, 15.2 self-paced enroll, 14.2 registration | **Done** |
 | [M9.2 Checkout & billing](../completed/mobile/M9.2-checkout-billing.md) ✅ | 15.3 Stripe billing, checkout, 16.8 payment abstraction | **Done** |
 | [M9.3 Certificates, badges & gamification](../completed/mobile/M9.3-certificates-gamification.md) ✅ | 15.5 certs/badges, 15.9 gamification, leaderboard | **Done** |
-| [M10.1 Parent portal](M10.1-parent-portal.md) | 13.1 parent portal, parent-dashboard | **P1** |
+| [M10.1 Parent portal](../completed/mobile/M10.1-parent-portal.md) | 13.1 parent portal, parent-dashboard | **P1** ✅ |
 | [M10.2 Conference booking (parent)](M10.2-conference-booking.md) | 13.12 conference scheduling | **P1** |
 | [M11.1 Take attendance (instructor)](../completed/mobile/M11.1-take-attendance.md) ✅ | 13.2 daily attendance | **Done** |
 | [M0.3 Accessibility: VoiceOver/TalkBack & dynamic type](../completed/mobile/M0.3-accessibility.md) ✅ | 12.1/12.2/12.8 a11y | **Done** |
@@ -210,7 +210,7 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
    M3.5 vibe activities ✅ + M3.6 library/e-reserves ✅, standards/mastery (M6.2 ✅),
    M6.3 immersive reader ✅, groups/office-hours (M7.3 ✅/M7.4 ✅) + M7.5 live classes ✅ +
    M7.6 course feed ✅ + M7.7 evaluations, adaptive (M8.2 ✅/M8.3 ✅/M8.4 ✅), self-learner commerce
-   (M9.1 ✅/M9.2 ✅/M9.3 ✅), parent (M10.1/M10.2), accessibility & i18n (M0.3 ✅/M0.4 ✅), settings (M1.4 ✅),
+   (M9.1 ✅/M9.2 ✅/M9.3 ✅), parent (M10.1 ✅/M10.2), accessibility & i18n (M0.3 ✅/M0.4 ✅), settings (M1.4 ✅),
    instructor attendance (M11.1 ✅) + M11.3 instructor insights/at-risk + M11.4 course
    people/roster.
 3. **Wave 3 — Situational (P2).** Lockdown, code exec, behavior/hall-pass,

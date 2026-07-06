@@ -195,6 +195,8 @@ data class MobilePlatformFeatures(
     val ffTaxCollection: Boolean = false,
     val ffAdvisingIntegration: Boolean = false,
     val ffMobileAdvising: Boolean = true,
+    val ffParentPortal: Boolean = false,
+    val ffConferenceScheduling: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -253,6 +255,8 @@ data class MobilePlatformFeatures(
             ffTaxCollection = features?.ffTaxCollection == true,
             ffAdvisingIntegration = features?.ffAdvisingIntegration == true,
             ffMobileAdvising = features?.ffMobileAdvising != false,
+            ffParentPortal = features?.ffParentPortal == true,
+            ffConferenceScheduling = features?.ffConferenceScheduling == true,
         )
     }
 }

@@ -161,6 +161,19 @@ final class AppShellModel {
             : AppTab.allCases.map { legacyShellTab(for: $0) }
     }
 
+    var pendingBilling = false
+    var pendingParentStudentId: String?
+    var pendingParentRoute: ParentRoute?
+
+    func consumePendingParentNavigation() -> (studentId: String?, route: ParentRoute?)? {
+        defer {
+            pendingParentStudentId = nil
+            pendingParentRoute = nil
+        }
+        guard pendingParentStudentId != nil || pendingParentRoute != nil else { return nil }
+        return (pendingParentStudentId, pendingParentRoute)
+    }
+
     func openDeepLink(_ destination: DeepLinkDestination) {
         pendingDeepLink = destination
         switch destination {
@@ -187,10 +200,42 @@ final class AppShellModel {
             checkoutReturnPhase = .cancel
         case .course:
             selectShellTab(.courses)
+        case let .parent(studentId, section):
+            if roleSnapshot.hasParentDashboard {
+                setRoleContext(.parent)
+            }
+            if let studentId {
+                MobileIaPreferences.saveSelectedChildId(studentId)
+                pendingParentStudentId = studentId
+            }
+            pendingParentRoute = parentRoute(studentId: studentId, section: section)
+            selectShellTab(.children)
         }
     }
 
-    var pendingBilling = false
+    private func parentRoute(studentId: String?, section: ParentDeepLinkSection) -> ParentRoute? {
+        let resolvedStudentId = studentId ?? pendingParentStudentId ?? MobileIaPreferences.loadSelectedChildId()
+        guard let resolvedStudentId else {
+            switch section {
+            case .dashboard, .notificationPrefs:
+                return section == .notificationPrefs ? .notificationPrefs : nil
+            default:
+                return nil
+            }
+        }
+        switch section {
+        case .dashboard:
+            return nil
+        case .grades:
+            return .grades(studentId: resolvedStudentId)
+        case .attendance:
+            return .attendance(studentId: resolvedStudentId)
+        case .conferences:
+            return .conferences(studentId: resolvedStudentId)
+        case .notificationPrefs:
+            return .notificationPrefs
+        }
+    }
 
     func consumePendingBilling() -> Bool {
         defer { pendingBilling = false }
@@ -424,13 +469,27 @@ struct MainTabView: View {
         GeometryReader { geo in
             let width = geo.size.width
             ZStack {
-                iaPane(.dashboard, width: width) { DashboardView() }
+                iaPane(.dashboard, width: width) {
+                    if shell.activeRoleContext == .parent {
+                        ParentDashboardView(
+                            initialStudentId: shell.pendingParentStudentId,
+                            initialRoute: shell.pendingParentRoute
+                        )
+                    } else {
+                        DashboardView()
+                    }
+                }
                 iaPane(.courses, width: width) { CoursesListView() }
                 iaPane(.notebooks, width: width) { NotebooksListView() }
                 iaPane(.inbox, width: width) { InboxView() }
                 profilePane(width: width)
                 iaPane(.teach, width: width) { TeachHubView() }
-                iaPane(.children, width: width) { ChildrenPlaceholderView() }
+                iaPane(.children, width: width) {
+                    ParentDashboardView(
+                        initialStudentId: shell.pendingParentStudentId,
+                        initialRoute: shell.pendingParentRoute
+                    )
+                }
 
                 secondaryPane(.calendar, width: width) {
                     NavigationStack { PlannerView(initialTab: .calendar).globalDrawerToolbar() }
