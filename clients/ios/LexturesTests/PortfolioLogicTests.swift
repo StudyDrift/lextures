@@ -15,20 +15,20 @@ final class PortfolioLogicTests: XCTestCase {
     }
 
     func testOrderedArtifacts() {
-        let a = PortfolioArtifact(
-            id: "a", portfolioId: "p", artifactType: "upload", title: "A", description: "",
+        let first = PortfolioArtifact(
+            id: "artifact-a", portfolioId: "portfolio-1", artifactType: "upload", title: "First", description: "",
             sourceSubmissionId: nil, sourceCourseId: nil, fileName: "", fileMime: "",
             textContent: "", externalUrl: "", outcomeIds: [], isPublic: false, sortOrder: 1,
             createdAt: "", updatedAt: ""
         )
-        let b = PortfolioArtifact(
-            id: "b", portfolioId: "p", artifactType: "url", title: "B", description: "",
+        let second = PortfolioArtifact(
+            id: "artifact-b", portfolioId: "portfolio-1", artifactType: "url", title: "Second", description: "",
             sourceSubmissionId: nil, sourceCourseId: nil, fileName: "", fileMime: "",
             textContent: "", externalUrl: "https://x", outcomeIds: [], isPublic: false, sortOrder: 0,
             createdAt: "", updatedAt: ""
         )
-        let ordered = PortfolioLogic.orderedArtifacts([a, b], order: ["b", "a"])
-        XCTAssertEqual(ordered.map(\.id), ["b", "a"])
+        let ordered = PortfolioLogic.orderedArtifacts([first, second], order: ["artifact-b", "artifact-a"])
+        XCTAssertEqual(ordered.map(\.id), ["artifact-b", "artifact-a"])
     }
 
     func testParseOutcomeIds() {
