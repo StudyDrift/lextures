@@ -80,8 +80,8 @@ final class PlannerModelsTests: XCTestCase {
             structureItemId: "q1",
             notebookPageId: nil
         )
-        let snapshot = PlannerLogic.encodeSnapshot(todos: [todo], events: [event])
-        let decoded = PlannerLogic.decodeSnapshot(snapshot)
+        let snapshot = PlannerSnapshotCoding.encodeSnapshot(todos: [todo], events: [event])
+        let decoded = PlannerSnapshotCoding.decodeSnapshot(snapshot)
         XCTAssertEqual(decoded.todos.count, 1)
         XCTAssertEqual(decoded.events.count, 1)
         XCTAssertEqual(decoded.todos[0].key, todo.key)

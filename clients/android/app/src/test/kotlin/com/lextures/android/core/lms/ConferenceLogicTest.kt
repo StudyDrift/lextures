@@ -5,8 +5,11 @@ import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.time.Instant
 
+@RunWith(RobolectricTestRunner::class)
 class ConferenceLogicTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 

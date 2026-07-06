@@ -84,7 +84,7 @@ object ConferenceLogic {
     }
 
     fun icalUrl(slotId: String): String =
-        AppConfiguration.apiUrl("/api/v1/conference-slots/${slotId}/ical")
+        AppConfiguration.apiUrl("/api/v1/conference-slots/${slotId}/ical").toString()
 
     fun todayDateString(): String {
         val formatter = DateTimeFormatter.ISO_LOCAL_DATE.withZone(ZoneId.systemDefault())
