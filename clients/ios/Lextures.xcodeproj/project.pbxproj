@@ -360,6 +360,8 @@
 		8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */; };
 		8B60BC2D3E4F5061728394 /* ConferenceLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */; };
 		8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */; };
+		8B60CC3D3E4F5061728394 /* MyConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CD3E4F5061728394A5 /* MyConferencesView.swift */; };
+		8B60DC2D3E4F5061728394 /* ConferenceReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -720,6 +722,8 @@
 		8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentLogicTests.swift; sourceTree = "<group>"; };
 		8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceLogicTests.swift; sourceTree = "<group>"; };
 		8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentDashboardSections.swift; sourceTree = "<group>"; };
+		8B60CD3E4F5061728394A5 /* MyConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyConferencesView.swift; sourceTree = "<group>"; };
+		8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceReminderScheduler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -942,6 +946,7 @@
 		D2384791A1E3420B9476C89D /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */,
 				8B604D3E4F5061728394A5 /* LMSAPIParent.swift */,
 				8B603D3E4F5061728394A5 /* LMSFeatureModelsParent.swift */,
 				8B602D3E4F5061728394A5 /* ConferenceLogic.swift */,
@@ -1684,6 +1689,10 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+
+				8B60DC2D3E4F5061728394 /* ConferenceReminderScheduler.swift in Sources */,
+
+				8B60CC3D3E4F5061728394 /* MyConferencesView.swift in Sources */,
 
 				8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */,
 				8B609C2D3E4F5061728394 /* ConferenceBookingView.swift in Sources */,

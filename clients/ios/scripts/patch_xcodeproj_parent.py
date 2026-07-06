@@ -20,6 +20,8 @@ ENTRIES: list[tuple[str, str, str, str, bool]] = [
     ("ParentAttendanceDetailView.swift", "8B607C2D3E4F5061728394", "8B607D3E4F5061728394A5", "8B60PAR5C6D7E8F901234567", False),
     ("ParentNotificationPrefsView.swift", "8B608C2D3E4F5061728394", "8B608D3E4F5061728394A5", "8B60PAR5C6D7E8F901234567", False),
     ("ConferenceBookingView.swift", "8B609C2D3E4F5061728394", "8B609D3E4F5061728394A5", "8B60PAR5C6D7E8F901234567", False),
+    ("MyConferencesView.swift", "8B60CC3D3E4F5061728394", "8B60CD3E4F5061728394A5", "8B60PAR5C6D7E8F901234567", False),
+    ("ConferenceReminderScheduler.swift", "8B60DC2D3E4F5061728394", "8B60DD3E4F5061728394A5", "D2384791A1E3420B9476C89D", False),
     ("ParentLogicTests.swift", "8B60AC2D3E4F5061728394", "8B60AD3E4F5061728394A5", "C76648F9447549EBA4F966C1", True),
     ("ConferenceLogicTests.swift", "8B60BC2D3E4F5061728394", "8B60BD3E4F5061728394A5", "C76648F9447549EBA4F966C1", True),
 ]
@@ -34,6 +36,7 @@ NEW_GROUP = """
 \t\t\t\t8B607D3E4F5061728394A5 /* ParentAttendanceDetailView.swift */,
 \t\t\t\t8B608D3E4F5061728394A5 /* ParentNotificationPrefsView.swift */,
 \t\t\t\t8B609D3E4F5061728394A5 /* ConferenceBookingView.swift */,
+\t\t\t\t8B60CD3E4F5061728394A5 /* MyConferencesView.swift */,
 \t\t\t);
 \t\t\tpath = Parent;
 \t\t\tsourceTree = "<group>";

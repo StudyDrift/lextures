@@ -29343,6 +29343,40 @@
         }
       }
     },
+    "mobile.parent.conferences.addToCalendar": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to calendar"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to calendar"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äđđ ţö çäľëñđäŕ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to calendar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to calendar"
+          }
+        }
+      }
+    },
     "mobile.parent.conferences.available": {
       "localizations": {
         "ar": {
@@ -29441,6 +29475,108 @@
           "stringUnit": {
             "state": "translated",
             "value": "Conference booked."
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.booking.confirmed": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're booked!"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're booked!"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ýöû'ŕë ƀööķëđ!]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're booked!"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're booked!"
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.booking.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference booked"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference booked"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöñƒëŕëñçë ƀööķëđ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference booked"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference booked"
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.calendarTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference with %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference with %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöñƒëŕëñçë ŵîţĥ %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference with %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference with %@"
           }
         }
       }
@@ -29581,6 +29717,142 @@
         }
       }
     },
+    "mobile.parent.conferences.error.book": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not book this slot."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not book this slot."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöûľđ ñöţ ƀööķ ţĥîš šľöţ.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not book this slot."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not book this slot."
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.error.cancel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not cancel your booking."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not cancel your booking."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöûľđ ñöţ çäñçëľ ÿöûŕ ƀööķîñġ.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not cancel your booking."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not cancel your booking."
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.error.load": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load conference slots."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load conference slots."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöûľđ ñöţ ľöäđ çöñƒëŕëñçë šľöţš.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load conference slots."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load conference slots."
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.joinMeeting": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join meeting"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join meeting"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ĵöîñ ɱëëţîñġ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join meeting"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join meeting"
+          }
+        }
+      }
+    },
     "mobile.parent.conferences.myBookings": {
       "localizations": {
         "ar": {
@@ -29611,6 +29883,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your bookings"
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.myBookings.empty.message": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book a slot from the Available tab."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book a slot from the Available tab."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[ƀööķ ä šľöţ ƒŕöɱ ţĥë Äṽäîľäƀľë ţäƀ.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book a slot from the Available tab."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book a slot from the Available tab."
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.myBookings.empty.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No upcoming conferences"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No upcoming conferences"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ñö ûþçöɱîñġ çöñƒëŕëñçëš]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No upcoming conferences"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No upcoming conferences"
           }
         }
       }
@@ -29683,6 +30023,108 @@
         }
       }
     },
+    "mobile.parent.conferences.reminder.body": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$s · %2$s"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$s · %2$s"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[%1$s · %2$s]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$s · %2$s"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$s · %2$s"
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.reminder.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference soon"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference soon"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöñƒëŕëñçë šööñ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference soon"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conference soon"
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.reschedule": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reschedule"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reschedule"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Řëšçĥëđûľë]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reschedule"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reschedule"
+          }
+        }
+      }
+    },
     "mobile.parent.conferences.subtitle": {
       "localizations": {
         "ar": {
@@ -29713,6 +30155,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Book a slot for %@."
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.tab.available": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äṽäîľäƀľë]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available"
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.tab.myBookings": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My conferences"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My conferences"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ḿÿ çöñƒëŕëñçëš]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My conferences"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My conferences"
           }
         }
       }
@@ -29781,6 +30291,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Teacher"
+          }
+        }
+      }
+    },
+    "mobile.parent.conferences.virtual": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ṽîŕţûäľ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual"
           }
         }
       }
@@ -35561,6 +36105,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Devoir"
+          }
+        }
+      }
+    },
+    "mobile.planner.kind.conference": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parent conference"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parent conference"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Þäŕëñţ çöñƒëŕëñçë]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parent conference"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parent conference"
           }
         }
       }

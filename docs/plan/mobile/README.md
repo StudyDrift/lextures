@@ -137,7 +137,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M9.2 Checkout & billing](../completed/mobile/M9.2-checkout-billing.md) ✅ | 15.3 Stripe billing, checkout, 16.8 payment abstraction | **Done** |
 | [M9.3 Certificates, badges & gamification](../completed/mobile/M9.3-certificates-gamification.md) ✅ | 15.5 certs/badges, 15.9 gamification, leaderboard | **Done** |
 | [M10.1 Parent portal](../completed/mobile/M10.1-parent-portal.md) | 13.1 parent portal, parent-dashboard | **P1** ✅ |
-| [M10.2 Conference booking (parent)](M10.2-conference-booking.md) | 13.12 conference scheduling | **P1** |
+| [M10.2 Conference booking (parent)](../completed/mobile/M10.2-conference-booking.md) ✅ | 13.12 conference scheduling | **Done** |
 | [M11.1 Take attendance (instructor)](../completed/mobile/M11.1-take-attendance.md) ✅ | 13.2 daily attendance | **Done** |
 | [M0.3 Accessibility: VoiceOver/TalkBack & dynamic type](../completed/mobile/M0.3-accessibility.md) ✅ | 12.1/12.2/12.8 a11y | **Done** |
 | [M0.4 i18n, locale & RTL](../completed/mobile/M0.4-i18n-rtl.md) | 11.1 i18n, 11.2 RTL, 11.3/11.4 locale/tz | **Done** |

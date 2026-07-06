@@ -21,6 +21,7 @@ enum class PlannerCalendarEventKind {
     Academic,
     OfficeHours,
     LiveMeeting,
+    Conference,
 }
 
 data class StudentTodoItem(
@@ -55,6 +56,8 @@ data class PlannerCalendarEvent(
     val notebookPageId: String? = null,
     val officeHoursSlotId: String? = null,
     val meetingId: String? = null,
+    val conferenceSlotId: String? = null,
+    val videoLink: String? = null,
 )
 
 data class PlannerCourseFilter(
@@ -100,6 +103,8 @@ data class CachedPlannerCalendarEvent(
     val notebookPageId: String? = null,
     val officeHoursSlotId: String? = null,
     val meetingId: String? = null,
+    val conferenceSlotId: String? = null,
+    val videoLink: String? = null,
 )
 
 enum class DueReminderLeadTime(val minutes: Int) {
@@ -216,6 +221,7 @@ object PlannerLogic {
         academicEvents: List<AcademicCalendarEvent>,
         officeHoursByCourseCode: Map<String, OfficeHoursAvailability> = emptyMap(),
         liveMeetingsByCourseCode: Map<String, List<VirtualMeeting>> = emptyMap(),
+        parentConferenceEvents: List<PlannerCalendarEvent> = emptyList(),
     ): List<PlannerCalendarEvent> {
         val courseTitles = studentCourses.associate { it.courseCode to it.displayTitle }
         val events = mutableListOf<PlannerCalendarEvent>()
@@ -267,6 +273,7 @@ object PlannerLogic {
 
         events += OfficeHoursLogic.collectCalendarEvents(studentCourses, officeHoursByCourseCode)
         events += LiveMeetingsLogic.collectCalendarEvents(studentCourses, liveMeetingsByCourseCode)
+        events += parentConferenceEvents
 
         return events.sortedBy { it.startsAt }
     }
@@ -377,6 +384,8 @@ object PlannerLogic {
         notebookPageId = event.notebookPageId,
         officeHoursSlotId = event.officeHoursSlotId,
         meetingId = event.meetingId,
+        conferenceSlotId = event.conferenceSlotId,
+        videoLink = event.videoLink,
     )
 
     private fun decodedEvent(cached: CachedPlannerCalendarEvent) = PlannerCalendarEvent(
@@ -394,6 +403,8 @@ object PlannerLogic {
         notebookPageId = cached.notebookPageId,
         officeHoursSlotId = cached.officeHoursSlotId,
         meetingId = cached.meetingId,
+        conferenceSlotId = cached.conferenceSlotId,
+        videoLink = cached.videoLink,
     )
 }
 

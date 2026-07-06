@@ -31,6 +31,7 @@ enum PlannerCalendarEventKind: String, Hashable {
     case academic
     case officeHours
     case liveMeeting
+    case conference
 }
 
 struct StudentTodoItem: Identifiable, Hashable {
@@ -65,6 +66,8 @@ struct PlannerCalendarEvent: Identifiable, Hashable {
     let notebookPageId: String?
     let officeHoursSlotId: String?
     let meetingId: String?
+    let conferenceSlotId: String?
+    let videoLink: String?
 
     init(
         id: String,
@@ -79,7 +82,9 @@ struct PlannerCalendarEvent: Identifiable, Hashable {
         structureItemId: String?,
         notebookPageId: String?,
         officeHoursSlotId: String? = nil,
-        meetingId: String? = nil
+        meetingId: String? = nil,
+        conferenceSlotId: String? = nil,
+        videoLink: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -94,6 +99,8 @@ struct PlannerCalendarEvent: Identifiable, Hashable {
         self.notebookPageId = notebookPageId
         self.officeHoursSlotId = officeHoursSlotId
         self.meetingId = meetingId
+        self.conferenceSlotId = conferenceSlotId
+        self.videoLink = videoLink
     }
 }
 
@@ -139,6 +146,8 @@ struct CachedPlannerCalendarEvent: Codable, Hashable {
     var notebookPageId: String?
     var officeHoursSlotId: String?
     var meetingId: String?
+    var conferenceSlotId: String?
+    var videoLink: String?
 }
 
 enum DueReminderLeadTime: Int, CaseIterable, Identifiable {
@@ -302,7 +311,8 @@ enum PlannerLogic {
         notebookTasks: [NotebookTask],
         academicEvents: [AcademicCalendarEvent],
         officeHoursByCourseCode: [String: OfficeHoursAvailability] = [:],
-        liveMeetingsByCourseCode: [String: [VirtualMeeting]] = [:]
+        liveMeetingsByCourseCode: [String: [VirtualMeeting]] = [:],
+        parentConferenceBookings: [ParentConferenceBooking] = []
     ) -> [PlannerCalendarEvent] {
         var events: [PlannerCalendarEvent] = []
         let courseTitles = Dictionary(uniqueKeysWithValues: studentCourses.map { ($0.courseCode, $0.displayTitle) })
@@ -380,6 +390,7 @@ enum PlannerLogic {
             studentCourses: studentCourses,
             meetingsByCourseCode: liveMeetingsByCourseCode
         ))
+        events.append(contentsOf: ConferenceLogic.calendarEvents(from: parentConferenceBookings))
 
         return events.sorted { $0.startsAt < $1.startsAt }
     }
@@ -523,7 +534,9 @@ enum PlannerLogic {
             structureItemId: event.structureItemId,
             notebookPageId: event.notebookPageId,
             officeHoursSlotId: event.officeHoursSlotId,
-            meetingId: event.meetingId
+            meetingId: event.meetingId,
+            conferenceSlotId: event.conferenceSlotId,
+            videoLink: event.videoLink
         )
     }
 
@@ -541,7 +554,9 @@ enum PlannerLogic {
             structureItemId: cached.structureItemId,
             notebookPageId: cached.notebookPageId,
             officeHoursSlotId: cached.officeHoursSlotId,
-            meetingId: cached.meetingId
+            meetingId: cached.meetingId,
+            conferenceSlotId: cached.conferenceSlotId,
+            videoLink: cached.videoLink
         )
     }
 }

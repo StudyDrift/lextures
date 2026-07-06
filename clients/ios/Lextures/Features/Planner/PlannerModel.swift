@@ -131,6 +131,7 @@ final class PlannerModel {
         var academic: [AcademicCalendarEvent] = []
         var officeHoursByCourse: [String: OfficeHoursAvailability] = [:]
         var liveMeetingsByCourse: [String: [VirtualMeeting]] = [:]
+        var parentConferenceBookings: [ParentConferenceBooking] = []
         var evaluationStatusByCourse: [String: EvaluationStatus] = [:]
         var seenKeys = Set<String>()
         for course in studentCourses {
@@ -192,6 +193,19 @@ final class PlannerModel {
             }
         }
 
+        if let children = try? await LMSAPI.fetchParentChildren(accessToken: accessToken), !children.isEmpty {
+            let childTuples = children.map { child in
+                let name = child.displayName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+                    ? child.displayName!
+                    : child.email
+                return (studentId: child.studentUserId, childName: name)
+            }
+            parentConferenceBookings = await ConferenceLogic.loadParentBookings(
+                children: childTuples,
+                accessToken: accessToken
+            )
+        }
+
         let todos = PlannerLogic.collectTodos(
             studentCourses: studentCourses,
             structureByCourseCode: structures,
@@ -205,7 +219,8 @@ final class PlannerModel {
             notebookTasks: notebookTasks,
             academicEvents: academic,
             officeHoursByCourseCode: officeHoursByCourse,
-            liveMeetingsByCourseCode: liveMeetingsByCourse
+            liveMeetingsByCourseCode: liveMeetingsByCourse,
+            parentConferenceBookings: parentConferenceBookings
         )
         return PlannerLogic.encodeSnapshot(todos: todos, events: events)
     }
