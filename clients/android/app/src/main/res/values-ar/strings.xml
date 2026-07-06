@@ -881,7 +881,9 @@
     <string name="mobile_parent_noChildren">No children linked yet. Contact your school administrator to connect your account to a student.</string>
     <string name="mobile_parent_notificationPrefs">Notification preferences</string>
     <string name="mobile_parent_prefs_attendanceEvent">Attendance events</string>
+    <string name="mobile_parent_prefs_decreaseThreshold">Decrease threshold</string>
     <string name="mobile_parent_prefs_gradePosted">Grade posted</string>
+    <string name="mobile_parent_prefs_increaseThreshold">Increase threshold</string>
     <string name="mobile_parent_prefs_lowGradeEnabled">Low grade alerts</string>
     <string name="mobile_parent_prefs_lowGradeValue">Alert below %1$d%%</string>
     <string name="mobile_parent_prefs_missingAssignment">Missing assignments</string>

@@ -29955,6 +29955,40 @@
         }
       }
     },
+    "mobile.parent.prefs.decreaseThreshold": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrease threshold"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrease threshold"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrease threshold"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrease threshold"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrease threshold"
+          }
+        }
+      }
+    },
     "mobile.parent.prefs.gradePosted": {
       "localizations": {
         "ar": {
@@ -29985,6 +30019,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Grade posted"
+          }
+        }
+      }
+    },
+    "mobile.parent.prefs.increaseThreshold": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Increase threshold"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Increase threshold"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Increase threshold"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Increase threshold"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Increase threshold"
           }
         }
       }
