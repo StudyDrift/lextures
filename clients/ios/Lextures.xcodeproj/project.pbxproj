@@ -69,6 +69,7 @@
 		C4A2B2AB47F54D27B4E931F6 /* LMSAPIMobileWave.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D84565E80E4E0795C38D7D /* LMSAPIMobileWave.swift */; };
 		7A6C09E92FDB4DF6AE400789 /* LMSAPIPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4A84F1B602423498384469 /* LMSAPIPaths.swift */; };
 		8D13D9E7370B4CA6A870C05E /* LMSAPIPeerReview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3880F988ACEF4208923E5BEE /* LMSAPIPeerReview.swift */; };
+		B3C4D5E6F7A84901B2C3D4E5 /* LMSAPIProctoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4B5C6D7E8F94012A3B4C5D6 /* LMSAPIProctoring.swift */; };
 		2D0F44A0470049FDA14382F1 /* LMSAPIQuizCodeRun.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1F069E275E44318AC0700A /* LMSAPIQuizCodeRun.swift */; };
 		7AFACF8F7A754412A5C5E40B /* LMSAPIReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2559073A5F0C4468BB9F2F42 /* LMSAPIReader.swift */; };
 		1EA89251F1FD4E98BE4999EC /* LMSAPIReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D503E80F054E6EB3D5FACF /* LMSAPIReading.swift */; };
@@ -415,6 +416,7 @@
 		30D84565E80E4E0795C38D7D /* LMSAPIMobileWave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIMobileWave.swift; sourceTree = "<group>"; };
 		DD4A84F1B602423498384469 /* LMSAPIPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIPaths.swift; sourceTree = "<group>"; };
 		3880F988ACEF4208923E5BEE /* LMSAPIPeerReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIPeerReview.swift; sourceTree = "<group>"; };
+		A4B5C6D7E8F94012A3B4C5D6 /* LMSAPIProctoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIProctoring.swift; sourceTree = "<group>"; };
 		CF1F069E275E44318AC0700A /* LMSAPIQuizCodeRun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIQuizCodeRun.swift; sourceTree = "<group>"; };
 		2559073A5F0C4468BB9F2F42 /* LMSAPIReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIReader.swift; sourceTree = "<group>"; };
 		F6D503E80F054E6EB3D5FACF /* LMSAPIReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIReading.swift; sourceTree = "<group>"; };
@@ -951,6 +953,7 @@
 				30D84565E80E4E0795C38D7D /* LMSAPIMobileWave.swift */,
 				DD4A84F1B602423498384469 /* LMSAPIPaths.swift */,
 				3880F988ACEF4208923E5BEE /* LMSAPIPeerReview.swift */,
+				A4B5C6D7E8F94012A3B4C5D6 /* LMSAPIProctoring.swift */,
 				CF1F069E275E44318AC0700A /* LMSAPIQuizCodeRun.swift */,
 				2559073A5F0C4468BB9F2F42 /* LMSAPIReader.swift */,
 				F6D503E80F054E6EB3D5FACF /* LMSAPIReading.swift */,
@@ -1701,6 +1704,7 @@
 				C4A2B2AB47F54D27B4E931F6 /* LMSAPIMobileWave.swift in Sources */,
 				7A6C09E92FDB4DF6AE400789 /* LMSAPIPaths.swift in Sources */,
 				8D13D9E7370B4CA6A870C05E /* LMSAPIPeerReview.swift in Sources */,
+				B3C4D5E6F7A84901B2C3D4E5 /* LMSAPIProctoring.swift in Sources */,
 				2D0F44A0470049FDA14382F1 /* LMSAPIQuizCodeRun.swift in Sources */,
 				7AFACF8F7A754412A5C5E40B /* LMSAPIReader.swift in Sources */,
 				1EA89251F1FD4E98BE4999EC /* LMSAPIReading.swift in Sources */,

@@ -1,6 +1,8 @@
 package com.lextures.android.features.quiz
 
 import android.app.Activity
+import android.app.ActivityManager
+import android.content.Context
 import android.view.WindowManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,7 +38,7 @@ class LockdownController(
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         runCatching { activity.startLockTask() }
-        if (!activity.isInLockTaskMode) {
+        if (!isInLockTaskMode()) {
             platformWarning = activity.getString(com.lextures.android.R.string.mobile_quiz_lockdown_pinningWarning)
         }
     }
@@ -73,5 +75,10 @@ class LockdownController(
         if (showBanner) {
             focusLossBanner = activity.getString(com.lextures.android.R.string.mobile_quiz_lockdown_focusLossBanner)
         }
+    }
+
+    private fun isInLockTaskMode(): Boolean {
+        val manager = activity.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager ?: return false
+        return manager.lockTaskModeState != ActivityManager.LOCK_TASK_MODE_NONE
     }
 }
