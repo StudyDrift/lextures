@@ -148,26 +148,6 @@ extension LMSAPI {
         )
     }
 
-    // MARK: - Announcements (org broadcasts)
-
-    static func fetchMyBroadcasts(accessToken: String) async throws -> [Broadcast] {
-        let (data, _) = try await client.request(
-            path: "/api/v1/me/broadcasts",
-            authorized: true,
-            accessToken: accessToken
-        )
-        return try decode(BroadcastsResponse.self, from: data).broadcasts
-    }
-
-    static func acknowledgeBroadcast(id: String, accessToken: String) async throws {
-        _ = try await client.request(
-            path: "/api/v1/broadcasts/\(encodePath(id))/acknowledge",
-            method: "POST",
-            authorized: true,
-            accessToken: accessToken
-        )
-    }
-
     // MARK: - My grades (student)
 
     static func fetchMyGrades(courseCode: String, accessToken: String) async throws -> MyGradesResponse {

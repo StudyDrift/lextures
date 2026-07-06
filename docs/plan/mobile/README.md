@@ -54,7 +54,7 @@ Verified in the iOS/Android trees as of this plan:
 |---|---|---|---|
 | Auth (email/password, signup, secure token store, session, biometric lock, session mgmt, SSO/MFA/magic link) | ✅ | ✅ | Keychain / encrypted store; SSO/MFA/magic link ([M1.1](../completed/mobile/M1.1-sso-mfa-magic-link.md)) |
 | Navigation shell (role-aware two-level left drawer: global + course) | ✅ | ✅ | Web-parity drawer replaced the bottom tab bar (#419); deep links wired ([M0.1](../completed/mobile/M0.1-push-deep-links.md)) |
-| Dashboard / Home + announcements | ✅ | ✅ | Read-only |
+| Dashboard / Home + announcements | ✅ | ✅ | Read + staff/admin compose |
 | Courses: list, detail, syllabus, **grades (feedback, what-if)**, attendance (read), item detail | ✅ | ✅ | Student grades with rubric/annotation/a-v feedback |
 | Grading: backlog, submissions list, **Speed Grader** | ✅ | ✅ | Instructor; see `../speed-grader-mobile.md` |
 | Inbox: list, thread, compose | ✅ | ✅ | 1:1 messaging |
@@ -154,7 +154,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M5.3 Code-execution questions](../completed/mobile/M5.3-code-execution.md) ✅ | 2.4 code exec | **Done** |
 | [M10.3 Behavior/PBIS & hall pass](M10.3-behavior-hallpass.md) | 13.3 behavior, 13.9 hall pass | **P2** |
 | [M10.4 Age-appropriate UI mode](../completed/mobile/M10.4-age-appropriate-ui.md) | 13.11 age-appropriate UI | **DONE** |
-| [M11.2 Post announcement / broadcast](M11.2-instructor-announce.md) | 13.10 broadcast, announcements compose | **P2** |
+| [M11.2 Post announcement / broadcast](../completed/mobile/M11.2-instructor-announce.md) | 13.10 broadcast, announcements compose | **Done** |
 | [M12.1 e-Portfolio & artifacts](M12.1-eportfolio.md) | 14.12 e-portfolio, portfolios pages | **P2** |
 | [M12.2 Credentials wallet & transcripts](M12.2-credentials-transcripts.md) | 14.13 CCR, transcripts, 15.6 LinkedIn share | **P2** |
 

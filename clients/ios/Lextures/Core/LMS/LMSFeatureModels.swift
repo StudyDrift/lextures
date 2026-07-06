@@ -182,6 +182,16 @@ struct BroadcastsResponse: Decodable {
     var broadcasts: [Broadcast]
 }
 
+struct CreateBroadcastRequest: Encodable {
+    var type: String
+    var subject: String
+    var body: String
+}
+
+struct CreateBroadcastResponse: Decodable {
+    var broadcast: Broadcast
+}
+
 // MARK: - My grades
 
 /// Column from `/my-grades` / gradebook grid (subset used on mobile).

@@ -309,6 +309,42 @@ object LmsApi {
         }
     }
 
+    suspend fun createBroadcast(
+        orgId: String,
+        type: String,
+        subject: String,
+        body: String,
+        accessToken: String,
+    ): Broadcast = withContext(Dispatchers.IO) {
+        val payload = CreateBroadcastRequest(type = type, subject = subject, body = body)
+        val (responseBody, code) = client.request(
+            path = "/api/v1/orgs/${encodePath(orgId)}/broadcasts",
+            method = "POST",
+            body = client.encodeBody(payload, CreateBroadcastRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode<CreateBroadcastResponse>(responseBody).broadcast
+    }
+
+    suspend fun createCourseAnnouncement(
+        courseCode: String,
+        channelId: String,
+        title: String,
+        body: String,
+        sectionName: String?,
+        mentionsEveryone: Boolean,
+        accessToken: String,
+    ): String = withContext(Dispatchers.IO) {
+        val text = AnnouncementLogic.formatAnnouncementBody(
+            title = title,
+            body = body,
+            sectionName = sectionName,
+            mentionsEveryone = mentionsEveryone,
+        )
+        postFeedMessage(courseCode, channelId, text, accessToken)
+    }
+
     // My grades (student)
 
     suspend fun fetchMyGrades(courseCode: String, accessToken: String): MyGradesResponse =

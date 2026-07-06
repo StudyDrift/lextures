@@ -63,6 +63,7 @@
 		F84106555B304E7B8F45ED06 /* LMSAPIEvaluations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F34631010A44663A56670A0 /* LMSAPIEvaluations.swift */; };
 		F92D5747CBCA4C83AA82872B /* LMSAPIFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5600EDE053C4E7E99E854F4 /* LMSAPIFeatures.swift */; };
 		3AE85242D6C345D48DD769B0 /* LMSAPIFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86809022FC3D419C81004C9A /* LMSAPIFeed.swift */; };
+		F5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift */; };
 		32D61C5FD68E4BA49ADC9C32 /* LMSAPIGamification.swift in Sources */ = {isa = PBXBuildFile; fileRef = C083220C1AD046F498269C66 /* LMSAPIGamification.swift */; };
 		DBB5B1920D86401496C5079A /* LMSAPIGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C91F089DDA4F10901AC904 /* LMSAPIGroups.swift */; };
 		8BE81F542EB6436E82CF15FD /* LMSAPIInsights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838E560A28D840B6B48B4023 /* LMSAPIInsights.swift */; };
@@ -118,6 +119,9 @@
 		749F9A25E09C4B5AAA050025 /* RequirementsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D84A26FDFD4064AF088529 /* RequirementsLogic.swift */; };
 		9BA81674669B4B0F88CA3DFC /* ReviewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48F1FFCB5C94784B6C31A23 /* ReviewModels.swift */; };
 		733DDE7391834C01A201EAD9 /* TakeAttendanceLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B64A106E43D64229ACF29E2D /* TakeAttendanceLogic.swift */; };
+		F1A2B3C4D5E6012345678AB /* AnnouncementLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A2B3C4D5E6012345678AB /* AnnouncementLogic.swift */; };
+		F2A2B3C4D5E6012345678AC /* AnnouncementComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A2B3C4D5E6012345678AC /* AnnouncementComposerView.swift */; };
+		F3A2B3C4D5E6012345678AD /* BroadcastComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A2B3C4D5E6012345678AD /* BroadcastComposerView.swift */; };
 		E724F5E7039D4F218EA1DB9A /* TutorLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0561D63E939E40EB8F0236BC /* TutorLogic.swift */; };
 		F880BC9664DC4F1D9942668A /* TutorStreamClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57C66528FA7A4D1DA2F5B283 /* TutorStreamClient.swift */; };
 		C21B2742902A4771BC6B3A17 /* VibeActivityLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFED684558A34783B299AB8E /* VibeActivityLogic.swift */; };
@@ -347,6 +351,7 @@
 		56BA40DD565544F9A5835F29 /* SearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F64AC200DD1E48DF8CC18896 /* SearchTests.swift */; };
 		68DE8DFD8CE14F668491DBF7 /* SettingsAccommodationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93872E2D7D48441FBB8D445F /* SettingsAccommodationsTests.swift */; };
 		8897B13D14154F8A9AE464D8 /* TakeAttendanceLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C4F131715F04ABFBF7AFCC0 /* TakeAttendanceLogicTests.swift */; };
+		F4A2B3C4D5E6012345678AE /* AnnouncementLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A2B3C4D5E6012345678AE /* AnnouncementLogicTests.swift */; };
 		1DF82723B67C48919B65C220 /* TutorLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6557A7906F40A3A754FD73 /* TutorLogicTests.swift */; };
 		197379A9CCDE42FBA3509618 /* VibeActivityLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F7C4E5B29D4D9B86606947 /* VibeActivityLogicTests.swift */; };
 		1661CD891F7A421BA44555AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5C8F791AFB704172AFCC83FB /* Assets.xcassets */; };
@@ -433,6 +438,7 @@
 		9F34631010A44663A56670A0 /* LMSAPIEvaluations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIEvaluations.swift; sourceTree = "<group>"; };
 		A5600EDE053C4E7E99E854F4 /* LMSAPIFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIFeatures.swift; sourceTree = "<group>"; };
 		86809022FC3D419C81004C9A /* LMSAPIFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIFeed.swift; sourceTree = "<group>"; };
+		E5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIAnnouncements.swift; sourceTree = "<group>"; };
 		C083220C1AD046F498269C66 /* LMSAPIGamification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIGamification.swift; sourceTree = "<group>"; };
 		B3C91F089DDA4F10901AC904 /* LMSAPIGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIGroups.swift; sourceTree = "<group>"; };
 		838E560A28D840B6B48B4023 /* LMSAPIInsights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIInsights.swift; sourceTree = "<group>"; };
@@ -488,6 +494,7 @@
 		F9D84A26FDFD4064AF088529 /* RequirementsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequirementsLogic.swift; sourceTree = "<group>"; };
 		B48F1FFCB5C94784B6C31A23 /* ReviewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewModels.swift; sourceTree = "<group>"; };
 		B64A106E43D64229ACF29E2D /* TakeAttendanceLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TakeAttendanceLogic.swift; sourceTree = "<group>"; };
+		E1A2B3C4D5E6012345678AB /* AnnouncementLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementLogic.swift; sourceTree = "<group>"; };
 		0561D63E939E40EB8F0236BC /* TutorLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorLogic.swift; sourceTree = "<group>"; };
 		57C66528FA7A4D1DA2F5B283 /* TutorStreamClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorStreamClient.swift; sourceTree = "<group>"; };
 		EFED684558A34783B299AB8E /* VibeActivityLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibeActivityLogic.swift; sourceTree = "<group>"; };
@@ -592,6 +599,8 @@
 		FBB2475247D641378E222A19 /* CourseGroupsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseGroupsSection.swift; sourceTree = "<group>"; };
 		685C557E3B444B2686341A25 /* GroupSpaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSpaceView.swift; sourceTree = "<group>"; };
 		BF7364ED115A492FA4C84082 /* AnnouncementsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementsViews.swift; sourceTree = "<group>"; };
+		E2A2B3C4D5E6012345678AC /* AnnouncementComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementComposerView.swift; sourceTree = "<group>"; };
+		E3A2B3C4D5E6012345678AD /* BroadcastComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastComposerView.swift; sourceTree = "<group>"; };
 		27D35DF2E7344F18BE7BE6C4 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		8E4D00ED5523441CB26C4D43 /* MoreHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreHubView.swift; sourceTree = "<group>"; };
 		7C617A3566E74FF58194EB21 /* ShellHeaderBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellHeaderBar.swift; sourceTree = "<group>"; };
@@ -717,6 +726,7 @@
 		F64AC200DD1E48DF8CC18896 /* SearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTests.swift; sourceTree = "<group>"; };
 		93872E2D7D48441FBB8D445F /* SettingsAccommodationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAccommodationsTests.swift; sourceTree = "<group>"; };
 		0C4F131715F04ABFBF7AFCC0 /* TakeAttendanceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TakeAttendanceLogicTests.swift; sourceTree = "<group>"; };
+		E4A2B3C4D5E6012345678AE /* AnnouncementLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementLogicTests.swift; sourceTree = "<group>"; };
 		7B6557A7906F40A3A754FD73 /* TutorLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorLogicTests.swift; sourceTree = "<group>"; };
 		17F7C4E5B29D4D9B86606947 /* VibeActivityLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VibeActivityLogicTests.swift; sourceTree = "<group>"; };
 		5C8F791AFB704172AFCC83FB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -815,6 +825,7 @@
 				F64AC200DD1E48DF8CC18896 /* SearchTests.swift */,
 				93872E2D7D48441FBB8D445F /* SettingsAccommodationsTests.swift */,
 				0C4F131715F04ABFBF7AFCC0 /* TakeAttendanceLogicTests.swift */,
+				E4A2B3C4D5E6012345678AE /* AnnouncementLogicTests.swift */,
 				7B6557A7906F40A3A754FD73 /* TutorLogicTests.swift */,
 				17F7C4E5B29D4D9B86606947 /* VibeActivityLogicTests.swift */,
 			);
@@ -1006,6 +1017,7 @@
 				9F34631010A44663A56670A0 /* LMSAPIEvaluations.swift */,
 				A5600EDE053C4E7E99E854F4 /* LMSAPIFeatures.swift */,
 				86809022FC3D419C81004C9A /* LMSAPIFeed.swift */,
+				E5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift */,
 				C083220C1AD046F498269C66 /* LMSAPIGamification.swift */,
 				B3C91F089DDA4F10901AC904 /* LMSAPIGroups.swift */,
 				838E560A28D840B6B48B4023 /* LMSAPIInsights.swift */,
@@ -1061,6 +1073,7 @@
 				F9D84A26FDFD4064AF088529 /* RequirementsLogic.swift */,
 				B48F1FFCB5C94784B6C31A23 /* ReviewModels.swift */,
 				B64A106E43D64229ACF29E2D /* TakeAttendanceLogic.swift */,
+				E1A2B3C4D5E6012345678AB /* AnnouncementLogic.swift */,
 				0561D63E939E40EB8F0236BC /* TutorLogic.swift */,
 				57C66528FA7A4D1DA2F5B283 /* TutorStreamClient.swift */,
 				EFED684558A34783B299AB8E /* VibeActivityLogic.swift */,
@@ -1340,6 +1353,8 @@
 			isa = PBXGroup;
 			children = (
 				BF7364ED115A492FA4C84082 /* AnnouncementsViews.swift */,
+				E2A2B3C4D5E6012345678AC /* AnnouncementComposerView.swift */,
+				E3A2B3C4D5E6012345678AD /* BroadcastComposerView.swift */,
 				27D35DF2E7344F18BE7BE6C4 /* MainTabView.swift */,
 				8E4D00ED5523441CB26C4D43 /* MoreHubView.swift */,
 				7C617A3566E74FF58194EB21 /* ShellHeaderBar.swift */,
@@ -1812,6 +1827,7 @@
 				F84106555B304E7B8F45ED06 /* LMSAPIEvaluations.swift in Sources */,
 				F92D5747CBCA4C83AA82872B /* LMSAPIFeatures.swift in Sources */,
 				3AE85242D6C345D48DD769B0 /* LMSAPIFeed.swift in Sources */,
+				F5A2B3C4D5E6012345678AF /* LMSAPIAnnouncements.swift in Sources */,
 				32D61C5FD68E4BA49ADC9C32 /* LMSAPIGamification.swift in Sources */,
 				DBB5B1920D86401496C5079A /* LMSAPIGroups.swift in Sources */,
 				8BE81F542EB6436E82CF15FD /* LMSAPIInsights.swift in Sources */,
@@ -1867,6 +1883,7 @@
 				749F9A25E09C4B5AAA050025 /* RequirementsLogic.swift in Sources */,
 				9BA81674669B4B0F88CA3DFC /* ReviewModels.swift in Sources */,
 				733DDE7391834C01A201EAD9 /* TakeAttendanceLogic.swift in Sources */,
+				F1A2B3C4D5E6012345678AB /* AnnouncementLogic.swift in Sources */,
 				E724F5E7039D4F218EA1DB9A /* TutorLogic.swift in Sources */,
 				F880BC9664DC4F1D9942668A /* TutorStreamClient.swift in Sources */,
 				C21B2742902A4771BC6B3A17 /* VibeActivityLogic.swift in Sources */,
@@ -1971,6 +1988,8 @@
 				9E2EB7B8FC7D43D0994349F6 /* CourseGroupsSection.swift in Sources */,
 				B346D5F498414EC1ACF94EFD /* GroupSpaceView.swift in Sources */,
 				0F3180CE6AF54A5A861FF7B9 /* AnnouncementsViews.swift in Sources */,
+				F2A2B3C4D5E6012345678AC /* AnnouncementComposerView.swift in Sources */,
+				F3A2B3C4D5E6012345678AD /* BroadcastComposerView.swift in Sources */,
 				BDD9548103E84E8A9B999797 /* MainTabView.swift in Sources */,
 				77CB7C5C3F374E03BA2BDC06 /* MoreHubView.swift in Sources */,
 				7D7CD68178504072AC8101FE /* ShellHeaderBar.swift in Sources */,
@@ -2111,6 +2130,7 @@
 				56BA40DD565544F9A5835F29 /* SearchTests.swift in Sources */,
 				68DE8DFD8CE14F668491DBF7 /* SettingsAccommodationsTests.swift in Sources */,
 				8897B13D14154F8A9AE464D8 /* TakeAttendanceLogicTests.swift in Sources */,
+				F4A2B3C4D5E6012345678AE /* AnnouncementLogicTests.swift in Sources */,
 				1DF82723B67C48919B65C220 /* TutorLogicTests.swift in Sources */,
 				197379A9CCDE42FBA3509618 /* VibeActivityLogicTests.swift in Sources */,
 			);
