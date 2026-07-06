@@ -5,6 +5,7 @@ import com.lextures.android.core.network.ApiError
 import com.lextures.android.core.network.parseApiErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -2731,4 +2732,128 @@ object LmsApi {
             if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
             decode<HallPassResponse>(body).pass ?: throw ApiError.Decoding(IllegalStateException("Missing pass"))
         }
+
+    // ePortfolio (M12.1)
+
+    suspend fun fetchMyPortfolios(accessToken: String): List<PortfolioSummary> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/portfolios", accessToken = accessToken)
+        if (code == 501) throw ApiError.HttpStatus(code, "ePortfolio is not enabled.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<PortfoliosListResponse>(body).portfolios.orEmpty()
+    }
+
+    suspend fun createPortfolio(title: String, introText: String, accessToken: String): PortfolioSummary =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/me/portfolios",
+                method = "POST",
+                body = client.encodeBody(
+                    CreatePortfolioRequest(title = title, introText = introText),
+                    CreatePortfolioRequest.serializer(),
+                ),
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchMyPortfolio(portfolioId: String, accessToken: String): PortfolioDetailResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/me/portfolios/${encodePath(portfolioId)}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun patchPortfolio(
+        portfolioId: String,
+        payload: PatchPortfolioRequest,
+        accessToken: String,
+    ): PortfolioSummary = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/me/portfolios/${encodePath(portfolioId)}",
+            method = "PATCH",
+            body = client.encodeBody(payload, PatchPortfolioRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun createArtifact(
+        portfolioId: String,
+        payload: CreateArtifactRequest,
+        accessToken: String,
+    ): PortfolioArtifact = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/me/portfolios/${encodePath(portfolioId)}/artifacts",
+            method = "POST",
+            body = client.encodeBody(payload, CreateArtifactRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun patchArtifact(
+        portfolioId: String,
+        artifactId: String,
+        payload: PatchArtifactRequest,
+        accessToken: String,
+    ): PortfolioArtifact = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/me/portfolios/${encodePath(portfolioId)}/artifacts/${encodePath(artifactId)}",
+            method = "PATCH",
+            body = client.encodeBody(payload, PatchArtifactRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun deleteArtifact(portfolioId: String, artifactId: String, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/me/portfolios/${encodePath(portfolioId)}/artifacts/${encodePath(artifactId)}",
+                method = "DELETE",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299 && code != 204) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+
+    suspend fun uploadPortfolioArtifactFile(
+        portfolioId: String,
+        fileBytes: ByteArray,
+        fileName: String,
+        mimeType: String,
+        title: String,
+        description: String,
+        outcomeIds: List<String>,
+        isPublic: Boolean,
+        accessToken: String,
+    ): PortfolioArtifact = withContext(Dispatchers.IO) {
+        val fields = mutableMapOf(
+            "title" to title,
+            "description" to description,
+            "isPublic" to if (isPublic) "true" else "false",
+        )
+        if (outcomeIds.isNotEmpty()) {
+            fields["outcomeIds"] = json.encodeToString(outcomeIds)
+        }
+        val body = client.uploadMultipart(
+            path = "/api/v1/me/portfolios/${encodePath(portfolioId)}/artifacts/upload",
+            fieldName = "file",
+            fileName = fileName,
+            mimeType = mimeType,
+            fileBytes = fileBytes,
+            accessToken = accessToken,
+            extraFields = fields,
+        )
+        decode(body)
+    }
+
+    fun portfolioArtifactContentPath(portfolioId: String, artifactId: String): String =
+        "/api/v1/me/portfolios/${encodePath(portfolioId)}/artifacts/${encodePath(artifactId)}/content"
 }

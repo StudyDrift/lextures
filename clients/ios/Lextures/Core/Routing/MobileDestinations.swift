@@ -369,6 +369,7 @@ struct MobilePlatformFeatures: Equatable {
     var ffSelfPacedMode = false
     var ffCourseReviews = false
     var ffCompletionCredentials = false
+    var ffEportfolio = false
     var ffGamification = false
     var ffStripeBilling = false
     var ffPaymentsEnabled = false
@@ -415,6 +416,7 @@ struct MobilePlatformFeatures: Equatable {
             ffSelfPacedMode: features?.ffSelfPacedMode == true,
             ffCourseReviews: features?.ffCourseReviews == true,
             ffCompletionCredentials: features?.ffCompletionCredentials == true,
+            ffEportfolio: features?.ffEportfolio == true,
             ffGamification: features?.ffGamification == true,
             ffStripeBilling: features?.ffStripeBilling == true,
             ffPaymentsEnabled: features?.ffPaymentsEnabled == true,
@@ -610,7 +612,7 @@ enum MobileDestinations {
             if platform.libraryBrowseEnabled { out.append(.library) }
             if platform.ffCompletionCredentials { out.append(.credentials) }
             if platform.ffGamification { out.append(.gamification) }
-            out.append(.portfolio)
+            if platform.ffEportfolio { out.append(.portfolio) }
             if AdvisingLogic.advisingEnabled(platform) { out.append(.advising) }
             out.append(.settings)
         case .teaching:

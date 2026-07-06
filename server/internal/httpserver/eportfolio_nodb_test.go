@@ -35,6 +35,8 @@ var eportfolioAuthRoutes = []struct {
 	{http.MethodPatch, "/api/v1/me/portfolios/" + eportfolioUUID},
 	{http.MethodDelete, "/api/v1/me/portfolios/" + eportfolioUUID},
 	{http.MethodPost, "/api/v1/me/portfolios/" + eportfolioUUID + "/artifacts"},
+	{http.MethodPost, "/api/v1/me/portfolios/" + eportfolioUUID + "/artifacts/upload"},
+	{http.MethodGet, "/api/v1/me/portfolios/" + eportfolioUUID + "/artifacts/" + eportfolioUUID2 + "/content"},
 	{http.MethodPatch, "/api/v1/me/portfolios/" + eportfolioUUID + "/artifacts/" + eportfolioUUID2},
 	{http.MethodDelete, "/api/v1/me/portfolios/" + eportfolioUUID + "/artifacts/" + eportfolioUUID2},
 	{http.MethodPost, "/api/v1/portfolios/" + eportfolioUUID + "/artifacts/" + eportfolioUUID2 + "/evaluate"},
