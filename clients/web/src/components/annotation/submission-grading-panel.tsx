@@ -566,17 +566,17 @@ export function SubmissionGradingPanel({
                 <button
                   type="button"
                   onClick={() => setAgentOpen(true)}
-                  className="rounded-lg border border-indigo-300 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300"
+                  className="rounded-full border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-800 transition-[background-color,color,border-color] hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
                 >
                   {t('gradingAgent.button')}
                 </button>
               ) : null}
               {posted ? (
-                <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200">
+                <span className="rounded-full border border-transparent bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/80 dark:text-emerald-100">
                   Posted
                 </span>
               ) : (
-                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900 dark:bg-amber-950/60 dark:text-amber-200">
+                <span className="rounded-full border border-transparent bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/80 dark:text-amber-100">
                   Draft
                 </span>
               )}

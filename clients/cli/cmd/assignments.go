@@ -27,6 +27,7 @@ type structureItemPublic struct {
 	Published   bool       `json:"published"`
 	DueAt       *time.Time `json:"dueAt"`
 	PointsWorth *int       `json:"pointsWorth"`
+	ExternalURL *string    `json:"externalUrl,omitempty"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	UpdatedAt   time.Time  `json:"updatedAt"`
 }

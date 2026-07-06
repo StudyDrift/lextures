@@ -43,6 +43,94 @@ object LmsApi {
         decode<CourseSummary>(body)
     }
 
+    suspend fun updateCourse(
+        courseCode: String,
+        body: CourseUpdateRequest,
+        accessToken: String,
+    ): CourseSummary = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}",
+            method = "PUT",
+            body = client.encodeBody(body, CourseUpdateRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<CourseSummary>(response)
+    }
+
+    suspend fun patchCourseMarkdownTheme(
+        courseCode: String,
+        body: CourseMarkdownThemePatch,
+        accessToken: String,
+    ): CourseSummary = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/markdown-theme",
+            method = "PATCH",
+            body = client.encodeBody(body, CourseMarkdownThemePatch.serializer()),
+            accessToken = accessToken,
+        )
+        decode<CourseSummary>(response)
+    }
+
+    suspend fun saveCourseHeroImage(
+        courseCode: String,
+        imageUrl: String,
+        accessToken: String,
+    ): CourseSummary = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/hero-image",
+            method = "PUT",
+            body = client.encodeBody(CourseHeroImageURLRequest(imageUrl), CourseHeroImageURLRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<CourseSummary>(response)
+    }
+
+    suspend fun saveCourseHeroPosition(
+        courseCode: String,
+        objectPosition: String?,
+        accessToken: String,
+    ): CourseSummary = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/hero-image",
+            method = "PUT",
+            body = client.encodeBody(CourseHeroPositionRequest(objectPosition), CourseHeroPositionRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<CourseSummary>(response)
+    }
+
+    suspend fun generateCourseImage(
+        courseCode: String,
+        prompt: String,
+        accessToken: String,
+    ): CourseGenerateImageResponse = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/generate-image",
+            method = "POST",
+            body = client.encodeBody(CourseGenerateImageRequest(prompt), CourseGenerateImageRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<CourseGenerateImageResponse>(response)
+    }
+
+    suspend fun uploadCourseFile(
+        courseCode: String,
+        fileBytes: ByteArray,
+        fileName: String,
+        mimeType: String,
+        accessToken: String,
+    ): CourseFileUploadResponse = withContext(Dispatchers.IO) {
+        val body = client.uploadMultipart(
+            path = "/api/v1/courses/${encodePath(courseCode)}/course-files",
+            fieldName = "file",
+            fileName = fileName,
+            mimeType = mimeType,
+            fileBytes = fileBytes,
+            accessToken = accessToken,
+        )
+        decode<CourseFileUploadResponse>(body)
+    }
+
     /** Accept a pending enrollment invitation, activating the viewer's enrollment. */
     suspend fun approveCourseInvitation(courseCode: String, enrollmentId: String, accessToken: String) {
         withContext(Dispatchers.IO) {
@@ -2298,6 +2386,47 @@ object LmsApi {
 
     fun credentialPdfPath(credentialId: String): String =
         "/api/v1/credentials/${encodePath(credentialId)}/download"
+
+    // Credentials wallet (M12.2)
+
+    suspend fun fetchMyCcr(accessToken: String): CCRSummaryResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/ccr", accessToken = accessToken)
+        if (code == 404) throw ApiError.HttpStatus(code, "Co-curricular transcript is not enabled.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun generateMyCcr(sharePublicly: Boolean, accessToken: String): CCRGenerateResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/me/ccr/generate",
+                method = "POST",
+                body = client.encodeBody(CCRGenerateRequest(sharePublicly), CCRGenerateRequest.serializer()),
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    fun ccrDownloadPath(documentId: String, format: String): String =
+        "/api/v1/me/ccr/${encodePath(documentId)}/download?format=${encodeQuery(format)}"
+
+    suspend fun fetchCeTranscript(accessToken: String): CETranscriptResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/ce-transcript", accessToken = accessToken)
+        if (code == 404) throw ApiError.HttpStatus(code, "CEU tracking is not enabled.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    fun ceTranscriptPdfPath(): String = "/api/v1/me/ce-transcript?format=pdf"
+
+    suspend fun fetchTranscriptRequests(accessToken: String): List<TranscriptRequestSummary> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request("/api/v1/transcripts/requests", accessToken = accessToken)
+            if (code == 404) throw ApiError.HttpStatus(code, "Transcripts are not enabled.")
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<TranscriptRequestsResponse>(body).requests.orEmpty()
+        }
 
     // Academic advising (M7.8)
 

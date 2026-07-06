@@ -1,0 +1,4 @@
+# MainTabView is the app shell; splitting it further is deferred.
+file_length:
+  warning: 800
+  error: 1200

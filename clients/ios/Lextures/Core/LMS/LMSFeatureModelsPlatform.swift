@@ -38,6 +38,9 @@ struct PlatformFeatures: Decodable {
     var ffSelfPacedMode: Bool?
     var ffCourseReviews: Bool?
     var ffCompletionCredentials: Bool?
+    var ffCoCurricularTranscript: Bool?
+    var ffTranscripts: Bool?
+    var ffCeuTracking: Bool?
     var ffEportfolio: Bool?
     var ffGamification: Bool?
     var ffStripeBilling: Bool?
@@ -54,4 +57,8 @@ struct PlatformFeatures: Decodable {
     var instructorInsightsEnabled: Bool?
     var studentProgressEnabled: Bool?
     var ffMobileInstructorInsights: Bool?
+    var ffMobileCourseSettings: Bool?
+    var graderAgentEnabled: Bool?
+    var ffPlagiarismChecks: Bool?
+    var altTextEnforcementEnabled: Bool?
 }

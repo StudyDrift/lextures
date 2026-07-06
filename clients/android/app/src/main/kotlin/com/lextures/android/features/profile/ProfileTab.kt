@@ -478,6 +478,17 @@ fun ProfileTab(
                 } else {
                     MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
                 }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Wallet) {
+                if (com.lextures.android.core.lms.WalletLogic.walletEnabled(shell.platformFeatures)) {
+                    com.lextures.android.features.wallet.WalletScreen(
+                        session = session,
+                        localePrefs = localePreferences,
+                        platform = shell.platformFeatures,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
             } else if (destination == com.lextures.android.core.navigation.MoreDestination.Credentials) {
                 if (com.lextures.android.core.lms.CredentialsLogic.credentialsEnabled(shell.platformFeatures)) {
                     when {

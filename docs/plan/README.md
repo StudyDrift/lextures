@@ -39,6 +39,11 @@ One plan per feature gap identified in `[docs/MISSING_FEATURES.md](../MISSING_FE
 - [20 — Documentation & Trust Surfaces](../completed/20-docs-trust/) (completed plans)
 - [21 — Mobile, Offline & Cross-Platform](21-mobile-offline-cross-platform/)
 - [LH — Lighthouse remediation](../completed/lighthouse/) (completed; audits from `docs/lighthouse/` reports)
+- [S — Standards & Legal Hardening](standards/) — bullet-proofing FERPA + every jurisdiction's privacy/AI/accessibility law (S01–S21)
+
+## Standards & Legal Hardening (2026-07-06)
+
+A dedicated [`standards/`](standards/) folder hardens the shipped compliance layer (`docs/completed/10-*`) and extends it to every market we sell into. It contains a full **coverage matrix** (every law → owning plan → status) plus 21 template-compliant plans: cross-cutting engines (DSAR orchestration, retention/deletion, breach notification, consent ledger, RoPA/data-map, DPIA/AIA, transfer & subprocessor governance, children/age-assurance), US (FERPA deep-hardening, PPRA, state-law expansion), EU/UK (GDPR accountability, **EU AI Act high-risk**), rest-of-world (Canada/Quebec, Australia/NZ, Brazil, India, China, APAC/Africa), accessibility law (ADA Title II/III, §508, EAA/EN 301 549, AODA), and continuous compliance-evidence monitoring. See [standards/README](standards/README.md).
 
 ## Newly identified gaps — adoption-blocker scan (2026-06-19)
 

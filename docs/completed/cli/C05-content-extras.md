@@ -10,7 +10,7 @@
 | **Section** | Course & content authoring |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Content / CLI |
 | **Depends on** | C02, C40 |
@@ -66,7 +66,9 @@ Rich course content — interactive H5P, SCORM packages, glossaries, embedded ex
 
 ## 8. Data Model
 
-- None client-side. Document CSV/JSON glossary schema.
+- None client-side. Glossary bulk-import schema:
+  - **CSV:** `sourceTerm,targetTerm` (optional header row; optional `sourceLocale,targetLocale` columns).
+  - **JSON:** array of `{sourceTerm,targetTerm,sourceLocale?,targetLocale?}` or `{entries:[...]}`.
 
 ## 9. API Surface
 
@@ -74,7 +76,7 @@ Rich course content — interactive H5P, SCORM packages, glossaries, embedded ex
 
 ## 10. UI / UX
 
-- `lextures scorm|h5p|glossary|tools|resources ...`, all `--course` scoped.
+- `lextures scorm|h5p|glossary|tools|resources ...`, all course-scoped via positional `<course_code>`.
 - Import shows upload progress; `--json` returns created ids.
 
 ## 11. AI / ML Considerations
@@ -83,8 +85,8 @@ Rich course content — interactive H5P, SCORM packages, glossaries, embedded ex
 
 ## 12. Integration Points
 
-- Server content handlers; TUS/upload pipeline (existing `files upload`).
-- Internal: new command files.
+- Server content handlers; multipart upload to module endpoints (SCORM/H5P).
+- Internal: `content_upload.go`, `scorm.go`, `h5p.go`, `glossary.go`, `tools.go`, `resources.go`, `collab_docs.go`, `whiteboards.go`.
 
 ## 13. Dependencies & Sequencing
 
@@ -115,10 +117,12 @@ Rich course content — interactive H5P, SCORM packages, glossaries, embedded ex
 
 ## 18. Open Questions
 
-1. Are SCORM/H5P imports synchronous or job-backed?
-2. Is there a stable export format for collab-docs/whiteboards?
+1. Are SCORM/H5P imports synchronous or job-backed? *(Sync when AV scan off; otherwise extraction is job-backed.)*
+2. Is there a stable export format for collab-docs/whiteboards? *(Export is opaque JSON + snapshot metadata.)*
+3. Glossary per-term delete? *(No server DELETE endpoint yet — only `glossary add` implemented.)*
 
 ## 19. References
 
 - Content sub-resource handlers in `server/internal/httpserver`.
-- Related: [C02](C02-modules-course-structure.md), [C23](C23-lti-developer-keys.md), [C33](C33-accessibility-media-localization.md), [C40](C40-cli-framework.md).
+- `clients/cli/cmd/content_upload.go`, `scorm.go`, `h5p.go`, `glossary.go`, `tools.go`, `resources.go`, `collab_docs.go`, `whiteboards.go`, `content_extras_test.go`.
+- Related: [C02](C02-modules-course-structure.md), [C23](../plan/cli/C23-lti-developer-keys.md), [C33](../plan/cli/C33-accessibility-media-localization.md), [C40](../plan/cli/C40-cli-framework.md).

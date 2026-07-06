@@ -1,0 +1,6 @@
+---
+description: Ensure all tests pass before merging.
+alwaysApply: true
+---
+
+Ensure all tests pass before merging. Conduct thorough code reviews via pull requests; include clear PR descriptions with context. Implement comprehensive automated testing (unit, integration, e2e). Do not skip tests unless explicity authorized by the user.

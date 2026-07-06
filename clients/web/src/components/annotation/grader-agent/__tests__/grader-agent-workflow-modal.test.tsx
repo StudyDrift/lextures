@@ -100,6 +100,21 @@ describe('GraderAgentWorkflowModal', () => {
     expect(screen.getByText('1/2')).toBeInTheDocument()
   })
 
+  it('shows an import workflow menu in the header', async () => {
+    render(
+      <GraderAgentWorkflowModal
+        open
+        onClose={() => undefined}
+        courseCode="demo"
+        itemId="00000000-0000-0000-0000-000000000001"
+        submissionId="00000000-0000-0000-0000-000000000002"
+        rubric={null}
+        maxPoints={100}
+      />,
+    )
+    expect(await screen.findByRole('button', { name: /gradingAgent.import.button/i })).toBeInTheDocument()
+  })
+
   it('shows a save menu while the agent is editable', async () => {
     render(
       <GraderAgentWorkflowModal

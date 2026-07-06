@@ -313,6 +313,7 @@ fun CourseDetailScreen(
 
     val workspaceContext = CourseWorkspaceContext(
         course = course,
+        permissions = shell?.permissions.orEmpty(),
         hasAttendanceSessions = hasAttendanceSessions,
         hasLibraryResources = LibraryResourceLogic.hasLibraryResources(items),
         evaluationStatus = evaluationStatus,
@@ -490,6 +491,16 @@ fun CourseDetailScreen(
                             shell = shell,
                             onOpenAtRisk = { openInstructorAtRisk = true },
                             onOpenWhatsWorking = { openInstructorWhatsWorking = true },
+                        )
+                    }
+                    CourseWorkspaceSection.Settings -> item {
+                        com.lextures.android.features.courses.settings.CourseSettingsHostScreen(
+                            session = session,
+                            course = course,
+                            offline = offline,
+                            platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
+                            permissions = shell?.permissions.orEmpty(),
+                            onCourseUpdated = { resolvedCourse = it },
                         )
                     }
                     CourseWorkspaceSection.Files -> item {

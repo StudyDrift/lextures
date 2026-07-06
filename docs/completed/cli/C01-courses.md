@@ -10,7 +10,7 @@
 | **Section** | Course & content authoring |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL (list, get, create, delete only) |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Platform / CLI |
 | **Depends on** | C40 (framework) |

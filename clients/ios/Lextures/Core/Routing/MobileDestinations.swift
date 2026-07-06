@@ -166,6 +166,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     case reading
     case portfolio
     case credentials
+    case wallet
     case gamification
     case advising
     case settings
@@ -190,6 +191,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
         case .reading: return L.text("mobile.ia.more.reading")
         case .portfolio: return L.text("mobile.ia.more.portfolio")
         case .credentials: return L.text("mobile.ia.more.credentials")
+        case .wallet: return L.text("mobile.ia.more.wallet")
         case .gamification: return L.text("mobile.ia.more.gamification")
         case .advising: return L.text("mobile.ia.more.advising")
         case .settings: return L.text("mobile.ia.more.settings")
@@ -210,6 +212,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
         case .reading: return "book.fill"
         case .portfolio: return "folder.fill"
         case .credentials: return "rosette"
+        case .wallet: return "wallet.pass.fill"
         case .gamification: return "flame.fill"
         case .advising: return "person.2.fill"
         case .settings: return "gearshape.fill"
@@ -238,6 +241,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
     case collabDocs
     case grading
     case instructorInsights
+    case settings
     case behavior
     case hallPass
 
@@ -260,6 +264,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .collabDocs: return L.text("mobile.ia.course.collabDocs")
         case .grading: return L.text("mobile.ia.course.grading")
         case .instructorInsights: return L.text("mobile.ia.course.insights")
+        case .settings: return L.text("mobile.ia.course.settings")
         case .behavior: return L.text("mobile.ia.course.behavior")
         case .hallPass: return L.text("mobile.ia.course.hallPass")
         }
@@ -285,6 +290,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .collabDocs: return "collab-docs"
         case .grading: return "grading"
         case .instructorInsights: return "insights"
+        case .settings: return "settings"
         case .behavior: return "behavior"
         case .hallPass: return "hall-pass"
         }
@@ -373,6 +379,9 @@ struct MobilePlatformFeatures: Equatable {
     var ffSelfPacedMode = false
     var ffCourseReviews = false
     var ffCompletionCredentials = false
+    var ffCoCurricularTranscript = false
+    var ffTranscripts = false
+    var ffCeuTracking = false
     var ffEportfolio = false
     var ffGamification = false
     var ffStripeBilling = false
@@ -389,6 +398,10 @@ struct MobilePlatformFeatures: Equatable {
     var instructorInsightsEnabled = false
     var studentProgressEnabled = true
     var ffMobileInstructorInsights = true
+    var ffMobileCourseSettings = false
+    var graderAgentEnabled = false
+    var ffPlagiarismChecks = false
+    var altTextEnforcementEnabled = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -424,6 +437,9 @@ struct MobilePlatformFeatures: Equatable {
             ffSelfPacedMode: features?.ffSelfPacedMode == true,
             ffCourseReviews: features?.ffCourseReviews == true,
             ffCompletionCredentials: features?.ffCompletionCredentials == true,
+            ffCoCurricularTranscript: features?.ffCoCurricularTranscript == true,
+            ffTranscripts: features?.ffTranscripts == true,
+            ffCeuTracking: features?.ffCeuTracking == true,
             ffEportfolio: features?.ffEportfolio == true,
             ffGamification: features?.ffGamification == true,
             ffStripeBilling: features?.ffStripeBilling == true,
@@ -439,7 +455,11 @@ struct MobilePlatformFeatures: Equatable {
             atRiskAlertsEnabled: features?.atRiskAlertsEnabled == true,
             instructorInsightsEnabled: features?.instructorInsightsEnabled == true,
             studentProgressEnabled: features?.studentProgressEnabled != false,
-            ffMobileInstructorInsights: features?.ffMobileInstructorInsights != false
+            ffMobileInstructorInsights: features?.ffMobileInstructorInsights != false,
+            ffMobileCourseSettings: features?.ffMobileCourseSettings == true,
+            graderAgentEnabled: features?.graderAgentEnabled == true,
+            ffPlagiarismChecks: features?.ffPlagiarismChecks == true,
+            altTextEnforcementEnabled: features?.altTextEnforcementEnabled == true
         )
     }
 
@@ -463,6 +483,7 @@ struct MobilePlatformFeatures: Equatable {
 
 struct CourseWorkspaceContext: Equatable {
     var course: CourseSummary
+    var permissions: [String] = []
     var hasAttendanceSessions = false
     var hasLibraryResources = false
     var evaluationStatus: EvaluationStatus?
@@ -540,7 +561,7 @@ enum MobileDestinations {
         ]
         let grades: [CourseWorkspaceSection] = [.grades, .mastery]
         let people: [CourseWorkspaceSection] = [.people]
-        let manage: [CourseWorkspaceSection] = [.grading, .instructorInsights, .attendance, .evaluations, .behavior, .hallPass]
+        let manage: [CourseWorkspaceSection] = [.grading, .instructorInsights, .settings, .attendance, .evaluations, .behavior, .hallPass]
 
         func filtered(_ group: [CourseWorkspaceSection]) -> [CourseWorkspaceSection] {
             group.filter(sections.contains)
@@ -622,7 +643,11 @@ enum MobileDestinations {
             out += [.calendar, .planner, .catalog, .paths]
             if platform.ffLibrary { out.append(.reading) }
             if platform.libraryBrowseEnabled { out.append(.library) }
-            if platform.ffCompletionCredentials { out.append(.credentials) }
+            if WalletLogic.walletEnabled(platform) {
+                out.append(.wallet)
+            } else if platform.ffCompletionCredentials {
+                out.append(.credentials)
+            }
             if platform.ffGamification { out.append(.gamification) }
             if platform.ffEportfolio { out.append(.portfolio) }
             if AdvisingLogic.advisingEnabled(platform) { out.append(.advising) }
@@ -674,6 +699,13 @@ enum MobileDestinations {
             features: ctx.platformFeatures
         ) {
             out.append(.instructorInsights)
+        }
+        if CourseSettingsLogic.shouldShowWorkspaceSection(
+            course: course,
+            permissions: ctx.permissions,
+            features: ctx.platformFeatures
+        ) {
+            out.append(.settings)
         }
         if ctx.platformFeatures.ffClassroomSignals && course.viewerIsStaff {
             out.append(.behavior)

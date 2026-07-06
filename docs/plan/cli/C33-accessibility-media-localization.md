@@ -119,4 +119,4 @@ Accessibility tooling (alt-text generation, captions, TTS/STT, reading-level), m
 ## 19. References
 
 - `alt_text_http.go`, `course_translation.go`, `accessibility_http.go`, caption/transcode/TUS routes.
-- Related: [C02](C02-modules-course-structure.md), [C05](C05-content-extras.md), [C29](C29-compliance-privacy.md).
+- Related: [C02](../completed/cli/C02-modules-course-structure.md), [C05](../completed/cli/C05-content-extras.md), [C29](C29-compliance-privacy.md).

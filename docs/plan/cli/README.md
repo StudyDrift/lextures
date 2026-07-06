@@ -58,7 +58,7 @@ that can be driven from a terminal gets a command group, including student-facin
 | C02 | [Modules & course structure](C02-modules-course-structure.md) | BLOCKER | MISSING | M |
 | C03 | [Assignments (expand)](C03-assignments.md) | MAJOR | PARTIAL | M |
 | C04 | [Quizzes & question banks](C04-quizzes-question-banks.md) | BLOCKER | PARTIAL | L |
-| C05 | [Content extras (pages, glossary, H5P, SCORM, tools)](C05-content-extras.md) | MINOR | MISSING | M |
+| C05 | [Content extras (pages, glossary, H5P, SCORM, tools)](../completed/cli/C05-content-extras.md) | MINOR | COMPLETE | M |
 
 ### B. Assessment & grading
 

@@ -79,6 +79,9 @@ enum OfflineCacheKey {
         "reading:library:\(orgId):\(gradeBand)"
     }
     static func credentialsList() -> String { "credentials:list" }
+    static func walletCCR() -> String { "wallet:ccr" }
+    static func walletCETranscript() -> String { "wallet:ce-transcript" }
+    static func walletTranscriptRequests() -> String { "wallet:transcript-requests" }
     static func portfolioList() -> String { "portfolio:list" }
     static func portfolioDetail(portfolioId: String) -> String { "portfolio:\(portfolioId)" }
     static func gamificationProfile() -> String { "gamification:profile" }

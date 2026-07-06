@@ -390,9 +390,9 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 			if derivedModel != nil && (body.ModelID == nil || strings.TrimSpace(*body.ModelID) == "") {
 				body.ModelID = derivedModel
 			}
-			if status == gradingagentrepo.StatusDraft {
-				prompt = gradingagentsvc.PersistencePrompt(body.WorkflowGraph, prompt)
-			}
+			// Canvas-only workflows (e.g. Participation router) have no legacy grader prompt;
+			// PersistencePrompt supplies a placeholder for the required DB column.
+			prompt = gradingagentsvc.PersistencePrompt(body.WorkflowGraph, prompt)
 		}
 		if prompt == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Prompt is required.")

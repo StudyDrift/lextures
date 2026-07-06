@@ -164,6 +164,13 @@ func sampleGraphWithAI(prompt string) WorkflowGraph {
 	}
 }
 
+func TestPersistencePrompt_participationWorkflowUsesPlaceholder(t *testing.T) {
+	g := ParticipationWorkflowGraph()
+	if got := PersistencePrompt(&g, ""); got != "." {
+		t.Fatalf("expected placeholder prompt for canvas-only workflow, got %q", got)
+	}
+}
+
 func TestDeriveLegacyFields_aiWorkflow(t *testing.T) {
 	g := sampleGraphWithAI("Grade like a TA")
 	prompt, incContent, incRubric, _ := DeriveLegacyFields(&g)

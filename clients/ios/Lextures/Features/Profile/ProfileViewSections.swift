@@ -195,6 +195,12 @@ struct ProfileMoreDestinationScreen: View {
             } else {
                 MoreDestinationPlaceholder(destination: destination)
             }
+        } else if destination == .wallet {
+            if WalletLogic.walletEnabled(shell.platformFeatures) {
+                WalletView()
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
         } else if destination == .credentials {
             if CredentialsLogic.credentialsEnabled(shell.platformFeatures) {
                 CredentialsView()

@@ -6,6 +6,16 @@ describe('ICU plural forms (plan 11.1 AC-3)', () => {
     await i18n.loadLanguages(['en', 'es', 'fr'])
   })
 
+  it('interpolates grading agent import strings', async () => {
+    await i18n.changeLanguage('en')
+    expect(i18n.t('gradingAgent.import.thisCourse', { course: 'Demo course (demo)' })).toBe(
+      'This course — Demo course (demo)',
+    )
+    expect(
+      i18n.t('gradingAgent.import.confirmDescription', { name: 'Essay template' }),
+    ).toContain('Essay template')
+  })
+
   it.each([
     ['en', 1, '1 assignment'],
     ['en', 2, '2 assignments'],
