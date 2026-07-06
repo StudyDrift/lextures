@@ -361,7 +361,7 @@
 		8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */; };
 		8B60BC2D3E4F5061728394 /* ConferenceLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */; };
 		8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */; };
-		8B60CC3D3E4F5061728394 /* MyConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CD3E4F5061728394A5 /* MyConferencesView.swift */; };
+		8B60CC3D3E4F5061728394 /* MyConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CE3E4F5061728394A5 /* MyConferencesView.swift */; };
 		8B60DC2D3E4F5061728394 /* ConferenceReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */; };
 /* End PBXBuildFile section */
 
@@ -724,7 +724,7 @@
 		8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentLogicTests.swift; sourceTree = "<group>"; };
 		8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceLogicTests.swift; sourceTree = "<group>"; };
 		8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentDashboardSections.swift; sourceTree = "<group>"; };
-		8B60CD3E4F5061728394A5 /* MyConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyConferencesView.swift; sourceTree = "<group>"; };
+		8B60CE3E4F5061728394A5 /* MyConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyConferencesView.swift; sourceTree = "<group>"; };
 		8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceReminderScheduler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1581,6 +1581,7 @@
 				8B607D3E4F5061728394A5 /* ParentAttendanceDetailView.swift */,
 				8B608D3E4F5061728394A5 /* ParentNotificationPrefsView.swift */,
 				8B609D3E4F5061728394A5 /* ConferenceBookingView.swift */,
+				8B60CE3E4F5061728394A5 /* MyConferencesView.swift */,
 			);
 			path = Parent;
 			sourceTree = "<group>";
