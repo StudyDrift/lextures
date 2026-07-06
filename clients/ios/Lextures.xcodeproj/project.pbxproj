@@ -359,6 +359,7 @@
 		8B609C2D3E4F5061728394 /* ConferenceBookingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B609D3E4F5061728394A5 /* ConferenceBookingView.swift */; };
 		8B60AC2D3E4F5061728394 /* ParentLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */; };
 		8B60BC2D3E4F5061728394 /* ConferenceLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */; };
+		8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -718,6 +719,7 @@
 		8B609D3E4F5061728394A5 /* ConferenceBookingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceBookingView.swift; sourceTree = "<group>"; };
 		8B60AD3E4F5061728394A5 /* ParentLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentLogicTests.swift; sourceTree = "<group>"; };
 		8B60BD3E4F5061728394A5 /* ConferenceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceLogicTests.swift; sourceTree = "<group>"; };
+		8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentDashboardSections.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1682,6 +1684,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
 
+				8B60CC2D3E4F5061728394 /* ParentDashboardSections.swift in Sources */,
 				8B609C2D3E4F5061728394 /* ConferenceBookingView.swift in Sources */,
 				8B608C2D3E4F5061728394 /* ParentNotificationPrefsView.swift in Sources */,
 				8B607C2D3E4F5061728394 /* ParentAttendanceDetailView.swift in Sources */,

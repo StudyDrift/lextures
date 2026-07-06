@@ -15,6 +15,7 @@ ENTRIES: list[tuple[str, str, str, str, bool]] = [
     ("LMSFeatureModelsParent.swift", "8B603C2D3E4F5061728394", "8B603D3E4F5061728394A5", "D2384791A1E3420B9476C89D", False),
     ("LMSAPIParent.swift", "8B604C2D3E4F5061728394", "8B604D3E4F5061728394A5", "D2384791A1E3420B9476C89D", False),
     ("ParentDashboardView.swift", "8B605C2D3E4F5061728394", "8B605D3E4F5061728394A5", "8B60PAR5C6D7E8F901234567", False),
+    ("ParentDashboardSections.swift", "8B60CC2D3E4F5061728394", "8B60CD3E4F5061728394A5", "8B60PAR5C6D7E8F901234567", False),
     ("ParentGradesDetailView.swift", "8B606C2D3E4F5061728394", "8B606D3E4F5061728394A5", "8B60PAR5C6D7E8F901234567", False),
     ("ParentAttendanceDetailView.swift", "8B607C2D3E4F5061728394", "8B607D3E4F5061728394A5", "8B60PAR5C6D7E8F901234567", False),
     ("ParentNotificationPrefsView.swift", "8B608C2D3E4F5061728394", "8B608D3E4F5061728394A5", "8B60PAR5C6D7E8F901234567", False),
@@ -28,6 +29,7 @@ NEW_GROUP = """
 \t\t\tisa = PBXGroup;
 \t\t\tchildren = (
 \t\t\t\t8B605D3E4F5061728394A5 /* ParentDashboardView.swift */,
+\t\t\t\t8B60CD3E4F5061728394A5 /* ParentDashboardSections.swift */,
 \t\t\t\t8B606D3E4F5061728394A5 /* ParentGradesDetailView.swift */,
 \t\t\t\t8B607D3E4F5061728394A5 /* ParentAttendanceDetailView.swift */,
 \t\t\t\t8B608D3E4F5061728394A5 /* ParentNotificationPrefsView.swift */,
