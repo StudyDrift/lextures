@@ -2731,4 +2731,56 @@ object LmsApi {
             if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
             decode<HallPassResponse>(body).pass ?: throw ApiError.Decoding(IllegalStateException("Missing pass"))
         }
+
+    // Instructor insights (staff, M11.3)
+
+    suspend fun fetchCourseAtRisk(courseCode: String, accessToken: String): AtRiskListResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/at-risk",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchInstructorInsights(courseCode: String, accessToken: String): InstructorInsightsResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/analytics/insights",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchStudentProgress(
+        courseCode: String,
+        enrollmentId: String,
+        accessToken: String,
+    ): StudentProgressResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/enrollments/${encodePath(enrollmentId)}/progress",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchStudentProgressActivity(
+        courseCode: String,
+        enrollmentId: String,
+        cursor: String?,
+        accessToken: String,
+    ): StudentProgressActivityResponse =
+        withContext(Dispatchers.IO) {
+            val suffix = cursor?.takeIf { it.isNotEmpty() }?.let { "?cursor=${encodePath(it)}" }.orEmpty()
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/enrollments/${encodePath(enrollmentId)}/progress/activity$suffix",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
 }

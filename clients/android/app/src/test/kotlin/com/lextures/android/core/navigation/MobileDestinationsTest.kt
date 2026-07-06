@@ -78,6 +78,22 @@ class MobileDestinationsTest {
         assertEquals(CourseWorkspaceSection.CollabDocs, CourseWorkspaceSection.from(CourseDeepLinkSection.CollabDocs))
         assertEquals(CourseWorkspaceSection.Behavior, CourseWorkspaceSection.from(CourseDeepLinkSection.Behavior))
         assertEquals(CourseWorkspaceSection.HallPass, CourseWorkspaceSection.from(CourseDeepLinkSection.HallPass))
+        assertEquals(CourseWorkspaceSection.InstructorInsights, CourseWorkspaceSection.from(CourseDeepLinkSection.Insights))
+    }
+
+    @Test
+    fun courseWorkspaceShowsInsightsForStaffWhenEnabled() {
+        val course = CourseSummary(
+            id = "1",
+            courseCode = "demo",
+            title = "Demo",
+            viewerEnrollmentRoles = listOf("teacher"),
+        )
+        val features = MobilePlatformFeatures(atRiskAlertsEnabled = true)
+        val sections = MobileDestinations.courseWorkspaceSections(
+            CourseWorkspaceContext(course = course, platformFeatures = features),
+        )
+        assertTrue(sections.contains(CourseWorkspaceSection.InstructorInsights))
     }
 
     @Test

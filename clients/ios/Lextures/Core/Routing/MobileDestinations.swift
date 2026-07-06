@@ -237,6 +237,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
     case groups
     case collabDocs
     case grading
+    case instructorInsights
     case behavior
     case hallPass
 
@@ -258,6 +259,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .groups: return L.text("mobile.ia.course.groups")
         case .collabDocs: return L.text("mobile.ia.course.collabDocs")
         case .grading: return L.text("mobile.ia.course.grading")
+        case .instructorInsights: return L.text("mobile.ia.course.insights")
         case .behavior: return L.text("mobile.ia.course.behavior")
         case .hallPass: return L.text("mobile.ia.course.hallPass")
         }
@@ -282,6 +284,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .groups: return "groups"
         case .collabDocs: return "collab-docs"
         case .grading: return "grading"
+        case .instructorInsights: return "insights"
         case .behavior: return "behavior"
         case .hallPass: return "hall-pass"
         }
@@ -305,6 +308,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .collabDocs: return .collabDocs
         case .behavior: return .behavior
         case .hallPass: return .hallPass
+        case .insights: return .instructorInsights
         }
     }
 }
@@ -380,6 +384,10 @@ struct MobilePlatformFeatures: Equatable {
     var ffClassroomSignals = false
     var ffBroadcasts = false
     var ffUiMode = false
+    var atRiskAlertsEnabled = false
+    var instructorInsightsEnabled = false
+    var studentProgressEnabled = true
+    var ffMobileInstructorInsights = true
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -425,7 +433,11 @@ struct MobilePlatformFeatures: Equatable {
             ffConferenceScheduling: features?.ffConferenceScheduling == true,
             ffClassroomSignals: features?.ffClassroomSignals == true,
             ffBroadcasts: features?.ffBroadcasts == true,
-            ffUiMode: features?.ffUiMode == true
+            ffUiMode: features?.ffUiMode == true,
+            atRiskAlertsEnabled: features?.atRiskAlertsEnabled == true,
+            instructorInsightsEnabled: features?.instructorInsightsEnabled == true,
+            studentProgressEnabled: features?.studentProgressEnabled != false,
+            ffMobileInstructorInsights: features?.ffMobileInstructorInsights != false
         )
     }
 
@@ -526,7 +538,7 @@ enum MobileDestinations {
         ]
         let grades: [CourseWorkspaceSection] = [.grades, .mastery]
         let people: [CourseWorkspaceSection] = [.people]
-        let manage: [CourseWorkspaceSection] = [.grading, .attendance, .evaluations, .behavior, .hallPass]
+        let manage: [CourseWorkspaceSection] = [.grading, .instructorInsights, .attendance, .evaluations, .behavior, .hallPass]
 
         func filtered(_ group: [CourseWorkspaceSection]) -> [CourseWorkspaceSection] {
             group.filter(sections.contains)
@@ -654,6 +666,12 @@ enum MobileDestinations {
         }
         if course.viewerIsStaff {
             out.append(.grading)
+        }
+        if InstructorInsightsLogic.shouldShowWorkspaceSection(
+            course: course,
+            features: ctx.platformFeatures
+        ) {
+            out.append(.instructorInsights)
         }
         if ctx.platformFeatures.ffClassroomSignals && course.viewerIsStaff {
             out.append(.behavior)

@@ -152,6 +152,9 @@ fun CourseDetailScreen(
     var openAttendanceSession by remember { mutableStateOf<AttendanceSession?>(null) }
     var openTakeAttendance by remember { mutableStateOf<TakeAttendanceRequest?>(null) }
     var openBacklogItem by remember { mutableStateOf<GradingBacklogItem?>(null) }
+    var openInstructorAtRisk by remember { mutableStateOf(false) }
+    var openInstructorWhatsWorking by remember { mutableStateOf(false) }
+    var openStudentProgress by remember { mutableStateOf<Pair<String, String>?>(null) }
     var openFilePreview by remember { mutableStateOf<FilePreviewTarget?>(null) }
     var openGradeFeedback by remember { mutableStateOf<GradeFeedbackRoute?>(null) }
     var showCourseSearch by remember { mutableStateOf(false) }
@@ -234,6 +237,43 @@ fun CourseDetailScreen(
             course = course,
             backlogItem = selected,
             onBack = { openBacklogItem = null },
+            modifier = modifier,
+        )
+        return
+    }
+
+    openStudentProgress?.let { (enrollmentId, displayName) ->
+        com.lextures.android.features.instructorinsights.StudentProgressScreen(
+            session = session,
+            course = course,
+            offline = offline,
+            enrollmentId = enrollmentId,
+            displayName = displayName,
+            onBack = { openStudentProgress = null },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (openInstructorAtRisk) {
+        com.lextures.android.features.instructorinsights.AtRiskListScreen(
+            session = session,
+            course = course,
+            offline = offline,
+            platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
+            onBack = { openInstructorAtRisk = false },
+            onOpenStudent = { enrollmentId, name -> openStudentProgress = enrollmentId to name },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (openInstructorWhatsWorking) {
+        com.lextures.android.features.instructorinsights.WhatsWorkingScreen(
+            session = session,
+            course = course,
+            offline = offline,
+            onBack = { openInstructorWhatsWorking = false },
             modifier = modifier,
         )
         return
@@ -439,6 +479,17 @@ fun CourseDetailScreen(
                             session = session,
                             course = course,
                             onOpenItem = { openBacklogItem = it },
+                        )
+                    }
+                    CourseWorkspaceSection.InstructorInsights -> item {
+                        com.lextures.android.features.instructorinsights.CourseInsightsSection(
+                            session = session,
+                            course = course,
+                            offline = offline,
+                            platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
+                            shell = shell,
+                            onOpenAtRisk = { openInstructorAtRisk = true },
+                            onOpenWhatsWorking = { openInstructorWhatsWorking = true },
                         )
                     }
                     CourseWorkspaceSection.Files -> item {

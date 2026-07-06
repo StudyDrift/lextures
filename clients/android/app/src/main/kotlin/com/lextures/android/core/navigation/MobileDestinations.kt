@@ -6,6 +6,7 @@ import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.EvaluationLogic
 import com.lextures.android.core.lms.EvaluationStatus
 import com.lextures.android.core.lms.ImmersiveReaderCapabilities
+import com.lextures.android.core.lms.InstructorInsightsLogic
 import com.lextures.android.core.lms.PlatformFeatures
 import com.lextures.android.core.lms.TutorLogic
 import com.lextures.android.core.lms.isOfficeHoursEnabled
@@ -112,6 +113,7 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
     Groups("mobile_ia_course_groups", "groups"),
     CollabDocs("mobile_ia_course_collabDocs", "collab-docs"),
     Grading("mobile_ia_course_grading", "grading"),
+    InstructorInsights("mobile_ia_course_insights", "insights"),
     Behavior("mobile_ia_course_behavior", "behavior"),
     HallPass("mobile_ia_course_hallPass", "hall-pass"),
     ;
@@ -134,6 +136,7 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
             CourseDeepLinkSection.CollabDocs -> CollabDocs
             CourseDeepLinkSection.Behavior -> Behavior
             CourseDeepLinkSection.HallPass -> HallPass
+            CourseDeepLinkSection.Insights -> InstructorInsights
             null -> null
         }
     }
@@ -205,6 +208,10 @@ data class MobilePlatformFeatures(
     val ffClassroomSignals: Boolean = false,
     val ffBroadcasts: Boolean = false,
     val ffUiMode: Boolean = false,
+    val atRiskAlertsEnabled: Boolean = false,
+    val instructorInsightsEnabled: Boolean = false,
+    val studentProgressEnabled: Boolean = true,
+    val ffMobileInstructorInsights: Boolean = true,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -268,6 +275,10 @@ data class MobilePlatformFeatures(
             ffClassroomSignals = features?.ffClassroomSignals == true,
             ffBroadcasts = features?.ffBroadcasts == true,
             ffUiMode = features?.ffUiMode == true,
+            atRiskAlertsEnabled = features?.atRiskAlertsEnabled == true,
+            instructorInsightsEnabled = features?.instructorInsightsEnabled == true,
+            studentProgressEnabled = features?.studentProgressEnabled != false,
+            ffMobileInstructorInsights = features?.ffMobileInstructorInsights != false,
         )
     }
 }
@@ -365,6 +376,7 @@ object MobileDestinations {
             "mobile_drawer_course_manage" to filtered(
                 listOf(
                     CourseWorkspaceSection.Grading,
+                    CourseWorkspaceSection.InstructorInsights,
                     CourseWorkspaceSection.Attendance,
                     CourseWorkspaceSection.Evaluations,
                     CourseWorkspaceSection.Behavior,
@@ -466,6 +478,9 @@ object MobileDestinations {
         }
         if (ctx.course.viewerIsStaff) {
             add(CourseWorkspaceSection.Grading)
+        }
+        if (InstructorInsightsLogic.shouldShowWorkspaceSection(ctx.course, ctx.platformFeatures)) {
+            add(CourseWorkspaceSection.InstructorInsights)
         }
         if (ctx.platformFeatures.ffClassroomSignals && ctx.course.viewerIsStaff) {
             add(CourseWorkspaceSection.Behavior)

@@ -56,6 +56,15 @@ enum OfflineCacheKey {
     static func courseEnrollments(_ courseCode: String) -> String {
         "course:\(courseCode):enrollments"
     }
+    static func courseAtRisk(_ courseCode: String) -> String {
+        "course:\(courseCode):at-risk"
+    }
+    static func courseInstructorInsights(_ courseCode: String) -> String {
+        "course:\(courseCode):instructor-insights"
+    }
+    static func studentProgress(courseCode: String, enrollmentId: String) -> String {
+        "course:\(courseCode):student-progress:\(enrollmentId)"
+    }
     static func myPaths() -> String { "paths:my" }
     static func pathProgress(_ pathId: String) -> String { "paths:progress:\(pathId)" }
     static func catalogPaths(query: String) -> String { "paths:catalog:\(query)" }

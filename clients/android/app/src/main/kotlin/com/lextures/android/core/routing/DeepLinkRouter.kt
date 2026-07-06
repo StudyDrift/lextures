@@ -47,6 +47,7 @@ enum class CourseDeepLinkSection {
     CollabDocs,
     Behavior,
     HallPass,
+    Insights,
 }
 
 /** Maps web-style action URLs and `lextures://` links to native navigation intents. */
@@ -156,6 +157,7 @@ object DeepLinkRouter {
             "groups" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Groups)
             "behavior" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Behavior)
             "hall-pass" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.HallPass)
+            "insights", "at-risk", "whats-working" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Insights)
             "collab-docs" -> DeepLinkDestination.Course(
                 code = courseCode,
                 section = CourseDeepLinkSection.CollabDocs,

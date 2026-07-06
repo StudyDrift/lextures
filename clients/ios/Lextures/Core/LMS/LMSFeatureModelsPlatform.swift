@@ -49,4 +49,8 @@ struct PlatformFeatures: Decodable {
     var ffClassroomSignals: Bool?
     var ffBroadcasts: Bool?
     var ffUiMode: Bool?
+    var atRiskAlertsEnabled: Bool?
+    var instructorInsightsEnabled: Bool?
+    var studentProgressEnabled: Bool?
+    var ffMobileInstructorInsights: Bool?
 }

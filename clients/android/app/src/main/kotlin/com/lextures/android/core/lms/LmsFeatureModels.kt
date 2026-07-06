@@ -480,6 +480,10 @@ data class PlatformFeatures(
     val ffClassroomSignals: Boolean? = null,
     val ffBroadcasts: Boolean? = null,
     val ffUiMode: Boolean? = null,
+    val atRiskAlertsEnabled: Boolean? = null,
+    val instructorInsightsEnabled: Boolean? = null,
+    val studentProgressEnabled: Boolean? = null,
+    val ffMobileInstructorInsights: Boolean? = null,
 )
 
 @Serializable
@@ -1442,6 +1446,142 @@ data class NotebookRagSource(
 data class NotebookRagQueryResponse(
     val answerMarkdown: String,
     val sources: List<NotebookRagSource>? = null,
+)
+
+// endregion
+
+// region Instructor insights (M11.3)
+
+@Serializable
+data class AtRiskAlert(
+    val id: String,
+    val enrollmentId: String,
+    val userId: String,
+    val displayName: String,
+    val score: Float,
+    val status: String,
+    val topFactor: String,
+    val topFactorLabel: String,
+    val snoozeUntil: String? = null,
+    val notes: String? = null,
+    val triggeredDate: String,
+    val missingPct: Float? = null,
+    val quizAvg: Float? = null,
+    val daysInactive: Int? = null,
+)
+
+@Serializable
+data class AtRiskListResponse(
+    val alerts: List<AtRiskAlert> = emptyList(),
+    val resolved: List<AtRiskAlert>? = null,
+)
+
+@Serializable
+data class InstructorSignalItem(
+    val itemId: String,
+    val title: String,
+    val kind: String,
+    val completionRate: Double,
+    val avgScore: Double? = null,
+    val engagement: Double,
+    val difficulty: Double? = null,
+    val compositeScore: Double,
+    val narrative: String,
+)
+
+@Serializable
+data class InstructorScatterPoint(
+    val itemId: String,
+    val title: String,
+    val kind: String,
+    val difficulty: Double,
+    val engagement: Double,
+    val flag: String? = null,
+)
+
+@Serializable
+data class InstructorInsightsResponse(
+    val courseId: String,
+    val weekOf: String,
+    val generatedAt: String,
+    val workingWell: List<InstructorSignalItem> = emptyList(),
+    val needsAttention: List<InstructorSignalItem> = emptyList(),
+    val scatter: List<InstructorScatterPoint>? = null,
+)
+
+@Serializable
+data class StudentProgressSummary(
+    val enrollmentId: String,
+    val courseId: String,
+    val studentUserId: String,
+    val studentDisplayName: String,
+    val studentAvatarUrl: String? = null,
+    val assignmentsSubmittedPct: Double,
+    val modulesViewedPct: Double,
+    val avgQuizScore: Double? = null,
+    val avgGradePercent: Double? = null,
+    val lastActiveAt: String? = null,
+    val missingCount: Int,
+    val dataAsOf: String,
+    val staleMinutes: Int,
+    val canManageNotes: Boolean,
+)
+
+@Serializable
+data class StudentProgressMissingItem(
+    val itemId: String,
+    val title: String,
+    val kind: String,
+    val dueAt: String? = null,
+    val daysOverdue: Int,
+    val gradeStatus: String,
+)
+
+@Serializable
+data class StudentProgressAssignmentRow(
+    val itemId: String,
+    val title: String,
+    val dueAt: String? = null,
+    val submittedAt: String? = null,
+    val grade: String,
+    val status: String,
+)
+
+@Serializable
+data class StudentProgressQuizRow(
+    val attemptId: String,
+    val itemId: String,
+    val title: String,
+    val submittedAt: String,
+    val scorePercent: Double? = null,
+)
+
+@Serializable
+data class StudentProgressResponse(
+    val summary: StudentProgressSummary,
+    val missing: List<StudentProgressMissingItem> = emptyList(),
+    val assignments: List<StudentProgressAssignmentRow> = emptyList(),
+    val quizzes: List<StudentProgressQuizRow> = emptyList(),
+)
+
+@Serializable
+data class StudentProgressActivityEvent(
+    val occurredAt: String,
+    val kind: String,
+    val label: String,
+    val detail: String? = null,
+)
+
+@Serializable
+data class StudentProgressActivityResponse(
+    val events: List<StudentProgressActivityEvent> = emptyList(),
+    val nextCursor: String? = null,
+)
+
+data class CourseHealthSnapshot(
+    val atRiskCount: Int,
+    val ungradedCount: Int,
+    val engagementHighlightCount: Int,
 )
 
 // endregion
