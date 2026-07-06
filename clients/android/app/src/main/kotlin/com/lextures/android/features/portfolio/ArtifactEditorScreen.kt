@@ -16,7 +16,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -508,7 +507,7 @@ fun ArtifactEditorScreen(
                     onExpandedChange = { courseMenuExpanded = it },
                 ) {
                     OutlinedTextField(
-                        value = submissionPickerCourse?.name
+                        value = submissionPickerCourse?.title
                             ?: L.text(context, localePrefs, R.string.mobile_portfolio_selectCourse),
                         onValueChange = {},
                         readOnly = true,
@@ -522,7 +521,7 @@ fun ArtifactEditorScreen(
                     ) {
                         enrolledCourses.forEach { course ->
                             DropdownMenuItem(
-                                text = { Text(course.name) },
+                                text = { Text(course.title) },
                                 onClick = {
                                     submissionPickerCourse = course
                                     courseMenuExpanded = false
