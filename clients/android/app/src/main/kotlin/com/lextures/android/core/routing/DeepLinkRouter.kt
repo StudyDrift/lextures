@@ -86,10 +86,13 @@ object DeepLinkRouter {
 
     private fun resolveParent(raw: String): DeepLinkDestination? {
         val urlString = if (raw.startsWith("/")) "https://lextures.com$raw" else raw
-        val uri = runCatching { android.net.Uri.parse(urlString) }.getOrNull() ?: return null
+        val uri = runCatching { java.net.URI(urlString) }.getOrNull() ?: return null
         val path = uri.path.orEmpty()
         if (path != "/parent" && !path.startsWith("/parent/")) return null
-        val studentId = uri.getQueryParameter("student")
+        val studentId = uri.rawQuery.orEmpty().split("&")
+            .map { it.split("=", limit = 2) }
+            .firstOrNull { it.getOrNull(0) == "student" }
+            ?.getOrNull(1)
         val section = when {
             path.contains("conferences") -> ParentDeepLinkSection.Conferences
             path.contains("notification") -> ParentDeepLinkSection.NotificationPrefs

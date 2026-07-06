@@ -321,7 +321,7 @@ private fun ParentSummarySection(
                 Text(
                     "${item.courseTitle} · ${item.kind}" +
                         (item.dueAt?.let {
-                            " · ${DateFormatting.formatAbsoluteShort(it, localePrefs.effectiveLocale())}"
+                            " · ${DateFormatting.formatAbsoluteShort(it, localePrefs.effectiveLocale)}"
                         }.orEmpty()),
                     fontSize = 12.sp,
                     color = textSecondary(),
