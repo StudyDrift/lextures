@@ -2,7 +2,6 @@ package com.lextures.android.core.lms
 
 import android.content.Context
 import com.lextures.android.R
-import com.lextures.android.core.i18n.L
 
 /** Parent portal display helpers and summaries (M10.1). */
 object ParentLogic {
@@ -15,7 +14,7 @@ object ParentLogic {
     fun teacherLabel(context: Context, teacher: ConferenceTeacher): String {
         val name = teacher.displayName?.trim().orEmpty()
         if (name.isNotEmpty()) return name
-        return L.text(context, R.string.mobile_parent_conferences_teacherFallback)
+        return context.getString(R.string.mobile_parent_conferences_teacherFallback)
     }
 
     fun resolveSelectedChildId(
@@ -71,6 +70,6 @@ object ParentLogic {
         if (label.isNotEmpty()) return label
         val code = record.code?.trim().orEmpty()
         if (code.isNotEmpty()) return code
-        return record.category ?: L.text(context, R.string.mobile_parent_attendance_unknown)
+        return record.category ?: context.getString(R.string.mobile_parent_attendance_unknown)
     }
 }

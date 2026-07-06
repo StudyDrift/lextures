@@ -1396,6 +1396,8 @@
         "mobile.parent.notificationPrefs": "Notification preferences",
         "mobile.parent.prefs.attendanceEvent": "Attendance events",
         "mobile.parent.prefs.gradePosted": "Grade posted",
+        "mobile.parent.prefs.decreaseThreshold": "Decrease threshold",
+        "mobile.parent.prefs.increaseThreshold": "Increase threshold",
         "mobile.parent.prefs.lowGradeEnabled": "Low grade alerts",
         "mobile.parent.prefs.lowGradeValue": "Alert below %d%%",
         "mobile.parent.prefs.missingAssignment": "Missing assignments",
