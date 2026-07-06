@@ -210,7 +210,7 @@ enum CourseSettingsLogic {
         localDateStringToIso(isoToLocalDateString(iso))
     }
 
-    static func parseHeroObjectPosition(_ pos: String?) -> (x: Double, y: Double) {
+    static func parseHeroObjectPosition(_ pos: String?) -> (posX: Double, posY: Double) {
         guard let pos, !pos.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return (50, 50)
         }
@@ -223,9 +223,9 @@ enum CourseSettingsLogic {
         return (posX, posY)
     }
 
-    static func formatHeroObjectPosition(x: Double, y: Double) -> String? {
-        let rx = round(x)
-        let ry = round(y)
+    static func formatHeroObjectPosition(posX: Double, posY: Double) -> String? {
+        let rx = round(posX)
+        let ry = round(posY)
         if rx == 50 && ry == 50 { return nil }
         return "\(Int(rx))% \(Int(ry))%"
     }

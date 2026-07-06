@@ -41,8 +41,8 @@ final class CourseSettingsLogicTests: XCTestCase {
     }
 
     func testHeroPositionFormatCenterIsNil() {
-        XCTAssertNil(CourseSettingsLogic.formatHeroObjectPosition(x: 50, y: 50))
-        XCTAssertEqual(CourseSettingsLogic.formatHeroObjectPosition(x: 30, y: 70), "30% 70%")
+        XCTAssertNil(CourseSettingsLogic.formatHeroObjectPosition(posX: 50, posY: 50))
+        XCTAssertEqual(CourseSettingsLogic.formatHeroObjectPosition(posX: 30, posY: 70), "30% 70%")
     }
 
     func testDirtyDetectionTitleChange() {

@@ -14,7 +14,7 @@ struct CourseHeroImageEditor: View {
     @State private var mode: Mode = .menu
     @State private var prompt = ""
     @State private var previewUrl: String?
-    @State private var positionDraft: (x: Double, y: Double) = (50, 50)
+    @State private var positionDraft: (posX: Double, posY: Double) = (50, 50)
     @State private var photoItem: PhotosPickerItem?
     @State private var statusMessage: String?
     @State private var isBusy = false
@@ -151,8 +151,8 @@ struct CourseHeroImageEditor: View {
                             .background(Circle().fill(.white.opacity(0.35)))
                             .frame(width: 28, height: 28)
                             .position(
-                                x: geo.size.width * positionDraft.x / 100,
-                                y: geo.size.height * positionDraft.y / 100
+                                x: geo.size.width * positionDraft.posX / 100,
+                                y: geo.size.height * positionDraft.posY / 100
                             )
                     }
                     .contentShape(Rectangle())
@@ -258,8 +258,8 @@ struct CourseHeroImageEditor: View {
         isBusy = true
         defer { isBusy = false }
         let position = CourseSettingsLogic.formatHeroObjectPosition(
-            x: positionDraft.x,
-            y: positionDraft.y
+            posX: positionDraft.posX,
+            posY: positionDraft.posY
         )
         do {
             _ = try await offline.enqueueMutation(
