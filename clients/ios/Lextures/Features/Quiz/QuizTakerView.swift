@@ -277,6 +277,11 @@ struct QuizTakerView: View {
 
     @State private var model: QuizTakerModel
     @State private var timerTask: Task<Void, Never>?
+    @State private var lockdownController = LockdownController()
+
+    private var deviceLockdownRequired: Bool {
+        QuizLogic.requiresDeviceLockdown(lockdownMode: start.lockdownMode)
+    }
 
     init(
         course: CourseSummary,
@@ -318,10 +323,21 @@ struct QuizTakerView: View {
             await model.load(quiz: quiz, start: start, accessToken: token)
             startTimerLoop()
         }
-        .onDisappear { timerTask?.cancel() }
+        .onDisappear {
+            timerTask?.cancel()
+            lockdownController.deactivate()
+        }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .background || phase == .inactive {
+            if lockdownController.isActive {
+                lockdownController.handleScenePhaseChange(phase)
+            } else if phase == .background || phase == .inactive {
                 model.reportFocusLoss(accessToken: session.accessToken ?? "", eventType: "app_background")
+            }
+        }
+        .onAppear {
+            guard deviceLockdownRequired else { return }
+            lockdownController.activate { eventType in
+                model.reportFocusLoss(accessToken: session.accessToken ?? "", eventType: eventType)
             }
         }
         .confirmationDialog(
@@ -350,6 +366,7 @@ struct QuizTakerView: View {
             LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea()
             VStack(spacing: 0) {
                 timerBar
+                lockdownBanners
                 if let error = model.errorMessage {
                     LMSErrorBanner(message: error)
                         .padding(.horizontal, 16)
@@ -405,6 +422,35 @@ struct QuizTakerView: View {
                 } else {
                     submitReadyView
                 }
+            }
+        }
+    }
+
+    private var lockdownBanners: some View {
+        VStack(spacing: 8) {
+            if deviceLockdownRequired {
+                Text(L.text("mobile.quiz.lockdown.kioskBanner"))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.amber)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .accessibilityLabel(L.text("mobile.quiz.lockdown.kioskBanner"))
+            }
+            if let warning = lockdownController.platformWarning {
+                Text(warning)
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.amber)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+            }
+            if let banner = lockdownController.focusLossBanner {
+                Text(banner)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.coral)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .accessibilityLabel(banner)
             }
         }
     }

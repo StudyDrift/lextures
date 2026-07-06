@@ -43,6 +43,16 @@ class QuizLogicTest {
     }
 
     @Test
+    fun kioskAndDeviceLockdown() {
+        assertTrue(QuizLogic.isKioskMode("kiosk"))
+        assertFalse(QuizLogic.isKioskMode("one_at_a_time"))
+        assertTrue(QuizLogic.needsLockdownConsent("kiosk"))
+        assertTrue(QuizLogic.requiresDeviceLockdown("kiosk"))
+        assertFalse(QuizLogic.requiresDeviceLockdown("one_at_a_time"))
+        assertTrue(QuizLogic.requiresDeviceLockdown("standard", proctoringRequired = true))
+    }
+
+    @Test
     fun formatTimer() {
         assertEquals("2:05", QuizLogic.formatTimer(125))
         assertEquals("0:59", QuizLogic.formatTimer(59))

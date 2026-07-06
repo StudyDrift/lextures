@@ -19,6 +19,8 @@ struct QuizIntroView: View {
     @State private var startResponse: QuizStartResponse?
     @State private var showTaker = false
     @State private var showPreview = false
+    @State private var showLockdownConsent = false
+    @State private var proctoringRequired = false
 
     private var courseCode: String { course.courseCode }
     private var isStaff: Bool { course.viewerIsStaff }
@@ -81,6 +83,11 @@ struct QuizIntroView: View {
         .navigationDestination(isPresented: $showPreview) {
             if let payload = quizPayload {
                 QuizPreviewView(title: item.title, quiz: payload)
+            }
+        }
+        .overlay {
+            if showLockdownConsent {
+                lockdownConsentOverlay
             }
         }
     }
@@ -197,7 +204,11 @@ struct QuizIntroView: View {
                 }
             }
             Button {
-                Task { await startAttempt() }
+                if needsLockdownConsentBeforeStart {
+                    showLockdownConsent = true
+                } else {
+                    Task { await startAttempt() }
+                }
             } label: {
                 HStack {
                     if starting {
@@ -227,6 +238,75 @@ struct QuizIntroView: View {
         return pastAttempts.count < max
     }
 
+    private var effectiveLockdownMode: String? {
+        quizPayload?.lockdownMode ?? detail?.lockdownMode
+    }
+
+    private var needsLockdownConsentBeforeStart: Bool {
+        QuizLogic.needsLockdownConsent(effectiveLockdownMode) ||
+            QuizLogic.requiresDeviceLockdown(
+                lockdownMode: effectiveLockdownMode,
+                proctoringRequired: proctoringRequired
+            )
+    }
+
+    private var lockdownConsentOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.45).ignoresSafeArea()
+            LMSCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(lockdownConsentTitle)
+                        .font(LexturesTheme.displayFont(18))
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(lockdownConsentBullets, id: \.self) { bullet in
+                            HStack(alignment: .top, spacing: 8) {
+                                Text("•")
+                                Text(bullet)
+                                    .font(.subheadline)
+                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            }
+                        }
+                    }
+                    HStack(spacing: 12) {
+                        Button(L.text("mobile.quiz.lockdown.confirm")) {
+                            showLockdownConsent = false
+                            Task { await startAttempt() }
+                        }
+                        .buttonStyle(AuthPrimaryButtonStyle())
+                        Button(L.text("mobile.quiz.lockdown.cancel")) {
+                            showLockdownConsent = false
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+            }
+            .padding(24)
+        }
+        .accessibilityAddTraits(.isModal)
+    }
+
+    private var lockdownConsentTitle: String {
+        if QuizLogic.isKioskMode(effectiveLockdownMode) {
+            return L.text("mobile.quiz.lockdown.kioskTitle")
+        }
+        return L.text("mobile.quiz.lockdown.oneAtATimeTitle")
+    }
+
+    private var lockdownConsentBullets: [String] {
+        if QuizLogic.isKioskMode(effectiveLockdownMode) {
+            return [
+                L.text("mobile.quiz.lockdown.kioskBulletBack"),
+                L.text("mobile.quiz.lockdown.kioskBulletHints"),
+                L.text("mobile.quiz.lockdown.kioskBulletFocus"),
+            ]
+        }
+        return [
+            L.text("mobile.quiz.lockdown.oneAtATimeBulletBack"),
+            L.text("mobile.quiz.lockdown.oneAtATimeBulletHints"),
+        ]
+    }
+
     private var pointsValue: Int? {
         if let pts = detail?.pointsWorth { return pts }
         if let pts = quizPayload?.pointsWorth { return pts }
@@ -252,6 +332,15 @@ struct QuizIntroView: View {
                 itemId: item.id,
                 accessToken: token
             )
+            if let config = await LMSAPI.fetchQuizProctoringConfig(
+                courseCode: courseCode,
+                itemId: item.id,
+                accessToken: token
+            ) {
+                proctoringRequired = config.required
+            } else {
+                proctoringRequired = false
+            }
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.modules.loadError")
         }

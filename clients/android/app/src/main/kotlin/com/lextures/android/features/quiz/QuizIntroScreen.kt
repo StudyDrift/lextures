@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.activity.ComponentActivity
 import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.AuthPrimaryButton
@@ -72,6 +74,8 @@ fun QuizIntroScreen(
     var startResponse by remember { mutableStateOf<QuizStartResponse?>(null) }
     var showTaker by remember { mutableStateOf(false) }
     var showPreview by remember { mutableStateOf(false) }
+    var showLockdownConsent by remember { mutableStateOf(false) }
+    var proctoringRequired by remember { mutableStateOf(false) }
     val isStaff = course.viewerIsStaff
 
     LaunchedEffect(accessToken, item.id) {
@@ -82,6 +86,7 @@ fun QuizIntroScreen(
             detail = LmsApi.fetchItemDetail(course.courseCode, item, token)
             quiz = LmsApi.fetchModuleQuiz(course.courseCode, item.id, null, token)
             attempts = LmsApi.fetchQuizAttempts(course.courseCode, item.id, token)
+            proctoringRequired = LmsApi.fetchQuizProctoringConfig(course.courseCode, item.id, token)?.required == true
         } catch (e: Exception) {
             error = session.mapError(e)
         } finally {
@@ -183,27 +188,57 @@ fun QuizIntroScreen(
                     LmsCard { Text(quizNoAttemptsLabel()) }
                 } else {
                     val scope = rememberCoroutineScope()
+                    val lockdownMode = detail?.lockdownMode ?: quiz?.lockdownMode
+                    val needsConsent = QuizLogic.needsLockdownConsent(lockdownMode) ||
+                        QuizLogic.requiresDeviceLockdown(lockdownMode, proctoringRequired)
                     AuthPrimaryButton(
                         text = if (starting) "…" else quizStartLabel(),
                         onClick = {
-                            val token = accessToken ?: return@AuthPrimaryButton
-                            scope.launch {
-                                starting = true
-                                try {
-                                    val start = LmsApi.startQuiz(course.courseCode, item.id, null, token)
-                                    quiz = LmsApi.fetchModuleQuiz(course.courseCode, item.id, start.attemptId, token)
-                                    startResponse = start
-                                    showTaker = true
-                                } catch (e: Exception) {
-                                    error = session.mapError(e)
-                                } finally {
-                                    starting = false
+                            if (needsConsent) {
+                                showLockdownConsent = true
+                            } else {
+                                val token = accessToken ?: return@AuthPrimaryButton
+                                scope.launch {
+                                    starting = true
+                                    try {
+                                        val start = LmsApi.startQuiz(course.courseCode, item.id, null, token)
+                                        quiz = LmsApi.fetchModuleQuiz(course.courseCode, item.id, start.attemptId, token)
+                                        startResponse = start
+                                        showTaker = true
+                                    } catch (e: Exception) {
+                                        error = session.mapError(e)
+                                    } finally {
+                                        starting = false
+                                    }
                                 }
                             }
                         },
                         enabled = !starting,
                         modifier = Modifier.fillMaxWidth(),
                     )
+                    if (showLockdownConsent) {
+                        LockdownConsentDialog(
+                            lockdownMode = lockdownMode,
+                            onConfirm = {
+                                showLockdownConsent = false
+                                val token = accessToken ?: return@LockdownConsentDialog
+                                scope.launch {
+                                    starting = true
+                                    try {
+                                        val start = LmsApi.startQuiz(course.courseCode, item.id, null, token)
+                                        quiz = LmsApi.fetchModuleQuiz(course.courseCode, item.id, start.attemptId, token)
+                                        startResponse = start
+                                        showTaker = true
+                                    } catch (e: Exception) {
+                                        error = session.mapError(e)
+                                    } finally {
+                                        starting = false
+                                    }
+                                }
+                            },
+                            onDismiss = { showLockdownConsent = false },
+                        )
+                    }
                 }
             }
         }
@@ -264,9 +299,16 @@ fun QuizTakerScreen(
 ) {
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
+    val activity = context as? ComponentActivity
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
     val scope = rememberCoroutineScope()
+    val deviceLockdownRequired = remember(start.lockdownMode) {
+        QuizLogic.requiresDeviceLockdown(start.lockdownMode)
+    }
+    val lockdownController = remember(activity) {
+        activity?.let { LockdownController(it) }
+    }
 
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -286,19 +328,36 @@ fun QuizTakerScreen(
     val flagged = remember { mutableStateMapOf<String, Boolean>() }
 
     val lifecycleOwner = LocalLifecycleOwner.current
-    androidx.compose.runtime.DisposableEffect(lifecycleOwner, start.attemptId, accessToken) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_STOP) {
-                val token = accessToken ?: return@LifecycleEventObserver
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner, start.attemptId, accessToken, lockdownController) {
+        val controller = lockdownController
+        if (controller != null && deviceLockdownRequired) {
+            controller.activate { eventType ->
+                val token = accessToken ?: return@activate
                 scope.launch {
                     LmsApi.postQuizFocusLoss(
-                        course.courseCode, item.id, start.attemptId, "app_background", token,
+                        course.courseCode, item.id, start.attemptId, eventType, token,
                     )
                 }
             }
+            lifecycleOwner.lifecycle.addObserver(controller)
+            onDispose {
+                controller.deactivate()
+                lifecycleOwner.lifecycle.removeObserver(controller)
+            }
+        } else {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_STOP) {
+                    val token = accessToken ?: return@LifecycleEventObserver
+                    scope.launch {
+                        LmsApi.postQuizFocusLoss(
+                            course.courseCode, item.id, start.attemptId, "app_background", token,
+                        )
+                    }
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
         }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(accessToken) {
@@ -364,6 +423,26 @@ fun QuizTakerScreen(
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
                 Text(quizTimerLabel(QuizLogic.formatTimer(seconds)), fontWeight = FontWeight.SemiBold)
             }
+        }
+        if (deviceLockdownRequired) {
+            Text(
+                quizLockdownKioskBanner(),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        lockdownController?.platformWarning?.let { warning ->
+            Text(
+                warning,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            )
+        }
+        lockdownController?.focusLossBanner?.let { banner ->
+            Text(
+                banner,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                fontWeight = FontWeight.SemiBold,
+            )
         }
         error?.let { LmsErrorBanner(it, Modifier.padding(horizontal = 16.dp)) }
         when {
@@ -512,6 +591,51 @@ fun QuizTakerScreen(
                             },
                             enabled = !advancing && !submitting,
                         )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LockdownConsentDialog(
+    lockdownMode: String?,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val isKiosk = QuizLogic.isKioskMode(lockdownMode)
+    val title = if (isKiosk) quizLockdownKioskTitle() else quizLockdownOneAtATimeTitle()
+    val bullets = if (isKiosk) {
+        listOf(
+            quizLockdownKioskBulletBack(),
+            quizLockdownKioskBulletHints(),
+            quizLockdownKioskBulletFocus(),
+        )
+    } else {
+        listOf(
+            quizLockdownOneAtATimeBulletBack(),
+            quizLockdownOneAtATimeBulletHints(),
+        )
+    }
+
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        LmsCard {
+            Column(
+                modifier = Modifier.padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(title, fontWeight = FontWeight.Bold)
+                bullets.forEach { bullet ->
+                    Text("• $bullet")
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    AuthPrimaryButton(
+                        text = quizLockdownConfirmLabel(),
+                        onClick = onConfirm,
+                    )
+                    TextButton(onClick = onDismiss) {
+                        Text(quizLockdownCancelLabel())
                     }
                 }
             }

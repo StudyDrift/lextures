@@ -38761,6 +38761,448 @@
         }
       }
     },
+    "mobile.quiz.lockdown.cancel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.confirm": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand — begin exam"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand — begin exam"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand — begin exam"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand — begin exam"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand — begin exam"
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.focusLossBanner": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A focus-loss event was recorded. Leaving the exam may be flagged for review."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A focus-loss event was recorded. Leaving the exam may be flagged for review."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A focus-loss event was recorded. Leaving the exam may be flagged for review."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A focus-loss event was recorded. Leaving the exam may be flagged for review."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A focus-loss event was recorded. Leaving the exam may be flagged for review."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.guidedAccessWarning": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the strongest lock, turn on Guided Access in Settings before you begin (triple-click the side button)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the strongest lock, turn on Guided Access in Settings before you begin (triple-click the side button)."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the strongest lock, turn on Guided Access in Settings before you begin (triple-click the side button)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the strongest lock, turn on Guided Access in Settings before you begin (triple-click the side button)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the strongest lock, turn on Guided Access in Settings before you begin (triple-click the side button)."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.kioskBanner": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiosk mode: stay in this app. Leaving may be logged."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiosk mode: stay in this app. Leaving may be logged."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiosk mode: stay in this app. Leaving may be logged."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiosk mode: stay in this app. Leaving may be logged."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiosk mode: stay in this app. Leaving may be logged."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.kioskBulletBack": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.kioskBulletFocus": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leaving the app or taking screenshots may be logged for instructor review."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leaving the app or taking screenshots may be logged for instructor review."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leaving the app or taking screenshots may be logged for instructor review."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leaving the app or taking screenshots may be logged for instructor review."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leaving the app or taking screenshots may be logged for instructor review."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.kioskBulletHints": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.kioskTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam uses kiosk mode."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam uses kiosk mode."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam uses kiosk mode."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam uses kiosk mode."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam uses kiosk mode."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.oneAtATimeBulletBack": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You cannot go back to change previous answers after you continue."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.oneAtATimeBulletHints": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints follow the exam settings and any accommodations on your account."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.oneAtATimeTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam is delivered one question at a time."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam is delivered one question at a time."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam is delivered one question at a time."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam is delivered one question at a time."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exam is delivered one question at a time."
+          }
+        }
+      }
+    },
+    "mobile.quiz.lockdown.pinningWarning": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen pinning could not be enabled automatically. Use your device’s screen pinning setting if your instructor requires it."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen pinning could not be enabled automatically. Use your device’s screen pinning setting if your instructor requires it."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen pinning could not be enabled automatically. Use your device’s screen pinning setting if your instructor requires it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen pinning could not be enabled automatically. Use your device’s screen pinning setting if your instructor requires it."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen pinning could not be enabled automatically. Use your device’s screen pinning setting if your instructor requires it."
+          }
+        }
+      }
+    },
     "mobile.quiz.matchNone": {
       "localizations": {
         "ar": {

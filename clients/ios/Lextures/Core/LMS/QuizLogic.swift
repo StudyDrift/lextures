@@ -206,6 +206,14 @@ struct QuizFocusLossRequest: Encodable {
     var durationMs: Int?
 }
 
+struct QuizProctoringConfig: Decodable {
+    var id: String
+    var quizItemId: String
+    var externalToolId: String
+    var vendor: String
+    var required: Bool
+}
+
 struct QuizCodeRunRequest: Encodable {
     var code: String
     var languageId: Int?
@@ -293,6 +301,20 @@ struct QuizMatchingPairDraft: Equatable {
 enum QuizLogic {
     static func isServerLockdown(_ mode: String?) -> Bool {
         mode == "one_at_a_time" || mode == "kiosk"
+    }
+
+    static func isKioskMode(_ mode: String?) -> Bool {
+        mode == "kiosk"
+    }
+
+    /// Pre-start consent for server-enforced delivery (web parity).
+    static func needsLockdownConsent(_ mode: String?) -> Bool {
+        isServerLockdown(mode)
+    }
+
+    /// Platform lockdown (screen pinning / Guided Access, FLAG_SECURE, integrity signals).
+    static func requiresDeviceLockdown(lockdownMode: String?, proctoringRequired: Bool = false) -> Bool {
+        isKioskMode(lockdownMode) || proctoringRequired
     }
 
     static func visibleChoices(_ question: QuizQuestion) -> [String] {

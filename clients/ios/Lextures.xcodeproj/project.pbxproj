@@ -280,6 +280,7 @@
 		2F6B3095ED434FCC92A4B497 /* ProfileViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC7FA07D30414AFEB4445750 /* ProfileViewSections.swift */; };
 		50AEA297401A4F10AA380AEB /* ResearchStudiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5223616B74C46DAAFC9B287 /* ResearchStudiesView.swift */; };
 		D3F91B0F679E4B72B2F5C37B /* CodeQuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E390EE6D5CC049CDBCF7FA17 /* CodeQuestionView.swift */; };
+		F1A2B3C4D5E6478990ABCDEF /* LockdownController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6478990123456 /* LockdownController.swift */; };
 		CA5154D276C34A20B572597B /* QuizIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8253651D1F2344A4B1518061 /* QuizIntroView.swift */; };
 		DD9A6313FDF3429496D524B2 /* QuizQuestionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F9AFD5BCAAE44539D8EEE30 /* QuizQuestionViews.swift */; };
 		5FBBB7D3BB4D405C97C7E269 /* QuizResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B24458FE0964AD08A2BAC6E /* QuizResultsView.swift */; };
@@ -625,6 +626,7 @@
 		DC7FA07D30414AFEB4445750 /* ProfileViewSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewSections.swift; sourceTree = "<group>"; };
 		E5223616B74C46DAAFC9B287 /* ResearchStudiesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchStudiesView.swift; sourceTree = "<group>"; };
 		E390EE6D5CC049CDBCF7FA17 /* CodeQuestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeQuestionView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6478990123456 /* LockdownController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockdownController.swift; sourceTree = "<group>"; };
 		8253651D1F2344A4B1518061 /* QuizIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizIntroView.swift; sourceTree = "<group>"; };
 		8F9AFD5BCAAE44539D8EEE30 /* QuizQuestionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizQuestionViews.swift; sourceTree = "<group>"; };
 		9B24458FE0964AD08A2BAC6E /* QuizResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizResultsView.swift; sourceTree = "<group>"; };
@@ -1433,6 +1435,7 @@
 			isa = PBXGroup;
 			children = (
 				E390EE6D5CC049CDBCF7FA17 /* CodeQuestionView.swift */,
+				A1B2C3D4E5F6478990123456 /* LockdownController.swift */,
 				8253651D1F2344A4B1518061 /* QuizIntroView.swift */,
 				8F9AFD5BCAAE44539D8EEE30 /* QuizQuestionViews.swift */,
 				9B24458FE0964AD08A2BAC6E /* QuizResultsView.swift */,
@@ -1909,6 +1912,7 @@
 				2F6B3095ED434FCC92A4B497 /* ProfileViewSections.swift in Sources */,
 				50AEA297401A4F10AA380AEB /* ResearchStudiesView.swift in Sources */,
 				D3F91B0F679E4B72B2F5C37B /* CodeQuestionView.swift in Sources */,
+				F1A2B3C4D5E6478990ABCDEF /* LockdownController.swift in Sources */,
 				CA5154D276C34A20B572597B /* QuizIntroView.swift in Sources */,
 				DD9A6313FDF3429496D524B2 /* QuizQuestionViews.swift in Sources */,
 				5FBBB7D3BB4D405C97C7E269 /* QuizResultsView.swift in Sources */,
