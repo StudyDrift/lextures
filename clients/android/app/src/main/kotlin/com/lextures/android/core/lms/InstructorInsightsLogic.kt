@@ -1,6 +1,7 @@
 package com.lextures.android.core.lms
 
 import com.lextures.android.R
+import com.lextures.android.core.navigation.MobilePlatformFeatures
 
 /** Staff course health, at-risk, and engagement helpers (M11.3). */
 object InstructorInsightsLogic {

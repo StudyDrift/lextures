@@ -12,7 +12,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,9 +57,9 @@ import com.lextures.android.core.lms.InstructorInsightsLogic
 import com.lextures.android.core.lms.InstructorInsightsResponse
 import com.lextures.android.core.lms.InstructorSignalItem
 import com.lextures.android.core.lms.LmsApi
-import com.lextures.android.core.lms.MobilePlatformFeatures
 import com.lextures.android.core.lms.StudentProgressResponse
 import com.lextures.android.core.navigation.CourseWorkspaceSection
+import com.lextures.android.core.navigation.MobilePlatformFeatures
 import com.lextures.android.core.offline.OfflineCacheKey
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.home.HomeShellState
@@ -77,6 +80,8 @@ fun CourseInsightsSection(
     onOpenWhatsWorking: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val accessToken by session.accessToken.collectAsState()
+    val isOnline by offline.networkMonitor.isOnline.collectAsState()
     val context = LocalContext.current
     val localePrefs = LocalLocalePreferences.current
     var snapshot by remember { mutableStateOf<CourseHealthSnapshot?>(null) }
@@ -86,8 +91,8 @@ fun CourseInsightsSection(
     var backlogError by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(session.accessToken, course.courseCode) {
-        val token = session.accessToken ?: return@LaunchedEffect
+    LaunchedEffect(accessToken, course.courseCode) {
+        val token = accessToken ?: return@LaunchedEffect
         loading = true
         var atRiskCount = 0
         var ungradedCount = 0
@@ -103,7 +108,7 @@ fun CourseInsightsSection(
                     serializer = AtRiskListResponse.serializer(),
                 ) { LmsApi.fetchCourseAtRisk(course.courseCode, token) }
                 atRiskCount = result.first.alerts.size
-                result.second?.takeIf { it.isStale(offline.isOnline) }?.let { stale = it.lastUpdatedLabel() }
+                result.second?.takeIf { it.isStale(isOnline) }?.let { stale = it.lastUpdatedLabel() }
             }.onFailure {
                 atRiskError = L.text(context, localePrefs, R.string.mobile_instructorInsights_error_atRisk)
             }
@@ -127,7 +132,7 @@ fun CourseInsightsSection(
                 working = result.first.workingWell
                 attention = result.first.needsAttention
                 if (stale == null) {
-                    result.second?.takeIf { it.isStale(offline.isOnline) }?.let { stale = it.lastUpdatedLabel() }
+                    result.second?.takeIf { it.isStale(isOnline) }?.let { stale = it.lastUpdatedLabel() }
                 }
             }.onFailure {
                 insightsError = L.text(context, localePrefs, R.string.mobile_instructorInsights_error_insights)
@@ -140,7 +145,7 @@ fun CourseInsightsSection(
     }
 
     Column(modifier = modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        if (!offline.isOnline) OfflineBanner()
+        if (!isOnline) OfflineBanner()
         cacheLabel?.let { StalenessChip(label = it) }
         Text(
             L.text(context, localePrefs, R.string.mobile_instructorInsights_predictedNotice),
@@ -226,6 +231,8 @@ fun AtRiskListScreen(
     onOpenStudent: (String, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val accessToken by session.accessToken.collectAsState()
+    val isOnline by offline.networkMonitor.isOnline.collectAsState()
     val context = LocalContext.current
     val localePrefs = LocalLocalePreferences.current
     var alerts by remember { mutableStateOf<List<AtRiskAlert>>(emptyList()) }
@@ -233,8 +240,8 @@ fun AtRiskListScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(session.accessToken) {
-        val token = session.accessToken ?: return@LaunchedEffect
+    LaunchedEffect(accessToken, course.courseCode) {
+        val token = accessToken ?: return@LaunchedEffect
         loading = true
         runCatching {
             val result = offline.cachedFetch(
@@ -243,7 +250,7 @@ fun AtRiskListScreen(
                 serializer = AtRiskListResponse.serializer(),
             ) { LmsApi.fetchCourseAtRisk(course.courseCode, token) }
             alerts = InstructorInsightsLogic.sortAlerts(result.first.alerts)
-            cacheLabel = result.second?.takeIf { it.isStale(offline.isOnline) }?.lastUpdatedLabel()
+            cacheLabel = result.second?.takeIf { it.isStale(isOnline) }?.lastUpdatedLabel()
         }.onFailure {
             errorMessage = L.text(context, localePrefs, R.string.mobile_instructorInsights_error_atRisk)
         }
@@ -257,7 +264,7 @@ fun AtRiskListScreen(
                 title = { Text(L.text(context, localePrefs, R.string.mobile_instructorInsights_atRisk_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L.text(context, localePrefs, R.string.mobile_common_back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
             )
@@ -267,12 +274,13 @@ fun AtRiskListScreen(
             Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (!offline.isOnline) OfflineBanner()
+            if (!isOnline) OfflineBanner()
             cacheLabel?.let { StalenessChip(label = it) }
             errorMessage?.let { LmsErrorBanner(message = it) }
             if (loading && alerts.isEmpty()) LmsSkeletonList(count = 4)
             else if (alerts.isEmpty()) {
                 LmsEmptyState(
+                    icon = Icons.Default.Warning,
                     title = L.text(context, localePrefs, R.string.mobile_instructorInsights_atRisk_empty),
                     message = L.text(context, localePrefs, R.string.mobile_instructorInsights_atRisk_emptyHint),
                 )
@@ -311,14 +319,15 @@ fun WhatsWorkingScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val localePrefs = LocalLocalePreferences.current
     var workingWell by remember { mutableStateOf<List<InstructorSignalItem>>(emptyList()) }
     var needsAttention by remember { mutableStateOf<List<InstructorSignalItem>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(session.accessToken) {
-        val token = session.accessToken ?: return@LaunchedEffect
+    LaunchedEffect(accessToken, course.courseCode) {
+        val token = accessToken ?: return@LaunchedEffect
         loading = true
         runCatching {
             val result = offline.cachedFetch(
@@ -339,7 +348,7 @@ fun WhatsWorkingScreen(
                 title = { Text(L.text(context, localePrefs, R.string.mobile_instructorInsights_whatsWorking_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L.text(context, localePrefs, R.string.mobile_common_back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
             )
@@ -352,6 +361,7 @@ fun WhatsWorkingScreen(
             if (loading) LmsSkeletonList(count = 3)
             else if (workingWell.isEmpty() && needsAttention.isEmpty()) {
                 LmsEmptyState(
+                    icon = Icons.Default.BarChart,
                     title = L.text(context, localePrefs, R.string.mobile_instructorInsights_whatsWorking_empty),
                     message = L.text(context, localePrefs, R.string.mobile_instructorInsights_whatsWorking_emptyHint),
                 )
@@ -396,8 +406,10 @@ fun StudentProgressScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val localePrefs = LocalLocalePreferences.current
+    val localized = remember(localePrefs) { localePrefs.localizedContext(context) }
     val scope = rememberCoroutineScope()
     var progress by remember { mutableStateOf<StudentProgressResponse?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -406,8 +418,8 @@ fun StudentProgressScreen(
     var body by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
 
-    LaunchedEffect(session.accessToken, enrollmentId) {
-        val token = session.accessToken ?: return@LaunchedEffect
+    LaunchedEffect(accessToken, enrollmentId) {
+        val token = accessToken ?: return@LaunchedEffect
         runCatching {
             val result = offline.cachedFetch(
                 key = OfflineCacheKey.studentProgress(course.courseCode, enrollmentId),
@@ -434,7 +446,7 @@ fun StudentProgressScreen(
                 TextButton(
                     enabled = !sending && subject.isNotBlank() && body.isNotBlank(),
                     onClick = {
-                        val token = session.accessToken ?: return@TextButton
+                        val token = accessToken ?: return@TextButton
                         scope.launch {
                             sending = true
                             runCatching {
@@ -468,7 +480,7 @@ fun StudentProgressScreen(
                 title = { Text(displayName) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L.text(context, localePrefs, R.string.mobile_common_back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
             )
@@ -501,8 +513,8 @@ fun StudentProgressScreen(
                 }
                 Button(
                     onClick = {
-                        subject = L.format(context, localePrefs, R.string.mobile_instructorInsights_message_subject, displayName)
-                        body = L.format(context, localePrefs, R.string.mobile_instructorInsights_message_body, displayName, reason)
+                        subject = localized.getString(R.string.mobile_instructorInsights_message_subject, displayName)
+                        body = localized.getString(R.string.mobile_instructorInsights_message_body, displayName, reason)
                         showMessage = true
                     },
                     modifier = Modifier.fillMaxWidth(),
