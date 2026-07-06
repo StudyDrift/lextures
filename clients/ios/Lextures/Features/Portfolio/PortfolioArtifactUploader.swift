@@ -20,16 +20,20 @@ final class PortfolioArtifactUploader {
         phase = .idle
     }
 
+    struct UploadRequest {
+        var portfolioId: String
+        var fileData: Data
+        var fileName: String
+        var mimeType: String
+        var title: String
+        var description: String
+        var outcomeIds: [String]
+        var isPublic: Bool
+        var accessToken: String
+    }
+
     func upload(
-        portfolioId: String,
-        fileData: Data,
-        fileName: String,
-        mimeType: String,
-        title: String,
-        description: String,
-        outcomeIds: [String],
-        isPublic: Bool,
-        accessToken: String,
+        request: UploadRequest,
         maxAttempts: Int = 3,
         onSuccess: @escaping (PortfolioArtifact) -> Void
     ) {
@@ -42,15 +46,17 @@ final class PortfolioArtifactUploader {
                 attempt += 1
                 do {
                     let artifact = try await LMSAPI.uploadPortfolioArtifactFile(
-                        portfolioId: portfolioId,
-                        fileData: fileData,
-                        fileName: fileName,
-                        mimeType: mimeType,
-                        title: title,
-                        description: description,
-                        outcomeIds: outcomeIds,
-                        isPublic: isPublic,
-                        accessToken: accessToken
+                        input: LMSAPI.PortfolioArtifactUploadInput(
+                            portfolioId: request.portfolioId,
+                            fileData: request.fileData,
+                            fileName: request.fileName,
+                            mimeType: request.mimeType,
+                            title: request.title,
+                            description: request.description,
+                            outcomeIds: request.outcomeIds,
+                            isPublic: request.isPublic
+                        ),
+                        accessToken: request.accessToken
                     ) { progress in
                         Task { @MainActor in
                             self.phase = .uploading(progress: progress)

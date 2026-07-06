@@ -70,8 +70,8 @@ struct ArtifactEditorView: View {
 
                 if !isEditing {
                     Picker(L.text("mobile.portfolio.artifactKind"), selection: $kind) {
-                        ForEach(ArtifactEditorKind.allCases) { k in
-                            Text(k.label).tag(k)
+                        ForEach(ArtifactEditorKind.allCases) { editorKind in
+                            Text(editorKind.label).tag(editorKind)
                         }
                     }
                 }
@@ -248,15 +248,17 @@ struct ArtifactEditorView: View {
                 return
             }
             uploader.upload(
-                portfolioId: portfolioId,
-                fileData: attachment.data,
-                fileName: attachment.fileName,
-                mimeType: attachment.mimeType,
-                title: trimmedTitle,
-                description: reflection.trimmingCharacters(in: .whitespacesAndNewlines),
-                outcomeIds: outcomeIds,
-                isPublic: isPublic,
-                accessToken: token
+                request: PortfolioArtifactUploader.UploadRequest(
+                    portfolioId: portfolioId,
+                    fileData: attachment.data,
+                    fileName: attachment.fileName,
+                    mimeType: attachment.mimeType,
+                    title: trimmedTitle,
+                    description: reflection.trimmingCharacters(in: .whitespacesAndNewlines),
+                    outcomeIds: outcomeIds,
+                    isPublic: isPublic,
+                    accessToken: token
+                )
             ) { artifact in
                 onSaved(artifact)
                 dismiss()

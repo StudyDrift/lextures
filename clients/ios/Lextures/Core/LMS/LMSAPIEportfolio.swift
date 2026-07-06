@@ -110,34 +110,38 @@ extension LMSAPI {
         }
     }
 
+    struct PortfolioArtifactUploadInput {
+        var portfolioId: String
+        var fileData: Data
+        var fileName: String
+        var mimeType: String
+        var title: String
+        var description: String
+        var outcomeIds: [String]
+        var isPublic: Bool
+    }
+
     static func uploadPortfolioArtifactFile(
-        portfolioId: String,
-        fileData: Data,
-        fileName: String,
-        mimeType: String,
-        title: String,
-        description: String,
-        outcomeIds: [String],
-        isPublic: Bool,
+        input: PortfolioArtifactUploadInput,
         accessToken: String,
         onProgress: ((Double) -> Void)? = nil
     ) async throws -> PortfolioArtifact {
         var fields: [String: String] = [
-            "title": title,
-            "description": description,
-            "isPublic": isPublic ? "true" : "false",
+            "title": input.title,
+            "description": input.description,
+            "isPublic": input.isPublic ? "true" : "false",
         ]
-        if !outcomeIds.isEmpty,
-           let json = try? JSONEncoder().encode(outcomeIds),
+        if !input.outcomeIds.isEmpty,
+           let json = try? JSONEncoder().encode(input.outcomeIds),
            let raw = String(data: json, encoding: .utf8) {
             fields["outcomeIds"] = raw
         }
         let (data, response) = try await client.uploadMultipart(
-            path: "/api/v1/me/portfolios/\(encodePath(portfolioId))/artifacts/upload",
+            path: "/api/v1/me/portfolios/\(encodePath(input.portfolioId))/artifacts/upload",
             fieldName: "file",
-            fileName: fileName,
-            mimeType: mimeType,
-            fileData: fileData,
+            fileName: input.fileName,
+            mimeType: input.mimeType,
+            fileData: input.fileData,
             extraFields: fields,
             accessToken: accessToken,
             onProgress: onProgress
