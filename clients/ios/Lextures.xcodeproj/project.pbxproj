@@ -948,7 +948,6 @@
 		D2384791A1E3420B9476C89D /* LMS */ = {
 			isa = PBXGroup;
 			children = (
-				8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */,
 				8B604D3E4F5061728394A5 /* LMSAPIParent.swift */,
 				8B603D3E4F5061728394A5 /* LMSFeatureModelsParent.swift */,
 				8B602D3E4F5061728394A5 /* ConferenceLogic.swift */,
@@ -1441,6 +1440,7 @@
 			children = (
 				9CEB62AB01A045DDAEA7B5E4 /* CalendarSubscribeSheet.swift */,
 				F388290B4F2441588160BA66 /* CalendarView.swift */,
+				8B60DD3E4F5061728394A5 /* ConferenceReminderScheduler.swift */,
 				4A99A307AB3D424B9336121D /* DueReminderScheduler.swift */,
 				C96DFA8D559A4637897D73AD /* OfficeHoursReminderScheduler.swift */,
 				1776EDB62E274D0AA1FC3A00 /* PlannerModel.swift */,
