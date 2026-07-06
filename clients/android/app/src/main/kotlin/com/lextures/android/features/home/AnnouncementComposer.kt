@@ -106,7 +106,7 @@ fun AnnouncementComposerScreen(
             }
             selectedSectionId = sections.firstOrNull()?.id.orEmpty()
             if (announcementsChannelId == null) {
-                errorMessage = L.text(context, localePreferences, R.string.mobile_announcement_compose_no_channel)
+                errorMessage = L.text(context, localePreferences, R.string.mobile_announcement_compose_noChannel)
             }
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
@@ -118,11 +118,11 @@ fun AnnouncementComposerScreen(
     if (showConfirm) {
         AlertDialog(
             onDismissRequest = { showConfirm = false },
-            title = { Text(L.text(R.string.mobile_announcement_compose_confirm_title)) },
+            title = { Text(L.text(R.string.mobile_announcement_compose_confirmTitle)) },
             text = {
                 Text(
                     L.format(
-                        R.string.mobile_announcement_compose_confirm_message,
+                        R.string.mobile_announcement_compose_confirmMessage,
                         AnnouncementLogic.audienceLabel(course, audience, selectedSectionName),
                     ),
                 )
@@ -195,7 +195,7 @@ fun AnnouncementComposerScreen(
                 Icon(Icons.Default.Close, contentDescription = L.text(R.string.mobile_common_cancel), tint = textPrimary())
             }
             Text(
-                text = L.text(R.string.mobile_announcement_compose_nav_title),
+                text = L.text(R.string.mobile_announcement_compose_navTitle),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = textPrimary(),
@@ -236,9 +236,9 @@ fun AnnouncementComposerScreen(
 
             DictationField(
                 title = L.text(R.string.mobile_announcement_compose_body),
-                text = bodyText,
-                onTextChange = { bodyText = it },
-                placeholder = L.text(R.string.mobile_announcement_compose_body_placeholder),
+                value = bodyText,
+                onValueChange = { bodyText = it },
+                placeholder = L.text(R.string.mobile_announcement_compose_bodyPlaceholder),
             )
 
             Text(
@@ -248,15 +248,15 @@ fun AnnouncementComposerScreen(
                 color = textSecondary(),
             )
             val audienceOptions = buildList {
-                add(L.text(R.string.mobile_announcement_compose_audience_whole_course) to AnnouncementAudience.WholeCourse)
+                add("whole" to L.text(R.string.mobile_announcement_compose_audienceWholeCourse))
                 if (course.isSectionsEnabled && sections.isNotEmpty()) {
-                    add(L.text(R.string.mobile_announcement_compose_audience_section) to AnnouncementAudience.Section)
+                    add("section" to L.text(R.string.mobile_announcement_compose_audienceSection))
                 }
             }
             LmsSegmentedChips(
-                options = audienceOptions.map { it.first },
-                selectedIndex = audienceOptions.indexOfFirst { it.second == audience }.coerceAtLeast(0),
-                onSelect = { index -> audience = audienceOptions[index].second },
+                options = audienceOptions,
+                selectedId = if (audience == AnnouncementAudience.Section) "section" else "whole",
+                onSelect = { id -> audience = if (id == "section") AnnouncementAudience.Section else AnnouncementAudience.WholeCourse },
             )
 
             if (audience == AnnouncementAudience.Section && sections.isNotEmpty()) {
@@ -272,24 +272,24 @@ fun AnnouncementComposerScreen(
                     ),
                 )
                 LmsSegmentedChips(
-                    options = sections.map { it.displayName },
-                    selectedIndex = sections.indexOfFirst { it.id == selectedSectionId }.coerceAtLeast(0),
-                    onSelect = { index -> selectedSectionId = sections[index].id },
+                    options = sections.map { it.id to it.displayName },
+                    selectedId = selectedSectionId,
+                    onSelect = { selectedSectionId = it },
                 )
             }
 
             TextButton(onClick = { photoPicker.launch("image/*") }) {
                 Text(
                     text = if (pendingImageUri == null) {
-                        L.text(R.string.mobile_announcement_compose_add_photo)
+                        L.text(R.string.mobile_announcement_compose_addPhoto)
                     } else {
-                        L.text(R.string.mobile_announcement_compose_change_photo)
+                        L.text(R.string.mobile_announcement_compose_changePhoto)
                     },
                 )
             }
             if (pendingImageUri != null) {
                 TextButton(onClick = { pendingImageUri = null }) {
-                    Text(L.text(R.string.mobile_announcement_compose_remove_photo))
+                    Text(L.text(R.string.mobile_announcement_compose_removePhoto))
                 }
             }
         }

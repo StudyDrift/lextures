@@ -172,7 +172,7 @@ fun FeedChannelsScreen(
                 if (com.lextures.android.core.lms.AnnouncementLogic.canComposeCourseAnnouncement(course)) {
                     TextButton(onClick = { showAnnouncementComposer = true }) {
                         Icon(Icons.Default.Campaign, contentDescription = null)
-                        Text(com.lextures.android.core.i18n.L.text(com.lextures.android.R.string.mobile_announcement_compose_short_action))
+                        Text(com.lextures.android.core.i18n.L.text(com.lextures.android.R.string.mobile_announcement_compose_shortAction))
                     }
                 }
                 TextButton(onClick = { showNewChannel = true }) {

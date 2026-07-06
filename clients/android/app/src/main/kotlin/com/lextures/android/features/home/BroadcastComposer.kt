@@ -72,18 +72,18 @@ fun BroadcastComposerScreen(
             title = {
                 Text(
                     if (type == BroadcastComposeType.Emergency) {
-                        L.text(R.string.mobile_broadcast_compose_emergency_confirm_title)
+                        L.text(R.string.mobile_broadcast_compose_emergencyConfirmTitle)
                     } else {
-                        L.text(R.string.mobile_broadcast_compose_confirm_title)
+                        L.text(R.string.mobile_broadcast_compose_confirmTitle)
                     },
                 )
             },
             text = {
                 Text(
                     if (type == BroadcastComposeType.Emergency) {
-                        L.format(R.string.mobile_broadcast_compose_emergency_confirm_message, reach)
+                        L.format(R.string.mobile_broadcast_compose_emergencyConfirmMessage, reach)
                     } else {
-                        L.format(R.string.mobile_broadcast_compose_confirm_message, reach)
+                        L.format(R.string.mobile_broadcast_compose_confirmMessage, reach)
                     },
                 )
             },
@@ -114,7 +114,7 @@ fun BroadcastComposerScreen(
                 ) {
                     Text(
                         if (type == BroadcastComposeType.Emergency) {
-                            L.text(R.string.mobile_broadcast_compose_send_emergency)
+                            L.text(R.string.mobile_broadcast_compose_sendEmergency)
                         } else {
                             L.text(R.string.mobile_broadcast_compose_send)
                         },
@@ -138,7 +138,7 @@ fun BroadcastComposerScreen(
                 Icon(Icons.Default.Close, contentDescription = L.text(R.string.mobile_common_cancel), tint = textPrimary())
             }
             Text(
-                text = L.text(R.string.mobile_broadcast_compose_nav_title),
+                text = L.text(R.string.mobile_broadcast_compose_navTitle),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = textPrimary(),
@@ -169,7 +169,7 @@ fun BroadcastComposerScreen(
             if (type == BroadcastComposeType.Emergency) {
                 LmsCard(accent = LexturesColors.Coral) {
                     Text(
-                        text = L.text(R.string.mobile_broadcast_compose_emergency_warning),
+                        text = L.text(R.string.mobile_broadcast_compose_emergencyWarning),
                         color = LexturesColors.Coral,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -185,12 +185,12 @@ fun BroadcastComposerScreen(
             )
             LmsSegmentedChips(
                 options = listOf(
-                    L.text(R.string.mobile_broadcast_compose_type_announcement),
-                    L.text(R.string.mobile_broadcast_compose_type_emergency),
+                    "announcement" to L.text(R.string.mobile_broadcast_compose_typeAnnouncement),
+                    "emergency" to L.text(R.string.mobile_broadcast_compose_typeEmergency),
                 ),
-                selectedIndex = if (type == BroadcastComposeType.Announcement) 0 else 1,
-                onSelect = { index ->
-                    type = if (index == 0) BroadcastComposeType.Announcement else BroadcastComposeType.Emergency
+                selectedId = type.wire,
+                onSelect = { id ->
+                    type = if (id == "emergency") BroadcastComposeType.Emergency else BroadcastComposeType.Announcement
                 },
             )
 
@@ -207,9 +207,9 @@ fun BroadcastComposerScreen(
 
             DictationField(
                 title = L.text(R.string.mobile_broadcast_compose_body),
-                text = bodyText,
-                onTextChange = { bodyText = it },
-                placeholder = L.text(R.string.mobile_broadcast_compose_body_placeholder),
+                value = bodyText,
+                onValueChange = { bodyText = it },
+                placeholder = L.text(R.string.mobile_broadcast_compose_bodyPlaceholder),
             )
         }
     }

@@ -407,7 +407,7 @@ fun AnnouncementsScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
             }
             Text(
-                text = L.text(com.lextures.android.R.string.mobile_announcements_list_title),
+                text = L.text(com.lextures.android.R.string.mobile_announcements_listTitle),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = textPrimary(),
@@ -415,7 +415,7 @@ fun AnnouncementsScreen(
             )
             if (canComposeBroadcast && broadcastOrgId != null) {
                 IconButton(onClick = { showBroadcastComposer = true }) {
-                    Icon(Icons.Default.Edit, contentDescription = L.text(com.lextures.android.R.string.mobile_broadcast_compose_nav_title), tint = textPrimary())
+                    Icon(Icons.Default.Edit, contentDescription = L.text(com.lextures.android.R.string.mobile_broadcast_compose_navTitle), tint = textPrimary())
                 }
             }
         }
