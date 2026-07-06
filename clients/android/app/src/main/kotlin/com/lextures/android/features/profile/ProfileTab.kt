@@ -126,6 +126,9 @@ fun ProfileTab(
     var openCatalogCourseSlug by remember { mutableStateOf<String?>(null) }
     var showBilling by remember { mutableStateOf(false) }
     var openCredential by remember { mutableStateOf<com.lextures.android.core.lms.IssuedCredentialSummary?>(null) }
+    var openPortfolioId by remember { mutableStateOf<String?>(null) }
+    var openPortfolioTitle by remember { mutableStateOf<String?>(null) }
+    var openPortfolioArtifact by remember { mutableStateOf<com.lextures.android.core.lms.PortfolioArtifact?>(null) }
     var openCatalogPathSlug by remember { mutableStateOf<String?>(null) }
     var openReadingLibraryOrgId by remember { mutableStateOf<String?>(null) }
     var readingLogBook by remember { mutableStateOf<com.lextures.android.core.lms.LibraryBook?>(null) }
@@ -423,6 +426,52 @@ fun ProfileTab(
                             session = session,
                             onOpenPath = { openPathProgress = it },
                             onBrowseCatalog = { showPathsCatalog = true },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Portfolio) {
+                if (com.lextures.android.core.lms.PortfolioLogic.portfolioEnabled(shell.platformFeatures)) {
+                    when {
+                        openPortfolioArtifact != null && openPortfolioId != null -> {
+                            com.lextures.android.features.portfolio.ArtifactDetailScreen(
+                                session = session,
+                                localePrefs = localePreferences,
+                                portfolioId = openPortfolioId!!,
+                                artifact = openPortfolioArtifact!!,
+                                onArtifactUpdated = { openPortfolioArtifact = it },
+                                onDeleted = {
+                                    openPortfolioArtifact = null
+                                },
+                                onBack = { openPortfolioArtifact = null },
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                        openPortfolioId != null -> Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                            TextButton(onClick = {
+                                openPortfolioId = null
+                                openPortfolioTitle = null
+                            }) {
+                                Text(L.text(context, localePreferences, R.string.mobile_ia_close))
+                            }
+                            com.lextures.android.features.portfolio.PortfolioDetailScreen(
+                                session = session,
+                                localePrefs = localePreferences,
+                                portfolioId = openPortfolioId!!,
+                                initialTitle = openPortfolioTitle.orEmpty(),
+                                onOpenArtifact = { openPortfolioArtifact = it },
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                        else -> com.lextures.android.features.portfolio.PortfolioScreen(
+                            session = session,
+                            localePrefs = localePreferences,
+                            onOpenPortfolio = { portfolio ->
+                                openPortfolioId = portfolio.id
+                                openPortfolioTitle = portfolio.title
+                            },
                             modifier = Modifier.fillMaxSize(),
                         )
                     }

@@ -104,12 +104,17 @@ class ApiClient(
         mimeType: String,
         fileBytes: ByteArray,
         accessToken: String,
+        extraFields: Map<String, String> = emptyMap(),
     ): String {
         val temp = File.createTempFile("lextures-upload-", "-$fileName")
         try {
             temp.writeBytes(fileBytes)
-            val body = MultipartBody.Builder()
+            val multipartBuilder = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
+            for ((key, value) in extraFields) {
+                multipartBuilder.addFormDataPart(key, value)
+            }
+            val body = multipartBuilder
                 .addFormDataPart(
                     fieldName,
                     fileName,

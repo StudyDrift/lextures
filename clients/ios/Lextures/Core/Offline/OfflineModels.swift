@@ -70,6 +70,8 @@ enum OfflineCacheKey {
         "reading:library:\(orgId):\(gradeBand)"
     }
     static func credentialsList() -> String { "credentials:list" }
+    static func portfolioList() -> String { "portfolio:list" }
+    static func portfolioDetail(portfolioId: String) -> String { "portfolio:\(portfolioId)" }
     static func gamificationProfile() -> String { "gamification:profile" }
     static func gamificationLeaderboard(courseCode: String) -> String {
         "gamification:leaderboard:\(courseCode)"

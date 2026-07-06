@@ -38,6 +38,7 @@ struct PlatformFeatures: Decodable {
     var ffSelfPacedMode: Bool?
     var ffCourseReviews: Bool?
     var ffCompletionCredentials: Bool?
+    var ffEportfolio: Bool?
     var ffGamification: Bool?
     var ffStripeBilling: Bool?
     var ffPaymentsEnabled: Bool?

@@ -44,6 +44,15 @@
 		FC40D5831EAB4A789F5F9A3D /* CoursePeopleLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E42AB9E11084A3DBFC9421E /* CoursePeopleLogic.swift */; };
 		5CB349597C334E29A0C1A4F3 /* CourseReviewLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0F41E7441847E0AACF48AF /* CourseReviewLogic.swift */; };
 		C58889B9D36F43CE84970491 /* CredentialsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = E09F0E6308E14BEA8BEEE6EB /* CredentialsLogic.swift */; };
+		M12PORTFOLIOLOGICBUILD0001 /* PortfolioLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = M12PORTFOLIOLOGICFILE0001 /* PortfolioLogic.swift */; };
+		M12LMSAPIEPORTBUILD000001 /* LMSAPIEportfolio.swift in Sources */ = {isa = PBXBuildFile; fileRef = M12LMSAPIEPORTFILE00001 /* LMSAPIEportfolio.swift */; };
+		M12LMSMODELEPORTBUILD001 /* LMSFeatureModelsEportfolio.swift in Sources */ = {isa = PBXBuildFile; fileRef = M12LMSMODELEPORTFILE001 /* LMSFeatureModelsEportfolio.swift */; };
+		M12PORTFOLIOVIEWBUILD01 /* PortfolioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M12PORTFOLIOVIEWFILE001 /* PortfolioView.swift */; };
+		M12PORTDETAILVIEWBUILD01 /* PortfolioDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M12PORTDETAILVIEWFILE01 /* PortfolioDetailView.swift */; };
+		M12ARTIFACTEDITBUILD001 /* ArtifactEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M12ARTIFACTEDITFILE001 /* ArtifactEditorView.swift */; };
+		M12ARTIFACTDETBUILD001 /* ArtifactDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M12ARTIFACTDETFILE001 /* ArtifactDetailView.swift */; };
+		M12PORTUPLOADERBUILD001 /* PortfolioArtifactUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = M12PORTUPLOADERFILE001 /* PortfolioArtifactUploader.swift */; };
+		M12PORTFOLIOTESTBUILD01 /* PortfolioLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M12PORTFOLIOTESTFILE01 /* PortfolioLogicTests.swift */; };
 		9F5AC03CD3F541AFB69D4F5F /* DiscussionLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02FFA96AE2C4C008D6EB584 /* DiscussionLogic.swift */; };
 		5339F5938E83451AA183065A /* EvaluationLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31686991D721473BB74CD631 /* EvaluationLogic.swift */; };
 		17A91B52A8E340B1BDFC4C28 /* FileDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF66DBC98F04C34BB2CEA58 /* FileDownloadManager.swift */; };
@@ -419,6 +428,15 @@
 		5E42AB9E11084A3DBFC9421E /* CoursePeopleLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleLogic.swift; sourceTree = "<group>"; };
 		BE0F41E7441847E0AACF48AF /* CourseReviewLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseReviewLogic.swift; sourceTree = "<group>"; };
 		E09F0E6308E14BEA8BEEE6EB /* CredentialsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsLogic.swift; sourceTree = "<group>"; };
+		M12PORTFOLIOLOGICFILE0001 /* PortfolioLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioLogic.swift; sourceTree = "<group>"; };
+		M12LMSAPIEPORTFILE00001 /* LMSAPIEportfolio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIEportfolio.swift; sourceTree = "<group>"; };
+		M12LMSMODELEPORTFILE001 /* LMSFeatureModelsEportfolio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsEportfolio.swift; sourceTree = "<group>"; };
+		M12PORTFOLIOVIEWFILE001 /* PortfolioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioView.swift; sourceTree = "<group>"; };
+		M12PORTDETAILVIEWFILE01 /* PortfolioDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioDetailView.swift; sourceTree = "<group>"; };
+		M12ARTIFACTEDITFILE001 /* ArtifactEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtifactEditorView.swift; sourceTree = "<group>"; };
+		M12ARTIFACTDETFILE001 /* ArtifactDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtifactDetailView.swift; sourceTree = "<group>"; };
+		M12PORTUPLOADERFILE001 /* PortfolioArtifactUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioArtifactUploader.swift; sourceTree = "<group>"; };
+		M12PORTFOLIOTESTFILE01 /* PortfolioLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioLogicTests.swift; sourceTree = "<group>"; };
 		C02FFA96AE2C4C008D6EB584 /* DiscussionLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionLogic.swift; sourceTree = "<group>"; };
 		31686991D721473BB74CD631 /* EvaluationLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationLogic.swift; sourceTree = "<group>"; };
 		6BF66DBC98F04C34BB2CEA58 /* FileDownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDownloadManager.swift; sourceTree = "<group>"; };
@@ -796,6 +814,7 @@
 				0B7BC45A7B0A4BF89FA6DE4C /* CoursePeopleLogicTests.swift */,
 				29660101C7EC432F9FC75734 /* CourseReviewLogicTests.swift */,
 				935665FE8FEA410DA24EF40A /* CredentialsLogicTests.swift */,
+				M12PORTFOLIOTESTFILE01 /* PortfolioLogicTests.swift */,
 				1C99812A71184ED79E349E18 /* DiscussionLogicTests.swift */,
 				6C9FF23BB3C94014A26F31C3 /* EvaluationLogicTests.swift */,
 				C8170BF330CE4E0E80BD42E7 /* FeedLogicTests.swift */,
@@ -875,6 +894,7 @@
 				B9032FE2546348579574E116 /* Catalog */,
 				8AB31F2CDB06415C84160913 /* Courses */,
 				AB622FD7F1014A319F8C5A83 /* Credentials */,
+				M12PORTFOLIOGROUP000001 /* Portfolio */,
 				22B0A0F6910649398F234C9F /* Dashboard */,
 				029D20659FA54A68B62A3043 /* Discussions */,
 				1DBC1E4AE9D843DEAEB966C8 /* Evaluations */,
@@ -998,6 +1018,7 @@
 				5E42AB9E11084A3DBFC9421E /* CoursePeopleLogic.swift */,
 				BE0F41E7441847E0AACF48AF /* CourseReviewLogic.swift */,
 				E09F0E6308E14BEA8BEEE6EB /* CredentialsLogic.swift */,
+				M12PORTFOLIOLOGICFILE0001 /* PortfolioLogic.swift */,
 				C02FFA96AE2C4C008D6EB584 /* DiscussionLogic.swift */,
 				31686991D721473BB74CD631 /* EvaluationLogic.swift */,
 				6BF66DBC98F04C34BB2CEA58 /* FileDownloadManager.swift */,
@@ -1013,6 +1034,7 @@
 				93275EA9E35745AC8CE8EDFE /* LMSAPICatalog.swift */,
 				D4C712B011754834804D073E /* LMSAPICourseReviews.swift */,
 				6E7106FB5CDB4FF68B6D2F1B /* LMSAPICredentials.swift */,
+				M12LMSAPIEPORTFILE00001 /* LMSAPIEportfolio.swift */,
 				FE815CC23710439E816F0768 /* LMSAPIDiscussions.swift */,
 				9F34631010A44663A56670A0 /* LMSAPIEvaluations.swift */,
 				A5600EDE053C4E7E99E854F4 /* LMSAPIFeatures.swift */,
@@ -1037,6 +1059,7 @@
 				C9058B708BEC4726AEA440EB /* LMSFeatureModelsCatalog.swift */,
 				24F21700D2F94142972DA778 /* LMSFeatureModelsCourseReviews.swift */,
 				82931B9900AA46218D966BAF /* LMSFeatureModelsCredentials.swift */,
+				M12LMSMODELEPORTFILE001 /* LMSFeatureModelsEportfolio.swift */,
 				2E165EAAE1164C5A9B0A8ACF /* LMSFeatureModelsDiscussions.swift */,
 				DD682F0560E44F648F94BEC4 /* LMSFeatureModelsEvaluations.swift */,
 				D85AA82700844FA582D9AFD4 /* LMSFeatureModelsFeed.swift */,
@@ -1255,6 +1278,18 @@
 				FB2FDFFC4F8345B3A4B812D7 /* CredentialsView.swift */,
 			);
 			path = Credentials;
+			sourceTree = "<group>";
+		};
+		M12PORTFOLIOGROUP000001 /* Portfolio */ = {
+			isa = PBXGroup;
+			children = (
+				M12PORTFOLIOVIEWFILE001 /* PortfolioView.swift */,
+				M12PORTDETAILVIEWFILE01 /* PortfolioDetailView.swift */,
+				M12ARTIFACTEDITFILE001 /* ArtifactEditorView.swift */,
+				M12ARTIFACTDETFILE001 /* ArtifactDetailView.swift */,
+				M12PORTUPLOADERFILE001 /* PortfolioArtifactUploader.swift */,
+			);
+			path = Portfolio;
 			sourceTree = "<group>";
 		};
 		22B0A0F6910649398F234C9F /* Dashboard */ = {
@@ -1808,6 +1843,14 @@
 				FC40D5831EAB4A789F5F9A3D /* CoursePeopleLogic.swift in Sources */,
 				5CB349597C334E29A0C1A4F3 /* CourseReviewLogic.swift in Sources */,
 				C58889B9D36F43CE84970491 /* CredentialsLogic.swift in Sources */,
+				M12PORTFOLIOLOGICBUILD0001 /* PortfolioLogic.swift in Sources */,
+				M12LMSAPIEPORTBUILD000001 /* LMSAPIEportfolio.swift in Sources */,
+				M12LMSMODELEPORTBUILD001 /* LMSFeatureModelsEportfolio.swift in Sources */,
+				M12PORTFOLIOVIEWBUILD01 /* PortfolioView.swift in Sources */,
+				M12PORTDETAILVIEWBUILD01 /* PortfolioDetailView.swift in Sources */,
+				M12ARTIFACTEDITBUILD001 /* ArtifactEditorView.swift in Sources */,
+				M12ARTIFACTDETBUILD001 /* ArtifactDetailView.swift in Sources */,
+				M12PORTUPLOADERBUILD001 /* PortfolioArtifactUploader.swift in Sources */,
 				9F5AC03CD3F541AFB69D4F5F /* DiscussionLogic.swift in Sources */,
 				5339F5938E83451AA183065A /* EvaluationLogic.swift in Sources */,
 				17A91B52A8E340B1BDFC4C28 /* FileDownloadManager.swift in Sources */,
@@ -2101,6 +2144,7 @@
 				91BCC90F971347169392E7AC /* CoursePeopleLogicTests.swift in Sources */,
 				BA7636705E0242D993EF706B /* CourseReviewLogicTests.swift in Sources */,
 				74B87270B66A49F5B29BAF4E /* CredentialsLogicTests.swift in Sources */,
+				M12PORTFOLIOTESTBUILD01 /* PortfolioLogicTests.swift in Sources */,
 				CF9168A9D70A4693BD58FFAC /* DiscussionLogicTests.swift in Sources */,
 				45C4EFEB1AF940368DEDFC6F /* EvaluationLogicTests.swift in Sources */,
 				57DDFFD9D7EC4155BD72B85D /* FeedLogicTests.swift in Sources */,

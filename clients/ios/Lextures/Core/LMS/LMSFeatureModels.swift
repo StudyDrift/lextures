@@ -972,6 +972,21 @@ struct FilePreviewTarget: Hashable, Identifiable {
             source: .directPath(contentPath)
         )
     }
+
+    static func portfolioArtifact(
+        portfolioId: String,
+        artifactId: String,
+        fileName: String,
+        mimeType: String?
+    ) -> FilePreviewTarget {
+        FilePreviewTarget(
+            courseCode: "_portfolio",
+            displayName: fileName,
+            mimeType: mimeType,
+            byteSize: nil,
+            source: .directPath(LMSAPI.portfolioArtifactContentPath(portfolioId: portfolioId, artifactId: artifactId))
+        )
+    }
 }
 
 

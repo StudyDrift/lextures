@@ -201,6 +201,12 @@ struct ProfileMoreDestinationScreen: View {
             } else {
                 MoreDestinationPlaceholder(destination: destination)
             }
+        } else if destination == .portfolio {
+            if PortfolioLogic.portfolioEnabled(shell.platformFeatures) {
+                PortfolioView()
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
         } else if destination == .gamification {
             if GamificationLogic.gamificationEnabled(shell.platformFeatures) {
                 GamificationView()

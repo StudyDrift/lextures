@@ -122,18 +122,24 @@ struct APIClient {
         )
     }
 
-    /// Multipart file upload (assignment submissions, etc.).
+    /// Multipart file upload (assignment submissions, portfolio artifacts, etc.).
     func uploadMultipart(
         path: String,
         fieldName: String,
         fileName: String,
         mimeType: String,
         fileData: Data,
+        extraFields: [String: String] = [:],
         accessToken: String,
         onProgress: ((Double) -> Void)? = nil
     ) async throws -> (Data, HTTPURLResponse) {
         let boundary = "Boundary-\(UUID().uuidString)"
         var body = Data()
+        for (key, value) in extraFields {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append(
             "Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\r\n"

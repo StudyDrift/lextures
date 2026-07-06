@@ -781,8 +781,10 @@ func (d Deps) registerEportfolioRoutes(r chi.Router) {
 	r.Patch("/api/v1/me/portfolios/{pid}", d.handlePatchMyPortfolio())
 	r.Delete("/api/v1/me/portfolios/{pid}", d.handleDeleteMyPortfolio())
 	r.Post("/api/v1/me/portfolios/{pid}/artifacts", d.handleCreateArtifact())
+	r.Post("/api/v1/me/portfolios/{pid}/artifacts/upload", d.handlePostPortfolioArtifactUpload())
 	r.Patch("/api/v1/me/portfolios/{pid}/artifacts/{aid}", d.handlePatchArtifact())
 	r.Delete("/api/v1/me/portfolios/{pid}/artifacts/{aid}", d.handleDeleteArtifact())
+	r.Get("/api/v1/me/portfolios/{pid}/artifacts/{aid}/content", d.handleGetPortfolioArtifactContent())
 	// Public, unauthenticated read-only view.
 	r.Get("/api/v1/portfolios/{slug}", d.handleGetPublicPortfolio())
 	// Reviewer rubric evaluation.

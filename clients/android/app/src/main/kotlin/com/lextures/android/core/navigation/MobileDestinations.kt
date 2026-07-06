@@ -194,6 +194,7 @@ data class MobilePlatformFeatures(
     val ffSelfPacedMode: Boolean = false,
     val ffCourseReviews: Boolean = false,
     val ffCompletionCredentials: Boolean = false,
+    val ffEportfolio: Boolean = false,
     val ffGamification: Boolean = false,
     val ffStripeBilling: Boolean = false,
     val ffPaymentsEnabled: Boolean = false,
@@ -257,6 +258,7 @@ data class MobilePlatformFeatures(
             ffSelfPacedMode = features?.ffSelfPacedMode == true,
             ffCourseReviews = features?.ffCourseReviews == true,
             ffCompletionCredentials = features?.ffCompletionCredentials == true,
+            ffEportfolio = features?.ffEportfolio == true,
             ffGamification = features?.ffGamification == true,
             ffStripeBilling = features?.ffStripeBilling == true,
             ffPaymentsEnabled = features?.ffPaymentsEnabled == true,
@@ -424,7 +426,7 @@ object MobileDestinations {
                 add(MoreDestination.Paths)
                 if (platform.ffLibrary) add(MoreDestination.Reading)
                 if (platform.libraryBrowseEnabled) add(MoreDestination.Library)
-                add(MoreDestination.Portfolio)
+                if (platform.ffEportfolio) add(MoreDestination.Portfolio)
                 if (platform.ffCompletionCredentials) add(MoreDestination.Credentials)
                 if (platform.ffGamification) add(MoreDestination.Gamification)
                 if (AdvisingLogic.advisingEnabled(platform)) add(MoreDestination.Advising)
