@@ -58,6 +58,17 @@ var scormDeleteCmd = &cobra.Command{
 	RunE:  runScormDelete,
 }
 
+var scormCommitFlags struct {
+	file string
+}
+
+var scormCommitCmd = &cobra.Command{
+	Use:   "commit <registration_id>",
+	Short: "Commit SCORM RTE state for testing",
+	Args:  cobra.ExactArgs(1),
+	RunE:  runScormCommit,
+}
+
 var scormProgressOut io.Writer
 
 func init() {
@@ -66,8 +77,32 @@ func init() {
 	scormImportCmd.Flags().BoolVar(&scormImportFlags.quiet, "quiet", false, "suppress progress output")
 	_ = scormImportCmd.MarkFlagRequired("module")
 
-	scormCmd.AddCommand(scormListCmd, scormGetCmd, scormImportCmd, scormDeleteCmd)
+	scormCommitCmd.Flags().StringVar(&scormCommitFlags.file, "file", "", "commit JSON with cmi map (required)")
+	_ = scormCommitCmd.MarkFlagRequired("file")
+
+	scormCmd.AddCommand(scormListCmd, scormGetCmd, scormImportCmd, scormDeleteCmd, scormCommitCmd)
 	rootCmd.AddCommand(scormCmd)
+}
+
+func runScormCommit(cmd *cobra.Command, args []string) error {
+	c := client.New(Cfg.Server, Cfg.APIKey)
+	payload, err := loadJSONFile(scormCommitFlags.file)
+	if err != nil {
+		return err
+	}
+	body, err := postScormCommit(c, args[0], payload)
+	if err != nil {
+		return err
+	}
+	if len(body) > 0 {
+		_, err = cmd.OutOrStdout().Write(body)
+		return err
+	}
+	if globalFlags.jsonOut {
+		return json.NewEncoder(cmd.OutOrStdout()).Encode(map[string]bool{"ok": true})
+	}
+	_, _ = fmt.Fprintln(cmd.OutOrStdout(), "SCORM state committed.")
+	return nil
 }
 
 func filterScormItems(items []structureItemPublic) []structureItemPublic {

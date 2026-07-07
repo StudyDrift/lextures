@@ -15,6 +15,7 @@ import (
 )
 
 func resetContentExtrasFlags() {
+	globalFlags.jsonOut = false
 	scormImportFlags.module = ""
 	scormImportFlags.title = ""
 	scormImportFlags.quiet = true

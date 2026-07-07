@@ -745,5 +745,6 @@
   "people.suspend.title": "Suspend {{name}}? They will not be able to sign in.",
   "people.reactivate.title": "Reactivate this account?",
   "people.delete.title": "Permanently delete {{name}}? Their profile will be anonymized and they will not be able to sign in. This cannot be undone.",
-  "tutor.citation.title": "{{title}}"
+  "tutor.citation.title": "{{title}}",
+  "featureHelp.media.modules.alt": "عرض توضيحي صامت: أعد ترتيب وحدات المقرر باستخدام مقابض السحب وافتح إعدادات الوحدة."
 }

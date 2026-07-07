@@ -84,7 +84,38 @@ var filesListCmd = &cobra.Command{
 	RunE:  runFilesList,
 }
 
+var filesUsageFlags struct {
+	course string
+}
+
+var filesUsageCmd = &cobra.Command{
+	Use:   "usage",
+	Short: "Show storage usage vs quota for a course",
+	RunE:  runFilesUsage,
+}
+
+func runFilesUsage(cmd *cobra.Command, _ []string) error {
+	usage, raw, err := fetchCourseStorageUsage(client.New(Cfg.Server, Cfg.APIKey), filesUsageFlags.course)
+	if err != nil {
+		return err
+	}
+	if globalFlags.jsonOut {
+		_, err = cmd.OutOrStdout().Write(raw)
+		return err
+	}
+	limit := "unlimited"
+	if usage.LimitBytes != nil {
+		limit = formatFileBytes(*usage.LimitBytes)
+	}
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "course %s: used %s / %s (%.1f%%)\n",
+		filesUsageFlags.course, formatFileBytes(usage.UsedBytes), limit, usage.PercentUsed)
+	return nil
+}
+
 func init() {
+	filesUsageCmd.Flags().StringVar(&filesUsageFlags.course, "course", "", "course code (required)")
+	_ = filesUsageCmd.MarkFlagRequired("course")
+
 	filesListCmd.Flags().StringVar(&filesListFlags.course, "course", "", "course code (required)")
 	_ = filesListCmd.MarkFlagRequired("course")
 	filesListCmd.Flags().StringVar(&filesListFlags.folder, "folder", "", "folder UUID (omit for root)")
@@ -837,6 +868,7 @@ func init() {
 		filesRenameCmd,
 		filesMoveCmd,
 		filesDeleteCmd,
+		filesUsageCmd,
 	)
 	rootCmd.AddCommand(filesCmd)
 }
