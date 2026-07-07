@@ -455,6 +455,9 @@ func putGradebookGrades(c *client.Client, courseCode string, grades map[string]m
 		return fmt.Errorf("syncing gradebook: %w", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode == http.StatusForbidden {
+		return fmt.Errorf("permission denied (403): you do not have permission to update grades in this course")
+	}
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		return apiErrorBody(resp.StatusCode, body)

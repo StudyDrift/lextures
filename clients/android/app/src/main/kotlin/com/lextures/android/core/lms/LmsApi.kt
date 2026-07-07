@@ -7,8 +7,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.put
 import java.net.URLEncoder
 
 /** LMS endpoints used by the post-auth tabs (parity with web `courses-api` / `communication-api`). */
@@ -69,6 +72,37 @@ object LmsApi {
             accessToken = accessToken,
         )
         decode<CourseSummary>(response)
+    }
+
+    suspend fun fetchCourseExport(
+        courseCode: String,
+        accessToken: String,
+    ): JsonObject = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/export",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        json.parseToJsonElement(body).jsonObject
+    }
+
+    suspend fun postCourseImport(
+        courseCode: String,
+        mode: CourseImportExportLogic.ImportMode,
+        export: JsonObject,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        val payload = buildJsonObject {
+            put("mode", JsonPrimitive(mode.name))
+            put("export", export)
+        }
+        val (responseBody, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/import",
+            method = "POST",
+            body = json.encodeToString(payload),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
     }
 
     suspend fun saveCourseHeroImage(

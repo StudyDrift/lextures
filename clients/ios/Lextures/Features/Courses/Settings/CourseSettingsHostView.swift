@@ -99,6 +99,8 @@ struct CourseSettingsHostView: View {
         switch selectedSection {
         case .general:
             CourseGeneralSettingsView(course: course, onCourseUpdated: onCourseUpdated)
+        case .importExport:
+            CourseImportExportView(course: course)
         default:
             CourseSettingsPlaceholderView(section: selectedSection)
         }

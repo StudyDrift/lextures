@@ -1,6 +1,6 @@
 # C07 — Outcomes, standards & SBG report cards
 
-> CLI parity plan. Source: `courses/{id}/outcomes`, `registerStandardsRoutes`, `registerSBGReportRoutes`, `registerReportCardRoutes`, `course_outcomes_report.go`, `sbg`. Baseline: none.
+> CLI parity plan. Source: `courses/{id}/outcomes`, `registerStandardsRoutes`, `registerSBGReportRoutes`, `registerReportCardRoutes`, `course_outcomes_report.go`, `sbg`. Baseline: `clients/cli/cmd/standards.go`, `outcomes.go`, `sbg.go`, `report_cards.go`, `outcomes_standards_logic.go`.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Assessment & grading |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Assessment / CLI |
 | **Depends on** | C06, C40 |
@@ -64,7 +64,11 @@ Standards/outcomes alignment, standards-based grading (SBG) and report cards are
 
 ## 8. Data Model
 
-- None client-side. Document framework import JSON and report-card CSV schema.
+- **Framework import JSON** (native; converted to SBG CSV on import):
+  - Flat: `{ "standards": [{ "code", "description", "domainCode", "domainName", "gradeLevel?" }] }`
+  - Nested: `{ "domains": [{ "code", "name", "gradeLevel?", "standards": [...] }] }`
+- **Outcome align CSV**: `outcome_id, structure_item_id, target_kind` (+ optional `quiz_question_id`, `measurement_level`, `intensity_level`, `sub_outcome_id`).
+- **Report-card export CSV**: `card_id, student_id, grading_period, status, final_grade_pct, letter_grade, comment`.
 
 ## 9. API Surface
 
@@ -72,8 +76,8 @@ Standards/outcomes alignment, standards-based grading (SBG) and report cards are
 
 ## 10. UI / UX
 
-- `lextures standards ...`, `lextures outcomes ...`, `lextures report-cards ...`.
-- Export writes files; `--json` for data.
+- `lextures standards list|get|import`, `lextures outcomes list|create|align|report|mastery`, `lextures sbg get`, `lextures report-cards list|get|export`.
+- Export writes files; `--json` for data; bulk export gated by `--yes`.
 
 ## 11. AI / ML Considerations
 
@@ -82,7 +86,7 @@ Standards/outcomes alignment, standards-based grading (SBG) and report cards are
 ## 12. Integration Points
 
 - Server standards/outcomes/SBG/report-card handlers.
-- Internal: new command files.
+- Internal: `clients/cli/cmd/standards.go`, `outcomes.go`, `sbg.go`, `report_cards.go`, `outcomes_standards_logic.go`, `outcomes_standards_test.go`.
 
 ## 13. Dependencies & Sequencing
 
@@ -113,10 +117,10 @@ Standards/outcomes alignment, standards-based grading (SBG) and report cards are
 
 ## 18. Open Questions
 
-1. What framework import format does the server accept (native vs IMS CASE)?
-2. Is report-card export synchronous?
+1. Framework import: server accepts SBG CSV at `POST /admin/orgs/{orgId}/sbg/standards/import`; CLI accepts CSV or native JSON (converted client-side). IMS CASE is follow-up.
+2. Report-card PDF export is synchronous via `POST /report-cards/{id}/generate-pdf` (returns PDF bytes inline).
 
 ## 19. References
 
 - `registerStandardsRoutes`, `registerSBGReportRoutes`, `registerReportCardRoutes`, `course_outcomes_report.go`.
-- Related: [C06](C06-gradebook-final-grades.md), [C27](C27-reports-exports.md), [C31](C31-credentials-transcripts-advising.md).
+- Related: [C06](C06-gradebook-final-grades.md), [C27](../../plan/cli/C27-reports-exports.md), [C31](../../plan/cli/C31-credentials-transcripts-advising.md).

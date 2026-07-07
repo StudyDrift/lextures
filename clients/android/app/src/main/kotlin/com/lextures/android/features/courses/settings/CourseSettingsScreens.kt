@@ -99,6 +99,10 @@ fun CourseSettingsHostScreen(
                     offline = offline,
                     onCourseUpdated = onCourseUpdated,
                 )
+                CourseSettingsLogic.CourseSettingsSection.ImportExport -> CourseImportExportScreen(
+                    session = session,
+                    course = course,
+                )
                 else -> LmsEmptyState(
                     icon = Icons.Filled.Settings,
                     title = L.text(sectionLabelRes(selected)),

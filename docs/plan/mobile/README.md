@@ -213,7 +213,7 @@ link-out to web for credential entry and deep authoring**, consistent with the d
 | [M13.7 Plagiarism & AI-authorship](./M13.7-course-plagiarism-settings.md) | `plagiarism` (flag) | **P2** |
 | [M13.8 Accessibility (alt-text) review](./M13.8-course-accessibility-review.md) | `accessibility` (flag) | **P2** |
 | [M13.9 Translations & localization](./M13.9-course-translations-localization.md) | `translations` (flag) | **P2** |
-| [M13.10 Import / export & backup](./M13.10-course-import-export.md) | `import-export` | **P2** |
+| [M13.10 Import / export & backup](../completed/mobile/M13.10-course-import-export.md) | `import-export` | **P2** ✅ |
 | [M13.11 Blueprint (curriculum sync)](./M13.11-course-blueprint-sync.md) | `blueprint` | **P2** |
 | [M13.12 Archived content](./M13.12-course-archived-content.md) | `archive` | **P2** |
 
