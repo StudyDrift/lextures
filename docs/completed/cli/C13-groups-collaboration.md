@@ -1,6 +1,6 @@
 # C13 — Groups & collaboration
 
-> CLI parity plan. Source: `courses/{id}/groups` (6), `my-groups`, `collab-docs` (7), `whiteboards` (5), `forums`/`discussion-threads`/`discussion-posts`. Baseline: none.
+> CLI parity plan. Source: `courses/{id}/groups` (6), `courses/{id}/enrollment-groups`, `my-groups`, `collab-docs` (7), `whiteboards` (5), `forums`/`discussion-threads`/`discussion-posts`. Baseline: `clients/cli/cmd/groups.go`, `groups_collaboration_logic.go`, `discussions.go`, `groups_collaboration_test.go`; `collab-docs` and `whiteboards` read/export preserved.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Roster & classroom |
 | **Severity** | MINOR |
 | **Markets** | HE / K12 / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Collaboration / CLI |
 | **Depends on** | C11, C40 |
