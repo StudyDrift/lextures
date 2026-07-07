@@ -160,10 +160,8 @@ fun CourseFeaturesSettingsScreen(
             text = {
                 Text(
                     L.format(
-                        context,
-                        localePrefs,
                         R.string.mobile_courseSettings_features_disableConfirmMessage,
-                        L.text(context, localePrefs, CourseFeaturesLogic.toolLabelRes(tool)),
+                        L.text(CourseFeaturesLogic.toolLabelRes(tool)),
                     ),
                 )
             },
@@ -216,7 +214,7 @@ fun CourseFeaturesSettingsScreen(
                                 modifier = Modifier.fillMaxWidth(),
                             )
                             if (visibleTools.isEmpty()) {
-                                Text(L.format(context, localePrefs, R.string.mobile_courseSettings_features_noToolsMatch, query))
+                                Text(L.format(R.string.mobile_courseSettings_features_noToolsMatch, query))
                             } else {
                                 visibleTools.forEachIndexed { index, row ->
                                     val tool = row.tool
