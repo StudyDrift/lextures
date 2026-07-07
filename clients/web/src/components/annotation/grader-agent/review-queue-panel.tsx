@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { patchGraderAgentResult, putSubmissionGrade, type GraderAgentReviewQueueItem } from '../../../lib/courses-api'
+import { usePrompt } from '../../use-prompt'
 
 type ReviewQueuePanelProps = {
   courseCode: string
@@ -18,6 +19,7 @@ export function ReviewQueuePanel({
   onOpenSubmission,
 }: ReviewQueuePanelProps) {
   const { t } = useTranslation('common')
+  const { prompt, InputDialogHost } = usePrompt()
   const [busyId, setBusyId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editScore, setEditScore] = useState('')
@@ -62,7 +64,9 @@ export function ReviewQueuePanel({
   }
 
   const dismiss = async (item: GraderAgentReviewQueueItem) => {
-    const reason = window.prompt(t('gradingAgent.review.flagged.dismissPrompt'))
+    const reason = await prompt({
+      title: t('gradingAgent.review.flagged.dismissPrompt'),
+    })
     if (reason == null) return
     setBusyId(item.id)
     setError(null)
@@ -80,6 +84,8 @@ export function ReviewQueuePanel({
   }
 
   return (
+    <>
+    {InputDialogHost}
     <section
       className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 dark:border-rose-900/50 dark:bg-rose-950/20"
       aria-label={t('gradingAgent.review.flagged.title')}
@@ -200,5 +206,6 @@ export function ReviewQueuePanel({
         })}
       </ul>
     </section>
+    </>
   )
 }

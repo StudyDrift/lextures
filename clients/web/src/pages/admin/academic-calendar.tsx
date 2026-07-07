@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useConfirm } from '../../components/use-confirm'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { fetchOrgTerms, type OrgTerm } from '../../lib/courses-api'
 import {
@@ -10,6 +12,7 @@ import {
   type CalendarEventType,
 } from '../../lib/courses-api'
 import { getJwtSubject } from '../../lib/auth'
+import { toastMutationError } from '../../lib/lms-toast'
 
 const EVENT_TYPES: { value: CalendarEventType; label: string }[] = [
   { value: 'term_start', label: 'Term Start' },
@@ -189,6 +192,8 @@ function EventModal({
 }
 
 export default function AcademicCalendarAdminPage() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { ffAcademicCalendar } = usePlatformFeatures()
   const [orgId, setOrgId] = useState('')
   const [terms, setTerms] = useState<OrgTerm[]>([])
@@ -231,13 +236,13 @@ export default function AcademicCalendarAdminPage() {
   }, [ffAcademicCalendar, loadEvents, orgId, selectedTermId])
 
   async function handleDelete(eventId: string) {
-    if (!window.confirm('Delete this calendar event?')) return
+    if (!(await confirm({ title: t('admin.deleteCalendarEvent.title'), variant: 'danger' }))) return
     setDeleting(eventId)
     try {
       await deleteCalendarEvent(orgId, eventId)
       setEvents((prev) => prev.filter((e) => e.id !== eventId))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete event.')
+      toastMutationError(err instanceof Error ? err.message : 'Failed to delete event.')
     } finally {
       setDeleting(null)
     }
@@ -387,6 +392,7 @@ export default function AcademicCalendarAdminPage() {
           onSaved={handleSaved}
         />
       )}
+      {ConfirmDialogHost}
     </div>
   )
 }

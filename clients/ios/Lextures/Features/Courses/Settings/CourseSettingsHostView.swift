@@ -101,6 +101,8 @@ struct CourseSettingsHostView: View {
             CourseGeneralSettingsView(course: course, onCourseUpdated: onCourseUpdated)
         case .importExport:
             CourseImportExportView(course: course)
+        case .blueprint:
+            CourseBlueprintSettingsView(course: course, onCourseUpdated: onCourseUpdated)
         default:
             CourseSettingsPlaceholderView(section: selectedSection)
         }

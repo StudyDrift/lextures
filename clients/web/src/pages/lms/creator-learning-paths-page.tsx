@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { GripVertical, Plus, Route, Trash2 } from 'lucide-react'
 import {
   createLearningPath,
@@ -10,12 +11,15 @@ import {
 import { authorizedFetch } from '../../lib/api'
 import { type CoursePublic } from '../../lib/courses-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { useConfirm } from '../../components/use-confirm'
 import { LmsPage } from './lms-page'
 import { EmptyState } from '../../components/ui/empty-state'
 
 type TeachableCourse = { id: string; courseCode: string; title: string }
 
 export default function CreatorLearningPathsPage() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { ffLearningPaths, loading: featuresLoading } = usePlatformFeatures()
   const [paths, setPaths] = useState<CreatorLearningPath[]>([])
   const [courses, setCourses] = useState<TeachableCourse[]>([])
@@ -105,7 +109,15 @@ export default function CreatorLearningPathsPage() {
   }
 
   async function handleDelete(pathId: string) {
-    if (!window.confirm('Delete this learning path?')) return
+    if (
+      !(await confirm({
+        title: t('learningPaths.delete.title'),
+        variant: 'danger',
+        confirmLabel: t('dialogs.delete'),
+      }))
+    ) {
+      return
+    }
     await deleteLearningPath(pathId)
     await load()
   }
@@ -259,6 +271,7 @@ export default function CreatorLearningPathsPage() {
           </ul>
         )}
       </section>
+      {ConfirmDialogHost}
     </LmsPage>
   )
 }

@@ -1,5 +1,8 @@
 import { startRegistration } from '@simplewebauthn/browser'
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { usePrompt } from '../use-prompt'
+import { useConfirm } from '../use-confirm'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
@@ -16,6 +19,9 @@ type Props = {
 }
 
 export function MfaFactorsPanel({ embedded = false }: Props) {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
+  const { prompt, InputDialogHost } = usePrompt()
   const [loading, setLoading] = useState(true)
   const [factors, setFactors] = useState<Factor[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -110,7 +116,12 @@ export function MfaFactorsPanel({ embedded = false }: Props) {
   }
 
   async function addPasskey() {
-    const name = globalThis.prompt('Name this passkey (optional)', 'Passkey') ?? ''
+    const name =
+      (await prompt({
+        title: t('dialogs.passkeyName.title'),
+        label: t('dialogs.passkeyName.label'),
+        defaultValue: t('dialogs.passkeyName.default'),
+      })) ?? ''
     setBusy(true)
     setError(null)
     try {
@@ -162,7 +173,7 @@ export function MfaFactorsPanel({ embedded = false }: Props) {
   }
 
   async function remove(id: string) {
-    if (!globalThis.confirm('Remove this sign-in method?')) return
+    if (!(await confirm({ title: t('mfa.removeFactor.title'), variant: 'danger' }))) return
     setBusy(true)
     try {
       const res = await authorizedFetch(`/api/v1/me/mfa/${encodeURIComponent(id)}`, { method: 'DELETE' })
@@ -271,6 +282,8 @@ export function MfaFactorsPanel({ embedded = false }: Props) {
           </div>
         </form>
       )}
+      {ConfirmDialogHost}
+      {InputDialogHost}
     </div>
   )
 }

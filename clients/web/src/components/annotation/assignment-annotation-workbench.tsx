@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { formatDateTime } from '../../lib/format'
 import {
@@ -54,6 +55,8 @@ import { SubmissionPreviewSidebar } from './submission-preview-sidebar'
 import type { RubricDefinition } from '../../lib/courses-api'
 import { QuizSpeedGraderBranch } from '../quiz/quiz-speed-grader-branch'
 import { FullScreenModalShell } from '../ui/fullscreen-modal-shell'
+import { toastMutationError } from '../../lib/lms-toast'
+import { useConfirm } from '../use-confirm'
 
 function submissionContentPath(contentPath?: string | null): string | null {
   const trimmed = contentPath?.trim()
@@ -144,6 +147,8 @@ function AssignmentAnnotationWorkbenchInner({
   onModalClose,
   initialStudentUserId = null,
 }: AssignmentAnnotationWorkbenchProps) {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const annotationsActive = annotationsActiveProp ?? submissionAllowsFile
   const [panel, setPanel] = useState<'document' | 'media'>('document')
   const [mediaItems, setMediaItems] = useState<SubmissionFeedbackMediaApi[]>([])
@@ -190,11 +195,11 @@ function AssignmentAnnotationWorkbenchInner({
     try {
       const n = await retrySubmissionOriginality(courseCode, itemId, current.id)
       if (n === 0) {
-        window.alert('No failed scans to retry.')
+        toastMutationError(t('grading.noFailedScans'))
       }
       await reloadOriginality()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Retry failed.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.retryFailed'))
     } finally {
       setBusy(false)
     }
@@ -469,7 +474,7 @@ function AssignmentAnnotationWorkbenchInner({
       await reloadAnnotations()
       return created
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Could not save annotation.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.saveAnnotationFailed'))
       return null
     } finally {
       setBusy(false)
@@ -528,7 +533,7 @@ function AssignmentAnnotationWorkbenchInner({
       })
       await reloadAnnotations()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Could not save comment.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.saveCommentFailed'))
     } finally {
       setBusy(false)
     }
@@ -536,13 +541,21 @@ function AssignmentAnnotationWorkbenchInner({
 
   async function onDeleteAnnotation(id: string) {
     if (!current?.id || readOnlyDocument) return
-    if (!window.confirm('Delete this annotation?')) return
+    if (
+      !(await confirm({
+        title: t('grading.deleteAnnotation.title'),
+        confirmLabel: t('grading.deleteAnnotation.confirm'),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     setBusy(true)
     try {
       await deleteSubmissionAnnotation(courseCode, itemId, current.id, id)
       await reloadAnnotations()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Could not delete.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.deleteFailed'))
     } finally {
       setBusy(false)
     }
@@ -556,7 +569,7 @@ function AssignmentAnnotationWorkbenchInner({
       if (revDueLocal.trim()) {
         const d = new Date(revDueLocal)
         if (Number.isNaN(d.getTime())) {
-          window.alert('Use a valid date and time for the revision deadline.')
+          toastMutationError(t('grading.invalidRevisionDeadline'))
           return
         }
         revisionDueAt = d.toISOString()
@@ -570,7 +583,7 @@ function AssignmentAnnotationWorkbenchInner({
       setRevFeedback('')
       await reloadStaffList()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Request failed.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.requestFailed'))
     } finally {
       setRevisionBusy(false)
     }
@@ -586,7 +599,7 @@ function AssignmentAnnotationWorkbenchInner({
       setDraftText('')
       await reloadMine()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Submit failed.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.submitFailed'))
     } finally {
       setBusy(false)
     }
@@ -600,9 +613,7 @@ function AssignmentAnnotationWorkbenchInner({
       mine.attachmentFileId &&
       !mine.resubmissionRequested
     ) {
-      window.alert(
-        'Resubmission is not open. Your instructor must request a revision before you can upload a new file.',
-      )
+      toastMutationError(t('grading.resubmissionClosed'))
       return
     }
     setBusy(true)
@@ -610,7 +621,7 @@ function AssignmentAnnotationWorkbenchInner({
       await uploadModuleAssignmentSubmissionFile(courseCode, itemId, file)
       await reloadMine()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Upload failed.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.uploadFailed'))
     } finally {
       setBusy(false)
     }
@@ -618,9 +629,12 @@ function AssignmentAnnotationWorkbenchInner({
 
   async function onRevealIdentities() {
     if (
-      !window.confirm(
-        'You are about to unmask student identities for this assignment. This cannot be undone. Continue?',
-      )
+      !(await confirm({
+        title: t('grading.revealIdentities.title'),
+        description: t('grading.revealIdentities.description'),
+        confirmLabel: t('grading.revealIdentities.confirm'),
+        variant: 'danger',
+      }))
     ) {
       return
     }
@@ -632,9 +646,12 @@ function AssignmentAnnotationWorkbenchInner({
         const msg = e instanceof Error ? e.message : ''
         if (
           msg.toLowerCase().includes('ungraded') &&
-          window.confirm(
-            'Some submissions are still ungraded. Reveal identities anyway? This cannot be undone.',
-          )
+          (await confirm({
+            title: t('grading.revealIdentitiesUngraded.title'),
+            description: t('grading.revealIdentitiesUngraded.description'),
+            confirmLabel: t('grading.revealIdentities.confirm'),
+            variant: 'danger',
+          }))
         ) {
           await revealModuleAssignmentIdentities(courseCode, itemId, { force: true })
         } else {
@@ -644,7 +661,7 @@ function AssignmentAnnotationWorkbenchInner({
       onAfterRevealIdentities?.()
       if (mode === 'staff') void reloadStaffList()
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : 'Could not reveal identities.')
+      toastMutationError(err instanceof Error ? err.message : t('grading.revealIdentitiesFailed'))
     } finally {
       setBusy(false)
     }
@@ -673,9 +690,9 @@ function AssignmentAnnotationWorkbenchInner({
         setOriginalityViewerOpen(true)
         return
       }
-      window.alert('No originality report is available yet for this submission.')
+      toastMutationError(t('grading.noOriginalityReport'))
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'No originality report is available yet.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.noOriginalityReport'))
     } finally {
       setBusy(false)
     }
@@ -687,7 +704,7 @@ function AssignmentAnnotationWorkbenchInner({
     try {
       await downloadSubmissionAttachmentsArchive(courseCode, itemId, current.id)
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Download failed.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.downloadFailed'))
     } finally {
       setDownloadAllBusy(false)
     }
@@ -1401,6 +1418,7 @@ function AssignmentAnnotationWorkbenchInner({
           />
         </div>
       ) : null}
+      {ConfirmDialogHost}
     </section>
   )
 }

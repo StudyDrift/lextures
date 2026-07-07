@@ -8,7 +8,9 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ImageIcon, Monitor, Save, Upload, X } from 'lucide-react'
+import { useConfirm } from '../use-confirm'
 import { OidcConnectedAccountsPanel } from '../oidc-connected-accounts-panel'
 import { BotConnectedAccountsPanel } from '../bot-connected-accounts-panel'
 import { MfaFactorsPanel } from './mfa-factors-panel'
@@ -90,6 +92,8 @@ const disabledInputClass =
   'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-500 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-400'
 
 export function AccountSettingsView() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const accountFormId = useId()
   const { density, setDensity } = useUiDensityControls()
   const { setProfile: setLocaleProfile } = useLocaleFormatContext()
@@ -455,7 +459,7 @@ export function AccountSettingsView() {
   }
 
   async function revokeSession(id: string) {
-    if (!window.confirm('Sign out this session? You will be logged out on that device the next time it refreshes.')) {
+    if (!(await confirm({ title: t('account.signOutSession.title') }))) {
       return
     }
     setSessionsError(null)
@@ -476,11 +480,7 @@ export function AccountSettingsView() {
   }
 
   async function revokeAllOtherSessions() {
-    if (
-      !window.confirm(
-        'Sign out all other sessions? Other browsers and devices will need to sign in again. This device stays signed in.',
-      )
-    ) {
+    if (!(await confirm({ title: t('account.signOutAll.title') }))) {
       return
     }
     setSessionsError(null)
@@ -1092,6 +1092,7 @@ export function AccountSettingsView() {
           </div>
         </div>
       ) : null}
+      {ConfirmDialogHost}
     </div>
   )
 }

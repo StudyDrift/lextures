@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
+import { useConfirm } from '../../components/use-confirm'
 import { GripVertical, Plus, Trash2 } from 'lucide-react'
 import {
   createCustomField,
@@ -13,6 +15,7 @@ import {
   type CustomFieldVisibility,
 } from '../../lib/custom-fields-api'
 import { fetchAdminConsoleCapabilities } from '../../lib/admin-console-api'
+import { toastMutationError } from '../../lib/lms-toast'
 
 const ENTITY_TABS: { id: CustomFieldEntityType; label: string }[] = [
   { id: 'user', label: 'Users' },
@@ -46,6 +49,8 @@ const emptyDraft = (): DraftField => ({
 })
 
 export default function AdminCustomFields() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const titleId = useId()
   const drawerTitleId = useId()
   const [searchParams] = useSearchParams()
@@ -147,13 +152,20 @@ export default function AdminCustomFields() {
   }
 
   async function removeField(field: CustomFieldDefinition) {
-    if (!window.confirm(`Delete custom field "${field.label}"? Existing values are retained but hidden.`)) return
+    if (
+      !(await confirm({
+        title: t('admin.deleteCustomField.title', { label: field.label }),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     setBusy(true)
     try {
       await deleteCustomField(field.id, orgId)
       await load()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to delete custom field.')
+      toastMutationError(e instanceof Error ? e.message : 'Failed to delete custom field.')
     } finally {
       setBusy(false)
     }
@@ -365,6 +377,7 @@ export default function AdminCustomFields() {
           </div>
         </div>
       )}
+      {ConfirmDialogHost}
     </div>
   )
 }

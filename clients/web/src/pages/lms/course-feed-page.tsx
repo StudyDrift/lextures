@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Navigate, useParams } from 'react-router-dom'
 import { CourseFileMarkdownImage } from '../../components/syllabus/course-file-markdown-image'
 import { FeedComposer } from '../../components/feed/feed-composer'
@@ -41,6 +42,7 @@ import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
 import { formatAbsolute, formatRelativeCompact } from '../../lib/format-datetime'
 import { TabPresenceHint } from '../../components/presence/tab-presence-hint'
+import { useConfirm } from '../../components/use-confirm'
 import { LmsPage } from './lms-page'
 
 function isCourseStaff(roles: string[] | undefined): boolean {
@@ -310,6 +312,8 @@ function FeedMessageBody({
 }
 
 export default function CourseFeedPage() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { courseCode } = useParams<{ courseCode: string }>()
   const { feedEnabled: courseFeedEnabled, loading: courseFeatureFlagsLoading } =
     useCourseNavFeatures()
@@ -595,7 +599,15 @@ export default function CourseFeedPage() {
 
   const deleteMessage = async (messageId: string) => {
     if (!courseCode) return
-    if (!globalThis.confirm('Delete this message? This cannot be undone.')) return
+    if (
+      !(await confirm({
+        title: t('feed.deleteMessage.title'),
+        variant: 'danger',
+        confirmLabel: t('dialogs.delete'),
+      }))
+    ) {
+      return
+    }
     try {
       await deleteFeedMessage(courseCode, messageId)
       if (replyTo?.id === messageId) setReplyTo(null)
@@ -1068,6 +1080,7 @@ export default function CourseFeedPage() {
           </section>
         </div>
       )}
+      {ConfirmDialogHost}
     </LmsPage>
   )
 }

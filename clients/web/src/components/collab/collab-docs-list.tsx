@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatDate } from '../../lib/format'
 import { Link } from 'react-router-dom'
 import { FileText, LayoutTemplate, Plus, Trash2 } from 'lucide-react'
 import type { CollabDoc, DocType } from '../../lib/collab-docs-api'
 import { createCollabDoc, deleteCollabDoc } from '../../lib/collab-docs-api'
 import { toastMutationError } from '../../lib/lms-toast'
+import { useConfirm } from '../use-confirm'
 
 type Props = {
   courseCode: string
@@ -14,6 +16,8 @@ type Props = {
 }
 
 export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: Props) {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const [creating, setCreating] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newType, setNewType] = useState<DocType>('rich_text')
@@ -38,7 +42,15 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
   }
 
   async function handleDelete(docId: string) {
-    if (!window.confirm('Delete this document? This cannot be undone.')) return
+    if (
+      !(await confirm({
+        title: t('collab.deleteDocument.title'),
+        confirmLabel: t('dialogs.delete'),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     try {
       await deleteCollabDoc(courseCode, docId)
       onDocsChanged()
@@ -48,6 +60,8 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
   }
 
   return (
+    <>
+    {ConfirmDialogHost}
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-slate-900 dark:text-neutral-100">
@@ -185,5 +199,6 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
         ))}
       </ul>
     </div>
+    </>
   )
 }

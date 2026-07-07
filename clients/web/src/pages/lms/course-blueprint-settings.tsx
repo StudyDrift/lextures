@@ -1,4 +1,5 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatDateTime } from '../../lib/format'
 
 import {
@@ -16,6 +17,7 @@ import {
 import { PERM_RBAC_MANAGE, PERM_TENANT_ORG_UNITS_ADMIN } from '../../lib/rbac-api'
 import { usePermissions } from '../../context/use-permissions'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { useConfirm } from '../../components/use-confirm'
 import { UnsavedChangesBanner } from '../../components/ui/unsaved-changes-banner'
 
 type Props = {
@@ -31,6 +33,8 @@ function formatSyncAt(iso: string | null | undefined): string {
 }
 
 export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: Props) {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { allows, loading: permLoading } = usePermissions()
   const canOrgBlueprint =
     !permLoading && (allows(PERM_RBAC_MANAGE) || allows(PERM_TENANT_ORG_UNITS_ADMIN))
@@ -119,7 +123,14 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
   }
 
   async function onUnlink(cc: string) {
-    if (!window.confirm(`Unlink ${cc} from this blueprint? Copied course content is not removed.`)) return
+    if (
+      !(await confirm({
+        title: t('blueprint.unlink.title', { code: cc }),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     setBusy(true)
     try {
       await deleteBlueprintChildLink(courseCode, cc)
@@ -149,12 +160,15 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
 
   if (!course.orgId || !canOrgBlueprint) {
     return (
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Blueprint</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
-          Org administrators manage district blueprint courses here. Ask your platform admin for access.
-        </p>
-      </section>
+      <>
+        <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Blueprint</h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+            Org administrators manage district blueprint courses here. Ask your platform admin for access.
+          </p>
+        </section>
+        {ConfirmDialogHost}
+      </>
     )
   }
 
@@ -319,6 +333,7 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
         onDiscard={discardChanges}
         onSave={() => void onSingleSaveChanges()}
       />
+      {ConfirmDialogHost}
     </section>
   )
 }

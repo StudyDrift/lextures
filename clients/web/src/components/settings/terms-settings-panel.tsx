@@ -1,5 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CalendarRange, Plus, Trash2 } from 'lucide-react'
+import { useConfirm } from '../use-confirm'
 import { authorizedFetch } from '../../lib/api'
 import { decodeJwtPayload } from '../../lib/jwt-payload'
 import { getAccessToken } from '../../lib/auth'
@@ -20,6 +22,8 @@ export type TermRow = {
 }
 
 export function TermsSettingsPanel() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const headingId = useId()
   const errId = useId()
   const { allows, loading: permLoading } = usePermissions()
@@ -120,7 +124,7 @@ export function TermsSettingsPanel() {
 
   async function deleteTerm(id: string) {
     if (!orgId) return
-    if (!window.confirm('Delete this term? Courses must be unlinked first.')) return
+    if (!(await confirm({ title: t('terms.delete.title'), variant: 'danger' }))) return
     setError(null)
     try {
       const res = await authorizedFetch(
@@ -312,6 +316,7 @@ export function TermsSettingsPanel() {
           </tbody>
         </table>
       </div>
+      {ConfirmDialogHost}
     </section>
   )
 }

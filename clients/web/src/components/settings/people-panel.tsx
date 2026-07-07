@@ -1,5 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
+import { useConfirm } from '../use-confirm'
 import {
   ArrowLeft,
   Loader2,
@@ -212,6 +214,8 @@ function PersonReportView({
 }
 
 export function PeoplePanel() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const [searchParams, setSearchParams] = useSearchParams()
   const selectedUserId = searchParams.get('userId')
 
@@ -322,8 +326,11 @@ export function PeoplePanel() {
     }
   }
 
-  async function mutatePerson(userId: string, active: boolean, confirmMsg: string) {
-    if (!window.confirm(confirmMsg)) return
+  async function mutatePerson(userId: string, active: boolean, name: string) {
+    const title = active
+      ? t('people.reactivate.title')
+      : t('people.suspend.title', { name })
+    if (!(await confirm({ title, variant: active ? 'default' : 'danger' }))) return
     setBusyId(userId)
     try {
       await patchPerson(userId, { active })
@@ -337,9 +344,8 @@ export function PeoplePanel() {
     }
   }
 
-  async function removePerson(userId: string, label: string) {
-    const msg = `Permanently delete ${label}? Their profile will be anonymized and they will not be able to sign in. This cannot be undone.`
-    if (!window.confirm(msg)) return
+  async function removePerson(userId: string, name: string) {
+    if (!(await confirm({ title: t('people.delete.title', { name }), variant: 'danger' }))) return
     setBusyId(userId)
     try {
       await deletePerson(userId)
@@ -355,24 +361,27 @@ export function PeoplePanel() {
 
   if (selectedUserId) {
     return (
-      <PersonReportView
-        report={report}
-        loading={reportLoading}
-        error={reportError}
-        busy={busyId === selectedUserId}
-        onBack={closePerson}
-        onSuspend={() => {
-          const label = report ? personDisplayName(report) : 'this user'
-          void mutatePerson(selectedUserId, false, `Suspend ${label}? They will not be able to sign in.`)
-        }}
-        onReactivate={() => {
-          void mutatePerson(selectedUserId, true, 'Reactivate this account?')
-        }}
-        onDelete={() => {
-          const label = report ? personDisplayName(report) : 'this user'
-          void removePerson(selectedUserId, label)
-        }}
-      />
+      <>
+        <PersonReportView
+          report={report}
+          loading={reportLoading}
+          error={reportError}
+          busy={busyId === selectedUserId}
+          onBack={closePerson}
+          onSuspend={() => {
+            const name = report ? personDisplayName(report) : 'this user'
+            void mutatePerson(selectedUserId, false, name)
+          }}
+          onReactivate={() => {
+            void mutatePerson(selectedUserId, true, '')
+          }}
+          onDelete={() => {
+            const name = report ? personDisplayName(report) : 'this user'
+            void removePerson(selectedUserId, name)
+          }}
+        />
+        {ConfirmDialogHost}
+      </>
     )
   }
 
@@ -490,13 +499,7 @@ export function PeoplePanel() {
                           <button
                             type="button"
                             disabled={busyId === user.id}
-                            onClick={() =>
-                              void mutatePerson(
-                                user.id,
-                                false,
-                                `Suspend ${personDisplayName(user)}? They will not be able to sign in.`,
-                              )
-                            }
+                            onClick={() => void mutatePerson(user.id, false, personDisplayName(user))}
                             className="text-sm text-amber-700 hover:underline disabled:opacity-50 dark:text-amber-400"
                           >
                             Suspend
@@ -505,7 +508,7 @@ export function PeoplePanel() {
                           <button
                             type="button"
                             disabled={busyId === user.id}
-                            onClick={() => void mutatePerson(user.id, true, 'Reactivate this account?')}
+                            onClick={() => void mutatePerson(user.id, true, '')}
                             className="text-sm text-emerald-700 hover:underline disabled:opacity-50 dark:text-emerald-400"
                           >
                             Reactivate
@@ -618,6 +621,7 @@ export function PeoplePanel() {
           </form>
         </div>
       ) : null}
+      {ConfirmDialogHost}
     </div>
   )
 }

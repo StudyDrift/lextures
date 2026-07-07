@@ -1,6 +1,6 @@
 # C09 — AI grading agents
 
-> CLI parity plan. Source: `courses/{id}/grader-agent-templates` (5), `grader-agents`, `course-grading-agents`, `grading_agent_dry_run_ws.go`, `course_grading_settings`. Baseline: none.
+> CLI parity plan. Source: `courses/{id}/grader-agent-templates`, `grader-agents`, `grading_agent_dry_run_ws.go`, `grading_agent_http.go`. Baseline: `clients/cli/cmd/grader_templates.go`, `grader_agents.go`, `grader_agents_logic.go`, `grader_agents_test.go`, `internal/wsclient/wsclient.go`.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Assessment & grading |
 | **Severity** | MAJOR |
 | **Markets** | HE / K12 / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | AI / CLI |
 | **Depends on** | C03, C06, C40 |
@@ -64,7 +64,7 @@ AI grading agents (templates, per-course agents, dry-runs) are a differentiating
 
 ## 8. Data Model
 
-- None client-side. Document agent config JSON schema.
+- None client-side. Agent config JSON accepts either a legacy `prompt` or a `workflowGraph` (same shape as the web grader canvas). `grader-agents set --file` also accepts a `get` response wrapped in `{ "config": … }`.
 
 ## 9. API Surface
 
@@ -72,7 +72,11 @@ AI grading agents (templates, per-course agents, dry-runs) are a differentiating
 
 ## 10. UI / UX
 
-- `lextures grader-templates ...`, `lextures grader-agents ...`.
+- `lextures grader-templates list|get|create <course>`.
+- `lextures grader-agents list|get|set|delete <course> --assignment <item-id>` (`set --file agent.json`).
+- `lextures grader-agents dry-run <course> --assignment <a> [--sample N] [--submission id]`.
+- `lextures grader-agents run <assignment> --course C [--scope ungraded|all] [--mode suggest|apply] [--wait] [--yes]`.
+- `lextures grader-agents results <assignment> --course C [--run id] [--accept --yes]`.
 - WebSocket dry-run renders a live progress line; `--json` collects final results.
 
 ## 11. AI / ML Considerations
@@ -83,8 +87,8 @@ AI grading agents (templates, per-course agents, dry-runs) are a differentiating
 
 ## 12. Integration Points
 
-- Server grader-agent + AI provider + disclosure handlers; WebSocket client (new in CLI — see C40 WS helper).
-- Internal: new `cmd/grader_agents.go`.
+- Server grader-agent + AI provider + disclosure handlers; WebSocket client in `clients/cli/internal/wsclient`.
+- Internal: `clients/cli/cmd/grader_templates.go`, `grader_agents.go`, `grader_agents_logic.go`, `grader_agents_test.go`.
 
 ## 13. Dependencies & Sequencing
 
@@ -95,30 +99,45 @@ AI grading agents (templates, per-course agents, dry-runs) are a differentiating
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| CLI has no WebSocket client yet | H | M | Add shared WS helper in C40; fall back to polling if server offers REST dry-run |
-| Cost overrun on large runs | M | M | Enforce `--sample`; print estimate; require `--yes` for full-class runs |
+| CLI has no WebSocket client yet | H | M | Added `internal/wsclient` for dry-run streaming |
+| Cost overrun on large runs | M | M | `--sample`; run-estimate line; `--yes` for scope=all |
 
 ## 15. Rollout Plan
 
-- Ship templates/agents CRUD + dry-run first, then run/accept.
+- Shipped templates/agents CRUD + dry-run + run/accept.
 - Rollback: additive; dry-run has no side effects.
 
 ## 16. Test Plan
 
-- **Unit** — config parse; opt-out gating.
+- **Unit** — config parse; opt-out gating (`grader_agents_test.go`).
 - **Integration** — WS dry-run stream parsing (mock WS server).
-- **E2E** — set agent → dry-run → run → sync grade.
+- **E2E** — set agent → dry-run → run → sync grade (manual / future stack test).
 
 ## 17. Documentation & Training
 
-- "Version-control an AI grader and validate it in CI" recipe.
+- "Version-control an AI grader and validate it in CI" recipe:
+
+```bash
+# 1. Save agent config from git
+lextures grader-agents set CS101 --assignment <item-id> --file agent.json
+
+# 2. Preview on one submission (no gradebook writes)
+lextures grader-agents dry-run CS101 --assignment <item-id> --sample 1
+
+# 3. Run suggest mode for ungraded work, then inspect results
+lextures grader-agents run <item-id> --course CS101 --mode suggest --wait
+lextures grader-agents results <item-id> --course CS101
+
+# 4. Accept held suggestions into the gradebook
+lextures grader-agents results <item-id> --course CS101 --accept --yes
+```
 
 ## 18. Open Questions
 
-1. Is dry-run WebSocket-only, or is there a REST variant?
-2. How is estimated cost surfaced by the server?
+1. Dry-run is **WebSocket-only** (`GET …/grader-agent/dry-run/ws`); there is no REST dry-run variant.
+2. Estimated cost is returned by `GET …/grader-agent/run-estimate` (`estimatedCostMinUsd` / `estimatedCostMaxUsd`, token fields).
 
 ## 19. References
 
 - `grading_agent_dry_run_ws.go`, grader-agent handlers; `ai_provider_usage.go`.
-- Related: [C06](C06-gradebook-final-grades.md), [C25](C25-integrations-webhooks-bots.md), [C29](C29-compliance-privacy.md), [C40](C40-cli-framework.md).
+- Related: [C06](C06-gradebook-final-grades.md), [C25](../../plan/cli/C25-integrations-webhooks-bots.md), [C29](../../plan/cli/C29-compliance-privacy.md), [C40](../../plan/cli/C40-cli-framework.md).

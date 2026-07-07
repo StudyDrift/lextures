@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import {
   fetchModerationReconciliation,
   postModerationReconcile,
   type ModerationReconciliationRow,
 } from '../../lib/courses-api'
+import { usePrompt } from '../../components/use-prompt'
 import { LmsPage } from './lms-page'
 
 export default function ModerationDashboard() {
+  const { t } = useTranslation('common')
+  const { prompt, InputDialogHost } = usePrompt()
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const [rows, setRows] = useState<ModerationReconciliationRow[]>([])
   const [unreconciledFlagged, setUnreconciledFlagged] = useState(0)
@@ -55,6 +59,19 @@ export default function ModerationDashboard() {
     } finally {
       setBusyId(null)
     }
+  }
+
+  async function handleOverride(row: ModerationReconciliationRow) {
+    const max = row.pointsWorth ?? 'max'
+    const raw = await prompt({
+      title: t('moderation.overrideScore.title', { max }),
+      label: t('moderation.overrideScore.label'),
+      defaultValue: row.finalScore != null ? String(row.finalScore) : '',
+    })
+    if (raw == null || raw.trim() === '') return
+    const n = Number(raw)
+    if (!Number.isFinite(n)) return
+    await reconcile(row.submissionId, { action: 'override', overrideScore: n })
   }
 
   if (!courseCode || !itemId) {
@@ -204,16 +221,7 @@ export default function ModerationDashboard() {
                       <button
                         type="button"
                         disabled={busyId === r.submissionId}
-                        onClick={() => {
-                          const raw = window.prompt(
-                            `Override final score (0–${r.pointsWorth ?? 'max'} points)`,
-                            r.finalScore != null ? String(r.finalScore) : '',
-                          )
-                          if (raw == null || raw.trim() === '') return
-                          const n = Number(raw)
-                          if (!Number.isFinite(n)) return
-                          void reconcile(r.submissionId, { action: 'override', overrideScore: n })
-                        }}
+                        onClick={() => void handleOverride(r)}
                         className="rounded-lg border border-indigo-200 bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-900 hover:bg-indigo-100 disabled:opacity-50 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-100 dark:hover:bg-indigo-950"
                       >
                         Override…
@@ -226,6 +234,7 @@ export default function ModerationDashboard() {
           </table>
         </div>
       )}
+      {InputDialogHost}
     </LmsPage>
   )
 }

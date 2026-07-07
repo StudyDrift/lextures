@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { BookOpen, Plus, Trash2 } from 'lucide-react'
 import {
@@ -9,6 +10,8 @@ import {
   type LibraryBook,
 } from '../../lib/library-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { useConfirm } from '../../components/use-confirm'
+import { toastMutationError } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
 
 type FilterState = {
@@ -22,6 +25,8 @@ type AddBookForm = CreateBookPayload & { title: string }
 const GRADE_BANDS = ['', 'K-2', '3-5', '6-8', '9-12', 'K-12']
 
 export default function LibraryCatalogPage() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { orgId } = useParams<{ orgId: string }>()
   const { ffLibrary } = usePlatformFeatures()
   const [books, setBooks] = useState<LibraryBook[]>([])
@@ -93,12 +98,20 @@ export default function LibraryCatalogPage() {
 
   const handleDelete = async (book: LibraryBook) => {
     if (!orgId) return
-    if (!window.confirm(`Delete "${book.title}"?`)) return
+    if (
+      !(await confirm({
+        title: t('library.deleteBook.title', { title: book.title }),
+        variant: 'danger',
+        confirmLabel: t('dialogs.delete'),
+      }))
+    ) {
+      return
+    }
     try {
       await deleteLibraryBook(orgId, book.id)
       setBooks((prev) => prev.filter((b) => b.id !== book.id))
     } catch {
-      alert('Failed to delete book.')
+      toastMutationError(t('library.deleteBookFailed'))
     }
   }
 
@@ -344,6 +357,7 @@ export default function LibraryCatalogPage() {
           </div>
         )}
       </div>
+      {ConfirmDialogHost}
     </LmsPage>
   )
 }

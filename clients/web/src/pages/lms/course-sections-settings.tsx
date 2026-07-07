@@ -1,4 +1,5 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   deleteCourseSection,
   fetchCourseSections,
@@ -8,6 +9,7 @@ import {
 } from '../../lib/courses-api'
 import { authorizedFetch } from '../../lib/api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { useConfirm } from '../../components/use-confirm'
 
 type Props = {
   courseCode: string
@@ -16,6 +18,8 @@ type Props = {
 type StructureItem = { id: string; kind: string; title: string }
 
 export function CourseSectionsSettingsSection({ courseCode }: Props) {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const [sections, setSections] = useState<CourseSection[] | null>(null)
   const [assignments, setAssignments] = useState<StructureItem[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -93,7 +97,14 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
   }
 
   async function onArchive(s: CourseSection) {
-    if (!window.confirm(`Archive section ${s.sectionCode}?`)) return
+    if (
+      !(await confirm({
+        title: t('sections.archive.title', { code: s.sectionCode }),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     setBusy(true)
     try {
       await deleteCourseSection(courseCode, s.id)
@@ -271,6 +282,7 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
           </button>
         </form>
       </section>
+      {ConfirmDialogHost}
     </div>
   )
 }

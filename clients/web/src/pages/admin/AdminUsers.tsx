@@ -12,6 +12,8 @@ import {
 } from '../../lib/admin-console-api'
 import { fetchCustomFields, usersExportUrl } from '../../lib/custom-fields-api'
 import { startImpersonationSession } from '../../lib/impersonation'
+import { toastMutationError } from '../../lib/lms-toast'
+import { useConfirm } from '../../components/use-confirm'
 
 const AdminUserCustomFieldsPanel = lazy(() => import('./AdminUserCustomFieldsPanel'))
 
@@ -20,6 +22,7 @@ const PAGE_SIZES = [25, 50, 100]
 
 export default function AdminUsers() {
   const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const titleId = useId()
   const { impersonationEnabled } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
@@ -71,13 +74,20 @@ export default function AdminUsers() {
   }, [load])
 
   async function deactivate(user: AdminUser) {
-    if (!window.confirm(`Deactivate ${user.email}? They will not be able to sign in.`)) return
+    if (
+      !(await confirm({
+        title: t('admin.deactivateUser.title', { email: user.email }),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     setBusy(user.id)
     try {
       await patchAdminUser(user.id, { active: false })
       await load()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to deactivate user.')
+      toastMutationError(e instanceof Error ? e.message : 'Failed to deactivate user.')
     } finally {
       setBusy(null)
     }
@@ -85,19 +95,24 @@ export default function AdminUsers() {
 
   async function viewAs(user: AdminUser) {
     const name = user.displayName?.trim() || user.email
-    const msg = t('impersonation.confirm', {
-      name,
-      defaultValue:
-        'You are about to view the application as {{name}}. All writes will be blocked. Continue?',
-    })
-    if (!window.confirm(msg)) return
+    if (
+      !(await confirm({
+        title: t('impersonation.confirm', {
+          name,
+          defaultValue:
+            'You are about to view the application as {{name}}. All writes will be blocked. Continue?',
+        }),
+      }))
+    ) {
+      return
+    }
     setBusy(user.id)
     try {
       const result = await startImpersonation(user.id)
       startImpersonationSession(result.impersonation_token)
       window.location.assign('/')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to start impersonation.')
+      toastMutationError(e instanceof Error ? e.message : 'Failed to start impersonation.')
       setBusy(null)
     }
   }
@@ -314,6 +329,7 @@ export default function AdminUsers() {
           </button>
         </nav>
       ) : null}
+      {ConfirmDialogHost}
     </div>
   )
 }

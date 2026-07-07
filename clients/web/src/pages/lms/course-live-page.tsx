@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Navigate, useParams } from 'react-router-dom'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import {
@@ -14,6 +15,8 @@ import {
   listMeetings,
   patchMeeting,
 } from '../../lib/virtual-meetings-api'
+import { useConfirm } from '../../components/use-confirm'
+import { toastMutationError } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
 
 function statusBadge(status: MeetingStatus) {
@@ -316,6 +319,8 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
 }
 
 export default function CourseLivePage() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { courseCode } = useParams<{ courseCode: string }>()
   const viewerRoles = useViewerEnrollmentRoles(courseCode)
   const rolesLoading = viewerRoles === null
@@ -353,19 +358,26 @@ export default function CourseLivePage() {
       const info = await getMeetingJoinInfo(meeting.id)
       window.open(info.joinUrl, '_blank', 'noopener,noreferrer')
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Could not get join URL.')
+      toastMutationError(e instanceof Error ? e.message : t('courseLive.joinFailed'))
     }
-  }, [])
+  }, [t])
 
   const handleCancel = useCallback(async (meeting: VirtualMeeting) => {
-    if (!window.confirm(`Cancel "${meeting.title}"?`)) return
+    if (
+      !(await confirm({
+        title: t('courseLive.cancelMeeting.title', { title: meeting.title }),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     try {
       await patchMeeting(meeting.id, { status: 'cancelled' })
       setMeetings((prev) => prev.filter((m) => m.id !== meeting.id))
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed to cancel meeting.')
+      toastMutationError(e instanceof Error ? e.message : t('courseLive.cancelMeetingFailed'))
     }
-  }, [])
+  }, [confirm, t])
 
   const handleCreated = useCallback((m: VirtualMeeting) => {
     setMeetings((prev) => [m, ...prev])
@@ -515,6 +527,7 @@ export default function CourseLivePage() {
           onCreated={handleCreated}
         />
       )}
+      {ConfirmDialogHost}
     </LmsPage>
   )
 }

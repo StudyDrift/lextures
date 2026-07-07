@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
+import { useConfirm } from '../../components/use-confirm'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   createWebhookSubscription,
@@ -14,8 +16,11 @@ import {
   type WebhookEventGroup,
   type WebhookSubscription,
 } from '../../lib/webhooks-api'
+import { toastMutationError } from '../../lib/lms-toast'
 
 export default function WebhooksAdminPage() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const titleId = useId()
   const labelId = useId()
   const urlId = useId()
@@ -146,14 +151,21 @@ export default function WebhooksAdminPage() {
 
   async function handleDelete(sub: WebhookSubscription) {
     if (!orgId) return
-    if (!window.confirm(`Delete webhook "${sub.label}"?`)) return
+    if (
+      !(await confirm({
+        title: t('admin.deleteWebhook.title', { label: sub.label }),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     setBusyId(`delete-${sub.id}`)
     try {
       await deleteWebhookSubscription(orgId, sub.id)
       if (selectedId === sub.id) setSelectedId(null)
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete subscription.')
+      toastMutationError(err instanceof Error ? err.message : 'Failed to delete subscription.')
     } finally {
       setBusyId(null)
     }
@@ -412,6 +424,7 @@ export default function WebhooksAdminPage() {
           </div>
         </section>
       ) : null}
+      {ConfirmDialogHost}
     </div>
   )
 }

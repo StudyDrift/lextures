@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Building2, Plus, RefreshCw } from 'lucide-react'
+import { useConfirm } from '../use-confirm'
 import { authorizedFetch, tryRefreshSession } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
@@ -24,6 +26,8 @@ type OrgRow = {
 }
 
 export function OrganizationsPanel() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const [orgs, setOrgs] = useState<OrgRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -96,7 +100,10 @@ export function OrganizationsPanel() {
   }
 
   async function setStatus(id: string, name: string, next: 'active' | 'suspended') {
-    if (next === 'suspended' && !window.confirm(`Suspend organization “${name}”? Users in this org will be blocked from signing in.`)) {
+    if (
+      next === 'suspended' &&
+      !(await confirm({ title: t('organizations.suspend.title', { name }), variant: 'danger' }))
+    ) {
       return
     }
     try {
@@ -287,6 +294,7 @@ export function OrganizationsPanel() {
           </table>
         </div>
       )}
+      {ConfirmDialogHost}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { formatNumber } from '../lib/format'
 import { Bot, Plus, Send, Trash2, X } from 'lucide-react'
@@ -14,6 +15,7 @@ import {
   type TutorSessionMessage,
   type TutorSessionSummary,
 } from '../lib/tutor-api'
+import { toast } from '../lib/lms-toast'
 
 const API_BASE = '/api/v1'
 
@@ -55,6 +57,7 @@ function AiTutorTrigger({ open, onToggle }: { open: boolean; onToggle: () => voi
 }
 
 function CitationChips({ citations }: { citations: TutorCitation[] }) {
+  const { t } = useTranslation('common')
   if (!citations.length) return null
   return (
     <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Source citations">
@@ -66,7 +69,9 @@ function CitationChips({ citations }: { citations: TutorCitation[] }) {
           className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950 dark:text-indigo-300"
           onClick={() => {
             if (c.sourceId) {
-              window.alert(`${c.title ?? 'Course material'}\n\n${c.excerpt}`)
+              toast(t('tutor.citation.title', { title: c.title ?? 'Course material' }), {
+                description: c.excerpt,
+              })
             }
           }}
         >

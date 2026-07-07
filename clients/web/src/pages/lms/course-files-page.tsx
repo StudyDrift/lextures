@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Archive,
   ChevronDown,
@@ -42,6 +43,7 @@ import { getAccessToken } from '../../lib/auth'
 import { FilePreview } from '../../components/file-preview'
 import { ConfirmDialog } from '../../components/confirm-dialog'
 import { CloudImportMenu } from '../../components/cloud-import-menu'
+import { toastMutationError } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
 
 type ContextMenu =
@@ -70,6 +72,7 @@ const CHECKBOX_INPUT_CLASS =
   'block h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900'
 
 export default function CourseFilesPage() {
+  const { t } = useTranslation('common')
   const { courseCode: rawCode } = useParams<{ courseCode: string }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
   const [searchParams, setSearchParams] = useSearchParams()
@@ -271,7 +274,7 @@ export default function CourseFilesPage() {
       clearSelection()
       void load()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Could not move items.')
+      toastMutationError(err instanceof Error ? err.message : t('courseFiles.moveFailed'))
     }
   }
 
@@ -335,7 +338,7 @@ export default function CourseFilesPage() {
       setShowNewFolder(false)
       void load()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Could not create folder.')
+      toastMutationError(err instanceof Error ? err.message : t('courseFiles.createFolderFailed'))
     }
   }
 
@@ -348,7 +351,7 @@ export default function CourseFilesPage() {
       setRenamingFolder(null)
       void load()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Could not rename folder.')
+      toastMutationError(err instanceof Error ? err.message : t('courseFiles.renameFolderFailed'))
     }
   }
 
@@ -372,7 +375,7 @@ export default function CourseFilesPage() {
       setRenamingFile(null)
       void load()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Could not rename file.')
+      toastMutationError(err instanceof Error ? err.message : t('courseFiles.renameFileFailed'))
     }
   }
 
@@ -396,7 +399,9 @@ export default function CourseFilesPage() {
       }
       void load()
     } catch (err) {
-      alert(err instanceof Error ? err.message : `Could not move ${kind}.`)
+      toastMutationError(
+        err instanceof Error ? err.message : t('courseFiles.moveItemFailed', { kind }),
+      )
     }
   }
 
@@ -444,7 +449,12 @@ export default function CourseFilesPage() {
       try {
         await uploadSingleFile(file, destinationFolderId)
       } catch (err) {
-        alert(`Failed to upload ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        toastMutationError(
+          t('courseFiles.uploadFailed', {
+            name: file.name,
+            message: err instanceof Error ? err.message : 'Unknown error',
+          }),
+        )
       }
     }
     setUploading(false)
@@ -840,7 +850,7 @@ export default function CourseFilesPage() {
           try {
             await pendingDelete.action()
           } catch (err) {
-            alert(err instanceof Error ? err.message : 'Could not delete.')
+            toastMutationError(err instanceof Error ? err.message : t('courseFiles.deleteFailed'))
           } finally {
             setDeleting(false)
             setPendingDelete(null)

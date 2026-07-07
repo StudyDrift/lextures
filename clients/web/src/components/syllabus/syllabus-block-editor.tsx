@@ -2,6 +2,7 @@ import { FileText, Plus } from 'lucide-react'
 import { formatNumber } from '../../lib/format'
 import { marked } from 'marked'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Editor } from '@tiptap/core'
 import {
   generateSyllabusSectionMarkdown,
@@ -41,6 +42,7 @@ import {
 } from '../../lib/stt/text-insert'
 import { summarizeSectionsAltText } from '../../lib/image-alt-validation'
 import { toastMutationError } from '../../lib/lms-toast'
+import { InputDialog } from '../input-dialog'
 
 function newLocalId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -413,6 +415,7 @@ function SyllabusBlockEditorInner({
   requireSyllabusAcceptance,
   onRequireSyllabusAcceptanceChange,
 }: SyllabusBlockEditorInnerProps) {
+  const { t } = useTranslation('common')
   const { selectedId, setSelectedId } = useBlockEditor()
   const equationEditor = useEquationEditor()
   const [activeField, setActiveField] = useState<ActiveField | null>(null)
@@ -430,6 +433,9 @@ function SyllabusBlockEditorInner({
   const altTextHardBlock = altTextHardBlockEnabled()
   const sttAvailability = useSpeechToTextAvailability(courseCode)
   const dictationInterimRef = useRef<Record<string, InterimRange>>({})
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
+  const [linkSectionId, setLinkSectionId] = useState<string | null>(null)
   const altCoverage = useMemo(
     () => (altTextOn ? summarizeSectionsAltText(sections) : { withAlt: 0, total: 0, missing: [] }),
     [altTextOn, sections],
@@ -561,9 +567,9 @@ function SyllabusBlockEditorInner({
         break
       case 'link': {
         const prev = editor.getAttributes('link').href as string | undefined
-        const url = window.prompt('Link URL', prev || 'https://')
-        if (url === null || url === '') return
-        chain.toggleLink({ href: url }).run()
+        setLinkSectionId(sectionId)
+        setLinkUrl(prev ?? t('dialogs.linkUrl.placeholder'))
+        setLinkDialogOpen(true)
         break
       }
       default:
@@ -833,6 +839,27 @@ function SyllabusBlockEditorInner({
         },
       }}
     >
+    <InputDialog
+      open={linkDialogOpen}
+      title={t('dialogs.linkUrl.title')}
+      label={t('dialogs.linkUrl.label')}
+      placeholder={t('dialogs.linkUrl.placeholder')}
+      value={linkUrl}
+      onValueChange={setLinkUrl}
+      onConfirm={(url) => {
+        const trimmed = url.trim()
+        if (trimmed && linkSectionId) {
+          const linkEditor = editorRefs.current[linkSectionId]
+          linkEditor?.chain().focus().toggleLink({ href: trimmed }).run()
+        }
+        setLinkDialogOpen(false)
+        setLinkSectionId(null)
+      }}
+      onClose={() => {
+        setLinkDialogOpen(false)
+        setLinkSectionId(null)
+      }}
+    />
     <BlockEditorShell
       sidebar={
         <SyllabusSidebar

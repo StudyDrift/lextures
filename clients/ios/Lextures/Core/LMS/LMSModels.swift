@@ -45,6 +45,10 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var collabDocsEnabled: Bool?
     var viewerEnrollmentInvitationPending: Bool?
     var viewerPendingEnrollmentId: String?
+    var isBlueprint: Bool?
+    var blueprintParentId: String?
+    var blueprintParentCourseCode: String?
+    var blueprintLastSyncAt: String?
 
     var isCalendarEnabled: Bool { calendarEnabled != false }
 

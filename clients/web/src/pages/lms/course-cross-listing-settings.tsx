@@ -1,4 +1,5 @@
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   deleteOrgCrossListMember,
   fetchCourseSections,
@@ -11,6 +12,7 @@ import {
 import { PERM_TENANT_ORG_UNITS_ADMIN } from '../../lib/rbac-api'
 import { usePermissions } from '../../context/use-permissions'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { useConfirm } from '../../components/use-confirm'
 
 type Props = {
   courseCode: string
@@ -19,6 +21,8 @@ type Props = {
 }
 
 export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props) {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { allows, loading: permLoading } = usePermissions()
   const canOrgAdmin = !permLoading && allows(PERM_TENANT_ORG_UNITS_ADMIN)
   const [sections, setSections] = useState<CourseSection[] | null>(null)
@@ -102,7 +106,14 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
 
   async function onRemove(sectionId: string) {
     if (!orgId || !group) return
-    if (!window.confirm('Remove this section from the cross-list group? Student grades are not deleted.')) return
+    if (
+      !(await confirm({
+        title: t('crossListing.remove.title'),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     setBusy(true)
     try {
       await deleteOrgCrossListMember(orgId, group.id, sectionId)
@@ -117,13 +128,16 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
 
   if (!orgId || !canOrgAdmin) {
     return (
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-        <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Cross-listing</h3>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
-          Cross-list sections so instructors see one combined gradebook. Only organization administrators can
-          configure cross-list groups.
-        </p>
-      </section>
+      <>
+        <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Cross-listing</h3>
+          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+            Cross-list sections so instructors see one combined gradebook. Only organization administrators can
+            configure cross-list groups.
+          </p>
+        </section>
+        {ConfirmDialogHost}
+      </>
     )
   }
 
@@ -271,6 +285,7 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
           )}
         </div>
       )}
+      {ConfirmDialogHost}
     </section>
   )
 }

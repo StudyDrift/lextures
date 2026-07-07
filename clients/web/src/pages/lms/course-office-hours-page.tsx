@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Navigate, useParams } from 'react-router-dom'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import {
@@ -13,6 +14,8 @@ import {
   getSlotIcalUrl,
   listAvailability,
 } from '../../lib/office-hours-api'
+import { useConfirm } from '../../components/use-confirm'
+import { toastMutationError } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
 
 function slotStatusBadge(status: AppointmentSlot['status']) {
@@ -451,6 +454,8 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
 }
 
 export default function CourseOfficeHoursPage() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { courseCode } = useParams<{ courseCode: string }>()
   const viewerRoles = useViewerEnrollmentRoles(courseCode)
   const rolesLoading = viewerRoles === null
@@ -505,14 +510,21 @@ export default function CourseOfficeHoursPage() {
   }, [])
 
   const handleCancel = useCallback(async (slot: AppointmentSlot) => {
-    if (!window.confirm('Cancel your appointment?')) return
+    if (
+      !(await confirm({
+        title: t('officeHours.cancelAppointment.title'),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     try {
       const updated = await cancelBooking(slot.id)
       setSlots((prev) => prev.map((s) => (s.id === updated.id ? updated : s)))
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed to cancel.')
+      toastMutationError(e instanceof Error ? e.message : t('officeHours.cancelFailed'))
     }
-  }, [])
+  }, [confirm, t])
 
   if (!courseCode) return <Navigate to="/courses" replace />
 
@@ -627,6 +639,7 @@ export default function CourseOfficeHoursPage() {
           onBooked={handleBooked}
         />
       )}
+      {ConfirmDialogHost}
     </LmsPage>
   )
 }
