@@ -40,11 +40,26 @@ that can be driven from a terminal gets a command group, including student-facin
 | `courses` | list, get, create, delete | [C01](C01-courses.md) |
 | `assignments` | list, get, create, submit | [C03](C03-assignments.md) |
 | `grades` | list, update, export | [C06](C06-gradebook-final-grades.md) |
-| `users` | list, get, create, enroll | [C15](C15-people-provisioning.md) |
-| `orgs` | list, get, create | [C14](C14-org-administration.md) |
+| `users` | list, get, create, enroll, update, suspend, reactivate, delete, import, search | [C15](../completed/cli/C15-people-provisioning.md) |
+| `imports` | submit, status, list | [C15](../completed/cli/C15-people-provisioning.md) |
+| `custom-fields` | list, create, update, delete | [C15](../completed/cli/C15-people-provisioning.md) |
+| `people` | list | [C15](../completed/cli/C15-people-provisioning.md) |
+| `enrollments` | list, export, import, add, remove, set-state, self-enroll | [C11](../completed/cli/C11-enrollments-sections.md) |
+| `sections` | list, create, update, delete, move, cross-list | [C11](../completed/cli/C11-enrollments-sections.md) |
+| `orgs` | list, get, create, update, archive, settings, branding, role-grants, parent-links, cross-list-groups | [C14](../completed/cli/C14-org-administration.md) |
+| `org-units` | list, create, update, delete, move | [C14](../completed/cli/C14-org-administration.md) |
+| `terms` | list, create, update, delete | [C14](../completed/cli/C14-org-administration.md) |
+| `groups` | list, create, delete, add, remove, members | [C13](../completed/cli/C13-groups-collaboration.md) |
+| `discussions` | list, export, post, lock | [C13](../completed/cli/C13-groups-collaboration.md) |
+| `collab-docs` | list, export | [C13](../completed/cli/C13-groups-collaboration.md) |
+| `whiteboards` | list, export | [C13](../completed/cli/C13-groups-collaboration.md) |
 | `files` | list, mkdir, upload, download, rename, move, delete | [C21](C21-platform-settings.md) |
 | `feed` | channels, post, recent | [C34](C34-messaging-broadcasts.md) |
 | `questions` | list, create, import | [C04](C04-quizzes-question-banks.md) |
+| `attendance` | list, record, import, export, summary | [C12](../completed/cli/C12-attendance-behavior.md) |
+| `behavior` | list, export, award | [C12](../completed/cli/C12-attendance-behavior.md) |
+| `seat-time` | report | [C12](../completed/cli/C12-attendance-behavior.md) |
+| `hall-pass` | list, issue, return | [C12](../completed/cli/C12-attendance-behavior.md) |
 
 ---
 
@@ -68,22 +83,22 @@ that can be driven from a terminal gets a command group, including student-facin
 | C07 | [Outcomes, standards & SBG report cards](C07-outcomes-standards-sbg.md) | MAJOR | MISSING | M |
 | C08 | [Peer review, evaluations & surveys](../completed/cli/C08-peer-review-evaluations-surveys.md) | MINOR | COMPLETE | M |
 | C09 | [AI grading agents](../completed/cli/C09-ai-grading-agents.md) | MAJOR | COMPLETE | M |
-| C10 | [Plagiarism & originality](C10-plagiarism-originality.md) | MAJOR | MISSING | S |
+| C10 | [Plagiarism & originality](../completed/cli/C10-plagiarism-originality.md) | MAJOR | COMPLETE | S |
 
 ### C. Roster & classroom
 
 | ID | Plan | Severity | Status | Effort |
 |---|---|---|---|---|
-| C11 | [Enrollments & sections](C11-enrollments-sections.md) | BLOCKER | PARTIAL | M |
-| C12 | [Attendance, behavior & seat-time](C12-attendance-behavior.md) | MAJOR | MISSING | M |
-| C13 | [Groups & collaboration](C13-groups-collaboration.md) | MINOR | MISSING | S |
+| C11 | [Enrollments & sections](../completed/cli/C11-enrollments-sections.md) | BLOCKER | COMPLETE | M |
+| C12 | [Attendance, behavior & seat-time](../completed/cli/C12-attendance-behavior.md) | MAJOR | COMPLETE | M |
+| C13 | [Groups & collaboration](../completed/cli/C13-groups-collaboration.md) | MINOR | COMPLETE | S |
 
 ### D. Admin & governance
 
 | ID | Plan | Severity | Status | Effort |
 |---|---|---|---|---|
-| C14 | [Org & org-unit administration](C14-org-administration.md) | MAJOR | PARTIAL | M |
-| C15 | [People, provisioning & bulk import](C15-people-provisioning.md) | BLOCKER | PARTIAL | L |
+| C14 | [Org & org-unit administration](../completed/cli/C14-org-administration.md) | MAJOR | COMPLETE | M |
+| C15 | [People, provisioning & bulk import](../completed/cli/C15-people-provisioning.md) | BLOCKER | COMPLETE | L |
 | C16 | [Roles & permissions (RBAC)](C16-roles-permissions.md) | BLOCKER | MISSING | M |
 | C17 | [Licenses, entitlements & marketplace](C17-licenses-entitlements.md) | MAJOR | MISSING | M |
 | C18 | [Jobs, scheduler, quarantine & backups](C18-jobs-scheduler-backups.md) | MAJOR | MISSING | M |

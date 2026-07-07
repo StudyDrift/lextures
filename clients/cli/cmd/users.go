@@ -159,6 +159,13 @@ func runUsersGet(cmd *cobra.Command, args []string) error {
 	_, _ = fmt.Fprintf(out, "Email:    %s\n", u.Email)
 	_, _ = fmt.Fprintf(out, "Role:     %s\n", u.Role)
 	_, _ = fmt.Fprintf(out, "Created:  %s\n", u.CreatedAt.Format(time.RFC3339))
+	if adminUser, _, err := fetchAdminConsoleUser(c, u.ID, ""); err == nil {
+		state := "active"
+		if !adminUser.Active {
+			state = "suspended"
+		}
+		_, _ = fmt.Fprintf(out, "Status:   %s\n", state)
+	}
 	return nil
 }
 
