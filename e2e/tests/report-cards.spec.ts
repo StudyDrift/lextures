@@ -225,7 +225,7 @@ test.describe('Report Cards — UI', () => {
     const editBtn = page.getByRole('button', { name: 'Edit' }).first()
     if (await editBtn.isVisible().catch(() => false)) {
       await editBtn.click()
-      await page.getByRole('button', { name: /ai suggest/i }).click()
+      await page.getByRole('button', { name: /get ai comment suggestion/i }).click()
       await expect.poll(() => aiPayload?.absences).toBe(3)
     }
   })
