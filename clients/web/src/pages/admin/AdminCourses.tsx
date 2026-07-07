@@ -1,15 +1,20 @@
 import { useCallback, useEffect, useId, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useConfirm } from '../../components/use-confirm'
 import {
   fetchAdminCourses,
   patchAdminCourseStatus,
   type AdminCourse,
   type Paginated,
 } from '../../lib/admin-console-api'
+import { toastMutationError } from '../../lib/lms-toast'
 
 const STATUSES = ['', 'active', 'archived', 'draft']
 
 export default function AdminCourses() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const titleId = useId()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
@@ -46,12 +51,18 @@ export default function AdminCourses() {
   }, [load])
 
   async function setCourseStatus(course: AdminCourse, next: 'active' | 'archived' | 'draft') {
-    if (!window.confirm(`Set "${course.title}" to ${next}?`)) return
+    if (
+      !(await confirm({
+        title: t('admin.setCourseStatus.title', { title: course.title, status: next }),
+      }))
+    ) {
+      return
+    }
     try {
       await patchAdminCourseStatus(course.id, next)
       await load()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to update course.')
+      toastMutationError(e instanceof Error ? e.message : 'Failed to update course.')
     }
   }
 
@@ -206,6 +217,7 @@ export default function AdminCourses() {
           </button>
         </nav>
       ) : null}
+      {ConfirmDialogHost}
     </div>
   )
 }

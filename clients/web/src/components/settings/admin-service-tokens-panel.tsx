@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { KeyRound, Plus, Trash2 } from 'lucide-react'
+import { useConfirm } from '../use-confirm'
 import {
   AccessKeyCreatedModal,
   CreateAccessKeyModal,
@@ -32,6 +34,8 @@ type ServiceToken = {
 }
 
 export function AdminServiceTokensPanel() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
   const [createdKey, setCreatedKey] = useState<CreateAccessKeyResult | null>(null)
@@ -112,7 +116,7 @@ export function AdminServiceTokensPanel() {
   }
 
   async function revoke(id: string) {
-    if (!globalThis.confirm('Revoke this service token? Integrations using it will stop working immediately.')) return
+    if (!(await confirm({ title: t('serviceTokens.revoke.title'), variant: 'danger' }))) return
     try {
       const res = await authorizedFetch(`/api/v1/admin/tokens/${encodeURIComponent(id)}`, { method: 'DELETE' })
       const raw: unknown = await res.json().catch(() => ({}))
@@ -271,6 +275,7 @@ export function AdminServiceTokensPanel() {
         label={createdKey?.label ?? null}
         onClose={() => setCreatedKey(null)}
       />
+      {ConfirmDialogHost}
     </section>
   )
 }

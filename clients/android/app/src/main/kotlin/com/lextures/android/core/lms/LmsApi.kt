@@ -5,6 +5,7 @@ import com.lextures.android.core.network.ApiError
 import com.lextures.android.core.network.parseApiErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -13,6 +14,18 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import java.net.URLEncoder
+
+@Serializable
+private data class BlueprintChildrenResponse(val children: List<BlueprintChildRow>? = null)
+
+@Serializable
+private data class BlueprintSyncLogsResponse(val logs: List<BlueprintSyncLogRow>? = null)
+
+@Serializable
+private data class BlueprintPatchRequest(val isBlueprint: Boolean)
+
+@Serializable
+private data class BlueprintLinkChildRequest(val childCourseCode: String)
 
 /** LMS endpoints used by the post-auth tabs (parity with web `courses-api` / `communication-api`). */
 object LmsApi {
@@ -103,6 +116,95 @@ object LmsApi {
             accessToken = accessToken,
         )
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+    }
+
+    suspend fun patchCourseBlueprint(
+        courseCode: String,
+        isBlueprint: Boolean,
+        accessToken: String,
+    ): CourseSummary = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/blueprint",
+            method = "PATCH",
+            body = json.encodeToString(BlueprintPatchRequest(isBlueprint)),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseSummary>(response)
+    }
+
+    suspend fun fetchBlueprintChildren(
+        courseCode: String,
+        accessToken: String,
+    ): List<BlueprintChildRow> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/blueprint/children",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<BlueprintChildrenResponse>(body).children.orEmpty()
+    }
+
+    suspend fun postBlueprintChildLink(
+        courseCode: String,
+        childCourseCode: String,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/blueprint/children",
+            method = "POST",
+            body = json.encodeToString(BlueprintLinkChildRequest(childCourseCode)),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+    }
+
+    suspend fun deleteBlueprintChildLink(
+        courseCode: String,
+        childCourseCode: String,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/blueprint/children/${encodePath(childCourseCode)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+    }
+
+    suspend fun postBlueprintPush(
+        courseCode: String,
+        accessToken: String,
+    ): BlueprintPushResult = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/blueprint/push",
+            method = "POST",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<BlueprintPushResult>(body)
+    }
+
+    suspend fun fetchBlueprintSyncLogs(
+        courseCode: String,
+        accessToken: String,
+    ): List<BlueprintSyncLogRow> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/blueprint/sync-logs",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<BlueprintSyncLogsResponse>(body).logs.orEmpty()
+    }
+
+    suspend fun fetchBlueprintPayload(
+        courseCode: String,
+        accessToken: String,
+    ): BlueprintCachedPayload = withContext(Dispatchers.IO) {
+        BlueprintCachedPayload(
+            children = fetchBlueprintChildren(courseCode, accessToken),
+            syncLogs = fetchBlueprintSyncLogs(courseCode, accessToken),
+        )
     }
 
     suspend fun saveCourseHeroImage(

@@ -2,6 +2,13 @@
 
 > Implementation plan. Source: web market-readiness scan (2026-07-06).
 
+## Implementation notes (2026-07)
+
+- **Zero native dialogs** in `clients/web/src/pages/**` and `clients/web/src/components/**`; errors use `toastMutationError` / `toast` (sonner); destructive gates use `ConfirmDialog` via `useConfirm()` or inline state.
+- **New infra:** `components/use-confirm.tsx` (promise-based confirm), `components/input-dialog.tsx` + `usePrompt()` for text input; lint rule `lextures-i18n/no-native-dialogs` in `.oxlintrc.json`.
+- **i18n:** ~80 new `common` namespace keys (`dialogs.*`, `grading.*`, `admin.*`, etc.) with parity in `en`/`es`/`fr`/`ar`.
+- **Tests:** Vitest for `ConfirmDialog`, `InputDialog`, `useConfirm`, and toast error path.
+
 ## Metadata
 
 | Field | Value |
@@ -10,7 +17,7 @@
 | **Section** | Web / UX Consistency & Accessibility |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Frontend platform team |
 | **Depends on** | none |

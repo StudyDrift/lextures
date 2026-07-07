@@ -223,6 +223,8 @@ export function useGraderAgentWorkflow({
   const canvasSyncAbortRef = useRef<(() => void) | null>(null)
   const canvasSyncedSubmissionIdsRef = useRef<Set<string>>(new Set())
   const lastRunProgressLogRef = useRef<string | null>(null)
+  const onAppliedRef = useRef(onApplied)
+  onAppliedRef.current = onApplied
 
   const { libraryRubrics, setLibraryRubricAvailability } = useRubricLibraryRubrics(graph)
   const validationOptions = useMemo(
@@ -462,7 +464,7 @@ export function useGraderAgentWorkflow({
           gradePayload: canvasPayloadFromSubmissionGrade(grade),
           onComplete: () => {
             finishAppliedSubmission(submissionId)
-            onApplied?.()
+            onAppliedRef.current?.()
           },
           onError: (message) => {
             finishAppliedSubmission(submissionId)
@@ -482,7 +484,7 @@ export function useGraderAgentWorkflow({
         )
       }
     },
-    [addSyncingSubmission, appendRunLog, canvasLink, courseCode, finishAppliedSubmission, itemId, onApplied],
+    [addSyncingSubmission, appendRunLog, canvasLink, courseCode, finishAppliedSubmission, itemId],
   )
 
   const processRunStatus = useCallback(
@@ -583,6 +585,9 @@ export function useGraderAgentWorkflow({
     [appendRunLog, lastRunMode, resetBatchNodeExecution, syncAppliedResultToCanvas, t],
   )
 
+  const processRunStatusRef = useRef(processRunStatus)
+  processRunStatusRef.current = processRunStatus
+
   useEffect(() => {
     if (!open || !runId) return
     let cancelled = false
@@ -593,14 +598,14 @@ export function useGraderAgentWorkflow({
       if (finalized) return
       finalized = true
       if (timer !== undefined) window.clearInterval(timer)
-      onApplied?.()
+      onAppliedRef.current?.()
     }
 
     const poll = async () => {
       try {
         const run = await fetchGraderAgentRun(courseCode, itemId, runId)
         if (cancelled) return
-        const finished = await processRunStatus(run)
+        const finished = await processRunStatusRef.current(run)
         if (finished) finalize()
       } catch {
         if (!cancelled) {
@@ -617,7 +622,7 @@ export function useGraderAgentWorkflow({
       cancelled = true
       if (timer !== undefined) window.clearInterval(timer)
     }
-  }, [open, runId, courseCode, itemId, processRunStatus, appendRunLog, t, onApplied])
+  }, [open, runId, courseCode, itemId, appendRunLog, t])
 
   const updateGraph = useCallback((next: GraderWorkflowGraph) => {
     setGraph(next)
@@ -766,8 +771,8 @@ export function useGraderAgentWorkflow({
       failed: run.failedCount,
       total: run.totalCount,
     })
-    onApplied?.()
-  }, [courseCode, itemId, onApplied, runId])
+    onAppliedRef.current?.()
+  }, [courseCode, itemId, runId])
 
   const updateNodeLabel = useCallback((nodeId: string, label: string | null) => {
     setGraph((prev) => {
@@ -912,7 +917,7 @@ export function useGraderAgentWorkflow({
     canvasSyncAbortRef.current = null
     try {
       await putSubmissionGrade(courseCode, itemId, submissionId, built.gradeBody)
-      onApplied?.()
+      onAppliedRef.current?.()
       let startedCanvasSync = false
       if (canvasLink) {
         const syncHandle = queueCanvasGradeSync({
@@ -924,7 +929,7 @@ export function useGraderAgentWorkflow({
           onComplete: () => {
             finishAppliedSubmission(submissionId)
             setStatusMessage('Grade applied and synced to Canvas.')
-            onApplied?.()
+            onAppliedRef.current?.()
           },
           onError: (message) => {
             finishAppliedSubmission(submissionId)

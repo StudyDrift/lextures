@@ -53,6 +53,10 @@ data class CourseSummary(
     val collabDocsEnabled: Boolean? = null,
     val viewerEnrollmentInvitationPending: Boolean? = null,
     val viewerPendingEnrollmentId: String? = null,
+    val isBlueprint: Boolean? = null,
+    val blueprintParentId: String? = null,
+    val blueprintParentCourseCode: String? = null,
+    val blueprintLastSyncAt: String? = null,
 ) {
     /**
      * True when the viewer has an unaccepted enrollment invitation for this course. The
@@ -122,6 +126,44 @@ data class CourseStructureItem(
 @Serializable
 data class CourseStructureResponse(
     val items: List<CourseStructureItem> = emptyList(),
+)
+
+@Serializable
+data class BlueprintChildRow(
+    val courseCode: String,
+    val title: String,
+    val lastSyncAt: String? = null,
+)
+
+@Serializable
+data class BlueprintPushDetailRow(
+    val courseCode: String? = null,
+    val ok: Boolean? = null,
+    val error: String? = null,
+)
+
+@Serializable
+data class BlueprintPushResult(
+    val childrenTotal: Int,
+    val childrenSuccess: Int,
+    val childrenError: Int,
+    val detail: List<BlueprintPushDetailRow> = emptyList(),
+)
+
+@Serializable
+data class BlueprintSyncLogRow(
+    val id: String,
+    val triggeredBy: String,
+    val triggeredAt: String,
+    val childrenTotal: Int,
+    val childrenSuccess: Int,
+    val childrenError: Int,
+)
+
+@Serializable
+data class BlueprintCachedPayload(
+    val children: List<BlueprintChildRow> = emptyList(),
+    val syncLogs: List<BlueprintSyncLogRow> = emptyList(),
 )
 
 /**

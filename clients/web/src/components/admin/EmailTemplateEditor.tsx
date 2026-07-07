@@ -2,7 +2,9 @@ import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { InputDialog } from '../input-dialog'
 
 type EmailTemplateEditorProps = {
   value: string
@@ -19,6 +21,9 @@ export function EmailTemplateEditor({
   disabled = false,
   placeholder = 'Edit email body…',
 }: EmailTemplateEditorProps) {
+  const { t } = useTranslation('common')
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: false, codeBlock: false, blockquote: false }),
@@ -52,6 +57,7 @@ export function EmailTemplateEditor({
   }, [editor, onInsertReady])
 
   return (
+    <>
     <div className="rounded-xl border border-slate-200 dark:border-neutral-700">
       <div className="flex flex-wrap gap-1 border-b border-slate-200 p-2 dark:border-neutral-700">
         <button
@@ -74,9 +80,9 @@ export function EmailTemplateEditor({
           type="button"
           disabled={disabled}
           onClick={() => {
-            const url = window.prompt('Link URL')
-            if (!url) return
-            editor?.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+            const prev = editor?.getAttributes('link').href as string | undefined
+            setLinkUrl(prev ?? '')
+            setLinkDialogOpen(true)
           }}
           className="rounded px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
         >
@@ -91,6 +97,23 @@ export function EmailTemplateEditor({
         Type <code className="rounded bg-slate-100 px-1 dark:bg-neutral-800">{'{{'}</code> or use merge-field buttons.
       </div>
     </div>
+    <InputDialog
+      open={linkDialogOpen}
+      title={t('dialogs.linkUrl.title')}
+      label={t('dialogs.linkUrl.label')}
+      placeholder={t('dialogs.linkUrl.placeholder')}
+      value={linkUrl}
+      onValueChange={setLinkUrl}
+      onConfirm={(url) => {
+        const trimmed = url.trim()
+        if (trimmed) {
+          editor?.chain().focus().extendMarkRange('link').setLink({ href: trimmed }).run()
+        }
+        setLinkDialogOpen(false)
+      }}
+      onClose={() => setLinkDialogOpen(false)}
+    />
+    </>
   )
 }
 

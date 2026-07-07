@@ -3,6 +3,14 @@ module github.com/lextures/lextures/clients/cli
 go 1.26.3
 
 require (
+	github.com/coder/websocket v1.8.15
+	github.com/spf13/cobra v1.10.2
+	github.com/spf13/viper v1.19.0
+	github.com/zalando/go-keyring v0.2.8
+	gopkg.in/yaml.v3 v3.0.1
+)
+
+require (
 	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/godbus/dbus/v5 v5.2.2 // indirect
@@ -16,17 +24,12 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/spf13/viper v1.19.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/zalando/go-keyring v0.2.8 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/sys v0.44.0 // indirect
-	golang.org/x/term v0.43.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { KeyRound, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { useConfirm } from '../use-confirm'
 import {
   AccessKeyCreatedModal,
   CreateAccessKeyModal,
@@ -49,6 +51,8 @@ function courseSummary(key: AccessKey): string {
 }
 
 export function IntegrationsAccessKeysPanel() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
   const [createdKey, setCreatedKey] = useState<CreateAccessKeyResult | null>(null)
@@ -88,7 +92,7 @@ export function IntegrationsAccessKeysPanel() {
   }
 
   async function rotate(id: string) {
-    if (!globalThis.confirm('Rotate this access key? The current key stays valid for 24 hours, then stops working.')) return
+    if (!(await confirm({ title: t('accessKeys.rotate.title'), variant: 'danger' }))) return
     setError(null)
     try {
       const res = await authorizedFetch(`/api/v1/me/access-keys/${encodeURIComponent(id)}/rotate`, {
@@ -115,7 +119,7 @@ export function IntegrationsAccessKeysPanel() {
   }
 
   async function revoke(id: string) {
-    if (!globalThis.confirm('Revoke this access key? Tools using it will stop working immediately.')) return
+    if (!(await confirm({ title: t('accessKeys.revoke.title'), variant: 'danger' }))) return
     setError(null)
     try {
       const res = await authorizedFetch(`/api/v1/me/access-keys/${encodeURIComponent(id)}`, {
@@ -269,6 +273,7 @@ export function IntegrationsAccessKeysPanel() {
         label={createdKey?.label ?? null}
         onClose={() => setCreatedKey(null)}
       />
+      {ConfirmDialogHost}
     </section>
   )
 }

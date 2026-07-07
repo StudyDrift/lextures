@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
+import { useConfirm } from '../../components/use-confirm'
 import { EmailTemplateEditor, MergeFieldButton } from '../../components/admin/EmailTemplateEditor'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
@@ -14,8 +16,11 @@ import {
   type EmailTemplateSlot,
   type EmailTemplateVersion,
 } from '../../lib/email-templates-api'
+import { toastMutationError } from '../../lib/lms-toast'
 
 export default function AdminEmailTemplatesPage() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const titleId = useId()
   const previewLiveId = useId()
   const [searchParams] = useSearchParams()
@@ -124,25 +129,25 @@ export default function AdminEmailTemplatesPage() {
 
   const onReset = async () => {
     if (!orgId || !selectedSlotId) return
-    if (!window.confirm('Reset this template to the system default? Custom versions stay in history.')) return
+    if (!(await confirm({ title: t('admin.resetEmailTemplate.title'), variant: 'danger' }))) return
     try {
       await resetEmailTemplate(orgId, selectedSlotId)
       setMessage('Template reset to default.')
       await loadSlot()
       await loadSlots()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to reset template')
+      toastMutationError(e instanceof Error ? e.message : 'Failed to reset template')
     }
   }
 
   const onTest = async () => {
     if (!orgId || !selectedSlotId) return
-    if (!window.confirm('Send a test email to your own address?')) return
+    if (!(await confirm({ title: t('admin.sendTestEmail.title') }))) return
     try {
       await sendEmailTemplateTest(orgId, selectedSlotId)
       setMessage('Test email queued.')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to send test email')
+      toastMutationError(e instanceof Error ? e.message : 'Failed to send test email')
     }
   }
 
@@ -341,6 +346,7 @@ export default function AdminEmailTemplatesPage() {
           />
         </section>
       </div>
+      {ConfirmDialogHost}
     </div>
   )
 }

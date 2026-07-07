@@ -142,6 +142,31 @@ describe('useGraderAgentWorkflow — polling robustness', () => {
     expect(onApplied).toHaveBeenCalledTimes(1)
   })
 
+  it('finishes batch run when onApplied identity changes every render', async () => {
+    vi.mocked(fetchGraderAgentRun)
+      .mockResolvedValueOnce(makeRunStatus('running', 1, 2))
+      .mockResolvedValue(makeRunStatus('done', 2, 2))
+
+    const { result, rerender } = renderHook(
+      ({ appliedCb }) => useGraderAgentWorkflow(defaultArgs({ onApplied: appliedCb })),
+      { initialProps: { appliedCb: vi.fn() } },
+    )
+
+    vi.useFakeTimers()
+    try {
+      await startRun(result)
+      rerender({ appliedCb: vi.fn() })
+      rerender({ appliedCb: vi.fn() })
+      await act(async () => {
+        vi.advanceTimersByTime(1500)
+      })
+    } finally {
+      vi.useRealTimers()
+    }
+
+    await waitFor(() => expect(result.current.batchRunning).toBe(false))
+  })
+
   it('calls onApplied exactly once when two concurrent polls both see terminal status (FR-3, FR-5)', async () => {
     const onApplied = vi.fn()
 

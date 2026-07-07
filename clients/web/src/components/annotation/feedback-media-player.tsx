@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { authorizedFetch } from '../../lib/api'
 import type { SubmissionFeedbackMediaApi } from '../../lib/courses-api'
 import { deleteSubmissionFeedbackMedia, getSubmissionFeedbackPlaybackInfo } from '../../lib/courses-api'
+import { toastMutationError } from '../../lib/lms-toast'
+import { useConfirm } from '../use-confirm'
 
 function FeedbackMediaItem({
   courseCode,
@@ -18,6 +21,8 @@ function FeedbackMediaItem({
   readOnly: boolean
   onDeleted?: () => void
 }) {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const [mediaUrl, setMediaUrl] = useState<string | null>(null)
   const [trackUrl, setTrackUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -83,12 +88,20 @@ function FeedbackMediaItem({
   }
 
   async function onDelete() {
-    if (!window.confirm('Delete this media feedback?')) return
+    if (
+      !(await confirm({
+        title: t('grading.deleteMedia.title'),
+        confirmLabel: t('dialogs.delete'),
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
     try {
       await deleteSubmissionFeedbackMedia(courseCode, itemId, submissionId, media.id)
       onDeleted?.()
     } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Could not delete.')
+      toastMutationError(e instanceof Error ? e.message : t('grading.deleteFailed'))
     }
   }
 
@@ -114,6 +127,8 @@ function FeedbackMediaItem({
     )
 
   return (
+    <>
+    {ConfirmDialogHost}
     <div
       className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-neutral-600 dark:bg-neutral-900/60"
       onKeyDown={onKeyDown}
@@ -155,6 +170,7 @@ function FeedbackMediaItem({
         Keyboard: Space play/pause · ←/→ seek · M mute
       </p>
     </div>
+    </>
   )
 }
 

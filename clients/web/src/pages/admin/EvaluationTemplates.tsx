@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useConfirm } from '../../components/use-confirm'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   createEvaluationTemplate,
@@ -8,6 +10,7 @@ import {
   type EvaluationQuestion,
   type EvaluationTemplate,
 } from '../../lib/course-evaluations-api'
+import { toastMutationError } from '../../lib/lms-toast'
 
 const QUESTION_TYPES: { value: EvaluationQuestion['type']; label: string }[] = [
   { value: 'rating', label: 'Rating scale (1–5)' },
@@ -207,6 +210,8 @@ function TemplateForm({
 }
 
 export default function EvaluationTemplates() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { ffCourseEvaluations, loading: featuresLoading } = usePlatformFeatures()
   const [templates, setTemplates] = useState<EvaluationTemplate[]>([])
   const [loading, setLoading] = useState(true)
@@ -250,12 +255,12 @@ export default function EvaluationTemplates() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this template? This cannot be undone.')) return
+    if (!(await confirm({ title: t('admin.deleteEvaluationTemplate.title'), variant: 'danger' }))) return
     try {
       await deleteEvaluationTemplate(id)
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete template.')
+      toastMutationError(err instanceof Error ? err.message : 'Failed to delete template.')
     }
   }
 
@@ -270,6 +275,7 @@ export default function EvaluationTemplates() {
           onSave={handleSave}
           onCancel={() => setEditing(null)}
         />
+        {ConfirmDialogHost}
       </main>
     )
   }
@@ -334,6 +340,7 @@ export default function EvaluationTemplates() {
           ))}
         </ul>
       )}
+      {ConfirmDialogHost}
     </main>
   )
 }

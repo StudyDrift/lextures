@@ -120,6 +120,7 @@
       "rules": {
         "lextures-i18n/no-physical-tailwind": "warn",
         "lextures-i18n/bare-animate-guard": "warn",
+        "lextures-i18n/no-native-dialogs": "error",
         "jsx-a11y/aria-props": "error",
         "jsx-a11y/aria-proptypes": "error",
         "jsx-a11y/aria-role": "error",

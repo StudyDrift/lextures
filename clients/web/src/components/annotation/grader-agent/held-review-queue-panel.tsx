@@ -6,6 +6,8 @@ import {
   putSubmissionGrade,
   type GraderAgentReviewQueueItem,
 } from '../../../lib/courses-api'
+import { usePrompt } from '../../use-prompt'
+import { useConfirm } from '../../use-confirm'
 
 type HeldReviewQueuePanelProps = {
   courseCode: string
@@ -25,6 +27,8 @@ export function HeldReviewQueuePanel({
   onOpenSubmission,
 }: HeldReviewQueuePanelProps) {
   const { t } = useTranslation('common')
+  const { prompt, InputDialogHost } = usePrompt()
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const [busyId, setBusyId] = useState<string | null>(null)
   const [bulkBusy, setBulkBusy] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -123,7 +127,9 @@ export function HeldReviewQueuePanel({
   }
 
   const reject = async (item: GraderAgentReviewQueueItem) => {
-    const reason = window.prompt(t('gradingAgent.review.queue.rejectPrompt'))
+    const reason = await prompt({
+      title: t('gradingAgent.review.queue.rejectPrompt'),
+    })
     if (reason == null) return
     setBusyId(item.id)
     setError(null)
@@ -149,7 +155,9 @@ export function HeldReviewQueuePanel({
 
   const runBulk = async (action: 'approve_all' | 'approve' | 'reject', opts?: { minConfidence?: number }) => {
     if (action === 'approve_all') {
-      const confirmed = window.confirm(t('gradingAgent.review.bulk.confirmApproveAll', { count: held.length }))
+      const confirmed = await confirm({
+        title: t('gradingAgent.review.bulk.confirmApproveAll', { count: held.length }),
+      })
       if (!confirmed) return
     }
     setBulkBusy(true)
@@ -200,6 +208,9 @@ export function HeldReviewQueuePanel({
   }
 
   return (
+    <>
+    {InputDialogHost}
+    {ConfirmDialogHost}
     <section
       className="rounded-xl border border-slate-300 bg-slate-50/70 p-4 dark:border-neutral-600 dark:bg-neutral-900/40"
       aria-label={t('gradingAgent.review.queue.title')}
@@ -413,5 +424,6 @@ export function HeldReviewQueuePanel({
         })}
       </ul>
     </section>
+    </>
   )
 }

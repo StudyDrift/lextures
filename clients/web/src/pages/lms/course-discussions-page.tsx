@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Lock, MessageCircle, Pin, Plus, ThumbsUp, Trash2 } from 'lucide-react'
 import { DiscussionDocEditor, DiscussionReadonlyBody } from '../../components/discussions/discussion-doc-editor'
@@ -22,6 +23,8 @@ import {
   type DiscussionThreadDetail,
   type DiscussionThreadSummary,
 } from '../../lib/discussions-api'
+import { useConfirm } from '../../components/use-confirm'
+import { usePrompt } from '../../components/use-prompt'
 import { LmsPage } from './lms-page'
 
 function nestPosts(posts: DiscussionPost[]): DiscussionPost[] {
@@ -48,6 +51,9 @@ function nestPosts(posts: DiscussionPost[]): DiscussionPost[] {
 }
 
 export default function CourseDiscussionsPage() {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
+  const { prompt, InputDialogHost } = usePrompt()
   const { courseCode: rawCode } = useParams<{ courseCode: string }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
   const { allows, loading: permLoading } = usePermissions()
@@ -162,6 +168,53 @@ export default function CourseDiscussionsPage() {
       return d
     },
     [posts],
+  )
+
+  const handleCreateThread = useCallback(async () => {
+    if (!forumId) return
+    const title = await prompt({
+      title: t('dialogs.threadTitle.title'),
+      label: t('dialogs.threadTitle.label'),
+    })
+    if (!title?.trim()) return
+    setBusy(true)
+    try {
+      const thread = await createDiscussionThread(courseCode, forumId, {
+        title: title.trim(),
+        body: emptyTipTapDoc,
+      })
+      await loadThread(thread.id)
+      const list = await fetchDiscussionThreads(courseCode, forumId)
+      setThreads(list)
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Could not create thread.')
+    } finally {
+      setBusy(false)
+    }
+  }, [courseCode, forumId, loadThread, prompt, t])
+
+  const handleDeletePost = useCallback(
+    async (postId: string) => {
+      if (
+        !(await confirm({
+          title: t('discussions.deletePost.title'),
+          variant: 'danger',
+          confirmLabel: t('dialogs.delete'),
+        }))
+      ) {
+        return
+      }
+      setBusy(true)
+      try {
+        await deleteDiscussionPost(courseCode, postId)
+        if (threadDetail) await loadThread(threadDetail.id)
+      } catch (e) {
+        setMsg(e instanceof Error ? e.message : 'Could not delete.')
+      } finally {
+        setBusy(false)
+      }
+    },
+    [confirm, courseCode, loadThread, t, threadDetail],
   )
 
   if (!courseCode) {
@@ -287,26 +340,7 @@ export default function CourseDiscussionsPage() {
                   type="button"
                   disabled={!forumId || busy}
                   className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
-                  onClick={() => {
-                    const title = window.prompt('Thread title')
-                    if (!title?.trim() || !forumId) return
-                    void (async () => {
-                      setBusy(true)
-                      try {
-                        const t = await createDiscussionThread(courseCode, forumId, {
-                          title: title.trim(),
-                          body: emptyTipTapDoc,
-                        })
-                        await loadThread(t.id)
-                        const list = await fetchDiscussionThreads(courseCode, forumId)
-                        setThreads(list)
-                      } catch (e) {
-                        setMsg(e instanceof Error ? e.message : 'Could not create thread.')
-                      } finally {
-                        setBusy(false)
-                      }
-                    })()
-                  }}
+                  onClick={() => void handleCreateThread()}
                 >
                   <Plus className="h-4 w-4" aria-hidden />
                   New thread
@@ -496,18 +530,7 @@ export default function CourseDiscussionsPage() {
                           <button
                             type="button"
                             className="inline-flex items-center gap-1 text-rose-600 hover:underline dark:text-rose-400"
-                            onClick={async () => {
-                              if (!window.confirm('Delete this post and its replies?')) return
-                              setBusy(true)
-                              try {
-                                await deleteDiscussionPost(courseCode, p.id)
-                                if (threadDetail) await loadThread(threadDetail.id)
-                              } catch (e) {
-                                setMsg(e instanceof Error ? e.message : 'Could not delete.')
-                              } finally {
-                                setBusy(false)
-                              }
-                            }}
+                            onClick={() => void handleDeletePost(p.id)}
                           >
                             <Trash2 className="h-3.5 w-3.5" aria-hidden />
                             Delete
@@ -581,6 +604,8 @@ export default function CourseDiscussionsPage() {
           )}
         </div>
       </div>
+      {ConfirmDialogHost}
+      {InputDialogHost}
     </LmsPage>
   )
 }

@@ -66,8 +66,8 @@ that can be driven from a terminal gets a command group, including student-facin
 |---|---|---|---|---|
 | C06 | [Gradebook & final grades (expand)](C06-gradebook-final-grades.md) | BLOCKER | PARTIAL | M |
 | C07 | [Outcomes, standards & SBG report cards](C07-outcomes-standards-sbg.md) | MAJOR | MISSING | M |
-| C08 | [Peer review, evaluations & surveys](C08-peer-review-evaluations-surveys.md) | MINOR | MISSING | M |
-| C09 | [AI grading agents](C09-ai-grading-agents.md) | MAJOR | MISSING | M |
+| C08 | [Peer review, evaluations & surveys](../completed/cli/C08-peer-review-evaluations-surveys.md) | MINOR | COMPLETE | M |
+| C09 | [AI grading agents](../completed/cli/C09-ai-grading-agents.md) | MAJOR | COMPLETE | M |
 | C10 | [Plagiarism & originality](C10-plagiarism-originality.md) | MAJOR | MISSING | S |
 
 ### C. Roster & classroom
