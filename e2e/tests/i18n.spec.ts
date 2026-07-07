@@ -88,7 +88,7 @@ test.describe('i18n — Arabic RTL (plan W01 AC-2)', () => {
 })
 
 test.describe('i18n — first-wave namespaces (plan W01)', () => {
-  test('checkout cancel page renders Spanish billing copy', async ({ page }) => {
+  test('checkout cancel page renders Spanish billing copy', async ({ authedPage: page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('lextures.locale', 'es')
     })
