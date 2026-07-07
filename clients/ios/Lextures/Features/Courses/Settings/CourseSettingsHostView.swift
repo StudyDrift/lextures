@@ -103,6 +103,8 @@ struct CourseSettingsHostView: View {
             CourseImportExportView(course: course)
         case .blueprint:
             CourseBlueprintSettingsView(course: course, onCourseUpdated: onCourseUpdated)
+        case .archive:
+            CourseArchivedContentView(course: course)
         default:
             CourseSettingsPlaceholderView(section: selectedSection)
         }

@@ -1,6 +1,14 @@
 # W04 — Report-Card AI Comment: Attendance Wiring (Bug)
 
-> Implementation plan. Source: web market-readiness scan (2026-07-06). Related: [docs/completed/13-k12-specific/13.4-report-cards.md](../../completed/13-k12-specific/13.4-report-cards.md).
+> Implementation plan. Source: web market-readiness scan (2026-07-06). Related: [docs/completed/13-k12-specific/13.4-report-cards.md](../13-k12-specific/13.4-report-cards.md).
+
+## Implementation notes (2026-07)
+
+- **Server:** `GET /api/v1/courses/:code/report-cards/:period` now includes optional `absences` per card when attendance is enabled, the grading period resolves to calendar dates, and at least one attendance record exists in range. Counts combine section-based (`attendance_records`) and session-based (`attendance_session_records`) data.
+- **Grading period dates:** `reportcards.ResolveGradingPeriodDateRange` prefers an org term name match, then parses `Q1-2026` / `S1-2026` labels.
+- **AI endpoint:** `POST /api/v1/ai/report-card-comment` accepts optional `absences`; when omitted the prompt explicitly avoids attendance claims.
+- **Client:** `absencesForAIComment()` in `report-cards-api.ts` reads the batched card payload; `fetchAICommentSuggestion` omits `absences` from the JSON body when unknown.
+- **Tests:** Vitest (`report-cards-api.test.ts`), Go unit tests (`grading_period_test.go`), Playwright (`report-cards.spec.ts` AI payload).
 
 ## Metadata
 
@@ -10,7 +18,7 @@
 | **Section** | Web / K-12 Specific (bug fix) |
 | **Severity** | MINOR |
 | **Markets** | K12 |
-| **Status (today)** | PARTIAL |
+| **Status (today)** | DONE |
 | **Estimated effort** | XS (≤1d) |
 | **Owner (proposed)** | K-12 pod |
 | **Depends on** | 13.2 (attendance), 13.4 (report cards) |
@@ -140,11 +148,11 @@ comments the teacher may not catch before releasing to families.
 ## 18. Open Questions
 
 1. Include *tardies* as well as absences in the comment input?
-2. Enrich the card payload with `absences` server-side vs. a separate client fetch?
+2. Enrich the card payload with `absences` server-side vs. a separate client fetch? **Resolved:** server-side batch on list endpoint.
 
 ## 19. References
 
-- `clients/web/src/pages/lms/CourseReportCards.tsx:227` (`const absences = 0 // TODO: wire from attendance summary`).
-- Related plans: [13.4](../../completed/13-k12-specific/13.4-report-cards.md),
-  [13.2](../../completed/13-k12-specific/13.2-daily-attendance.md),
+- `clients/web/src/pages/lms/CourseReportCards.tsx` (removed hardcoded absences).
+- Related plans: [13.4](../13-k12-specific/13.4-report-cards.md),
+  [13.2](../13-k12-specific/13.2-daily-attendance.md),
   [W02](W02-parent-guardian-portal-completeness.md).

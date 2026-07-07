@@ -1,8 +1,12 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -16,6 +20,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
 	prrepo "github.com/lextures/lextures/server/internal/repos/peerreview"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	"github.com/lextures/lextures/server/internal/repos/user"
 	peerreviewsvc "github.com/lextures/lextures/server/internal/service/peerreview"
 )
 
@@ -29,6 +34,43 @@ func (d Deps) peerReviewFeatureOff(w http.ResponseWriter) bool {
 
 func (d Deps) peerReviewService() peerreviewsvc.Service {
 	return peerreviewsvc.New(d.Pool)
+}
+
+func (d Deps) reviewerLabelsByEnrollmentIDs(ctx context.Context, enrollmentIDs []uuid.UUID) ([]string, error) {
+	if len(enrollmentIDs) == 0 || d.Pool == nil {
+		return nil, nil
+	}
+	rows, err := d.Pool.Query(ctx, `
+SELECT ce.id, COALESCE(NULLIF(TRIM(u.display_name), ''), u.email) AS display_label
+FROM course.course_enrollments ce
+INNER JOIN "user".users u ON u.id = ce.user_id
+WHERE ce.id = ANY($1)
+`, enrollmentIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	labelsByEnrollment := make(map[uuid.UUID]string, len(enrollmentIDs))
+	for rows.Next() {
+		var eid uuid.UUID
+		var label string
+		if err := rows.Scan(&eid, &label); err != nil {
+			return nil, err
+		}
+		labelsByEnrollment[eid] = strings.TrimSpace(label)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(enrollmentIDs))
+	for _, eid := range enrollmentIDs {
+		label := labelsByEnrollment[eid]
+		if label == "" {
+			label = "Unknown reviewer"
+		}
+		out = append(out, label)
+	}
+	return out, nil
 }
 
 func blindLabelRank(id uuid.UUID) int {
@@ -522,30 +564,85 @@ func (d Deps) handleGetPeerReviewSummary() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to build summary.")
 			return
 		}
+		anon := cfg.Anonymity != peerreview.AnonymityNamed
+		studentIDs := make([]uuid.UUID, 0, len(summary.SubmissionSummaries))
+		for _, s := range summary.SubmissionSummaries {
+			studentIDs = append(studentIDs, s.StudentUserID)
+		}
+		studentNames := map[uuid.UUID]string{}
+		if !anon && len(studentIDs) > 0 {
+			studentNames, err = user.DisplayLabelsByIDs(r.Context(), d.Pool, studentIDs)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to resolve student names.")
+				return
+			}
+		}
+		sortedSubs := append([]peerreviewsvc.SubmissionSummary(nil), summary.SubmissionSummaries...)
+		sort.Slice(sortedSubs, func(i, j int) bool {
+			return sortedSubs[i].SubmissionID.String() < sortedSubs[j].SubmissionID.String()
+		})
+		blindRanks := make(map[uuid.UUID]int, len(sortedSubs))
+		for i, s := range sortedSubs {
+			blindRanks[s.SubmissionID] = i + 1
+		}
 		students := make([]map[string]any, 0, len(summary.SubmissionSummaries))
 		for _, s := range summary.SubmissionSummaries {
+			var studentLabel string
+			if anon {
+				studentLabel = gradingredaction.BlindStudentLabel(blindRanks[s.SubmissionID])
+			} else {
+				studentLabel = strings.TrimSpace(studentNames[s.StudentUserID])
+				if studentLabel == "" {
+					studentLabel = "Unknown student"
+				}
+			}
 			students = append(students, map[string]any{
 				"submissionId":  s.SubmissionID.String(),
 				"studentUserId": s.StudentUserID.String(),
+				"studentLabel":  studentLabel,
 				"peerAggregate": s.PeerAggregate,
 				"reviewCount":   s.ReviewCount,
 			})
 		}
 		incomplete := make([]string, 0, len(summary.IncompleteReviewers))
-		for _, id := range summary.IncompleteReviewers {
+		incompleteLabels := make([]string, 0, len(summary.IncompleteReviewers))
+		for i, id := range summary.IncompleteReviewers {
 			incomplete = append(incomplete, id.String())
+			if anon {
+				incompleteLabels = append(incompleteLabels, fmt.Sprintf("Reviewer %d", i+1))
+			}
+		}
+		if !anon && len(summary.IncompleteReviewers) > 0 {
+			incompleteLabels, err = d.reviewerLabelsByEnrollmentIDs(r.Context(), summary.IncompleteReviewers)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to resolve reviewer names.")
+				return
+			}
 		}
 		outliers := make([]string, 0, len(summary.OutlierReviewers))
-		for _, id := range summary.OutlierReviewers {
+		outlierLabels := make([]string, 0, len(summary.OutlierReviewers))
+		for i, id := range summary.OutlierReviewers {
 			outliers = append(outliers, id.String())
+			if anon {
+				outlierLabels = append(outlierLabels, fmt.Sprintf("Reviewer %d", i+1))
+			}
+		}
+		if !anon && len(summary.OutlierReviewers) > 0 {
+			outlierLabels, err = d.reviewerLabelsByEnrollmentIDs(r.Context(), summary.OutlierReviewers)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to resolve reviewer names.")
+				return
+			}
 		}
 		writeJSON(w, http.StatusOK, map[string]any{
-			"config":              peerReviewConfigToJSON(cfg),
-			"totalAllocations":    summary.TotalAllocations,
-			"completedReviews":    summary.CompletedReviews,
-			"incompleteReviewers": incomplete,
-			"outlierReviewers":    outliers,
-			"submissions":         students,
+			"config":                   peerReviewConfigToJSON(cfg),
+			"totalAllocations":         summary.TotalAllocations,
+			"completedReviews":         summary.CompletedReviews,
+			"incompleteReviewers":      incomplete,
+			"incompleteReviewerLabels": incompleteLabels,
+			"outlierReviewers":         outliers,
+			"outlierReviewerLabels":    outlierLabels,
+			"submissions":              students,
 		})
 	}
 }

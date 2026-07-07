@@ -1,4 +1,4 @@
-.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-test-ios android ios server web cli www
+.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-build-ios-test mobile-test-ios mobile-test-ios-fast ios-xcodebuild android ios server web cli www
 
 # Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
 LINT_APPS := server web cli www
@@ -43,31 +43,78 @@ mobile-test-android:
 mobile-lint-ios:
 	cd clients/ios && swiftlint lint
 
+# iOS xcodebuild tuning (optional env overrides):
+#   IOS_DERIVED_DATA_PATH=.cache/DerivedData  — reuse compile artifacts (default)
+#   IOS_SIMULATOR="iPhone 17"                 — force a simulator (else booted, then 17 → 17 Pro → 16 → 15)
+#   IOS_TEST_JOBS=4                           — cap concurrent compile tasks
+#   IOS_TEST_PARALLEL=NO                      — disable parallel XCTest workers (lower RAM)
+#   IOS_TEST_PARALLEL=2                       — cap parallel XCTest workers
+#   IOS_ONLY_TESTING=LexturesTests/QuizLogicTests — run one test class
+IOS_DERIVED_DATA_PATH ?= .cache/DerivedData
+IOS_SIMULATOR ?=
+IOS_TEST_JOBS ?=
+IOS_TEST_PARALLEL ?=
+IOS_ONLY_TESTING ?=
+
+mobile-build-ios-test:
+	@$(MAKE) ios-xcodebuild ACTION=build-for-testing
+
+mobile-test-ios-fast:
+	@$(MAKE) ios-xcodebuild ACTION=test-without-building
+
 mobile-test-ios:
+	@$(MAKE) ios-xcodebuild ACTION=test
+
+ios-xcodebuild:
 	@set -e; \
 	dest=''; \
-	booted=$$(xcrun simctl list devices booted 2>/dev/null | grep -E '^\s+iPhone' | head -1 | sed -E 's/^[[:space:]]+([^()]+)[[:space:]]*\(.*/\1/' | xargs); \
-	if [ -n "$$booted" ]; then \
-		dest="platform=iOS Simulator,name=$$booted"; \
+	if [ -n "$(IOS_SIMULATOR)" ]; then \
+		dest="platform=iOS Simulator,name=$(IOS_SIMULATOR)"; \
 	else \
-		for sim in "iPhone 16" "iPhone 17" "iPhone 17 Pro" "iPhone 15"; do \
-			if xcrun simctl list devices available 2>/dev/null | grep -qF "    $$sim ("; then \
-				dest="platform=iOS Simulator,name=$$sim"; \
-				break; \
-			fi; \
-		done; \
+		booted=$$(xcrun simctl list devices booted 2>/dev/null | grep -E '^\s+iPhone' | head -1 | sed -E 's/^[[:space:]]+([^()]+)[[:space:]]*\(.*/\1/' | xargs); \
+		if [ -n "$$booted" ]; then \
+			dest="platform=iOS Simulator,name=$$booted"; \
+		else \
+			for sim in "iPhone 17" "iPhone 17 Pro" "iPhone 16" "iPhone 15"; do \
+				if xcrun simctl list devices available 2>/dev/null | grep -qF "    $$sim ("; then \
+					dest="platform=iOS Simulator,name=$$sim"; \
+					break; \
+				fi; \
+			done; \
+		fi; \
 	fi; \
 	if [ -z "$$dest" ]; then \
 		echo "No iOS Simulator found. Install one in Xcode → Settings → Platforms."; \
 		exit 1; \
 	fi; \
-	echo "==> iOS test ($$dest)"; \
-	cd clients/ios && xcodebuild test \
+	mkdir -p "$(IOS_DERIVED_DATA_PATH)"; \
+	parallel_args=''; \
+	if [ "$(IOS_TEST_PARALLEL)" = "NO" ]; then \
+		parallel_args='-parallel-testing-enabled NO'; \
+	elif [ -n "$(IOS_TEST_PARALLEL)" ]; then \
+		parallel_args="-maximum-parallel-testing-workers $(IOS_TEST_PARALLEL)"; \
+	fi; \
+	jobs_args=''; \
+	if [ -n "$(IOS_TEST_JOBS)" ]; then \
+		jobs_args="-jobs $(IOS_TEST_JOBS)"; \
+	fi; \
+	only_args=''; \
+	if [ -n "$(IOS_ONLY_TESTING)" ]; then \
+		only_args="-only-testing:$(IOS_ONLY_TESTING)"; \
+	fi; \
+	echo "==> iOS $(ACTION) ($$dest, derivedData=$(IOS_DERIVED_DATA_PATH))"; \
+	cd clients/ios && xcodebuild $(ACTION) \
 		-project Lextures.xcodeproj \
 		-scheme Lextures \
 		-destination "$$dest" \
 		-configuration Debug \
-		CODE_SIGNING_ALLOWED=NO
+		-derivedDataPath "$(CURDIR)/$(IOS_DERIVED_DATA_PATH)" \
+		$$jobs_args \
+		$$parallel_args \
+		$$only_args \
+		CODE_SIGNING_ALLOWED=NO \
+		COMPILER_INDEX_STORE_ENABLE=NO \
+		ONLY_ACTIVE_ARCH=YES
 
 lint-server:
 	$(MAKE) -C server lint

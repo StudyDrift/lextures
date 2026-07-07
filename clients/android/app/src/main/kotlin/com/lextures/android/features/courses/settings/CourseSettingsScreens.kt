@@ -110,6 +110,12 @@ fun CourseSettingsHostScreen(
                     permissions = permissions,
                     onCourseUpdated = onCourseUpdated,
                 )
+                CourseSettingsLogic.CourseSettingsSection.Archive -> CourseArchivedContentScreen(
+                    session = session,
+                    course = course,
+                    offline = offline,
+                    permissions = permissions,
+                )
                 else -> LmsEmptyState(
                     icon = Icons.Filled.Settings,
                     title = L.text(sectionLabelRes(selected)),

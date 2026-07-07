@@ -6,6 +6,7 @@ import {
   patchReportCard,
   releaseReportCards,
   fetchAICommentSuggestion,
+  absencesForAIComment,
   fetchCommentBank,
   type ReportCard,
   type CommentBankEntry,
@@ -224,11 +225,10 @@ export default function CourseReportCards() {
     if (!card) return
     setAiLoading(cardId)
     try {
-      const absences = 0 // TODO: wire from attendance summary
       const suggestion = await fetchAICommentSuggestion(
         courseName,
         card.finalGradePct ?? 0,
-        absences,
+        absencesForAIComment(card),
       )
       setDraftComments((prev) => ({ ...prev, [cardId]: suggestion }))
       announce('AI suggestion inserted. Review and edit before saving.')

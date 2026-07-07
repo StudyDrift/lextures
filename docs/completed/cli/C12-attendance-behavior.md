@@ -1,6 +1,6 @@
 # C12 — Attendance, behavior & seat-time
 
-> CLI parity plan. Source: `attendance_http.go` (`courses/{id}/attendance`), `behavior_http.go` (`behavior`, `pbis`), `registerSeatTimeRoutes` (`seat-time`), hall pass. Baseline: none.
+> CLI parity plan. Source: `course_attendance.go` (`courses/{code}/attendance/sessions`), `behavior_http.go` (`behavior`, `pbis`), `registerSeatTimeRoutes` (`seat-time`), `classroom_signals.go` (hall pass). Baseline: `clients/cli/cmd/attendance.go`, `behavior.go`, `seat_time.go`, `hall_pass.go`, `attendance_behavior_logic.go`, `attendance_behavior_test.go`.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Roster & classroom |
 | **Severity** | MAJOR |
 | **Markets** | K12 (primary) / HE |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | K12 / CLI |
 | **Depends on** | C11, C40 |
@@ -68,11 +68,11 @@ Attendance, behavior/PBIS records and seat-time tracking are UI-only. K-12 distr
 
 ## 9. API Surface
 
-- `courses/{c}/attendance` CRUD/import/export; `behavior`/`pbis`; `seat-time`/`seat-time-report`; hall-pass endpoints.
+- `courses/{c}/attendance/sessions` list/create/get/records; `students/{id}/behavior`; `pbis/awards`; `courses/{code}/seat-time-report`; `sections/{id}/hall-passes`.
 
 ## 10. UI / UX
 
-- `lextures attendance ...`, `lextures behavior ...`, `lextures seat-time ...`.
+- `lextures attendance ...`, `lextures behavior ...`, `lextures seat-time ...`, `lextures hall-pass ...`.
 
 ## 11. AI / ML Considerations
 
@@ -101,20 +101,51 @@ Attendance, behavior/PBIS records and seat-time tracking are UI-only. K-12 distr
 
 ## 16. Test Plan
 
-- **Unit** — status enum; idempotency key.
-- **Integration** — import summary; export range filter.
-- **E2E** — record attendance → export → verify.
+- **Unit** — status enum; idempotency key; CSV parse; FERPA gates (`attendance_behavior_test.go`).
+- **Integration** — httptest for import summary; export range filter; seat-time report; behavior award.
+- **E2E** — record attendance → export → verify (manual / future stack test).
 
 ## 17. Documentation & Training
 
-- "Export attendance for state reporting" recipe.
+- "Export attendance for state reporting" recipe:
+
+```bash
+# 1. Author a day CSV (email or student UUID; period optional)
+cat > day.csv <<'EOF'
+email,date,period,status
+alice@k12.edu,2026-01-15,,present
+bob@k12.edu,2026-01-15,,tardy
+EOF
+
+# 2. Bulk import (re-run updates in place per student/date/period)
+lextures attendance import CS101 --file day.csv
+
+# 3. Export for ADA reporting (FERPA-gated)
+lextures attendance export CS101 --from 2026-01-01 --to 2026-01-31 --format json --yes
+
+# 4. Per-student rollup
+lextures attendance summary CS101 --from 2026-01-01 --to 2026-01-31
+
+# 5. PBIS export and award
+lextures behavior export CS101 --format csv --yes
+lextures behavior award CS101 --user alice@k12.edu --points 5 --category Respect
+
+# 6. Seat-time compliance report
+lextures seat-time report CS101
+
+# 7. Hall pass (section required; issue uses authenticated student token)
+lextures hall-pass issue CS101 --section SEC-01 --destination bathroom --approve
+lextures hall-pass list CS101 --section SEC-01
+lextures hall-pass return --pass <pass-uuid>
+```
 
 ## 18. Open Questions
 
-1. Does the model support periods/blocks or only daily attendance?
-2. Is hall-pass exposed via REST?
+1. **Periods/blocks** — course attendance sessions support optional `--period` (separate session per date+period via title); K12 section roll (`sections/{id}/attendance/{date}`) remains UI-only for now.
+2. **Hall pass** — REST exists under `sections/{sectionId}/hall-passes`; `issue` uses the authenticated student's token (teachers use `--approve` after request).
 
 ## 19. References
 
-- `attendance_http.go`, `behavior_http.go`, `registerSeatTimeRoutes`.
-- Related: [C11](C11-enrollments-sections.md), [C27](C27-reports-exports.md), [C28](C28-insights-at-risk.md).
+- `clients/cli/cmd/attendance.go`, `behavior.go`, `seat_time.go`, `hall_pass.go`, `attendance_behavior_logic.go`.
+- Server: `course_attendance.go`, `behavior_http.go`, `seattime_http.go`, `classroom_signals.go`.
+- Related: [C11](C11-enrollments-sections.md), [C27](../../plan/cli/C27-reports-exports.md), [C28](../../plan/cli/C28-insights-at-risk.md).

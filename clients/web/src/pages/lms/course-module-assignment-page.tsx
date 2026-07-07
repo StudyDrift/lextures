@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatDateTime } from '../../lib/format'
+import { formatEntityLabel } from '../../lib/format-entity-label'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { Eye } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -157,6 +159,7 @@ function scrollToSubmissionPreview() {
 }
 
 export default function CourseModuleAssignmentPage() {
+  const { t } = useTranslation('common')
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const [searchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
@@ -666,9 +669,12 @@ export default function CourseModuleAssignmentPage() {
     () =>
       (staffRoster ?? []).map((r) => ({
         userId: r.userId,
-        label: r.displayName?.trim() ? r.displayName.trim() : `Staff ${r.userId.slice(0, 8)}…`,
+        label: formatEntityLabel({
+          name: r.displayName,
+          fallback: t('entityLabel.unknownStaff'),
+        }),
       })),
-    [staffRoster],
+    [staffRoster, t],
   )
 
   const myUserId = getJwtSubject()

@@ -218,5 +218,5 @@ primary evaluation surface; in its current state it undercuts the sale.
   [13.3](../../completed/13-k12-specific/13.3-behavior-pbis-tracking.md),
   [13.4](../../completed/13-k12-specific/13.4-report-cards.md),
   [13.12](../../completed/13-k12-specific/13.12-parent-teacher-conference-scheduling.md),
-  [W01](W01-i18n-application-coverage.md), [W05](W05-human-readable-entity-labels.md).
+  [W01](W01-i18n-application-coverage.md), [W05](W05-human-readable-entity-labels.md) (parent grade legibility shipped in W02; staff/reviewer surfaces in W05).
 - Standards: FERPA guardian access; COPPA.

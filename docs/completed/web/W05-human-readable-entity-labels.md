@@ -2,6 +2,15 @@
 
 > Implementation plan. Source: web market-readiness scan (2026-07-06).
 
+## Implementation notes (2026-07)
+
+- **Shared helper:** `formatEntityLabel()` in `clients/web/src/lib/format-entity-label.ts` and `<EntityLabel>` in `components/ui/entity-label.tsx` centralize name → pseudonym → neutral fallback (never raw UUID prefixes).
+- **Moderation API:** `GET .../reconciliation` now returns `studentName`, `submissionLabel`, and `graderName` per provisional row; respects blind-grading redaction server-side. Go handlers in `moderated_grading_http.go`; repo in `provisionalgrades/`.
+- **Peer review API:** `GET .../peer-review/summary` adds `studentLabel` and `incompleteReviewerLabels` / `outlierReviewerLabels` (real names when `named`, stable pseudonyms when anonymous).
+- **Assignment staff picker:** uses `entityLabel.unknownStaff` fallback instead of `Staff {id.slice(0,8)}…`.
+- **Guard:** `npm test` runs `scripts/check-entity-labels.mjs` on the three W05 surfaces.
+- **Tests:** Vitest (`format-entity-label.test.ts`); Go nodb test (`moderated_grading_nodb_test.go`).
+
 ## Metadata
 
 | Field | Value |
@@ -10,7 +19,7 @@
 | **Section** | Web / UX Polish |
 | **Severity** | MINOR |
 | **Markets** | HE / K12 |
-| **Status (today)** | PARTIAL |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Frontend platform team |
 | **Depends on** | none (parent surface handled by W02) |

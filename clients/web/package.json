@@ -11,7 +11,7 @@
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "preview": "vite preview",
-    "test": "vitest run && node scripts/check-platform-feature-toggles.mjs",
+    "test": "vitest run && node scripts/check-platform-feature-toggles.mjs && node scripts/check-entity-labels.mjs",
     "test:watch": "vitest",
     "test:tdd": "vitest",
     "test:coverage": "vitest run --coverage",

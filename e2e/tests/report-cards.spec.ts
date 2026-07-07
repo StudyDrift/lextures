@@ -154,6 +154,82 @@ test.describe('Report Cards — UI', () => {
     ).toBeVisible({ timeout: 8000 })
   })
 
+  test('AI suggest sends real absences from report card payload', async ({
+    coursePage: page,
+    seededCourse,
+  }) => {
+    await enableReportCards(seededCourse.instructorToken, seededCourse.courseCode)
+
+    const enrollRes = await fetch(
+      `${apiBase}/api/v1/courses/${seededCourse.courseCode}/enrollments`,
+      { headers: { Authorization: `Bearer ${seededCourse.instructorToken}` } },
+    )
+    expect(enrollRes.status).toBe(200)
+    const enrollBody = (await enrollRes.json()) as {
+      enrollments?: Array<{ userId: string; role: string }>
+    }
+    const studentId = enrollBody.enrollments?.find(
+      (e) => e.role === 'student' || e.role === 'learner',
+    )?.userId
+    if (!studentId) {
+      test.skip(true, 'no enrolled student')
+      return
+    }
+
+    let aiPayload: { absences?: number } | null = null
+    await page.route('**/api/v1/ai/report-card-comment', async (route) => {
+      const body = route.request().postDataJSON() as { absences?: number }
+      aiPayload = body
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ suggestion: 'Strong quarter with consistent effort.' }),
+      })
+    })
+
+    await page.route(
+      `**/api/v1/courses/${seededCourse.courseCode}/report-cards/*`,
+      async (route) => {
+        if (route.request().method() !== 'GET') {
+          await route.continue()
+          return
+        }
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            period: 'Q1-2026',
+            reportCards: [
+              {
+                id: '00000000-0000-0000-0000-000000000099',
+                studentId,
+                courseId: '00000000-0000-0000-0000-000000000001',
+                gradingPeriod: 'Q1-2026',
+                finalGradePct: 92,
+                letterGrade: 'A-',
+                comment: null,
+                absences: 3,
+                status: 'draft',
+                createdAt: '2026-01-01T00:00:00Z',
+                updatedAt: '2026-01-01T00:00:00Z',
+              },
+            ],
+          }),
+        })
+      },
+    )
+
+    await page.goto(`/courses/${seededCourse.courseCode}/report-cards`)
+    await expect(page.getByLabel(/grading period/i)).toBeVisible({ timeout: 8000 })
+
+    const editBtn = page.getByRole('button', { name: 'Edit' }).first()
+    if (await editBtn.isVisible().catch(() => false)) {
+      await editBtn.click()
+      await page.getByRole('button', { name: /get ai comment suggestion/i }).click()
+      await expect.poll(() => aiPayload?.absences).toBe(3)
+    }
+  })
+
   test('student cannot navigate to report-cards page (redirected or 403)', async ({
     page,
     seededCourse,

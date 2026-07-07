@@ -6,10 +6,13 @@ import {
   putPeerReviewConfig,
   type PeerReviewSummary,
 } from '../../lib/peer-review-api'
+import { useTranslation } from 'react-i18next'
+import { EntityLabel } from '../../components/ui/entity-label'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
 
 export default function PeerReviewSummaryPage() {
+  const { t } = useTranslation('common')
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const { ffPeerReview } = usePlatformFeatures()
   const [summary, setSummary] = useState<PeerReviewSummary | null>(null)
@@ -101,6 +104,9 @@ export default function PeerReviewSummaryPage() {
           <p>
             {summary.completedReviews} of {summary.totalAllocations} reviews completed ·{' '}
             {summary.incompleteReviewers.length} incomplete reviewers
+            {summary.incompleteReviewerLabels && summary.incompleteReviewerLabels.length > 0
+              ? ` (${summary.incompleteReviewerLabels.join(', ')})`
+              : null}
           </p>
           <table className="w-full border-collapse text-left">
             <thead>
@@ -113,7 +119,9 @@ export default function PeerReviewSummaryPage() {
             <tbody>
               {summary.submissions.map((s) => (
                 <tr key={s.submissionId} className="border-b border-slate-100 dark:border-neutral-800">
-                  <td className="py-2 pr-4 font-mono text-xs">{s.studentUserId.slice(0, 8)}…</td>
+                  <td className="py-2 pr-4">
+                    <EntityLabel name={s.studentLabel} fallback={t('entityLabel.unknownStudent')} />
+                  </td>
                   <td className="py-2 pr-4">{s.peerAggregate?.toFixed(1) ?? '—'}</td>
                   <td className="py-2">{s.reviewCount}</td>
                 </tr>

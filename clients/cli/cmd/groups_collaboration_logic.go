@@ -45,16 +45,6 @@ type enrollmentGroupsTreeBody struct {
 	GroupSets []enrollmentGroupSetPublic `json:"groupSets"`
 }
 
-type enrollmentRow struct {
-	ID     string `json:"id"`
-	UserID string `json:"userId"`
-	Role   string `json:"role"`
-}
-
-type enrollmentsListBody struct {
-	Enrollments []enrollmentRow `json:"enrollments"`
-}
-
 func enrollmentGroupsBase(course string) string {
 	return "/api/v1/courses/" + url.PathEscape(course) + "/enrollment-groups"
 }
@@ -278,30 +268,6 @@ func findGroupInTree(tree enrollmentGroupsTreeBody, groupID string) (*enrollment
 		}
 	}
 	return nil, nil
-}
-
-func fetchEnrollments(c *client.Client, course string) ([]enrollmentRow, error) {
-	req, err := c.NewRequest(http.MethodGet, "/api/v1/courses/"+url.PathEscape(course)+"/enrollments", nil)
-	if err != nil {
-		return nil, fmt.Errorf("building request: %w", err)
-	}
-	resp, err := doWithRetry(c, req)
-	if err != nil {
-		return nil, fmt.Errorf("listing enrollments: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-	body, err := readResponseBody(resp)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, apiErrorBody(resp.StatusCode, body)
-	}
-	var parsed enrollmentsListBody
-	if err := json.Unmarshal(body, &parsed); err != nil {
-		return nil, fmt.Errorf("decoding response: %w", err)
-	}
-	return parsed.Enrollments, nil
 }
 
 func studentEnrollmentIDs(rows []enrollmentRow) []string {

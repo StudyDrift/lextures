@@ -6,7 +6,9 @@ import {
   postModerationReconcile,
   type ModerationReconciliationRow,
 } from '../../lib/courses-api'
+import { EntityLabel } from '../../components/ui/entity-label'
 import { usePrompt } from '../../components/use-prompt'
+import { formatEntityLabel } from '../../lib/format-entity-label'
 import { LmsPage } from './lms-page'
 
 export default function ModerationDashboard() {
@@ -145,11 +147,14 @@ export default function ModerationDashboard() {
                   key={r.submissionId}
                   className="border-b border-slate-100 last:border-0 dark:border-neutral-800"
                 >
-                  <td className="px-3 py-2 font-mono text-xs text-slate-600 dark:text-neutral-400">
-                    {r.submissionId.slice(0, 8)}…
+                  <td className="px-3 py-2 text-slate-800 dark:text-neutral-100">
+                    <EntityLabel
+                      name={r.submissionLabel ?? r.studentName}
+                      fallback={t('entityLabel.unknownSubmission')}
+                    />
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-slate-600 dark:text-neutral-400">
-                    {r.studentUserId.slice(0, 8)}…
+                  <td className="px-3 py-2 text-slate-800 dark:text-neutral-100">
+                    <EntityLabel name={r.studentName} fallback={t('entityLabel.unknownStudent')} />
                   </td>
                   <td className="px-3 py-2 text-slate-800 dark:text-neutral-100">
                     {r.provisional.length === 0 ? (
@@ -159,7 +164,14 @@ export default function ModerationDashboard() {
                         {r.provisional.map((p) => (
                           <li key={`${p.graderId}-${p.score}`}>
                             {p.score}
-                            <span className="ms-1 text-xs text-slate-400">({p.graderId.slice(0, 8)}…)</span>
+                            <span className="ms-1 text-xs text-slate-400">
+                              (
+                              {formatEntityLabel({
+                                name: p.graderName,
+                                fallback: t('entityLabel.unknownGrader'),
+                              })}
+                              )
+                            </span>
                           </li>
                         ))}
                       </ul>
