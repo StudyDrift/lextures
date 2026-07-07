@@ -329,19 +329,3 @@ func waitForImportJob(c *client.Client, orgID, jobID string, timeout time.Durati
 	}
 }
 
-func writeSecretsFile(path string, rows []map[string]string) error {
-	if path == "" || len(rows) == 0 {
-		return nil
-	}
-	var buf bytes.Buffer
-	w := csv.NewWriter(&buf)
-	_ = w.Write([]string{"email", "temporaryPassword"})
-	for _, row := range rows {
-		_ = w.Write([]string{row["email"], row["password"]})
-	}
-	w.Flush()
-	if err := w.Error(); err != nil {
-		return err
-	}
-	return os.WriteFile(path, buf.Bytes(), 0o600)
-}
