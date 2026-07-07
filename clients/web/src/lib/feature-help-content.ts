@@ -1,5 +1,12 @@
 import type { FeatureHelpTopic } from '../context/feature-help-context'
 
+export type FeatureHelpMedia = {
+  /** Bundled or CSP-allowed static asset URL (silent short MP4 preferred). */
+  src: string
+  /** i18n key in the `common` namespace for the accessible text alternative. */
+  altKey: string
+}
+
 export const FEATURE_HELP_TITLES: Record<FeatureHelpTopic, string> = {
   gradebook: 'Gradebook',
   modules: 'Modules',
@@ -22,4 +29,12 @@ export const FEATURE_HELP_BODY: Record<FeatureHelpTopic, string> = {
     'Blocks stack in order; pick a markdown theme for readability. Images upload into the course file store and resolve for everyone enrolled.',
   'content-page':
     'Same block editor as the syllabus: autosave is explicit via Save so you always know when the server has your latest draft.',
+}
+
+/** Optional per-feature walkthrough media. Omit the key when no clip is available. */
+export const FEATURE_HELP_MEDIA: Partial<Record<FeatureHelpTopic, FeatureHelpMedia>> = {
+  modules: {
+    src: '/feature-help/modules-walkthrough.mp4',
+    altKey: 'featureHelp.media.modules.alt',
+  },
 }

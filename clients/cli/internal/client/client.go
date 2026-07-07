@@ -52,6 +52,11 @@ func (c *Client) Do(req *http.Request) (*http.Response, error) {
 	return c.httpClient.Do(req)
 }
 
+// HTTPClient returns the underlying http.Client (for streaming/SSE).
+func (c *Client) HTTPClient() *http.Client {
+	return c.httpClient
+}
+
 // BaseURL returns the configured base URL.
 func (c *Client) BaseURL() string {
 	return c.baseURL

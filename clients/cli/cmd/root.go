@@ -32,6 +32,12 @@ var globalFlags struct {
 // PersistentPreRunE fires.
 var Cfg *config.Config
 
+// ImpersonationActive is true when the effective API key is an impersonation token.
+var ImpersonationActive bool
+
+// RealAPIKey holds the admin token while impersonating (empty otherwise).
+var RealAPIKey string
+
 var rootCmd = &cobra.Command{
 	Use:   "lextures",
 	Short: "Lextures CLI — command line interface for Lextures",
@@ -66,21 +72,34 @@ file values.`,
 		}
 		Cfg = cfg
 		client.DefaultUserAgent = "lextures-cli/" + Version
+		ImpersonationActive = false
+		RealAPIKey = ""
 
 		if commandNeedsAuth(cmd) && Cfg.APIKey == "" {
-			mgr := auth.New(Cfg.Server)
 			profile := globalFlags.profile
 			if profile == "" {
 				profile = "default"
 			}
-			tok, err := mgr.Load(profile)
-			if err != nil {
-				return fmt.Errorf("loading token: %w", err)
+			if imp, err := auth.NewImpersonationStore().Load(profile); err != nil {
+				return fmt.Errorf("loading impersonation session: %w", err)
+			} else if imp != nil && imp.ImpersonationToken != "" {
+				RealAPIKey = imp.RealAccessToken
+				Cfg.APIKey = imp.ImpersonationToken
+				ImpersonationActive = true
+				if !globalFlags.jsonOut {
+					fmt.Fprintln(os.Stderr, "⚠ impersonation active — writes are blocked server-side")
+				}
+			} else {
+				mgr := auth.New(Cfg.Server)
+				tok, err := mgr.Load(profile)
+				if err != nil {
+					return fmt.Errorf("loading token: %w", err)
+				}
+				if tok == nil {
+					return errNotAuthenticated
+				}
+				Cfg.APIKey = tok.AccessToken
 			}
-			if tok == nil {
-				return errNotAuthenticated
-			}
-			Cfg.APIKey = tok.AccessToken
 		}
 		return nil
 	},

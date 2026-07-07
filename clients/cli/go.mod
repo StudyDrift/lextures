@@ -4,6 +4,7 @@ go 1.26.3
 
 require (
 	github.com/coder/websocket v1.8.15
+	github.com/google/uuid v1.6.0
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.19.0
 	github.com/zalando/go-keyring v0.2.8

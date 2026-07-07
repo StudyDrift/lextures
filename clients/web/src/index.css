@@ -332,30 +332,7 @@ html.reduced-motion *::after {
   font-feature-settings: "liga" 1, "kern" 1;
 }
 
-/* Feature help dock: subtle motion as a stand-in for a short demo clip. */
-@keyframes lex-help-clip-pan {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-.lex-help-clip {
-  background-size: 200% 200%;
-  animation: lex-help-clip-pan 18s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .lex-help-clip {
-    animation: none;
-  }
-}
-html.reduced-motion .lex-help-clip {
-  animation: none;
-}
+
 
 /* prefers-reduced-data: defer heavy hero imagery until needed (see clients/web courses grid). */
 .lex-reduced-data img[data-lex-hero] {

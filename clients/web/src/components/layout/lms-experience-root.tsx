@@ -1,8 +1,11 @@
-import type { ReactNode } from 'react'
+import { lazy, Suspense, type ReactNode } from 'react'
 import { UiDensityProvider } from '../../context/ui-density-context'
 import { FeatureHelpProvider } from '../../context/feature-help-context'
 import { ReducedDataProvider } from '../../context/reduced-data-context'
-import { FeatureHelpDock } from '../feature-help/feature-help-dock'
+
+const FeatureHelpDock = lazy(() =>
+  import('../feature-help/feature-help-dock').then((m) => ({ default: m.FeatureHelpDock })),
+)
 
 export function LmsExperienceRoot({ children }: { children: ReactNode }) {
   return (
@@ -10,7 +13,9 @@ export function LmsExperienceRoot({ children }: { children: ReactNode }) {
       <UiDensityProvider>
         <FeatureHelpProvider>
           {children}
-          <FeatureHelpDock />
+          <Suspense fallback={null}>
+            <FeatureHelpDock />
+          </Suspense>
         </FeatureHelpProvider>
       </UiDensityProvider>
     </ReducedDataProvider>
