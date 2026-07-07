@@ -128,14 +128,24 @@ struct SaveAttendanceRecordsResponse: Decodable {
     var message: String?
 }
 
-struct CourseSection: Decodable, Identifiable, Hashable {
+struct CourseSection: Codable, Identifiable, Hashable {
     var id: String
     var sectionCode: String
     var name: String?
+    var status: String?
+    var courseId: String?
+
+    var isActive: Bool { (status ?? "active") == "active" }
 
     var displayName: String {
         let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !trimmed.isEmpty { return trimmed }
+        return sectionCode
+    }
+
+    var displayLabel: String {
+        let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !trimmed.isEmpty { return "\(sectionCode) — \(trimmed)" }
         return sectionCode
     }
 }

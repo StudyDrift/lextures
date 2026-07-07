@@ -777,9 +777,19 @@ data class CourseSection(
     val id: String,
     val sectionCode: String,
     val name: String? = null,
+    val status: String? = null,
+    val courseId: String? = null,
 ) {
+    val isActive: Boolean get() = (status ?: "active") == "active"
+
     val displayName: String
         get() = name?.trim()?.takeIf { it.isNotEmpty() } ?: sectionCode
+
+    val displayLabel: String
+        get() {
+            val trimmed = name?.trim().orEmpty()
+            return if (trimmed.isNotEmpty()) "$sectionCode — $trimmed" else sectionCode
+        }
 }
 
 @Serializable

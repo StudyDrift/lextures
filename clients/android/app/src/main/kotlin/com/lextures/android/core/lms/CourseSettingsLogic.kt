@@ -201,6 +201,22 @@ object CourseSettingsLogic {
 
     fun themeNeedsUpdate(form: CourseGeneralFormState, course: CourseSummary): Boolean =
         buildMarkdownThemePatch(form) != buildMarkdownThemePatch(applyCourseToForm(course))
+
+    fun isoToLocalDateString(iso: String?): String {
+        if (iso.isNullOrBlank()) return ""
+        val instant = runCatching { java.time.Instant.parse(iso) }.getOrNull() ?: return ""
+        val zoned = instant.atZone(java.time.ZoneId.systemDefault())
+        return java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm").format(zoned)
+    }
+
+    fun localDateStringToIso(value: String): String? {
+        val trimmed = value.trim()
+        if (trimmed.isEmpty()) return null
+        return runCatching {
+            val local = java.time.LocalDateTime.parse(trimmed, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
+            local.atZone(java.time.ZoneId.systemDefault()).toInstant().toString()
+        }.getOrNull()
+    }
 }
 
 data class CourseGeneralFormState(
