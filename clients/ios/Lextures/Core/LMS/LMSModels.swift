@@ -43,6 +43,16 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var reportCardsEnabled: Bool?
     var groupSpacesEnabled: Bool?
     var collabDocsEnabled: Bool?
+    var questionBankEnabled: Bool?
+    var lockdownModeEnabled: Bool?
+    var adaptivePathsEnabled: Bool?
+    var srsEnabled: Bool?
+    var diagnosticAssessmentsEnabled: Bool?
+    var hintScaffoldingEnabled: Bool?
+    var misconceptionDetectionEnabled: Bool?
+    var multilingualMessagingEnabled: Bool?
+    var whiteboardEnabled: Bool?
+    var requireCaptions: Bool?
     var viewerEnrollmentInvitationPending: Bool?
     var viewerPendingEnrollmentId: String?
     var isBlueprint: Bool?

@@ -422,6 +422,10 @@
 		8B812C2D3E4F5061728394 /* LMSAPICourseArchivedContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B812D3E4F5061728394A5 /* LMSAPICourseArchivedContent.swift */; };
 		8B813C2D3E4F5061728394 /* CourseArchivedContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B813D3E4F5061728394A5 /* CourseArchivedContentView.swift */; };
 		8B814C2D3E4F5061728394 /* CourseArchivedContentLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B814D3E4F5061728394A5 /* CourseArchivedContentLogicTests.swift */; };
+		8B815C2D3E4F5061728394 /* CourseFeaturesLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B815D3E4F5061728394A5 /* CourseFeaturesLogic.swift */; };
+		8B816C2D3E4F5061728394 /* LMSAPICourseFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B816D3E4F5061728394A5 /* LMSAPICourseFeatures.swift */; };
+		8B817C2D3E4F5061728394 /* CourseFeaturesSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B817D3E4F5061728394A5 /* CourseFeaturesSettingsView.swift */; };
+		8B818C2D3E4F5061728394 /* CourseFeaturesLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B818D3E4F5061728394A5 /* CourseFeaturesLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -854,6 +858,10 @@
 		8B812D3E4F5061728394A5 /* LMSAPICourseArchivedContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICourseArchivedContent.swift; sourceTree = "<group>"; };
 		8B813D3E4F5061728394A5 /* CourseArchivedContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseArchivedContentView.swift; sourceTree = "<group>"; };
 		8B814D3E4F5061728394A5 /* CourseArchivedContentLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseArchivedContentLogicTests.swift; sourceTree = "<group>"; };
+		8B815D3E4F5061728394A5 /* CourseFeaturesLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseFeaturesLogic.swift; sourceTree = "<group>"; };
+		8B816D3E4F5061728394A5 /* LMSAPICourseFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICourseFeatures.swift; sourceTree = "<group>"; };
+		8B817D3E4F5061728394A5 /* CourseFeaturesSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseFeaturesSettingsView.swift; sourceTree = "<group>"; };
+		8B818D3E4F5061728394A5 /* CourseFeaturesLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseFeaturesLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -887,6 +895,8 @@
 		0192C31B7A97444D9236A8A1 /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B816D3E4F5061728394A5 /* LMSAPICourseFeatures.swift */,
+				8B815D3E4F5061728394A5 /* CourseFeaturesLogic.swift */,
 				8B812D3E4F5061728394A5 /* LMSAPICourseArchivedContent.swift */,
 				8B811D3E4F5061728394A5 /* CourseArchivedContentLogic.swift */,
 				8B80ED3E4F5061728394A5 /* LMSAPICourseBlueprint.swift */,
@@ -1435,6 +1445,7 @@
 		8B80SETT5C6D7E8F901234567 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				8B817D3E4F5061728394A5 /* CourseFeaturesSettingsView.swift */,
 				8B813D3E4F5061728394A5 /* CourseArchivedContentView.swift */,
 				8B80FD3E4F5061728394A5 /* CourseBlueprintSettingsView.swift */,
 				8B805D3E4F5061728394A5 /* CourseSettingsHostView.swift */,
@@ -1708,6 +1719,7 @@
 		FB04F8A19314441A8AB2F273 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B818D3E4F5061728394A5 /* CourseFeaturesLogicTests.swift */,
 				8B814D3E4F5061728394A5 /* CourseArchivedContentLogicTests.swift */,
 				8B810D3E4F5061728394A5 /* CourseBlueprintLogicTests.swift */,
 				8B80CD3E4F5061728394A5 /* CourseImportExportLogicTests.swift */,
@@ -1907,6 +1919,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B817C2D3E4F5061728394 /* CourseFeaturesSettingsView.swift in Sources */,
+				8B816C2D3E4F5061728394 /* LMSAPICourseFeatures.swift in Sources */,
+				8B815C2D3E4F5061728394 /* CourseFeaturesLogic.swift in Sources */,
 				8B813C2D3E4F5061728394 /* CourseArchivedContentView.swift in Sources */,
 				8B812C2D3E4F5061728394 /* LMSAPICourseArchivedContent.swift in Sources */,
 				8B811C2D3E4F5061728394 /* CourseArchivedContentLogic.swift in Sources */,
@@ -2273,6 +2288,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B818C2D3E4F5061728394 /* CourseFeaturesLogicTests.swift in Sources */,
 				8B814C2D3E4F5061728394 /* CourseArchivedContentLogicTests.swift in Sources */,
 				8B810C2D3E4F5061728394 /* CourseBlueprintLogicTests.swift in Sources */,
 				8B80CC2D3E4F5061728394 /* CourseImportExportLogicTests.swift in Sources */,

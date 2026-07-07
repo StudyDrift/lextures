@@ -87,6 +87,63 @@ object LmsApi {
         decode<CourseSummary>(response)
     }
 
+    suspend fun patchCourseFeatures(
+        courseCode: String,
+        body: CourseFeaturesPatch,
+        accessToken: String,
+    ): CourseSummary = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/features",
+            method = "PATCH",
+            body = json.encodeToString(CourseFeaturesPatch.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseSummary>(response)
+    }
+
+    suspend fun patchCourseCaptionPolicy(
+        courseCode: String,
+        requireCaptions: Boolean,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/caption-policy",
+            method = "PATCH",
+            body = json.encodeToString(CourseCaptionPolicyPatch(requireCaptions)),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+    }
+
+    suspend fun fetchCourseConsortiumSettings(
+        courseCode: String,
+        accessToken: String,
+    ): CourseConsortiumSettings? = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/consortium-settings",
+            accessToken = accessToken,
+        )
+        if (code == 404) return@withContext null
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CourseConsortiumSettings>(body)
+    }
+
+    suspend fun patchCourseConsortiumSettings(
+        courseCode: String,
+        consortiumShareable: Boolean,
+        accessToken: String,
+    ): CourseConsortiumSettings = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/consortium-settings",
+            method = "PATCH",
+            body = json.encodeToString(CourseConsortiumSettingsPatch(consortiumShareable)),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseConsortiumSettings>(response)
+    }
+
     suspend fun fetchCourseExport(
         courseCode: String,
         accessToken: String,

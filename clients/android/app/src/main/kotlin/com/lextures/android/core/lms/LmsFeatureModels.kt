@@ -489,6 +489,7 @@ data class PlatformFeatures(
     val studentProgressEnabled: Boolean? = null,
     val ffMobileInstructorInsights: Boolean? = null,
     val ffMobileCourseSettings: Boolean? = null,
+    val ffConsortiumSharing: Boolean? = null,
     val graderAgentEnabled: Boolean? = null,
     val ffPlagiarismChecks: Boolean? = null,
     val altTextEnforcementEnabled: Boolean? = null,

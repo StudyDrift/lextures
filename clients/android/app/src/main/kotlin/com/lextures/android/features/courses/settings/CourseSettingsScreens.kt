@@ -99,6 +99,13 @@ fun CourseSettingsHostScreen(
                     offline = offline,
                     onCourseUpdated = onCourseUpdated,
                 )
+                CourseSettingsLogic.CourseSettingsSection.Features -> CourseFeaturesSettingsScreen(
+                    session = session,
+                    course = course,
+                    offline = offline,
+                    platformFeatures = platformFeatures,
+                    onCourseUpdated = onCourseUpdated,
+                )
                 CourseSettingsLogic.CourseSettingsSection.ImportExport -> CourseImportExportScreen(
                     session = session,
                     course = course,
