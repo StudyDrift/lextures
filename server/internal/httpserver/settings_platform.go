@@ -120,6 +120,7 @@ type platformSettingsJSON struct {
 	RTLEnabled                      bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
 	FFParentPortal                  bool `json:"ffParentPortal"`
+	FFParentPortalV2                bool `json:"ffParentPortalV2"`
 	FFReportCards                   bool `json:"ffReportCards"`
 	FFLibrary                       bool `json:"ffLibrary"`
 	FFBroadcasts                    bool `json:"ffBroadcasts"`
@@ -341,6 +342,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
 			FFParentPortal:                  merged.FFParentPortal,
+			FFParentPortalV2:                merged.FFParentPortalV2,
 			FFReportCards:                   merged.FFReportCards,
 			FFLibrary:                       merged.FFLibrary,
 			FFBroadcasts:                    merged.FFBroadcasts,
@@ -537,6 +539,7 @@ type putPlatformBody struct {
 	SecurityDisclosureModuleEnabled *bool `json:"securityDisclosureModuleEnabled"`
 	FFUiMode                        *bool `json:"ffUiMode"`
 	FFParentPortal                  *bool `json:"ffParentPortal"`
+	FFParentPortalV2                *bool `json:"ffParentPortalV2"`
 	FFReportCards                   *bool `json:"ffReportCards"`
 	FFLibrary                       *bool `json:"ffLibrary"`
 	FFBroadcasts                    *bool `json:"ffBroadcasts"`
@@ -879,6 +882,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
 		setBool("securitydisclosuremoduleenabled", body.SecurityDisclosureModuleEnabled, func(v bool) { wr.SecurityDisclosureModuleEnabled = &v })
 		setBool("ffparentportal", body.FFParentPortal, func(v bool) { wr.FFParentPortal = &v })
+		setBool("ffparentportalv2", body.FFParentPortalV2, func(v bool) { wr.FFParentPortalV2 = &v })
 		setBool("ffreportcards", body.FFReportCards, func(v bool) { wr.FFReportCards = &v })
 		setBool("fflibrary", body.FFLibrary, func(v bool) { wr.FFLibrary = &v })
 		setBool("ffbroadcasts", body.FFBroadcasts, func(v bool) { wr.FFBroadcasts = &v })
@@ -1054,6 +1058,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
 			FFParentPortal:                  merged.FFParentPortal,
+			FFParentPortalV2:                merged.FFParentPortalV2,
 			FFReportCards:                   merged.FFReportCards,
 			FFLibrary:                       merged.FFLibrary,
 			FFBroadcasts:                    merged.FFBroadcasts,

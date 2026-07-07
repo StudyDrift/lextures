@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Archive,
   ChevronLeft,
@@ -109,6 +110,7 @@ function InboxMessageActions({
 }
 
 export default function Inbox() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const mailboxRevision = useMailboxRevision()
   const coursesRevision = useCoursesRevision()
   const refreshUnread = useRefreshUnread()
@@ -128,6 +130,16 @@ export default function Inbox() {
   const [composeBody, setComposeBody] = useState('')
   const [composeBusy, setComposeBusy] = useState(false)
   const [composeError, setComposeError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (searchParams.get('compose') !== '1') return
+    setComposeOpen(true)
+    const to = searchParams.get('to')?.trim()
+    const subject = searchParams.get('subject')?.trim()
+    if (to) setComposeTo(to)
+    if (subject) setComposeSubject(subject)
+    setSearchParams({}, { replace: true })
+  }, [searchParams, setSearchParams])
 
   useEffect(() => {
     const t = window.setTimeout(() => setDebouncedQuery(query), 300)

@@ -44,6 +44,9 @@ export type PlatformFeaturesSnapshot = {
   ffBroadcasts?: boolean
   ffClassroomSignals?: boolean
   ffConferenceScheduling?: boolean
+  ffParentPortal?: boolean
+  ffParentPortalV2?: boolean
+  ffReportCards?: boolean
   ffDemographics?: boolean
   ffContentFilterIntegration?: boolean
   ffSisIntegration?: boolean
@@ -137,6 +140,9 @@ const defaults: PlatformFeaturesSnapshot = {
   ffBroadcasts: false,
   ffClassroomSignals: false,
   ffConferenceScheduling: false,
+  ffParentPortal: false,
+  ffParentPortalV2: false,
+  ffReportCards: false,
   ffDemographics: false,
   ffContentFilterIntegration: false,
   ffSisIntegration: false,

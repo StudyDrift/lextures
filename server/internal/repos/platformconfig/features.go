@@ -64,6 +64,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFAltTextEnforcement = mergeBool(db.FFAltTextEnforcement, false)
 	out.FFHighContrastReducedMotion = mergeBool(db.FFHighContrastReducedMotion, false)
 	out.FFParentPortal = mergeBool(db.FFParentPortal, false)
+	out.FFParentPortalV2 = mergeBool(db.FFParentPortalV2, false)
 	out.FFReportCards = mergeBool(db.FFReportCards, false)
 	out.FFSISIntegration = mergeBool(db.FFSISIntegration, false)
 	out.FFCatalogIntegration = mergeBool(db.FFCatalogIntegration, false)
