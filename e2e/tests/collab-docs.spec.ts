@@ -193,9 +193,11 @@ test.describe('Collaborative documents', () => {
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs`)
     await expect(page.getByText(doc.title)).toBeVisible({ timeout: 8000 })
 
-    // Confirm the browser dialog.
-    page.once('dialog', (dialog) => void dialog.accept())
     await page.getByRole('button', { name: new RegExp(`delete.*${doc.title}`, 'i') }).click()
+
+    const dialog = page.getByRole('dialog', { name: /delete this document/i })
+    await expect(dialog).toBeVisible({ timeout: 5000 })
+    await dialog.getByRole('button', { name: /^delete$/i }).click()
 
     await expect(page.getByText(doc.title)).not.toBeVisible({ timeout: 8000 })
   })
