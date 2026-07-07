@@ -13,11 +13,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/course"
-	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/parentlinks"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/repos/attendance"
 )
 
 func (d Deps) forbidParentViewerCourseWork(w http.ResponseWriter, r *http.Request, viewer uuid.UUID) bool {
@@ -160,11 +160,6 @@ func (d Deps) handleParentStudentCourses() http.HandlerFunc {
 
 // handleParentStudentGrades is GET /api/v1/parent/students/{sid}/grades
 func (d Deps) handleParentStudentGrades() http.HandlerFunc {
-	type courseGrades struct {
-		CourseCode string            `json:"courseCode"`
-		Title      string            `json:"title"`
-		Grades     map[string]string `json:"grades"`
-	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
@@ -187,29 +182,50 @@ func (d Deps) handleParentStudentGrades() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 			return
 		}
-		out := make([]courseGrades, 0, len(courses))
+		out := make([]parentCourseGradesOut, 0, len(courses))
 		for _, c := range courses {
-			cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, c.CourseCode)
-			if err != nil || cid == nil {
-				continue
-			}
-			gmap, _, _, _, err := coursegrades.ListForCourse(r.Context(), d.Pool, *cid)
+			row, err := d.buildParentCourseGrades(r.Context(), studentID, c)
 			if err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grades.")
 				return
 			}
-			row := gmap[studentID.String()]
 			if row == nil {
-				row = map[string]string{}
+				continue
 			}
-			title := c.Title
-			if title == "" {
-				title = c.CourseCode
-			}
-			out = append(out, courseGrades{CourseCode: c.CourseCode, Title: title, Grades: row})
+			out = append(out, *row)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"courses": out})
+	}
+}
+
+// handleParentStudentAttendanceSummary is GET /api/v1/parent/students/{sid}/attendance-summary
+func (d Deps) handleParentStudentAttendanceSummary() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		parentID, orgID, ok := d.requireParentViewer(w, r)
+		if !ok {
+			return
+		}
+		studentID, ok := d.parseStudentIDParam(w, r)
+		if !ok {
+			return
+		}
+		if _, ok := d.requireParentLink(w, r, parentID, orgID, studentID); !ok {
+			return
+		}
+		records, err := attendance.ListForStudent(r.Context(), d.Pool, studentID, 200)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load attendance.")
+			return
+		}
+		summary := parentAttendanceSummary(records, 14)
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(summary)
 	}
 }
 
@@ -730,6 +746,7 @@ func (d Deps) registerParentRoutes(r chi.Router) {
 	r.Get("/api/v1/parent/children", d.handleParentChildren())
 	r.Get("/api/v1/parent/students/{sid}/courses", d.handleParentStudentCourses())
 	r.Get("/api/v1/parent/students/{sid}/grades", d.handleParentStudentGrades())
+	r.Get("/api/v1/parent/students/{sid}/attendance-summary", d.handleParentStudentAttendanceSummary())
 	r.Get("/api/v1/parent/students/{sid}/assignments", d.handleParentStudentAssignments())
 	r.Get("/api/v1/parent/weekly-summary", d.handleParentWeeklySummary())
 	r.Method(http.MethodGet, "/api/v1/parent/notification-prefs", d.handleParentNotificationPrefs())

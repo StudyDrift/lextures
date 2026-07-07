@@ -124,6 +124,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffProctoringIntegration: false,
     ffCourseReviews: false,
     ffParentPortal: false,
+    ffParentPortalV2: false,
     ffReportCards: false,
     ffPublicCatalog: false,
     ffSelfPacedMode: false,

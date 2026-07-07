@@ -9,18 +9,21 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './supported-locales'
 import enAuth from '../../public/locales/en/auth.json'
 import enCommon from '../../public/locales/en/common.json'
 import enCompliance from '../../public/locales/en/compliance.json'
+import enParent from '../../public/locales/en/parent.json'
 import esAuth from '../../public/locales/es/auth.json'
 import esCommon from '../../public/locales/es/common.json'
 import esCompliance from '../../public/locales/es/compliance.json'
+import esParent from '../../public/locales/es/parent.json'
 import frAuth from '../../public/locales/fr/auth.json'
 import frCommon from '../../public/locales/fr/common.json'
 import frCompliance from '../../public/locales/fr/compliance.json'
+import frParent from '../../public/locales/fr/parent.json'
 
-export const I18N_NAMESPACES = ['common', 'auth', 'compliance'] as const
+export const I18N_NAMESPACES = ['common', 'auth', 'compliance', 'parent'] as const
 const bundledResources = {
-  en: { common: enCommon, auth: enAuth, compliance: enCompliance },
-  es: { common: esCommon, auth: esAuth, compliance: esCompliance },
-  fr: { common: frCommon, auth: frAuth, compliance: frCompliance },
+  en: { common: enCommon, auth: enAuth, compliance: enCompliance, parent: enParent },
+  es: { common: esCommon, auth: esAuth, compliance: esCompliance, parent: esParent },
+  fr: { common: frCommon, auth: frAuth, compliance: frCompliance, parent: frParent },
 } as const
 
 const useHttpBackend = !import.meta.env.VITEST

@@ -140,6 +140,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("backup_module_enabled", w.BackupModuleEnabled)
 	addBool("ff_high_contrast_reduced_motion", w.FFHighContrastReducedMotion)
 	addBool("ff_parent_portal", w.FFParentPortal)
+	addBool("ff_parent_portal_v2", w.FFParentPortalV2)
 	addBool("ff_report_cards", w.FFReportCards)
 	addBool("ff_sbg_report_cards", w.FFSBGReportCards)
 	addBool("ff_sis_integration", w.FFSISIntegration)

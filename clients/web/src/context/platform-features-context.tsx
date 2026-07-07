@@ -58,6 +58,9 @@ export type PlatformFeatures = {
   ffBroadcasts: boolean
   ffClassroomSignals: boolean
   ffConferenceScheduling: boolean
+  ffParentPortal: boolean
+  ffParentPortalV2: boolean
+  ffReportCards: boolean
   ffDemographics: boolean
   ffContentFilterIntegration: boolean
   ffSisIntegration: boolean
@@ -159,6 +162,9 @@ const defaultFeatures: PlatformFeatures = {
   ffBroadcasts: false,
   ffClassroomSignals: false,
   ffConferenceScheduling: false,
+  ffParentPortal: false,
+  ffParentPortalV2: false,
+  ffReportCards: false,
   ffDemographics: false,
   ffContentFilterIntegration: false,
   ffSisIntegration: false,
@@ -259,6 +265,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffBroadcasts: false,
     ffClassroomSignals: false,
     ffConferenceScheduling: false,
+    ffParentPortal: false,
+    ffParentPortalV2: false,
+    ffReportCards: false,
     ffDemographics: false,
     ffContentFilterIntegration: false,
     ffSisIntegration: false,
@@ -366,6 +375,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffBroadcasts: data.ffBroadcasts === true,
           ffClassroomSignals: data.ffClassroomSignals === true,
           ffConferenceScheduling: data.ffConferenceScheduling === true,
+          ffParentPortal: data.ffParentPortal === true,
+          ffParentPortalV2: data.ffParentPortalV2 === true,
+          ffReportCards: data.ffReportCards === true,
           ffDemographics: data.ffDemographics === true,
           ffContentFilterIntegration: data.ffContentFilterIntegration === true,
           ffSisIntegration: data.ffSisIntegration === true,
@@ -430,6 +442,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffBroadcasts: next.ffBroadcasts === true,
           ffClassroomSignals: next.ffClassroomSignals === true,
           ffConferenceScheduling: next.ffConferenceScheduling === true,
+          ffParentPortal: next.ffParentPortal === true,
+          ffParentPortalV2: next.ffParentPortalV2 === true,
+          ffReportCards: next.ffReportCards === true,
           ffDemographics: next.ffDemographics === true,
           ffContentFilterIntegration: next.ffContentFilterIntegration === true,
           ffSisIntegration: next.ffSisIntegration === true,

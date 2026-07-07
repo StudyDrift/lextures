@@ -40,8 +40,17 @@ test('Parent portal: GET children unauthenticated returns 401', async () => {
   expect(res.status).toBe(401)
 })
 
-test('Parent portal: GET weekly-summary unauthenticated returns 401', async () => {
-  const res = await fetch(`${API_BASE}/api/v1/parent/weekly-summary`)
+test('Parent portal: GET attendance-summary unauthenticated returns 401', async () => {
+  const res = await fetch(
+    `${API_BASE}/api/v1/parent/students/00000000-0000-0000-0000-000000000001/attendance-summary`,
+  )
+  expect(res.status).toBe(401)
+})
+
+test('Parent portal: GET report-cards unauthenticated returns 401', async () => {
+  const res = await fetch(
+    `${API_BASE}/api/v1/parent/students/00000000-0000-0000-0000-000000000001/report-cards`,
+  )
   expect(res.status).toBe(401)
 })
 
@@ -300,6 +309,16 @@ test('Parent portal: parent cannot access non-linked student grades (403)', asyn
     headers: { Authorization: `Bearer ${parentToken}` },
   })
   expect(linkedRes.status).toBe(200)
+  const gradesBody = (await linkedRes.json()) as {
+    courses?: Array<{ items?: Array<{ title?: string; itemId?: string }> }>
+  }
+  for (const course of gradesBody.courses ?? []) {
+    for (const item of course.items ?? []) {
+      expect(typeof item.title).toBe('string')
+      expect(item.title?.length).toBeGreaterThan(0)
+      expect(item.title).not.toMatch(/^[0-9a-f]{8}$/i)
+    }
+  }
 
   // Parent cannot access non-linked student's grades.
   const unlinkedRes = await fetch(`${API_BASE}/api/v1/parent/students/${otherId}/grades`, {

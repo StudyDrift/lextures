@@ -53,6 +53,7 @@ type platformFeaturesJSON struct {
 	FFReadingPreferences        bool `json:"ffReadingPreferences"`
 	FFHighContrastReducedMotion bool `json:"ffHighContrastReducedMotion"`
 	FFParentPortal              bool `json:"ffParentPortal"`
+	FFParentPortalV2            bool `json:"ffParentPortalV2"`
 	FFReportCards               bool `json:"ffReportCards"`
 	FFLibrary                   bool `json:"ffLibrary"`
 	FFBroadcasts                bool `json:"ffBroadcasts"`
@@ -175,6 +176,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFReadingPreferences:        cfg.FFReadingPreferences,
 		FFHighContrastReducedMotion: cfg.FFHighContrastReducedMotion,
 		FFParentPortal:              cfg.FFParentPortal,
+		FFParentPortalV2:            cfg.FFParentPortalV2,
 		FFReportCards:               cfg.FFReportCards,
 		FFLibrary:                   cfg.FFLibrary,
 		FFBroadcasts:                cfg.FFBroadcasts,
