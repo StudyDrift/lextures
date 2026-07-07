@@ -1,0 +1,19 @@
+{
+  "parent.dashboard.badge": "Vue parent",
+  "parent.dashboard.title": "Tableau de bord familial",
+  "parent.dashboard.description": "Consultez les cours, notes et travaux à venir des élèves liés. Cette vue est en lecture seule ; contactez l'administrateur de l'école si un enfant est manquant.",
+  "parent.dashboard.conferencesLink": "Réserver des conférences parents-enseignants",
+  "parent.dashboard.errors.loadChildren": "Impossible de charger les enfants.",
+  "parent.dashboard.errors.loadStudentData": "Impossible de charger les données de l'élève.",
+  "parent.dashboard.noChildren": "Aucun enfant lié pour le moment. Contactez l'administrateur de l'école pour connecter votre compte à un élève.",
+  "parent.dashboard.selectStudent": "Sélectionner un élève",
+  "parent.dashboard.viewingAs": "Affichage en tant que parent de <strong>{{name}}</strong> — lecture seule.",
+  "parent.dashboard.grades.title": "Notes par cours",
+  "parent.dashboard.grades.loading": "Chargement…",
+  "parent.dashboard.grades.empty": "Aucun élément noté pour le moment.",
+  "parent.dashboard.grades.noScores": "Aucune note publiée.",
+  "parent.dashboard.assignments.title": "Devoirs et quiz",
+  "parent.dashboard.assignments.empty": "Aucun devoir publié trouvé.",
+  "parent.dashboard.assignments.due": "Échéance {date}",
+  "parent.dashboard.inboxHint": "Envoyez un message à un enseignant depuis la <inboxLink>Boîte de réception</inboxLink>."
+}

@@ -1,0 +1,13 @@
+{
+  "billing.checkout.success.verifying.title": "Verificando el pago…",
+  "billing.checkout.success.verifying.description": "Esto suele tardar unos segundos. Mantenga esta página abierta.",
+  "billing.checkout.success.ready.title": "Pago confirmado",
+  "billing.checkout.success.ready.description": "Su acceso está listo. ¡Comience a aprender!",
+  "billing.checkout.success.ready.continue": "Continuar",
+  "billing.checkout.success.timeout.title": "Aún procesando",
+  "billing.checkout.success.timeout.description": "Su pago puede seguir procesándose. Revise la configuración de facturación en un momento.",
+  "billing.checkout.success.timeout.billingLink": "Abrir configuración de facturación",
+  "billing.checkout.cancel.title": "Pago cancelado",
+  "billing.checkout.cancel.description": "No se realizó ningún cargo. Puede volver al catálogo de cursos cuando esté listo.",
+  "billing.checkout.cancel.backToCourses": "Volver a los cursos"
+}

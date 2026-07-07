@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Verifies translation key parity: every key in en must exist in es and fr.
+ * Verifies translation key parity: every key in en must exist in es, fr, and ar.
  * Fails CI when missing keys exceed I18N_MAX_MISSING_KEYS (default 0).
  */
 import { readdir, readFile } from 'node:fs/promises'
@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'public', 'locales')
 const baseLocale = 'en'
-const requiredLocales = ['es', 'fr']
+const requiredLocales = ['es', 'fr', 'ar']
 const maxMissing = Number.parseInt(process.env.I18N_MAX_MISSING_KEYS ?? '0', 10)
 
 function flattenKeys(obj, prefix = '') {
@@ -66,4 +66,6 @@ if (failures > 0) {
   console.warn(`[i18n] ${failures} missing key(s) within threshold ${maxMissing}`)
 }
 
-console.log(`[i18n] locale parity OK for ${namespaces.length} namespace(s) (${requiredLocales.join(', ')} vs en)`)
+console.log(
+  `[i18n] locale parity OK for ${namespaces.length} namespace(s) (${requiredLocales.join(', ')} vs en)`,
+)

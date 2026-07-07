@@ -1,0 +1,19 @@
+{
+  "parent.dashboard.badge": "Vista de padre/madre",
+  "parent.dashboard.title": "Panel familiar",
+  "parent.dashboard.description": "Revise los cursos, calificaciones y trabajo próximo de los estudiantes vinculados. Esta vista es de solo lectura; contacte al administrador escolar si falta un hijo.",
+  "parent.dashboard.conferencesLink": "Reservar conferencias de padres y maestros",
+  "parent.dashboard.errors.loadChildren": "No se pudieron cargar los hijos.",
+  "parent.dashboard.errors.loadStudentData": "No se pudieron cargar los datos del estudiante.",
+  "parent.dashboard.noChildren": "Aún no hay hijos vinculados. Contacte al administrador escolar para conectar su cuenta con un estudiante.",
+  "parent.dashboard.selectStudent": "Seleccionar estudiante",
+  "parent.dashboard.viewingAs": "Viendo como padre/madre de <strong>{{name}}</strong> — solo lectura.",
+  "parent.dashboard.grades.title": "Calificaciones por curso",
+  "parent.dashboard.grades.loading": "Cargando…",
+  "parent.dashboard.grades.empty": "Aún no hay elementos calificados.",
+  "parent.dashboard.grades.noScores": "No hay puntuaciones publicadas.",
+  "parent.dashboard.assignments.title": "Tareas y cuestionarios",
+  "parent.dashboard.assignments.empty": "No se encontraron tareas publicadas.",
+  "parent.dashboard.assignments.due": "Vence {date}",
+  "parent.dashboard.inboxHint": "Envíe un mensaje a un instructor desde la <inboxLink>Bandeja de entrada</inboxLink>."
+}

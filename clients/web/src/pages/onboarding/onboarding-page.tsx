@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Trans, useTranslation } from 'react-i18next'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { getAccountType } from '../../lib/auth'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -18,7 +19,10 @@ import { OnboardingShell } from './onboarding-shell'
 
 type WizardStep = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
+const EXPERIENCE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const satisfies readonly PriorKnowledgeLevel[]
+
 export default function OnboardingPage() {
+  const { t } = useTranslation('onboarding')
   const navigate = useNavigate()
   const { ffOnboardingFlow, gdprModuleEnabled, loading: featuresLoading } = usePlatformFeatures()
   const [step, setStep] = useState<WizardStep>(0)
@@ -98,7 +102,7 @@ export default function OnboardingPage() {
   if (loading || featuresLoading) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-slate-50 dark:bg-neutral-950">
-        <p className="text-sm text-slate-500 dark:text-neutral-400">Loading onboarding…</p>
+        <p className="text-sm text-slate-500 dark:text-neutral-400">{t('onboarding.loading')}</p>
       </div>
     )
   }
@@ -111,7 +115,7 @@ export default function OnboardingPage() {
       setGoals(row)
       setStep(nextStep)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save progress.')
+      setError(err instanceof Error ? err.message : t('onboarding.errors.saveProgress'))
     } finally {
       setSubmitting(false)
     }
@@ -136,7 +140,7 @@ export default function OnboardingPage() {
       setGoals(row)
       setStep(6)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not complete onboarding.')
+      setError(err instanceof Error ? err.message : t('onboarding.errors.complete'))
     } finally {
       setSubmitting(false)
     }
@@ -149,7 +153,7 @@ export default function OnboardingPage() {
       await postOnboarding({ skipAll: true })
       navigate('/', { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not skip onboarding.')
+      setError(err instanceof Error ? err.message : t('onboarding.errors.skip'))
     } finally {
       setSubmitting(false)
     }
@@ -163,11 +167,9 @@ export default function OnboardingPage() {
 
   if (step === 0) {
     return (
-      <OnboardingShell step={0} title="Welcome to Lextures">
+      <OnboardingShell step={0} title={t('onboarding.welcome.title')}>
         {errorBanner}
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
-          Let&apos;s personalize your learning path in about five minutes. You can skip any step.
-        </p>
+        <p className="text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.welcome.description')}</p>
         <div className="mt-6 flex flex-wrap gap-3">
           <button
             type="button"
@@ -175,7 +177,7 @@ export default function OnboardingPage() {
             onClick={() => void saveStep(1)}
             className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
           >
-            Let&apos;s get started
+            {t('onboarding.welcome.start')}
             <ArrowRight className="h-4 w-4" aria-hidden />
           </button>
           <button
@@ -184,7 +186,7 @@ export default function OnboardingPage() {
             onClick={() => void skipAll()}
             className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
           >
-            Skip for now
+            {t('onboarding.welcome.skip')}
           </button>
         </div>
       </OnboardingShell>
@@ -193,38 +195,38 @@ export default function OnboardingPage() {
 
   if (step === 1) {
     return (
-      <OnboardingShell step={1} title="What do you want to learn?" onBack={() => setStep(0)}>
+      <OnboardingShell step={1} title={t('onboarding.goal.title')} onBack={() => setStep(0)}>
         {errorBanner}
-        <p className="text-sm text-slate-600 dark:text-neutral-400">Pick a topic and describe your goal.</p>
+        <p className="text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.goal.description')}</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {ONBOARDING_TOPICS.map((t) => (
+          {ONBOARDING_TOPICS.map((topicOption) => (
             <button
-              key={t.id}
+              key={topicOption.id}
               type="button"
-              onClick={() => setTopic(t.id)}
+              onClick={() => setTopic(topicOption.id)}
               className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
-                topic === t.id
+                topic === topicOption.id
                   ? 'border-indigo-600 bg-indigo-50 text-indigo-800 dark:border-indigo-400 dark:bg-indigo-950 dark:text-indigo-100'
                   : 'border-slate-200 text-slate-700 dark:border-neutral-600 dark:text-neutral-300'
               }`}
             >
-              {t.label}
+              {topicOption.label}
             </button>
           ))}
         </div>
         <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="goal-text">
-          Your goal
+          {t('onboarding.goal.label')}
         </label>
         <input
           id="goal-text"
           type="text"
           value={goalText}
           onChange={(e) => setGoalText(e.target.value)}
-          placeholder="e.g. I want to learn Python by July"
+          placeholder={t('onboarding.goal.placeholder')}
           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
         />
         <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="target-date">
-          Target date (optional)
+          {t('onboarding.goal.targetDate')}
         </label>
         <input
           id="target-date"
@@ -245,7 +247,7 @@ export default function OnboardingPage() {
           }
           className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
-          Continue
+          {t('onboarding.goal.continue')}
           <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </OnboardingShell>
@@ -254,18 +256,12 @@ export default function OnboardingPage() {
 
   if (step === 2) {
     return (
-      <OnboardingShell step={2} title="Your experience level" onBack={() => setStep(1)}>
+      <OnboardingShell step={2} title={t('onboarding.experience.title')} onBack={() => setStep(1)}>
         {errorBanner}
         <fieldset>
-          <legend className="sr-only">Prior knowledge</legend>
+          <legend className="sr-only">{t('onboarding.experience.legend')}</legend>
           <div className="space-y-2">
-            {(
-              [
-                ['beginner', 'Beginner', 'I am new to this topic'],
-                ['intermediate', 'Some experience', 'I know the basics'],
-                ['advanced', 'Advanced', 'I want to deepen existing skills'],
-              ] as const
-            ).map(([value, label, hint]) => (
+            {EXPERIENCE_LEVELS.map((value) => (
               <label
                 key={value}
                 className={`flex cursor-pointer flex-col rounded-xl border p-4 ${
@@ -281,9 +277,13 @@ export default function OnboardingPage() {
                     checked={priorLevel === value}
                     onChange={() => setPriorLevel(value)}
                   />
-                  <span className="font-medium text-slate-900 dark:text-neutral-100">{label}</span>
+                  <span className="font-medium text-slate-900 dark:text-neutral-100">
+                    {t(`onboarding.experience.${value}.label`)}
+                  </span>
                 </span>
-                <span className="mt-1 pl-6 text-xs text-slate-500 dark:text-neutral-400">{hint}</span>
+                <span className="mt-1 pl-6 text-xs text-slate-500 dark:text-neutral-400">
+                  {t(`onboarding.experience.${value}.hint`)}
+                </span>
               </label>
             ))}
           </div>
@@ -294,7 +294,7 @@ export default function OnboardingPage() {
           onClick={() => void saveStep(3, { priorKnowledgeLevel: priorLevel })}
           className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
-          Continue
+          {t('onboarding.goal.continue')}
           <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </OnboardingShell>
@@ -304,15 +304,16 @@ export default function OnboardingPage() {
   if (step === 3) {
     const q = questions[questionIndex]
     return (
-      <OnboardingShell step={3} title="Quick placement quiz (optional)" onBack={() => setStep(2)}>
+      <OnboardingShell step={3} title={t('onboarding.diagnostic.title')} onBack={() => setStep(2)}>
         {errorBanner}
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
-          Five short questions help us suggest the right starting course. You can skip without penalty.
-        </p>
+        <p className="text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.diagnostic.description')}</p>
         {q ? (
           <div className="mt-4">
             <p className="text-xs text-slate-500 dark:text-neutral-400">
-              Question {questionIndex + 1} of {questions.length}
+              {t('onboarding.diagnostic.questionProgress', {
+                current: questionIndex + 1,
+                total: questions.length,
+              })}
             </p>
             <p className="mt-2 font-medium text-slate-900 dark:text-neutral-100">{q.prompt}</p>
             <div className="mt-3 space-y-2">
@@ -343,7 +344,7 @@ export default function OnboardingPage() {
                   onClick={() => setQuestionIndex((i) => i + 1)}
                   className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
                 >
-                  Next question
+                  {t('onboarding.diagnostic.nextQuestion')}
                 </button>
               ) : (
                 <button
@@ -352,7 +353,7 @@ export default function OnboardingPage() {
                   onClick={() => void saveStep(4, { diagnosticAnswers: answers })}
                   className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
                 >
-                  Continue
+                  {t('onboarding.goal.continue')}
                 </button>
               )}
             </div>
@@ -364,7 +365,7 @@ export default function OnboardingPage() {
           onClick={() => void saveStep(4, { skipDiagnostic: true })}
           className="mt-4 text-sm font-medium text-slate-600 underline hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
         >
-          Skip diagnostic
+          {t('onboarding.diagnostic.skip')}
         </button>
       </OnboardingShell>
     )
@@ -372,10 +373,10 @@ export default function OnboardingPage() {
 
   if (step === 4) {
     return (
-      <OnboardingShell step={4} title="Study habits" onBack={() => setStep(3)}>
+      <OnboardingShell step={4} title={t('onboarding.habits.title')} onBack={() => setStep(3)}>
         {errorBanner}
         <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="daily-minutes">
-          Daily study goal (minutes)
+          {t('onboarding.habits.dailyGoal')}
         </label>
         <input
           id="daily-minutes"
@@ -396,16 +397,16 @@ export default function OnboardingPage() {
             />
             <span>
               <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
-                Send me study reminders
+                {t('onboarding.habits.reminders.label')}
               </span>
               <span className="block text-xs text-slate-500 dark:text-neutral-400">
-                Separate from terms of service. Unchecked by default.
+                {t('onboarding.habits.reminders.hint')}
               </span>
             </span>
           </label>
           {reminderOptIn ? (
             <label className="mt-3 block text-sm text-slate-700 dark:text-neutral-300" htmlFor="reminder-time">
-              Reminder time
+              {t('onboarding.habits.reminders.time')}
               <input
                 id="reminder-time"
                 type="time"
@@ -422,7 +423,7 @@ export default function OnboardingPage() {
           onClick={() => void saveStep(5, { dailyMinutes, reminderOptIn, reminderTime })}
           className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
-          Continue
+          {t('onboarding.goal.continue')}
           <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </OnboardingShell>
@@ -431,7 +432,7 @@ export default function OnboardingPage() {
 
   if (step === 5) {
     return (
-      <OnboardingShell step={5} title="Consent" onBack={() => setStep(4)}>
+      <OnboardingShell step={5} title={t('onboarding.consent.title')} onBack={() => setStep(4)}>
         {errorBanner}
         <div className="space-y-4">
           <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 dark:border-neutral-700">
@@ -443,11 +444,18 @@ export default function OnboardingPage() {
               required
             />
             <span className="text-sm text-slate-700 dark:text-neutral-300">
-              I accept the{' '}
-              <Link to="/trust" className="font-medium text-indigo-600 underline dark:text-indigo-400">
-                Terms of Service
-              </Link>{' '}
-              (required)
+              <Trans
+                i18nKey="onboarding.consent.terms"
+                ns="onboarding"
+                components={{
+                  termsLink: (
+                    <Link
+                      to="/trust"
+                      className="font-medium text-indigo-600 underline dark:text-indigo-400"
+                    />
+                  ),
+                }}
+              />
             </span>
           </label>
           {gdprModuleEnabled ? (
@@ -458,9 +466,7 @@ export default function OnboardingPage() {
                 onChange={(e) => setMarketingConsent(e.target.checked)}
                 className="mt-1"
               />
-              <span className="text-sm text-slate-700 dark:text-neutral-300">
-                I agree to receive marketing communications (optional, unchecked by default)
-              </span>
+              <span className="text-sm text-slate-700 dark:text-neutral-300">{t('onboarding.consent.marketing')}</span>
             </label>
           ) : null}
         </div>
@@ -470,7 +476,7 @@ export default function OnboardingPage() {
           onClick={() => void finishOnboarding()}
           className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
-          Finish setup
+          {t('onboarding.consent.finish')}
           <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </OnboardingShell>
@@ -480,15 +486,13 @@ export default function OnboardingPage() {
   const recommended = goals?.recommendedCourseTitle ?? goals?.recommendedCourseCode
 
   return (
-    <OnboardingShell step={6} title="You're all set!">
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
-        Your dashboard is personalized from day one.
-      </p>
+    <OnboardingShell step={6} title={t('onboarding.done.title')}>
+      <p className="text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.done.description')}</p>
       {recommended ? (
         <article className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/80 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/30">
           <div className="flex items-center gap-2 text-xs font-medium text-emerald-800 dark:text-emerald-200">
             <Sparkles className="h-4 w-4" aria-hidden />
-            Start here
+            {t('onboarding.done.startHere')}
           </div>
           <p className="mt-2 font-semibold text-slate-900 dark:text-neutral-50">{recommended}</p>
           {goals?.recommendedCourseCode ? (
@@ -496,21 +500,19 @@ export default function OnboardingPage() {
               to={`/courses/${encodeURIComponent(goals.recommendedCourseCode)}`}
               className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-600 dark:text-emerald-300"
             >
-              Open course
+              {t('onboarding.done.openCourse')}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           ) : null}
         </article>
       ) : (
-        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
-          Browse the catalog to find courses matching your goal.
-        </p>
+        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.done.browseCatalog')}</p>
       )}
       <Link
         to="/"
         className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
       >
-        Go to Dashboard
+        {t('onboarding.done.goToDashboard')}
         <ArrowRight className="h-4 w-4" aria-hidden />
       </Link>
     </OnboardingShell>

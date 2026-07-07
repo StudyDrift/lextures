@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { formatDate, formatDateTime } from '../../lib/format'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -131,12 +133,12 @@ function countEmptyGradeCells(grid: CourseGradebookGridResponse): number {
   return n
 }
 
-function courseSectionSubtitle(course: CoursePublic): string | null {
+function courseSectionSubtitle(course: CoursePublic, t: TFunction<'dashboard'>): string | null {
   if (course.sectionsEnabled !== true) return null
   const code = course.viewerSectionCode?.trim()
   if (!code) return null
   const name = course.viewerSectionName?.trim()
-  return name ? `Section ${code} — ${name}` : `Section ${code}`
+  return name ? t('dashboard.section.withName', { code, name }) : t('dashboard.section.codeOnly', { code })
 }
 
 function dueThisWeekItems(
@@ -161,15 +163,16 @@ function dueThisWeekItems(
 function gradeSnippetForItem(
   my: CourseMyGradesResponse | null,
   itemId: string,
+  t: TFunction<'dashboard'>,
 ): { label: string; pct: number } | null {
   if (!my) return null
   const col = my.columns.find((c) => c.id === itemId)
   if (!col || col.maxPoints == null || col.maxPoints <= 0) return null
   const raw = my.grades[itemId]
   const earned = raw != null && String(raw).trim() !== '' ? Number.parseFloat(String(raw).replace(/,/g, '')) : NaN
-  if (!Number.isFinite(earned)) return { label: 'Not submitted', pct: 0 }
+  if (!Number.isFinite(earned)) return { label: t('dashboard.grades.notSubmitted'), pct: 0 }
   const pct = Math.max(0, Math.min(100, (earned / col.maxPoints) * 100))
-  return { label: `${earned}/${col.maxPoints} pts`, pct }
+  return { label: t('dashboard.grades.points', { earned, max: col.maxPoints }), pct }
 }
 
 type AnnouncementPreview = {
@@ -182,7 +185,10 @@ type AnnouncementPreview = {
   pinned: boolean
 }
 
-async function loadAnnouncementPreview(course: CoursePublic): Promise<AnnouncementPreview | null> {
+async function loadAnnouncementPreview(
+  course: CoursePublic,
+  t: TFunction<'dashboard'>,
+): Promise<AnnouncementPreview | null> {
   if (course.feedEnabled === false) return null
   try {
     const channels = await fetchFeedChannels(course.courseCode)
@@ -211,7 +217,7 @@ async function loadAnnouncementPreview(course: CoursePublic): Promise<Announceme
       courseTitle: course.title,
       channelName: preferred.name,
       snippet: snip,
-      author: pick.authorDisplayName?.trim() || pick.authorEmail || 'Someone',
+      author: pick.authorDisplayName?.trim() || pick.authorEmail || t('dashboard.announcements.authorFallback'),
       createdAt: pick.createdAt,
       pinned: Boolean(pick.pinnedAt),
     }
@@ -220,7 +226,7 @@ async function loadAnnouncementPreview(course: CoursePublic): Promise<Announceme
   }
 }
 
-async function loadStudentRow(course: CoursePublic) {
+async function loadStudentRow(course: CoursePublic, t: TFunction<'dashboard'>) {
   let structure: CourseStructureItem[] = []
   let myGrades: CourseMyGradesResponse | null = null
   try {
@@ -238,7 +244,7 @@ async function loadStudentRow(course: CoursePublic) {
   }
   let announcement: AnnouncementPreview | null = null
   if (course.feedEnabled !== false) {
-    announcement = await loadAnnouncementPreview(course)
+    announcement = await loadAnnouncementPreview(course, t)
   }
   return { course, structure, myGrades, announcement }
 }
@@ -276,6 +282,7 @@ async function loadStaffRow(
 }
 
 export default function Dashboard() {
+  const { t } = useTranslation('dashboard')
   const navigate = useNavigate()
   useEffect(() => {
     if (getAccountType() === 'parent') {
@@ -417,14 +424,14 @@ export default function Dashboard() {
       } catch {
         if (!cancelled) {
           setCatalog([])
-          setCatalogError('Could not load courses.')
+          setCatalogError(t('dashboard.errors.loadCourses'))
         }
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [coursesRevision])
+  }, [coursesRevision, t])
 
   useEffect(() => {
     if (!ffCatalogIntegration) {
@@ -487,7 +494,7 @@ export default function Dashboard() {
         const { initial: initialStudent, deferred: deferredStudent } = splitCoursesForPrefetch(studentCourses)
         const { initial: initialStaff, deferred: deferredStaff } = splitCoursesForPrefetch(staffCourses)
 
-        const sRows = await mapPool(initialStudent, 3, (course) => loadStudentRow(course))
+        const sRows = await mapPool(initialStudent, 3, (course) => loadStudentRow(course, t))
         if (detailGenRef.current !== gen) return
 
         const tRows = await mapPool(initialStaff, 3, (course) => loadStaffRow(course, allows))
@@ -501,12 +508,12 @@ export default function Dashboard() {
         performance.mark('dashboard:rows-loaded')
       } catch {
         if (detailGenRef.current !== gen) return
-        setDetailError('Could not load dashboard details.')
+        setDetailError(t('dashboard.errors.loadDetails'))
         setCourses(list)
         setDetailsLoading(false)
       }
     })()
-  }, [catalog, permLoading, allows])
+  }, [catalog, permLoading, allows, t])
 
   const loadMoreCourses = () => {
     if (loadingMoreCourses) return
@@ -518,7 +525,7 @@ export default function Dashboard() {
     void (async () => {
       try {
         const [moreStudent, moreStaff] = await Promise.all([
-          mapPool(pendingStudent, 3, (course) => loadStudentRow(course)),
+          mapPool(pendingStudent, 3, (course) => loadStudentRow(course, t)),
           mapPool(pendingStaff, 3, (course) => loadStaffRow(course, allows)),
         ])
         setStudentRows((prev) => [...prev, ...moreStudent])
@@ -643,8 +650,8 @@ export default function Dashboard() {
 
   return (
     <LmsPage
-      title="Dashboard"
-      description="Deadlines, grades, and teaching signals across your courses."
+      title={t('dashboard.title')}
+      description={t('dashboard.description')}
     >
       {catalogError && (
         <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-100">
@@ -661,18 +668,18 @@ export default function Dashboard() {
 
       {catalog && catalog.length === 0 && !catalogError && (
         <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50/80 px-6 py-8 text-center dark:border-neutral-700 dark:bg-neutral-900/50">
-          <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">No courses yet</p>
+          <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">{t('dashboard.empty.noCourses')}</p>
           <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
             {showCourseCreateActions
-              ? 'Join a course from an invite link, or create one if you teach.'
-              : 'Join a course from an invite link. When an instructor adds you, courses will appear here.'}
+              ? t('dashboard.empty.joinOrCreate')
+              : t('dashboard.empty.joinOnly')}
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link
               to="/courses"
               className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
             >
-              Browse courses
+              {t('dashboard.empty.browseCourses')}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
@@ -681,14 +688,14 @@ export default function Dashboard() {
 
       {hasCourses && (
         <div data-onboarding="dashboard-main" className="mt-8 space-y-10">
-          <section aria-label="Quick links and unread">
+          <section aria-label={t('dashboard.quickLinks.ariaLabel')}>
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/inbox"
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
               >
                 <Inbox className="h-4 w-4 text-indigo-500" aria-hidden />
-                Inbox
+                {t('dashboard.quickLinks.inbox')}
                 {inboxUnread > 0 ? (
                   <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-xs font-semibold text-white">
                     {inboxUnread > 99 ? '99+' : inboxUnread}
@@ -700,7 +707,7 @@ export default function Dashboard() {
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
               >
                 <BookOpen className="h-4 w-4 text-indigo-500" aria-hidden />
-                All courses
+                {t('dashboard.quickLinks.allCourses')}
               </Link>
               {ffEportfolio ? (
                 <Link
@@ -708,7 +715,7 @@ export default function Dashboard() {
                   className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
                 >
                   <FolderOpen className="h-4 w-4 text-indigo-500" aria-hidden />
-                  My Portfolio
+                  {t('dashboard.quickLinks.myPortfolio')}
                 </Link>
               ) : null}
               {ffAdvisingIntegration ? (
@@ -717,18 +724,18 @@ export default function Dashboard() {
                   className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
                 >
                   <GraduationCap className="h-4 w-4 text-indigo-500" aria-hidden />
-                  Advising notes
+                  {t('dashboard.quickLinks.advisingNotes')}
                 </Link>
               ) : null}
               {totalFeedUnread > 0 ? (
                 <span className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-medium text-teal-900 dark:border-teal-900/50 dark:bg-teal-950/40 dark:text-teal-50">
                   <MessageCircle className="h-4 w-4" aria-hidden />
-                  {totalFeedUnread} new feed {totalFeedUnread === 1 ? 'post' : 'posts'} while browsing courses
+                  {t('dashboard.quickLinks.feedUnread', { count: totalFeedUnread })}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 text-xs text-slate-500 dark:border-neutral-800 dark:bg-neutral-900/40 dark:text-neutral-500">
                   <MessageCircle className="h-4 w-4" aria-hidden />
-                  Open a course feed to get live unread counts here.
+                  {t('dashboard.quickLinks.feedUnreadHint')}
                 </span>
               )}
             </div>
@@ -739,14 +746,17 @@ export default function Dashboard() {
           {detailsLoading && <DashboardCourseSectionSkeleton />}
 
           {whatsNext && anyStudentExperience && (
-            <section aria-label="Recommended next step">
+            <section aria-label={t('dashboard.whatsNext.ariaLabel')}>
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-                What&apos;s next
+                {t('dashboard.whatsNext.title')}
               </h2>
               {whatsNext.primary ? (
                 <article
                   role="article"
-                  aria-label={`Recommended: ${whatsNext.primary.title} (${surfaceLabel(whatsNext.primary.surface)})`}
+                  aria-label={t('dashboard.whatsNext.recommendedAria', {
+                    title: whatsNext.primary.title,
+                    surface: surfaceLabel(whatsNext.primary.surface),
+                  })}
                   className="mt-3 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/90 to-white p-5 shadow-sm dark:border-violet-900/40 dark:from-violet-950/30 dark:to-neutral-900"
                 >
                   <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-violet-800 dark:text-violet-200">
@@ -762,7 +772,7 @@ export default function Dashboard() {
                   <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">{whatsNext.primary.reason}</p>
                   {whatsNext.degraded ? (
                     <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">
-                      Suggestions may be briefly out of date while we refresh them.
+                      {t('dashboard.whatsNext.degraded')}
                     </p>
                   ) : null}
                   <Link
@@ -780,7 +790,7 @@ export default function Dashboard() {
                     }}
                     className="mt-4 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-violet-500"
                   >
-                    Go
+                    {t('dashboard.whatsNext.go')}
                     <ArrowRight className="h-4 w-4" aria-hidden />
                   </Link>
                   {whatsNext.chips.length > 0 ? (
@@ -809,7 +819,7 @@ export default function Dashboard() {
                 </article>
               ) : (
                 <p className="mt-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-4 text-sm text-slate-700 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-200">
-                  You&apos;re all caught up in {whatsNext.course.title}. Check back after your next activity.
+                  {t('dashboard.whatsNext.caughtUp', { courseTitle: whatsNext.course.title })}
                 </p>
               )}
             </section>
@@ -834,19 +844,21 @@ export default function Dashboard() {
           {ffResearchConsent && anyStudentExperience ? <ConsentPrompt /> : null}
 
           {ffCeuTracking ? (
-            <section aria-label="Continuing education">
+            <section aria-label={t('dashboard.continuingEducation.ariaLabel')}>
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-100 bg-teal-50/80 px-5 py-4 dark:border-teal-900/40 dark:bg-teal-950/30">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Continuing education</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    {t('dashboard.continuingEducation.title')}
+                  </p>
                   <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
-                    Track contact hours and download your CE transcript.
+                    {t('dashboard.continuingEducation.description')}
                   </p>
                 </div>
                 <Link
                   to="/me/ce-transcript"
                   className="inline-flex items-center gap-1 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white hover:bg-teal-700"
                 >
-                  CE transcript
+                  {t('dashboard.continuingEducation.transcriptLink')}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
@@ -854,19 +866,21 @@ export default function Dashboard() {
           ) : null}
 
           {ffCoCurricularTranscript ? (
-            <section aria-label="My achievements">
+            <section aria-label={t('dashboard.achievements.ariaLabel')}>
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-violet-100 bg-violet-50/80 px-5 py-4 dark:border-violet-900/40 dark:bg-violet-950/30">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">My achievements</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    {t('dashboard.achievements.title')}
+                  </p>
                   <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
-                    Build and share your comprehensive learner record.
+                    {t('dashboard.achievements.description')}
                   </p>
                 </div>
                 <Link
                   to="/me/ccr"
                   className="inline-flex items-center gap-1 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700"
                 >
-                  Open CCR
+                  {t('dashboard.achievements.openCcr')}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
@@ -874,19 +888,21 @@ export default function Dashboard() {
           ) : null}
 
           {ffCompletionCredentials ? (
-            <section aria-label="My credentials">
+            <section aria-label={t('dashboard.credentials.ariaLabel')}>
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/80 px-5 py-4 dark:border-emerald-900/40 dark:bg-emerald-950/30">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">My credentials</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    {t('dashboard.credentials.title')}
+                  </p>
                   <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
-                    Download certificates and share them to LinkedIn.
+                    {t('dashboard.credentials.description')}
                   </p>
                 </div>
                 <Link
                   to="/me/credentials"
                   className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
                 >
-                  View credentials
+                  {t('dashboard.credentials.viewLink')}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
@@ -896,18 +912,20 @@ export default function Dashboard() {
           <NotebookTasksCard courseTitles={courseTitles} />
 
           {reviewStats != null && (
-            <section aria-label="Spaced repetition review">
+            <section aria-label={t('dashboard.review.ariaLabel')}>
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-100 bg-amber-50/80 px-5 py-4 dark:border-amber-900/40 dark:bg-amber-950/30">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Review practice</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    {t('dashboard.review.title')}
+                  </p>
                   <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
                     {reviewStats.dueToday > 0
-                      ? `${reviewStats.dueToday} item${reviewStats.dueToday === 1 ? '' : 's'} due today`
-                      : 'No items due right now'}
+                      ? t('dashboard.review.dueToday', { count: reviewStats.dueToday })
+                      : t('dashboard.review.noneDue')}
                     {reviewStats.streak > 0 ? (
                       <span className="ms-2 inline-flex items-center gap-1 font-medium text-amber-800 dark:text-amber-200">
                         <Flame className="h-3.5 w-3.5" aria-hidden />
-                        {reviewStats.streak}-day streak
+                        {t('dashboard.review.streak', { count: reviewStats.streak })}
                       </span>
                     ) : null}
                   </p>
@@ -916,7 +934,9 @@ export default function Dashboard() {
                   to="/review"
                   className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-amber-600"
                 >
-                  {reviewStats.dueToday > 0 ? 'Start review' : 'Open review'}
+                  {reviewStats.dueToday > 0
+                    ? t('dashboard.review.startReview')
+                    : t('dashboard.review.openReview')}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
@@ -924,9 +944,9 @@ export default function Dashboard() {
           )}
 
           {ffAcademicCalendar && upcomingCalendarEvents.length > 0 && (
-            <section aria-label="Upcoming dates">
+            <section aria-label={t('dashboard.upcomingDates.ariaLabel')}>
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-                Upcoming dates
+                {t('dashboard.upcomingDates.title')}
               </h2>
               <ul className="mt-4 space-y-2">
                 {upcomingCalendarEvents.map((ev) => (
@@ -948,16 +968,16 @@ export default function Dashboard() {
           )}
 
           {ffCatalogIntegration && schedule.length > 0 && (
-            <section aria-label="My schedule">
+            <section aria-label={t('dashboard.schedule.ariaLabel')}>
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-                  My schedule
+                  {t('dashboard.schedule.title')}
                 </h2>
                 <Link
                   to="/catalog"
                   className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
                 >
-                  Browse catalog
+                  {t('dashboard.schedule.browseCatalog')}
                 </Link>
               </div>
               <ul className="mt-4 space-y-3">
@@ -973,11 +993,11 @@ export default function Dashboard() {
                     : '/catalog'
                   const regLabel =
                     entry.registrationStatus === 'registered'
-                      ? 'Registered'
+                      ? t('dashboard.schedule.registration.registered')
                       : entry.registrationStatus === 'waitlisted'
-                        ? 'Waitlisted'
+                        ? t('dashboard.schedule.registration.waitlisted')
                         : entry.registrationStatus === 'auditing'
-                          ? 'Auditing'
+                          ? t('dashboard.schedule.registration.auditing')
                           : entry.registrationStatus
                   return (
                     <li key={sec.id}>
@@ -989,7 +1009,7 @@ export default function Dashboard() {
                           <p className="text-xs font-medium text-slate-500 dark:text-neutral-400">
                             {sec.subject} {sec.courseNumber}
                             {sec.sectionNumber ? ` · ${sec.sectionNumber}` : ''}
-                            {sec.crn ? ` · CRN ${sec.crn}` : ''}
+                            {sec.crn ? t('dashboard.schedule.crn', { crn: sec.crn }) : ''}
                           </p>
                           <p className="truncate font-semibold text-slate-900 dark:text-neutral-100">
                             {entry.courseTitle ?? sec.title}
@@ -1014,9 +1034,9 @@ export default function Dashboard() {
           <SelfPacedDashboardSection />
 
           {continueTarget && (
-            <section aria-label="Continue learning">
+            <section aria-label={t('dashboard.continue.ariaLabel')}>
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-                Continue
+                {t('dashboard.continue.title')}
               </h2>
               <div className="mt-3 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 to-white p-5 shadow-sm dark:border-indigo-900/40 dark:from-indigo-950/40 dark:to-neutral-900">
                 <p className="text-xs font-medium text-indigo-700 dark:text-indigo-200">
@@ -1030,7 +1050,7 @@ export default function Dashboard() {
                   to={hrefForLastVisited(continueTarget.courseCode, continueTarget.kind, continueTarget.itemId)}
                   className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                 >
-                  Continue
+                  {t('dashboard.continue.button')}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
@@ -1038,15 +1058,19 @@ export default function Dashboard() {
           )}
 
           {anyStudentExperience && (
-            <section aria-label="Student overview">
+            <section aria-label={t('dashboard.learning.ariaLabel')}>
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-                  Learning
+                  {t('dashboard.learning.title')}
                 </h2>
                 <button
                   onClick={() => toggleSection('student-overview')}
                   className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
-                  aria-label={collapsedSections['student-overview'] ? 'Expand Learning' : 'Collapse Learning'}
+                  aria-label={
+                    collapsedSections['student-overview']
+                      ? t('dashboard.learning.expandAria')
+                      : t('dashboard.learning.collapseAria')
+                  }
                 >
                   {collapsedSections['student-overview'] ? (
                     <ChevronDown className="h-4 w-4" />
@@ -1061,7 +1085,9 @@ export default function Dashboard() {
                   <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <p className="text-base font-semibold text-slate-900 dark:text-neutral-100">Due this week</p>
+                        <p className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+                          {t('dashboard.learning.dueThisWeek')}
+                        </p>
                         <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
                           {formatDate(weekStart, { dateStyle: 'medium' })} –{' '}
                           {formatDate(weekEnd, { dateStyle: 'medium' })}
@@ -1069,7 +1095,7 @@ export default function Dashboard() {
                       </div>
                       <div className="min-w-[140px] flex-1 max-w-xs">
                         <div className="flex justify-between text-[0.65rem] font-medium uppercase tracking-wide text-slate-400 dark:text-neutral-500">
-                          <span>Week</span>
+                          <span>{t('dashboard.learning.weekLabel')}</span>
                           <span>{Math.round(weekFrac * 100)}%</span>
                         </div>
                         <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800">
@@ -1088,7 +1114,7 @@ export default function Dashboard() {
                         })
                         .slice(0, 24)
                         .map(({ row, it }) => {
-                          const g = gradeSnippetForItem(row.myGrades, it.id)
+                          const g = gradeSnippetForItem(row.myGrades, it.id, t)
                           const base = `/courses/${encodeURIComponent(row.course.courseCode)}`
                           const href =
                             it.kind === 'quiz'
@@ -1105,8 +1131,8 @@ export default function Dashboard() {
                                 <div className="min-w-0">
                                   <p className="text-xs font-medium text-slate-500 dark:text-neutral-400">
                                     {row.course.title}
-                                    {courseSectionSubtitle(row.course)
-                                      ? ` · ${courseSectionSubtitle(row.course)}`
+                                    {courseSectionSubtitle(row.course, t)
+                                      ? ` · ${courseSectionSubtitle(row.course, t)}`
                                       : ''}
                                   </p>
                                   <p className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
@@ -1142,14 +1168,14 @@ export default function Dashboard() {
                     </ul>
                     {studentRows.every((r) => dueThisWeekItems(r.structure, weekStart, weekEnd).length === 0) && (
                       <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
-                        Nothing due this calendar week.{' '}
+                        {t('dashboard.learning.nothingDue')}{' '}
                         <Link
                           className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
                           to="/calendar"
                         >
-                          Open calendar
+                          {t('dashboard.learning.openCalendar')}
                         </Link>{' '}
-                        for the full schedule.
+                        {t('dashboard.learning.fullSchedule')}
                       </p>
                     )}
                   </div>
@@ -1201,13 +1227,13 @@ export default function Dashboard() {
                               />
                             ) : null}
                           </div>
-                          {courseSectionSubtitle(row.course) ? (
+                          {courseSectionSubtitle(row.course, t) ? (
                             <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
-                              {courseSectionSubtitle(row.course)}
+                              {courseSectionSubtitle(row.course, t)}
                             </p>
                           ) : null}
                           <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-neutral-500">
-                            Course grade (so far)
+                            {t('dashboard.learning.courseGrade')}
                           </p>
                           <p className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
                             {row.myGrades ? formatFinalPercent(finalPct) : '—'}
@@ -1218,21 +1244,21 @@ export default function Dashboard() {
                               className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
                             >
                               <ClipboardList className="h-3.5 w-3.5" aria-hidden />
-                              Modules
+                              {t('dashboard.learning.modules')}
                             </Link>
                             <Link
                               to={`${base}/feed`}
                               className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
                             >
                               <MessageCircle className="h-3.5 w-3.5" aria-hidden />
-                              Feed
+                              {t('dashboard.learning.feed')}
                             </Link>
                             <Link
                               to={`${base}/my-grades`}
                               className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
                             >
                               <Sparkles className="h-3.5 w-3.5" aria-hidden />
-                              Grades
+                              {t('dashboard.learning.grades')}
                             </Link>
                           </div>
                         </div>
@@ -1242,7 +1268,9 @@ export default function Dashboard() {
 
                   {announcements.length > 0 && (
                     <div className="mt-8">
-                      <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">From your courses</h3>
+                      <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+                        {t('dashboard.learning.announcementsTitle')}
+                      </h3>
                       <ul className="mt-3 space-y-3">
                         {announcements.map((a) => (
                           <li
@@ -1259,7 +1287,7 @@ export default function Dashboard() {
                               </Link>
                               {a.pinned ? (
                                 <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-amber-900 dark:bg-amber-950/60 dark:text-amber-100">
-                                  Pinned
+                                  {t('dashboard.learning.pinned')}
                                 </span>
                               ) : null}
                             </div>
@@ -1284,15 +1312,19 @@ export default function Dashboard() {
           )}
 
           {anyStaffExperience && (
-            <section aria-label="Teaching overview">
+            <section aria-label={t('dashboard.teaching.ariaLabel')}>
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-                  Teaching
+                  {t('dashboard.teaching.title')}
                 </h2>
                 <button
                   onClick={() => toggleSection('teaching-overview')}
                   className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
-                  aria-label={collapsedSections['teaching-overview'] ? 'Expand Teaching' : 'Collapse Teaching'}
+                  aria-label={
+                    collapsedSections['teaching-overview']
+                      ? t('dashboard.teaching.expandAria')
+                      : t('dashboard.teaching.collapseAria')
+                  }
                 >
                   {collapsedSections['teaching-overview'] ? (
                     <ChevronDown className="h-4 w-4" />
@@ -1307,10 +1339,10 @@ export default function Dashboard() {
                   {allGradingBacklog.length > 0 ? (
                     <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50/50 p-5 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/20">
                       <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
-                        Needs grading
+                        {t('dashboard.teaching.needsGrading')}
                       </h3>
                       <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
-                        Open SpeedGrader or grade submissions for assignments with ungraded work.
+                        {t('dashboard.teaching.needsGradingHint')}
                       </p>
                       <div className="mt-3">
                         <GradingBacklogList items={allGradingBacklog} showCourse />
@@ -1331,15 +1363,15 @@ export default function Dashboard() {
                         >
                           {row.course.title}
                         </Link>
-                        {courseSectionSubtitle(row.course) ? (
+                        {courseSectionSubtitle(row.course, t) ? (
                           <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
-                            {courseSectionSubtitle(row.course)}
+                            {courseSectionSubtitle(row.course, t)}
                           </p>
                         ) : null}
                         {row.gradingBacklog.length > 0 ? (
                           <div className="mt-4">
                             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-                              Ungraded submissions
+                              {t('dashboard.teaching.ungradedSubmissions')}
                             </p>
                             <div className="mt-2">
                               <GradingBacklogList items={row.gradingBacklog} />
@@ -1347,19 +1379,23 @@ export default function Dashboard() {
                           </div>
                         ) : (
                           <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">
-                            No ungraded submissions right now.
+                            {t('dashboard.teaching.noUngraded')}
                           </p>
                         )}
                         <dl className="mt-4 space-y-3 text-sm">
                           <div className="flex justify-between gap-3">
-                            <dt className="text-slate-500 dark:text-neutral-400">Gradebook gaps</dt>
+                            <dt className="text-slate-500 dark:text-neutral-400">
+                              {t('dashboard.teaching.gradebookGaps')}
+                            </dt>
                             <dd className="font-semibold text-slate-900 dark:text-neutral-100">
                               {row.emptyGradeCells == null ? (
-                                <span className="text-slate-400">No access</span>
+                                <span className="text-slate-400">{t('dashboard.teaching.noAccess')}</span>
                               ) : (
                                 <>
                                   {row.emptyGradeCells}{' '}
-                                  <span className="font-normal text-slate-500 dark:text-neutral-400">empty cells</span>
+                                  <span className="font-normal text-slate-500 dark:text-neutral-400">
+                                    {t('dashboard.teaching.emptyCells')}
+                                  </span>
                                 </>
                               )}
                             </dd>
@@ -1370,13 +1406,13 @@ export default function Dashboard() {
                             to={`${base}/gradebook`}
                             className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                           >
-                            Open gradebook
+                            {t('dashboard.teaching.openGradebook')}
                           </Link>
                           <Link
                             to={`${base}/modules`}
                             className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
                           >
-                            Modules
+                            {t('dashboard.teaching.modules')}
                           </Link>
                         </div>
                       </div>
@@ -1390,8 +1426,7 @@ export default function Dashboard() {
 
           {!anyStudentExperience && !anyStaffExperience && hasCourses && (
             <p className="text-sm text-slate-500 dark:text-neutral-400">
-              You have courses open, but no learner or instructor enrollments were returned. Open a course from the
-              catalog for full details.
+              {t('dashboard.noEnrollments')}
             </p>
           )}
 
@@ -1404,8 +1439,8 @@ export default function Dashboard() {
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
               >
                 {loadingMoreCourses
-                  ? 'Loading…'
-                  : `Load ${deferredCourseCount} more course${deferredCourseCount === 1 ? '' : 's'}`}
+                  ? t('dashboard.loadMore.loading')
+                  : t('dashboard.loadMore.button', { count: deferredCourseCount })}
               </button>
             </div>
           )}

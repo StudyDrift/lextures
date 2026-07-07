@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { formatDateTime } from '../../../lib/format'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CalendarHeart, Users } from 'lucide-react'
@@ -19,6 +20,7 @@ function childLabel(c: ParentChildSummary): string {
 }
 
 export default function ParentDashboard() {
+  const { t } = useTranslation('parent')
   const { ffConferenceScheduling } = usePlatformFeatures()
   const [params, setParams] = useSearchParams()
   const [children, setChildren] = useState<ParentChildSummary[] | null>(null)
@@ -42,14 +44,14 @@ export default function ParentDashboard() {
         setLoadError(null)
       } catch (e) {
         if (!cancelled) {
-          setLoadError(e instanceof Error ? e.message : 'Could not load children.')
+          setLoadError(e instanceof Error ? e.message : t('parent.dashboard.errors.loadChildren'))
         }
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     if (!children || children.length === 0) return
@@ -75,14 +77,14 @@ export default function ParentDashboard() {
         setAssignments(a.assignments)
       } catch (e) {
         if (!cancelled) {
-          setDetailError(e instanceof Error ? e.message : 'Could not load student data.')
+          setDetailError(e instanceof Error ? e.message : t('parent.dashboard.errors.loadStudentData'))
         }
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [selectedId])
+  }, [selectedId, t])
 
   const selectedChild = useMemo(
     () => children?.find((c) => c.studentUserId === selectedId),
@@ -96,14 +98,13 @@ export default function ParentDashboard() {
       <header className="flex flex-col gap-2 border-b border-slate-200 pb-6 dark:border-neutral-800">
         <div className="flex items-center gap-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
           <Users className="h-4 w-4" aria-hidden />
-          Parent view
+          {t('parent.dashboard.badge')}
         </div>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
-          Family dashboard
+          {t('parent.dashboard.title')}
         </h1>
         <p className="max-w-prose text-sm leading-relaxed text-slate-600 dark:text-neutral-400">
-          Review linked students&apos; courses, grades, and upcoming work. This view is read-only; contact the school
-          admin if a child is missing.
+          {t('parent.dashboard.description')}
         </p>
         {ffConferenceScheduling && (
           <Link
@@ -111,7 +112,7 @@ export default function ParentDashboard() {
             className="mt-2 inline-flex w-fit items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200"
           >
             <CalendarHeart className="h-4 w-4" aria-hidden />
-            Book parent-teacher conferences
+            {t('parent.dashboard.conferencesLink')}
           </Link>
         )}
       </header>
@@ -124,13 +125,13 @@ export default function ParentDashboard() {
 
       {children && children.length === 0 && !loadError && (
         <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
-          No children linked yet. Contact your school administrator to connect your account to a student.
+          {t('parent.dashboard.noChildren')}
         </p>
       )}
 
       {children && children.length > 0 && (
         <>
-          <div role="listbox" aria-label="Select student" className="flex flex-wrap gap-2">
+          <div role="listbox" aria-label={t('parent.dashboard.selectStudent')} className="flex flex-wrap gap-2">
             {children.map((c) => {
               const active = c.studentUserId === selectedId
               return (
@@ -158,7 +159,12 @@ export default function ParentDashboard() {
               aria-live="polite"
               className="sticky top-0 z-10 rounded-md border border-amber-300/80 bg-amber-50 px-4 py-2 text-sm text-amber-950 shadow-sm dark:border-amber-700/60 dark:bg-amber-950/50 dark:text-amber-50"
             >
-              Viewing as parent of <strong className="font-semibold">{displayName}</strong> — read only.
+              <Trans
+                i18nKey="parent.dashboard.viewingAs"
+                ns="parent"
+                values={{ name: displayName }}
+                components={{ strong: <strong className="font-semibold" /> }}
+              />
             </div>
           )}
 
@@ -169,10 +175,14 @@ export default function ParentDashboard() {
           )}
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Grades by course</h2>
-            {!gradesForView && !detailError && <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>}
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+              {t('parent.dashboard.grades.title')}
+            </h2>
+            {!gradesForView && !detailError && (
+              <p className="text-sm text-slate-500 dark:text-neutral-400">{t('parent.dashboard.grades.loading')}</p>
+            )}
             {gradesForView && gradesForView.length === 0 && (
-              <p className="text-sm text-slate-600 dark:text-neutral-400">No graded items yet.</p>
+              <p className="text-sm text-slate-600 dark:text-neutral-400">{t('parent.dashboard.grades.empty')}</p>
             )}
             {gradesForView && gradesForView.length > 0 && (
               <ul className="space-y-4">
@@ -184,7 +194,9 @@ export default function ParentDashboard() {
                     <h3 className="font-medium text-slate-900 dark:text-neutral-50">{row.title}</h3>
                     <p className="text-xs text-slate-500 dark:text-neutral-500">{row.courseCode}</p>
                     {Object.keys(row.grades).length === 0 ? (
-                      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">No scores posted.</p>
+                      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+                        {t('parent.dashboard.grades.noScores')}
+                      </p>
                     ) : (
                       <ul className="mt-3 grid gap-2 sm:grid-cols-2">
                         {Object.entries(row.grades).map(([itemId, pts]) => (
@@ -209,10 +221,14 @@ export default function ParentDashboard() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Assignments & quizzes</h2>
-            {!assignmentsForView && !detailError && <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>}
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+              {t('parent.dashboard.assignments.title')}
+            </h2>
+            {!assignmentsForView && !detailError && (
+              <p className="text-sm text-slate-500 dark:text-neutral-400">{t('parent.dashboard.grades.loading')}</p>
+            )}
             {assignmentsForView && assignmentsForView.length === 0 && (
-              <p className="text-sm text-slate-600 dark:text-neutral-400">No published assignments found.</p>
+              <p className="text-sm text-slate-600 dark:text-neutral-400">{t('parent.dashboard.assignments.empty')}</p>
             )}
             {assignmentsForView && assignmentsForView.length > 0 && (
               <ul className="divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
@@ -227,7 +243,7 @@ export default function ParentDashboard() {
                       </div>
                       {a.dueAt && (
                         <time className="shrink-0 text-xs text-slate-600 dark:text-neutral-400" dateTime={a.dueAt}>
-                          Due {formatDateTime(a.dueAt)}
+                          {t('parent.dashboard.assignments.due', { date: formatDateTime(a.dueAt) })}
                         </time>
                       )}
                     </div>
@@ -238,11 +254,18 @@ export default function ParentDashboard() {
           </section>
 
           <p className="text-sm text-slate-600 dark:text-neutral-400">
-            Message an instructor from the{' '}
-            <Link to="/inbox" className="text-indigo-700 underline underline-offset-2 dark:text-indigo-300">
-              Inbox
-            </Link>
-            .
+            <Trans
+              i18nKey="parent.dashboard.inboxHint"
+              ns="parent"
+              components={{
+                inboxLink: (
+                  <Link
+                    to="/inbox"
+                    className="text-indigo-700 underline underline-offset-2 dark:text-indigo-300"
+                  />
+                ),
+              }}
+            />
           </p>
         </>
       )}

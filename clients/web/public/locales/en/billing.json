@@ -1,0 +1,13 @@
+{
+  "billing.checkout.success.verifying.title": "Verifying payment…",
+  "billing.checkout.success.verifying.description": "This usually takes a few seconds. Please keep this page open.",
+  "billing.checkout.success.ready.title": "Payment confirmed",
+  "billing.checkout.success.ready.description": "Your access is ready. Start learning!",
+  "billing.checkout.success.ready.continue": "Continue",
+  "billing.checkout.success.timeout.title": "Still processing",
+  "billing.checkout.success.timeout.description": "Your payment may still be processing. Check billing settings in a moment.",
+  "billing.checkout.success.timeout.billingLink": "Open billing settings",
+  "billing.checkout.cancel.title": "Checkout cancelled",
+  "billing.checkout.cancel.description": "No charge was made. You can return to the course catalog when you are ready.",
+  "billing.checkout.cancel.backToCourses": "Back to courses"
+}

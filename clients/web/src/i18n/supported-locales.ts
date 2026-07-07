@@ -1,32 +1,33 @@
-export type SupportedLocale = 'en' | 'es' | 'fr'
+export type SupportedLocale = 'en' | 'es' | 'fr' | 'ar'
 
 export const DEFAULT_LOCALE: SupportedLocale = 'en'
 
-/** Locales with bundled translation JSON (plan 11.1). */
-export const SUPPORTED_LOCALES: readonly SupportedLocale[] = ['en', 'es', 'fr'] as const
+/** Locales with bundled translation JSON (plan W01). */
+export const SUPPORTED_LOCALES: readonly SupportedLocale[] = ['en', 'es', 'fr', 'ar'] as const
 
 export type LocaleOption = {
   tag: string
   label: string
+  /** Shown in switcher when bundle is incomplete (plan W01 rollout). */
+  beta?: boolean
 }
 
-/** UI locale switcher options; ar/he use English strings until translated (plan 11.2). */
+/** UI locale switcher options; only languages with real bundles are listed (plan W01 FR-3). */
 export const LOCALE_OPTIONS: readonly LocaleOption[] = [
   { tag: 'en', label: 'English' },
   { tag: 'es', label: 'Español' },
   { tag: 'fr', label: 'Français' },
   { tag: 'ar', label: 'العربية' },
-  { tag: 'he', label: 'עברית' },
 ] as const
 
 const bcp47Pattern = /^[a-z]{2}(-[A-Z]{2})?$/
 
-/** Maps a BCP 47 tag to a loaded resource bundle language (en/es/fr). */
+/** Maps a BCP 47 tag to a loaded resource bundle language (en/es/fr/ar). */
 export function resolveResourceLanguage(tag: string | null | undefined): SupportedLocale {
   const raw = tag?.trim() ?? ''
   if (!raw) return DEFAULT_LOCALE
   const base = raw.split('-')[0]?.toLowerCase()
-  if (base === 'es' || base === 'fr') return base
+  if (base === 'es' || base === 'fr' || base === 'ar') return base
   return DEFAULT_LOCALE
 }
 

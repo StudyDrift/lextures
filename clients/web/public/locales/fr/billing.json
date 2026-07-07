@@ -1,0 +1,13 @@
+{
+  "billing.checkout.success.verifying.title": "Vérification du paiement…",
+  "billing.checkout.success.verifying.description": "Cela prend généralement quelques secondes. Veuillez garder cette page ouverte.",
+  "billing.checkout.success.ready.title": "Paiement confirmé",
+  "billing.checkout.success.ready.description": "Votre accès est prêt. Commencez à apprendre !",
+  "billing.checkout.success.ready.continue": "Continuer",
+  "billing.checkout.success.timeout.title": "Traitement en cours",
+  "billing.checkout.success.timeout.description": "Votre paiement est peut-être encore en cours de traitement. Vérifiez les paramètres de facturation dans un instant.",
+  "billing.checkout.success.timeout.billingLink": "Ouvrir les paramètres de facturation",
+  "billing.checkout.cancel.title": "Paiement annulé",
+  "billing.checkout.cancel.description": "Aucun débit n'a été effectué. Vous pouvez revenir au catalogue de cours quand vous êtes prêt.",
+  "billing.checkout.cancel.backToCourses": "Retour aux cours"
+}

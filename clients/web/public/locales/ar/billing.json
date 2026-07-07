@@ -1,0 +1,13 @@
+{
+  "billing.checkout.success.verifying.title": "جارٍ التحقق من الدفع…",
+  "billing.checkout.success.verifying.description": "يستغرق ذلك عادةً بضع ثوانٍ. يُرجى إبقاء هذه الصفحة مفتوحة.",
+  "billing.checkout.success.ready.title": "تم تأكيد الدفع",
+  "billing.checkout.success.ready.description": "وصولك جاهز. ابدأ التعلّم!",
+  "billing.checkout.success.ready.continue": "متابعة",
+  "billing.checkout.success.timeout.title": "لا يزال قيد المعالجة",
+  "billing.checkout.success.timeout.description": "قد يكون دفعك لا يزال قيد المعالجة. تحقق من إعدادات الفوترة بعد قليل.",
+  "billing.checkout.success.timeout.billingLink": "فتح إعدادات الفوترة",
+  "billing.checkout.cancel.title": "تم إلغاء الدفع",
+  "billing.checkout.cancel.description": "لم يتم خصم أي مبلغ. يمكنك العودة إلى كتالوج المقررات عندما تكون جاهزًا.",
+  "billing.checkout.cancel.backToCourses": "العودة إلى المقررات"
+}

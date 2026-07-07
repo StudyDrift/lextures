@@ -1,0 +1,19 @@
+{
+  "parent.dashboard.badge": "Parent view",
+  "parent.dashboard.title": "Family dashboard",
+  "parent.dashboard.description": "Review linked students' courses, grades, and upcoming work. This view is read-only; contact the school admin if a child is missing.",
+  "parent.dashboard.conferencesLink": "Book parent-teacher conferences",
+  "parent.dashboard.errors.loadChildren": "Could not load children.",
+  "parent.dashboard.errors.loadStudentData": "Could not load student data.",
+  "parent.dashboard.noChildren": "No children linked yet. Contact your school administrator to connect your account to a student.",
+  "parent.dashboard.selectStudent": "Select student",
+  "parent.dashboard.viewingAs": "Viewing as parent of <strong>{{name}}</strong> — read only.",
+  "parent.dashboard.grades.title": "Grades by course",
+  "parent.dashboard.grades.loading": "Loading…",
+  "parent.dashboard.grades.empty": "No graded items yet.",
+  "parent.dashboard.grades.noScores": "No scores posted.",
+  "parent.dashboard.assignments.title": "Assignments & quizzes",
+  "parent.dashboard.assignments.empty": "No published assignments found.",
+  "parent.dashboard.assignments.due": "Due {date}",
+  "parent.dashboard.inboxHint": "Message an instructor from the <inboxLink>Inbox</inboxLink>."
+}

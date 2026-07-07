@@ -38,9 +38,13 @@ export function isBannerDismissed(banner: MaintenanceBanner): boolean {
 }
 
 export function dismissBanner(banner: MaintenanceBanner): void {
-  const map = readDismissMap()
-  map[banner.id] = banner.updatedAt
-  localStorage.setItem(DISMISS_STORAGE_KEY, JSON.stringify(map))
+  try {
+    const map = readDismissMap()
+    map[banner.id] = banner.updatedAt
+    localStorage.setItem(DISMISS_STORAGE_KEY, JSON.stringify(map))
+  } catch {
+    /* ignore when storage unavailable (SSR/tests) */
+  }
 }
 
 export async function fetchActiveBanner(orgSlug?: string | null): Promise<MaintenanceBanner | null> {

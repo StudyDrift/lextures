@@ -1,0 +1,19 @@
+{
+  "parent.dashboard.badge": "عرض ولي الأمر",
+  "parent.dashboard.title": "لوحة العائلة",
+  "parent.dashboard.description": "اطّلع على مقررات الطلاب المرتبطين ودرجاتهم والعمل القادم. هذا العرض للقراءة فقط؛ تواصل مع مسؤول المدرسة إذا كان أحد الأبناء مفقودًا.",
+  "parent.dashboard.conferencesLink": "حجز مؤتمرات أولياء الأمور والمعلمين",
+  "parent.dashboard.errors.loadChildren": "تعذّر تحميل الأبناء.",
+  "parent.dashboard.errors.loadStudentData": "تعذّر تحميل بيانات الطالب.",
+  "parent.dashboard.noChildren": "لا يوجد أبناء مرتبطون بعد. تواصل مع مسؤول المدرسة لربط حسابك بطالب.",
+  "parent.dashboard.selectStudent": "اختر طالبًا",
+  "parent.dashboard.viewingAs": "عرض كولي أمر لـ <strong>{{name}}</strong> — للقراءة فقط.",
+  "parent.dashboard.grades.title": "الدرجات حسب المقرر",
+  "parent.dashboard.grades.loading": "جارٍ التحميل…",
+  "parent.dashboard.grades.empty": "لا توجد عناصر مُقيّمة بعد.",
+  "parent.dashboard.grades.noScores": "لم تُنشر أي درجات.",
+  "parent.dashboard.assignments.title": "الواجبات والاختبارات",
+  "parent.dashboard.assignments.empty": "لم يُعثر على واجبات منشورة.",
+  "parent.dashboard.assignments.due": "الاستحقاق {date}",
+  "parent.dashboard.inboxHint": "راسل مدرّسًا من <inboxLink>صندوق الوارد</inboxLink>."
+}

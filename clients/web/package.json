@@ -19,6 +19,7 @@
     "analyze": "ANALYZE=1 vite build",
     "bundle:check": "node scripts/check-bundle-size.mjs",
     "i18n:check": "node scripts/check-i18n-locales.mjs",
+    "i18n:extract": "node scripts/i18n-extract.mjs",
     "contrast:check": "node scripts/check-contrast.mjs",
     "interface-polish:check": "node scripts/check-interface-polish.mjs",
     "lighthouse:dashboard:dark": "npm run lighthouse:dashboard:dark --prefix ../../e2e"

@@ -87,8 +87,7 @@ export function LocaleSwitcher({ initialLocale, onLocaleChange, embedded = false
       <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{t('common.locale.description')}</p>
       {!rtlEnabled ? (
         <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
-          RTL layout mirroring is not enabled on this platform; Arabic and Hebrew use left-to-right chrome until
-          a platform admin enables RTL support.
+          {t('common.locale.rtlDisabledHint')}
         </p>
       ) : null}
       <label htmlFor={selectId} className="sr-only">

@@ -7,20 +7,65 @@ import { detectInitialLocale, readStoredLocaleTag } from './locale-storage'
 import { recordMissingTranslationKey } from './missing-key'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './supported-locales'
 import enAuth from '../../public/locales/en/auth.json'
+import enBilling from '../../public/locales/en/billing.json'
 import enCommon from '../../public/locales/en/common.json'
 import enCompliance from '../../public/locales/en/compliance.json'
+import enDashboard from '../../public/locales/en/dashboard.json'
+import enOnboarding from '../../public/locales/en/onboarding.json'
+import enParent from '../../public/locales/en/parent.json'
 import esAuth from '../../public/locales/es/auth.json'
+import esBilling from '../../public/locales/es/billing.json'
 import esCommon from '../../public/locales/es/common.json'
 import esCompliance from '../../public/locales/es/compliance.json'
+import esDashboard from '../../public/locales/es/dashboard.json'
+import esOnboarding from '../../public/locales/es/onboarding.json'
+import esParent from '../../public/locales/es/parent.json'
 import frAuth from '../../public/locales/fr/auth.json'
+import frBilling from '../../public/locales/fr/billing.json'
 import frCommon from '../../public/locales/fr/common.json'
 import frCompliance from '../../public/locales/fr/compliance.json'
+import frDashboard from '../../public/locales/fr/dashboard.json'
+import frOnboarding from '../../public/locales/fr/onboarding.json'
+import frParent from '../../public/locales/fr/parent.json'
 
-export const I18N_NAMESPACES = ['common', 'auth', 'compliance'] as const
+export const I18N_NAMESPACES = [
+  'common',
+  'auth',
+  'compliance',
+  'dashboard',
+  'parent',
+  'billing',
+  'onboarding',
+] as const
+
 const bundledResources = {
-  en: { common: enCommon, auth: enAuth, compliance: enCompliance },
-  es: { common: esCommon, auth: esAuth, compliance: esCompliance },
-  fr: { common: frCommon, auth: frAuth, compliance: frCompliance },
+  en: {
+    common: enCommon,
+    auth: enAuth,
+    compliance: enCompliance,
+    dashboard: enDashboard,
+    parent: enParent,
+    billing: enBilling,
+    onboarding: enOnboarding,
+  },
+  es: {
+    common: esCommon,
+    auth: esAuth,
+    compliance: esCompliance,
+    dashboard: esDashboard,
+    parent: esParent,
+    billing: esBilling,
+    onboarding: esOnboarding,
+  },
+  fr: {
+    common: frCommon,
+    auth: frAuth,
+    compliance: frCompliance,
+    dashboard: frDashboard,
+    parent: frParent,
+    billing: frBilling,
+    onboarding: frOnboarding,
+  },
 } as const
 
 const useHttpBackend = !import.meta.env.VITEST

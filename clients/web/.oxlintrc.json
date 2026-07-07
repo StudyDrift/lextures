@@ -154,7 +154,11 @@
     },
     {
       "files": [
-        "src/pages/login.tsx"
+        "src/pages/login.tsx",
+        "src/pages/lms/dashboard.tsx",
+        "src/pages/lms/parent/**/*.tsx",
+        "src/pages/checkout/**/*.tsx",
+        "src/pages/onboarding/**/*.tsx"
       ],
       "rules": {
         "i18next/no-literal-string": [
@@ -171,7 +175,8 @@
               "href",
               "to",
               "minLength",
-              "placeholder"
+              "dateTime",
+              "data-testid"
             ]
           }
         ]
