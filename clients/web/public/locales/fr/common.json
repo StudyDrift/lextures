@@ -3,6 +3,7 @@
   "common.locale.description": "Choisissez la langue des menus, boutons et autres textes de l'interface.",
   "common.locale.saved": "Préférence linguistique enregistrée.",
   "common.locale.saveError": "Impossible d'enregistrer la préférence linguistique.",
+  "common.locale.rtlDisabledHint": "La mise en miroir RTL n'est pas activée sur cette plateforme ; l'arabe utilise une interface de gauche à droite jusqu'à ce qu'un administrateur active le support RTL.",
   "common.assignmentCount": "{count, plural, one {# devoir} other {# devoirs}}",
   "common.loading": "Chargement…",
   "a11y.editor.canvasRegion": "Canevas de l'éditeur de blocs",

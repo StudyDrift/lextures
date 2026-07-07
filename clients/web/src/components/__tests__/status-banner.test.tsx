@@ -21,9 +21,36 @@ function renderBanner() {
   return render(<StatusBanner />)
 }
 
+function mockLocalStorage(): Storage {
+  const store = new Map<string, string>()
+  return {
+    get length() {
+      return store.size
+    },
+    clear() {
+      store.clear()
+    },
+    getItem(key: string) {
+      return store.get(key) ?? null
+    },
+    setItem(key: string, value: string) {
+      store.set(key, value)
+    },
+    removeItem(key: string) {
+      store.delete(key)
+    },
+    key(index: number) {
+      return [...store.keys()][index] ?? null
+    },
+  }
+}
+
 describe('StatusBanner', () => {
   beforeEach(() => {
-    localStorage.clear()
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: mockLocalStorage(),
+      configurable: true,
+    })
     vi.mocked(bannerApi.fetchActiveBanner).mockReset()
   })
 

@@ -1,19 +1,30 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
-const STEP_LABELS = ['Welcome', 'Goal', 'Experience', 'Diagnostic', 'Habits', 'Consent', 'Done'] as const
+const STEP_KEYS = [
+  'onboarding.steps.welcome',
+  'onboarding.steps.goal',
+  'onboarding.steps.experience',
+  'onboarding.steps.diagnostic',
+  'onboarding.steps.habits',
+  'onboarding.steps.consent',
+  'onboarding.steps.done',
+] as const
 
 type StepIndicatorProps = {
   current: number
 }
 
 export function OnboardingStepIndicator({ current }: StepIndicatorProps) {
+  const { t } = useTranslation('onboarding')
+
   return (
-    <nav aria-label="Onboarding progress" className="mb-8">
+    <nav aria-label={t('onboarding.shell.progressAria')} className="mb-8">
       <ol className="flex flex-wrap items-center justify-center gap-2">
-        {STEP_LABELS.map((label, index) => {
+        {STEP_KEYS.map((key, index) => {
           const active = index === current
           return (
-            <li key={label} className="flex items-center gap-2">
+            <li key={key} className="flex items-center gap-2">
               <span
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${
                   active
@@ -24,11 +35,11 @@ export function OnboardingStepIndicator({ current }: StepIndicatorProps) {
                 }`}
                 aria-current={active ? 'step' : undefined}
               >
-                <span className="sr-only">{active ? 'Current step: ' : ''}</span>
+                <span className="sr-only">{active ? t('onboarding.shell.currentStep') : ''}</span>
                 {index + 1}
               </span>
-              <span className="hidden text-xs text-slate-600 sm:inline dark:text-neutral-400">{label}</span>
-              {index < STEP_LABELS.length - 1 ? (
+              <span className="hidden text-xs text-slate-600 sm:inline dark:text-neutral-400">{t(key)}</span>
+              {index < STEP_KEYS.length - 1 ? (
                 <span className="hidden h-px w-4 bg-slate-200 sm:block dark:bg-neutral-700" aria-hidden />
               ) : null}
             </li>
@@ -44,7 +55,7 @@ export function OnboardingShell({
   title,
   children,
   onBack,
-  backLabel = 'Back',
+  backLabel,
 }: {
   step: number
   title: string
@@ -52,13 +63,16 @@ export function OnboardingShell({
   onBack?: () => void
   backLabel?: string
 }) {
+  const { t } = useTranslation('onboarding')
+  const resolvedBackLabel = backLabel ?? t('onboarding.shell.back')
+
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-neutral-950">
       <a
         href="#onboarding-main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:shadow"
       >
-        Skip to content
+        {t('onboarding.shell.skipToContent')}
       </a>
       <div className="mx-auto max-w-xl px-4 py-10">
         <OnboardingStepIndicator current={step} />
@@ -72,7 +86,7 @@ export function OnboardingShell({
                 onClick={onBack}
                 className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
               >
-                {backLabel}
+                {resolvedBackLabel}
               </button>
             </div>
           ) : null}

@@ -1,5 +1,5 @@
 /**
- * i18n framework (plan 11.1): locale detection, switcher, lazy-loaded bundles.
+ * i18n framework (plan 11.1) + application coverage (plan W01): locale detection, switcher, RTL, first-wave namespaces.
  */
 import { test, expect } from '../fixtures/test.js'
 import { apiSignup } from '../fixtures/api.js'
@@ -71,5 +71,29 @@ test.describe('i18n — profile locale on session', () => {
     await page.goto('/settings/account')
     await expect(page.locator('html')).toHaveAttribute('lang', 'es', { timeout: 10_000 })
     await expect(page.getByTestId('locale-switcher')).toHaveValue('es')
+  })
+})
+
+test.describe('i18n — Arabic RTL (plan W01 AC-2)', () => {
+  test('stored locale ar sets dir=rtl and loads Arabic parent dashboard copy', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('lextures.locale', 'ar')
+      localStorage.setItem('lextures.rtlEnabled', '1')
+    })
+    await page.goto('/login')
+    await expect(page.locator('html')).toHaveAttribute('lang', 'ar', { timeout: 8_000 })
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
+    await expect(page.getByRole('heading', { name: 'تسجيل الدخول' })).toBeVisible()
+  })
+})
+
+test.describe('i18n — first-wave namespaces (plan W01)', () => {
+  test('checkout cancel page renders Spanish billing copy', async ({ authedPage: page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('lextures.locale', 'es')
+    })
+    await page.goto('/checkout/cancel')
+    await expect(page.getByRole('heading', { name: 'Pago cancelado' })).toBeVisible({ timeout: 8_000 })
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es')
   })
 })

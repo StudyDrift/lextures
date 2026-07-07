@@ -6,11 +6,13 @@ describe('locale resolution', () => {
   it('maps regional tags to resource languages', () => {
     expect(resolveResourceLanguage('es-MX')).toBe('es')
     expect(resolveResourceLanguage('fr-CA')).toBe('fr')
+    expect(resolveResourceLanguage('ar-SA')).toBe('ar')
     expect(resolveResourceLanguage('en-US')).toBe('en')
   })
 
   it('defaults unknown languages to en', () => {
     expect(resolveResourceLanguage('de')).toBe('en')
+    expect(resolveResourceLanguage('he')).toBe('en')
   })
 
   it('reads stored locale tag when present', () => {

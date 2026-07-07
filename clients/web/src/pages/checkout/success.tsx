@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { checkEntitlement, fetchMyEntitlements } from '../../lib/billing-api'
 import { authorizedFetch } from '../../lib/api'
 
 export default function CheckoutSuccessPage() {
+  const { t } = useTranslation('billing')
   const [params] = useSearchParams()
   const courseId = params.get('course_id') ?? ''
   const [status, setStatus] = useState<'verifying' | 'ready' | 'timeout'>('verifying')
@@ -55,32 +57,36 @@ export default function CheckoutSuccessPage() {
       {status === 'verifying' ? (
         <>
           <Loader2 className="h-10 w-10 animate-spin text-indigo-600" aria-hidden />
-          <h1 className="mt-4 text-2xl font-semibold">Verifying payment…</h1>
+          <h1 className="mt-4 text-2xl font-semibold">{t('billing.checkout.success.verifying.title')}</h1>
           <p className="mt-2 text-slate-600 dark:text-neutral-400">
-            This usually takes a few seconds. Please keep this page open.
+            {t('billing.checkout.success.verifying.description')}
           </p>
         </>
       ) : null}
       {status === 'ready' ? (
         <>
-          <h1 className="text-2xl font-semibold text-emerald-700 dark:text-emerald-300">Payment confirmed</h1>
-          <p className="mt-2 text-slate-600 dark:text-neutral-400">Your access is ready. Start learning!</p>
+          <h1 className="text-2xl font-semibold text-emerald-700 dark:text-emerald-300">
+            {t('billing.checkout.success.ready.title')}
+          </h1>
+          <p className="mt-2 text-slate-600 dark:text-neutral-400">
+            {t('billing.checkout.success.ready.description')}
+          </p>
           <Link
             to={courseId ? `/courses/${courseId}` : '/'}
             className="mt-6 inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
           >
-            Continue
+            {t('billing.checkout.success.ready.continue')}
           </Link>
         </>
       ) : null}
       {status === 'timeout' ? (
         <>
-          <h1 className="text-2xl font-semibold">Still processing</h1>
+          <h1 className="text-2xl font-semibold">{t('billing.checkout.success.timeout.title')}</h1>
           <p className="mt-2 text-slate-600 dark:text-neutral-400">
-            Your payment may still be processing. Check billing settings in a moment.
+            {t('billing.checkout.success.timeout.description')}
           </p>
           <Link to="/me/billing" className="mt-6 text-sm font-medium text-indigo-600 hover:underline">
-            Open billing settings
+            {t('billing.checkout.success.timeout.billingLink')}
           </Link>
         </>
       ) : null}

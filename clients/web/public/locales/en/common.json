@@ -3,6 +3,7 @@
   "common.locale.description": "Choose the language for menus, buttons, and other interface text.",
   "common.locale.saved": "Language preference saved.",
   "common.locale.saveError": "Could not save language preference.",
+  "common.locale.rtlDisabledHint": "RTL layout mirroring is not enabled on this platform; Arabic uses left-to-right chrome until a platform admin enables RTL support.",
   "common.assignmentCount": "{count, plural, one {# assignment} other {# assignments}}",
   "common.loading": "Loading…",
   "a11y.editor.canvasRegion": "Block editor canvas",

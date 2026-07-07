@@ -40,7 +40,7 @@ in `index.html`) and offline resilience (workbox background-sync queues + Indexe
 
 | ID | Plan | Severity | Markets | Effort | One-line gap |
 |---|---|---|---|---|---|
-| W01 | [App-wide internationalization & RTL coverage](W01-i18n-application-coverage.md) | MAJOR | K12 · HE · SL | L | Only `common`/`auth`/`compliance` are translated; ~2.5% of pages call `t()`; `ar`/`he` fall back to English. |
+| W01 | [App-wide internationalization & RTL coverage](../../completed/web/W01-i18n-application-coverage.md) | MAJOR | K12 · HE · SL | L | **Done** — first-wave namespaces (`dashboard`, `parent`, `billing`, `onboarding`), `ar` bundle + RTL, lint gate on externalized surfaces. |
 | W02 | [K-12 parent/guardian portal completeness](W02-parent-guardian-portal-completeness.md) | MAJOR | K12 | M | One read-only page; grades render as raw item-ID prefixes; no attendance / behavior / report-card visibility. |
 | W03 | [In-app dialogs & notifications (replace native alerts)](W03-in-app-dialogs-notifications.md) | MINOR | K12 · HE · SL | S | ~67 `window.alert/confirm/prompt` calls in the grading workbench and settings bypass the app's toast + confirm system. |
 | W04 | [Report-card AI comment — attendance wiring](W04-report-card-attendance-wiring.md) | MINOR (bug) | K12 | XS | AI report-card comments are generated with `absences = 0` hardcoded. |
@@ -49,8 +49,7 @@ in `index.html`) and offline resilience (workbox background-sync queues + Indexe
 
 ## Sequencing at a glance
 
-- **W01** is the largest and the highest-leverage market unlock (Spanish-speaking K-12 families under
-  Title VI; international HE/SL). It should be staffed first and can proceed in parallel with the rest.
+- **W01** shipped first-wave i18n coverage; continue namespace-by-namespace rollout for remaining pages.
 - **W02** and **W04** are the concrete K-12 defects; **W02** subsumes the parent half of **W05**.
 - **W03**, **W05**, and **W06** are cross-cutting polish that any team can pick up independently.
 

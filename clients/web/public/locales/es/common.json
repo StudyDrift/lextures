@@ -3,6 +3,7 @@
   "common.locale.description": "Elige el idioma de menús, botones y demás textos de la interfaz.",
   "common.locale.saved": "Preferencia de idioma guardada.",
   "common.locale.saveError": "No se pudo guardar la preferencia de idioma.",
+  "common.locale.rtlDisabledHint": "La disposición RTL no está habilitada en esta plataforma; el árabe usa interfaz de izquierda a derecha hasta que un administrador habilite el soporte RTL.",
   "common.assignmentCount": "{count, plural, one {# tarea} other {# tareas}}",
   "common.loading": "Cargando…",
   "a11y.editor.canvasRegion": "Lienzo del editor de bloques",
