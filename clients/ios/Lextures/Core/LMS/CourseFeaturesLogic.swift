@@ -65,66 +65,70 @@ enum CourseFeaturesLogic {
     static func filterTools(_ tools: [ToolRow], query: String) -> [ToolRow] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return tools }
-        let q = trimmed.lowercased()
+        let queryLower = trimmed.lowercased()
         return tools.filter { row in
-            L.text(String.LocalizationValue(row.tool.labelKey)).lowercased().contains(q)
-                || L.text(String.LocalizationValue(row.tool.descriptionKey)).lowercased().contains(q)
+            L.text(String.LocalizationValue(row.tool.labelKey)).lowercased().contains(queryLower)
+                || L.text(String.LocalizationValue(row.tool.descriptionKey)).lowercased().contains(queryLower)
         }
     }
 
+    private static let enabledReaders: [Tool: (CourseSummary) -> Bool] = [
+        .adaptivePaths: { $0.adaptivePathsEnabled == true },
+        .aiTutor: { $0.aiTutorEnabled == true },
+        .attendance: { $0.attendanceEnabled == true },
+        .calendar: { $0.calendarEnabled != false },
+        .collabDocs: { $0.collabDocsEnabled == true },
+        .sections: { $0.sectionsEnabled == true },
+        .discussions: { $0.discussionsEnabled == true },
+        .feed: { $0.feedEnabled != false },
+        .files: { $0.filesEnabled != false },
+        .liveSessions: { $0.liveSessionsEnabled == true },
+        .misconceptionDetection: { $0.misconceptionDetectionEnabled == true },
+        .multilingualMessaging: { $0.multilingualMessagingEnabled == true },
+        .notebook: { $0.notebookEnabled != false },
+        .officeHours: { $0.officeHoursEnabled == true },
+        .diagnosticAssessments: { $0.diagnosticAssessmentsEnabled == true },
+        .questionBank: { $0.questionBankEnabled == true },
+        .reportCards: { $0.reportCardsEnabled == true },
+        .hintScaffolding: { $0.hintScaffoldingEnabled == true },
+        .lockdownMode: { $0.lockdownModeEnabled == true },
+        .srs: { $0.srsEnabled == true },
+        .standardsAlignment: { $0.standardsAlignmentEnabled == true },
+        .whiteboard: { $0.whiteboardEnabled == true },
+    ]
+
+    private static let togglers: [Tool: (inout CourseSummary, Bool) -> Void] = [
+        .adaptivePaths: { $0.adaptivePathsEnabled = $1 },
+        .aiTutor: { $0.aiTutorEnabled = $1 },
+        .attendance: { $0.attendanceEnabled = $1 },
+        .calendar: { $0.calendarEnabled = $1 },
+        .collabDocs: { $0.collabDocsEnabled = $1 },
+        .sections: { $0.sectionsEnabled = $1 },
+        .discussions: { $0.discussionsEnabled = $1 },
+        .feed: { $0.feedEnabled = $1 },
+        .files: { $0.filesEnabled = $1 },
+        .liveSessions: { $0.liveSessionsEnabled = $1 },
+        .misconceptionDetection: { $0.misconceptionDetectionEnabled = $1 },
+        .multilingualMessaging: { $0.multilingualMessagingEnabled = $1 },
+        .notebook: { $0.notebookEnabled = $1 },
+        .officeHours: { $0.officeHoursEnabled = $1 },
+        .diagnosticAssessments: { $0.diagnosticAssessmentsEnabled = $1 },
+        .questionBank: { $0.questionBankEnabled = $1 },
+        .reportCards: { $0.reportCardsEnabled = $1 },
+        .hintScaffolding: { $0.hintScaffoldingEnabled = $1 },
+        .lockdownMode: { $0.lockdownModeEnabled = $1 },
+        .srs: { $0.srsEnabled = $1 },
+        .standardsAlignment: { $0.standardsAlignmentEnabled = $1 },
+        .whiteboard: { $0.whiteboardEnabled = $1 },
+    ]
+
     static func isEnabled(_ tool: Tool, course: CourseSummary) -> Bool {
-        switch tool {
-        case .adaptivePaths: return course.adaptivePathsEnabled == true
-        case .aiTutor: return course.aiTutorEnabled == true
-        case .attendance: return course.attendanceEnabled == true
-        case .calendar: return course.calendarEnabled != false
-        case .collabDocs: return course.collabDocsEnabled == true
-        case .sections: return course.sectionsEnabled == true
-        case .discussions: return course.discussionsEnabled == true
-        case .feed: return course.feedEnabled != false
-        case .files: return course.filesEnabled != false
-        case .liveSessions: return course.liveSessionsEnabled == true
-        case .misconceptionDetection: return course.misconceptionDetectionEnabled == true
-        case .multilingualMessaging: return course.multilingualMessagingEnabled == true
-        case .notebook: return course.notebookEnabled != false
-        case .officeHours: return course.officeHoursEnabled == true
-        case .diagnosticAssessments: return course.diagnosticAssessmentsEnabled == true
-        case .questionBank: return course.questionBankEnabled == true
-        case .reportCards: return course.reportCardsEnabled == true
-        case .hintScaffolding: return course.hintScaffoldingEnabled == true
-        case .lockdownMode: return course.lockdownModeEnabled == true
-        case .srs: return course.srsEnabled == true
-        case .standardsAlignment: return course.standardsAlignmentEnabled == true
-        case .whiteboard: return course.whiteboardEnabled == true
-        }
+        enabledReaders[tool]?(course) ?? false
     }
 
     static func applyToggle(course: CourseSummary, tool: Tool, enabled: Bool) -> CourseSummary {
         var updated = course
-        switch tool {
-        case .adaptivePaths: updated.adaptivePathsEnabled = enabled
-        case .aiTutor: updated.aiTutorEnabled = enabled
-        case .attendance: updated.attendanceEnabled = enabled
-        case .calendar: updated.calendarEnabled = enabled
-        case .collabDocs: updated.collabDocsEnabled = enabled
-        case .sections: updated.sectionsEnabled = enabled
-        case .discussions: updated.discussionsEnabled = enabled
-        case .feed: updated.feedEnabled = enabled
-        case .files: updated.filesEnabled = enabled
-        case .liveSessions: updated.liveSessionsEnabled = enabled
-        case .misconceptionDetection: updated.misconceptionDetectionEnabled = enabled
-        case .multilingualMessaging: updated.multilingualMessagingEnabled = enabled
-        case .notebook: updated.notebookEnabled = enabled
-        case .officeHours: updated.officeHoursEnabled = enabled
-        case .diagnosticAssessments: updated.diagnosticAssessmentsEnabled = enabled
-        case .questionBank: updated.questionBankEnabled = enabled
-        case .reportCards: updated.reportCardsEnabled = enabled
-        case .hintScaffolding: updated.hintScaffoldingEnabled = enabled
-        case .lockdownMode: updated.lockdownModeEnabled = enabled
-        case .srs: updated.srsEnabled = enabled
-        case .standardsAlignment: updated.standardsAlignmentEnabled = enabled
-        case .whiteboard: updated.whiteboardEnabled = enabled
-        }
+        togglers[tool]?(&updated, enabled)
         return updated
     }
 

@@ -14043,6 +14043,2352 @@
         }
       }
     },
+    "mobile.courseSettings.features.cancel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.captionSaveLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.captionSaved": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy updated."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy updated."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy updated."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy updated."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caption policy updated."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.captionsDescription": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Require captions before publishing module items that embed course videos."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Require captions before publishing module items that embed course videos."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Require captions before publishing module items that embed course videos."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Require captions before publishing module items that embed course videos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Require captions before publishing module items that embed course videos."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.captionsMandatory": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mandatory captions for this course"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mandatory captions for this course"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mandatory captions for this course"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mandatory captions for this course"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mandatory captions for this course"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.captionsTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video captions"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video captions"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video captions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video captions"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video captions"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.consortiumAllow": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow consortium enrollment"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow consortium enrollment"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow consortium enrollment"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow consortium enrollment"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow consortium enrollment"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.consortiumDescription": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.consortiumLoading": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading consortium settings…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading consortium settings…"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading consortium settings…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading consortium settings…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading consortium settings…"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.consortiumSaveLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.consortiumSaved": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings saved."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings saved."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings saved."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium settings saved."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.consortiumTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium enrollment"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium enrollment"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium enrollment"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium enrollment"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consortium enrollment"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.disableConfirmAction": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.disableConfirmMessage": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turning off %@ hides it from the course menu until you enable it again."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turning off %@ hides it from the course menu until you enable it again."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turning off %@ hides it from the course menu until you enable it again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turning off %@ hides it from the course menu until you enable it again."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turning off %@ hides it from the course menu until you enable it again."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.disableConfirmTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off this tool?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off this tool?"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off this tool?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off this tool?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn off this tool?"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.disabled": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.enabled": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.genericError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save course tools."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save course tools."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save course tools."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save course tools."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save course tools."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.noToolsMatch": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tools match “%@”"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tools match “%@”"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tools match “%@”"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tools match “%@”"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tools match “%@”"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.pending": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.saveLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.saved": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.searchPlaceholder": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search tools…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search tools…"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search tools…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search tools…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search tools…"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.adaptivePaths.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.adaptivePaths.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaptive learning paths"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaptive learning paths"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaptive learning paths"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaptive learning paths"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaptive learning paths"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.aiTutor.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversational AI tutor side-panel available on all course pages."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversational AI tutor side-panel available on all course pages."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversational AI tutor side-panel available on all course pages."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversational AI tutor side-panel available on all course pages."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversational AI tutor side-panel available on all course pages."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.aiTutor.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Tutor"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Tutor"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Tutor"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Tutor"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Tutor"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.attendance.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.attendance.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attendance"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attendance"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attendance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attendance"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attendance"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.calendar.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Month, week, and agenda views of assignment and content due dates for this course."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Month, week, and agenda views of assignment and content due dates for this course."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Month, week, and agenda views of assignment and content due dates for this course."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Month, week, and agenda views of assignment and content due dates for this course."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Month, week, and agenda views of assignment and content due dates for this course."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.calendar.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.collabDocs.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.collabDocs.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collaborative documents"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collaborative documents"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collaborative documents"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collaborative documents"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collaborative documents"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.diagnosticAssessments.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offer a short adaptive placement assessment after enrollment."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offer a short adaptive placement assessment after enrollment."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offer a short adaptive placement assessment after enrollment."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offer a short adaptive placement assessment after enrollment."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offer a short adaptive placement assessment after enrollment."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.diagnosticAssessments.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placement diagnostic"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placement diagnostic"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placement diagnostic"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placement diagnostic"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placement diagnostic"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.discussions.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.discussions.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discussion forums"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discussion forums"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discussion forums"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discussion forums"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discussion forums"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.feed.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course-wide channels and messages, including uploads and real-time updates."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course-wide channels and messages, including uploads and real-time updates."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course-wide channels and messages, including uploads and real-time updates."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course-wide channels and messages, including uploads and real-time updates."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course-wide channels and messages, including uploads and real-time updates."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.feed.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.files.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course file space where instructors and students can upload, organize, and share materials."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course file space where instructors and students can upload, organize, and share materials."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course file space where instructors and students can upload, organize, and share materials."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course file space where instructors and students can upload, organize, and share materials."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course file space where instructors and students can upload, organize, and share materials."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.files.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.hintScaffolding.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.hintScaffolding.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz hints & worked examples"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz hints & worked examples"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz hints & worked examples"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz hints & worked examples"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz hints & worked examples"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.liveSessions.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.liveSessions.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live sessions"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live sessions"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live sessions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live sessions"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live sessions"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.lockdownMode.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.lockdownMode.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz lockdown / kiosk"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz lockdown / kiosk"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz lockdown / kiosk"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz lockdown / kiosk"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz lockdown / kiosk"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.misconceptionDetection.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.misconceptionDetection.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception detection"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception detection"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception detection"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception detection"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception detection"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.multilingualMessaging.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.multilingualMessaging.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multilingual Messaging"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multilingual Messaging"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multilingual Messaging"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multilingual Messaging"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multilingual Messaging"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.notebook.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal notes workspace for this course."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal notes workspace for this course."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal notes workspace for this course."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal notes workspace for this course."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal notes workspace for this course."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.notebook.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.officeHours.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.officeHours.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Office hours"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Office hours"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Office hours"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Office hours"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Office hours"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.questionBank.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.questionBank.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Question bank"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Question bank"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Question bank"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Question bank"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Question bank"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.reportCards.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.reportCards.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report cards"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report cards"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report cards"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report cards"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report cards"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.sections.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.sections.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course sections"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course sections"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course sections"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course sections"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course sections"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.srs.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.srs.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spaced repetition (review)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spaced repetition (review)"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spaced repetition (review)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spaced repetition (review)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spaced repetition (review)"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.standardsAlignment.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map concepts to standards codes and view per-standard coverage for this course."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map concepts to standards codes and view per-standard coverage for this course."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map concepts to standards codes and view per-standard coverage for this course."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map concepts to standards codes and view per-standard coverage for this course."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map concepts to standards codes and view per-standard coverage for this course."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.standardsAlignment.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standards alignment"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standards alignment"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standards alignment"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standards alignment"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standards alignment"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.whiteboard.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.tool.whiteboard.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whiteboard"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whiteboard"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whiteboard"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whiteboard"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whiteboard"
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.toolsDescription": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
+          }
+        }
+      }
+    },
+    "mobile.courseSettings.features.toolsTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course tools"
+          }
+        }
+      }
+    },
     "mobile.courseSettings.gradeLevel": {
       "localizations": {
         "ar": {
@@ -64947,2352 +67293,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.toolsTitle": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.toolsDescription": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.searchPlaceholder": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search tools…"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search tools…"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search tools…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search tools…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search tools…"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.noToolsMatch": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No tools match “%@”"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No tools match “%@”"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No tools match “%@”"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No tools match “%@”"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No tools match “%@”"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.saveLabel": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course tools"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.saved": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saved."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.pending": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pending"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pending"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pending"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pending"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pending"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.enabled": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.disabled": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.genericError": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not save course tools."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not save course tools."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not save course tools."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not save course tools."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not save course tools."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.disableConfirmTitle": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off this tool?"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off this tool?"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off this tool?"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off this tool?"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off this tool?"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.disableConfirmMessage": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turning off %@ hides it from the course menu until you enable it again."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turning off %@ hides it from the course menu until you enable it again."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turning off %@ hides it from the course menu until you enable it again."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turning off %@ hides it from the course menu until you enable it again."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turning off %@ hides it from the course menu until you enable it again."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.disableConfirmAction": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn off"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.cancel": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.captionsTitle": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Video captions"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Video captions"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Video captions"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Video captions"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Video captions"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.captionsDescription": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Require captions before publishing module items that embed course videos."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Require captions before publishing module items that embed course videos."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Require captions before publishing module items that embed course videos."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Require captions before publishing module items that embed course videos."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Require captions before publishing module items that embed course videos."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.captionsMandatory": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mandatory captions for this course"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mandatory captions for this course"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mandatory captions for this course"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mandatory captions for this course"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mandatory captions for this course"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.captionSaveLabel": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.captionSaved": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy updated."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy updated."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy updated."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy updated."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caption policy updated."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.consortiumTitle": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium enrollment"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium enrollment"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium enrollment"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium enrollment"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium enrollment"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.consortiumDescription": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow students from partner institutions with an active sharing agreement to enroll in this course."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.consortiumAllow": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow consortium enrollment"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow consortium enrollment"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow consortium enrollment"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow consortium enrollment"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow consortium enrollment"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.consortiumLoading": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading consortium settings…"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading consortium settings…"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading consortium settings…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading consortium settings…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading consortium settings…"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.consortiumSaveLabel": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.consortiumSaved": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings saved."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings saved."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings saved."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings saved."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consortium settings saved."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.adaptivePaths.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adaptive learning paths"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adaptive learning paths"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adaptive learning paths"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adaptive learning paths"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adaptive learning paths"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.adaptivePaths.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow mastery-based branching between modules. Instructors configure rules on each module in the course outline."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.aiTutor.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI Tutor"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI Tutor"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI Tutor"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI Tutor"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI Tutor"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.aiTutor.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conversational AI tutor side-panel available on all course pages."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conversational AI tutor side-panel available on all course pages."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conversational AI tutor side-panel available on all course pages."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conversational AI tutor side-panel available on all course pages."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conversational AI tutor side-panel available on all course pages."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.attendance.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attendance"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attendance"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attendance"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attendance"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attendance"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.attendance.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.calendar.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendar"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendar"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendar"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendar"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendar"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.calendar.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Month, week, and agenda views of assignment and content due dates for this course."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Month, week, and agenda views of assignment and content due dates for this course."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Month, week, and agenda views of assignment and content due dates for this course."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Month, week, and agenda views of assignment and content due dates for this course."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Month, week, and agenda views of assignment and content due dates for this course."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.collabDocs.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collaborative documents"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collaborative documents"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collaborative documents"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collaborative documents"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collaborative documents"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.collabDocs.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Real-time co-editing with shared rich-text docs and whiteboards for group work."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.sections.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course sections"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course sections"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course sections"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course sections"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course sections"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.sections.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Split one course into multiple sections with separate rosters and optional per-section due dates."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.discussions.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discussion forums"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discussion forums"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discussion forums"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discussion forums"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discussion forums"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.discussions.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.feed.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feed"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feed"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feed"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feed"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feed"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.feed.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course-wide channels and messages, including uploads and real-time updates."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course-wide channels and messages, including uploads and real-time updates."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course-wide channels and messages, including uploads and real-time updates."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course-wide channels and messages, including uploads and real-time updates."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course-wide channels and messages, including uploads and real-time updates."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.files.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Files"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Files"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Files"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Files"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Files"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.files.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course file space where instructors and students can upload, organize, and share materials."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course file space where instructors and students can upload, organize, and share materials."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course file space where instructors and students can upload, organize, and share materials."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course file space where instructors and students can upload, organize, and share materials."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Course file space where instructors and students can upload, organize, and share materials."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.liveSessions.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Live sessions"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Live sessions"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Live sessions"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Live sessions"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Live sessions"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.liveSessions.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Virtual classroom meetings — shows the Live Sessions menu item and scheduling page."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.misconceptionDetection.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Misconception detection"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Misconception detection"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Misconception detection"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Misconception detection"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Misconception detection"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.misconceptionDetection.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record misconception events when tagged distractors are selected and show targeted remediation."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.multilingualMessaging.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Multilingual Messaging"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Multilingual Messaging"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Multilingual Messaging"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Multilingual Messaging"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Multilingual Messaging"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.multilingualMessaging.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show a Translate button on feed posts, discussion posts, and inbox messages."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.notebook.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notebook"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notebook"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notebook"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notebook"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notebook"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.notebook.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personal notes workspace for this course."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personal notes workspace for this course."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personal notes workspace for this course."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personal notes workspace for this course."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Personal notes workspace for this course."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.officeHours.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Office hours"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Office hours"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Office hours"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Office hours"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Office hours"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.officeHours.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let instructors define availability windows and students book 1-on-1 appointment slots."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.diagnosticAssessments.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Placement diagnostic"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Placement diagnostic"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Placement diagnostic"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Placement diagnostic"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Placement diagnostic"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.diagnosticAssessments.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offer a short adaptive placement assessment after enrollment."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offer a short adaptive placement assessment after enrollment."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offer a short adaptive placement assessment after enrollment."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offer a short adaptive placement assessment after enrollment."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offer a short adaptive placement assessment after enrollment."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.questionBank.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Question bank"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Question bank"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Question bank"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Question bank"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Question bank"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.questionBank.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Store quiz items in a reusable bank with optional random pools per attempt."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.reportCards.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report cards"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report cards"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report cards"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report cards"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report cards"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.reportCards.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Author district-formatted report cards with comment banks and PDF release to the parent portal."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.hintScaffolding.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz hints & worked examples"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz hints & worked examples"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz hints & worked examples"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz hints & worked examples"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz hints & worked examples"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.hintScaffolding.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners request progressive hints and unlock worked examples during quizzes."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.lockdownMode.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz lockdown / kiosk"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz lockdown / kiosk"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz lockdown / kiosk"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz lockdown / kiosk"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiz lockdown / kiosk"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.lockdownMode.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose one-question-at-a-time or kiosk delivery on quizzes."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.srs.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spaced repetition (review)"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spaced repetition (review)"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spaced repetition (review)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spaced repetition (review)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spaced repetition (review)"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.srs.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let learners use the global review queue for SRS-eligible question-bank items."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.standardsAlignment.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Standards alignment"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Standards alignment"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Standards alignment"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Standards alignment"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Standards alignment"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.standardsAlignment.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Map concepts to standards codes and view per-standard coverage for this course."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Map concepts to standards codes and view per-standard coverage for this course."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Map concepts to standards codes and view per-standard coverage for this course."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Map concepts to standards codes and view per-standard coverage for this course."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Map concepts to standards codes and view per-standard coverage for this course."
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.whiteboard.label": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Whiteboard"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Whiteboard"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Whiteboard"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Whiteboard"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Whiteboard"
-          }
-        }
-      }
-    },
-    "mobile.courseSettings.features.tool.whiteboard.description": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Interactive canvas for teachers to draw diagrams and save named boards."
           }
         }
       }
