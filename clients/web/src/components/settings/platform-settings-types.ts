@@ -102,6 +102,7 @@ export type PlatformSettingsPayload = {
   ffProctoringIntegration: boolean
   ffCourseReviews: boolean
   ffParentPortal: boolean
+  ffParentPortalV2: boolean
   ffReportCards: boolean
   ffPublicCatalog: boolean
   ffSelfPacedMode: boolean

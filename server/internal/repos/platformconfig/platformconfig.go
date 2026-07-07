@@ -105,6 +105,7 @@ type Row struct {
 	BackupModuleEnabled             *bool
 	FFHighContrastReducedMotion     *bool
 	FFParentPortal                  *bool
+	FFParentPortalV2                *bool
 	FFReportCards                   *bool
 	FFSBGReportCards                *bool
 	FFSISIntegration                *bool
@@ -279,6 +280,7 @@ type Write struct {
 	BackupModuleEnabled             *bool
 	FFHighContrastReducedMotion     *bool
 	FFParentPortal                  *bool
+	FFParentPortalV2                *bool
 	FFReportCards                   *bool
 	FFSBGReportCards                *bool
 	FFSISIntegration                *bool
@@ -451,6 +453,7 @@ SELECT
 	backup_module_enabled,
 	ff_high_contrast_reduced_motion,
 	ff_parent_portal,
+	ff_parent_portal_v2,
 	ff_report_cards,
 	ff_sbg_report_cards,
 	ff_sis_integration,
@@ -616,6 +619,7 @@ WHERE id = 1
 		&r.BackupModuleEnabled,
 		&r.FFHighContrastReducedMotion,
 		&r.FFParentPortal,
+		&r.FFParentPortalV2,
 		&r.FFReportCards,
 		&r.FFSBGReportCards,
 		&r.FFSISIntegration,
@@ -832,6 +836,7 @@ INSERT INTO settings.platform_app_settings (
 	backup_module_enabled,
 	ff_high_contrast_reduced_motion,
 	ff_parent_portal,
+	ff_parent_portal_v2,
 	ff_report_cards,
 	ff_sbg_report_cards,
 	ff_sis_integration,
@@ -1002,6 +1007,7 @@ ON CONFLICT (id) DO UPDATE SET
 	backup_module_enabled = COALESCE(EXCLUDED.backup_module_enabled, settings.platform_app_settings.backup_module_enabled),
 	ff_high_contrast_reduced_motion = COALESCE(EXCLUDED.ff_high_contrast_reduced_motion, settings.platform_app_settings.ff_high_contrast_reduced_motion),
 	ff_parent_portal = COALESCE(EXCLUDED.ff_parent_portal, settings.platform_app_settings.ff_parent_portal),
+	ff_parent_portal_v2 = COALESCE(EXCLUDED.ff_parent_portal_v2, settings.platform_app_settings.ff_parent_portal_v2),
 	ff_report_cards = COALESCE(EXCLUDED.ff_report_cards, settings.platform_app_settings.ff_report_cards),
 	ff_sbg_report_cards = COALESCE(EXCLUDED.ff_sbg_report_cards, settings.platform_app_settings.ff_sbg_report_cards),
 	ff_sis_integration = COALESCE(EXCLUDED.ff_sis_integration, settings.platform_app_settings.ff_sis_integration),
@@ -1165,6 +1171,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.BackupModuleEnabled,
 		w.FFHighContrastReducedMotion,
 		w.FFParentPortal,
+		w.FFParentPortalV2,
 		w.FFReportCards,
 		w.FFSBGReportCards,
 		w.FFSISIntegration,

@@ -357,6 +357,8 @@ type Config struct {
 	FFReadingPreferences bool
 	// FFParentPortal enables the K-12 parent/guardian portal: parent-student linking, read-only grade access, and notification prefs (plan 13.1).
 	FFParentPortal bool
+	// FFParentPortalV2 enables expanded parent portal sections (attendance, behavior, report cards, message teacher) — plan W02.
+	FFParentPortalV2 bool
 	// FFReportCards enables district-formatted report cards with comment banks and PDF generation (plan 13.4).
 	FFReportCards bool
 	// FFSISIntegration enables SIS vendor connections (PowerSchool, Infinite Campus, Skyward, Aeries) and nightly sync (plan 13.7).

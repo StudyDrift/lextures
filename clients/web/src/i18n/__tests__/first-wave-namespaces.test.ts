@@ -8,7 +8,7 @@ describe('first-wave namespace bundles (plan W01)', () => {
 
   it('resolves parent dashboard title in Spanish', async () => {
     await i18n.changeLanguage('es')
-    expect(i18n.t('parent.dashboard.title', { ns: 'parent' })).toBe('Panel familiar')
+    expect(i18n.t('parent.title', { ns: 'parent' })).toBe('Panel familiar')
   })
 
   it('resolves billing checkout cancel title in French', async () => {

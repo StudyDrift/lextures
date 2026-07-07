@@ -2,6 +2,14 @@
 
 > Implementation plan. Source: web market-readiness scan (2026-07-06). Related: [docs/completed/13-k12-specific/13.1-parent-portal.md](../../completed/13-k12-specific/13.1-parent-portal.md).
 
+## Implementation notes (2026-07)
+
+- **Grades API** enriches each score with `items[]` (`title`, `category`, `percentage`, `status`, `teacherEmail`) while keeping legacy `grades` map for mobile.
+- **New endpoint** `GET /api/v1/parent/students/{id}/attendance-summary` aggregates present/absent/tardy counts and recent days.
+- **Parent dashboard** uses `parent` i18n namespace (`en`/`es`/`fr`/`ar`); attendance, behavior, report cards, and message-teacher ship behind `ffParentPortalV2` (grade legibility is unflagged).
+- **Message teacher** opens Inbox compose via `/inbox?compose=1&to=&subject=` pre-filled per course teacher.
+- **Tests**: Go unit tests for attendance summary helpers; Vitest for parent-portal helpers; e2e authz + grade item shape checks.
+
 ## Metadata
 
 | Field | Value |
@@ -10,7 +18,7 @@
 | **Section** | Web / K-12 Specific |
 | **Severity** | MAJOR |
 | **Markets** | K12 |
-| **Status (today)** | THIN |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | K-12 pod (frontend + backend) |
 | **Depends on** | 13.1 (parent portal), 13.2 (attendance), 13.3 (behavior/PBIS), 13.4 (report cards), W01 (localization) |

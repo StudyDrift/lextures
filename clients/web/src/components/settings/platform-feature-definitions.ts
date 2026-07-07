@@ -539,6 +539,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'K-12 parent/guardian portal with child linking, read-only grade access, and notification preferences (plan 13.1).',
   },
   {
+    key: 'ffParentPortalV2',
+    label: 'Parent portal v2 sections',
+    description:
+      'Expanded parent dashboard: attendance, behavior, report cards, and message-teacher actions (plan W02).',
+  },
+  {
     key: 'ffProctoringIntegration',
     label: 'Proctoring integration',
     description:
