@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -195,7 +194,7 @@ func runEnrollmentsExport(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var w io.Writer = cmd.OutOrStdout()
+	w := cmd.OutOrStdout()
 	var file *os.File
 	if enrollmentsExportFlags.out != "" {
 		file, err = os.Create(enrollmentsExportFlags.out)

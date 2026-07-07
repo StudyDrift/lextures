@@ -895,31 +895,6 @@ func fetchSeatTimeReport(c *client.Client, course string) ([]seatTimeStudentRow,
 	return parsed.Students, nil
 }
 
-func fetchMySeatTime(c *client.Client, courseID string) (map[string]any, error) {
-	path := "/api/v1/me/seat-time?courseId=" + url.QueryEscape(courseID)
-	req, err := c.NewRequest(http.MethodGet, path, nil)
-	if err != nil {
-		return nil, fmt.Errorf("building request: %w", err)
-	}
-	resp, err := doWithRetry(c, req)
-	if err != nil {
-		return nil, fmt.Errorf("loading seat time: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("reading response: %w", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, apiErrorBody(resp.StatusCode, body)
-	}
-	var parsed map[string]any
-	if err := json.Unmarshal(body, &parsed); err != nil {
-		return nil, fmt.Errorf("decoding response: %w", err)
-	}
-	return parsed, nil
-}
-
 func listActiveHallPasses(c *client.Client, sectionID string) ([]hallPassJSON, error) {
 	path := "/api/v1/sections/" + url.PathEscape(sectionID) + "/hall-passes/active"
 	req, err := c.NewRequest(http.MethodGet, path, nil)
