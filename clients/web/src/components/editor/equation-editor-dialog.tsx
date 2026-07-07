@@ -103,7 +103,7 @@ export function EquationEditorDialog({
     [latex, onLatexChange],
   )
 
-  const confirm = useCallback(() => {
+  const handleConfirm = useCallback(() => {
     if (!editor) return
     const t = latex.trim()
     if (!t) return
@@ -196,7 +196,7 @@ export function EquationEditorDialog({
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault()
-                  confirm()
+                  handleConfirm()
                 }
               }}
             />
@@ -297,7 +297,7 @@ export function EquationEditorDialog({
           <button
             type="button"
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
-            onClick={confirm}
+            onClick={handleConfirm}
           >
             {isEdit ? equationI18n.update : equationI18n.insert}
           </button>
