@@ -2,6 +2,7 @@ package com.lextures.android.features.courses.settings
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -229,7 +230,7 @@ fun CourseSectionsSettingsScreen(
                                         )
                                         newSectionCode = ""
                                         newSectionName = ""
-                                        actionSuccess = L.text(R.string.mobile_courseSettings_sections_createSuccess)
+                                        actionSuccess = L.text(context, localePrefs, R.string.mobile_courseSettings_sections_createSuccess)
                                         reload()
                                     }.onFailure { actionError = session.mapError(it) }
                                     busy = false
@@ -281,7 +282,7 @@ fun CourseSectionsSettingsScreen(
                                     val token = session.accessToken.value ?: return@launch
                                     val body = CourseSectionsLogic.buildOverrideBody(overrideDue)
                                         ?: run {
-                                            actionError = L.text(R.string.mobile_courseSettings_sections_overrideInvalidDate)
+                                            actionError = L.text(context, localePrefs, R.string.mobile_courseSettings_sections_overrideInvalidDate)
                                             return@launch
                                         }
                                     busy = true
@@ -295,7 +296,7 @@ fun CourseSectionsSettingsScreen(
                                             idempotencyKey = CourseSectionsLogic.overrideIdempotencyKey(overrideSectionId, overrideItemId),
                                         )
                                         overrideDue = ""
-                                        actionSuccess = L.text(R.string.mobile_courseSettings_sections_overrideSuccess)
+                                        actionSuccess = L.text(context, localePrefs, R.string.mobile_courseSettings_sections_overrideSuccess)
                                     }.onFailure { actionError = session.mapError(it) }
                                     busy = false
                                 }
@@ -359,7 +360,7 @@ fun CourseSectionsSettingsScreen(
                                             accessToken = token,
                                             idempotencyKey = CourseSectionsLogic.patchSectionIdempotencyKey(course.courseCode, section.id),
                                         )
-                                        actionSuccess = L.text(R.string.mobile_courseSettings_sections_renameSuccess)
+                                        actionSuccess = L.text(context, localePrefs, R.string.mobile_courseSettings_sections_renameSuccess)
                                         reload()
                                     }.onFailure { actionError = session.mapError(it) }
                                     busy = false
@@ -415,7 +416,7 @@ fun CourseSectionsSettingsScreen(
                                 idempotencyKey = CourseSectionsLogic.archiveSectionIdempotencyKey(course.courseCode, section.id),
                             )
                             selectedSection = null
-                            actionSuccess = L.text(R.string.mobile_courseSettings_sections_archiveSuccess)
+                            actionSuccess = L.text(context, localePrefs, R.string.mobile_courseSettings_sections_archiveSuccess)
                             reload()
                         }.onFailure { actionError = session.mapError(it) }
                         busy = false
@@ -460,7 +461,7 @@ fun CourseSectionsSettingsScreen(
                                                     section.id,
                                                 ),
                                             )
-                                            actionSuccess = L.text(R.string.mobile_courseSettings_sections_moveStudentSuccess)
+                                            actionSuccess = L.text(context, localePrefs, R.string.mobile_courseSettings_sections_moveStudentSuccess)
                                             reload()
                                         }.onFailure { actionError = session.mapError(it) }
                                         busy = false

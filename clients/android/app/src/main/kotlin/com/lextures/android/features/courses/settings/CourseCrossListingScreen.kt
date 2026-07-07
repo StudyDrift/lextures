@@ -22,11 +22,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.i18n.L
+import com.lextures.android.core.i18n.LocalLocalePreferences
 import com.lextures.android.core.lms.AddCrossListMemberBody
 import com.lextures.android.core.lms.CourseSection
 import com.lextures.android.core.lms.CourseSectionsLogic
@@ -47,6 +49,8 @@ fun CourseCrossListingSection(
     onReload: suspend () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val localePrefs = LocalLocalePreferences.current
     val accessToken by session.accessToken.collectAsState()
     val canOrgAdmin = CourseSectionsLogic.canManageCrossListing(permissions)
     val orgId = course.orgId?.trim()?.takeIf { it.isNotEmpty() }
@@ -130,7 +134,7 @@ fun CourseCrossListingSection(
                                         )
                                         primaryPick = ""
                                         groupName = ""
-                                        actionSuccess = L.text(R.string.mobile_courseSettings_sections_crossListingCreateSuccess)
+                                        actionSuccess = L.text(context, localePrefs, R.string.mobile_courseSettings_sections_crossListingCreateSuccess)
                                         val groups = LmsApi.fetchOrgCrossListGroups(orgId, token)
                                         group = CourseSectionsLogic.crossListGroup(course.id, groups)
                                         onReload()
@@ -177,7 +181,7 @@ fun CourseCrossListingSection(
                                         runCatching {
                                             LmsApi.postOrgCrossListMember(orgId, current.id, addPick, token)
                                             addPick = ""
-                                            actionSuccess = L.text(R.string.mobile_courseSettings_sections_crossListingAddSuccess)
+                                            actionSuccess = L.text(context, localePrefs, R.string.mobile_courseSettings_sections_crossListingAddSuccess)
                                             val groups = LmsApi.fetchOrgCrossListGroups(orgId, token)
                                             group = CourseSectionsLogic.crossListGroup(course.id, groups)
                                             onReload()
@@ -213,7 +217,7 @@ fun CourseCrossListingSection(
                         busy = true
                         runCatching {
                             LmsApi.deleteOrgCrossListMember(oid, current.id, sectionId, token)
-                            actionSuccess = L.text(R.string.mobile_courseSettings_sections_crossListingRemoveSuccess)
+                            actionSuccess = L.text(context, localePrefs, R.string.mobile_courseSettings_sections_crossListingRemoveSuccess)
                             val groups = LmsApi.fetchOrgCrossListGroups(oid, token)
                             group = CourseSectionsLogic.crossListGroup(course.id, groups)
                             onReload()
