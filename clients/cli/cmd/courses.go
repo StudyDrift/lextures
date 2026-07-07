@@ -362,6 +362,14 @@ func apiErrorBody(status int, body []byte) error {
 	return fmt.Errorf("server error (%d)", status)
 }
 
+func readResponseBody(resp *http.Response) ([]byte, error) {
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("reading response: %w", err)
+	}
+	return data, nil
+}
+
 // doWithRetry executes req, retrying once with exponential backoff on network errors.
 func doWithRetry(c *client.Client, req *http.Request) (*http.Response, error) {
 	resp, err := c.Do(req)
