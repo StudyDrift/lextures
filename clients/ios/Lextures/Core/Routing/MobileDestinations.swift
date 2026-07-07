@@ -399,6 +399,7 @@ struct MobilePlatformFeatures: Equatable {
     var studentProgressEnabled = true
     var ffMobileInstructorInsights = true
     var ffMobileCourseSettings = false
+    var ffConsortiumSharing = false
     var graderAgentEnabled = false
     var ffPlagiarismChecks = false
     var altTextEnforcementEnabled = false
@@ -457,6 +458,7 @@ struct MobilePlatformFeatures: Equatable {
             studentProgressEnabled: features?.studentProgressEnabled != false,
             ffMobileInstructorInsights: features?.ffMobileInstructorInsights != false,
             ffMobileCourseSettings: features?.ffMobileCourseSettings == true,
+            ffConsortiumSharing: features?.ffConsortiumSharing == true,
             graderAgentEnabled: features?.graderAgentEnabled == true,
             ffPlagiarismChecks: features?.ffPlagiarismChecks == true,
             altTextEnforcementEnabled: features?.altTextEnforcementEnabled == true
