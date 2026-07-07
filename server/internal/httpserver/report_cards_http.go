@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/repos/attendance"
+	"github.com/lextures/lextures/server/internal/repos/attendancesessions"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
@@ -112,9 +114,16 @@ func (d Deps) handleListCourseReportCards() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load report cards.")
 			return
 		}
+
+		absenceCounts, attendanceKnown := d.reportCardAbsenceCountsForPeriod(r, *cid, courseCode, period)
+
 		out := make([]map[string]any, 0, len(cards))
 		for i := range cards {
-			out = append(out, reportCardToJSON(&cards[i]))
+			m := reportCardToJSON(&cards[i])
+			if attendanceKnown {
+				m["absences"] = absenceCounts[cards[i].StudentID]
+			}
+			out = append(out, m)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"reportCards": out, "period": period})
@@ -478,9 +487,9 @@ func (d Deps) handleAIReportCardComment() http.HandlerFunc {
 		}
 
 		var body struct {
-			CourseName string  `json:"courseName"`
-			GradePct   float64 `json:"gradePct"`
-			Absences   int     `json:"absences"`
+			CourseName string   `json:"courseName"`
+			GradePct   float64  `json:"gradePct"`
+			Absences   *int     `json:"absences"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -502,10 +511,18 @@ func (d Deps) handleAIReportCardComment() http.HandlerFunc {
 		if courseName == "" {
 			courseName = "this course"
 		}
-		prompt := fmt.Sprintf(
-			"Write a 2-sentence report card comment for a student with a %.1f%% average in %s and %d absence(s). Be encouraging and specific. Do not use the student's name.",
-			body.GradePct, courseName, body.Absences,
-		)
+		var prompt string
+		if body.Absences != nil {
+			prompt = fmt.Sprintf(
+				"Write a 2-sentence report card comment for a student with a %.1f%% average in %s and %d absence(s). Be encouraging and specific. Do not use the student's name.",
+				body.GradePct, courseName, *body.Absences,
+			)
+		} else {
+			prompt = fmt.Sprintf(
+				"Write a 2-sentence report card comment for a student with a %.1f%% average in %s. Attendance data is unavailable — do not mention attendance or imply perfect attendance. Be encouraging and specific. Do not use the student's name.",
+				body.GradePct, courseName,
+			)
+		}
 
 		msgs := []openrouter.Message{
 			{Role: "system", Content: "You are a helpful teacher assistant writing concise, professional report card comments."},
@@ -672,6 +689,36 @@ func (d Deps) handleMyReportCards() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"reportCards": out})
 	}
+}
+
+// reportCardAbsenceCountsForPeriod returns per-student absence totals when attendance data is
+// available for the grading period; the bool is false when absences should not be asserted.
+func (d Deps) reportCardAbsenceCountsForPeriod(r *http.Request, courseID uuid.UUID, courseCode, period string) (map[uuid.UUID]int, bool) {
+	enabled, err := attendancesessions.AttendanceEnabledForCourseID(r.Context(), d.Pool, courseID)
+	if err != nil || !enabled {
+		return nil, false
+	}
+
+	orgID, err := course.CourseOrgID(r.Context(), d.Pool, courseCode)
+	if err != nil || orgID == nil {
+		return nil, false
+	}
+
+	dr, ok, err := reportcards.ResolveGradingPeriodDateRange(r.Context(), d.Pool, *orgID, period)
+	if err != nil || !ok {
+		return nil, false
+	}
+
+	hasData, err := attendance.CourseHasAttendanceInRange(r.Context(), d.Pool, courseID, dr.Start, dr.End)
+	if err != nil || !hasData {
+		return nil, false
+	}
+
+	counts, err := attendance.AbsenceCountsForCourseStudents(r.Context(), d.Pool, courseID, dr.Start, dr.End)
+	if err != nil {
+		return nil, false
+	}
+	return counts, true
 }
 
 // canManageReportCard checks that actorID is an instructor/admin for the given courseID.

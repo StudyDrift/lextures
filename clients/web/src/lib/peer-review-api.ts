@@ -48,10 +48,13 @@ export type PeerReviewSummary = {
   totalAllocations: number
   completedReviews: number
   incompleteReviewers: string[]
+  incompleteReviewerLabels?: string[]
   outlierReviewers: string[]
+  outlierReviewerLabels?: string[]
   submissions: {
     submissionId: string
     studentUserId: string
+    studentLabel?: string
     peerAggregate?: number
     reviewCount: number
   }[]

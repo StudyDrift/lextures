@@ -300,6 +300,33 @@ object LmsApi {
             decode<CourseStructureResponse>(body).items
         }
 
+    suspend fun fetchCourseArchivedStructure(
+        courseCode: String,
+        accessToken: String,
+    ): List<CourseStructureItem> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/structure/archived",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CourseStructureResponse>(body).items
+    }
+
+    suspend fun unarchiveCourseStructureItem(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): CourseStructureItem = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/structure/items/${encodePath(itemId)}",
+            method = "PATCH",
+            body = json.encodeToString(buildJsonObject { put("archived", false) }),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode(response)
+    }
+
     /** Per-kind detail GET for a structure item; null when the kind has no detail endpoint. */
     suspend fun fetchItemDetail(
         courseCode: String,

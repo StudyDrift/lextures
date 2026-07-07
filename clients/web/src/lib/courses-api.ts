@@ -4829,6 +4829,7 @@ export async function bulkExtendAssignToDueDate(
 export type ModerationProvisionalGrade = {
   submissionId: string
   graderId: string
+  graderName?: string
   score: number
   submittedAt: string | null
 }
@@ -4879,6 +4880,8 @@ export async function postProvisionalGrade(
 export type ModerationReconciliationRow = {
   submissionId: string
   studentUserId: string
+  studentName?: string
+  submissionLabel?: string
   provisional: ModerationProvisionalGrade[]
   flagged: boolean
   pointsWorth: number | null
@@ -4914,17 +4917,23 @@ export async function fetchModerationReconciliation(
           const gid = typeof pr.graderId === 'string' ? pr.graderId : null
           const sc = typeof pr.score === 'number' && Number.isFinite(pr.score) ? pr.score : NaN
           if (!sid || !gid || !Number.isFinite(sc)) continue
+          const graderName = typeof pr.graderName === 'string' ? pr.graderName : undefined
           provisional.push({
             submissionId: sid,
             graderId: gid,
+            graderName,
             score: sc,
             submittedAt: typeof pr.submittedAt === 'string' ? pr.submittedAt : null,
           })
         }
       }
+      const studentName = typeof o.studentName === 'string' ? o.studentName : undefined
+      const submissionLabel = typeof o.submissionLabel === 'string' ? o.submissionLabel : undefined
       rows.push({
         submissionId,
         studentUserId,
+        studentName,
+        submissionLabel,
         provisional,
         flagged: Boolean(o.flagged),
         pointsWorth: typeof o.pointsWorth === 'number' ? o.pointsWorth : null,

@@ -8,6 +8,8 @@ export type ReportCard = {
   finalGradePct?: number | null
   letterGrade?: string | null
   comment?: string | null
+  /** Present only when attendance data is known for the grading period (W04). */
+  absences?: number
   status: 'draft' | 'submitted' | 'approved' | 'released'
   pdfUrl?: string | null
   generatedAt?: string | null
@@ -118,15 +120,27 @@ export async function fetchParentReportCards(studentId: string): Promise<ListRep
   return (await res.json()) as ListReportCardsResponse
 }
 
+/** Returns the absence count to send to AI when known; undefined omits attendance from the prompt. */
+export function absencesForAIComment(card: ReportCard): number | undefined {
+  return card.absences
+}
+
 export async function fetchAICommentSuggestion(
   courseName: string,
   gradePct: number,
-  absences: number,
+  absences?: number,
 ): Promise<string> {
+  const body: { courseName: string; gradePct: number; absences?: number } = {
+    courseName,
+    gradePct,
+  }
+  if (absences !== undefined) {
+    body.absences = absences
+  }
   const res = await authorizedFetch('/api/v1/ai/report-card-comment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ courseName, gradePct, absences }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) throw new Error(`AI comment failed: ${res.status}`)
   const data = (await res.json()) as AICommentResponse

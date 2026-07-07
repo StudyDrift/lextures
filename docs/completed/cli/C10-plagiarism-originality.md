@@ -1,6 +1,6 @@
 # C10 — Plagiarism & originality
 
-> CLI parity plan. Source: `courses/{id}/plagiarism-settings` (3), `originality_http.go`, `webhooks_originality.go`, `registerFERPARoutes` (integrity adjacency). Baseline: none.
+> CLI parity plan. Source: `courses/{id}/plagiarism-settings` (3), `originality_http.go`, `webhooks_originality.go`, `registerFERPARoutes` (integrity adjacency). Baseline: `clients/cli/cmd/plagiarism.go`, `originality.go`, `plagiarism_originality_logic.go`, `plagiarism_originality_test.go`.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Assessment & grading |
 | **Severity** | MAJOR |
 | **Markets** | HE / K12 |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Integrity / CLI |
 | **Depends on** | C03, C40 |
@@ -61,15 +61,31 @@ Originality/plagiarism configuration and report retrieval are UI-only. Instituti
 
 ## 8. Data Model
 
-- None client-side. Document policy JSON schema.
+- None client-side. Policy JSON schema (PATCH body):
+
+```json
+{
+  "plagiarismChecksEnabled": true,
+  "plagiarismProvider": "turnitin",
+  "plagiarismAlertThresholdPct": 25
+}
+```
+
+`plagiarismProvider` accepts `none`, `turnitin`, `copyleaks`, or `gptzero` (validated client- and server-side).
 
 ## 9. API Surface
 
-- `courses/{c}/plagiarism-settings` get/set; `originality_http.go` status/get/list/submit. (Inbound `webhooks_originality.go` is server-side, not CLI.)
+- `GET|PATCH /api/v1/courses/{c}/plagiarism-settings`
+- `GET .../submissions/{id}/originality` (full reports)
+- `GET .../originality/summary` (status)
+- `GET .../originality/embed-url` (report link)
+- `POST .../originality/retry` (submit/retry)
+- Inbound `webhooks_originality.go` is server-side, not CLI.
 
 ## 10. UI / UX
 
 - `lextures plagiarism settings ...`, `lextures originality ...`.
+- Human tables for list; `--json` passthrough for scripting.
 
 ## 11. AI / ML Considerations
 
@@ -78,6 +94,7 @@ Originality/plagiarism configuration and report retrieval are UI-only. Instituti
 ## 12. Integration Points
 
 - Server originality + plagiarism-settings handlers; third-party provider (Turnitin/etc.) via server.
+- Internal: `clients/cli/cmd/plagiarism.go`, `originality.go`, `plagiarism_originality_logic.go`.
 
 ## 13. Dependencies & Sequencing
 
@@ -92,24 +109,44 @@ Originality/plagiarism configuration and report retrieval are UI-only. Instituti
 
 ## 15. Rollout Plan
 
-- Ship settings get/set + originality get/list; add submit/export next.
+- Shipped settings get/set, originality status/get/list/submit/export.
 - Rollback: additive.
 
 ## 16. Test Plan
 
-- **Unit** — policy parse; `--yes` gate.
-- **Integration** — originality get/list shapes.
-- **E2E** — set policy → submit → get score.
+- **Unit** — policy parse; `--yes` gate (`plagiarism_originality_test.go`).
+- **Integration** — httptest for originality get/list shapes.
+- **E2E** — set policy → submit → get score (manual / future stack test).
 
 ## 17. Documentation & Training
 
-- "Standardize plagiarism policy across a term" recipe.
+- "Standardize plagiarism policy across a term" recipe:
+
+```bash
+# 1. Author a shared policy file in git
+cat > policy.json <<'EOF'
+{
+  "plagiarismChecksEnabled": true,
+  "plagiarismProvider": "turnitin",
+  "plagiarismAlertThresholdPct": 25
+}
+EOF
+
+# 2. Apply to each course in a term
+for code in CS101 CS102 CS103; do
+  lextures plagiarism settings set "$code" --file policy.json
+done
+
+# 3. Audit originality scores for an assignment cohort
+lextures originality list <item-id> --course CS101
+lextures originality export <item-id> --course CS101 --out scores.csv --yes
+```
 
 ## 18. Open Questions
 
-1. Which providers are enabled, and do their report shapes differ enough to need per-provider handling?
+1. Providers enabled today: `none`, `turnitin`, `copyleaks`, `gptzero`. Report shapes differ per provider; the CLI normalizes to similarity/AI score + report URL and passes raw `reports` in `--json`.
 
 ## 19. References
 
-- `originality_http.go`, `webhooks_originality.go`, `plagiarism-settings` handlers.
-- Related: [C03](C03-assignments.md), [C29](C29-compliance-privacy.md).
+- `originality_http.go`, `webhooks_originality.go`, `course_plagiarism_settings.go`.
+- Related: [C03](C03-assignments.md), [C29](../../plan/cli/C29-compliance-privacy.md).

@@ -114,6 +114,8 @@ struct CourseStructureItem: Codable, Identifiable, Hashable {
     var dueAt: String?
     var pointsWorth: Double?
     var pointsPossible: Double?
+    var archived: Bool?
+    var updatedAt: String?
 
     var isModule: Bool { kind == "module" }
 

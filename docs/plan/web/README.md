@@ -43,15 +43,15 @@ in `index.html`) and offline resilience (workbox background-sync queues + Indexe
 | W01 | [App-wide internationalization & RTL coverage](../../completed/web/W01-i18n-application-coverage.md) | MAJOR | K12 · HE · SL | L | **Done** — first-wave namespaces (`dashboard`, `parent`, `billing`, `onboarding`), `ar` bundle + RTL, lint gate on externalized surfaces. |
 | W02 | [K-12 parent/guardian portal completeness](W02-parent-guardian-portal-completeness.md) | MAJOR | K12 | M | One read-only page; grades render as raw item-ID prefixes; no attendance / behavior / report-card visibility. |
 | W03 | [In-app dialogs & notifications (replace native alerts)](W03-in-app-dialogs-notifications.md) | MINOR | K12 · HE · SL | S | ~67 `window.alert/confirm/prompt` calls in the grading workbench and settings bypass the app's toast + confirm system. |
-| W04 | [Report-card AI comment — attendance wiring](W04-report-card-attendance-wiring.md) | MINOR (bug) | K12 | XS | AI report-card comments are generated with `absences = 0` hardcoded. |
-| W05 | [Human-readable labels for entity IDs](W05-human-readable-entity-labels.md) | MINOR | HE · K12 | S | Parent, peer-review, and moderation surfaces show `id.slice(0,8)…` instead of names/titles. |
+| W04 | [Report-card AI comment — attendance wiring](../../completed/web/W04-report-card-attendance-wiring.md) | MINOR (bug) | K12 | XS | **Done** — report-card list payload includes period-scoped absences; AI suggest omits attendance when unknown. |
+| W05 | [Human-readable labels for entity IDs](../../completed/web/W05-human-readable-entity-labels.md) | MINOR | HE · K12 | S | **Done** — moderation, peer-review, and assignment staff surfaces use `<EntityLabel>` + enriched API labels. |
 | W06 | [Feature-help onboarding walkthrough media](W06-feature-help-onboarding-media.md) | MINOR | SL · K12 · HE | S | The feature-help dock ships a visible "placeholder for a demo GIF" region to end users. |
 
 ## Sequencing at a glance
 
 - **W01** shipped first-wave i18n coverage; continue namespace-by-namespace rollout for remaining pages.
-- **W02** and **W04** are the concrete K-12 defects; **W02** subsumes the parent half of **W05**.
-- **W03**, **W05**, and **W06** are cross-cutting polish that any team can pick up independently.
+- **W02** is the remaining concrete K-12 defect; it subsumes the parent half of **W05**.
+- **W03** and **W06** are cross-cutting polish that any team can pick up independently.
 
 ## Related plan sets
 

@@ -26,6 +26,10 @@ ENTRIES: list[tuple[str, str, str, str, bool]] = [
     ("LMSAPICourseBlueprint.swift", "8B80EC2D3E4F5061728394", "8B80ED3E4F5061728394A5", "0192C31B7A97444D9236A8A1", False),
     ("CourseBlueprintSettingsView.swift", "8B80FC2D3E4F5061728394", "8B80FD3E4F5061728394A5", "8B80SETT5C6D7E8F901234567", False),
     ("CourseBlueprintLogicTests.swift", "8B810C2D3E4F5061728394", "8B810D3E4F5061728394A5", "FB04F8A19314441A8AB2F273", True),
+    ("CourseArchivedContentLogic.swift", "8B811C2D3E4F5061728394", "8B811D3E4F5061728394A5", "0192C31B7A97444D9236A8A1", False),
+    ("LMSAPICourseArchivedContent.swift", "8B812C2D3E4F5061728394", "8B812D3E4F5061728394A5", "0192C31B7A97444D9236A8A1", False),
+    ("CourseArchivedContentView.swift", "8B813C2D3E4F5061728394", "8B813D3E4F5061728394A5", "8B80SETT5C6D7E8F901234567", False),
+    ("CourseArchivedContentLogicTests.swift", "8B814C2D3E4F5061728394", "8B814D3E4F5061728394A5", "FB04F8A19314441A8AB2F273", True),
 ]
 
 NEW_GROUPS = """
@@ -37,6 +41,7 @@ NEW_GROUPS = """
 \t\t\t\t8B807D3E4F5061728394A5 /* CourseHeroImageEditor.swift */,
 \t\t\t\t8B80BD3E4F5061728394A5 /* CourseImportExportView.swift */,
 \t\t\t\t8B80FD3E4F5061728394A5 /* CourseBlueprintSettingsView.swift */,
+\t\t\t\t8B813D3E4F5061728394A5 /* CourseArchivedContentView.swift */,
 \t\t\t);
 \t\t\tpath = Settings;
 \t\t\tsourceTree = "<group>";

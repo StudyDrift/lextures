@@ -8,6 +8,7 @@ import {
   createCommentBankEntry,
   deleteCommentBankEntry,
   fetchAICommentSuggestion,
+  absencesForAIComment,
   releaseReportCards,
   fetchParentReportCards,
   type ReportCard,
@@ -131,9 +132,26 @@ describe('deleteCommentBankEntry', () => {
   })
 })
 
+describe('absencesForAIComment', () => {
+  it('returns the card absence count when present', () => {
+    expect(absencesForAIComment({ ...sampleCard, absences: 3 })).toBe(3)
+  })
+
+  it('returns undefined when absences are omitted (attendance unknown)', () => {
+    expect(absencesForAIComment(sampleCard)).toBeUndefined()
+  })
+
+  it('returns zero when attendance is known and student had no absences', () => {
+    expect(absencesForAIComment({ ...sampleCard, absences: 0 })).toBe(0)
+  })
+})
+
 describe('fetchAICommentSuggestion', () => {
   beforeEach(() => {
     setAccessToken('test-token')
+  })
+
+  it('returns AI suggestion string', async () => {
     server.use(
       http.post('http://localhost:8080/api/v1/ai/report-card-comment', async ({ request }) => {
         const body = (await request.json()) as Record<string, unknown>
@@ -142,12 +160,34 @@ describe('fetchAICommentSuggestion', () => {
         })
       }),
     )
-  })
-
-  it('returns AI suggestion string', async () => {
     const suggestion = await fetchAICommentSuggestion('Mathematics', 94, 2)
     expect(suggestion).toContain('Mathematics')
     expect(suggestion).toContain('94')
+  })
+
+  it('sends absences in the request payload when known', async () => {
+    let captured: Record<string, unknown> | null = null
+    server.use(
+      http.post('http://localhost:8080/api/v1/ai/report-card-comment', async ({ request }) => {
+        captured = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json({ suggestion: 'Nice work.' })
+      }),
+    )
+    await fetchAICommentSuggestion('Mathematics', 90, 3)
+    expect(captured).toMatchObject({ courseName: 'Mathematics', gradePct: 90, absences: 3 })
+  })
+
+  it('omits absences from the request when attendance is unknown', async () => {
+    let captured: Record<string, unknown> | null = null
+    server.use(
+      http.post('http://localhost:8080/api/v1/ai/report-card-comment', async ({ request }) => {
+        captured = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json({ suggestion: 'Nice work.' })
+      }),
+    )
+    await fetchAICommentSuggestion('Mathematics', 90)
+    expect(captured).toMatchObject({ courseName: 'Mathematics', gradePct: 90 })
+    expect(captured).not.toHaveProperty('absences')
   })
 })
 

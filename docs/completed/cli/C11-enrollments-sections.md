@@ -1,6 +1,6 @@
 # C11 — Enrollments & sections
 
-> CLI parity plan. Source: `courses/{id}/enrollments` (25), `courses/{id}/sections`, `self-enroll`, `registerCatalogRoutes`, `enrollments` top-level (4), `orgs/{orgId}/cross-list-groups`. Baseline: `users enroll` only.
+> CLI parity plan. Source: `courses/{id}/enrollments`, `courses/{id}/sections`, `self-enroll`, `enrollments` top-level, `orgs/{orgId}/cross-list-groups`. Baseline: `clients/cli/cmd/enrollments.go`, `sections.go`, `enrollments_sections_logic.go`, `orgs_cross_list.go`, `enrollments_sections_test.go`; `users enroll` preserved.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Roster & classroom |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL (`users enroll` single-user) |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Platform / CLI |
 | **Depends on** | C01, C15, C40 |
@@ -106,20 +106,46 @@ Roster management is the #1 CLI use case for an LMS, but the CLI only supports e
 
 ## 16. Test Plan
 
-- **Unit** — CSV parse; idempotency keys.
-- **Integration** — bulk import partial-failure summary; state transitions.
-- **E2E** — import roster → export → diff.
+- **Unit** — CSV parse; idempotency keys; state aliases; FERPA gate (`enrollments_sections_test.go`).
+- **Integration** — httptest for list/export/import/set-state/section move.
+- **E2E** — import roster → export → diff (manual / future stack test).
 
 ## 17. Documentation & Training
 
-- "Sync a section roster from CSV" recipe; note relationship to C22.
+- "Sync a section roster from CSV" recipe:
+
+```bash
+# 1. Author a roster CSV (email required; sis_id reserved for C22)
+cat > roster.csv <<'EOF'
+email,role,section
+alice@uni.edu,student,SEC-01
+bob@uni.edu,student,SEC-01
+ta@uni.edu,ta,
+EOF
+
+# 2. Bulk enroll (re-run is idempotent: skipped=already enrolled)
+lextures enrollments import CS101 --file roster.csv --role student
+
+# 3. Export for SIS reconciliation (FERPA-gated)
+lextures enrollments export CS101 --format json --yes
+
+# 4. Conclude a student enrollment
+lextures enrollments set-state CS101 --user alice@uni.edu --state concluded
+
+# 5. Cross-list sections under an org
+lextures sections cross-list CS101 --org <org-uuid> --primary SEC-01 --name "Combined lecture"
+lextures orgs cross-list-groups add-member <org-uuid> <group-uuid> --section <section-uuid>
+```
+
+Note relationship to [C22](../../plan/cli/C22-sis-scim-oneroster.md) for automated SIS sync.
 
 ## 18. Open Questions
 
-1. Does enroll accept email/SIS id or only user UUID? (Affects `--create-missing`.)
-2. Is cross-listing course-level or org-level only?
+1. Bulk enroll API accepts **email only** (not user UUID). CLI `enrollments add` resolves UUID → email before POST. SIS id column is parsed but rejected until C22 lookup exists.
+2. Cross-listing is **org-level** (`/api/v1/orgs/{orgId}/cross-list-groups`); `sections cross-list` is a convenience wrapper.
 
 ## 19. References
 
-- `clients/cli/cmd/users.go` (`usersEnrollCmd`); enrollment/section handlers.
-- Related: [C15](C15-people-provisioning.md), [C22](C22-sis-scim-oneroster.md), [C06](C06-gradebook-final-grades.md).
+- `clients/cli/cmd/users.go` (`usersEnrollCmd`); `enrollments.go`, `sections.go`, `enrollments_sections_logic.go`.
+- Server: `course_enrollments_http.go`, `course_sections.go`, `enrollment_state_http.go`, `cross_list_http.go`.
+- Related: [C15](../../plan/cli/C15-people-provisioning.md), [C22](../../plan/cli/C22-sis-scim-oneroster.md), [C06](C06-gradebook-final-grades.md).

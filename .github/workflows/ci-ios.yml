@@ -58,7 +58,7 @@ jobs:
         id: sim
         run: |
           set -euo pipefail
-          for sim in "iPhone 16" "iPhone 17" "iPhone 17 Pro" "iPhone 15"; do
+          for sim in "iPhone 17" "iPhone 17 Pro" "iPhone 16" "iPhone 15"; do
             if xcrun simctl list devices available 2>/dev/null | grep -qF "    $sim ("; then
               echo "name=$sim" >> "$GITHUB_OUTPUT"
               exit 0

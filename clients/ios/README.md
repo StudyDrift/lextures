@@ -114,7 +114,9 @@ The `.github/workflows/ci-ios.yml` workflow runs on every PR that touches `clien
 
 1. **Lint** — `swiftlint lint` with inline GitHub annotations on the PR diff
 2. **Build** — `xcodebuild build` targeting `generic/platform=iOS Simulator` (`CODE_SIGNING_ALLOWED=NO`)
-3. **Test** — `xcodebuild test` on the first available iPhone simulator (16 → 17 → 17 Pro → 15; `CODE_SIGNING_ALLOWED=NO`)
+3. **Test** — `xcodebuild test` on the first available iPhone simulator (17 → 17 Pro → 16 → 15; cached DerivedData, `CODE_SIGNING_ALLOWED=NO`)
+
+Local runs: `make mobile-test-ios` (full build + test), `make mobile-build-ios-test` then `make mobile-test-ios-fast` (incremental). Set `IOS_TEST_PARALLEL=NO` or `IOS_TEST_JOBS=4` to reduce RAM/CPU.
 
 No provisioning profile or Apple developer account is needed for simulator builds. CI boots the selected simulator before running tests. Test output is logged without xcpretty so failures surface in the Actions log.
 

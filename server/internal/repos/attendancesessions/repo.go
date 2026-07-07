@@ -598,6 +598,13 @@ SELECT EXISTS(SELECT 1 FROM course.course_sections WHERE id = $1 AND course_id =
 	return ok, err
 }
 
+// AttendanceEnabledForCourseID returns whether attendance is enabled for a course.
+func AttendanceEnabledForCourseID(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (bool, error) {
+	var enabled bool
+	err := pool.QueryRow(ctx, `SELECT attendance_enabled FROM course.courses WHERE id = $1`, courseID).Scan(&enabled)
+	return enabled, err
+}
+
 // AttendanceEnabledForCourseCode returns whether attendance is enabled by course code.
 func AttendanceEnabledForCourseCode(ctx context.Context, pool *pgxpool.Pool, courseCode string) (bool, error) {
 	var ok bool
