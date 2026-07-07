@@ -156,7 +156,7 @@
       "files": [
         "src/pages/login.tsx",
         "src/pages/lms/dashboard.tsx",
-        "src/pages/lms/parent/**/*.tsx",
+        "src/pages/lms/parent/parent-dashboard.tsx",
         "src/pages/checkout/**/*.tsx",
         "src/pages/onboarding/**/*.tsx"
       ],
