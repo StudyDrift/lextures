@@ -117,7 +117,7 @@ func TestManager_Load_ExpiredWithRefreshToken(t *testing.T) {
 	})
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/api/oauth/token/refresh" {
+		if r.URL.Path != "/api/v1/auth/refresh" {
 			t.Errorf("unexpected path: %s", r.URL.Path)
 		}
 		var body map[string]string
@@ -127,8 +127,9 @@ func TestManager_Load_ExpiredWithRefreshToken(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"access_token": "new-token",
-			"expires_in":   3600,
+			"access_token":  "new-token",
+			"refresh_token": "rotated-refresh",
+			"expires_in":    3600,
 		})
 	}))
 	defer srv.Close()
@@ -145,6 +146,9 @@ func TestManager_Load_ExpiredWithRefreshToken(t *testing.T) {
 	saved, _ := store.Load("default")
 	if saved == nil || saved.AccessToken != "new-token" {
 		t.Errorf("refreshed token not saved to store")
+	}
+	if saved.RefreshToken != "rotated-refresh" {
+		t.Errorf("refresh_token = %q, want rotated-refresh", saved.RefreshToken)
 	}
 }
 

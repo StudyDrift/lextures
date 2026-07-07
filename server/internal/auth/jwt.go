@@ -21,6 +21,8 @@ import (
 const (
 	// AccessTokenTTL is the lifetime of login (Bearer) JWTs (plan 4.8).
 	AccessTokenTTL = 15 * time.Minute
+	// CLIAccessTokenTTL is the lifetime of access JWTs issued via CLI browser auth.
+	CLIAccessTokenTTL = 7 * 24 * time.Hour
 	defaultTokenTTL = AccessTokenTTL
 	mfaPendingTTL     = 60 * time.Second
 	ltiEmbedTicketTTL   = 15 * time.Minute
@@ -139,6 +141,11 @@ func (s *JWTSigner) RevokeToken(ctx context.Context, token string) error {
 
 // Sign creates a login JWT containing sub, email, org_id, org_slug, exp, optional session version (revocation), and optional refresh-token session id (rti).
 func (s *JWTSigner) Sign(ctx context.Context, userID, email string, orgID, orgSlug string, refreshTokenSessionID *uuid.UUID) (string, error) {
+	return s.SignWithTTL(ctx, userID, email, orgID, orgSlug, refreshTokenSessionID, s.ttl)
+}
+
+// SignWithTTL is like Sign but uses ttl instead of the signer's default TTL.
+func (s *JWTSigner) SignWithTTL(ctx context.Context, userID, email string, orgID, orgSlug string, refreshTokenSessionID *uuid.UUID, ttl time.Duration) (string, error) {
 	if !isUUID(userID) || strings.TrimSpace(email) == "" {
 		return "", ErrInvalidToken
 	}
@@ -146,6 +153,9 @@ func (s *JWTSigner) Sign(ctx context.Context, userID, email string, orgID, orgSl
 		return "", ErrInvalidToken
 	}
 	if refreshTokenSessionID != nil && *refreshTokenSessionID == uuid.Nil {
+		return "", ErrInvalidToken
+	}
+	if ttl == 0 {
 		return "", ErrInvalidToken
 	}
 	var sv int64
@@ -175,7 +185,7 @@ func (s *JWTSigner) Sign(ctx context.Context, userID, email string, orgID, orgSl
 		Issued:         unixSeconds(s.now()),
 		JTI:            jti,
 		RTI:            rti,
-		Expires:        unixSeconds(s.now().Add(s.ttl)),
+		Expires:        unixSeconds(s.now().Add(ttl)),
 	})
 }
 
