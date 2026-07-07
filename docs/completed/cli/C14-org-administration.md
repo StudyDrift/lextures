@@ -1,6 +1,6 @@
 # C14 — Org & org-unit administration
 
-> CLI parity plan. Source: `admin/orgs` (38), `admin_org_units.go` (`admin/org-units`, `orgs/{orgId}/terms`, `cross-list-groups`, `branding`, `role-grants`, `parent-links`, `settings`), `admin_orgs.go`. Baseline: `orgs list/get/create`.
+> CLI parity plan. Source: `admin/orgs` (38), `admin_org_units.go` (`admin/org-units`, `orgs/{orgId}/terms`, `cross-list-groups`, `branding`, `role-grants`, `parent-links`, `settings`), `admin_orgs.go`. Baseline: `clients/cli/cmd/orgs.go`, `orgs_extend.go`, `orgs_admin_logic.go`, `org_units.go`, `terms.go`, `orgs_cross_list.go`, `orgs_admin_test.go`; `orgs list/get/create` preserved.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Admin & governance |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE |
-| **Status (today)** | PARTIAL (orgs list/get/create) |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Admin / CLI |
 | **Depends on** | C40 |

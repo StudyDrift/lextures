@@ -1,6 +1,6 @@
 # C15 — People, provisioning & bulk import
 
-> CLI parity plan. Source: `admin/people` (5), `admin/provisioning` (8), `admin/users`, `admin/students`, `admin/teachers`, `admin-console/imports`, `admin_import.go`, `admin_custom_fields.go`, `platform/people`. Baseline: `users list/get/create/enroll`.
+> CLI parity plan. Source: `admin/people` (5), `admin/provisioning` (8), `admin/users`, `admin/students`, `admin/teachers`, `admin-console/imports`, `admin_import.go`, `admin_custom_fields.go`, `platform/people`. Baseline: `clients/cli/cmd/users.go`, `users_extend.go`, `people_provisioning_logic.go`, `imports.go`, `custom_fields.go`, `people.go`, `people_provisioning_test.go`; `users list/get/create/enroll` preserved.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Admin & governance |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL (users list/get/create/enroll) |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Admin / CLI |
 | **Depends on** | C14, C40 |
