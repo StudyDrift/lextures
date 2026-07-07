@@ -237,6 +237,11 @@
 		8B80EC2D3E4F5061728394 /* LMSAPICourseBlueprint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B80ED3E4F5061728394A5 /* LMSAPICourseBlueprint.swift */; };
 		8B80FC2D3E4F5061728394 /* CourseBlueprintSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B80FD3E4F5061728394A5 /* CourseBlueprintSettingsView.swift */; };
 		8B810C2D3E4F5061728394 /* CourseBlueprintLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B810D3E4F5061728394A5 /* CourseBlueprintLogicTests.swift */; };
+		8B820C2D3E4F5061728394 /* CourseSectionsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B820D3E4F5061728394A5 /* CourseSectionsLogic.swift */; };
+		8B821C2D3E4F5061728394 /* LMSAPICourseSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B821D3E4F5061728394A5 /* LMSAPICourseSections.swift */; };
+		8B822C2D3E4F5061728394 /* CourseSectionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B822D3E4F5061728394A5 /* CourseSectionsSettingsView.swift */; };
+		8B823C2D3E4F5061728394 /* CourseCrossListingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B823D3E4F5061728394A5 /* CourseCrossListingView.swift */; };
+		8B824C2D3E4F5061728394 /* CourseSectionsLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B824D3E4F5061728394A5 /* CourseSectionsLogicTests.swift */; };
 		8BC1A6564CC4448BB314F2CE /* PortfolioLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F20D791B554FFA9287D92E /* PortfolioLogicTests.swift */; };
 		8BE12061C5DC42FAA6B56793 /* CoursePeopleLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C33BB319C14CAA95E1EA2D /* CoursePeopleLogic.swift */; };
 		8C5F503D881C49A1A74D5734 /* QuizIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F68C48EE9134456AB4C277F /* QuizIntroView.swift */; };
@@ -680,6 +685,11 @@
 		8B80ED3E4F5061728394A5 /* LMSAPICourseBlueprint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICourseBlueprint.swift; sourceTree = "<group>"; };
 		8B80FD3E4F5061728394A5 /* CourseBlueprintSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseBlueprintSettingsView.swift; sourceTree = "<group>"; };
 		8B810D3E4F5061728394A5 /* CourseBlueprintLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseBlueprintLogicTests.swift; sourceTree = "<group>"; };
+		8B820D3E4F5061728394A5 /* CourseSectionsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSectionsLogic.swift; sourceTree = "<group>"; };
+		8B821D3E4F5061728394A5 /* LMSAPICourseSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICourseSections.swift; sourceTree = "<group>"; };
+		8B822D3E4F5061728394A5 /* CourseSectionsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSectionsSettingsView.swift; sourceTree = "<group>"; };
+		8B823D3E4F5061728394A5 /* CourseCrossListingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseCrossListingView.swift; sourceTree = "<group>"; };
+		8B824D3E4F5061728394A5 /* CourseSectionsLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSectionsLogicTests.swift; sourceTree = "<group>"; };
 		8B9DAB24E88B4519B6364A46 /* AdvisingLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisingLogic.swift; sourceTree = "<group>"; };
 		8CA40C5AE78A4F62A55FEF1F /* ProfilePersonalDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePersonalDetailsView.swift; sourceTree = "<group>"; };
 		8D23934020EB45049FE7F04B /* AuthSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSession.swift; sourceTree = "<group>"; };
@@ -901,6 +911,8 @@
 				8B811D3E4F5061728394A5 /* CourseArchivedContentLogic.swift */,
 				8B80ED3E4F5061728394A5 /* LMSAPICourseBlueprint.swift */,
 				8B80DD3E4F5061728394A5 /* CourseBlueprintLogic.swift */,
+				8B821D3E4F5061728394A5 /* LMSAPICourseSections.swift */,
+				8B820D3E4F5061728394A5 /* CourseSectionsLogic.swift */,
 				8B80AD3E4F5061728394A5 /* LMSAPICourseImportExport.swift */,
 				8B809D3E4F5061728394A5 /* CourseImportExportLogic.swift */,
 				8B803D3E4F5061728394A5 /* LMSAPICourseSettings.swift */,
@@ -1446,6 +1458,8 @@
 			isa = PBXGroup;
 			children = (
 				8B817D3E4F5061728394A5 /* CourseFeaturesSettingsView.swift */,
+				8B822D3E4F5061728394A5 /* CourseSectionsSettingsView.swift */,
+				8B823D3E4F5061728394A5 /* CourseCrossListingView.swift */,
 				8B813D3E4F5061728394A5 /* CourseArchivedContentView.swift */,
 				8B80FD3E4F5061728394A5 /* CourseBlueprintSettingsView.swift */,
 				8B805D3E4F5061728394A5 /* CourseSettingsHostView.swift */,
@@ -1722,6 +1736,7 @@
 				8B818D3E4F5061728394A5 /* CourseFeaturesLogicTests.swift */,
 				8B814D3E4F5061728394A5 /* CourseArchivedContentLogicTests.swift */,
 				8B810D3E4F5061728394A5 /* CourseBlueprintLogicTests.swift */,
+				8B824D3E4F5061728394A5 /* CourseSectionsLogicTests.swift */,
 				8B80CD3E4F5061728394A5 /* CourseImportExportLogicTests.swift */,
 				8B808D3E4F5061728394A5 /* CourseSettingsLogicTests.swift */,
 				8B708D3E4F5061728394A5 /* WalletLogicTests.swift */,
@@ -1928,6 +1943,10 @@
 				8B80FC2D3E4F5061728394 /* CourseBlueprintSettingsView.swift in Sources */,
 				8B80EC2D3E4F5061728394 /* LMSAPICourseBlueprint.swift in Sources */,
 				8B80DC2D3E4F5061728394 /* CourseBlueprintLogic.swift in Sources */,
+				8B821C2D3E4F5061728394 /* LMSAPICourseSections.swift in Sources */,
+				8B820C2D3E4F5061728394 /* CourseSectionsLogic.swift in Sources */,
+				8B822C2D3E4F5061728394 /* CourseSectionsSettingsView.swift in Sources */,
+				8B823C2D3E4F5061728394 /* CourseCrossListingView.swift in Sources */,
 				8B80BC2D3E4F5061728394 /* CourseImportExportView.swift in Sources */,
 				8B80AC2D3E4F5061728394 /* LMSAPICourseImportExport.swift in Sources */,
 				8B809C2D3E4F5061728394 /* CourseImportExportLogic.swift in Sources */,
@@ -2291,6 +2310,7 @@
 				8B818C2D3E4F5061728394 /* CourseFeaturesLogicTests.swift in Sources */,
 				8B814C2D3E4F5061728394 /* CourseArchivedContentLogicTests.swift in Sources */,
 				8B810C2D3E4F5061728394 /* CourseBlueprintLogicTests.swift in Sources */,
+				8B824C2D3E4F5061728394 /* CourseSectionsLogicTests.swift in Sources */,
 				8B80CC2D3E4F5061728394 /* CourseImportExportLogicTests.swift in Sources */,
 				8B808C2D3E4F5061728394 /* CourseSettingsLogicTests.swift in Sources */,
 				8B708C2D3E4F5061728394 /* WalletLogicTests.swift in Sources */,

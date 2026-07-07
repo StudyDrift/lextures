@@ -1184,6 +1184,156 @@ object LmsApi {
             decode<CourseSectionsResponse>(body).sections
         }
 
+    suspend fun postCourseSection(
+        courseCode: String,
+        body: CreateCourseSectionBody,
+        accessToken: String,
+    ): CourseSection = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/sections",
+            method = "POST",
+            body = client.encodeBody(body, CreateCourseSectionBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun patchCourseSection(
+        courseCode: String,
+        sectionId: String,
+        body: PatchCourseSectionBody,
+        accessToken: String,
+    ): CourseSection = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/sections/${encodePath(sectionId)}",
+            method = "PATCH",
+            body = client.encodeBody(body, PatchCourseSectionBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun deleteCourseSection(
+        courseCode: String,
+        sectionId: String,
+        accessToken: String,
+    ): Unit = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/sections/${encodePath(sectionId)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299 && code != 204) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun putSectionAssignmentOverride(
+        sectionId: String,
+        itemId: String,
+        body: SectionAssignmentOverrideBody,
+        accessToken: String,
+    ): Unit = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/sections/${encodePath(sectionId)}/overrides/${encodePath(itemId)}",
+            method = "PUT",
+            body = client.encodeBody(body, SectionAssignmentOverrideBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+    }
+
+    suspend fun patchEnrollmentSection(
+        enrollmentId: String,
+        sectionId: String,
+        accessToken: String,
+    ): Unit = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/enrollments/${encodePath(enrollmentId)}/section",
+            method = "PATCH",
+            body = client.encodeBody(
+                EnrollmentSectionPatchBody(sectionId),
+                EnrollmentSectionPatchBody.serializer(),
+            ),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+    }
+
+    suspend fun fetchOrgCrossListGroups(orgId: String, accessToken: String): List<CrossListGroup> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/orgs/${encodePath(orgId)}/cross-list-groups",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<CrossListGroupsResponse>(body).groups
+        }
+
+    suspend fun postOrgCrossListGroup(
+        orgId: String,
+        body: CreateCrossListGroupBody,
+        accessToken: String,
+    ): CrossListGroup = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/orgs/${encodePath(orgId)}/cross-list-groups",
+            method = "POST",
+            body = client.encodeBody(body, CreateCrossListGroupBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun postOrgCrossListMember(
+        orgId: String,
+        groupId: String,
+        sectionId: String,
+        accessToken: String,
+    ): CrossListGroup = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/orgs/${encodePath(orgId)}/cross-list-groups/${encodePath(groupId)}/members",
+            method = "POST",
+            body = client.encodeBody(AddCrossListMemberBody(sectionId), AddCrossListMemberBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun deleteOrgCrossListMember(
+        orgId: String,
+        groupId: String,
+        sectionId: String,
+        accessToken: String,
+    ): CrossListGroup? = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/orgs/${encodePath(orgId)}/cross-list-groups/${encodePath(groupId)}/members/${encodePath(sectionId)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        if (code == 204 || body.isEmpty()) return@withContext null
+        runCatching {
+            val removed = decode<Map<String, Boolean>>(body)["removed"] == true
+            if (removed) null else decode(body)
+        }.getOrNull()
+    }
+
+    suspend fun fetchCourseSectionsPayload(
+        courseCode: String,
+        accessToken: String,
+    ): CourseSectionsCachedPayload = withContext(Dispatchers.IO) {
+        val sections = fetchCourseSections(courseCode, accessToken)
+        val enrollments = fetchCourseEnrollments(courseCode, accessToken)
+        val structure = fetchCourseStructure(courseCode, accessToken)
+        CourseSectionsCachedPayload(
+            sections = sections,
+            enrollments = enrollments,
+            assignments = CourseSectionsLogic.assignmentItems(structure),
+        )
+    }
+
     // Course roster (M11.4)
 
     suspend fun fetchCourseEnrollments(courseCode: String, accessToken: String): List<CourseEnrollment> =
