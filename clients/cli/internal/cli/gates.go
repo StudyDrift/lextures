@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-const sensitiveExportWarning = `WARNING: This operation may export sensitive personal or academic data (FERPA).
-Re-run with --yes to confirm.`
+const sensitiveExportWarning = `WARNING: This operation may export sensitive personal or academic data (FERPA); re-run with --yes to confirm`
 
 // RequireYes refuses destructive or sensitive operations without confirmation.
 func RequireYes(confirmed bool, context string) error {
@@ -16,7 +15,7 @@ func RequireYes(confirmed bool, context string) error {
 	}
 	msg := sensitiveExportWarning
 	if context != "" {
-		msg = fmt.Sprintf("WARNING: %s\nRe-run with --yes to confirm.", context)
+		msg = fmt.Sprintf("WARNING: %s; re-run with --yes to confirm", context)
 	}
 	return fmt.Errorf("%s", msg)
 }
@@ -27,7 +26,7 @@ func RequireForce(confirmed bool, message string) error {
 		return nil
 	}
 	if message == "" {
-		message = "Re-run with --force to confirm this destructive operation."
+		message = "re-run with --force to confirm this destructive operation"
 	}
 	return fmt.Errorf("%s", message)
 }

@@ -354,7 +354,7 @@ func runBroadcastsSend(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("--org is required")
 	}
 	if !broadcastsSendFlags.yes {
-		return fmt.Errorf("%s\nRe-run with --yes to confirm.", broadcastWarning)
+		return fmt.Errorf("%s; re-run with --yes to confirm", broadcastWarning)
 	}
 	subject := strings.TrimSpace(broadcastsSendFlags.subject)
 	body := strings.TrimSpace(broadcastsSendFlags.body)
