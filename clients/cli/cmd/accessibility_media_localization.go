@@ -161,10 +161,6 @@ var accessibilityCmd = &cobra.Command{
 	Short: "WCAG accessibility checks",
 }
 
-var accessibilityCheckFlags struct {
-	course string
-}
-
 var accessibilityCheckCmd = &cobra.Command{
 	Use:   "check <course>",
 	Short: "Report alt-text coverage and uncovered items",

@@ -296,7 +296,7 @@ func runCredentialsIssue(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("--file is required")
 	}
 	if !credentialsIssueFlags.yes {
-		return fmt.Errorf("%s\nRe-run with --yes to confirm.", transcriptExportWarning)
+		return fmt.Errorf("%s; re-run with --yes to confirm", transcriptExportWarning)
 	}
 	recipients, err := parseCredentialRecipientsCSV(credentialsIssueFlags.file)
 	if err != nil {
@@ -373,7 +373,7 @@ func runTranscriptsGet(cmd *cobra.Command, _ []string) error {
 
 func runTranscriptsExport(cmd *cobra.Command, _ []string) error {
 	if !transcriptsExportFlags.yes {
-		return fmt.Errorf("%s\nRe-run with --yes to confirm.", transcriptExportWarning)
+		return fmt.Errorf("%s; re-run with --yes to confirm", transcriptExportWarning)
 	}
 	payload := map[string]any{
 		"deliveryType": transcriptsExportFlags.deliveryType,
@@ -403,7 +403,7 @@ func runTranscriptsBatch(cmd *cobra.Command, _ []string) error {
 
 func runCCRExport(cmd *cobra.Command, _ []string) error {
 	if !ccrExportFlags.yes {
-		return fmt.Errorf("%s\nRe-run with --yes to confirm.", transcriptExportWarning)
+		return fmt.Errorf("%s; re-run with --yes to confirm", transcriptExportWarning)
 	}
 	c := client.New(Cfg.Server, Cfg.APIKey)
 	genBody, err := generateCCR(c, ccrExportFlags.sharePublicly)

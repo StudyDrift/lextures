@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -322,10 +321,4 @@ func readJSONObjectsFromFile(path string) ([]json.RawMessage, error) {
 		return readNDJSONObjects(path)
 	}
 	return []json.RawMessage{json.RawMessage(data)}, nil
-}
-
-func writeJSONToWriter(w io.Writer, v any) error {
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	return enc.Encode(v)
 }

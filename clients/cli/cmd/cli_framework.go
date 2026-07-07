@@ -9,7 +9,6 @@ import (
 
 	"github.com/lextures/lextures/clients/cli/internal/cli"
 	"github.com/lextures/lextures/clients/cli/internal/client"
-	"github.com/lextures/lextures/clients/cli/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -186,22 +185,4 @@ func init() {
 
 	configCmd.AddCommand(configGetCmd, configListCmd, configEnvCmd)
 	rootCmd.AddCommand(completionCmd, configCmd, whoamiCmd)
-}
-
-// ensureConfigLoaded is a noop guard used by config commands after PersistentPreRunE.
-func ensureConfigLoaded() error {
-	if Cfg == nil {
-		cfg, err := config.Load(config.LoadOptions{
-			ConfigFile: globalFlags.configFile,
-			Profile:    globalFlags.profile,
-			Server:     globalFlags.server,
-			APIKey:     globalFlags.apiKey,
-			JSON:       globalFlags.jsonOut,
-		})
-		if err != nil {
-			return err
-		}
-		Cfg = cfg
-	}
-	return nil
 }

@@ -31,10 +31,6 @@ var canvasCatalogListCmd = &cobra.Command{
 	RunE:  runCanvasCatalogList,
 }
 
-var canvasCatalogSearchFlags struct {
-	query string
-}
-
 var canvasCatalogSearchCmd = &cobra.Command{
 	Use:   "search <query>",
 	Short: "Search the Canvas catalog",

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -376,11 +375,4 @@ func waitForTranscode(c *client.Client, objectID string, timeout time.Duration) 
 		}
 		time.Sleep(2 * time.Second)
 	}
-}
-
-func readOptionalFile(path string) ([]byte, error) {
-	if path == "" {
-		return nil, nil
-	}
-	return os.ReadFile(path)
 }

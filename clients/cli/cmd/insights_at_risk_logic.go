@@ -255,27 +255,6 @@ func fetchCourseInsights(c *client.Client, courseCode string) ([]byte, error) {
 	return body, nil
 }
 
-func fetchCourseCrossSection(c *client.Client, courseCode string) ([]byte, error) {
-	path := "/api/v1/courses/" + url.PathEscape(courseCode) + "/analytics/cross-section"
-	req, err := c.NewRequest(http.MethodGet, path, nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := doWithRetry(c, req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	body, err := readResponseBody(resp)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return body, apiErrorBody(resp.StatusCode, body)
-	}
-	return body, nil
-}
-
 type classroomQuestion struct {
 	ID        string `json:"id"`
 	Question  string `json:"question"`

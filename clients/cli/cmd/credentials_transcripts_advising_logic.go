@@ -5,7 +5,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -257,26 +256,6 @@ func submitTranscriptRequest(c *client.Client, payload map[string]any) ([]byte, 
 	return body, nil
 }
 
-func fetchCCR(c *client.Client) ([]byte, error) {
-	req, err := c.NewRequest(http.MethodGet, "/api/v1/me/ccr", nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := doWithRetry(c, req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	body, err := readResponseBody(resp)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return body, apiErrorBody(resp.StatusCode, body)
-	}
-	return body, nil
-}
-
 func generateCCR(c *client.Client, sharePublicly bool) ([]byte, error) {
 	raw, err := json.Marshal(map[string]bool{"sharePublicly": sharePublicly})
 	if err != nil {
@@ -451,14 +430,4 @@ func readTextFile(path string) (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(string(b)), nil
-}
-
-func writeOutFile(path string, r io.Reader) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = f.Close() }()
-	_, err = io.Copy(f, r)
-	return err
 }

@@ -107,7 +107,6 @@ func exportAuditLog(c *client.Client, filters auditLogFilters, format string) ([
 	}
 	if format == "csv" {
 		q += sep + "format=csv"
-		sep = "&"
 	}
 	path := "/api/v1/compliance/audit-log/export" + q
 	req, err := c.NewRequest(http.MethodGet, path, nil)
@@ -186,22 +185,6 @@ func fetchAdminSearch(c *client.Client, query, typeFilter string) ([]adminSearch
 	results = append(results, out.Courses...)
 	results = append(results, out.Content...)
 	return results, body, nil
-}
-
-func flattenAdminSearchResults(body []byte) ([]adminSearchResult, error) {
-	var out struct {
-		Users   []adminSearchResult `json:"users"`
-		Courses []adminSearchResult `json:"courses"`
-		Content []adminSearchResult `json:"content"`
-	}
-	if err := json.Unmarshal(body, &out); err != nil {
-		return nil, err
-	}
-	results := make([]adminSearchResult, 0, len(out.Users)+len(out.Courses)+len(out.Content))
-	results = append(results, out.Users...)
-	results = append(results, out.Courses...)
-	results = append(results, out.Content...)
-	return results, nil
 }
 
 type identityMeResponse struct {

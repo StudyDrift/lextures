@@ -212,30 +212,6 @@ func fetchComplianceExport(c *client.Client, path string) ([]byte, string, error
 	return body, resp.Header.Get("Content-Type"), nil
 }
 
-func postComplianceJSON(c *client.Client, path string, payload map[string]any) ([]byte, error) {
-	raw, err := json.Marshal(payload)
-	if err != nil {
-		return nil, err
-	}
-	req, err := c.NewRequest(http.MethodPost, path, bytes.NewReader(raw))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := doWithRetry(c, req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	body, err := readResponseBody(resp)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return body, apiErrorBody(resp.StatusCode, body)
-	}
-	return body, nil
-}
-
 func putComplianceJSON(c *client.Client, path string, payload map[string]any) ([]byte, error) {
 	raw, err := json.Marshal(payload)
 	if err != nil {
@@ -365,14 +341,6 @@ func fetchDPACurrent(c *client.Client) ([]byte, error) {
 
 func fetchDPAAcceptances(c *client.Client) ([]byte, error) {
 	return fetchComplianceGET(c, "/api/v1/compliance/dpa/acceptances")
-}
-
-func fetchSecurityReports(c *client.Client) ([]byte, error) {
-	return fetchComplianceGET(c, "/api/v1/compliance/security-reports")
-}
-
-func fetchSecurityReport(c *client.Client, id string) ([]byte, error) {
-	return fetchComplianceGET(c, "/api/v1/compliance/security-reports/"+url.PathEscape(id))
 }
 
 func fetchResearchConsentStudies(c *client.Client) ([]byte, error) {

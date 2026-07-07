@@ -146,7 +146,8 @@ func runNotebooksAdd(cmd *cobra.Command, _ []string) error {
 	if strings.HasSuffix(notebooksAddFlags.file, ".json") {
 		payload, err = cli.ReadFile(notebooksAddFlags.file)
 	} else {
-		text, err := cli.ReadTextFile(notebooksAddFlags.file)
+		var text string
+		text, err = cli.ReadTextFile(notebooksAddFlags.file)
 		if err != nil {
 			return err
 		}

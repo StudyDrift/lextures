@@ -656,23 +656,3 @@ func unlinkBot(c *client.Client, platform string) error {
 	}
 	return nil
 }
-
-func fetchBotLinks(c *client.Client) ([]byte, error) {
-	req, err := c.NewRequest(http.MethodGet, "/api/v1/me/bot-links", nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := doWithRetry(c, req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	body, err := readResponseBody(resp)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return body, apiErrorBody(resp.StatusCode, body)
-	}
-	return body, nil
-}

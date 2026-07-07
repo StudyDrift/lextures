@@ -67,7 +67,7 @@ func readCanvasToken(token, tokenFile string) (string, error) {
 			return t, nil
 		}
 	}
-	return "", fmt.Errorf("Canvas access token required via --token-file or stdin")
+	return "", fmt.Errorf("canvas access token required via --token-file or stdin")
 }
 
 func listCanvasCatalog(c *client.Client, canvasBase, accessToken string) ([]canvasCourseItem, []byte, error) {
@@ -285,28 +285,6 @@ func fetchCourseCanvasLink(c *client.Client, courseCode string) (map[string]any,
 		return nil, body, err
 	}
 	return out, body, nil
-}
-
-func patchCourseCanvasLink(c *client.Client, courseCode string, gradeSync bool) ([]byte, error) {
-	raw, _ := json.Marshal(map[string]bool{"gradeSyncEnabled": gradeSync})
-	path := "/api/v1/courses/" + url.PathEscape(courseCode) + "/canvas-link"
-	req, err := c.NewRequest(http.MethodPatch, path, bytes.NewReader(raw))
-	if err != nil {
-		return nil, err
-	}
-	resp, err := doWithRetry(c, req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	body, err := readResponseBody(resp)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return body, apiErrorBody(resp.StatusCode, body)
-	}
-	return body, nil
 }
 
 type contentImportJob struct {
