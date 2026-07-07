@@ -111,8 +111,12 @@ func MergeClientMeta(meta *ClientMeta, authMethod string) *ClientMeta {
 }
 
 func issueAccessAndRefresh(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSigner, row *user.Row, meta *ClientMeta) (access, refresh string, err error) {
+	return issueAccessAndRefreshWithAccessTTL(ctx, pool, jwt, row, meta, pauth.AccessTokenTTL)
+}
+
+func issueAccessAndRefreshWithAccessTTL(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSigner, row *user.Row, meta *ClientMeta, accessTTL time.Duration) (access, refresh string, err error) {
 	if pool == nil {
-		tok, err := jwt.Sign(ctx, row.ID, row.Email, "", "", nil)
+		tok, err := jwt.SignWithTTL(ctx, row.ID, row.Email, "", "", nil, accessTTL)
 		return tok, "", err
 	}
 	tx, err := pool.Begin(ctx)
@@ -120,7 +124,7 @@ func issueAccessAndRefresh(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.J
 		return "", "", err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
-	a, ref, err := issueAccessAndRefreshTx(ctx, pool, tx, jwt, row, meta, nil)
+	a, ref, err := issueAccessAndRefreshTx(ctx, pool, tx, jwt, row, meta, nil, accessTTL)
 	if err != nil {
 		return "", "", err
 	}
@@ -130,7 +134,7 @@ func issueAccessAndRefresh(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.J
 	return a, ref, nil
 }
 
-func issueAccessAndRefreshTx(ctx context.Context, pool *pgxpool.Pool, tx pgx.Tx, jwt *pauth.JWTSigner, row *user.Row, meta *ClientMeta, rotatedFrom *refreshtoken.Row) (access, refresh string, err error) {
+func issueAccessAndRefreshTx(ctx context.Context, pool *pgxpool.Pool, tx pgx.Tx, jwt *pauth.JWTSigner, row *user.Row, meta *ClientMeta, rotatedFrom *refreshtoken.Row, accessTTL time.Duration) (access, refresh string, err error) {
 	raw := make([]byte, refreshTokenRawBytes)
 	if _, err := rand.Read(raw); err != nil {
 		return "", "", err
@@ -162,7 +166,7 @@ func issueAccessAndRefreshTx(ctx context.Context, pool *pgxpool.Pool, tx pgx.Tx,
 		return "", "", err
 	}
 	rtid := refID
-	tok, err := jwt.Sign(ctx, row.ID, row.Email, orgID, orgSlug, &rtid)
+	tok, err := jwt.SignWithTTL(ctx, row.ID, row.Email, orgID, orgSlug, &rtid, accessTTL)
 	if err != nil {
 		return "", "", err
 	}
@@ -211,7 +215,11 @@ func Refresh(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSigner, rawR
 	if err := refreshtoken.MarkRevoked(ctx, tx, row.ID, now); err != nil {
 		return RefreshTokenResponse{}, err
 	}
-	access, newRefresh, err := issueAccessAndRefreshTx(ctx, pool, tx, jwt, urow, meta, row)
+	accessTTL := pauth.AccessTokenTTL
+	if row.AuthMethod != nil && *row.AuthMethod == "cli" {
+		accessTTL = pauth.CLIAccessTokenTTL
+	}
+	access, newRefresh, err := issueAccessAndRefreshTx(ctx, pool, tx, jwt, urow, meta, row, accessTTL)
 	if err != nil {
 		return RefreshTokenResponse{}, err
 	}
@@ -221,7 +229,7 @@ func Refresh(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSigner, rawR
 	return RefreshTokenResponse{
 		AccessToken:  access,
 		RefreshToken: newRefresh,
-		ExpiresIn:    int(pauth.AccessTokenTTL / time.Second),
+		ExpiresIn:    int(accessTTL / time.Second),
 		TokenType:    "Bearer",
 	}, nil
 }

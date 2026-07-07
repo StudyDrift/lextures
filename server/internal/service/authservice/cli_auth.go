@@ -68,12 +68,13 @@ func ApproveCLIAuth(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSigne
 		return errors.New("user not found")
 	}
 
-	access, refresh, err := issueAccessAndRefresh(ctx, pool, jwt, urow, meta)
+	meta = MergeClientMeta(meta, "cli")
+	access, refresh, err := issueAccessAndRefreshWithAccessTTL(ctx, pool, jwt, urow, meta, pauth.CLIAccessTokenTTL)
 	if err != nil {
 		return err
 	}
 
-	expiresIn := int(pauth.AccessTokenTTL / time.Second)
+	expiresIn := int(pauth.CLIAccessTokenTTL / time.Second)
 	return cliauthsession.Approve(ctx, pool, h[:], access, refresh, expiresIn)
 }
 

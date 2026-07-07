@@ -67,13 +67,14 @@ func (m *Manager) Backend() string {
 }
 
 type refreshResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int    `json:"expires_in"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int    `json:"expires_in"`
 }
 
 func (m *Manager) doRefresh(refreshToken string) (*TokenData, error) {
 	body, _ := json.Marshal(map[string]string{"refresh_token": refreshToken})
-	resp, err := http.Post(m.baseURL+"/api/oauth/token/refresh", "application/json", bytes.NewReader(body))
+	resp, err := http.Post(m.baseURL+"/api/v1/auth/refresh", "application/json", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -88,9 +89,13 @@ func (m *Manager) doRefresh(refreshToken string) (*TokenData, error) {
 	if r.AccessToken == "" {
 		return nil, fmt.Errorf("refresh response missing access_token")
 	}
+	newRefresh := refreshToken
+	if r.RefreshToken != "" {
+		newRefresh = r.RefreshToken
+	}
 	return &TokenData{
 		AccessToken:  r.AccessToken,
-		RefreshToken: refreshToken,
+		RefreshToken: newRefresh,
 		Expiry:       time.Now().Add(time.Duration(r.ExpiresIn) * time.Second),
 	}, nil
 }
