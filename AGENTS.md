@@ -26,6 +26,7 @@ Required env vars for the Go API (copy from `server/.env.example` to `server/.en
 - `PUBLIC_WEB_ORIGIN=http://localhost:5173`
 - `COURSE_FILES_ROOT=data/course-files`
 - `RABBITMQ_URL=amqp://studydrift:studydrift@localhost:5672/` (optional locally — falls back to in-process queue when unset)
+- Background job queue and scheduler are **on by default** when `APP_ENV=local` (no extra env vars). Scheduled job triggers enqueue to Postgres and need the API worker running — restart `go run ./cmd/server` after pulling config changes.
 
 Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run dev`). Feature flags are loaded at runtime from `GET /api/v1/platform/features` (backed by Settings → Global platform), not `VITE_FEATURE_*` build vars.
 

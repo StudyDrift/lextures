@@ -32,7 +32,12 @@ func (d Deps) handleAdminSchedulerList() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfiguration.")
 			return
 		}
-		writeJSON(w, http.StatusOK, map[string]any{"jobs": jobs})
+		cfg := d.effectiveConfig()
+		writeJSON(w, http.StatusOK, map[string]any{
+			"jobs":                    jobs,
+			"backgroundJobsEnabled":   cfg.BackgroundJobsEnabled,
+			"schedulerTickEnabled":    cfg.SchedulerEnabled && cfg.BackgroundJobsEnabled,
+		})
 	}
 }
 
@@ -105,6 +110,11 @@ func (d Deps) handleAdminSchedulerTrigger() http.HandlerFunc {
 			return
 		}
 		name := chi.URLParam(r, "name")
+		if !d.effectiveConfig().BackgroundJobsEnabled {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal,
+				"Background job worker is disabled. Set BACKGROUND_JOBS_ENABLED=1 and restart the API, or use APP_ENV=local for the default dev worker.")
+			return
+		}
 		jobID, err := d.Scheduler.Trigger(r.Context(), name, time.Now().UTC())
 		if errors.Is(err, scheduler.ErrUnknownJob) {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Scheduled job not found.")
