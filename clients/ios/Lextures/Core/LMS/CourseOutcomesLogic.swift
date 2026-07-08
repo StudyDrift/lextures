@@ -85,13 +85,13 @@ enum CourseOutcomesLogic {
             var moduleTitle = ""
             var parent = item.parentId.flatMap { byId[$0] }
             var guardIds = Set<String>()
-            while let p = parent, !guardIds.contains(p.id) {
-                guardIds.insert(p.id)
-                if p.kind == "module" {
-                    moduleTitle = p.title
+            while let currentParent = parent, !guardIds.contains(currentParent.id) {
+                guardIds.insert(currentParent.id)
+                if currentParent.kind == "module" {
+                    moduleTitle = currentParent.title
                     break
                 }
-                parent = p.parentId.flatMap { byId[$0] }
+                parent = currentParent.parentId.flatMap { byId[$0] }
             }
             let label = moduleTitle.isEmpty ? item.title : "\(moduleTitle) — \(item.title)"
             return GradableOption(id: item.id, label: label, kind: item.kind)
