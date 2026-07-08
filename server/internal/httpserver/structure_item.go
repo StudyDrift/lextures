@@ -11,9 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/lextures/lextures/server/internal/apierr"
-	"github.com/lextures/lextures/server/internal/repos/course"
-	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursegrading"
+	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 )
 
 // handlePatchCourseStructureItem is PATCH /api/v1/courses/{course_code}/structure/items/{item_id}
@@ -120,6 +121,92 @@ func (d Deps) handlePatchCourseStructureItem() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load structure item.")
 			return
 		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(out)
+	}
+}
+
+// handlePatchCourseStructureItemAssignmentGroup is PATCH /api/v1/courses/{course_code}/structure/items/{item_id}/assignment-group.
+func (d Deps) handlePatchCourseStructureItemAssignmentGroup() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPatch {
+			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		ok, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !ok {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to edit course structure.")
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		var body struct {
+			AssignmentGroupID *uuid.UUID `json:"assignmentGroupId"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		if body.AssignmentGroupID != nil {
+			groups, err := coursegrading.ListAssignmentGroups(r.Context(), d.Pool, *cid)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load assignment groups.")
+				return
+			}
+			found := false
+			for i := range groups {
+				if groups[i].ID == *body.AssignmentGroupID {
+					found = true
+					break
+				}
+			}
+			if !found {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Unknown assignment group id.")
+				return
+			}
+		}
+		row, err := coursestructure.PatchChildStructureItemAssignmentGroup(
+			r.Context(), d.Pool, *cid, itemID, body.AssignmentGroupID,
+		)
+		if errors.Is(err, pgx.ErrNoRows) {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Structure item not found.")
+			return
+		}
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update assignment group.")
+			return
+		}
+		out, err := coursestructure.ItemResponseForRow(r.Context(), d.Pool, *cid, row)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load structure item.")
+			return
+		}
+		d.invalidateCourseStructureCache(r.Context(), *cid)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

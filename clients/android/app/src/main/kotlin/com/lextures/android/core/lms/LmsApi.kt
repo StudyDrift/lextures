@@ -144,6 +144,162 @@ object LmsApi {
         decode<CourseConsortiumSettings>(response)
     }
 
+    suspend fun fetchCourseGradingSettings(
+        courseCode: String,
+        accessToken: String,
+    ): CourseGradingSettings = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/grading",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CourseGradingSettings>(body)
+    }
+
+    suspend fun putCourseGradingSettings(
+        courseCode: String,
+        body: PutCourseGradingSettingsBody,
+        accessToken: String,
+    ): CourseGradingSettings = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/grading",
+            method = "PUT",
+            body = json.encodeToString(PutCourseGradingSettingsBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseGradingSettings>(response)
+    }
+
+    suspend fun fetchCourseGradingScheme(
+        courseCode: String,
+        accessToken: String,
+    ): CourseGradingSchemeRecord? = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/grading-scheme",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CourseGradingSchemeEnvelope>(body).scheme
+    }
+
+    suspend fun putCourseGradingScheme(
+        courseCode: String,
+        body: PutCourseGradingSchemeBody,
+        accessToken: String,
+    ): CourseGradingSchemeRecord? = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/grading-scheme",
+            method = "PUT",
+            body = json.encodeToString(PutCourseGradingSchemeBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseGradingSchemeEnvelope>(response).scheme
+    }
+
+    suspend fun patchCourseStructureItemAssignmentGroup(
+        courseCode: String,
+        itemId: String,
+        assignmentGroupId: String?,
+        accessToken: String,
+    ): CourseStructureItem = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/structure/items/${encodePath(itemId)}/assignment-group",
+            method = "PATCH",
+            body = json.encodeToString(PatchItemAssignmentGroupBody(assignmentGroupId)),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseStructureItem>(response)
+    }
+
+    suspend fun fetchCourseOutcomes(
+        courseCode: String,
+        accessToken: String,
+    ): CourseOutcomesListResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/outcomes",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CourseOutcomesListResponse>(body)
+    }
+
+    suspend fun createCourseOutcome(
+        courseCode: String,
+        body: CreateCourseOutcomeBody,
+        accessToken: String,
+    ): CourseOutcome = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/outcomes",
+            method = "POST",
+            body = json.encodeToString(CreateCourseOutcomeBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseOutcome>(response)
+    }
+
+    suspend fun patchCourseOutcome(
+        courseCode: String,
+        outcomeId: String,
+        body: PatchCourseOutcomeBody,
+        accessToken: String,
+    ): CourseOutcome = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/outcomes/${encodePath(outcomeId)}",
+            method = "PATCH",
+            body = json.encodeToString(PatchCourseOutcomeBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseOutcome>(response)
+    }
+
+    suspend fun deleteCourseOutcome(
+        courseCode: String,
+        outcomeId: String,
+        accessToken: String,
+    ): Unit = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/outcomes/${encodePath(outcomeId)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+    }
+
+    suspend fun addCourseOutcomeLink(
+        courseCode: String,
+        outcomeId: String,
+        body: AddCourseOutcomeLinkBody,
+        accessToken: String,
+    ): CourseOutcomeLink = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/outcomes/${encodePath(outcomeId)}/links",
+            method = "POST",
+            body = json.encodeToString(AddCourseOutcomeLinkBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseOutcomeLink>(response)
+    }
+
+    suspend fun deleteCourseOutcomeLink(
+        courseCode: String,
+        outcomeId: String,
+        linkId: String,
+        accessToken: String,
+    ): Unit = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/outcomes/${encodePath(outcomeId)}/links/${encodePath(linkId)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+    }
+
     suspend fun fetchCourseExport(
         courseCode: String,
         accessToken: String,

@@ -128,6 +128,7 @@ data class CourseStructureItem(
     val pointsPossible: Double? = null,
     val archived: Boolean? = null,
     val updatedAt: String? = null,
+    val assignmentGroupId: String? = null,
 ) {
     val isModule: Boolean get() = kind == "module"
 

@@ -74,6 +74,31 @@ func PatchChildStructureItemDueAt(
 	return nil
 }
 
+// PatchChildStructureItemAssignmentGroup updates assignment_group_id for a module child item.
+func PatchChildStructureItemAssignmentGroup(
+	ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID, assignmentGroupID *uuid.UUID,
+) (ItemRow, error) {
+	var r ItemRow
+	err := pool.QueryRow(ctx, `
+		UPDATE course.course_structure_items
+		SET assignment_group_id = $1,
+		    updated_at = NOW()
+		WHERE id = $2
+		  AND course_id = $3
+		  AND parent_id IS NOT NULL
+		  AND kind `+patchableChildKindsSQL+`
+		RETURNING
+		    id, course_id, sort_order, kind, title, parent_id, published, visible_from, archived, due_at, assignment_group_id, blueprint_locked, blueprint_origin_id, created_at, updated_at
+	`, assignmentGroupID, itemID, courseID,
+	).Scan(
+		&r.ID, &r.CourseID, &r.SortOrder, &r.Kind, &r.Title, &r.ParentID, &r.Published, &r.VisibleFrom, &r.Archived, &r.DueAt, &r.AssignmentGroupID, &r.BlueprintLocked, &r.BlueprintOriginID, &r.CreatedAt, &r.UpdatedAt,
+	)
+	if err != nil {
+		return ItemRow{}, err
+	}
+	return r, nil
+}
+
 // ArchiveChildStructureItem sets archived = true for a child row.
 func ArchiveChildStructureItem(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID) error {
 	tag, err := pool.Exec(ctx, `

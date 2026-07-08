@@ -113,6 +113,16 @@ fun CourseSettingsHostScreen(
                     permissions = permissions,
                     onCourseUpdated = onCourseUpdated,
                 )
+                CourseSettingsLogic.CourseSettingsSection.Grading -> CourseGradingSettingsScreen(
+                    session = session,
+                    course = course,
+                    offline = offline,
+                )
+                CourseSettingsLogic.CourseSettingsSection.Outcomes -> CourseOutcomesSettingsScreen(
+                    session = session,
+                    course = course,
+                    offline = offline,
+                )
                 CourseSettingsLogic.CourseSettingsSection.ImportExport -> CourseImportExportScreen(
                     session = session,
                     course = course,
