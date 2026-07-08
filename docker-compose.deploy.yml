@@ -71,6 +71,7 @@ services:
       PUBLIC_WEB_ORIGIN: ${PUBLIC_WEB_ORIGIN:-http://localhost:5173}
       # Drain in-flight requests on SIGTERM during rolling restarts (plan 17.2 FR-8).
       SHUTDOWN_TIMEOUT_SECS: "30"
+      BACKGROUND_JOBS_ENABLED: 1
     volumes:
       - /mnt/lextures-db/course-files:/mnt/lextures-db/course-files
     depends_on:
