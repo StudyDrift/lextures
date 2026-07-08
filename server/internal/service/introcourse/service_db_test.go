@@ -24,6 +24,7 @@ func TestEnsureProvisioned_Idempotent_Pg(t *testing.T) {
 	ctx := context.Background()
 	svc := New(pool)
 	cfg := config.Config{IntroCourseEnabled: true}
+	resetIntroCourse(t, pool, svc)
 
 	first, err := svc.EnsureProvisioned(ctx, cfg)
 	if err != nil {
@@ -95,7 +96,7 @@ func TestEnsureProvisioned_DisabledSkipsCreate_Pg(t *testing.T) {
 	ctx := context.Background()
 	svc := New(pool)
 
-	_, _ = pool.Exec(ctx, `DELETE FROM course.courses WHERE short_code = $1`, ShortCode)
+	resetIntroCourse(t, pool, svc)
 
 	_, err := svc.EnsureProvisioned(ctx, config.Config{IntroCourseEnabled: false})
 	if err != nil {
@@ -186,7 +187,7 @@ func TestCourseID_CacheInvalidation_Pg(t *testing.T) {
 	pool := testPool(t)
 	ctx := context.Background()
 	svc := New(pool)
-	svc.InvalidateCache()
+	resetIntroCourse(t, pool, svc)
 
 	if _, ok, err := svc.CourseID(ctx); err != nil {
 		t.Fatal(err)
@@ -225,4 +226,15 @@ func testPool(t *testing.T) *pgxpool.Pool {
 	}
 	t.Cleanup(func() { pool.Close() })
 	return pool
+}
+
+// resetIntroCourse removes the canonical intro course so tests can assert create vs reconcile
+// on a shared CI database where other packages may have provisioned it first.
+func resetIntroCourse(t *testing.T, pool *pgxpool.Pool, svc *Service) {
+	t.Helper()
+	ctx := context.Background()
+	svc.InvalidateCache()
+	if _, err := pool.Exec(ctx, `DELETE FROM course.courses WHERE short_code = $1`, ShortCode); err != nil {
+		t.Fatalf("reset intro course: %v", err)
+	}
 }
