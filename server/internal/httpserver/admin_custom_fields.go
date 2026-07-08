@@ -369,7 +369,7 @@ SELECT u.id::text, u.email, COALESCE(u.first_name,''), COALESCE(u.last_name,''),
         WHERE uar.user_id = u.id ORDER BY ar.name LIMIT 1), '') AS role,
        COALESCE(u.external_id,''), u.custom_fields
 FROM "user".users u
-WHERE u.org_id = $1 AND u.id <> 'a0000000-0000-4000-8000-000000000001'::uuid
+WHERE u.org_id = $1 AND u.account_type <> 'system'
 ORDER BY u.email
 `, orgID)
 		if err != nil {

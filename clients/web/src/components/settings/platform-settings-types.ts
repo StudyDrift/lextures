@@ -20,6 +20,12 @@ export type PlatformSettingsPayload = {
   scimEnabled: boolean
   studentProgressEnabled: boolean
   selfReflectionEnabled: boolean
+  learnerProfileEnabled: boolean
+  lpAdaptRecommendationsEnabled: boolean
+  lpAdaptReviewEnabled: boolean
+  lpAdaptModalityEnabled: boolean
+  lpAdaptTutorEnabled: boolean
+  introCourseEnabled: boolean
   outcomesReportEnabled: boolean
   atRiskAlertsEnabled: boolean
   h5pEnabled: boolean

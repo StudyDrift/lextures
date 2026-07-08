@@ -60,6 +60,7 @@ func (d Deps) handlePostAssignmentSubmissionText() http.HandlerFunc {
 			return
 		}
 		d.maybeEnqueueAutoGrade(r, courseCode, *cid, itemID, subRow.ID)
+		d.maybeAutogradeIntroAssignment(r, courseCode, *cid, viewer, itemID)
 		webhooksvc.EmitAssignmentSubmittedEvent(r.Context(), d.Pool, d.effectiveConfig(), *cid, courseCode, itemID, subRow.ID, viewer)
 		out := d.submissionToJSON(r.Context(), courseCode, *subRow, false, 0, "")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

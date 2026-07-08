@@ -87,4 +87,10 @@ func TestNewHandler_AdminRoutesRegistered(t *testing.T) {
 	if rr.Code != http.StatusUnauthorized {
 		t.Fatalf("irt: %d", rr.Code)
 	}
+	rr = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/api/v1/admin/courses?q=test", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("admin courses search: %d, want 401", rr.Code)
+	}
 }

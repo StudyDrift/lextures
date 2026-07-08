@@ -225,6 +225,9 @@ data class MobilePlatformFeatures(
     val graderAgentEnabled: Boolean = false,
     val ffPlagiarismChecks: Boolean = false,
     val altTextEnforcementEnabled: Boolean = false,
+    val learnerProfileEnabled: Boolean = false,
+    val ffMobileLearnerProfile: Boolean = true,
+    val introCourseEnabled: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -301,6 +304,9 @@ data class MobilePlatformFeatures(
             graderAgentEnabled = features?.graderAgentEnabled == true,
             ffPlagiarismChecks = features?.ffPlagiarismChecks == true,
             altTextEnforcementEnabled = features?.altTextEnforcementEnabled == true,
+            learnerProfileEnabled = features?.learnerProfileEnabled == true,
+            ffMobileLearnerProfile = features?.ffMobileLearnerProfile != false,
+            introCourseEnabled = features?.introCourseEnabled != false,
         )
     }
 }

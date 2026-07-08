@@ -62,4 +62,7 @@ struct PlatformFeatures: Decodable {
     var graderAgentEnabled: Bool?
     var ffPlagiarismChecks: Bool?
     var altTextEnforcementEnabled: Bool?
+    var learnerProfileEnabled: Bool?
+    var ffMobileLearnerProfile: Bool?
+    var introCourseEnabled: Bool?
 }

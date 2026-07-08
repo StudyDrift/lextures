@@ -27,6 +27,7 @@ const (
 	StudyReminderStreakAtRisk  = "study_reminder_streak_at_risk"
 	StudyReminderWeeklySummary = "study_reminder_weekly_summary"
 	SeatUtilizationAlert       = "seat_utilization_alert"
+	IntroCourseCompleted       = "intro_course_completed"
 )
 
 // All is the canonical list for defaults and UI.
@@ -56,4 +57,5 @@ var All = []string{
 	StudyReminderStreakAtRisk,
 	StudyReminderWeeklySummary,
 	SeatUtilizationAlert,
+	IntroCourseCompleted,
 }

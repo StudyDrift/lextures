@@ -160,3 +160,275 @@ struct SettingsNavigationRow<Route: Hashable>: View {
         .buttonStyle(.plain)
     }
 }
+
+/// Profile tab hero with avatar, display name, and email.
+struct ProfileIdentityHero: View {
+    @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Circle()
+                .fill(.white.opacity(0.07))
+                .frame(width: 150, height: 150)
+                .offset(x: 46, y: -56)
+
+            VStack(spacing: 10) {
+                ProfileAvatarView(
+                    avatarUrl: shell.accountProfile?.avatarUrl,
+                    initials: profileInitials,
+                    size: 76,
+                    initialsBackground: .white.opacity(0.16),
+                    initialsForeground: .white
+                )
+                Text(displayName)
+                    .font(LexturesTheme.displayFont(22))
+                    .foregroundStyle(.white)
+                Text(shell.profile?.email ?? session.userEmail ?? "")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 26)
+        }
+        .background(LexturesTheme.heroGradient)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: LexturesTheme.primaryDeep.opacity(0.25), radius: 14, y: 7)
+    }
+
+    private var displayName: String {
+        if let account = shell.accountProfile {
+            return account.resolvedDisplayName
+        }
+        let name = shell.profile?.displayName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !name.isEmpty { return name }
+        return shell.profile?.firstName ?? L.text("mobile.profile.welcome")
+    }
+
+    private var profileInitials: String {
+        shell.accountProfile?.resolvedInitials ?? shell.profile?.initials ?? "··"
+    }
+}
+
+/// Locale picker with server persistence.
+struct ProfileLocaleCard: View {
+    @Environment(AuthSession.self) private var session
+    @Environment(LocalePreferences.self) private var localePreferences
+    @Environment(\.colorScheme) private var colorScheme
+    @Binding var localeError: String?
+
+    var body: some View {
+        LMSCard {
+            Text(L.text("common.locale.label"))
+                .font(LexturesTheme.displayFont(17))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            Text(L.text("common.locale.description"))
+                .font(.caption)
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            Picker(L.text("common.locale.label"), selection: Binding(
+                get: { localePreferences.localeTag },
+                set: { newTag in Task { await saveLocale(tag: newTag) } }
+            )) {
+                ForEach(LocalePreferences.localeOptions, id: \.tag) { option in
+                    Text(option.tag == "system" ? L.text("common.locale.systemDefault") : option.label)
+                        .tag(option.tag)
+                }
+            }
+            .pickerStyle(.menu)
+            if let localeError {
+                Text(localeError)
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.error)
+            }
+        }
+    }
+
+    @MainActor
+    private func saveLocale(tag: String) async {
+        localeError = nil
+        let previous = localePreferences.localeTag
+        localePreferences.localeTag = tag
+        guard let token = session.accessToken else { return }
+        let apiTag = tag == "system" ? Locale.current.identifier : tag
+        do {
+            let saved = try await LocaleAPI.saveLocale(apiTag, accessToken: token)
+            localePreferences.applyStoredTag(saved)
+        } catch {
+            localePreferences.localeTag = previous
+            localeError = L.text("common.locale.saveError")
+        }
+    }
+}
+
+/// Offline cache size and clear-data actions.
+struct ProfileOfflineStorageCard: View {
+    @Environment(AppShellModel.self) private var shell
+    @Environment(OfflineService.self) private var offline
+    @Environment(\.colorScheme) private var colorScheme
+    @Binding var confirmingClearCache: Bool
+    @Binding var confirmingClearSearchHistory: Bool
+
+    var body: some View {
+        LMSCard {
+            Text(L.text("mobile.profile.offlineStorage"))
+                .font(LexturesTheme.displayFont(17))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            ProfileInfoRow(
+                label: L.text("mobile.profile.cacheSize"),
+                value: ByteCountFormatter.string(fromByteCount: Int64(offline.storageBytes), countStyle: .file),
+                systemImage: "internaldrive"
+            )
+            Divider()
+            Button {
+                confirmingClearCache = true
+            } label: {
+                Label(L.text("mobile.profile.clearCachedData"), systemImage: "trash")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.error)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+            if shell.universalSearchEnabled {
+                Divider()
+                Button {
+                    confirmingClearSearchHistory = true
+                } label: {
+                    Label(L.text("mobile.search.clearHistory"), systemImage: "clock.arrow.circlepath")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(LexturesTheme.error)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+/// Account summary and billing entry point.
+struct ProfileAccountCard: View {
+    @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
+    @Environment(\.colorScheme) private var colorScheme
+    @Binding var billingNav: BillingRoute?
+
+    var body: some View {
+        LMSCard {
+            Text(L.text("mobile.profile.account"))
+                .font(LexturesTheme.displayFont(17))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            ProfileInfoRow(label: L.text("mobile.profile.displayName"), value: displayName, systemImage: "person")
+            Divider()
+            ProfileInfoRow(
+                label: L.text("mobile.profile.email"),
+                value: shell.profile?.email ?? session.userEmail ?? L.text("mobile.emDash"),
+                systemImage: "envelope"
+            )
+            if BillingLogic.billingEnabled(shell.platformFeatures) {
+                Divider()
+                Button {
+                    billingNav = BillingRoute()
+                } label: {
+                    Label(L.text("mobile.billing.title"), systemImage: "creditcard")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(LexturesTheme.primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private var displayName: String {
+        if let account = shell.accountProfile {
+            return account.resolvedDisplayName
+        }
+        let name = shell.profile?.displayName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !name.isEmpty { return name }
+        return shell.profile?.firstName ?? L.text("mobile.profile.welcome")
+    }
+}
+
+/// App version and API server details.
+struct ProfileAboutCard: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        LMSCard {
+            Text(L.text("mobile.profile.about"))
+                .font(LexturesTheme.displayFont(17))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            ProfileInfoRow(label: L.text("mobile.profile.version"), value: appVersion, systemImage: "app.badge")
+            Divider()
+            ProfileInfoRow(
+                label: L.text("mobile.profile.server"),
+                value: AppConfiguration.apiBaseURL.absoluteString,
+                systemImage: "server.rack"
+            )
+        }
+    }
+
+    private var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+        if let build, !build.isEmpty { return "\(version) (\(build))" }
+        return version
+    }
+}
+
+/// Sign-out control with confirmation dialog.
+struct ProfileSignOutButton: View {
+    @Environment(AuthSession.self) private var session
+    @Binding var confirmingSignOut: Bool
+
+    var body: some View {
+        Button {
+            confirmingSignOut = true
+        } label: {
+            Label(L.text("mobile.profile.signOut"), systemImage: "rectangle.portrait.and.arrow.right")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(LexturesTheme.error)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(LexturesTheme.error.opacity(0.09))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .confirmationDialog(
+            L.text("mobile.profile.signOutConfirm"),
+            isPresented: $confirmingSignOut,
+            titleVisibility: .visible
+        ) {
+            Button(L.text("mobile.profile.signOut"), role: .destructive) {
+                session.signOut()
+            }
+        }
+    }
+}
+
+/// Label/value row used across profile cards.
+struct ProfileInfoRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let label: String
+    let value: String
+    let systemImage: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: systemImage)
+                .font(.footnote)
+                .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                .frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                Text(value)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+}

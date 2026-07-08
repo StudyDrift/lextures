@@ -10,6 +10,10 @@ const (
 	JobTypeDueDateReminder     = "scheduled.due_date_reminder"
 	JobTypeInactiveIntegration = "scheduled.inactive_integration_alert"
 	JobTypeTutorSessionRetention = "scheduled.tutor_session_retention"
+	JobTypeLearnerProfileFull       = "scheduled.learner_profile_full_recompute"
+	JobTypeLearnerProfileRetention  = "scheduled.learner_profile_retention"
+	JobTypeIntroCourseBackfill         = "scheduled.intro_course_backfill"
+	JobTypeIntroCourseCompletionSweep  = "scheduled.intro_course_completion_sweep"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -81,6 +85,34 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "30 4 * * *", // daily 04:30 UTC
 			JobType:        JobTypeTutorSessionRetention,
 			Description:    "Purge tutor sessions older than each org's retention policy (plan 19.1).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "learner_profile_full_recompute",
+			Spec:           "0 2 * * *", // daily 02:00 UTC
+			JobType:        JobTypeLearnerProfileFull,
+			Description:    "Nightly full recompute of learner profile facets (LP01).",
+			DefaultEnabled: false,
+		},
+		{
+			Name:           "learner_profile_retention",
+			Spec:           "45 4 * * *", // daily 04:45 UTC
+			JobType:        JobTypeLearnerProfileRetention,
+			Description:    "Purge learner profiles for inactive users beyond retention window (LP08).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "intro_course_backfill",
+			Spec:           "15 1 * * *", // daily 01:15 UTC
+			JobType:        JobTypeIntroCourseBackfill,
+			Description:    "Resume intro course student enrollment backfill for eligible users (IC02).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "intro_course_completion_sweep",
+			Spec:           "45 2 * * *", // daily 02:45 UTC
+			JobType:        JobTypeIntroCourseCompletionSweep,
+			Description:    "Re-check intro course completion for enrolled students (IC05).",
 			DefaultEnabled: true,
 		},
 	}

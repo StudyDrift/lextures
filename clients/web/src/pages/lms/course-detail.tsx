@@ -32,9 +32,10 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { formatAbsolute } from '../../lib/format-datetime'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { getLastVisitedForCourse, hrefForLastVisited } from '../../lib/last-visited-module-item'
-import { heroImageObjectStyle } from '../../lib/hero-image-position'
+
 import { getJwtSubject } from '../../lib/auth'
 import { hrefForRecommendationItem, surfaceLabel } from '../../lib/recommendation-nav'
+import { ProfileRationaleChip } from '../../components/learner-profile/profile-rationale-chip'
 import { CourseVisibilityPill } from '../../components/ui/status-vocabulary'
 import { useCourseLiveStructureRevision } from '../../context/course-live-context'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
@@ -49,7 +50,7 @@ import {
   GradingBacklogList,
   type GradingBacklogItem,
 } from '../../components/dashboard/grading-backlog-list'
-import { CourseHeroImage } from '../../components/course-hero-image'
+import { CourseHeroBanner } from '../../components/course-hero-banner'
 import { LeaderboardWidget } from './LeaderboardWidget'
 
 function formatIsoDurationHuman(iso: string | null | undefined): string {
@@ -648,23 +649,7 @@ export default function CourseDetail() {
 
           {landing === 'data' ? (
             <>
-              {course.heroImageUrl && (
-                <div className="relative mt-6 h-44 w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm sm:h-56 dark:border-neutral-700">
-                  <CourseHeroImage
-                    src={course.heroImageUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    style={heroImageObjectStyle(course.heroImageObjectPosition)}
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-5">
-                    <h2 className="text-lg font-semibold tracking-tight text-white drop-shadow-sm sm:text-xl">
-                      {course.title}
-                    </h2>
-                    <p className="mt-0.5 text-xs font-medium text-white/80">{course.courseCode}</p>
-                  </div>
-                </div>
-              )}
+              <CourseHeroBanner course={course} />
               {viewerIsStudent && courseRecs.length > 0 && courseCode ? (
                 <section aria-label="Suggestions for this course" className="mt-8">
                   <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
@@ -686,6 +671,9 @@ export default function CourseDetail() {
                           </span>
                           <p className="mt-1 font-medium text-slate-900 dark:text-neutral-50">{r.title}</p>
                           <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">{r.reason}</p>
+                          {r.profileRationale ? (
+                            <ProfileRationaleChip rationale={r.profileRationale} className="mt-2" />
+                          ) : null}
                         </Link>
                       </li>
                     ))}

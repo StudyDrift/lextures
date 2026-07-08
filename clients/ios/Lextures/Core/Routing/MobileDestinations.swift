@@ -403,6 +403,9 @@ struct MobilePlatformFeatures: Equatable {
     var graderAgentEnabled = false
     var ffPlagiarismChecks = false
     var altTextEnforcementEnabled = false
+    var learnerProfileEnabled = false
+    var ffMobileLearnerProfile = true
+    var introCourseEnabled = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -461,7 +464,10 @@ struct MobilePlatformFeatures: Equatable {
             ffConsortiumSharing: features?.ffConsortiumSharing == true,
             graderAgentEnabled: features?.graderAgentEnabled == true,
             ffPlagiarismChecks: features?.ffPlagiarismChecks == true,
-            altTextEnforcementEnabled: features?.altTextEnforcementEnabled == true
+            altTextEnforcementEnabled: features?.altTextEnforcementEnabled == true,
+            learnerProfileEnabled: features?.learnerProfileEnabled == true,
+            ffMobileLearnerProfile: features?.ffMobileLearnerProfile != false,
+            introCourseEnabled: features?.introCourseEnabled != false
         )
     }
 

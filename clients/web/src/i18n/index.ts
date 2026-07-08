@@ -11,6 +11,8 @@ import enBilling from '../../public/locales/en/billing.json'
 import enCommon from '../../public/locales/en/common.json'
 import enCompliance from '../../public/locales/en/compliance.json'
 import enDashboard from '../../public/locales/en/dashboard.json'
+import enIntroCourse from '../../public/locales/en/introCourse.json'
+import enLearnerProfile from '../../public/locales/en/learnerProfile.json'
 import enOnboarding from '../../public/locales/en/onboarding.json'
 import enParent from '../../public/locales/en/parent.json'
 import esAuth from '../../public/locales/es/auth.json'
@@ -18,6 +20,8 @@ import esBilling from '../../public/locales/es/billing.json'
 import esCommon from '../../public/locales/es/common.json'
 import esCompliance from '../../public/locales/es/compliance.json'
 import esDashboard from '../../public/locales/es/dashboard.json'
+import esIntroCourse from '../../public/locales/es/introCourse.json'
+import esLearnerProfile from '../../public/locales/es/learnerProfile.json'
 import esOnboarding from '../../public/locales/es/onboarding.json'
 import esParent from '../../public/locales/es/parent.json'
 import frAuth from '../../public/locales/fr/auth.json'
@@ -25,6 +29,8 @@ import frBilling from '../../public/locales/fr/billing.json'
 import frCommon from '../../public/locales/fr/common.json'
 import frCompliance from '../../public/locales/fr/compliance.json'
 import frDashboard from '../../public/locales/fr/dashboard.json'
+import frIntroCourse from '../../public/locales/fr/introCourse.json'
+import frLearnerProfile from '../../public/locales/fr/learnerProfile.json'
 import frOnboarding from '../../public/locales/fr/onboarding.json'
 import frParent from '../../public/locales/fr/parent.json'
 
@@ -36,6 +42,8 @@ export const I18N_NAMESPACES = [
   'parent',
   'billing',
   'onboarding',
+  'learnerProfile',
+  'introCourse',
 ] as const
 
 const bundledResources = {
@@ -47,6 +55,8 @@ const bundledResources = {
     parent: enParent,
     billing: enBilling,
     onboarding: enOnboarding,
+    learnerProfile: enLearnerProfile,
+    introCourse: enIntroCourse,
   },
   es: {
     common: esCommon,
@@ -56,6 +66,8 @@ const bundledResources = {
     parent: esParent,
     billing: esBilling,
     onboarding: esOnboarding,
+    learnerProfile: esLearnerProfile,
+    introCourse: esIntroCourse,
   },
   fr: {
     common: frCommon,
@@ -65,6 +77,8 @@ const bundledResources = {
     parent: frParent,
     billing: frBilling,
     onboarding: frOnboarding,
+    learnerProfile: frLearnerProfile,
+    introCourse: frIntroCourse,
   },
 } as const
 

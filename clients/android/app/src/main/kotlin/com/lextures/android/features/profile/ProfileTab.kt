@@ -113,6 +113,7 @@ fun ProfileTab(
     var showAccommodations by remember { mutableStateOf(false) }
     var showPersonalDetails by remember { mutableStateOf(false) }
     var showResearchStudies by remember { mutableStateOf(false) }
+    var showLearnerProfile by remember { mutableStateOf(false) }
     var personalDetailsVisible by remember { mutableStateOf(false) }
     var researchVisible by remember { mutableStateOf(false) }
     var showMoreHub by remember { mutableStateOf(false) }
@@ -146,6 +147,19 @@ fun ProfileTab(
     val localePreferences = LocalLocalePreferences.current
     var localeExpanded by remember { mutableStateOf(false) }
     var localeError by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(shell.pendingProfileSettingsRoute) {
+        when (shell.consumePendingProfileSettingsRoute()) {
+            com.lextures.android.core.routing.SettingsDeepLinkSection.Account -> showEditProfile = true
+            com.lextures.android.core.routing.SettingsDeepLinkSection.Notifications -> showNotificationPreferences = true
+            com.lextures.android.core.routing.SettingsDeepLinkSection.LearnerProfile -> {
+                if (com.lextures.android.core.lms.LearnerProfileLogic.learnerProfileEnabled(shell.platformFeatures)) {
+                    showLearnerProfile = true
+                }
+            }
+            null -> Unit
+        }
+    }
 
     LaunchedEffect(shell.profileDepthEnabled, accessToken, shell.platformFeatures) {
         if (!shell.profileDepthEnabled || accessToken == null) {
@@ -264,6 +278,16 @@ fun ProfileTab(
         ResearchStudiesScreen(
             session = session,
             onBack = { showResearchStudies = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showLearnerProfile) {
+        com.lextures.android.features.settings.learnerprofile.LearnerProfileScreen(
+            session = session,
+            localePrefs = localePreferences,
+            onBack = { showLearnerProfile = false },
             modifier = modifier,
         )
         return
@@ -685,6 +709,17 @@ fun ProfileTab(
                         modifier = if (personalDetailsVisible) Modifier.padding(top = 4.dp) else Modifier,
                     )
                 }
+            }
+        }
+
+        if (com.lextures.android.core.lms.LearnerProfileLogic.learnerProfileEnabled(shell.platformFeatures)) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Person,
+                    title = L.text(R.string.mobile_learnerProfile_title),
+                    subtitle = L.text(R.string.mobile_learnerProfile_entry_subtitle),
+                    onClick = { showLearnerProfile = true },
+                )
             }
         }
 

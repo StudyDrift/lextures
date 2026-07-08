@@ -16,6 +16,23 @@ describe('ICU plural forms (plan 11.1 AC-3)', () => {
     ).toContain('Essay template')
   })
 
+  it('interpolates intro course progress strings', async () => {
+    await i18n.changeLanguage('en')
+    expect(
+      i18n.t('introCourse.progress.modules', {
+        ns: 'introCourse',
+        complete: 1,
+        total: 7,
+      }),
+    ).toBe('Module 1 of 7')
+    expect(
+      i18n.t('introCourse.rail.nextUp', {
+        ns: 'introCourse',
+        title: 'Welcome & Getting Oriented',
+      }),
+    ).toBe('Next up: Welcome & Getting Oriented')
+  })
+
   it.each([
     ['en', 1, '1 assignment'],
     ['en', 2, '2 assignments'],

@@ -69,6 +69,26 @@ class DeepLinkRouterTest {
     }
 
     @Test
+    fun resolvesIntroCourseContentItemPath() {
+        val destination = DeepLinkRouter.resolve(
+            "/courses/C-WLCOME/modules/quiz/a0000000-0000-4000-8000-000000000099",
+        )
+        assertTrue(destination is DeepLinkDestination.Course)
+        destination as DeepLinkDestination.Course
+        assertEquals("a0000000-0000-4000-8000-000000000099", destination.itemId)
+    }
+
+    @Test
+    fun resolvesSettingsNotificationsPath() {
+        val destination = DeepLinkRouter.resolve("/settings/notifications")
+        assertTrue(destination is DeepLinkDestination.Settings)
+        assertEquals(
+            com.lextures.android.core.routing.SettingsDeepLinkSection.Notifications,
+            (destination as DeepLinkDestination.Settings).section,
+        )
+    }
+
+    @Test
     fun resolvesParentConferencesPath() {
         val destination = DeepLinkRouter.resolve("/parent/conferences")
         assertTrue(destination is DeepLinkDestination.Parent)

@@ -44,6 +44,9 @@ import (
 	botsservice "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/integrations"
+	learnerprofilederivers "github.com/lextures/lextures/server/internal/service/learnerprofile/derivers"
+	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
+	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
@@ -155,7 +158,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	// Generic durable background job queue (plan 17.3). No-op unless
 	// BACKGROUND_JOBS_ENABLED; safe to start on every instance — workers claim
 	// rows with SELECT ... FOR UPDATE SKIP LOCKED so they coordinate via Postgres.
-	background.StartJobQueueWorker(ctx, pool, merged)
+	jobRegistry := background.StartJobQueueWorker(ctx, pool, merged)
 
 	// Scheduled-jobs / cron layer (plan 17.4). The Scheduler is always
 	// constructed so the admin API can list and manually trigger jobs, but the
@@ -205,6 +208,34 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		jwtSigner = jwtSigner.WithBlocklist(jwtBlocklist)
 	}
 	platform := platformstate.New(merged)
+	var learnerProfileSvc *learnerprofileservice.Service
+	var introCourseSvc *introcourseservice.Service
+	if pool != nil {
+		learnerProfileSvc = learnerprofileservice.New(pool,
+			learnerprofilederivers.StudyRhythmDeriver{Pool: pool},
+			learnerprofilederivers.ContentModalityDeriver{Pool: pool},
+			learnerprofilederivers.StrengthsGrowthDeriver{Pool: pool},
+			learnerprofilederivers.InterestsDeriver{Pool: pool},
+			learnerprofilederivers.LearningApproachDeriver{Pool: pool},
+		)
+		learnerprofileservice.RegisterMetrics(tel.Metrics.Registry())
+		if redisClient != nil {
+			learnerProfileSvc.SetRedis(redisClient)
+		}
+		background.RegisterLearnerProfileJobs(jobRegistry, learnerProfileSvc)
+
+		introCourseSvc = introcourseservice.New(pool)
+		introcourseservice.RegisterMetrics(tel.Metrics.Registry())
+		background.RegisterIntroCourseJobs(jobRegistry, introCourseSvc, merged)
+		if merged.IntroCourseEnabled {
+			if _, err := introCourseSvc.EnsureProvisioned(ctx, merged); err != nil {
+				slog.Warn("intro course startup provision failed", "err", err)
+			}
+			if _, err := introcourseservice.EnqueueBackfillIfNeeded(ctx, pool, merged); err != nil {
+				slog.Warn("intro course backfill enqueue failed", "err", err)
+			}
+		}
+	}
 	deps := httpserver.Deps{
 		Pool:                      pool,
 		Health:                    httpserver.NewHealthProbe(healthPool, redisClient, tel.Metrics),
@@ -232,6 +263,8 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		Integrations:              integrations.NewService(pool, integrationsPublicBase(merged), []byte(cfg.JWTSecret)),
 		Bots:                      botsservice.NewFromConfig(merged, pool, integrationsPublicBase(merged)),
 		Telemetry:                 tel,
+		LearnerProfileService:     learnerProfileSvc,
+		IntroCourseService:        introCourseSvc,
 	}
 	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
 	background.StartCanvasSubmissionSyncConsumer(ctx, canvasSubmissionSyncQueue, deps)

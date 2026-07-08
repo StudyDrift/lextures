@@ -1,0 +1,68 @@
+{
+  "slug": "m6.canvas.knowledge-check",
+  "title": "Module 6 knowledge check",
+  "sort_order": 4,
+  "markdown": "Questions about importing courses from Canvas.",
+  "questions": [
+    {
+      "id": "m6-q1",
+      "prompt": "Where do you typically start a Canvas import?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "The Courses page import flow",
+        "Global platform SCIM settings",
+        "Student transcript export only",
+        "Quiz lockdown admin"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q2",
+      "prompt": "Which items can transfer during a Canvas import?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Modules, assignments, and quizzes",
+        "Only user passwords",
+        "Only billing invoices",
+        "Only org branding colors"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q3",
+      "prompt": "What should you do after an import completes?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Spot-check modules and publish when ready",
+        "Delete the Lextures database",
+        "Disable all student accounts",
+        "Skip verification entirely"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q4",
+      "prompt": "What credentials does Canvas import usually require?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Canvas base URL and access token",
+        "Lextures root password only",
+        "Student SSN",
+        "Instructor home address"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

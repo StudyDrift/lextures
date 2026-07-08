@@ -16,6 +16,7 @@ import (
 const (
 	AccountTypeStandard = "standard"
 	AccountTypeParent   = "parent"
+	AccountTypeSystem   = "system"
 )
 
 // userRowColumns is the canonical SELECT/RETURNING column list for user rows.

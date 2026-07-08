@@ -85,14 +85,15 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 			resized, resizedCT, err := imageproxy.ResizeIfNeeded(b, ct, resizeOpts)
 			if err != nil {
 				if errors.Is(err, imageproxy.ErrNotImage) {
-					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Resize is only supported for images.")
+					// SVG and other non-raster formats: serve the original (e.g. course hero banners).
+				} else {
+					apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInternal, "Could not resize image.")
 					return
 				}
-				apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInternal, "Could not resize image.")
-				return
+			} else {
+				b = resized
+				ct = resizedCT
 			}
-			b = resized
-			ct = resizedCT
 		}
 		w.Header().Set("Content-Type", ct)
 		w.Header().Set("Cache-Control", "private, max-age=86400")

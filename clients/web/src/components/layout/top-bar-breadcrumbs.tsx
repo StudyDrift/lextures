@@ -60,6 +60,8 @@ function settingsSubLabel(view: ReturnType<typeof settingsViewFromPathname>): st
       return 'Account'
     case 'notifications':
       return 'Notifications'
+    case 'learner-profile':
+      return 'Learner Profile'
     case 'roles':
       return 'Roles and Permissions'
     case 'ai-models':
@@ -72,6 +74,8 @@ function settingsSubLabel(view: ReturnType<typeof settingsViewFromPathname>): st
       return 'LTI tools'
     case 'platform':
       return 'Global platform'
+    case 'intro-course':
+      return 'Intro course'
     case 'organizations':
       return 'Organizations'
     case 'org-units':

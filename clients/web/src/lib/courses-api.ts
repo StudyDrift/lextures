@@ -631,6 +631,12 @@ export type UpdateBankQuestionBody = {
   srsEligible?: boolean
 }
 
+export type ProfileRationale = {
+  text: string
+  facetKey: string
+  insightKey: string
+}
+
 export type ReviewQueueItem = {
   stateId: string
   questionId: string
@@ -643,6 +649,7 @@ export type ReviewQueueItem = {
   options?: unknown
   correctAnswer?: unknown
   explanation?: string | null
+  profileRationale?: ProfileRationale
 }
 
 export type ReviewQueuePayload = {
@@ -664,6 +671,7 @@ export type RecommendationItem = {
   surface: string
   reason: string
   score: number
+  profileRationale?: ProfileRationale
 }
 
 export type LearnerRecommendationsResponse = {
@@ -2393,6 +2401,9 @@ export type ModuleContentPagePayload = {
   simplifiedForReadingLevel?: boolean
   originalMarkdown?: string | null
   readingLevelTargetFkgl?: number | null
+  profileRationale?: ProfileRationale
+  preferredAlternateItemId?: string | null
+  modalityAlternates?: Array<{ itemId: string; title: string; modality: string }>
 }
 
 export type OriginalityDetectionMode = 'disabled' | 'plagiarism' | 'ai' | 'both'
@@ -2483,7 +2494,37 @@ function normalizeModuleContentPagePayload(raw: unknown): ModuleContentPagePaylo
     originalMarkdown: typeof r.originalMarkdown === 'string' ? r.originalMarkdown : null,
     readingLevelTargetFkgl:
       typeof r.readingLevelTargetFkgl === 'number' ? r.readingLevelTargetFkgl : null,
+    profileRationale: parseProfileRationale(r.profileRationale),
+    preferredAlternateItemId:
+      typeof r.preferredAlternateItemId === 'string' ? r.preferredAlternateItemId : null,
+    modalityAlternates: parseModalityAlternates(r.modalityAlternates),
   }
+}
+
+function parseProfileRationale(raw: unknown): ProfileRationale | undefined {
+  if (!raw || typeof raw !== 'object') return undefined
+  const o = raw as Record<string, unknown>
+  const text = typeof o.text === 'string' ? o.text : ''
+  const facetKey = typeof o.facetKey === 'string' ? o.facetKey : ''
+  const insightKey = typeof o.insightKey === 'string' ? o.insightKey : ''
+  if (!text || !facetKey) return undefined
+  return { text, facetKey, insightKey }
+}
+
+function parseModalityAlternates(
+  raw: unknown,
+): ModuleContentPagePayload['modalityAlternates'] {
+  if (!Array.isArray(raw)) return undefined
+  const out: NonNullable<ModuleContentPagePayload['modalityAlternates']> = []
+  for (const row of raw) {
+    if (!row || typeof row !== 'object') continue
+    const o = row as Record<string, unknown>
+    const itemId = typeof o.itemId === 'string' ? o.itemId : ''
+    const title = typeof o.title === 'string' ? o.title : ''
+    const modality = typeof o.modality === 'string' ? o.modality : ''
+    if (itemId) out.push({ itemId, title, modality })
+  }
+  return out.length > 0 ? out : undefined
 }
 
 function normalizeOriginalityDetection(raw: unknown): OriginalityDetectionMode {

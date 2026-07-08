@@ -235,6 +235,18 @@ export function buildGlobalSearchItems(
         hint: 'people users search invite suspend delete accounts enrollments activity admin',
       },
       {
+        title: 'Courses',
+        subtitle: 'System settings',
+        path: '/settings/courses',
+        hint: 'courses search course code title enrollments instructor admin access',
+      },
+      {
+        title: 'Intro course',
+        subtitle: 'System settings',
+        path: '/settings/intro-course',
+        hint: 'onboarding welcome LEX-WELCOME backfill intro course resync analytics',
+      },
+      {
         title: 'Roles and Permissions',
         subtitle: 'System settings',
         path: '/settings/roles',

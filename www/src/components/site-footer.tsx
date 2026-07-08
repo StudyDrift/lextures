@@ -99,8 +99,7 @@ export function SiteFooter() {
           className="mx-auto flex max-w-[1200px] flex-col gap-2 px-5 py-5 text-[13px] md:px-10 sm:flex-row sm:items-center sm:justify-between xl:px-14"
           style={{ color: '#8ea09d' }}
         >
-          <span>© {new Date().getFullYear()} Lextures contributors. Released under AGPL-3.0.</span>
-          <span>Self-host on Postgres · LTI 1.3 · SCIM 2.0</span>
+          <span>© {new Date().getFullYear()} Lextures LLC.</span>
         </div>
       </div>
     </footer>

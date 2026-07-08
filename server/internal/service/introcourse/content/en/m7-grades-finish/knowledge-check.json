@@ -1,0 +1,57 @@
+{
+  "slug": "m7.finish.knowledge-check",
+  "title": "Module 7 knowledge check",
+  "sort_order": 4,
+  "grade_policy": "quiz_autoscore",
+  "group": "Quizzes",
+  "max_attempts": 3,
+  "grade_attempt_policy": "highest",
+  "markdown": "Final knowledge check for the Welcome to Lextures tour.",
+  "questions": [
+    {
+      "id": "m7-q1",
+      "prompt": "Where do students typically view released course grades?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "The course Grades / gradebook area",
+        "Global admin people search only",
+        "SCIM token rotation",
+        "Caption compliance reports"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q2",
+      "prompt": "Which activity is most likely auto-graded?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A multiple-choice quiz",
+        "An unscored draft journal",
+        "An org branding logo upload",
+        "A maintenance banner toggle"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q3",
+      "prompt": "What should you do after finishing this intro course?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Open your real courses and continue learning",
+        "Delete your Lextures account",
+        "Disable all notifications permanently",
+        "Avoid the dashboard entirely"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

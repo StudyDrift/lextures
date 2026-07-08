@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const systemUserID = "a0000000-0000-4000-8000-000000000001"
+
 
 // PersonRow is a search result row.
 type PersonRow struct {
@@ -96,7 +96,7 @@ WITH matched AS (
         ) AS rank
     FROM "user".users u
     INNER JOIN tenant.organizations o ON o.id = u.org_id
-    WHERE u.id <> $3::uuid
+    WHERE u.account_type <> 'system'
       AND (
           u.search_vector @@ websearch_to_tsquery('english', $1)
           OR u.email ILIKE $2
@@ -122,8 +122,8 @@ SELECT
     COUNT(*) OVER () AS total
 FROM matched
 ORDER BY rank DESC, email ASC
-LIMIT $4 OFFSET $5
-`, q, like, systemUserID, perPage, offset)
+LIMIT $3 OFFSET $4
+`, q, like, perPage, offset)
 	if err != nil {
 		return ListResult{}, err
 	}
@@ -218,8 +218,8 @@ SELECT
     u.created_at
 FROM "user".users u
 INNER JOIN tenant.organizations o ON o.id = u.org_id
-WHERE u.id = $1 AND u.id <> $2::uuid
-`, userID, systemUserID).Scan(
+WHERE u.id = $1 AND u.account_type <> 'system'
+`, userID).Scan(
 		&rep.ID, &rep.Email, &rep.FirstName, &rep.LastName, &rep.DisplayName,
 		&rep.OrgID, &rep.OrgName, &roleName, &rep.Active, &rep.CreatedAt,
 	)

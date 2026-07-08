@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/mail"
 	"github.com/lextures/lextures/server/internal/repos/jobqueue"
+	learnerprofilesvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
 	"github.com/lextures/lextures/server/internal/service/notifications"
 )
 
@@ -76,6 +77,16 @@ func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfg config.Config) {
 	r.Register(JobTypeEmailDelivery, emailDeliveryHandler{pool: pool, cfg: cfg})
 	RegisterUserImportJob(r, pool, cfg)
 	registerScheduledJobs(r, pool, cfg)
+}
+
+// RegisterLearnerProfileJobs adds learner profile queue handlers when the service is wired.
+func RegisterLearnerProfileJobs(r *Registry, svc *learnerprofilesvc.Service) {
+	if r == nil || svc == nil {
+		return
+	}
+	learnerprofilesvc.RegisterJobHandlers(func(jobType string, h learnerprofilesvc.JobHandler) {
+		r.Register(jobType, HandlerFunc(h.Execute))
+	}, svc)
 }
 
 // EnqueueEmail queues a transactional email for asynchronous delivery on the

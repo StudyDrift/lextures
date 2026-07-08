@@ -42,6 +42,8 @@ const (
 	EventCourseArchive        = "course_archive"
 	EventOrgSettingsChange    = "org_settings_change"
 	EventCustomFieldDefinitionChange = "custom_field_definition_change"
+	EventLearnerProfileControl       = "learner_profile_control"
+	EventIntroCourseAdmin            = "intro_course_admin"
 )
 
 var ErrNotFound = errors.New("adminaudit: event not found")

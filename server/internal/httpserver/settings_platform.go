@@ -82,6 +82,12 @@ type platformSettingsJSON struct {
 	StudentProgressEnabled          bool `json:"studentProgressEnabled"`
 	EngagementTrackingEnabled       bool `json:"engagementTrackingEnabled"`
 	SelfReflectionEnabled           bool `json:"selfReflectionEnabled"`
+	LearnerProfileEnabled           bool `json:"learnerProfileEnabled"`
+	LpAdaptRecommendationsEnabled   bool `json:"lpAdaptRecommendationsEnabled"`
+	LpAdaptReviewEnabled            bool `json:"lpAdaptReviewEnabled"`
+	LpAdaptModalityEnabled          bool `json:"lpAdaptModalityEnabled"`
+	LpAdaptTutorEnabled             bool `json:"lpAdaptTutorEnabled"`
+	IntroCourseEnabled              bool `json:"introCourseEnabled"`
 	OutcomesReportEnabled           bool `json:"outcomesReportEnabled"`
 	InstructorInsightsEnabled       bool `json:"instructorInsightsEnabled"`
 	XAPIEmissionEnabled             bool `json:"xapiEmissionEnabled"`
@@ -304,6 +310,12 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			StudentProgressEnabled:          merged.StudentProgressEnabled,
 			EngagementTrackingEnabled:       merged.EngagementTrackingEnabled,
 			SelfReflectionEnabled:           merged.SelfReflectionEnabled,
+			LearnerProfileEnabled:           merged.LearnerProfileEnabled,
+			LpAdaptRecommendationsEnabled:   merged.LpAdaptRecommendationsEnabled,
+			LpAdaptReviewEnabled:            merged.LpAdaptReviewEnabled,
+			LpAdaptModalityEnabled:          merged.LpAdaptModalityEnabled,
+			LpAdaptTutorEnabled:             merged.LpAdaptTutorEnabled,
+			IntroCourseEnabled:              merged.IntroCourseEnabled,
 			OutcomesReportEnabled:           merged.OutcomesReportEnabled,
 			InstructorInsightsEnabled:       merged.InstructorInsightsEnabled,
 			XAPIEmissionEnabled:             merged.XAPIEmissionEnabled,
@@ -496,6 +508,12 @@ type putPlatformBody struct {
 	StudentProgressEnabled          *bool `json:"studentProgressEnabled"`
 	EngagementTrackingEnabled       *bool `json:"engagementTrackingEnabled"`
 	SelfReflectionEnabled           *bool `json:"selfReflectionEnabled"`
+	LearnerProfileEnabled           *bool `json:"learnerProfileEnabled"`
+	LpAdaptRecommendationsEnabled   *bool `json:"lpAdaptRecommendationsEnabled"`
+	LpAdaptReviewEnabled            *bool `json:"lpAdaptReviewEnabled"`
+	LpAdaptModalityEnabled          *bool `json:"lpAdaptModalityEnabled"`
+	LpAdaptTutorEnabled             *bool `json:"lpAdaptTutorEnabled"`
+	IntroCourseEnabled              *bool `json:"introCourseEnabled"`
 	OutcomesReportEnabled           *bool `json:"outcomesReportEnabled"`
 	InstructorInsightsEnabled       *bool `json:"instructorInsightsEnabled"`
 	XAPIEmissionEnabled             *bool `json:"xapiEmissionEnabled"`
@@ -627,13 +645,15 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if _, ok := d.adminRbacUser(w, r); !ok {
+		actorID, ok := d.adminRbacUser(w, r)
+		if !ok {
 			return
 		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Database is not configured.")
 			return
 		}
+		prevIntroCourseEnabled := d.effectiveConfig().IntroCourseEnabled
 		b, _ := io.ReadAll(r.Body)
 		_ = r.Body.Close()
 		var body putPlatformBody
@@ -837,6 +857,12 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("studentprogressenabled", body.StudentProgressEnabled, func(v bool) { wr.StudentProgressEnabled = &v })
 		setBool("engagementtrackingenabled", body.EngagementTrackingEnabled, func(v bool) { wr.EngagementTrackingEnabled = &v })
 		setBool("selfreflectionenabled", body.SelfReflectionEnabled, func(v bool) { wr.SelfReflectionEnabled = &v })
+		setBool("learnerprofileenabled", body.LearnerProfileEnabled, func(v bool) { wr.LearnerProfileEnabled = &v })
+		setBool("lpadaptrecommendationsenabled", body.LpAdaptRecommendationsEnabled, func(v bool) { wr.LpAdaptRecommendationsEnabled = &v })
+		setBool("lpadaptreviewenabled", body.LpAdaptReviewEnabled, func(v bool) { wr.LpAdaptReviewEnabled = &v })
+		setBool("lpadaptmodalityenabled", body.LpAdaptModalityEnabled, func(v bool) { wr.LpAdaptModalityEnabled = &v })
+		setBool("lpadapttutorenabled", body.LpAdaptTutorEnabled, func(v bool) { wr.LpAdaptTutorEnabled = &v })
+		setBool("introcourseenabled", body.IntroCourseEnabled, func(v bool) { wr.IntroCourseEnabled = &v })
 		setBool("outcomesreportenabled", body.OutcomesReportEnabled, func(v bool) { wr.OutcomesReportEnabled = &v })
 		setBool("instructorinsightsenabled", body.InstructorInsightsEnabled, func(v bool) { wr.InstructorInsightsEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
@@ -975,6 +1001,12 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		if d.Platform != nil {
 			d.Platform.Reload(merged)
 		}
+		if wr.IntroCourseEnabled != nil && merged.IntroCourseEnabled != prevIntroCourseEnabled {
+			d.recordIntroCourseAdminAudit(r, actorID, "toggle_flag", map[string]any{
+				"action":  "toggle_flag",
+				"enabled": merged.IntroCourseEnabled,
+			})
+		}
 
 		sources := platformconfig.ResolveSources(d.Config, dbRow)
 		out := platformSettingsJSON{
@@ -1020,6 +1052,12 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			StudentProgressEnabled:          merged.StudentProgressEnabled,
 			EngagementTrackingEnabled:       merged.EngagementTrackingEnabled,
 			SelfReflectionEnabled:           merged.SelfReflectionEnabled,
+			LearnerProfileEnabled:           merged.LearnerProfileEnabled,
+			LpAdaptRecommendationsEnabled:   merged.LpAdaptRecommendationsEnabled,
+			LpAdaptReviewEnabled:            merged.LpAdaptReviewEnabled,
+			LpAdaptModalityEnabled:          merged.LpAdaptModalityEnabled,
+			LpAdaptTutorEnabled:             merged.LpAdaptTutorEnabled,
+			IntroCourseEnabled:              merged.IntroCourseEnabled,
 			OutcomesReportEnabled:           merged.OutcomesReportEnabled,
 			InstructorInsightsEnabled:       merged.InstructorInsightsEnabled,
 			XAPIEmissionEnabled:             merged.XAPIEmissionEnabled,

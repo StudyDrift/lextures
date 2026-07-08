@@ -23,6 +23,7 @@ import {
   Users,
   Workflow,
   Lock,
+  Sparkles,
 } from 'lucide-react'
 import { SideNavAdminLinks } from './side-nav-admin-links'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -60,6 +61,7 @@ export function SideNavSettingsLinks() {
     ffConsortiumSharing,
     ffCoCurricularTranscript,
     gdprModuleEnabled,
+    learnerProfileEnabled,
   } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
@@ -103,6 +105,15 @@ export function SideNavSettingsLinks() {
       >
         Integrations
       </SideNavLink>
+      {learnerProfileEnabled && (
+        <SideNavLink
+          to="/settings/learner-profile"
+          className={() => (view === 'learner-profile' ? sideNavActiveClass : '')}
+          icon={<Sparkles className="h-5 w-5" />}
+        >
+          Learner Profile
+        </SideNavLink>
+      )}
       {gdprModuleEnabled && (
         <SideNavLink
           to="/privacy-centre"
@@ -158,6 +169,20 @@ export function SideNavSettingsLinks() {
                 icon={<Users className="h-5 w-5" />}
               >
                 People
+              </SideNavLink>
+              <SideNavLink
+                to="/settings/courses"
+                className={() => (view === 'courses' ? sideNavActiveClass : '')}
+                icon={<BookOpen className="h-5 w-5" />}
+              >
+                Courses
+              </SideNavLink>
+              <SideNavLink
+                to="/settings/intro-course"
+                className={() => (view === 'intro-course' ? sideNavActiveClass : '')}
+                icon={<GraduationCap className="h-5 w-5" />}
+              >
+                Intro course
               </SideNavLink>
               <SideNavLink
                 to="/settings/roles"

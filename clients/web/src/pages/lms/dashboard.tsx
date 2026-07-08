@@ -45,6 +45,7 @@ import {
 } from '../../lib/courses-api'
 import { getMostRecentLastVisited, hrefForLastVisited } from '../../lib/last-visited-module-item'
 import { hrefForRecommendationItem, surfaceLabel } from '../../lib/recommendation-nav'
+import { ProfileRationaleChip } from '../../components/learner-profile/profile-rationale-chip'
 import { DeadlineDateTime } from '../../components/timezone/deadline-datetime'
 import { useInboxUnreadCount, useCoursesRevision } from '../../context/use-inbox-unread'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
@@ -71,6 +72,9 @@ import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-sta
 import type { EnrollmentState } from '../../lib/enrollment-state-api'
 import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
 import { GamificationDashboardCard } from '../../components/gamification/gamification-dashboard-card'
+import { IntroCompletionCelebration } from '../../components/intro-course/intro-completion-celebration'
+import { IntroCourseCard } from '../../components/intro-course/intro-course-card'
+import { IntroWelcomeBanner } from '../../components/intro-course/intro-welcome-banner'
 import { StartHereCard } from '../../components/onboarding/start-here-card'
 import { DailyGoalProgressCard } from '../../components/study-reminders/daily-goal-progress-card'
 import { StudyBuddyPromptsCard, StudyBuddyWidget } from '../../components/notebook/study-buddy-widget'
@@ -741,6 +745,8 @@ export default function Dashboard() {
             </div>
           </section>
 
+          <IntroWelcomeBanner />
+          <IntroCourseCard />
           <StartHereCard />
 
           {detailsLoading && <DashboardCourseSectionSkeleton />}
@@ -770,6 +776,12 @@ export default function Dashboard() {
                     {whatsNext.primary.title}
                   </p>
                   <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">{whatsNext.primary.reason}</p>
+                  {whatsNext.primary.profileRationale ? (
+                    <ProfileRationaleChip
+                      rationale={whatsNext.primary.profileRationale}
+                      className="mt-2"
+                    />
+                  ) : null}
                   {whatsNext.degraded ? (
                     <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">
                       {t('dashboard.whatsNext.degraded')}
@@ -1449,6 +1461,7 @@ export default function Dashboard() {
       {aiStudyBuddyEnabled && studyBuddyCourseCode ? (
         <StudyBuddyWidget courseCode={studyBuddyCourseCode} />
       ) : null}
+      <IntroCompletionCelebration />
     </LmsPage>
   )
 }

@@ -47,6 +47,8 @@ var demoChecksumRepairMigrations = []struct {
 	{279, "279_learning_paths.sql"},
 	// Idempotent INSERT ... WHERE NOT EXISTS; AI Grader prompt refined after initial seed (319 updates existing rows).
 	{318, "318_grading_agent_default_templates.sql"},
+	// LP09 adaptivity sub-flags; idempotent ADD COLUMN IF NOT EXISTS.
+	{363, "363_lp_adaptivity_flags.sql"},
 }
 
 // repairMigration289RenumberCollision fixes dev/demo DBs that applied grading_agent as v289

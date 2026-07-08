@@ -1,0 +1,53 @@
+{
+  "slug": "m4.profile.knowledge-check",
+  "title": "Module 4 knowledge check",
+  "sort_order": 3,
+  "markdown": "Questions about the autonomous learner profile.",
+  "questions": [
+    {
+      "id": "m4-q1",
+      "prompt": "How is your learner profile created?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Derived automatically from your learning activity",
+        "Typed in manually during signup",
+        "Assigned only by instructors in a spreadsheet",
+        "Copied from another student's account"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q2",
+      "prompt": "What does provenance show for a profile insight?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "What activity contributed and when it was updated",
+        "Your password hash",
+        "Other students' grades",
+        "Instructor salary data"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q3",
+      "prompt": "Where can you manage profile pause, reset, and export?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Settings → Learner Profile",
+        "Course question bank",
+        "Global admin SCIM panel",
+        "Canvas import queue"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

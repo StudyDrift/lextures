@@ -21,7 +21,7 @@ export function StudyRemindersSettingsPanel({ embedded = false }: Props) {
   const timeId = useId()
   const goalId = useId()
   const goalHelpId = useId()
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [pausing, setPausing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,8 +45,9 @@ export function StudyRemindersSettingsPanel({ embedded = false }: Props) {
   }, [])
 
   useEffect(() => {
+    if (featuresLoading || !ffStudyReminders) return
     void load()
-  }, [load])
+  }, [load, featuresLoading, ffStudyReminders])
 
   if (featuresLoading || !ffStudyReminders) return null
 

@@ -22,6 +22,7 @@ import (
 	userrepo "github.com/lextures/lextures/server/internal/repos/user"
 	auditservice "github.com/lextures/lextures/server/internal/service/adminaudit"
 	"github.com/lextures/lextures/server/internal/service/authservice"
+	"github.com/lextures/lextures/server/internal/service/introcourse"
 	"github.com/lextures/lextures/server/internal/service/coursereviews"
 	"github.com/lextures/lextures/server/internal/service/licensesvc"
 )
@@ -161,6 +162,7 @@ func (d Deps) handleAdminPeopleInvite() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to assign role.")
 			return
 		}
+		introcourse.EnsureEnrollmentBestEffort(r.Context(), d.Pool, d.effectiveConfig(), d.Pool, uid, introcourse.PathAdminImport)
 
 		if err := d.licenseService().CheckCanActivate(ctx, uid, orgID); err != nil {
 			if errors.Is(err, licensesvc.ErrSeatLimitReached) {
@@ -346,6 +348,9 @@ func (d Deps) handleAdminPeopleDelete() http.HandlerFunc {
 		if err := platformpeople.SetActive(ctx, d.Pool, targetID, false); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to deactivate user.")
 			return
+		}
+		if d.LearnerProfileService != nil {
+			_ = d.LearnerProfileService.Erase(ctx, targetID)
 		}
 		if err := gdpr.AnonymiseUser(ctx, d.Pool, targetID); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete user account.")

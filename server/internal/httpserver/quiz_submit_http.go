@@ -190,6 +190,7 @@ func (d Deps) handleQuizSubmit() http.HandlerFunc {
 			return
 		}
 
+		d.maybeAutogradeIntroQuiz(ctx, *cid, viewer, itemID)
 		learningevents.EmitQuizGradedAsync(d.Pool, d.effectiveConfig(), body.AttemptID)
 		webhooksvc.EmitQuizCompletedEvent(ctx, d.Pool, d.effectiveConfig(), *cid, courseCode, itemID, body.AttemptID, viewer, float64(earned), float64(score))
 		if score >= 60 && cid != nil {

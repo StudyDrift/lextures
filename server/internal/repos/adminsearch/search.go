@@ -12,7 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/models/adminsearch"
 )
 
-const systemUserID = "a0000000-0000-4000-8000-000000000001"
+
 
 // SearchUsers finds users in orgID matching free text (FTS + pg_trgm fuzzy).
 func SearchUsers(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, q string, limit, offset int) ([]adminsearch.Result, int64, error) {
@@ -51,7 +51,7 @@ WITH matched AS (
         ) AS rank
     FROM "user".users u
     WHERE u.org_id = $1
-      AND u.id <> $4::uuid
+      AND u.account_type <> 'system'
       AND (
           u.search_vector @@ websearch_to_tsquery('english', $2)
           OR u.email ILIKE $3
@@ -74,8 +74,8 @@ SELECT
     COUNT(*) OVER () AS total
 FROM matched
 ORDER BY rank DESC, name ASC, email ASC
-LIMIT $5 OFFSET $6
-`, orgID, q, like, systemUserID, limit, offset)
+LIMIT $4 OFFSET $5
+`, orgID, q, like, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}

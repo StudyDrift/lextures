@@ -1,5 +1,5 @@
 # Common tasks for the Go API (`server/`). Run with DATABASE_URL for full tests (see CI).
-.PHONY: test testshort lint build docker-build stubs
+.PHONY: test testshort lint build docker-build stubs intro-course-validate
 stubs:
 	python3 scripts/gen_stubs.py
 test:
@@ -11,6 +11,9 @@ testshort:
 
 lint:
 	golangci-lint run ./...
+
+intro-course-validate:
+	go run ./cmd/intro-course-validate
 
 build:
 	go build -o bin/server ./cmd/server

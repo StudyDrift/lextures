@@ -24,6 +24,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/authservice"
+	"github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 const defaultCleverAuthorizeURL = "https://clever.com/oauth/authorize"
@@ -253,6 +254,7 @@ func (s *Service) CompleteLogin(ctx context.Context, pool *pgxpool.Pool, jwt *pa
 	if _, err := oidcrepo.TryInsertIdentity(ctx, pool, uid, "clever", subj, &email); err != nil {
 		return authservice.AuthResponse{}, nil, err
 	}
+	introcourse.EnsureEnrollmentBestEffort(ctx, pool, s.Cfg, pool, uid, introcourse.PathClever)
 	res, err := authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, nu, meta, "clever")
 	if err != nil {
 		return authservice.AuthResponse{}, nil, err

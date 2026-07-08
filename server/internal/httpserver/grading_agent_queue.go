@@ -6,9 +6,11 @@ import (
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
+	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
 	"github.com/lextures/lextures/server/internal/gradingagentqueue"
 	gradingagentsvc "github.com/lextures/lextures/server/internal/service/gradingagent"
+	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 // HandleGradingAgentQueueMessage grades one submission and writes a provisional grade.
@@ -139,12 +141,32 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 }
 
 func (d Deps) failGradingAgentItem(ctx context.Context, msg gradingagentqueue.QueueMessage, reason string, modality *string) error {
+	d.maybeRecordIntroCourseGraderFallback(ctx, msg)
 	_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
 		RunID: &msg.RunID, ConfigID: msg.ConfigID, SubmissionID: msg.SubmissionID,
 		Status: gradingagentrepo.ItemFailed, Error: &reason, InputModality: modality,
 	})
 	_ = gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, true)
 	return nil
+}
+
+func (d Deps) maybeRecordIntroCourseGraderFallback(ctx context.Context, msg gradingagentqueue.QueueMessage) {
+	if d.Pool == nil {
+		return
+	}
+	ok, err := icrepo.IsIntroCourseID(ctx, d.Pool, msg.CourseID)
+	if err != nil || !ok {
+		return
+	}
+	subRow, err := moduleassignmentsubmissions.GetByIDForCourse(ctx, d.Pool, msg.CourseID, msg.SubmissionID)
+	if err != nil || subRow == nil {
+		return
+	}
+	cell, err := coursegrades.GetCell(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID)
+	if err != nil || cell == nil || cell.PointsEarned == nil {
+		return
+	}
+	introcourseservice.RecordGraderAgentFallback()
 }
 
 func gradingAgentStrPtr(s string) *string { return &s }

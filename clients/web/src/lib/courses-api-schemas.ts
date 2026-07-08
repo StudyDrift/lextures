@@ -161,6 +161,12 @@ export const bankQuestionDetailSchema = bankQuestionRowSchema.extend({
   optionMisconceptionTags: z.array(questionOptionMisconceptionTagSchema).optional(),
 })
 
+export const profileRationaleSchema = z.object({
+  text: z.string(),
+  facetKey: z.string(),
+  insightKey: z.string(),
+})
+
 export const reviewQueueItemSchema = z.object({
   stateId: z.string(),
   questionId: z.string(),
@@ -173,6 +179,7 @@ export const reviewQueueItemSchema = z.object({
   options: z.unknown().optional(),
   correctAnswer: z.unknown().optional(),
   explanation: z.string().nullable().optional(),
+  profileRationale: profileRationaleSchema.optional(),
 })
 
 export const reviewQueueResponseSchema = z.object({
@@ -194,6 +201,7 @@ export const recommendationItemSchema = z.object({
   surface: z.string(),
   reason: z.string(),
   score: z.number(),
+  profileRationale: profileRationaleSchema.optional(),
 })
 
 export const learnerRecommendationsResponseSchema = z.object({

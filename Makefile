@@ -1,4 +1,4 @@
-.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-build-ios-test mobile-test-ios mobile-test-ios-fast ios-xcodebuild android ios server web cli www
+.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www intro-course-validate iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-build-ios-test mobile-test-ios mobile-test-ios-fast ios-xcodebuild android ios server web cli www
 
 # Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
 LINT_APPS := server web cli www
@@ -115,6 +115,9 @@ ios-xcodebuild:
 		CODE_SIGNING_ALLOWED=NO \
 		COMPILER_INDEX_STORE_ENABLE=NO \
 		ONLY_ACTIVE_ARCH=YES
+
+intro-course-validate:
+	$(MAKE) -C server intro-course-validate
 
 lint-server:
 	$(MAKE) -C server lint

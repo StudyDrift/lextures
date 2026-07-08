@@ -493,6 +493,9 @@ data class PlatformFeatures(
     val graderAgentEnabled: Boolean? = null,
     val ffPlagiarismChecks: Boolean? = null,
     val altTextEnforcementEnabled: Boolean? = null,
+    val learnerProfileEnabled: Boolean? = null,
+    val ffMobileLearnerProfile: Boolean? = null,
+    val introCourseEnabled: Boolean? = null,
 )
 
 @Serializable

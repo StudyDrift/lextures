@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/userai"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	tutorsession "github.com/lextures/lextures/server/internal/service/tutorsession"
+	lpsvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
 )
 
 const aiTutorOptOutMessage = "AI tutor is disabled for your account."
@@ -306,7 +307,17 @@ func (d Deps) handlePostTutorSessionMessage() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load conversation history.")
 			return
 		}
-		msgs := tutorsession.BuildMessages(c.Title, history, cleaned, ragContext, hasRAG)
+		var profileScaffold string
+		if d.profileAdaptEnabled("tutor") {
+			adaptive, aerr := d.loadAdaptiveContext(ctx, userID)
+			if aerr == nil && adaptive.Usable(true) && adaptive.HelpSeekingStyle != "" {
+				profileScaffold = lpsvc.TutorScaffoldingPrompt(adaptive.HelpSeekingStyle)
+				lpsvc.RecordAdaptation("tutor", "applied")
+			} else {
+				lpsvc.RecordAdaptation("tutor", "suppressed")
+			}
+		}
+		msgs := tutorsession.BuildMessages(c.Title, history, cleaned, ragContext, hasRAG, profileScaffold)
 
 		flusher, canFlush := w.(http.Flusher)
 		w.Header().Set("Content-Type", "text/event-stream")

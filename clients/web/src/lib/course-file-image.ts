@@ -16,12 +16,26 @@ export function stripImageDisplayFragment(src: string): {
   return { base: src }
 }
 
-/** True when `src` (ignoring `#w=&h=` fragment) points at a course file blob that requires `Authorization`. */
-export function needsAuthenticatedCourseImageSrc(src: string): boolean {
+/** Pathname for course-file content URLs, ignoring `#w=&h=` fragments and `?resize` query params. */
+export function courseFileContentPathname(src: string): string {
   const { base } = stripImageDisplayFragment(src)
+  const pathOnly = base.split('?')[0]?.split('#')[0] ?? base
+  try {
+    if (pathOnly.startsWith('http://') || pathOnly.startsWith('https://')) {
+      return new URL(pathOnly).pathname
+    }
+  } catch {
+    // fall through with the raw path
+  }
+  return pathOnly
+}
+
+/** True when `src` points at a course file blob that requires `Authorization`. */
+export function needsAuthenticatedCourseImageSrc(src: string): boolean {
+  const pathname = courseFileContentPathname(src)
   return (
-    (base.includes('/course-files/') || base.includes('/files/items/')) &&
-    base.endsWith('/content')
+    (pathname.includes('/course-files/') || pathname.includes('/files/items/')) &&
+    pathname.endsWith('/content')
   )
 }
 

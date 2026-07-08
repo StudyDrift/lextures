@@ -58,6 +58,15 @@ type moduleAssignmentGetResponse struct {
 	SimplifiedForReadingLevel    bool             `json:"simplifiedForReadingLevel,omitempty"`
 	OriginalMarkdown             *string          `json:"originalMarkdown,omitempty"`
 	ReadingLevelTargetFkgl       *int             `json:"readingLevelTargetFkgl,omitempty"`
+	ProfileRationale             *profileRationaleJSON `json:"profileRationale,omitempty"`
+	PreferredAlternateItemID     *uuid.UUID       `json:"preferredAlternateItemId,omitempty"`
+	ModalityAlternates           []modalityAlternateJSON `json:"modalityAlternates,omitempty"`
+}
+
+type modalityAlternateJSON struct {
+	ItemID   uuid.UUID `json:"itemId"`
+	Title    string    `json:"title"`
+	Modality string    `json:"modality"`
 }
 
 func buildModuleAssignmentResponse(
@@ -255,6 +264,7 @@ func (d Deps) handleGetModuleAssignment() http.HandlerFunc {
 		)
 		d.enrichModuleItemResponse(r, *cid, itemID, rlrepo.TypeAssignment, viewer, canEdit, &out)
 		d.enrichModuleItemWithTranslation(r.Context(), *cid, itemID, ctrepo.TypeAssignment, viewer, canEdit, &out)
+		d.enrichIntroCourseContentPage(r, courseCode, *cid, itemID, viewer, canEdit, &out.Title, &out.Markdown)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

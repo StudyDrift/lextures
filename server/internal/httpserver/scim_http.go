@@ -162,7 +162,7 @@ func (d Deps) handleSCIMUsersCollection() http.HandlerFunc {
 				writeSCIMError(w, http.StatusBadRequest, "invalidSyntax", "Invalid JSON")
 				return
 			}
-			out, err := scim.CreateUser(r.Context(), d.Pool, inst, &u, base)
+			out, err := scim.CreateUser(r.Context(), d.Pool, d.effectiveConfig(), inst, &u, base)
 			if errors.Is(err, scim.ErrUniqueness) {
 				writeSCIMError(w, http.StatusConflict, "uniqueness", "Resource already exists")
 				return

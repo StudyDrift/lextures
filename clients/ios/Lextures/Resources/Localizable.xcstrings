@@ -38897,6 +38897,1026 @@
         }
       }
     },
+    "mobile.introCourse.card.ariaLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مقرر التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intro course onboarding"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Intro course onboarding]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Curso de introducción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cours d'introduction"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.completedAria": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اكتمل التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onboarding complete"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Onboarding complete]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introducción completada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduction terminée"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.completedLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اكتمل التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onboarding complete"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Onboarding complete]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introducción completada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduction terminée"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.continueOnboarding": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "متابعة التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue onboarding"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Continue onboarding]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar la introducción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poursuivre l'introduction"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.ctaContinue": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "متابعة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Continue]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuer"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.ctaStart": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ابدأ مقرر التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start the intro course"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Start the intro course]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar el curso de introducción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commencer le cours d'introduction"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.fallbackLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مقرر التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intro course"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Intro course]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Curso de introducción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cours d'introduction"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.fallbackLink": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "افتح مقرر التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the intro course"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Open the intro course]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir el curso de introducción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir le cours d'introduction"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.nextUp": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التالي: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next up: %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Next up: %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siguiente: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prochaine étape : %@"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.revisit": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إعادة الزيارة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisit"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Revisit]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volver a ver"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revoir"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.startHere": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ابدأ من هنا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start here"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Start here]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza aquí"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commencer ici"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.subtitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جولة إرشادية في التنقل وأنشطة التعلم وكيفية الحصول على المساعدة."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A guided tour of navigation, learning activities, and where to get help."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[A guided tour of navigation, learning activities, and where to get help.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un recorrido guiado por la navegación, las actividades de aprendizaje y dónde obtener ayuda."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une visite guidée de la navigation, des activités d'apprentissage et de l'aide disponible."
+          }
+        }
+      }
+    },
+    "mobile.introCourse.card.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مرحبًا بك في Lextures"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome to Lextures"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Welcome to Lextures]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bienvenido a Lextures"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bienvenue sur Lextures"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.celebration.ariaLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "احتفال بإكمال التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onboarding complete celebration"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Onboarding complete celebration]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Celebración de introducción completada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Célébration de fin d'introduction"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.celebration.badgeLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شهادة التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onboarding certificate"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Onboarding certificate]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Certificado de introducción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Certificat d'introduction"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.celebration.body": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أحسنت — أنت جاهز للبدء في مقرراتك الفعلية."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nice work — you're ready to dive into your real coursework."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Nice work — you're ready to dive into your real coursework.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buen trabajo — ya puedes empezar con tus cursos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bravo — vous êtes prêt à commencer vos vrais cours."
+          }
+        }
+      }
+    },
+    "mobile.introCourse.celebration.bodyWithCredential": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شهادة التعريف جاهزة للعرض والمشاركة."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your onboarding certificate is ready to view and share."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Your onboarding certificate is ready to view and share.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu certificado de introducción está listo para ver y compartir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre certificat d'introduction est prêt à être consulté et partagé."
+          }
+        }
+      }
+    },
+    "mobile.introCourse.celebration.close": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "العودة إلى لوحة التحكم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back to dashboard"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Back to dashboard]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volver al panel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retour au tableau de bord"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.celebration.credentialsLink": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عرض شهاداتك"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View your credentials"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[View your credentials]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver tus credenciales"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir vos attestations"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.celebration.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لقد أكملت مرحبًا بك في Lextures!"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You've completed Welcome to Lextures!"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[You've completed Welcome to Lextures!]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¡Has completado Bienvenido a Lextures!"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous avez terminé Bienvenue sur Lextures !"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.offline.cached": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عرض تقدّم التعريف المحفوظ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Showing cached onboarding progress"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Showing cached onboarding progress]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrando el progreso de introducción guardado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affichage de la progression d'introduction en cache"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.progress.ariaLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ من %@ وحدات مكتملة، %@ بالمئة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ of %@ modules complete, %@ percent"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[%@ of %@ modules complete, %@ percent]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ de %@ módulos completados, %@ por ciento"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ modules sur %@ terminés, %@ pour cent"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.progress.modules": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الوحدة %@ من %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module %@ of %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Module %@ of %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Módulo %@ de %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module %@ sur %@"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.rail.ariaLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقدّم مقرر التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intro course progress"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Intro course progress]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progreso del curso de introducción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progression du cours d'introduction"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.rail.modulesAria": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقدّم الوحدات"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module progress"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Module progress]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progreso por módulo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progression par module"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.rail.nextUp": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التالي: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next up: %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Next up: %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siguiente: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prochaine étape : %@"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.rail.statusCurrent": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الوحدة الحالية"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "current module"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[current module]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "módulo actual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "module en cours"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.rail.statusDone": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مكتمل"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "completed"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[completed]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "completado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "terminé"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.rail.statusUpcoming": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قادم"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "upcoming"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[upcoming]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "próximo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "à venir"
+          }
+        }
+      }
+    },
+    "mobile.introCourse.rail.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقدّمك في التعريف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your onboarding progress"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Your onboarding progress]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu progreso de introducción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre progression d'introduction"
+          }
+        }
+      }
+    },
     "mobile.item.details": {
       "localizations": {
         "ar": {
@@ -39233,6 +40253,3474 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rendez ce devoir depuis l'application web."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.chart.modalityCaption": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engagement by content format"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engagement by content format"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engagement by content format"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engagement by content format"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engagement by content format"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.chart.modalityRow": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %d%% affinity"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %d%% affinity"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %d%% affinity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %d%% affinity"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %d%% affinity"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.chart.rhythmCaption": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity by day and hour"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity by day and hour"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity by day and hour"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity by day and hour"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity by day and hour"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.chart.rhythmRow": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@: %d%% activity"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@: %d%% activity"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@: %d%% activity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@: %d%% activity"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@: %d%% activity"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.confidence.high": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High confidence"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High confidence"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High confidence"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High confidence"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High confidence"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.confidence.low": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low confidence"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low confidence"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low confidence"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low confidence"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low confidence"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.confidence.medium": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate confidence"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate confidence"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate confidence"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate confidence"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate confidence"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See what Lextures has learned about how you learn — and exactly where each insight comes from."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See what Lextures has learned about how you learn — and exactly where each insight comes from."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See what Lextures has learned about how you learn — and exactly where each insight comes from."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See what Lextures has learned about how you learn — and exactly where each insight comes from."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See what Lextures has learned about how you learn — and exactly where each insight comes from."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.empty.body": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep learning — as you engage with courses, quizzes, and study tools, insights will appear here. We never guess before there is enough evidence."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep learning — as you engage with courses, quizzes, and study tools, insights will appear here. We never guess before there is enough evidence."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep learning — as you engage with courses, quizzes, and study tools, insights will appear here. We never guess before there is enough evidence."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep learning — as you engage with courses, quizzes, and study tools, insights will appear here. We never guess before there is enough evidence."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep learning — as you engage with courses, quizzes, and study tools, insights will appear here. We never guess before there is enough evidence."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.empty.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile is still building"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile is still building"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile is still building"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile is still building"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile is still building"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.entry.subtitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See how you learn and manage your profile"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See how you learn and manage your profile"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See how you learn and manage your profile"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See how you learn and manage your profile"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See how you learn and manage your profile"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.error.load": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load your learner profile. Try again in a moment."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load your learner profile. Try again in a moment."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load your learner profile. Try again in a moment."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load your learner profile. Try again in a moment."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load your learner profile. Try again in a moment."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.collapse": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide evidence"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide evidence"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide evidence"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide evidence"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide evidence"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.derivedFrom": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@ across %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@ across %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@ across %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@ across %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@ across %@"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.derivedFromNoCourses": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from %@"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.empty": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No detailed evidence is available for this insight."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No detailed evidence is available for this insight."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No detailed evidence is available for this insight."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No detailed evidence is available for this insight."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No detailed evidence is available for this insight."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.error": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load evidence."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load evidence."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load evidence."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load evidence."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load evidence."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.expand": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from…"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derived from…"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.engagement_event": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study activity"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.generic": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learning activity"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learning activity"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learning activity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learning activity"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learning activity"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.hint_request": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hint requests"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hint requests"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hint requests"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hint requests"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hint requests"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.interests_signal": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic engagement"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic engagement"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic engagement"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic engagement"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic engagement"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.learner_concept_state": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concept mastery"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concept mastery"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concept mastery"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concept mastery"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concept mastery"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.login_audit": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in activity"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in activity"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in activity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in activity"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in activity"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.misconception_event": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception patterns"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception patterns"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception patterns"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception patterns"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Misconception patterns"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.notebook_activity": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook activity"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook activity"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook activity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook activity"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notebook activity"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.quiz_attempt": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz attempts"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz attempts"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz attempts"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz attempts"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiz attempts"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.source.submission_revision": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assignment revisions"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assignment revisions"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assignment revisions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assignment revisions"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assignment revisions"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.window": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – %@"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.collapse": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse section"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse section"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse section"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse section"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse section"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.contentModality.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The content formats and pacing that fit you best."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The content formats and pacing that fit you best."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The content formats and pacing that fit you best."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The content formats and pacing that fit you best."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The content formats and pacing that fit you best."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.contentModality.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you like to learn"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you like to learn"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you like to learn"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you like to learn"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you like to learn"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.error": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This section could not be loaded. Other sections are still available."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This section could not be loaded. Other sections are still available."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This section could not be loaded. Other sections are still available."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This section could not be loaded. Other sections are still available."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This section could not be loaded. Other sections are still available."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.expand": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expand section"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expand section"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expand section"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expand section"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expand section"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.generic.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insights about how you learn."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insights about how you learn."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insights about how you learn."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insights about how you learn."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insights about how you learn."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.generic.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile section"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile section"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile section"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile section"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile section"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.insufficient": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not enough data yet for this section."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not enough data yet for this section."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not enough data yet for this section."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not enough data yet for this section."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not enough data yet for this section."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.interests.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topics and subjects you engage with most."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topics and subjects you engage with most."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topics and subjects you engage with most."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topics and subjects you engage with most."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topics and subjects you engage with most."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.interests.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you're drawn to"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you're drawn to"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you're drawn to"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you're drawn to"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you're drawn to"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.lastComputed": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last updated %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last updated %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last updated %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last updated %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last updated %@"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.learningApproach.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist, seek help, and consolidate learning."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist, seek help, and consolidate learning."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist, seek help, and consolidate learning."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist, seek help, and consolidate learning."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist, seek help, and consolidate learning."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.learningApproach.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you approach challenges"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you approach challenges"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you approach challenges"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you approach challenges"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you approach challenges"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.strengthsGrowth.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts you have mastered and areas to develop."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts you have mastered and areas to develop."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts you have mastered and areas to develop."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts you have mastered and areas to develop."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts you have mastered and areas to develop."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.strengthsGrowth.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strengths & growth"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strengths & growth"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strengths & growth"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strengths & growth"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strengths & growth"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.studyRhythm.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When and how consistently you study."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When and how consistently you study."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When and how consistently you study."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When and how consistently you study."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When and how consistently you study."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.facet.studyRhythm.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study rhythm"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study rhythm"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study rhythm"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study rhythm"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study rhythm"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.howItWorks.body": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is built automatically from your activity across courses. It is never entered manually, and you own it. Each insight shows where it came from, when it was last updated, and how confident we are."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is built automatically from your activity across courses. It is never entered manually, and you own it. Each insight shows where it came from, when it was last updated, and how confident we are."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is built automatically from your activity across courses. It is never entered manually, and you own it. Each insight shows where it came from, when it was last updated, and how confident we are."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is built automatically from your activity across courses. It is never entered manually, and you own it. Each insight shows where it came from, when it was last updated, and how confident we are."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is built automatically from your activity across courses. It is never entered manually, and you own it. Each insight shows where it came from, when it was last updated, and how confident we are."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.howItWorks.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How this works"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How this works"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How this works"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How this works"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How this works"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.comfort": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comfortable reading level between %@ and %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comfortable reading level between %@ and %@."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comfortable reading level between %@ and %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comfortable reading level between %@ and %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comfortable reading level between %@ and %@."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.complexityComfort": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading level comfort band"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading level comfort band"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading level comfort band"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading level comfort band"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading level comfort band"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.consistency": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consistency score %d%% with about %@ active days per week."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consistency score %d%% with about %@ active days per week."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consistency score %d%% with about %@ active days per week."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consistency score %d%% with about %@ active days per week."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consistency score %d%% with about %@ active days per week."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.consolidation": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consolidation level: %@; %d notebook actions."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consolidation level: %@; %d notebook actions."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consolidation level: %@; %d notebook actions."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consolidation level: %@; %d notebook actions."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consolidation level: %@; %d notebook actions."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.consolidationLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you consolidate learning"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you consolidate learning"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you consolidate learning"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you consolidate learning"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you consolidate learning"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.contentPacing": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How thoroughly you work through content"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How thoroughly you work through content"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How thoroughly you work through content"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How thoroughly you work through content"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How thoroughly you work through content"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.generic": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.genericUnknown": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight details are not available yet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight details are not available yet."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight details are not available yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight details are not available yet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insight details are not available yet."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.growthAreas": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Areas to grow"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Areas to grow"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Areas to grow"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Areas to grow"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Areas to grow"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.growthList": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Growth areas: %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Growth areas: %@."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Growth areas: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Growth areas: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Growth areas: %@."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.helpSeeking": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help-seeking style: %@; about %@ hints per attempt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help-seeking style: %@; about %@ hints per attempt."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help-seeking style: %@; about %@ hints per attempt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help-seeking style: %@; about %@ hints per attempt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help-seeking style: %@; about %@ hints per attempt."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.helpSeekingLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you seek help"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you seek help"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you seek help"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you seek help"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you seek help"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.interestTop": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drawn to %@ (%d%% affinity)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drawn to %@ (%d%% affinity)."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drawn to %@ (%d%% affinity)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drawn to %@ (%d%% affinity)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drawn to %@ (%d%% affinity)."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.modalityAffinity": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you engage with each format"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you engage with each format"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you engage with each format"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you engage with each format"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you engage with each format"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.modalityTop": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You engage most with %@ content (%d%% affinity)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You engage most with %@ content (%d%% affinity)."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You engage most with %@ content (%d%% affinity)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You engage most with %@ content (%d%% affinity)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You engage most with %@ content (%d%% affinity)."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.needsReview": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts to review"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts to review"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts to review"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts to review"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts to review"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.pacing": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You tend to work through content at a %@ pace."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You tend to work through content at a %@ pace."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You tend to work through content at a %@ pace."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You tend to work through content at a %@ pace."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You tend to work through content at a %@ pace."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.peak": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You study most on %@ around %@ (%d%% of activity)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You study most on %@ around %@ (%d%% of activity)."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You study most on %@ around %@ (%d%% of activity)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You study most on %@ around %@ (%d%% of activity)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You study most on %@ around %@ (%d%% of activity)."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.peakStudyWindow": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you study most"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you study most"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you study most"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you study most"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you study most"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.peakUnknown": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your peak study window is still emerging."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your peak study window is still emerging."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your peak study window is still emerging."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your peak study window is still emerging."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your peak study window is still emerging."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.persistence": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Persistence level: %@%@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Persistence level: %@%@."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Persistence level: %@%@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Persistence level: %@%@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Persistence level: %@%@."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.persistenceLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist through challenges"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist through challenges"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist through challenges"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist through challenges"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How you persist through challenges"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.productiveRetakes": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " (productive retakes)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " (productive retakes)"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " (productive retakes)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " (productive retakes)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " (productive retakes)"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.reviewList": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review soon: %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review soon: %@."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review soon: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review soon: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review soon: %@."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.session": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session about %d minutes; %@ sessions per active week."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session about %d minutes; %@ sessions per active week."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session about %d minutes; %@ sessions per active week."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session about %d minutes; %@ sessions per active week."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session about %d minutes; %@ sessions per active week."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.sessionShape": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session length"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session length"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session length"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session length"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical session length"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.streak": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current streak %d days; longest streak %d days."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current streak %d days; longest streak %d days."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current streak %d days; longest streak %d days."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current streak %d days; longest streak %d days."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current streak %d days; longest streak %d days."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.strengthsList": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strong in: %@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strong in: %@."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strong in: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strong in: %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strong in: %@."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.studyConsistency": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study consistency"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study consistency"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study consistency"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study consistency"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study consistency"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.studyStreak": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study streak"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study streak"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study streak"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study streak"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Study streak"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.topStrengths": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your top strengths"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your top strengths"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your top strengths"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your top strengths"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your top strengths"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.insight.topic": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic you're drawn to"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic you're drawn to"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic you're drawn to"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic you're drawn to"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic you're drawn to"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download a portable copy, pause updates, or permanently reset your learner profile."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download a portable copy, pause updates, or permanently reset your learner profile."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download a portable copy, pause updates, or permanently reset your learner profile."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download a portable copy, pause updates, or permanently reset your learner profile."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download a portable copy, pause updates, or permanently reset your learner profile."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.download": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download profile"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download profile"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download profile"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download profile"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download profile"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.downloadHint": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exports a JSON copy of your profile"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exports a JSON copy of your profile"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exports a JSON copy of your profile"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exports a JSON copy of your profile"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exports a JSON copy of your profile"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.error": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That action could not be completed. Try again in a moment."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That action could not be completed. Try again in a moment."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That action could not be completed. Try again in a moment."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That action could not be completed. Try again in a moment."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That action could not be completed. Try again in a moment."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.pause": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause updates"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause updates"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause updates"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause updates"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause updates"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.pauseConfirmBody": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile will stay as it is and will not be updated from new activity until you resume."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile will stay as it is and will not be updated from new activity until you resume."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile will stay as it is and will not be updated from new activity until you resume."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile will stay as it is and will not be updated from new activity until you resume."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile will stay as it is and will not be updated from new activity until you resume."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.pauseConfirmTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause profile updates?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause profile updates?"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause profile updates?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause profile updates?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause profile updates?"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.reset": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset profile"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset profile"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset profile"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset profile"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset profile"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.resetConfirmBody": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This permanently deletes all profile insights and evidence. It cannot be undone."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This permanently deletes all profile insights and evidence. It cannot be undone."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This permanently deletes all profile insights and evidence. It cannot be undone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This permanently deletes all profile insights and evidence. It cannot be undone."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This permanently deletes all profile insights and evidence. It cannot be undone."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.resetConfirmPhrase": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RESET"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RESET"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RESET"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RESET"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RESET"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.resetConfirmPhraseLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type RESET to confirm"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type RESET to confirm"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type RESET to confirm"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type RESET to confirm"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type RESET to confirm"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.resetConfirmTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset your learner profile?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset your learner profile?"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset your learner profile?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset your learner profile?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset your learner profile?"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.resume": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume updates"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume updates"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume updates"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume updates"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume updates"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.resumeConfirmBody": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lextures will start updating your profile again from your learning activity."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lextures will start updating your profile again from your learning activity."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lextures will start updating your profile again from your learning activity."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lextures will start updating your profile again from your learning activity."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lextures will start updating your profile again from your learning activity."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.resumeConfirmTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume profile updates?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume profile updates?"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume profile updates?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume profile updates?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume profile updates?"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.manage.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage your profile"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage your profile"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage your profile"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage your profile"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage your profile"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.offline.banner": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're offline. Showing your last saved profile. Controls need a connection."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're offline. Showing your last saved profile. Controls need a connection."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're offline. Showing your last saved profile. Controls need a connection."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're offline. Showing your last saved profile. Controls need a connection."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're offline. Showing your last saved profile. Controls need a connection."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.offline.controlsDisabled": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to the internet to pause, resume, reset, or download your profile."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to the internet to pause, resume, reset, or download your profile."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to the internet to pause, resume, reset, or download your profile."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to the internet to pause, resume, reset, or download your profile."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to the internet to pause, resume, reset, or download your profile."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.paused.body": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is not being updated right now. Resume updates when you are ready, or manage your profile below."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is not being updated right now. Resume updates when you are ready, or manage your profile below."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is not being updated right now. Resume updates when you are ready, or manage your profile below."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is not being updated right now. Resume updates when you are ready, or manage your profile below."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your learner profile is not being updated right now. Resume updates when you are ready, or manage your profile below."
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.paused.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile updates are paused"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile updates are paused"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile updates are paused"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile updates are paused"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile updates are paused"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner Profile"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner Profile"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner Profile"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner Profile"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner Profile"
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.unavailable": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner profile is not available."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner profile is not available."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner profile is not available."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner profile is not available."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learner profile is not available."
           }
         }
       }
@@ -72614,6 +77102,194 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "%d items"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.courseCount": {
+      "localizations": {
+        "ar": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d course"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d courses"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d course"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d courses"
+                }
+              }
+            }
+          }
+        },
+        "en-XA": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d course"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d courses"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d course"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d courses"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d course"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d courses"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mobile.learnerProfile.evidence.observationCount": {
+      "localizations": {
+        "ar": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observation"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observations"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observation"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observations"
+                }
+              }
+            }
+          }
+        },
+        "en-XA": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observation"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observations"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observation"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observations"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observation"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%d observations"
                 }
               }
             }

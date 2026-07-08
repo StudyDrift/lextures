@@ -3,7 +3,7 @@
  *
  * Checklist coverage (docs/e2e.md):
  *   [x] Dashboard loads after login with "My Courses" section visible
- *   [x] Empty-state shown when user has no enrollments
+ *   [x] Intro course onboarding shown for fresh users (auto-enrolled in C-WLCOME)
  */
 import { test, expect } from '../fixtures/test.js'
 import { mainNav } from '../fixtures/test.js'
@@ -26,9 +26,11 @@ test.describe('Dashboard', () => {
     await expect(dashboardMain.getByRole('link', { name: /all courses/i })).toBeVisible()
   })
 
-  test('shows empty state when user has no course enrollments', async ({ authedPage: page }) => {
+  test('shows intro course onboarding for a fresh user', async ({ authedPage: page }) => {
     await expect(page).toHaveURL('/')
-    // A fresh user has no enrollments — the app shows an empty/no-courses message.
-    await expect(page.getByText(/no courses yet/i)).toBeVisible()
+    // New users are auto-enrolled in the platform intro course when intro_course_enabled is on.
+    await expect(page.getByRole('region', { name: /intro course onboarding/i })).toBeVisible({
+      timeout: 30000,
+    })
   })
 })

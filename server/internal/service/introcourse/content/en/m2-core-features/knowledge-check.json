@@ -1,0 +1,48 @@
+{
+  "slug": "m2.core.knowledge-check",
+  "title": "Module 2 knowledge check",
+  "sort_order": 7,
+  "markdown": "Check your recall of everyday Lextures features.",
+  "questions": [
+    {
+      "id": "m2-q1",
+      "prompt": "Where can you keep personal notes that follow you across courses?",
+      "questionType": "multiple_choice",
+      "choices": ["Notebook", "Gradebook", "SCIM provisioning", "Org branding"],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q2",
+      "prompt": "What view helps you see due dates across all enrolled courses?",
+      "questionType": "multiple_choice",
+      "choices": ["Calendar", "Transcripts admin", "LTI tools", "Question bank only"],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q3",
+      "prompt": "Which activity type is usually auto-graded?",
+      "questionType": "multiple_choice",
+      "choices": ["Quiz", "Ungraded survey", "External URL bookmark", "Org unit"],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q4",
+      "prompt": "Where do you read course-related messages?",
+      "questionType": "multiple_choice",
+      "choices": ["Inbox", "Archive settings", "Caption compliance", "SIS admin"],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

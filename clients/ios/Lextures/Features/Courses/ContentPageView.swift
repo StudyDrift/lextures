@@ -60,6 +60,7 @@ struct ContentPageView: View {
         .navigationTitle(item.title)
         .navigationBarTitleDisplayMode(.inline)
         .tutorLauncher(course: course, item: item)
+        .environment(\.openURL, ContentLinkRouter.openURLAction(shell: shell))
         .task { await load() }
     }
 

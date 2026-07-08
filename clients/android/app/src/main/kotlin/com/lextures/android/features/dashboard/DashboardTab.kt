@@ -403,6 +403,11 @@ fun DashboardTab(
         }
     }
 
+    com.lextures.android.features.introcourse.IntroCelebrationWatcher(
+        session = session,
+        shell = shell,
+    )
+
     if (showReview) {
         com.lextures.android.features.review.ReviewHomeScreen(
             session = session,
@@ -446,6 +451,13 @@ fun DashboardTab(
                 onOpenProfile = onOpenProfile,
                 showSearch = shell.iaRedesignEnabled && shell.universalSearchEnabled,
                 onOpenSearch = { shell.showUniversalSearch = true },
+            )
+        }
+
+        item {
+            com.lextures.android.features.introcourse.IntroCourseEntryCard(
+                session = session,
+                shell = shell,
             )
         }
 

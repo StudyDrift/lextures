@@ -80,7 +80,7 @@ func OverviewForOrg(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) (O
 	err := pool.QueryRow(ctx, `
 SELECT
   (SELECT COUNT(*)::bigint FROM "user".users u
-   WHERE u.org_id = $1 AND u.id <> 'a0000000-0000-4000-8000-000000000001'::uuid
+   WHERE u.org_id = $1 AND u.account_type <> 'system'
      AND u.deactivated_at IS NULL AND NOT u.login_blocked),
   (SELECT COUNT(*)::bigint FROM course.courses c
    WHERE c.org_id = $1 AND c.archived = false AND c.published = true),
@@ -108,7 +108,7 @@ func ListUsers(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, p ListP
 	args := []any{orgID}
 	where := []string{
 		`u.org_id = $1`,
-		`u.id <> 'a0000000-0000-4000-8000-000000000001'::uuid`,
+		`u.account_type <> 'system'`,
 	}
 	argIdx := 2
 
