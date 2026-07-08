@@ -177,7 +177,7 @@ func (d Deps) handleAdminIntroCourseAnalytics() http.HandlerFunc {
 		}
 		if !found || courseID == uuid.Nil || !introcourseservice.Enabled(cfg) {
 			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode(introcourseservice.Analytics{})
+			_ = json.NewEncoder(w).Encode(introcourseservice.EmptyAnalytics())
 			return
 		}
 		analytics, err := introcourseservice.LoadAnalytics(r.Context(), d.Pool, courseID)

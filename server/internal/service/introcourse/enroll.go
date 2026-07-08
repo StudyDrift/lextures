@@ -264,10 +264,6 @@ func (s *Service) RunBackfill(ctx context.Context, cfg config.Config) error {
 	if err != nil {
 		return err
 	}
-	if st.CompletedAt != nil {
-		slog.Debug("intro course backfill already completed")
-		return nil
-	}
 
 	courseID, ok, err := s.CourseID(ctx)
 	if err != nil {
@@ -281,6 +277,21 @@ func (s *Service) RunBackfill(ctx context.Context, cfg config.Config) error {
 		if err != nil || !ok {
 			return fmt.Errorf("intro course backfill: course unavailable: %w", err)
 		}
+	}
+
+	if st.CompletedAt != nil {
+		remaining, err := icrepo.CountBackfillRemaining(ctx, s.Pool, courseID, organization.SeedDefaultOrgID, SkipParentsOnEnroll)
+		if err != nil {
+			return err
+		}
+		if remaining == 0 {
+			slog.Debug("intro course backfill already completed")
+			return nil
+		}
+		if err := icrepo.ClearBackfillCompleted(ctx, s.Pool); err != nil {
+			return err
+		}
+		slog.Info("intro course backfill resuming", "remaining", remaining)
 	}
 
 	now := time.Now().UTC()
@@ -362,11 +373,19 @@ LIMIT $5
 		time.Sleep(50 * time.Millisecond)
 	}
 
+	remaining, err := icrepo.CountBackfillRemaining(ctx, s.Pool, courseID, organization.SeedDefaultOrgID, SkipParentsOnEnroll)
+	if err != nil {
+		return err
+	}
+	setBackfillProgress(1)
+	setBackfillRemaining(float64(remaining))
+	if remaining > 0 {
+		slog.Warn("intro course backfill pass finished with eligible users still not enrolled", "remaining", remaining)
+		return nil
+	}
 	if err := icrepo.MarkBackfillCompleted(ctx, s.Pool, time.Now().UTC()); err != nil {
 		return err
 	}
 	slog.Info("intro course backfill completed")
-	setBackfillProgress(1)
-	setBackfillRemaining(0)
 	return nil
 }

@@ -26,7 +26,8 @@ function percentLabel(rate: number): string {
 
 function FunnelTable({ analytics }: { analytics: IntroCourseAdminAnalytics }) {
   const { t } = useTranslation('introCourse')
-  if (analytics.perModuleFunnel.length === 0) {
+  const funnel = analytics.perModuleFunnel ?? []
+  if (funnel.length === 0) {
     return (
       <p className="text-sm text-slate-500 dark:text-neutral-400">
         {t('introCourse.admin.analytics.empty')}
@@ -51,7 +52,7 @@ function FunnelTable({ analytics }: { analytics: IntroCourseAdminAnalytics }) {
           </tr>
         </thead>
         <tbody>
-          {analytics.perModuleFunnel.map((row) => (
+          {funnel.map((row) => (
             <tr
               key={row.moduleSlug}
               className="border-b border-slate-100 dark:border-neutral-800"
@@ -190,7 +191,7 @@ export function IntroCoursePanel() {
   }
 
   const dropOffTitle =
-    analytics?.perModuleFunnel.find((m) => m.moduleSlug === analytics.dropOffModuleSlug)?.moduleTitle ??
+    analytics?.perModuleFunnel?.find((m) => m.moduleSlug === analytics.dropOffModuleSlug)?.moduleTitle ??
     analytics?.dropOffModuleSlug
 
   return (

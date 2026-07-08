@@ -76,6 +76,18 @@ describe('IntroCoursePanel', () => {
     fetchIntroCourseAdminAnalytics.mockResolvedValue(mockAnalytics)
   })
 
+  it('renders when perModuleFunnel is null from API', async () => {
+    fetchIntroCourseAdminAnalytics.mockResolvedValue({
+      ...mockAnalytics,
+      perModuleFunnel: null,
+    })
+    renderPanel()
+    await waitFor(() => {
+      expect(screen.getByText('12')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /re-sync content/i })).toBeInTheDocument()
+  })
+
   it('loads status and analytics', async () => {
     renderPanel()
     await waitFor(() => {
