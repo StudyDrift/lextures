@@ -1,0 +1,30 @@
+{
+  "require_acceptance": false,
+  "sections": [
+    {
+      "id": "overview",
+      "heading": "Course overview",
+      "markdown": "**Welcome to Lextures** is a guided, self-paced onboarding course. Every new account is enrolled automatically so you can learn the platform inside a real course — with modules, pages, quizzes, and assignments — not a separate product tour.\n\n- **Estimated time:** 30–45 minutes if you read each page and try the linked activities\n- **Format:** Seven short modules with a knowledge-check quiz at the end of each\n- **Pace:** Work at your own speed; progress is saved as you go\n- **Audience:** Students, self-learners, and instructors evaluating Lextures\n\n[Open your course list](/courses) when you are ready to explore alongside this tour."
+    },
+    {
+      "id": "learning-goals",
+      "heading": "What you'll learn",
+      "markdown": "By the end of this course, you will be able to:\n\n1. **Navigate Lextures** — find courses, modules, and your dashboard\n2. **Use everyday tools** — calendar, files, messaging, notebook, and announcements\n3. **Understand how learning works** — adaptive paths, spaced practice, diagnostics, and mastery tracking\n4. **Read your learner profile** — see how Lextures summarizes your learning patterns (when enabled)\n5. **Learn on mobile** — install the app, work offline, and manage notifications\n6. **Import from Canvas** — bring existing courses into Lextures (when your institution uses Canvas import)\n7. **Track grades and finish** — understand auto-grading, the gradebook, and course completion"
+    },
+    {
+      "id": "module-guide",
+      "heading": "Module guide",
+      "markdown": "Work through the modules in order. Each ends with a short auto-scored knowledge check.\n\n| Module | What it covers |\n|--------|----------------|\n| **1. Welcome & Getting Oriented** | What Lextures is, your dashboard, and how courses are organized |\n| **2. Core Features You'll Use Every Day** | Calendar, files, quizzes, assignments, messaging, notebook, and the course feed |\n| **3. How Learning Works on Lextures** | Adaptive paths, spaced practice, diagnostics, mastery, and self-reflection |\n| **4. Your Learner Profile** | What the profile shows, how to read it, and privacy controls |\n| **5. Lextures on the Go (Mobile App)** | Installing the app, offline use, and push notifications |\n| **6. Bringing Your Courses In (Canvas Import)** | When to import, what transfers, and how to verify results |\n| **7. Grades, Assignments & Finishing Up** | Auto-grading, the gradebook, reflection, and completing the tour |\n\nSome modules appear only when your institution has the related feature turned on."
+    },
+    {
+      "id": "grading",
+      "heading": "Grading & completion",
+      "markdown": "This course uses the same gradebook as any Lextures class.\n\n- **Knowledge-check quizzes** are auto-scored; you get instant feedback after each module\n- **Try-it assignments** award full credit when you submit a short confirmation (no instructor review)\n- **Capstone reflection** in the final module is the main graded assignment\n\nThere are no fixed due dates — complete the modules when it suits you. When you finish the final knowledge check, you have completed the core walkthrough. A completion credential may be available when your institution enables it.\n\n[View your grades](/courses) from any enrolled course."
+    },
+    {
+      "id": "getting-help",
+      "heading": "Getting help",
+      "markdown": "If you get stuck during the tour:\n\n- Re-read the module you are on — pages link directly to the feature being taught\n- Check [Settings](/settings/account) for account and notification preferences\n- Visit the [Privacy Center](/privacy-centre) for data and privacy questions\n- Return to this syllabus anytime for the full module outline\n\nFor institution-specific support (SSO, roster, or local policies), contact your school or organization's help desk."
+    }
+  ]
+}

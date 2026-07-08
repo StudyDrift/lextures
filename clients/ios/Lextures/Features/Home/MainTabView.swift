@@ -174,6 +174,7 @@ final class AppShellModel {
     }
 
     var pendingBilling = false
+    var pendingProfileSettingsRoute: SettingsDeepLinkSection?
     var pendingParentStudentId: String?
     var pendingParentRoute: ParentRoute?
 
@@ -205,6 +206,11 @@ final class AppShellModel {
         case .credentials:
             selectShellTab(.profile)
             pendingMoreDestination = WalletLogic.walletEnabled(platformFeatures) ? .wallet : .credentials
+        case .coursesList:
+            selectShellTab(.courses)
+        case let .settings(section):
+            selectShellTab(.profile)
+            pendingProfileSettingsRoute = section
         case let .checkoutSuccess(courseId):
             checkoutReturnPhase = .success(courseId: courseId)
         case .checkoutCancel:
@@ -252,6 +258,11 @@ final class AppShellModel {
     func consumePendingBilling() -> Bool {
         defer { pendingBilling = false }
         return pendingBilling
+    }
+
+    func consumePendingProfileSettingsRoute() -> SettingsDeepLinkSection? {
+        defer { pendingProfileSettingsRoute = nil }
+        return pendingProfileSettingsRoute
     }
 
     func selectShellTab(_ tab: ShellTab) {

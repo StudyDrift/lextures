@@ -3563,4 +3563,83 @@ object LmsApi {
 
     fun portfolioArtifactContentPath(portfolioId: String, artifactId: String): String =
         "/api/v1/me/portfolios/${encodePath(portfolioId)}/artifacts/${encodePath(artifactId)}/content"
+
+    // Intro course (IC07)
+
+    suspend fun fetchIntroCourseProgress(accessToken: String): IntroCourseProgress = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/intro-course", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun markIntroCelebrationSeen(accessToken: String) = withContext(Dispatchers.IO) {
+        val (_, code) = client.request(
+            path = "/api/v1/me/intro-course/celebration-seen",
+            method = "PUT",
+            accessToken = accessToken,
+        )
+        if (code != 204 && code !in 200..299) {
+            throw ApiError.HttpStatus(code, "Could not save celebration state.")
+        }
+    }
+
+    // Learner profile (LP10)
+
+    suspend fun fetchLearnerProfile(accessToken: String): LearnerProfile = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/learner-profile", accessToken = accessToken)
+        if (code == 404) throw ApiError.HttpStatus(code, "Learner profile is not enabled.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<LearnerProfileResponse>(body).profile ?: LearnerProfile()
+    }
+
+    suspend fun fetchLearnerProfileFacet(facetKey: String, accessToken: String): LearnerProfileFacetDetailResponse? =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/me/learner-profile/facets/${encodePath(facetKey)}",
+                accessToken = accessToken,
+            )
+            if (code == 404) return@withContext null
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchLearnerProfileFacetEvidence(
+        facetKey: String,
+        accessToken: String,
+    ): Map<String, List<LearnerProfileEvidenceRow>> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            "/api/v1/me/learner-profile/facets/${encodePath(facetKey)}/evidence",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun pauseLearnerProfile(accessToken: String): String = postLearnerProfileControl(
+        "/api/v1/me/learner-profile/pause",
+        accessToken,
+    )
+
+    suspend fun resumeLearnerProfile(accessToken: String): String = postLearnerProfileControl(
+        "/api/v1/me/learner-profile/resume",
+        accessToken,
+    )
+
+    suspend fun resetLearnerProfile(accessToken: String): String = postLearnerProfileControl(
+        "/api/v1/me/learner-profile/reset",
+        accessToken,
+    )
+
+    suspend fun exportLearnerProfile(accessToken: String): String = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/learner-profile/export", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        body
+    }
+
+    private suspend fun postLearnerProfileControl(path: String, accessToken: String): String =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(path = path, method = "POST", accessToken = accessToken)
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<LearnerProfileControlResponse>(body).status ?: "ok"
+        }
 }

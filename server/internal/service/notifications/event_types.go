@@ -27,6 +27,7 @@ const (
 	EventStudyReminderStreakAtRisk  = notificationevents.StudyReminderStreakAtRisk
 	EventStudyReminderWeeklySummary = notificationevents.StudyReminderWeeklySummary
 	EventSeatUtilizationAlert       = notificationevents.SeatUtilizationAlert
+	EventIntroCourseCompleted       = notificationevents.IntroCourseCompleted
 )
 
 // AllEventTypes re-exports the canonical event list for callers outside this package.

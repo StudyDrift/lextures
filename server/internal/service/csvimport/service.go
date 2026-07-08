@@ -16,7 +16,9 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/user"
 	cfservice "github.com/lextures/lextures/server/internal/service/customfields"
 	"github.com/lextures/lextures/server/internal/service/adminaudit"
+	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/service/authservice"
+	"github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 const batchSize = 500
@@ -39,6 +41,7 @@ type ProcessParams struct {
 	Rows          []ParsedRow
 	CursorRow     int // 0-based index into Rows to resume from
 	OnProgress    func(processed, errors int)
+	Config        config.Config
 }
 
 // ProcessResult summarizes an import run.
@@ -138,6 +141,7 @@ func processOneRow(ctx context.Context, pool *pgxpool.Pool, p ProcessParams, row
 				return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: err.Error()},
 					[]RowError{{Row: row.RowNumber, Column: "email", Message: err.Error(), Code: "create_failed"}}
 			}
+			introcourse.EnsureEnrollmentBestEffort(ctx, pool, p.Config, pool, uid, introcourse.PathAdminImport)
 			if err := applyImportedCustomFields(ctx, pool, p.OrgID, uid, row); err != nil {
 				return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: err.Error()},
 					[]RowError{{Row: row.RowNumber, Column: "custom_fields", Message: err.Error(), Code: "custom_fields_failed"}}

@@ -1,0 +1,53 @@
+{
+  "slug": "m3.patterns.knowledge-check",
+  "title": "Module 3 knowledge check",
+  "sort_order": 6,
+  "markdown": "Quick check on how learning patterns work on Lextures.",
+  "questions": [
+    {
+      "id": "m3-q1",
+      "prompt": "What is the main purpose of spaced practice?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Strengthen long-term memory through timed review",
+        "Replace all instructor grading",
+        "Hide the gradebook from students",
+        "Disable course modules"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q2",
+      "prompt": "Adaptive paths generally suggest activities based on what?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Your recent performance and mastery estimates",
+        "Random selection only",
+        "Instructor manual entry every hour",
+        "Public leaderboard rank alone"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q3",
+      "prompt": "Diagnostic assessments are best thought of as:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A map of gaps to guide study",
+        "A final exam grade",
+        "A billing invoice",
+        "A course export file"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

@@ -15,8 +15,10 @@ describe('settingsViewFromPathname', () => {
   it('maps top-level settings tabs', () => {
     expect(settingsViewFromPathname('/settings/account')).toBe('account')
     expect(settingsViewFromPathname('/settings/notifications')).toBe('notifications')
+    expect(settingsViewFromPathname('/settings/learner-profile')).toBe('learner-profile')
     expect(settingsViewFromPathname('/settings/roles')).toBe('roles')
     expect(settingsViewFromPathname('/settings/archive')).toBe('archive')
+    expect(settingsViewFromPathname('/settings/intro-course')).toBe('intro-course')
   })
 
   it('defaults to account for unknown settings paths', () => {

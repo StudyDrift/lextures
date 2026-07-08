@@ -18,7 +18,9 @@ import (
 
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/service/authservice"
+	"github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 const (
@@ -365,6 +367,7 @@ func canvasResolveLexturesUserForEnrollment(
 	ctx context.Context,
 	pool *pgxpool.Pool,
 	tx pgx.Tx,
+	cfg config.Config,
 	orgID uuid.UUID,
 	canvasUID int64,
 	rosterEmail string,
@@ -409,6 +412,7 @@ func canvasResolveLexturesUserForEnrollment(
 	if err != nil {
 		return uuid.Nil, err
 	}
+	introcourse.EnsureEnrollmentBestEffort(ctx, pool, cfg, tx, uid, introcourse.PathCanvas)
 	return uid, nil
 }
 
@@ -417,6 +421,7 @@ func canvasFillGradeUserMap(
 	ctx context.Context,
 	pool *pgxpool.Pool,
 	tx pgx.Tx,
+	cfg config.Config,
 	orgID uuid.UUID,
 	client *http.Client,
 	accessToken string,
@@ -437,7 +442,7 @@ func canvasFillGradeUserMap(
 		if _, ok := out[canvasUID]; ok {
 			continue
 		}
-		userID, err := canvasResolveLexturesUserForEnrollment(ctx, pool, tx, orgID, canvasUID, rosterEmailByCanvasUID[canvasUID], u, stats)
+		userID, err := canvasResolveLexturesUserForEnrollment(ctx, pool, tx, cfg, orgID, canvasUID, rosterEmailByCanvasUID[canvasUID], u, stats)
 		if err != nil {
 			return err
 		}

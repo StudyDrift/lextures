@@ -40,6 +40,7 @@ import { permCourseItemCreate } from '../../lib/rbac-api'
 import { LmsPage } from './lms-page'
 import { ReadingLevelBadge } from '../../components/reading-level/reading-level-badge'
 import { SimplifiedContentBanner } from '../../components/reading-level/simplified-content-banner'
+import { ProfileRationaleChip } from '../../components/learner-profile/profile-rationale-chip'
 import { SimplifyDiffDialog } from '../../components/reading-level/simplify-diff-dialog'
 import { useSimplifiedContentView } from '../../components/reading-level/use-simplified-content-view'
 import { useSimplifyDialog } from '../../components/reading-level/use-simplify-dialog'
@@ -89,6 +90,8 @@ export default function CourseModuleContentPage() {
     simplifiedForReadingLevel?: boolean
     originalMarkdown?: string | null
     readingLevelTargetFkgl?: number | null
+    profileRationale?: import('../../lib/courses-api').ProfileRationale
+    preferredAlternateItemId?: string | null
   }>({})
   const simplifyDlg = useSimplifyDialog()
   const readingLevelOn = isReadingLevelEnabled()
@@ -196,6 +199,8 @@ export default function CourseModuleContentPage() {
         simplifiedForReadingLevel: data.simplifiedForReadingLevel,
         originalMarkdown: data.originalMarkdown,
         readingLevelTargetFkgl: data.readingLevelTargetFkgl,
+        profileRationale: data.profileRationale,
+        preferredAlternateItemId: data.preferredAlternateItemId,
       })
       if (readingLevelOn && courseCode && itemId) {
         void fetchItemReadingLevel(courseCode, itemId)
@@ -522,6 +527,25 @@ export default function CourseModuleContentPage() {
             Cached — viewing offline content
           </p>
         )}
+
+        {!loading &&
+          !loadError &&
+          !editing &&
+          !canEdit &&
+          pagePayload.preferredAlternateItemId &&
+          pagePayload.preferredAlternateItemId !== itemId && (
+            <div className="mt-4 rounded-xl border border-violet-200 bg-violet-50/80 px-4 py-3 dark:border-violet-900/50 dark:bg-violet-950/30">
+              {pagePayload.profileRationale ? (
+                <ProfileRationaleChip rationale={pagePayload.profileRationale} />
+              ) : null}
+              <Link
+                to={`/courses/${encodeURIComponent(courseCode)}/modules/content/${encodeURIComponent(pagePayload.preferredAlternateItemId)}`}
+                className="mt-2 inline-flex text-sm font-semibold text-violet-800 underline underline-offset-2 dark:text-violet-200"
+              >
+                Open the version that fits how you learn
+              </Link>
+            </div>
+          )}
 
         {!loading && !loadError && !editing && simplifiedView.hasSimplified && (
           <SimplifiedContentBanner

@@ -256,6 +256,18 @@ type Config struct {
 	EngagementTrackingEnabled bool
 	// SelfReflectionEnabled gates learner study stats, journal, and coaching tips (plan 9.9).
 	SelfReflectionEnabled bool
+	// LearnerProfileEnabled gates the autonomous cross-course learner profile (LP01).
+	LearnerProfileEnabled bool
+	// LpAdaptRecommendationsEnabled gates profile-driven recommendation ranking (LP09).
+	LpAdaptRecommendationsEnabled bool
+	// LpAdaptReviewEnabled gates profile-driven SRS review prioritisation (LP09).
+	LpAdaptReviewEnabled bool
+	// LpAdaptModalityEnabled gates profile-driven content-format preference (LP09).
+	LpAdaptModalityEnabled bool
+	// LpAdaptTutorEnabled gates profile-driven tutor scaffolding (LP09).
+	LpAdaptTutorEnabled bool
+	// IntroCourseEnabled gates the canonical "Welcome to Lextures" intro course (IC01).
+	IntroCourseEnabled bool
 	// InstructorInsightsEnabled gates the "What's Working" instructor signals dashboard (plan 9.10).
 	InstructorInsightsEnabled bool
 

@@ -1,5 +1,11 @@
 package com.lextures.android.core.routing
 
+enum class SettingsDeepLinkSection {
+    Account,
+    Notifications,
+    LearnerProfile,
+}
+
 /** Parsed navigation target from a push tap, app link, or in-app notification action URL. */
 sealed class DeepLinkDestination {
     data object Home : DeepLinkDestination()
@@ -10,6 +16,8 @@ sealed class DeepLinkDestination {
     data object Credentials : DeepLinkDestination()
     data class CheckoutSuccess(val courseId: String? = null) : DeepLinkDestination()
     data object CheckoutCancel : DeepLinkDestination()
+    data object CoursesList : DeepLinkDestination()
+    data class Settings(val section: SettingsDeepLinkSection) : DeepLinkDestination()
     data class Course(
         val code: String,
         val section: CourseDeepLinkSection? = null,
@@ -112,6 +120,15 @@ object DeepLinkRouter {
             return when {
                 segments.firstOrNull()?.lowercase() == "inbox" -> DeepLinkDestination.Inbox
                 segments.firstOrNull()?.lowercase() == "review" -> DeepLinkDestination.Review
+                segments.firstOrNull()?.lowercase() == "courses" -> DeepLinkDestination.CoursesList
+                segments.firstOrNull()?.lowercase() == "settings" -> {
+                    val section = when (segments.getOrNull(1)?.lowercase()) {
+                        "notifications" -> SettingsDeepLinkSection.Notifications
+                        "learner-profile" -> SettingsDeepLinkSection.LearnerProfile
+                        else -> SettingsDeepLinkSection.Account
+                    }
+                    DeepLinkDestination.Settings(section)
+                }
                 segments.firstOrNull()?.lowercase() == "parent" -> {
                     val studentId = runCatching { android.net.Uri.parse(raw) }.getOrNull()?.getQueryParameter("student")
                     val section = when (segments.getOrNull(1)?.lowercase()) {
@@ -164,11 +181,21 @@ object DeepLinkRouter {
                 itemId = segments.getOrNull(3),
             )
             "gradebook" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Grades)
-            "assignments", "quizzes", "modules" -> DeepLinkDestination.Course(
-                code = courseCode,
-                section = CourseDeepLinkSection.Modules,
-                itemId = segments.getOrNull(3),
-            )
+            "assignments", "quizzes", "modules" -> {
+                if (segments.size >= 5 && segments[3].lowercase() in setOf("content", "quiz", "assignment")) {
+                    DeepLinkDestination.Course(
+                        code = courseCode,
+                        section = CourseDeepLinkSection.Modules,
+                        itemId = segments[4],
+                    )
+                } else {
+                    DeepLinkDestination.Course(
+                        code = courseCode,
+                        section = CourseDeepLinkSection.Modules,
+                        itemId = segments.getOrNull(3),
+                    )
+                }
+            }
             else -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Overview)
         }
     }

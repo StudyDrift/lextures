@@ -1,0 +1,30 @@
+{
+  "require_acceptance": false,
+  "sections": [
+    {
+      "id": "overview",
+      "heading": "Descripción del curso",
+      "markdown": "**Bienvenido a Lextures** es un curso de incorporación guiado y a tu ritmo. Cada cuenta nueva se inscribe automáticamente para que aprendas la plataforma dentro de un curso real — con módulos, páginas, cuestionarios y tareas — no en un recorrido aparte del producto.\n\n- **Tiempo estimado:** 30–45 minutos si lees cada página y pruebas las actividades enlazadas\n- **Formato:** Siete módulos breves con un cuestionario de comprobación al final de cada uno\n- **Ritmo:** Avanza a tu velocidad; el progreso se guarda automáticamente\n- **Público:** Estudiantes, autodidactas e instructores que evalúan Lextures\n\n[Abre tu lista de cursos](/courses) cuando quieras explorar junto con este recorrido."
+    },
+    {
+      "id": "learning-goals",
+      "heading": "Qué aprenderás",
+      "markdown": "Al terminar este curso, podrás:\n\n1. **Navegar Lextures** — encontrar cursos, módulos y tu panel\n2. **Usar herramientas cotidianas** — calendario, archivos, mensajes, cuaderno y anuncios\n3. **Entender cómo funciona el aprendizaje** — rutas adaptativas, práctica espaciada, diagnósticos y seguimiento de dominio\n4. **Leer tu perfil de aprendiz** — ver cómo Lextures resume tus patrones de aprendizaje (cuando esté activado)\n5. **Aprender en móvil** — instalar la app, trabajar sin conexión y gestionar notificaciones\n6. **Importar desde Canvas** — traer cursos existentes a Lextures (cuando tu institución use la importación de Canvas)\n7. **Seguir calificaciones y terminar** — entender la calificación automática, el libro de calificaciones y la finalización del curso"
+    },
+    {
+      "id": "module-guide",
+      "heading": "Guía de módulos",
+      "markdown": "Recorre los módulos en orden. Cada uno termina con un cuestionario breve calificado automáticamente.\n\n| Módulo | Qué cubre |\n|--------|-----------|\n| **1. Bienvenida y orientación** | Qué es Lextures, tu panel y cómo se organizan los cursos |\n| **2. Funciones principales del día a día** | Calendario, archivos, cuestionarios, tareas, mensajes, cuaderno y el feed del curso |\n| **3. Cómo funciona el aprendizaje en Lextures** | Rutas adaptativas, práctica espaciada, diagnósticos, dominio y autorreflexión |\n| **4. Tu perfil de aprendiz** | Qué muestra el perfil, cómo leerlo y controles de privacidad |\n| **5. Lextures en movimiento (app móvil)** | Instalar la app, uso sin conexión y notificaciones push |\n| **6. Traer tus cursos (importación desde Canvas)** | Cuándo importar, qué se transfiere y cómo verificar resultados |\n| **7. Calificaciones, tareas y cierre** | Calificación automática, libro de calificaciones, reflexión y completar el recorrido |\n\nAlgunos módulos aparecen solo cuando tu institución tiene activada la función relacionada."
+    },
+    {
+      "id": "grading",
+      "heading": "Calificación y finalización",
+      "markdown": "Este curso usa el mismo libro de calificaciones que cualquier clase de Lextures.\n\n- Los **cuestionarios de comprobación** se califican automáticamente; recibes retroalimentación al instante después de cada módulo\n- Las **tareas de práctica** otorgan crédito completo cuando envías una breve confirmación (sin revisión del instructor)\n- La **reflexión final** en el último módulo es la tarea calificada principal\n\nNo hay fechas de entrega fijas — completa los módulos cuando te convenga. Cuando termines el cuestionario final, habrás completado el recorrido principal. Puede haber una credencial de finalización si tu institución la activa.\n\n[Consulta tus calificaciones](/courses) desde cualquier curso en el que estés inscrito."
+    },
+    {
+      "id": "getting-help",
+      "heading": "Obtener ayuda",
+      "markdown": "Si te atascas durante el recorrido:\n\n- Vuelve a leer el módulo en el que estás — las páginas enlazan directamente a la función que se enseña\n- Revisa [Configuración](/settings/account) para preferencias de cuenta y notificaciones\n- Visita el [Centro de privacidad](/privacy-centre) para preguntas sobre datos y privacidad\n- Regresa a este programa cuando quieras ver el esquema completo de módulos\n\nPara soporte específico de tu institución (SSO, listas o políticas locales), contacta a la mesa de ayuda de tu escuela u organización."
+    }
+  ]
+}

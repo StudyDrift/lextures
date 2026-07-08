@@ -572,7 +572,7 @@ func (d Deps) runCanvasImport(
 			if canvasUID <= 0 {
 				continue
 			}
-			userID, err := canvasResolveLexturesUserForEnrollment(ctx, d.Pool, enrollTx, orgID, canvasUID, rosterEmailByCanvasUID[canvasUID], u, &enrollStats)
+			userID, err := canvasResolveLexturesUserForEnrollment(ctx, d.Pool, enrollTx, d.effectiveConfig(), orgID, canvasUID, rosterEmailByCanvasUID[canvasUID], u, &enrollStats)
 			if err != nil {
 				enrollFailed = true
 				return err
@@ -656,7 +656,7 @@ func (d Deps) runCanvasImport(
 			canvasUserToLocal = make(map[int64]uuid.UUID)
 		}
 		var gradeUserStats canvasEnrollmentImportStats
-		if err := canvasFillGradeUserMap(ctx, d.Pool, tx, orgID, client, accessToken, enrollmentRows, rosterEmailByCanvasUID, canvasUserToLocal, &gradeUserStats); err != nil {
+		if err := canvasFillGradeUserMap(ctx, d.Pool, tx, cfg, orgID, client, accessToken, enrollmentRows, rosterEmailByCanvasUID, canvasUserToLocal, &gradeUserStats); err != nil {
 			return err
 		}
 		if !include.Enrollments && gradeUserStats.AccountsCreated > 0 {

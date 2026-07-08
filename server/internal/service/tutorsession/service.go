@@ -143,8 +143,12 @@ func BuildMessages(
 	history []tutorrepo.Message,
 	userMessage, ragContext string,
 	hasRAG bool,
+	profileScaffolding string,
 ) []openrouter.Message {
 	sys := BuildSystemPrompt(courseTitle, hasRAG)
+	if strings.TrimSpace(profileScaffolding) != "" {
+		sys += profileScaffolding
+	}
 	msgs := []openrouter.Message{{Role: "system", Content: sys}}
 	start := 0
 	if len(history) > HistoryMessageLimit {

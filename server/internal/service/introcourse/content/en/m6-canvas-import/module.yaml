@@ -1,0 +1,4 @@
+slug: m6.canvas-import
+title: Bringing Your Courses In (Importing from Canvas)
+sort_order: 5
+requires_flag: canvas_import_enabled

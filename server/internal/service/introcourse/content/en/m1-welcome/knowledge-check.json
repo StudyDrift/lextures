@@ -1,0 +1,53 @@
+{
+  "slug": "m1.welcome.knowledge-check",
+  "title": "Module 1 knowledge check",
+  "sort_order": 3,
+  "markdown": "Three quick questions about getting oriented in Lextures.",
+  "questions": [
+    {
+      "id": "m1-q1",
+      "prompt": "Where do you primarily find the list of courses you are enrolled in?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "The Courses page after signing in",
+        "System Settings only",
+        "The question bank editor",
+        "An external-only launch link"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q2",
+      "prompt": "What groups related lessons and activities inside a course?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Modules",
+        "Rubrics",
+        "Transcripts",
+        "Org units"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q3",
+      "prompt": "Which item type is typically used for readings like this page?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Content page",
+        "Survey",
+        "LTI link",
+        "Blueprint"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

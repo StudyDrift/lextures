@@ -305,6 +305,100 @@ const spec = `{
         }
       }
     },
+    "/api/v1/me/learner-profile": {
+      "get": {
+        "tags": ["me"],
+        "summary": "Caller learner profile (facets, insights, evidence summary)",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "profile object with facets" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Feature disabled" }
+        }
+      }
+    },
+    "/api/v1/me/learner-profile/facets/{facetKey}": {
+      "get": {
+        "tags": ["me"],
+        "summary": "One learner profile facet with insights",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "facetKey", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "facet and insights" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Unknown facet or not derived" }
+        }
+      }
+    },
+    "/api/v1/me/learner-profile/facets/{facetKey}/evidence": {
+      "get": {
+        "tags": ["me"],
+        "summary": "Provenance evidence drill-down for a facet",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "facetKey", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "insightKey to evidence map" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Unknown facet" }
+        }
+      }
+    },
+    "/api/v1/me/learner-profile/pause": {
+      "post": {
+        "tags": ["me"],
+        "summary": "Pause learner profile derivation",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "status paused" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Feature disabled" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/me/learner-profile/resume": {
+      "post": {
+        "tags": ["me"],
+        "summary": "Resume learner profile derivation",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "status active" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Feature disabled" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/me/learner-profile/reset": {
+      "post": {
+        "tags": ["me"],
+        "summary": "Reset (erase) learner profile data",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "status reset" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Feature disabled" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/me/learner-profile/export": {
+      "get": {
+        "tags": ["me"],
+        "summary": "Portable learner profile export with provenance",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "JSON export with facets, insights, evidence" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Feature disabled" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
     "/api/v1/me/permissions": {
       "get": {
         "tags": ["me"],
@@ -556,6 +650,106 @@ const spec = `{
         "summary": "Create a permission",
         "security": [ { "bearerAuth": [] } ],
         "responses": { "200": { "description": "permission" }, "400": { "description": "Invalid input" }, "401": {}, "403": {} }
+      }
+    },
+    "/api/v1/admin/intro-course": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Intro course admin status (IC08)",
+        "description": "Operational snapshot: flag state, content version, sync/backfill health, locale coverage. Requires global:app:rbac:manage.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "{ enabled, coursePresent, contentVersion, moduleCount, lastSyncedAt, backfill, localeCoverage }" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/admin/intro-course/resync": {
+      "post": {
+        "tags": ["admin"],
+        "summary": "Re-sync the canonical intro course (IC01)",
+        "description": "Idempotently provisions or reconciles the platform-owned Welcome to Lextures course. Requires global:app:rbac:manage.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "{ courseId, status: created|reconciled }" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" },
+          "409": { "description": "Intro course disabled and not yet provisioned" }
+        }
+      }
+    },
+    "/api/v1/me/intro-course": {
+      "get": {
+        "tags": ["me"],
+        "summary": "Intro course progress and completion (IC05)",
+        "description": "Returns enrolled state, module progress, running grade, completion timestamp, credential id, next item deep link, and IC06 onboarding UI flags.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "{ enrolled, courseCode?, modulesComplete, modulesTotal, percent, runningGrade?, completedAt?, credentialId?, nextItem?, modules?, welcomeBannerDismissed, celebrationSeen }" },
+          "401": { "description": "Not signed in" }
+        }
+      }
+    },
+    "/api/v1/me/intro-course/welcome-banner-dismissed": {
+      "put": {
+        "tags": ["me"],
+        "summary": "Dismiss intro course welcome banner (IC06)",
+        "description": "Persists first-login welcome banner dismissal per user across devices.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "204": { "description": "Dismissed" },
+          "401": { "description": "Not signed in" }
+        }
+      }
+    },
+    "/api/v1/me/intro-course/celebration-seen": {
+      "put": {
+        "tags": ["me"],
+        "summary": "Mark intro course completion celebration seen (IC06)",
+        "description": "Persists that the one-time completion celebration was shown and dismissed.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "204": { "description": "Recorded" },
+          "401": { "description": "Not signed in" }
+        }
+      }
+    },
+    "/api/v1/admin/intro-course/analytics": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Intro course completion analytics (IC05/IC08)",
+        "description": "Completion rate, per-module funnel, drop-off module, and average time-to-complete. Requires global:app:rbac:manage.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "{ enrolled, completed, completionRate, perModuleFunnel, dropOffModuleSlug, avgTimeToCompleteHours }" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/admin/intro-course/backfill": {
+      "post": {
+        "tags": ["admin"],
+        "summary": "Start or resume intro course enrollment backfill (IC02)",
+        "description": "Queues a durable job to enroll eligible existing users as students in the intro course. Requires global:app:rbac:manage.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "202": { "description": "{ startedAt, remaining }" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" },
+          "409": { "description": "Intro course disabled" }
+        }
+      },
+      "get": {
+        "tags": ["admin"],
+        "summary": "Intro course enrollment backfill status (IC02)",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "{ startedAt, completedAt, enrolledCount, remaining }" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" }
+        }
       }
     },
     "/api/v1/settings/roles": {

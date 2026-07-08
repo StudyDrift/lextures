@@ -268,6 +268,7 @@ struct CourseDetailView: View {
                 message: L.text("mobile.modules.emptyCourseHint")
             )
         } else {
+            IntroCourseProgressRail(courseCode: course.courseCode)
             ModuleListView(
                 course: course,
                 groups: moduleGroups,

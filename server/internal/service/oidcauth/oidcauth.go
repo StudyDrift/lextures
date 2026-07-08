@@ -23,6 +23,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/authservice"
+	"github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 // Service holds HTTP clients and a small discovery cache (parity with Rust OidcState).
@@ -214,6 +215,7 @@ func (s *Service) completeClassLinkLogin(
 	if _, err := oidcrepo.TryInsertIdentity(ctx, pool, uid, "classlink", subj, &emailIn); err != nil {
 		return authservice.AuthResponse{}, nil, err
 	}
+	introcourse.EnsureEnrollmentBestEffort(ctx, pool, s.Cfg, pool, uid, introcourse.PathSSO)
 	res, err := authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, nu, meta, "classlink")
 	if err != nil {
 		return authservice.AuthResponse{}, nil, err
@@ -543,6 +545,7 @@ func (s *Service) CompleteLogin(
 	if _, err := oidcrepo.TryInsertIdentity(ctx, pool, uid, pv, subj, &emailIn); err != nil {
 		return authservice.AuthResponse{}, nil, err
 	}
+	introcourse.EnsureEnrollmentBestEffort(ctx, pool, s.Cfg, pool, uid, introcourse.PathSSO)
 	res, err := authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, nu, meta, "oidc")
 	if err != nil {
 		return authservice.AuthResponse{}, nil, err

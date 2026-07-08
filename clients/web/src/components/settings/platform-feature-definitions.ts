@@ -257,6 +257,42 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Prompt learners to reflect on progress and receive lightweight coaching nudges.',
   },
   {
+    key: 'learnerProfileEnabled',
+    label: 'Learner profile',
+    description:
+      'Autonomous cross-course learner profile with provenance-backed facets (LP01 foundation).',
+  },
+  {
+    key: 'lpAdaptRecommendationsEnabled',
+    label: 'Profile adaptivity — recommendations',
+    description:
+      'Rank suggested next steps using learner profile interests and growth areas (LP09).',
+  },
+  {
+    key: 'lpAdaptReviewEnabled',
+    label: 'Profile adaptivity — review queue',
+    description:
+      'Prioritise spaced-repetition reviews using needs-review concepts and study rhythm (LP09).',
+  },
+  {
+    key: 'lpAdaptModalityEnabled',
+    label: 'Profile adaptivity — content modality',
+    description:
+      'Prefer the learner’s preferred content format when equivalent items exist (LP09).',
+  },
+  {
+    key: 'lpAdaptTutorEnabled',
+    label: 'Profile adaptivity — AI tutor',
+    description:
+      'Adjust persistent tutor scaffolding to help-seeking style (LP09).',
+  },
+  {
+    key: 'introCourseEnabled',
+    label: 'Intro course ("Welcome to Lextures")',
+    description:
+      'Auto-enroll every new user as a student in the guided intro course. On by default.',
+  },
+  {
     key: 'ltiEnabled',
     label: 'LTI',
     description: 'Launch external LTI 1.3 tools from course modules and assignments.',

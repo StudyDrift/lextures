@@ -24,6 +24,8 @@ export type PlatformFeatures = {
   outcomesReportEnabled: boolean
   engagementTrackingEnabled: boolean
   selfReflectionEnabled: boolean
+  learnerProfileEnabled?: boolean
+  introCourseEnabled?: boolean
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
@@ -128,6 +130,8 @@ const defaultFeatures: PlatformFeatures = {
   outcomesReportEnabled: false,
   engagementTrackingEnabled: false,
   selfReflectionEnabled: false,
+  learnerProfileEnabled: true,
+  introCourseEnabled: true,
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
@@ -237,6 +241,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     outcomesReportEnabled: false,
     engagementTrackingEnabled: false,
     selfReflectionEnabled: false,
+  learnerProfileEnabled: true,
+  introCourseEnabled: true,
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     readingLevelEnabled: false,
@@ -341,6 +347,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           outcomesReportEnabled: data.outcomesReportEnabled === true,
           engagementTrackingEnabled: data.engagementTrackingEnabled === true,
           selfReflectionEnabled: data.selfReflectionEnabled === true,
+          learnerProfileEnabled: data.learnerProfileEnabled !== false,
+          introCourseEnabled: data.introCourseEnabled !== false,
           xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
           readingLevelEnabled: data.readingLevelEnabled === true,

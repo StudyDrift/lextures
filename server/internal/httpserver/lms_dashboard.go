@@ -24,6 +24,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/recommendations"
 	"github.com/lextures/lextures/server/internal/repos/srs"
+	lpsvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
 )
 
 // Stubs and thin reads for LMS dashboard until full ports.
@@ -80,17 +81,18 @@ func (d Deps) handleLearnerReviewStats() http.HandlerFunc {
 
 func (d Deps) handleLearnerReviewQueue() http.HandlerFunc {
 	type item struct {
-		StateID       string           `json:"stateId"`
-		QuestionID    string           `json:"questionId"`
-		CourseID      string           `json:"courseId"`
-		CourseCode    string           `json:"courseCode"`
-		CourseTitle   string           `json:"courseTitle"`
-		NextReviewAt  string           `json:"nextReviewAt"`
-		Stem          string           `json:"stem"`
-		QuestionType  string           `json:"questionType"`
-		Options       *json.RawMessage `json:"options,omitempty"`
-		CorrectAnswer *json.RawMessage `json:"correctAnswer,omitempty"`
-		Explanation   *string          `json:"explanation,omitempty"`
+		StateID          string                `json:"stateId"`
+		QuestionID       string                `json:"questionId"`
+		CourseID         string                `json:"courseId"`
+		CourseCode       string                `json:"courseCode"`
+		CourseTitle      string                `json:"courseTitle"`
+		NextReviewAt     string                `json:"nextReviewAt"`
+		Stem             string                `json:"stem"`
+		QuestionType     string                `json:"questionType"`
+		Options          *json.RawMessage      `json:"options,omitempty"`
+		CorrectAnswer    *json.RawMessage      `json:"correctAnswer,omitempty"`
+		Explanation      *string               `json:"explanation,omitempty"`
+		ProfileRationale *profileRationaleJSON `json:"profileRationale,omitempty"`
 	}
 	type resp struct {
 		Items    []item `json:"items"`
@@ -175,6 +177,31 @@ func (d Deps) handleLearnerReviewQueue() http.HandlerFunc {
 			}
 			items = append(items, it)
 		}
+		if d.profileAdaptEnabled("review") {
+			adaptive, err := d.loadAdaptiveContext(r.Context(), learner)
+			if err == nil && adaptive.Usable(true) {
+				adapted := make([]lpsvc.ReviewQueueItem, 0, len(items))
+				for _, it := range items {
+					adapted = append(adapted, lpsvc.ReviewQueueItem{
+						StateID: it.StateID, QuestionID: it.QuestionID, CourseID: it.CourseID,
+						CourseCode: it.CourseCode, CourseTitle: it.CourseTitle, NextReviewAt: it.NextReviewAt,
+						Stem: it.Stem, QuestionType: it.QuestionType,
+					})
+				}
+				adapted = lpsvc.ApplyReviewQueue(adaptive, adapted, time.Now().UTC())
+				byState := make(map[string]item, len(items))
+				for _, it := range items {
+					byState[it.StateID] = it
+				}
+				rebuilt := make([]item, 0, len(adapted))
+				for _, a := range adapted {
+					base := byState[a.StateID]
+					base.ProfileRationale = rationaleToJSON(a.Rationale)
+					rebuilt = append(rebuilt, base)
+				}
+				items = rebuilt
+			}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp{Items: items, TotalDue: total})
 	}
@@ -182,12 +209,13 @@ func (d Deps) handleLearnerReviewQueue() http.HandlerFunc {
 
 func (d Deps) handleLearnerRecommendations() http.HandlerFunc {
 	type item struct {
-		ItemID   string  `json:"itemId"`
-		ItemType string  `json:"itemType"`
-		Title    string  `json:"title"`
-		Surface  string  `json:"surface"`
-		Reason   string  `json:"reason"`
-		Score    float64 `json:"score"`
+		ItemID            string                  `json:"itemId"`
+		ItemType          string                  `json:"itemType"`
+		Title             string                  `json:"title"`
+		Surface           string                  `json:"surface"`
+		Reason            string                  `json:"reason"`
+		Score             float64                 `json:"score"`
+		ProfileRationale  *profileRationaleJSON   `json:"profileRationale,omitempty"`
 	}
 	type resp struct {
 		Recommendations []item `json:"recommendations"`
@@ -279,6 +307,28 @@ func (d Deps) handleLearnerRecommendations() http.HandlerFunc {
 			}
 		} else {
 			out.Degraded = true
+		}
+		if d.profileAdaptEnabled("recommendations") {
+			adaptive, err := d.loadAdaptiveContext(r.Context(), learner)
+			if err == nil && adaptive.Usable(true) {
+				adapted := make([]lpsvc.RecommendationItem, 0, len(out.Recommendations))
+				for _, it := range out.Recommendations {
+					adapted = append(adapted, lpsvc.RecommendationItem{
+						ItemID: it.ItemID, ItemType: it.ItemType, Title: it.Title,
+						Surface: it.Surface, Reason: it.Reason, Score: it.Score,
+					})
+				}
+				adapted = lpsvc.ApplyRecommendations(adaptive, adapted)
+				rebuilt := make([]item, 0, len(adapted))
+				for _, it := range adapted {
+					rebuilt = append(rebuilt, item{
+						ItemID: it.ItemID, ItemType: it.ItemType, Title: it.Title,
+						Surface: it.Surface, Reason: it.Reason, Score: it.Score,
+						ProfileRationale: rationaleToJSON(it.Rationale),
+					})
+				}
+				out.Recommendations = rebuilt
+			}
 		}
 		if len(out.Recommendations) > limit {
 			out.Recommendations = out.Recommendations[:limit]

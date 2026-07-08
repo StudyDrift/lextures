@@ -30,6 +30,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/validation"
+	"github.com/lextures/lextures/server/internal/service/introcourse"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 	"github.com/lextures/lextures/server/internal/service/licensesvc"
 
@@ -193,7 +194,7 @@ func Signup(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSigner, cfg c
 	var humanCount int64
 	err = tx.QueryRow(ctx, `
 SELECT COUNT(*)::bigint FROM "user".users
-WHERE id <> $1::uuid`, communication.PlatformInboxSenderID.String()).Scan(&humanCount)
+WHERE account_type <> 'system'`).Scan(&humanCount)
 	if err != nil {
 		return AuthResponse{}, err
 	}
@@ -244,6 +245,8 @@ WHERE id <> $1::uuid`, communication.PlatformInboxSenderID.String()).Scan(&human
 			return AuthResponse{}, err
 		}
 	}
+	introcourse.EnsureEnrollmentBestEffort(ctx, pool, cfg, tx, uid, introcourse.PathSignup)
+
 	if err := tx.Commit(ctx); err != nil {
 		return AuthResponse{}, err
 	}

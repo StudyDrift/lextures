@@ -1,5 +1,6 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import { LearnerProfilePanel } from '../../components/settings/learner-profile-panel'
 import { settingsViewFromPathname } from '../../components/layout/side-nav-path-utils'
 import { usePlatformScimEnabled } from '../../hooks/use-platform-scim-enabled'
 import { ImageModelPicker } from '../../components/image-model-picker'
@@ -36,6 +37,8 @@ import { AiGovernancePanel } from '../../components/settings/ai-governance-panel
 import { AiProviderSettingsPanel } from '../../components/settings/ai-provider-settings-panel'
 import { ArchivedCoursesPanel } from '../../components/settings/archived-courses-panel'
 import { PeoplePanel } from '../../components/settings/people-panel'
+import { CoursesPanel } from '../../components/settings/courses-panel'
+import { IntroCoursePanel } from '../../components/settings/intro-course-panel'
 import { AiReportsPanel } from '../../components/settings/ai-reports-panel'
 import { LmsPage } from './lms-page'
 import OrgBranding from './admin/org-branding'
@@ -62,7 +65,9 @@ function isSystemSettingsPath(pathname: string): boolean {
     pathname === '/settings/transcripts' ||
     pathname === '/settings/advising' ||
     pathname === '/settings/archive' ||
-    pathname === '/settings/people'
+    pathname === '/settings/people' ||
+    pathname === '/settings/courses' ||
+    pathname === '/settings/intro-course'
   )
 }
 
@@ -140,7 +145,12 @@ export default function Settings() {
   const { scimEnabled: platformScimEnabled, loading: platformScimFlagLoading } = usePlatformScimEnabled(
     canManageRbac && activeView === 'scim-provisioning',
   )
-  const { ffTranscripts, ffAdvisingIntegration, loading: featuresLoading } = usePlatformFeatures()
+  const {
+    ffTranscripts,
+    ffAdvisingIntegration,
+    learnerProfileEnabled,
+    loading: featuresLoading,
+  } = usePlatformFeatures()
   const [systemPrompts, setSystemPrompts] = useState<SystemPromptItem[]>([])
   const [systemPromptKey, setSystemPromptKey] = useState('')
   const [systemPromptDraft, setSystemPromptDraft] = useState('')
@@ -434,6 +444,9 @@ export default function Settings() {
   if (activeView === 'advising' && canManageRbac && !featuresLoading && !ffAdvisingIntegration) {
     return <Navigate to="/settings/platform" replace />
   }
+  if (activeView === 'learner-profile' && !featuresLoading && !learnerProfileEnabled) {
+    return <Navigate to="/settings/account" replace />
+  }
 
   return (
     <LmsPage title="Settings" description="Account and learning preferences.">
@@ -453,7 +466,9 @@ export default function Settings() {
           activeView === 'transcripts' ||
           activeView === 'advising' ||
           activeView === 'archive' ||
-          activeView === 'people'
+          activeView === 'people' ||
+          activeView === 'courses' ||
+          activeView === 'intro-course'
             ? 'max-w-4xl'
             : activeView === 'integrations'
               ? 'max-w-3xl'
@@ -462,6 +477,8 @@ export default function Settings() {
               : activeView === 'ai-reports'
                 ? 'max-w-4xl'
               : activeView === 'account'
+                ? 'max-w-3xl'
+              : activeView === 'learner-profile'
                 ? 'max-w-3xl'
               : 'max-w-xl'
         }`}
@@ -755,6 +772,8 @@ export default function Settings() {
           </div>
         )}
 
+        {activeView === 'learner-profile' && learnerProfileEnabled && <LearnerProfilePanel />}
+
         {activeView === 'roles' && (
           <div>
             <h2 className="text-base font-semibold text-slate-900">Roles and Permissions</h2>
@@ -973,6 +992,47 @@ export default function Settings() {
               }
             >
               <PeoplePanel />
+            </RequirePermission>
+          </div>
+        )}
+
+        {activeView === 'courses' && (
+          <div>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Courses</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              Search courses across the platform and open them with instructor access to manage content and enrollments.
+            </p>
+            <RequirePermission
+              permission={PERM_RBAC_MANAGE}
+              fallback={
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                  You need permission to manage courses (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              }
+            >
+              <CoursesPanel />
+            </RequirePermission>
+          </div>
+        )}
+
+        {activeView === 'intro-course' && (
+          <div>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Intro course</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              Govern the platform-wide Welcome to Lextures onboarding course: enable/disable, re-sync content, backfill
+              enrollments, and read completion analytics.
+            </p>
+            <RequirePermission
+              permission={PERM_RBAC_MANAGE}
+              fallback={
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                  You need permission to manage the intro course (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              }
+            >
+              <IntroCoursePanel />
             </RequirePermission>
           </div>
         )}

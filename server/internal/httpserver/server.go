@@ -31,6 +31,8 @@ import (
 	drmservice "github.com/lextures/lextures/server/internal/service/drm"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	integrationsservice "github.com/lextures/lextures/server/internal/service/integrations"
+	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
+	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 	statuspageservice "github.com/lextures/lextures/server/internal/service/statuspage"
@@ -102,6 +104,10 @@ type Deps struct {
 	// OpenTelemetry spans, X-Trace-Id header, Sentry panic capture) — plan 17.7.
 	// When nil, the server runs without instrumentation.
 	Telemetry *telemetry.Telemetry
+	// LearnerProfileService is the cross-course learner profile read/derive service (LP01).
+	LearnerProfileService *learnerprofileservice.Service
+	// IntroCourseService provisions the canonical intro course (IC01).
+	IntroCourseService *introcourseservice.Service
 }
 
 func (d Deps) effectiveConfig() config.Config {

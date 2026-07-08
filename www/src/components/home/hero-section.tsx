@@ -39,7 +39,7 @@ export function HeroSection() {
             className="mt-[26px] flex flex-wrap gap-x-4 gap-y-2 text-[14px]"
             style={{ color: '#7b8a8b' }}
           >
-            <span>Trusted by 200+ programs</span>
+            <span>Consolidate</span>
             <span style={{ color: '#c7cdc9' }}>·</span>
             <span>FERPA-ready</span>
             <span style={{ color: '#c7cdc9' }}>·</span>

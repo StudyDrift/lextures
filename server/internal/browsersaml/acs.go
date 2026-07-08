@@ -20,6 +20,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/samlidp"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/authservice"
+	"github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 // HTTPStatusError is returned for JSON/plain client errors.
@@ -240,6 +241,7 @@ func HandleACS(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, signe
 			externalRole = "teacher"
 		}
 		_, _ = rbac.AssignUserRoleFromProvisioningMap(ctx, pool, uid, "saml", externalRole, "Student")
+		introcourse.EnsureEnrollmentBestEffort(ctx, pool, cfg, pool, uid, introcourse.PathSSO)
 	}
 
 		res, err := authservice.AuthResponseForUser(ctx, pool, signer, cfg, urow, authservice.ClientMetaFromRequest(r), "saml")

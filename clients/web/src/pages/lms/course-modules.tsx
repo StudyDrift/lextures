@@ -57,6 +57,8 @@ import { IconSwap } from '../../components/ui/icon-swap'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { toast, toastWithUndo } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
+import { CourseHeroBanner } from '../../components/course-hero-banner'
+import { IntroCourseProgressRail } from '../../components/intro-course/intro-course-progress-rail'
 import { SelfPacedProgressHeader } from '../../components/self-paced/self-paced-progress'
 import { CourseReviewPrompt } from '../../components/reviews/course-review-prompt'
 import { OERSearchPanel } from '../../components/oer/oer-search-panel'
@@ -2652,6 +2654,12 @@ export default function CourseModules() {
         ) : null
       }
     >
+      {courseMeta ? <CourseHeroBanner course={courseMeta} /> : null}
+      {courseCode ? (
+        <div className="mt-6">
+          <IntroCourseProgressRail courseCode={courseCode} />
+        </div>
+      ) : null}
       {courseCode && courseMeta?.courseMode === 'self_paced' && !viewAsStudent && (
         <div className="mt-6">
           <SelfPacedProgressHeader

@@ -81,6 +81,7 @@ func (d Deps) handleGetCourseSyllabus() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load syllabus.")
 			return
 		}
+		out = d.localizeIntroCourseSyllabus(r, courseCode, p.CourseID, viewer, out)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

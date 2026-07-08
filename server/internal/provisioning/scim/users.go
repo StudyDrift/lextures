@@ -17,7 +17,9 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/service/authservice"
+	"github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 // UserResource is the minimal SCIM User JSON body we accept and emit.
@@ -113,7 +115,7 @@ func mapAppRoleName(ext *EnterpriseExt) string {
 }
 
 // CreateUser provisions a user bound to institution.
-func CreateUser(ctx context.Context, pool *pgxpool.Pool, institutionID uuid.UUID, in *UserResource, baseURL string) (*UserResource, error) {
+func CreateUser(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, institutionID uuid.UUID, in *UserResource, baseURL string) (*UserResource, error) {
 	email := user.NormalizeEmail(in.UserName)
 	if email == "" || !strings.Contains(email, "@") {
 		return nil, ErrInvalidValue
@@ -230,6 +232,8 @@ WHERE id = $1
 	if err := tx.Commit(ctx); err != nil {
 		return nil, err
 	}
+
+	introcourse.EnsureEnrollmentBestEffort(ctx, pool, cfg, pool, uid, introcourse.PathSSO)
 
 	_ = LogEvent(ctx, pool, institutionID, "create", "User", &uid, map[string]any{"userName": email})
 	out := buildUserResource(ctx, pool, uid, institutionID, baseURL)

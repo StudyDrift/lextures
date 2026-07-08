@@ -200,6 +200,8 @@ struct DashboardView: View {
     @State private var openPaths = false
     @State private var openInsights = false
     @State private var openRecommendedItem: RecommendedNavigationTarget?
+    @State private var showIntroCelebration = false
+    @State private var introCelebrationProgress: IntroCourseProgress?
     @Bindable private var realtime = RealtimeManager.shared
 
     private var studentCourses: [CourseSummary] {
@@ -217,6 +219,10 @@ struct DashboardView: View {
                             dueThisWeekCount: model.dueThisWeek.count,
                             loading: model.loading
                         )
+
+                        if IntroCourseLogic.introCourseEnabled(shell.platformFeatures) {
+                            IntroCourseEntryCard()
+                        }
 
                         if let error = model.errorMessage {
                             LMSErrorBanner(message: error)
@@ -320,6 +326,20 @@ struct DashboardView: View {
             .onAppear {
                 openPendingReviewIfNeeded()
                 openPendingInsightsIfNeeded()
+            }
+            .sheet(isPresented: $showIntroCelebration) {
+                if let introCelebrationProgress {
+                    IntroCompletionCelebrationSheet(
+                        isPresented: $showIntroCelebration,
+                        progress: introCelebrationProgress
+                    )
+                }
+            }
+            .background {
+                IntroCelebrationPresenter(
+                    isPresented: $showIntroCelebration,
+                    progress: $introCelebrationProgress
+                )
             }
         }
     }

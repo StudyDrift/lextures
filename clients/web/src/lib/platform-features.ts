@@ -9,6 +9,8 @@ export type PlatformFeaturesSnapshot = {
   itemAnalysisEnabled: boolean
   engagementTrackingEnabled: boolean
   selfReflectionEnabled: boolean
+  learnerProfileEnabled?: boolean
+  introCourseEnabled?: boolean
   outcomesReportEnabled: boolean
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
@@ -112,6 +114,8 @@ const defaults: PlatformFeaturesSnapshot = {
   itemAnalysisEnabled: false,
   engagementTrackingEnabled: false,
   selfReflectionEnabled: false,
+  learnerProfileEnabled: true,
+  introCourseEnabled: true,
   outcomesReportEnabled: false,
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
@@ -317,6 +321,10 @@ export function incompleteGradeWorkflowFeatureEnabled(): boolean {
 }
 
 /** True when GET/PATCH /api/v1/me/reading-preferences is available (matches server readingPreferencesEnabled). */
+export function learnerProfileFeatureEnabled(): boolean {
+  return loaded && snapshot.learnerProfileEnabled !== false
+}
+
 export function readingPreferencesApiEnabled(s?: PlatformFeaturesSnapshot): boolean {
   const snap = s ?? snapshot
   if (!s && !loaded) {

@@ -95,6 +95,9 @@ enum OfflineCacheKey {
     static func conferenceSlots(teacherId: String, date: String) -> String {
         "parent:conference-slots:\(teacherId):\(date)"
     }
+    static func learnerProfile() -> String { "learner-profile:summary" }
+    static func learnerProfileEvidence(_ facetKey: String) -> String { "learner-profile:evidence:\(facetKey)" }
+    static func introCourseProgress() -> String { "intro-course:progress" }
 }
 
 /// A cached value plus freshness metadata for read screens.

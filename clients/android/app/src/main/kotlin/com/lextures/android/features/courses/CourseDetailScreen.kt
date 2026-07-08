@@ -577,6 +577,15 @@ fun CourseDetailScreen(
                                 )
                             }
                         } else {
+                            if (shell != null) {
+                                item {
+                                    com.lextures.android.features.introcourse.IntroCourseProgressRail(
+                                        courseCode = course.courseCode,
+                                        session = session,
+                                        shell = shell,
+                                    )
+                                }
+                            }
                             item {
                                 ModuleList(
                                     course = course,

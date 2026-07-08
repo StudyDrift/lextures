@@ -25,10 +25,15 @@ type MasteryUpdateInput struct {
 
 // DecayAdjustedMastery applies time decay to stored mastery (Rust effective_mastery_engine).
 func DecayAdjustedMastery(stored float64, lastSeenAt *time.Time, decayLambda float64) float64 {
+	return DecayAdjustedMasteryAt(stored, lastSeenAt, decayLambda, time.Now().UTC())
+}
+
+// DecayAdjustedMasteryAt applies decay relative to an explicit reference time (for tests and batch derive).
+func DecayAdjustedMasteryAt(stored float64, lastSeenAt *time.Time, decayLambda float64, now time.Time) float64 {
 	if lastSeenAt == nil {
 		return clamp01(stored)
 	}
-	days := time.Since(*lastSeenAt).Seconds() / 86400.0
+	days := now.Sub(lastSeenAt.UTC()).Seconds() / 86400.0
 	if days <= 0 {
 		return clamp01(stored)
 	}

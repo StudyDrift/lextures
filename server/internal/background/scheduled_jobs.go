@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/config"
@@ -16,6 +17,8 @@ import (
 	tutorsessionrepo "github.com/lextures/lextures/server/internal/repos/tutorsession"
 	webhooksrepo "github.com/lextures/lextures/server/internal/repos/webhooks"
 	"github.com/lextures/lextures/server/internal/scheduler"
+	learnerprofilesvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
+	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 // dueReminderWindow is how far ahead the due_date_reminder job looks for
@@ -80,6 +83,58 @@ func registerScheduledJobs(r *Registry, pool *pgxpool.Pool, cfg config.Config) {
 		}
 		if len(rows) > 0 {
 			slog.Info("scheduled.inactive_integration_alert", "flagged", len(rows))
+		}
+		return nil
+	}))
+
+	r.Register(scheduler.JobTypeLearnerProfileFull, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfg.LearnerProfileEnabled {
+			return nil
+		}
+		_, err := learnerprofilesvc.EnqueueFull(ctx, pool)
+		return err
+	}))
+
+	r.Register(scheduler.JobTypeLearnerProfileRetention, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfg.LearnerProfileEnabled {
+			return nil
+		}
+		n, err := learnerprofilesvc.PurgeInactiveProfiles(ctx, pool, learnerprofilesvc.DefaultRetentionDays)
+		if err != nil {
+			return err
+		}
+		if n > 0 {
+			slog.Info("scheduled.learner_profile_retention", "deleted", n)
+		}
+		return nil
+	}))
+
+	r.Register(scheduler.JobTypeIntroCourseBackfill, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfg.IntroCourseEnabled {
+			return nil
+		}
+		_, err := introcourseservice.EnqueueBackfillIfNeeded(ctx, pool, cfg)
+		return err
+	}))
+
+	r.Register(scheduler.JobTypeIntroCourseCompletionSweep, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfg.IntroCourseEnabled || pool == nil {
+			return nil
+		}
+		svc := introcourseservice.New(pool)
+		courseID, ok, err := svc.CourseID(ctx)
+		if err != nil {
+			return err
+		}
+		if !ok || courseID == uuid.Nil {
+			return nil
+		}
+		n, err := introcourseservice.SweepIncompleteCompletions(ctx, pool, cfg, courseID)
+		if err != nil {
+			return err
+		}
+		if n > 0 {
+			slog.Info("scheduled.intro_course_completion_sweep", "newly_completed", n)
 		}
 		return nil
 	}))

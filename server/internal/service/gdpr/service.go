@@ -18,8 +18,11 @@ import (
 	pkgai "github.com/lextures/lextures/server/internal/aidisclosure"
 	repoaidisclosure "github.com/lextures/lextures/server/internal/repos/aidisclosure"
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
+	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
+	lprepo "github.com/lextures/lextures/server/internal/repos/learnerprofile"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/service/coursereviews"
+	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
 )
 
 // AdminPermission gates GDPR admin actions (approve/reject DSARs, manage RoPA).
@@ -123,11 +126,22 @@ func ApproveDSAR(ctx context.Context, pool *pgxpool.Pool, id, adminID uuid.UUID)
 	switch r.RequestType {
 	case "erasure":
 		// Anonymise user data and mark completed.
+		if err := lprepo.EraseUser(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: erase learner profile: %w", err)
+		}
+		if err := icrepo.DeleteCompletionByUser(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: erase intro course completion: %w", err)
+		}
 		if err := repo.AnonymiseUser(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: anonymise user: %w", err)
 		}
 		if err := coursereviews.AnonymizeReviewerReviews(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: anonymise course reviews: %w", err)
+		}
+		if n, err := lprepo.CountProfileRows(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: verify learner profile erasure: %w", err)
+		} else if n > 0 {
+			return fmt.Errorf("gdpr: learner profile erasure incomplete: %d rows remain", n)
 		}
 		t := time.Now().UTC()
 		expiresAt := t.Add(ArchiveLinkTTL)
@@ -254,6 +268,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		Consents       []consentSummary `json:"consents"`
 		CustomFields   map[string]any   `json:"customFields,omitempty"`
 		AIInferenceLog []map[string]any `json:"aiInferenceLog,omitempty"`
+		LearnerProfile any              `json:"learnerProfile,omitempty"`
 		ExportedAt     string           `json:"exportedAt"`
 	}
 
@@ -270,6 +285,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	}
 
 	aiLog := dsarAIInferenceSummary(ctx, pool, os.Getenv("JWT_SECRET"), userID)
+	learnerProfileExport := dsarLearnerProfileExport(ctx, pool, userID)
 
 	var customFields map[string]any
 	if len(customRaw) > 0 {
@@ -282,6 +298,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		Consents:       cs,
 		CustomFields:   customFields,
 		AIInferenceLog: aiLog,
+		LearnerProfile: learnerProfileExport,
 		ExportedAt:     time.Now().UTC().Format(time.RFC3339),
 	}
 	b, err := json.Marshal(doc)
@@ -312,6 +329,15 @@ func optRFC3339(t *time.Time) *string {
 // In a full implementation this would point to a confirmation page.
 func buildErasureConfirmationURL(requestID uuid.UUID) string {
 	return "erasure-confirmed:" + requestID.String()
+}
+
+func dsarLearnerProfileExport(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) any {
+	svc := learnerprofileservice.New(pool)
+	doc, err := svc.Export(ctx, userID)
+	if err != nil {
+		return nil
+	}
+	return doc
 }
 
 func dsarAIInferenceSummary(ctx context.Context, pool *pgxpool.Pool, secret string, userID uuid.UUID) []map[string]any {

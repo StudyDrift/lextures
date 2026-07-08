@@ -1,0 +1,53 @@
+{
+  "slug": "m5.mobile.knowledge-check",
+  "title": "Module 5 knowledge check",
+  "sort_order": 3,
+  "markdown": "Questions about the Lextures mobile experience.",
+  "questions": [
+    {
+      "id": "m5-q1",
+      "prompt": "How do you sign in to the mobile app?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "With the same account you use on the web",
+        "With a separate mobile-only username",
+        "Only through printed QR codes from instructors",
+        "Mobile does not support sign-in"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q2",
+      "prompt": "What happens to drafts you start offline?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "They sync when you reconnect",
+        "They are deleted immediately",
+        "They post to the public course catalog",
+        "They convert to SCIM tokens"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q3",
+      "prompt": "Where do you control push notification preferences?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Settings → Notifications",
+        "Course blueprint editor",
+        "Grade curving admin",
+        "Behavior PBIS dashboard"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

@@ -13,6 +13,9 @@ struct ProfileView: View {
     @State private var confirmingClearSearchHistory = false
     @State private var navigatedMoreDestination: MoreDestination?
     @State private var billingNav: BillingRoute?
+    @State private var notificationPrefsNav = false
+    @State private var editProfileNav = false
+    @State private var learnerProfileNav = false
     @State private var localeError: String?
 
     var body: some View {
@@ -32,6 +35,7 @@ struct ProfileView: View {
                         }
                         ProfilePersonalCard()
                         ProfileDepthCards()
+                        LearnerProfileEntryCard()
                         offlineStorageCard
                         ProfileAppearanceCard()
                         localeCard
@@ -71,6 +75,9 @@ struct ProfileView: View {
             .navigationDestination(for: ResearchStudiesRoute.self) { _ in
                 ResearchStudiesView()
             }
+            .navigationDestination(for: LearnerProfileRoute.self) { _ in
+                LearnerProfileView()
+            }
             .navigationDestination(for: MoreHubRoute.self) { _ in
                 MoreHubView()
             }
@@ -106,8 +113,18 @@ struct ProfileView: View {
                 Text(L.text("mobile.search.clearHistoryMessage"))
             }
             .task { await offline.refreshState() }
+            .navigationDestination(isPresented: $notificationPrefsNav) {
+                NotificationPreferencesView()
+            }
+            .navigationDestination(isPresented: $editProfileNav) {
+                EditProfileView()
+            }
+            .navigationDestination(isPresented: $learnerProfileNav) {
+                LearnerProfileView()
+            }
             .onAppear {
                 openPendingMoreDestinationIfNeeded()
+                openPendingProfileSettingsIfNeeded()
                 if shell.consumePendingBilling() {
                     billingNav = BillingRoute()
                 }
@@ -243,6 +260,20 @@ struct ProfileView: View {
     private func openPendingMoreDestinationIfNeeded() {
         guard let destination = shell.consumePendingMoreDestination() else { return }
         navigatedMoreDestination = destination
+    }
+
+    private func openPendingProfileSettingsIfNeeded() {
+        guard let route = shell.consumePendingProfileSettingsRoute() else { return }
+        switch route {
+        case .account:
+            editProfileNav = true
+        case .notifications:
+            notificationPrefsNav = true
+        case .learnerProfile:
+            if LearnerProfileLogic.learnerProfileEnabled(shell.platformFeatures) {
+                learnerProfileNav = true
+            }
+        }
     }
 
     private var accountCard: some View {

@@ -68,6 +68,14 @@ func TestResizeIfNeeded_NotImage(t *testing.T) {
 	}
 }
 
+func TestResizeIfNeeded_SVG(t *testing.T) {
+	svg := []byte(`<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"></svg>`)
+	_, _, err := ResizeIfNeeded(svg, "image/svg+xml", ResizeOpts{MaxWidth: 100})
+	if err != ErrNotImage {
+		t.Fatalf("err = %v want ErrNotImage", err)
+	}
+}
+
 func mustJPEG(t *testing.T, w, h int) []byte {
 	t.Helper()
 	img := image.NewRGBA(image.Rect(0, 0, w, h))

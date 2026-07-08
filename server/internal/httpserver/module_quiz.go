@@ -240,6 +240,7 @@ func (d Deps) handleGetModuleQuiz() http.HandlerFunc {
 		if !canEdit {
 			resolved = coursemodulequiz.SanitizeQuizQuestionsForLearner(resolved)
 		}
+		d.enrichIntroCourseQuiz(r, courseCode, *cid, itemID, viewer, canEdit, &disp.Title, &disp.Markdown, &resolved)
 		out := buildModuleQuizResponse(itemID, &disp, canEdit, shift, meta, resolved, usesServer)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)

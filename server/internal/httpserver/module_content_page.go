@@ -18,6 +18,7 @@ import (
 	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	lpsvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
 )
 
 type dueAtPatchMode uint8
@@ -153,6 +154,25 @@ func (d Deps) handleGetModuleContentPage() http.HandlerFunc {
 		out := buildModuleContentPageGetResponse(itemID, row, shift)
 		d.enrichModuleItemResponse(r, *cid, itemID, rlrepo.TypeContentPage, viewer, canEdit, &out)
 		d.enrichModuleItemWithTranslation(r.Context(), *cid, itemID, ctrepo.TypeContentPage, viewer, canEdit, &out)
+		d.enrichIntroCourseContentPage(r, courseCode, *cid, itemID, viewer, canEdit, &out.Title, &out.Markdown)
+		if !canEdit && d.profileAdaptEnabled("modality") {
+			adaptive, err := d.loadAdaptiveContext(r.Context(), viewer)
+			if err == nil {
+				pref, err := lpsvc.ResolveModalityPreference(r.Context(), d.Pool, adaptive, *cid, itemID)
+				if err == nil {
+					out.ProfileRationale = rationaleToJSON(pref.Rationale)
+					out.PreferredAlternateItemID = pref.PreferredItemID
+					if len(pref.Alternates) > 0 {
+						out.ModalityAlternates = make([]modalityAlternateJSON, 0, len(pref.Alternates))
+						for _, alt := range pref.Alternates {
+							out.ModalityAlternates = append(out.ModalityAlternates, modalityAlternateJSON{
+								ItemID: alt.ItemID, Title: alt.Title, Modality: alt.Modality,
+							})
+						}
+					}
+				}
+			}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

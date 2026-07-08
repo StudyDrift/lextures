@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/authservice"
+	"github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 func (s *Service) oidcFlowAllowed(pathProvider string) bool {
@@ -242,6 +243,7 @@ func (s *Service) completeK12OIDCLogin(
 	if err := user.UpdateK12ProfileAfterOIDC(ctx, pool, uid, cleverID, classlinkID, isMinor, givenName, familyName, connectedVia); err != nil {
 		return authservice.AuthResponse{}, nil, err
 	}
+	introcourse.EnsureEnrollmentBestEffort(ctx, pool, s.Cfg, pool, uid, introcourse.PathSSO)
 	u3, err := user.FindByID(ctx, pool, uid)
 	if err != nil {
 		return authservice.AuthResponse{}, nil, err

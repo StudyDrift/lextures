@@ -1,0 +1,53 @@
+{
+  "slug": "m1.welcome.knowledge-check",
+  "title": "Comprobación del módulo 1",
+  "sort_order": 3,
+  "markdown": "Tres preguntas rápidas sobre cómo orientarte en Lextures.",
+  "questions": [
+    {
+      "id": "m1-q1",
+      "prompt": "¿Dónde encuentras principalmente la lista de cursos en los que estás inscrito?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "La página de Cursos después de iniciar sesión",
+        "Solo en Configuración del sistema",
+        "El editor del banco de preguntas",
+        "Un enlace de lanzamiento externo"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q2",
+      "prompt": "¿Qué agrupa lecciones y actividades relacionadas dentro de un curso?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Módulos",
+        "Rúbricas",
+        "Expedientes académicos",
+        "Unidades organizativas"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q3",
+      "prompt": "¿Qué tipo de elemento se usa normalmente para lecturas como esta página?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Página de contenido",
+        "Encuesta",
+        "Enlace LTI",
+        "Plantilla"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

@@ -1,6 +1,12 @@
 import Foundation
 
 /// Parsed navigation target from a push tap, universal link, or in-app notification action URL.
+enum SettingsDeepLinkSection: Equatable {
+    case account
+    case notifications
+    case learnerProfile
+}
+
 enum DeepLinkDestination: Equatable {
     case home
     case inbox
@@ -10,6 +16,8 @@ enum DeepLinkDestination: Equatable {
     case credentials
     case checkoutSuccess(courseId: String?)
     case checkoutCancel
+    case coursesList
+    case settings(SettingsDeepLinkSection)
     case course(code: String, section: CourseDeepLinkSection?, itemId: String?)
     case parent(studentId: String?, section: ParentDeepLinkSection)
 }
@@ -138,6 +146,22 @@ enum DeepLinkRouter {
             return .inbox
         case "review":
             return .review
+        case "courses":
+            return .coursesList
+        case "settings":
+            if segments.count >= 2 {
+                switch segments[1].lowercased() {
+                case "account":
+                    return .settings(.account)
+                case "notifications":
+                    return .settings(.notifications)
+                case "learner-profile":
+                    return .settings(.learnerProfile)
+                default:
+                    break
+                }
+            }
+            return .settings(.account)
         case "parent":
             if segments.count >= 2 {
                 switch segments[1].lowercased() {
@@ -186,6 +210,10 @@ enum DeepLinkRouter {
             let itemId = segments.count >= 4 ? segments[3] : nil
             return .course(code: courseCode, section: .collabDocs, itemId: itemId)
         case "assignments", "quizzes", "modules":
+            if segments.count >= 5,
+               ["content", "quiz", "assignment"].contains(segments[3].lowercased()) {
+                return .course(code: courseCode, section: .modules, itemId: segments[4])
+            }
             let itemId = segments.count >= 4 ? segments[3] : nil
             return .course(code: courseCode, section: .modules, itemId: itemId)
         case "gradebook":

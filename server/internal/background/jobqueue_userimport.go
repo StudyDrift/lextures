@@ -85,6 +85,7 @@ func (h userImportHandler) Execute(ctx context.Context, payload json.RawMessage)
 		DryRun:        job.DryRun,
 		Rows:          parsed.Rows,
 		CursorRow:     cursor,
+		Config:        h.cfg,
 		OnProgress: func(processed, errors int) {
 			_ = userimport.UpdateProgress(ctx, h.pool, job.ID, userimport.ProgressUpdate{
 				ProcessedRows: cursor + processed,

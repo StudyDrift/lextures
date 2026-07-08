@@ -7,6 +7,7 @@ export type SettingsNavView =
   | 'account'
   | 'notifications'
   | 'integrations'
+  | 'learner-profile'
   | 'roles'
   | 'lti-tools'
   | 'platform'
@@ -22,6 +23,8 @@ export type SettingsNavView =
   | 'advising'
   | 'archive'
   | 'people'
+  | 'courses'
+  | 'intro-course'
 
 export function settingsViewFromPathname(pathname: string): SettingsNavView {
   if (pathname.startsWith('/settings/ai/system-prompts')) return 'ai-prompts'
@@ -33,6 +36,7 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
     raw === 'account' ||
     raw === 'notifications' ||
     raw === 'integrations' ||
+    raw === 'learner-profile' ||
     raw === 'roles' ||
     raw === 'lti-tools' ||
     raw === 'platform' ||
@@ -47,7 +51,9 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
     raw === 'transcripts' ||
     raw === 'advising' ||
     raw === 'archive' ||
-    raw === 'people'
+    raw === 'people' ||
+    raw === 'courses' ||
+    raw === 'intro-course'
   )
     return raw
   return 'account'

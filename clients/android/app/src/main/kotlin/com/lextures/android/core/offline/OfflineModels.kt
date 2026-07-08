@@ -69,6 +69,9 @@ object OfflineCacheKey {
     fun degreeProgress(): String = "advising:degree-progress"
     fun evaluationStatus(courseCode: String): String = "evaluation:status:$courseCode"
     fun evaluationResults(courseCode: String): String = "evaluation:results:$courseCode"
+    fun learnerProfile(): String = "learner-profile:summary"
+    fun learnerProfileEvidence(facetKey: String): String = "learner-profile:evidence:$facetKey"
+    fun introCourseProgress(): String = "intro-course:progress"
 }
 
 data class Cached<T>(

@@ -22,6 +22,8 @@ type platformFeaturesJSON struct {
 	OutcomesReportEnabled       bool `json:"outcomesReportEnabled"`
 	EngagementTrackingEnabled   bool `json:"engagementTrackingEnabled"`
 	SelfReflectionEnabled       bool `json:"selfReflectionEnabled"`
+	LearnerProfileEnabled       bool `json:"learnerProfileEnabled"`
+	IntroCourseEnabled          bool `json:"introCourseEnabled"`
 	InstructorInsightsEnabled   bool `json:"instructorInsightsEnabled"`
 	XAPIEmissionEnabled         bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled       bool `json:"equationEditorEnabled"`
@@ -144,6 +146,8 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		ItemAnalysisEnabled:         cfg.ItemAnalysisEnabled,
 		EngagementTrackingEnabled:   cfg.EngagementTrackingEnabled,
 		SelfReflectionEnabled:       cfg.SelfReflectionEnabled,
+		LearnerProfileEnabled:       cfg.LearnerProfileEnabled,
+		IntroCourseEnabled:          cfg.IntroCourseEnabled,
 		OutcomesReportEnabled:       cfg.OutcomesReportEnabled,
 		InstructorInsightsEnabled:   cfg.InstructorInsightsEnabled,
 		XAPIEmissionEnabled:         cfg.XAPIEmissionEnabled,

@@ -65,8 +65,10 @@ func isRasterImageMIME(mime string) bool {
 	switch strings.ToLower(strings.TrimSpace(mime)) {
 	case "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp":
 		return true
+	case "image/svg+xml", "image/svg":
+		return false
 	default:
-		return strings.HasPrefix(strings.ToLower(strings.TrimSpace(mime)), "image/")
+		return false
 	}
 }
 

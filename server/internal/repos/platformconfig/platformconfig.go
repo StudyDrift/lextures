@@ -61,6 +61,12 @@ type Row struct {
 	StudentProgressEnabled          *bool
 	EngagementTrackingEnabled       *bool
 	SelfReflectionEnabled           *bool
+	LearnerProfileEnabled           *bool
+	LpAdaptRecommendationsEnabled   *bool
+	LpAdaptReviewEnabled            *bool
+	LpAdaptModalityEnabled          *bool
+	LpAdaptTutorEnabled             *bool
+	IntroCourseEnabled              *bool
 	OutcomesReportEnabled           *bool
 	EquationEditorEnabled           *bool
 	ReadingLevelEnabled             *bool
@@ -236,6 +242,12 @@ type Write struct {
 	StudentProgressEnabled          *bool
 	EngagementTrackingEnabled       *bool
 	SelfReflectionEnabled           *bool
+	LearnerProfileEnabled           *bool
+	LpAdaptRecommendationsEnabled   *bool
+	LpAdaptReviewEnabled            *bool
+	LpAdaptModalityEnabled          *bool
+	LpAdaptTutorEnabled             *bool
+	IntroCourseEnabled              *bool
 	OutcomesReportEnabled           *bool
 	EquationEditorEnabled           *bool
 	ReadingLevelEnabled             *bool
@@ -409,6 +421,12 @@ SELECT
 	student_progress_enabled,
 	engagement_tracking_enabled,
 	self_reflection_enabled,
+	learner_profile_enabled,
+	lp_adapt_recommendations,
+	lp_adapt_review,
+	lp_adapt_modality,
+	lp_adapt_tutor,
+	intro_course_enabled,
 	outcomes_report_enabled,
 	equation_editor_enabled,
 	reading_level_enabled,
@@ -575,6 +593,12 @@ WHERE id = 1
 		&r.StudentProgressEnabled,
 		&r.EngagementTrackingEnabled,
 		&r.SelfReflectionEnabled,
+		&r.LearnerProfileEnabled,
+		&r.LpAdaptRecommendationsEnabled,
+		&r.LpAdaptReviewEnabled,
+		&r.LpAdaptModalityEnabled,
+		&r.LpAdaptTutorEnabled,
+		&r.IntroCourseEnabled,
 		&r.OutcomesReportEnabled,
 		&r.EquationEditorEnabled,
 		&r.ReadingLevelEnabled,
@@ -792,6 +816,12 @@ INSERT INTO settings.platform_app_settings (
 	student_progress_enabled,
 	engagement_tracking_enabled,
 	self_reflection_enabled,
+	learner_profile_enabled,
+	lp_adapt_recommendations,
+	lp_adapt_review,
+	lp_adapt_modality,
+	lp_adapt_tutor,
+	intro_course_enabled,
 	outcomes_report_enabled,
 	equation_editor_enabled,
 	reading_level_enabled,
@@ -963,6 +993,12 @@ ON CONFLICT (id) DO UPDATE SET
 	student_progress_enabled = COALESCE(EXCLUDED.student_progress_enabled, settings.platform_app_settings.student_progress_enabled),
 	engagement_tracking_enabled = COALESCE(EXCLUDED.engagement_tracking_enabled, settings.platform_app_settings.engagement_tracking_enabled),
 	self_reflection_enabled = COALESCE(EXCLUDED.self_reflection_enabled, settings.platform_app_settings.self_reflection_enabled),
+	learner_profile_enabled = COALESCE(EXCLUDED.learner_profile_enabled, settings.platform_app_settings.learner_profile_enabled),
+	lp_adapt_recommendations = COALESCE(EXCLUDED.lp_adapt_recommendations, settings.platform_app_settings.lp_adapt_recommendations),
+	lp_adapt_review = COALESCE(EXCLUDED.lp_adapt_review, settings.platform_app_settings.lp_adapt_review),
+	lp_adapt_modality = COALESCE(EXCLUDED.lp_adapt_modality, settings.platform_app_settings.lp_adapt_modality),
+	lp_adapt_tutor = COALESCE(EXCLUDED.lp_adapt_tutor, settings.platform_app_settings.lp_adapt_tutor),
+	intro_course_enabled = COALESCE(EXCLUDED.intro_course_enabled, settings.platform_app_settings.intro_course_enabled),
 	outcomes_report_enabled = COALESCE(EXCLUDED.outcomes_report_enabled, settings.platform_app_settings.outcomes_report_enabled),
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
 	reading_level_enabled = COALESCE(EXCLUDED.reading_level_enabled, settings.platform_app_settings.reading_level_enabled),
@@ -1127,6 +1163,12 @@ ON CONFLICT (id) DO UPDATE SET
 		w.StudentProgressEnabled,
 		w.EngagementTrackingEnabled,
 		w.SelfReflectionEnabled,
+		w.LearnerProfileEnabled,
+		w.LpAdaptRecommendationsEnabled,
+		w.LpAdaptReviewEnabled,
+		w.LpAdaptModalityEnabled,
+		w.LpAdaptTutorEnabled,
+		w.IntroCourseEnabled,
 		w.OutcomesReportEnabled,
 		w.EquationEditorEnabled,
 		w.ReadingLevelEnabled,

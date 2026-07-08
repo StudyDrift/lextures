@@ -83,6 +83,7 @@ import com.lextures.android.core.navigation.ShellTab
 import com.lextures.android.core.push.PushManager
 import com.lextures.android.core.realtime.RealtimeManager
 import com.lextures.android.core.routing.DeepLinkDestination
+import com.lextures.android.core.routing.SettingsDeepLinkSection
 import com.lextures.android.features.courses.CoursesTab
 import com.lextures.android.features.dashboard.DashboardTab
 import com.lextures.android.features.inbox.InboxTab
@@ -130,8 +131,15 @@ class HomeShellState {
     var pendingCheckout by mutableStateOf<com.lextures.android.core.lms.PendingCheckoutContext?>(null)
     var checkoutReturnPhase by mutableStateOf<com.lextures.android.core.lms.CheckoutReturnPhase?>(null)
     var pendingBilling by mutableStateOf(false)
+    var pendingProfileSettingsRoute by mutableStateOf<SettingsDeepLinkSection?>(null)
     var pendingParentStudentId by mutableStateOf<String?>(null)
     var pendingParentSubRoute by mutableStateOf<com.lextures.android.features.parent.ParentSubRoute?>(null)
+
+    fun consumePendingProfileSettingsRoute(): SettingsDeepLinkSection? {
+        val route = pendingProfileSettingsRoute
+        pendingProfileSettingsRoute = null
+        return route
+    }
 
     fun consumePendingParentNavigation(): Pair<String?, com.lextures.android.features.parent.ParentSubRoute?>? {
         val studentId = pendingParentStudentId
@@ -245,6 +253,11 @@ class HomeShellState {
                     } else {
                         com.lextures.android.core.navigation.MoreDestination.Credentials
                     }
+                    RootDestination.Profile
+                }
+                DeepLinkDestination.CoursesList -> RootDestination.Courses
+                is DeepLinkDestination.Settings -> {
+                    pendingProfileSettingsRoute = destination.section
                     RootDestination.Profile
                 }
                 is DeepLinkDestination.CheckoutSuccess -> {
