@@ -122,6 +122,26 @@ func TestLoadDefaults(t *testing.T) {
 	if c.OIDCPublicBaseURL != "http://localhost:8080" || c.OIDCMicrosoftTenant != "common" {
 		t.Fatalf("OIDC defaults: base=%q tenant=%q", c.OIDCPublicBaseURL, c.OIDCMicrosoftTenant)
 	}
+	if !c.BackgroundJobsEnabled {
+		t.Fatalf("BackgroundJobsEnabled: want true by default in local APP_ENV")
+	}
+	if !c.SchedulerEnabled {
+		t.Fatalf("SchedulerEnabled: want true by default in local APP_ENV")
+	}
+}
+
+func TestBackgroundJobsDisabledInProductionEnv(t *testing.T) {
+	baseEnv(t)
+	t.Setenv("APP_ENV", "production")
+	t.Setenv("BACKGROUND_JOBS_ENABLED", "")
+	t.Setenv("SCHEDULER_ENABLED", "")
+	c := Load()
+	if c.BackgroundJobsEnabled {
+		t.Fatalf("BackgroundJobsEnabled: want false in production when unset")
+	}
+	if c.SchedulerEnabled {
+		t.Fatalf("SchedulerEnabled: want false in production when unset")
+	}
 }
 
 func TestRunMigrationsFalse(t *testing.T) {

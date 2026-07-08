@@ -33,9 +33,24 @@ export interface ScheduleHistoryRow {
   notes?: string | null
 }
 
+export interface ScheduledJobsOverview {
+  jobs: ScheduledJob[]
+  backgroundJobsEnabled: boolean
+  schedulerTickEnabled: boolean
+}
+
+export async function fetchScheduledJobsOverview(): Promise<ScheduledJobsOverview> {
+  const res = await apiJson<ScheduledJobsOverview>('/api/v1/admin/scheduler')
+  return {
+    jobs: res.jobs ?? [],
+    backgroundJobsEnabled: res.backgroundJobsEnabled ?? false,
+    schedulerTickEnabled: res.schedulerTickEnabled ?? false,
+  }
+}
+
 export async function fetchScheduledJobs(): Promise<ScheduledJob[]> {
-  const res = await apiJson<{ jobs: ScheduledJob[] }>('/api/v1/admin/scheduler')
-  return res.jobs ?? []
+  const res = await fetchScheduledJobsOverview()
+  return res.jobs
 }
 
 export async function fetchScheduleHistory(name: string): Promise<ScheduleHistoryRow[]> {

@@ -126,7 +126,8 @@ type Config struct {
 	EmailNotificationsEnabled bool
 
 	// BackgroundJobsEnabled gates the generic Postgres-backed background job
-	// queue worker (plan 17.3, rollout flag background_jobs_enabled).
+	// queue worker (plan 17.3, rollout flag background_jobs_enabled). Defaults on
+	// when APP_ENV=local so manual triggers work in dev without extra env vars.
 	BackgroundJobsEnabled bool
 	// BackgroundJobsConcurrency is the number of jobs processed in parallel per
 	// app instance (default 4 when unset).
@@ -703,6 +704,9 @@ func Load() Config {
 		jwtSecret = insecureJWTFallback
 	}
 
+	env := appEnv()
+	localDev := env == "local"
+
 	return Config{
 		HTTPAddr: httpAddr(),
 
@@ -841,7 +845,7 @@ func Load() Config {
 		PayPalWebhookID:    strings.TrimSpace(os.Getenv("PAYPAL_WEBHOOK_ID")),
 		PayPalSandbox:      boolEnv("PAYPAL_SANDBOX"),
 
-		AppEnv:              appEnv(),
+		AppEnv:              env,
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
 		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
 
@@ -858,9 +862,9 @@ func Load() Config {
 		CanvasImportConcurrency:         canvasImportConcurrency(),
 		CanvasSubmissionSyncQueueName:   stringDefault(firstNonEmptyTrimmed("CANVAS_SUBMISSION_SYNC_QUEUE_NAME"), "canvas.submission.sync"),
 		CanvasSubmissionSyncConcurrency: canvasSubmissionSyncConcurrency(),
-		BackgroundJobsEnabled:           boolEnv("BACKGROUND_JOBS_ENABLED"),
+		BackgroundJobsEnabled:           boolEnvDefault("BACKGROUND_JOBS_ENABLED", localDev),
 		BackgroundJobsConcurrency:       intEnvDefault("BACKGROUND_JOBS_CONCURRENCY", 4),
-		SchedulerEnabled:                boolEnv("SCHEDULER_ENABLED"),
+		SchedulerEnabled:                boolEnvDefault("SCHEDULER_ENABLED", localDev),
 		SmsNotificationsEnabled:         boolEnv("SMS_NOTIFICATIONS_ENABLED"),
 		SmsNotificationQueueName:        stringDefault(firstNonEmptyTrimmed("SMS_NOTIFICATION_QUEUE_NAME"), "notifications.sms"),
 		SmsNotificationConcurrency:      smsNotificationConcurrency(),
