@@ -371,7 +371,7 @@ func (d InterestsDeriver) loadDeepReadingSignals(
 	windowStart, windowEnd time.Time,
 	courseTopics []courseTopicRow,
 ) ([]rawInterestSignal, error) {
-	modality := ContentModalityDeriver{Pool: d.Pool, Now: d.Now}
+	modality := ContentModalityDeriver(d)
 	rawEvents, err := modality.loadEngagementEvents(ctx, userID, windowStart, windowEnd)
 	if err != nil {
 		return nil, err

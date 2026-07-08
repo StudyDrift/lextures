@@ -51,7 +51,7 @@ export function IntroWelcomeBanner() {
           <Link
             to={ctaHref}
             onClick={() => recordIntroCourseCtaClick()}
-            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-amber-500"
+            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-amber-600"
           >
             {t('introCourse.banner.cta')}
             <ArrowRight className="h-4 w-4" aria-hidden />

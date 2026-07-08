@@ -566,9 +566,9 @@ private struct LearnerProfileInsightRow: View {
 
     private func formatWindow(_ start: String?, _ end: String?) -> String? {
         guard start != nil || end != nil else { return nil }
-        let a = start.map { DateFormatting.formatAbsoluteShort($0) } ?? "…"
-        let b = end.map { DateFormatting.formatAbsoluteShort($0) } ?? "…"
-        return L.format("mobile.learnerProfile.evidence.window", a, b)
+        let startLabel = start.map { DateFormatting.formatAbsoluteShort($0) } ?? "…"
+        let endLabel = end.map { DateFormatting.formatAbsoluteShort($0) } ?? "…"
+        return L.format("mobile.learnerProfile.evidence.window", startLabel, endLabel)
     }
 
     @MainActor

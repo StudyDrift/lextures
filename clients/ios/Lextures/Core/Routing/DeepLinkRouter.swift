@@ -149,46 +149,52 @@ enum DeepLinkRouter {
         case "courses":
             return .coursesList
         case "settings":
-            if segments.count >= 2 {
-                switch segments[1].lowercased() {
-                case "account":
-                    return .settings(.account)
-                case "notifications":
-                    return .settings(.notifications)
-                case "learner-profile":
-                    return .settings(.learnerProfile)
-                default:
-                    break
-                }
-            }
-            return .settings(.account)
+            return resolveSettingsDeepLink(segments)
         case "parent":
-            if segments.count >= 2 {
-                switch segments[1].lowercased() {
-                case "conferences":
-                    return .parent(studentId: nil, section: .conferences)
-                case "notification-prefs":
-                    return .parent(studentId: nil, section: .notificationPrefs)
-                case "grades":
-                    return .parent(studentId: nil, section: .grades)
-                case "attendance":
-                    return .parent(studentId: nil, section: .attendance)
-                default:
-                    break
-                }
-            }
-            return .parent(studentId: nil, section: .dashboard)
+            return resolveParentDeepLink(segments)
         default:
-            if segments.count >= 2, segments[0].lowercased() == "me" {
-                switch segments[1].lowercased() {
-                case "study-insights":
-                    return .insights
-                case "credentials":
-                    return .credentials
-                default:
-                    break
-                }
-            }
+            return resolveMeDeepLink(segments)
+        }
+    }
+
+    private static func resolveSettingsDeepLink(_ segments: [String]) -> DeepLinkDestination {
+        guard segments.count >= 2 else { return .settings(.account) }
+        switch segments[1].lowercased() {
+        case "account":
+            return .settings(.account)
+        case "notifications":
+            return .settings(.notifications)
+        case "learner-profile":
+            return .settings(.learnerProfile)
+        default:
+            return .settings(.account)
+        }
+    }
+
+    private static func resolveParentDeepLink(_ segments: [String]) -> DeepLinkDestination {
+        guard segments.count >= 2 else { return .parent(studentId: nil, section: .dashboard) }
+        switch segments[1].lowercased() {
+        case "conferences":
+            return .parent(studentId: nil, section: .conferences)
+        case "notification-prefs":
+            return .parent(studentId: nil, section: .notificationPrefs)
+        case "grades":
+            return .parent(studentId: nil, section: .grades)
+        case "attendance":
+            return .parent(studentId: nil, section: .attendance)
+        default:
+            return .parent(studentId: nil, section: .dashboard)
+        }
+    }
+
+    private static func resolveMeDeepLink(_ segments: [String]) -> DeepLinkDestination {
+        guard segments.count >= 2, segments[0].lowercased() == "me" else { return .home }
+        switch segments[1].lowercased() {
+        case "study-insights":
+            return .insights
+        case "credentials":
+            return .credentials
+        default:
             return .home
         }
     }

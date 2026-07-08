@@ -84,7 +84,7 @@ function IntroCourseCardContent({ progress }: { progress: IntroCourseProgress })
         <Link
           to={ctaHref}
           onClick={() => recordIntroCourseCtaClick()}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-sky-500"
+          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-sky-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-sky-600"
         >
           {isNotStarted ? t('introCourse.card.ctaStart') : t('introCourse.card.ctaContinue')}
           <ArrowRight className="h-4 w-4" aria-hidden />

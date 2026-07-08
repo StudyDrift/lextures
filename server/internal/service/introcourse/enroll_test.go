@@ -1,6 +1,7 @@
 package introcourse
 
 import (
+	"context"
 	"testing"
 
 	"github.com/google/uuid"
@@ -24,7 +25,7 @@ func TestEnrollPath_Constants(t *testing.T) {
 
 func TestEnsureEnrollment_NilServiceNoOp(t *testing.T) {
 	var svc *Service
-	if err := svc.EnsureEnrollment(nil, testCfg(true), nil, uuid.New(), PathSignup); err != nil {
+	if err := svc.EnsureEnrollment(context.TODO(), testCfg(true), nil, uuid.New(), PathSignup); err != nil {
 		t.Fatalf("nil service: %v", err)
 	}
 }

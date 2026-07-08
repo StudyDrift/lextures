@@ -60,11 +60,6 @@ type itemEngagement struct {
 	ExpectedDurationSec float64
 }
 
-type modalityComputeInput struct {
-	Items       []itemEngagement
-	WindowStart int // unused in math but kept for symmetry with other derivers
-}
-
 func mapItemTypeToModality(itemType string) modalityKind {
 	switch strings.ToLower(strings.TrimSpace(itemType)) {
 	case "video":
