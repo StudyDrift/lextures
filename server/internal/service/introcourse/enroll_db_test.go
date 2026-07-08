@@ -189,9 +189,6 @@ WHERE id = TRUE`); err != nil {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if st.CompletedAt == nil {
-		t.Fatal("expected completed backfill")
-	}
 
 	for _, uid := range userIDs {
 		var role string
@@ -204,6 +201,14 @@ SELECT role FROM course.course_enrollments WHERE course_id = $1 AND user_id = $2
 		if role != "student" {
 			t.Fatalf("user %s role=%q", uid, role)
 		}
+	}
+
+	if st.Remaining == 0 {
+		if st.CompletedAt == nil {
+			t.Fatal("expected completed backfill when no eligible users remain")
+		}
+	} else if st.CompletedAt != nil {
+		t.Fatalf("expected incomplete backfill while %d eligible users remain", st.Remaining)
 	}
 
 	if err := svc.RunBackfill(ctx, cfg); err != nil {

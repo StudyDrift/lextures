@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
 	"github.com/lextures/lextures/server/internal/repos/jobqueue"
+	"github.com/lextures/lextures/server/internal/repos/organization"
 )
 
 const (
@@ -46,7 +48,25 @@ func EnqueueBackfillIfNeeded(ctx context.Context, pool *pgxpool.Pool, cfg config
 		return uuid.Nil, err
 	}
 	if st.CompletedAt != nil {
-		return uuid.Nil, nil
+		svc := New(pool)
+		courseID, ok, err := svc.CourseID(ctx)
+		if err != nil {
+			return uuid.Nil, err
+		}
+		if !ok || courseID == uuid.Nil {
+			return uuid.Nil, nil
+		}
+		remaining, err := icrepo.CountBackfillRemaining(ctx, pool, courseID, organization.SeedDefaultOrgID, SkipParentsOnEnroll)
+		if err != nil {
+			return uuid.Nil, err
+		}
+		if remaining == 0 {
+			return uuid.Nil, nil
+		}
+		if err := icrepo.ClearBackfillCompleted(ctx, pool); err != nil {
+			return uuid.Nil, err
+		}
+		slog.Info("intro course backfill re-queued", "remaining", remaining)
 	}
 	return jobqueue.Enqueue(ctx, pool, jobqueue.EnqueueParams{
 		JobType:   JobTypeBackfill,

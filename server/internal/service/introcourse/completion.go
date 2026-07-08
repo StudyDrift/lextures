@@ -80,6 +80,11 @@ type Analytics struct {
 	AvgTimeToCompleteHours   *float64            `json:"avgTimeToCompleteHours,omitempty"`
 }
 
+// EmptyAnalytics returns a JSON-safe zero analytics payload (perModuleFunnel serializes as []).
+func EmptyAnalytics() Analytics {
+	return Analytics{PerModuleFunnel: []ModuleFunnelEntry{}}
+}
+
 type moduleQuiz struct {
 	ModuleSlug  string
 	ModuleTitle string
@@ -281,7 +286,7 @@ func RecheckCompletion(ctx context.Context, pool *pgxpool.Pool, cfg config.Confi
 
 // LoadAnalytics returns admin completion-rate and per-module funnel data.
 func LoadAnalytics(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (Analytics, error) {
-	var out Analytics
+	out := Analytics{PerModuleFunnel: []ModuleFunnelEntry{}}
 	if pool == nil || courseID == uuid.Nil {
 		return out, nil
 	}

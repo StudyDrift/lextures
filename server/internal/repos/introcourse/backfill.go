@@ -74,6 +74,18 @@ WHERE id = TRUE
 	return err
 }
 
+// ClearBackfillCompleted clears completed_at so a backfill pass can run again (e.g. remaining users after an early complete).
+func ClearBackfillCompleted(ctx context.Context, exec interface {
+	Exec(context.Context, string, ...any) (pgconn.CommandTag, error)
+}) error {
+	_, err := exec.Exec(ctx, `
+UPDATE settings.intro_course_backfill
+SET completed_at = NULL, updated_at = NOW()
+WHERE id = TRUE
+`)
+	return err
+}
+
 // CountBackfillRemaining returns eligible users not yet enrolled in the intro course.
 func CountBackfillRemaining(ctx context.Context, pool *pgxpool.Pool, introCourseID, defaultOrgID uuid.UUID, skipParents bool) (int64, error) {
 	parentClause := ""
