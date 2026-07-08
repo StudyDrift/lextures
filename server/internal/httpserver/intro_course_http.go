@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -213,6 +214,7 @@ func (d Deps) handleAdminIntroCourseResync() http.HandlerFunc {
 		}
 		course, err := svc.EnsureProvisioned(r.Context(), d.effectiveConfig())
 		if err != nil {
+			slog.Error("intro course resync provision failed", "err", err)
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Intro course provisioning failed.")
 			return
 		}
@@ -222,6 +224,7 @@ func (d Deps) handleAdminIntroCourseResync() http.HandlerFunc {
 		}
 		contentReport, contentErr := svc.SyncContentForCourse(r.Context(), d.effectiveConfig(), course.ID)
 		if contentErr != nil {
+			slog.Error("intro course resync content sync failed", "course_id", course.ID, "err", contentErr)
 			_ = introcourseservice.RecordSyncStatus(r.Context(), d.Pool, contentReport, contentErr)
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Intro course content sync failed.")
 			return

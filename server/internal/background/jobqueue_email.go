@@ -73,10 +73,11 @@ func (h emailDeliveryHandler) Execute(ctx context.Context, payload json.RawMessa
 // RegisterBuiltinJobs registers the job types shipped with the platform. New
 // job types are added here alongside their handler implementation
 // (plan 17.3 NFR maintainability).
-func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfg config.Config) {
+func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource) {
+	cfg := cfgSrc.Config()
 	r.Register(JobTypeEmailDelivery, emailDeliveryHandler{pool: pool, cfg: cfg})
 	RegisterUserImportJob(r, pool, cfg)
-	registerScheduledJobs(r, pool, cfg)
+	registerScheduledJobs(r, pool, cfgSrc)
 }
 
 // RegisterLearnerProfileJobs adds learner profile queue handlers when the service is wired.

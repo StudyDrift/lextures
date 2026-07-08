@@ -33,7 +33,8 @@ const inactiveIntegrationThreshold = 12 * time.Hour
 // registerScheduledJobs registers handlers for the built-in scheduled job types
 // (plan 17.4 FR-4). The scheduler enqueues these onto the durable queue; the
 // handlers run here under the same retry/dead-letter machinery as any other job.
-func registerScheduledJobs(r *Registry, pool *pgxpool.Pool, cfg config.Config) {
+func registerScheduledJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource) {
+	cfg := cfgSrc.Config()
 	r.Register(scheduler.JobTypeLateSubmissionSweep, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
 		n, err := subrepo.MarkOverdueLate(ctx, pool, time.Now().UTC())
 		if err != nil {
@@ -110,15 +111,17 @@ func registerScheduledJobs(r *Registry, pool *pgxpool.Pool, cfg config.Config) {
 	}))
 
 	r.Register(scheduler.JobTypeIntroCourseBackfill, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
-		if !cfg.IntroCourseEnabled {
+		live := cfgSrc.Config()
+		if !live.IntroCourseEnabled {
 			return nil
 		}
-		_, err := introcourseservice.EnqueueBackfillIfNeeded(ctx, pool, cfg)
+		_, err := introcourseservice.EnqueueBackfillIfNeeded(ctx, pool, live)
 		return err
 	}))
 
 	r.Register(scheduler.JobTypeIntroCourseCompletionSweep, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
-		if !cfg.IntroCourseEnabled || pool == nil {
+		live := cfgSrc.Config()
+		if !live.IntroCourseEnabled || pool == nil {
 			return nil
 		}
 		svc := introcourseservice.New(pool)
@@ -129,7 +132,7 @@ func registerScheduledJobs(r *Registry, pool *pgxpool.Pool, cfg config.Config) {
 		if !ok || courseID == uuid.Nil {
 			return nil
 		}
-		n, err := introcourseservice.SweepIncompleteCompletions(ctx, pool, cfg, courseID)
+		n, err := introcourseservice.SweepIncompleteCompletions(ctx, pool, live, courseID)
 		if err != nil {
 			return err
 		}

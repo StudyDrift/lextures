@@ -81,18 +81,21 @@ type JobHandler interface {
 	Execute(ctx context.Context, payload json.RawMessage) error
 }
 
+// ConfigProvider returns the current merged platform config (may change after admin toggles).
+type ConfigProvider func() config.Config
+
 // RegisterJobHandlers wires intro course jobs into a background job registry.
-func RegisterJobHandlers(register func(string, JobHandler), svc *Service, cfg config.Config) {
-	if register == nil || svc == nil {
+func RegisterJobHandlers(register func(string, JobHandler), svc *Service, cfgFn ConfigProvider) {
+	if register == nil || svc == nil || cfgFn == nil {
 		return
 	}
-	register(JobTypeEnrollRetry, enrollRetryHandler{svc: svc, cfg: cfg})
-	register(JobTypeBackfill, backfillHandler{svc: svc, cfg: cfg})
+	register(JobTypeEnrollRetry, enrollRetryHandler{svc: svc, cfgFn: cfgFn})
+	register(JobTypeBackfill, backfillHandler{svc: svc, cfgFn: cfgFn})
 }
 
 type enrollRetryHandler struct {
-	svc *Service
-	cfg config.Config
+	svc   *Service
+	cfgFn ConfigProvider
 }
 
 func (h enrollRetryHandler) Execute(ctx context.Context, payload json.RawMessage) error {
@@ -107,14 +110,14 @@ func (h enrollRetryHandler) Execute(ctx context.Context, payload json.RawMessage
 	if path == "" {
 		path = PathSignup
 	}
-	return h.svc.EnsureEnrollment(ctx, h.cfg, h.svc.Pool, p.UserID, path)
+	return h.svc.EnsureEnrollment(ctx, h.cfgFn(), h.svc.Pool, p.UserID, path)
 }
 
 type backfillHandler struct {
-	svc *Service
-	cfg config.Config
+	svc   *Service
+	cfgFn ConfigProvider
 }
 
 func (h backfillHandler) Execute(ctx context.Context, _ json.RawMessage) error {
-	return h.svc.RunBackfill(ctx, h.cfg)
+	return h.svc.RunBackfill(ctx, h.cfgFn())
 }

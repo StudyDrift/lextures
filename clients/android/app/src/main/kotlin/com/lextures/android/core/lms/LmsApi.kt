@@ -300,6 +300,163 @@ object LmsApi {
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
     }
 
+    suspend fun fetchCourseGradingAgents(
+        courseCode: String,
+        accessToken: String,
+    ): CourseGradingAgentsListResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/grader-agents",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CourseGradingAgentsListResponse>(body)
+    }
+
+    suspend fun fetchGraderAgentTemplates(
+        courseCode: String,
+        accessToken: String,
+    ): GraderAgentTemplatesListResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/grader-agent-templates",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<GraderAgentTemplatesListResponse>(body)
+    }
+
+    suspend fun fetchGraderAgentConfig(
+        courseCode: String,
+        itemId: String,
+        itemKind: String,
+        accessToken: String,
+    ): GraderAgentConfig? = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = CourseGradingAgentsLogic.graderAgentPath(courseCode, itemId, itemKind),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<GraderAgentConfigEnvelope>(body).config
+    }
+
+    suspend fun fetchGraderAgentTemplate(
+        courseCode: String,
+        templateId: String,
+        accessToken: String,
+    ): GraderAgentTemplateDetail = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/grader-agent-templates/${encodePath(templateId)}",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<GraderAgentTemplateDetailEnvelope>(body).template
+    }
+
+    suspend fun putGraderAgentConfig(
+        courseCode: String,
+        itemId: String,
+        itemKind: String,
+        body: PutGraderAgentConfigBody,
+        accessToken: String,
+    ): GraderAgentConfig = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = CourseGradingAgentsLogic.graderAgentPath(courseCode, itemId, itemKind),
+            method = "PUT",
+            body = json.encodeToString(PutGraderAgentConfigBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<PutGraderAgentConfigResponse>(response).config
+    }
+
+    suspend fun deleteGraderAgentConfig(
+        courseCode: String,
+        itemId: String,
+        itemKind: String,
+        accessToken: String,
+    ): Unit = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = CourseGradingAgentsLogic.graderAgentPath(courseCode, itemId, itemKind),
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+    }
+
+    suspend fun fetchCoursePlagiarismSettings(
+        courseCode: String,
+        accessToken: String,
+    ): CoursePlagiarismSettings = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/plagiarism-settings",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CoursePlagiarismSettings>(body)
+    }
+
+    suspend fun patchCoursePlagiarismSettings(
+        courseCode: String,
+        body: PatchCoursePlagiarismBody,
+        accessToken: String,
+    ): CoursePlagiarismSettings = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/plagiarism-settings",
+            method = "PATCH",
+            body = json.encodeToString(PatchCoursePlagiarismBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CoursePlagiarismSettings>(response)
+    }
+
+    suspend fun fetchCourseAccessibility(
+        courseCode: String,
+        accessToken: String,
+    ): CourseAccessibilityInfo = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/accessibility",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CourseAccessibilityInfo>(body)
+    }
+
+    suspend fun suggestAltText(
+        courseCode: String,
+        imageUrl: String,
+        language: String,
+        accessToken: String,
+    ): AltTextSuggestion = withContext(Dispatchers.IO) {
+        val payload = SuggestAltTextBody(imageUrl = imageUrl, language = language)
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/alt-text/suggest",
+            method = "POST",
+            body = json.encodeToString(SuggestAltTextBody.serializer(), payload),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<AltTextSuggestion>(response)
+    }
+
+    suspend fun patchItemMarkdown(
+        courseCode: String,
+        itemId: String,
+        kind: String,
+        markdown: String,
+        accessToken: String,
+    ): ModuleItemDetail = withContext(Dispatchers.IO) {
+        val path = CourseAccessibilityReviewLogic.markdownPatchPath(courseCode, itemId, kind)
+            ?: throw ApiError.HttpStatus(400, "Unsupported item kind")
+        val (response, code) = client.requestRaw(
+            path = path,
+            method = "PATCH",
+            body = json.encodeToString(PatchItemMarkdownBody.serializer(), PatchItemMarkdownBody(markdown)),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<ModuleItemDetail>(response)
+    }
+
     suspend fun fetchCourseExport(
         courseCode: String,
         accessToken: String,

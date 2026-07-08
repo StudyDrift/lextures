@@ -61,7 +61,7 @@ func TestSafeExecute_PassesError(t *testing.T) {
 func TestStartJobQueueWorker_DisabledStillRegisters(t *testing.T) {
 	// With a nil pool and flag off, the worker does not start but built-in job
 	// types are still registered so enqueue paths can reference them.
-	reg := StartJobQueueWorker(context.Background(), nil, config.Config{BackgroundJobsEnabled: false})
+	reg := StartJobQueueWorker(context.Background(), nil, StaticConfigSource{C: config.Config{BackgroundJobsEnabled: false}})
 	if _, ok := reg.handler(JobTypeEmailDelivery); !ok {
 		t.Fatal("email.delivery not registered")
 	}
