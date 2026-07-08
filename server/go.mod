@@ -32,7 +32,7 @@ require (
 	github.com/redis/go-redis/v9 v9.7.3
 	github.com/russellhaering/goxmldsig v1.6.0
 	github.com/stripe/stripe-go/v81 v81.4.0
-	github.com/yuin/goldmark v1.7.11
+	github.com/yuin/goldmark v1.7.17
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.44.0

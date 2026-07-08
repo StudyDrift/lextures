@@ -103,6 +103,10 @@ struct CourseSettingsHostView: View {
             CourseFeaturesSettingsView(course: course, onCourseUpdated: onCourseUpdated)
         case .sections:
             CourseSectionsSettingsView(course: course, onCourseUpdated: onCourseUpdated)
+        case .grading:
+            CourseGradingSettingsView(course: course)
+        case .outcomes:
+            CourseOutcomesSettingsView(course: course)
         case .importExport:
             CourseImportExportView(course: course)
         case .blueprint:

@@ -126,6 +126,7 @@ struct CourseStructureItem: Codable, Identifiable, Hashable {
     var pointsPossible: Double?
     var archived: Bool?
     var updatedAt: String?
+    var assignmentGroupId: String? = nil
 
     var isModule: Bool { kind == "module" }
 

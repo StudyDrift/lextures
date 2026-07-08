@@ -125,6 +125,9 @@ object L {
     fun text(context: Context, prefs: LocalePreferences, @androidx.annotation.StringRes id: Int): String =
         prefs.localizedContext(context).getString(id)
 
+    fun format(context: Context, prefs: LocalePreferences, @androidx.annotation.StringRes id: Int, vararg args: Any): String =
+        prefs.localizedContext(context).getString(id, *args)
+
     fun plural(context: Context, prefs: LocalePreferences, @androidx.annotation.PluralsRes id: Int, count: Int): String =
         prefs.localizedContext(context).resources.getQuantityString(id, count, count)
 }
