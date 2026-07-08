@@ -2,6 +2,7 @@
 ALTER TABLE settings.intro_course_items
     ADD COLUMN IF NOT EXISTS grade_policy TEXT NULL;
 
+ALTER TABLE settings.intro_course_items DROP CONSTRAINT IF EXISTS intro_course_items_grade_policy_check;
 ALTER TABLE settings.intro_course_items
     ADD CONSTRAINT intro_course_items_grade_policy_check CHECK (
         grade_policy IS NULL OR grade_policy IN ('quiz_autoscore', 'completion_full', 'grader_agent')

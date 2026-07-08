@@ -2,7 +2,7 @@
 
 CREATE SCHEMA IF NOT EXISTS learner;
 
-CREATE TABLE learner.profiles (
+CREATE TABLE IF NOT EXISTS learner.profiles (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id           UUID NOT NULL UNIQUE REFERENCES "user".users (id) ON DELETE CASCADE,
     status            TEXT NOT NULL DEFAULT 'active'
@@ -12,7 +12,7 @@ CREATE TABLE learner.profiles (
     updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE learner.profile_facets (
+CREATE TABLE IF NOT EXISTS learner.profile_facets (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     profile_id        UUID NOT NULL REFERENCES learner.profiles (id) ON DELETE CASCADE,
     facet_key         TEXT NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE learner.profile_facets (
     UNIQUE (profile_id, facet_key)
 );
 
-CREATE TABLE learner.profile_insights (
+CREATE TABLE IF NOT EXISTS learner.profile_insights (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     facet_id          UUID NOT NULL REFERENCES learner.profile_facets (id) ON DELETE CASCADE,
     insight_key       TEXT NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE learner.profile_insights (
     UNIQUE (facet_id, insight_key)
 );
 
-CREATE TABLE learner.profile_evidence (
+CREATE TABLE IF NOT EXISTS learner.profile_evidence (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     insight_id        UUID NOT NULL REFERENCES learner.profile_insights (id) ON DELETE CASCADE,
     source_kind       TEXT NOT NULL,
@@ -51,9 +51,9 @@ CREATE TABLE learner.profile_evidence (
     created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_lp_facets_profile ON learner.profile_facets (profile_id, facet_key);
-CREATE INDEX idx_lp_insights_facet ON learner.profile_insights (facet_id, salience DESC);
-CREATE INDEX idx_lp_evidence_insight ON learner.profile_evidence (insight_id);
+CREATE INDEX IF NOT EXISTS idx_lp_facets_profile ON learner.profile_facets (profile_id, facet_key);
+CREATE INDEX IF NOT EXISTS idx_lp_insights_facet ON learner.profile_insights (facet_id, salience DESC);
+CREATE INDEX IF NOT EXISTS idx_lp_evidence_insight ON learner.profile_evidence (insight_id);
 
 ALTER TABLE settings.platform_app_settings
     ADD COLUMN IF NOT EXISTS learner_profile_enabled BOOLEAN;

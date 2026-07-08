@@ -2,7 +2,6 @@ package migrate
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/jackc/pgx/v5"
@@ -16,10 +15,7 @@ func TestRepairMigration345RenumberCollision_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skip("use full go test to exercise migration repair with Postgres")
 	}
-	dsn := os.Getenv("DATABASE_URL")
-	if dsn == "" {
-		t.Skip("set DATABASE_URL to run integration test")
-	}
+	dsn := isolatedMigrationDSN(t)
 	t.Setenv("MIGRATE_REPAIR_CHECKSUMS", "1")
 
 	ctx := context.Background()
