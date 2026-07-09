@@ -41,7 +41,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.25.11"
+          go-version: "1.25.12"
           cache-dependency-path: server/go.sum
 
       - name: go mod download
@@ -256,7 +256,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.25.11"
+          go-version: "1.25.12"
           cache-dependency-path: server/go.sum
 
       - uses: actions/setup-node@v4

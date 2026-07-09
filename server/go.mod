@@ -2,7 +2,7 @@ module github.com/lextures/lextures/server
 
 go 1.25.0
 
-toolchain go1.25.10
+toolchain go1.25.12
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0

@@ -2144,7 +2144,7 @@
         "mobile.courseSettings.plagiarism.provider.turnitin": "Turnitin",
         "mobile.courseSettings.plagiarism.provider.copyleaks": "Copyleaks",
         "mobile.courseSettings.plagiarism.provider.gptzero": "GPTZero",
-        "mobile.courseSettings.plagiarism.thresholdLabel": "Instructor alert threshold (% similarity)",
+        "mobile.courseSettings.plagiarism.thresholdLabel": "Instructor alert threshold (%% similarity)",
         "mobile.courseSettings.plagiarism.thresholdHint": "Instructors are alerted when similarity meets or exceeds this percentage.",
         "mobile.courseSettings.plagiarism.privacyNote": "When enabled, student submission text may be sent to the selected provider for analysis. Review your institution's data-sharing policy before turning this on.",
         "mobile.courseSettings.plagiarism.signalNote": "Similarity and AI-authorship scores are signals, not proof of misconduct.",
