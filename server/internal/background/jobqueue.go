@@ -10,7 +10,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/repos/jobqueue"
 )
 
@@ -81,9 +80,10 @@ type jobWorker struct {
 // returns immediately; the worker runs until ctx is cancelled. Returns the
 // registry so callers can register job types (already populated with the
 // built-in types).
-func StartJobQueueWorker(ctx context.Context, pool *pgxpool.Pool, cfg config.Config) *Registry {
+func StartJobQueueWorker(ctx context.Context, pool *pgxpool.Pool, cfgSrc ConfigSource) *Registry {
 	registry := NewRegistry()
-	RegisterBuiltinJobs(registry, pool, cfg)
+	RegisterBuiltinJobs(registry, pool, cfgSrc)
+	cfg := cfgSrc.Config()
 	if pool == nil || !cfg.BackgroundJobsEnabled {
 		return registry
 	}

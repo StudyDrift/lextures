@@ -105,6 +105,12 @@ struct CourseSettingsHostView: View {
             CourseSectionsSettingsView(course: course, onCourseUpdated: onCourseUpdated)
         case .grading:
             CourseGradingSettingsView(course: course)
+        case .gradingAgents:
+            CourseGradingAgentsView(course: course)
+        case .plagiarism:
+            CoursePlagiarismSettingsView(course: course)
+        case .accessibility:
+            CourseAccessibilityReviewView(course: course)
         case .outcomes:
             CourseOutcomesSettingsView(course: course)
         case .importExport:

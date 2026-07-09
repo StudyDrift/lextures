@@ -3,12 +3,14 @@ package httpserver
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/crypto/appsecrets"
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
+	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
 )
 
 const placeholderSecretResponse = "••••••••••••"
@@ -1006,6 +1008,15 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				"action":  "toggle_flag",
 				"enabled": merged.IntroCourseEnabled,
 			})
+			if merged.IntroCourseEnabled {
+				if svc := d.introCourseService(); svc != nil {
+					if _, err := svc.EnsureProvisioned(r.Context(), merged); err != nil {
+						slog.Warn("intro course provision on flag enable failed", "err", err)
+					} else if _, err := introcourseservice.EnqueueBackfillIfNeeded(r.Context(), d.Pool, merged); err != nil {
+						slog.Warn("intro course backfill enqueue on flag enable failed", "err", err)
+					}
+				}
+			}
 		}
 
 		sources := platformconfig.ResolveSources(d.Config, dbRow)

@@ -6,11 +6,11 @@ import (
 )
 
 // RegisterIntroCourseJobs adds intro course enrollment retry and backfill handlers.
-func RegisterIntroCourseJobs(r *Registry, svc *introcourseservice.Service, cfg config.Config) {
+func RegisterIntroCourseJobs(r *Registry, svc *introcourseservice.Service, cfgSrc ConfigSource) {
 	if r == nil || svc == nil {
 		return
 	}
 	introcourseservice.RegisterJobHandlers(func(jobType string, h introcourseservice.JobHandler) {
 		r.Register(jobType, HandlerFunc(h.Execute))
-	}, svc, cfg)
+	}, svc, func() config.Config { return cfgSrc.Config() })
 }

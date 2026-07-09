@@ -128,6 +128,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	if err := merged.Validate(); err != nil {
 		return fmt.Errorf("app: effective configuration invalid (environment + database settings): %w", err)
 	}
+	platform := platformstate.New(merged)
 
 	storage, storageErr := filestorage.New(filestorage.BackendConfig{
 		Backend:         cfg.StorageBackend,
@@ -158,7 +159,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	// Generic durable background job queue (plan 17.3). No-op unless
 	// BACKGROUND_JOBS_ENABLED; safe to start on every instance — workers claim
 	// rows with SELECT ... FOR UPDATE SKIP LOCKED so they coordinate via Postgres.
-	jobRegistry := background.StartJobQueueWorker(ctx, pool, merged)
+	jobRegistry := background.StartJobQueueWorker(ctx, pool, platform)
 
 	// Scheduled-jobs / cron layer (plan 17.4). The Scheduler is always
 	// constructed so the admin API can list and manually trigger jobs, but the
@@ -207,7 +208,6 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	if jwtBlocklist != nil {
 		jwtSigner = jwtSigner.WithBlocklist(jwtBlocklist)
 	}
-	platform := platformstate.New(merged)
 	var learnerProfileSvc *learnerprofileservice.Service
 	var introCourseSvc *introcourseservice.Service
 	if pool != nil {
@@ -226,7 +226,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 
 		introCourseSvc = introcourseservice.New(pool)
 		introcourseservice.RegisterMetrics(tel.Metrics.Registry())
-		background.RegisterIntroCourseJobs(jobRegistry, introCourseSvc, merged)
+		background.RegisterIntroCourseJobs(jobRegistry, introCourseSvc, platform)
 		if merged.IntroCourseEnabled {
 			if _, err := introCourseSvc.EnsureProvisioned(ctx, merged); err != nil {
 				slog.Warn("intro course startup provision failed", "err", err)

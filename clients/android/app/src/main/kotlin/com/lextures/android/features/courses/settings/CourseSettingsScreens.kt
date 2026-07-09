@@ -123,6 +123,21 @@ fun CourseSettingsHostScreen(
                     course = course,
                     offline = offline,
                 )
+                CourseSettingsLogic.CourseSettingsSection.GradingAgents -> CourseGradingAgentsScreen(
+                    session = session,
+                    course = course,
+                    offline = offline,
+                )
+                CourseSettingsLogic.CourseSettingsSection.Plagiarism -> CoursePlagiarismSettingsScreen(
+                    session = session,
+                    course = course,
+                    offline = offline,
+                )
+                CourseSettingsLogic.CourseSettingsSection.Accessibility -> CourseAccessibilityReviewScreen(
+                    session = session,
+                    course = course,
+                    offline = offline,
+                )
                 CourseSettingsLogic.CourseSettingsSection.ImportExport -> CourseImportExportScreen(
                     session = session,
                     course = course,

@@ -327,6 +327,19 @@ Enterprise tier only.
 make iac-check
 ```
 
+## Troubleshooting: Intro course not provisioning (small tier)
+
+The API container runs as UID **65532** (`server/Dockerfile`). Course file uploads and intro course provisioning write to `/mnt/lextures-db/course-files`. If that directory is owned by another UID (older bootstrap scripts used `65534`), provisioning fails with a 500 on **Resync content** and the "Welcome to Lextures" course never appears.
+
+On the VM:
+
+```bash
+sudo chown 65532:65532 /mnt/lextures-db/course-files
+sudo docker compose -f /opt/lextures/docker-compose.deploy.yml restart server
+```
+
+Then in **Settings → Intro course**, click **Resync content**, or trigger the `intro_course_backfill` scheduled job. New VMs provisioned after the mount-script fix get the correct ownership automatically.
+
 ## Next steps (not in Terraform)
 
 - **Small tier:** CI/CD to push images and run `docker compose` on the droplet (similar to demo deploy workflow)
