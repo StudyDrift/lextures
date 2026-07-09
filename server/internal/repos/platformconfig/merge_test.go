@@ -85,4 +85,30 @@ func TestMerge_BookstoreIntegrationDBOverridesEnv(t *testing.T) {
 	}
 }
 
+// Plan MKT1 AC-1: FFCourseMarketplace defaults ON when platform settings row is unset.
+func TestMerge_CourseMarketplaceDefaultOnWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if !got.FFCourseMarketplace {
+		t.Fatal("expected FFCourseMarketplace true (default ON) when DB unset")
+	}
+	// Env/config seed must not win over the documented default when DB is unset.
+	got = Merge(config.Config{FFCourseMarketplace: false}, nil)
+	if !got.FFCourseMarketplace {
+		t.Fatal("expected default ON to override env false when DB unset")
+	}
+}
+
+func TestMerge_CourseMarketplaceDBOverridesDefault(t *testing.T) {
+	off := false
+	got := Merge(config.Config{}, &Row{FFCourseMarketplace: &off})
+	if got.FFCourseMarketplace {
+		t.Fatal("expected DB false to disable course marketplace")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFCourseMarketplace: &on})
+	if !got.FFCourseMarketplace {
+		t.Fatal("expected DB true to enable course marketplace")
+	}
+}
+
 func ptr(s string) *string { return &s }

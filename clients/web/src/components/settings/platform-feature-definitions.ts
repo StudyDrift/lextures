@@ -597,6 +597,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Marketing-style public catalog browse and course detail pages for open enrollment.',
   },
   {
+    key: 'ffCourseMarketplace',
+    label: 'Course marketplace',
+    description:
+      'Let learners discover and enroll in courses through an in-app storefront. Instructors opt individual courses in from course settings. Distinct from the plugin marketplace.',
+  },
+  {
     key: 'ffReadAloud',
     label: 'Read-aloud (text-to-speech)',
     description:

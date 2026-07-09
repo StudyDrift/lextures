@@ -29,6 +29,8 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var officeHoursEnabled: Bool?
     var orgId: String?
     var termId: String?
+    /// `traditional` or `competency_based` when set by the server.
+    var courseType: String?
     var viewerEnrollmentRoles: [String]?
     var feedEnabled: Bool?
     var discussionsEnabled: Bool?

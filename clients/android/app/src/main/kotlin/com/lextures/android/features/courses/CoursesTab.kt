@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,10 +34,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.realtime.RealtimeManager
 import com.lextures.android.core.design.LexturesColors
@@ -48,11 +51,14 @@ import com.lextures.android.core.design.cardBackground
 import com.lextures.android.core.design.fieldBorder
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
+import com.lextures.android.core.lms.CourseCreateLogic
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
+import com.lextures.android.core.navigation.MobilePlatformFeatures
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.core.offline.fetchCoursesCached
 import com.lextures.android.core.routing.DeepLinkDestination
+import com.lextures.android.features.courses.create.CourseCreateScreen
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsCoverTile
@@ -79,11 +85,18 @@ fun CoursesTab(
     var openCourse by remember { mutableStateOf<CourseSummary?>(null) }
     var deepLinkSection by remember { mutableStateOf<com.lextures.android.core.navigation.CourseWorkspaceSection?>(null) }
     var deepLinkThreadId by remember { mutableStateOf<String?>(null) }
+    var showCreateCourse by remember { mutableStateOf(false) }
+    var reloadToken by remember { mutableStateOf(0) }
 
     val coursesRevision by RealtimeManager.coursesRevision.collectAsState()
     val enrollmentsRevision by RealtimeManager.enrollmentsRevision.collectAsState()
+    val canCreateCourse = CourseCreateLogic.shouldShowNewCourseAction(
+        permissions = shell?.permissions.orEmpty(),
+        features = shell?.platformFeatures ?: MobilePlatformFeatures(),
+        isOnline = isOnline,
+    )
 
-    LaunchedEffect(accessToken, coursesRevision, enrollmentsRevision) {
+    LaunchedEffect(accessToken, coursesRevision, enrollmentsRevision, reloadToken) {
         val token = accessToken ?: return@LaunchedEffect
         loading = true
         errorMessage = null
@@ -110,6 +123,22 @@ fun CoursesTab(
                 .onFailure { shell.openDeepLink(DeepLinkDestination.Home) }
             shell.pendingDeepLink = null
         }
+    }
+
+    if (showCreateCourse) {
+        CourseCreateScreen(
+            session = session,
+            existingCourses = courses,
+            shell = shell,
+            onFinished = { created ->
+                showCreateCourse = false
+                reloadToken += 1
+                openCourse = created
+            },
+            onDismiss = { showCreateCourse = false },
+            modifier = modifier,
+        )
+        return
     }
 
     openCourse?.let { course ->
@@ -151,9 +180,20 @@ fun CoursesTab(
                 style = LexturesType.display(24),
                 color = textPrimary(),
             )
-            if (shell?.iaRedesignEnabled == true && shell.universalSearchEnabled) {
-                IconButton(onClick = { shell.showUniversalSearch = true }) {
-                    Icon(Icons.Default.Search, contentDescription = "Search", tint = textPrimary())
+            Row {
+                if (shell?.iaRedesignEnabled == true && shell.universalSearchEnabled) {
+                    IconButton(onClick = { shell.showUniversalSearch = true }) {
+                        Icon(Icons.Default.Search, contentDescription = "Search", tint = textPrimary())
+                    }
+                }
+                if (canCreateCourse) {
+                    IconButton(onClick = { showCreateCourse = true }) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(R.string.mobile_createCourse_title),
+                            tint = textPrimary(),
+                        )
+                    }
                 }
             }
         }

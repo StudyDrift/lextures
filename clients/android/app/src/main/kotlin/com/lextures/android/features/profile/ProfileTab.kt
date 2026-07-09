@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Person
@@ -39,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
@@ -114,6 +116,8 @@ fun ProfileTab(
     var showPersonalDetails by remember { mutableStateOf(false) }
     var showResearchStudies by remember { mutableStateOf(false) }
     var showLearnerProfile by remember { mutableStateOf(false) }
+    var showIntegrations by remember { mutableStateOf(false) }
+    var showArchivedCoursesAdmin by remember { mutableStateOf(false) }
     var personalDetailsVisible by remember { mutableStateOf(false) }
     var researchVisible by remember { mutableStateOf(false) }
     var showMoreHub by remember { mutableStateOf(false) }
@@ -278,6 +282,28 @@ fun ProfileTab(
         ResearchStudiesScreen(
             session = session,
             onBack = { showResearchStudies = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showIntegrations) {
+        com.lextures.android.features.settings.IntegrationsScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = { showIntegrations = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showArchivedCoursesAdmin) {
+        com.lextures.android.features.settings.admin.ArchivedCoursesAdminScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = { showArchivedCoursesAdmin = false },
             modifier = modifier,
         )
         return
@@ -709,6 +735,32 @@ fun ProfileTab(
                         modifier = if (personalDetailsVisible) Modifier.padding(top = 4.dp) else Modifier,
                     )
                 }
+            }
+        }
+
+        if (com.lextures.android.core.lms.AccountIntegrationsLogic.integrationsEnabled(shell.platformFeatures)) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Link,
+                    title = L.text(R.string.mobile_integrations_title),
+                    subtitle = L.text(R.string.mobile_integrations_entry_subtitle),
+                    onClick = { showIntegrations = true },
+                )
+            }
+        }
+
+        if (com.lextures.android.core.lms.ArchivedCoursesAdminLogic.shouldShowEntry(
+                shell.platformFeatures,
+                shell.permissions,
+            )
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Filled.Archive,
+                    title = L.text(R.string.mobile_admin_archivedCourses_title),
+                    subtitle = L.text(R.string.mobile_admin_archivedCourses_entry_subtitle),
+                    onClick = { showArchivedCoursesAdmin = true },
+                )
             }
         }
 

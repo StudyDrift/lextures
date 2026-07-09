@@ -37,6 +37,8 @@ data class CourseSummary(
     val officeHoursEnabled: Boolean? = null,
     val orgId: String? = null,
     val termId: String? = null,
+    /** `traditional` or `competency_based` when set by the server. */
+    val courseType: String? = null,
     val viewerEnrollmentRoles: List<String>? = null,
     val feedEnabled: Boolean? = null,
     val discussionsEnabled: Boolean? = null,

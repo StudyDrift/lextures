@@ -53,6 +53,23 @@ func WriteJSON(w http.ResponseWriter, status int, code, message string) {
 	_ = json.NewEncoder(w).Encode(body(code, message))
 }
 
+// WritePaymentRequired writes HTTP 402 with the standard error envelope plus an optional
+// checkoutHint path for marketplace purchase flows (plan MKT4).
+func WritePaymentRequired(w http.ResponseWriter, message, checkoutHint string) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusPaymentRequired)
+	payload := map[string]any{
+		"error": map[string]string{
+			"code":    CodePaymentRequired,
+			"message": message,
+		},
+	}
+	if checkoutHint != "" {
+		payload["checkoutHint"] = checkoutHint
+	}
+	_ = json.NewEncoder(w).Encode(payload)
+}
+
 // WriteJSONWithErr writes a JSON error body and records server-side failures for access logging.
 func WriteJSONWithErr(w http.ResponseWriter, r *http.Request, status int, code, message string, err error) {
 	if status >= http.StatusInternalServerError && r != nil {

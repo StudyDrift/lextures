@@ -133,6 +133,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffParentPortalV2: false,
     ffReportCards: false,
     ffPublicCatalog: false,
+    ffCourseMarketplace: true,
     ffSelfPacedMode: false,
     ffPublicApi: false,
     ffContentFilterIntegration: false,

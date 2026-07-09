@@ -147,6 +147,35 @@ ON CONFLICT (user_id, course_id, permission_string) DO NOTHING
 	return nil
 }
 
+// EnrollStudentWithGrants inserts a student enrollment (ON CONFLICT DO NOTHING) and refreshes
+// managed role grants. Returns true when a new enrollment row was created. Used by marketplace
+// free claim and Stripe purchase webhook (plan MKT4).
+func EnrollStudentWithGrants(ctx context.Context, pool *pgxpool.Pool, courseID, userID uuid.UUID, courseCode string) (bool, error) {
+	if pool == nil {
+		return false, nil
+	}
+	tx, err := pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return false, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	tag, err := tx.Exec(ctx, `
+INSERT INTO course.course_enrollments (course_id, user_id, role)
+VALUES ($1, $2, 'student')
+ON CONFLICT (course_id, user_id, role) DO NOTHING
+`, courseID, userID)
+	if err != nil {
+		return false, err
+	}
+	if err := RefreshManagedGrantsForCourseUser(ctx, tx, userID, courseID, courseCode); err != nil {
+		return false, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
+}
+
 // ParseConcreteCoursePermission returns the course code when required is course:{code}:fn:act.
 func ParseConcreteCoursePermission(required string) (courseCode string, ok bool) {
 	parts := strings.Split(strings.TrimSpace(required), ":")

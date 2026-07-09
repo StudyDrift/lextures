@@ -59,6 +59,60 @@ object LmsApi {
         decode<CourseSummary>(body)
     }
 
+    /** POST `/api/v1/courses` — create a new course (M11.5). */
+    suspend fun createCourse(
+        body: CreateCourseRequest,
+        accessToken: String,
+    ): CourseSummary = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses",
+            method = "POST",
+            body = client.encodeBody(body, CreateCourseRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<CourseSummary>(response)
+    }
+
+    /** PATCH `/api/v1/courses/{code}/syllabus` (M11.5). */
+    suspend fun patchCourseSyllabus(
+        courseCode: String,
+        body: PatchCourseSyllabusRequest,
+        accessToken: String,
+    ): SyllabusPayload = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/syllabus",
+            method = "PATCH",
+            body = client.encodeBody(body, PatchCourseSyllabusRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<SyllabusPayload>(response)
+    }
+
+    /** POST `/api/v1/courses/{code}/structure/modules` (M11.5). */
+    suspend fun createCourseModule(
+        courseCode: String,
+        title: String,
+        accessToken: String,
+    ): CourseStructureItem = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/structure/modules",
+            method = "POST",
+            body = client.encodeBody(CreateCourseModuleRequest(title), CreateCourseModuleRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<CourseStructureItem>(response)
+    }
+
+    /** GET `/api/v1/orgs/{orgId}/terms` (M11.5). */
+    suspend fun fetchOrgTerms(orgId: String, accessToken: String): List<OrgTerm> =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                path = "/api/v1/orgs/${encodePath(orgId)}/terms",
+                accessToken = accessToken,
+            )
+            decode<OrgTermsResponse>(body).terms.orEmpty()
+        }
+
     suspend fun updateCourse(
         courseCode: String,
         body: CourseUpdateRequest,
@@ -455,6 +509,74 @@ object LmsApi {
         )
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
         decode<ModuleItemDetail>(response)
+    }
+
+    suspend fun fetchTranslationLocales(
+        courseCode: String,
+        accessToken: String,
+    ): List<TranslationCoverage> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = CourseTranslationsLogic.coveragePath(courseCode),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        runCatching { decode<TranslationLocalesResponse>(body).locales }
+            .getOrDefault(emptyList())
+    }
+
+    suspend fun fetchTranslationCoverage(
+        courseCode: String,
+        targetLocale: String,
+        accessToken: String,
+    ): TranslationCoverage = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = CourseTranslationsLogic.coveragePath(courseCode, targetLocale),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchCourseTranslations(
+        courseCode: String,
+        targetLocale: String,
+        accessToken: String,
+    ): CourseTranslationListResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = CourseTranslationsLogic.translationsPath(courseCode, targetLocale),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchCourseGlossary(
+        courseCode: String,
+        targetLocale: String,
+        sourceLocale: String = CourseTranslationsLogic.DEFAULT_SOURCE_LOCALE,
+        accessToken: String,
+    ): List<CourseGlossaryEntry> = withContext(Dispatchers.IO) {
+        val path =
+            "${CourseTranslationsLogic.glossaryPath(courseCode)}" +
+                "?target_locale=${encodeQuery(targetLocale)}&source_locale=${encodeQuery(sourceLocale)}"
+        val (body, code) = client.request(path = path, accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CourseGlossaryListResponse>(body).entries
+    }
+
+    suspend fun addGlossaryEntry(
+        courseCode: String,
+        body: AddGlossaryEntryBody,
+        accessToken: String,
+    ): CourseGlossaryEntry = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = CourseTranslationsLogic.glossaryPath(courseCode),
+            method = "POST",
+            body = json.encodeToString(AddGlossaryEntryBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode(response)
     }
 
     suspend fun fetchCourseExport(
@@ -3799,4 +3921,123 @@ object LmsApi {
             if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
             decode<LearnerProfileControlResponse>(body).status ?: "ok"
         }
+
+    // Account integrations (M14.1)
+
+    suspend fun fetchAccessKeyScopes(accessToken: String): List<AccessKeyScopeDef> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/access-keys/scopes", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<AccessKeyScopesResponse>(body).scopes
+    }
+
+    suspend fun fetchAccessKeys(accessToken: String): List<AccessKeySummary> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/access-keys", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<AccessKeysListResponse>(body).tokens
+    }
+
+    suspend fun createAccessKey(
+        label: String,
+        scopes: List<String>,
+        accessToken: String,
+    ): CreateAccessKeyResponse = withContext(Dispatchers.IO) {
+        val payload = CreateAccessKeyRequest(label = label, scopes = scopes)
+        val (body, code) = client.request(
+            path = "/api/v1/me/access-keys",
+            method = "POST",
+            body = client.encodeBody(payload, CreateAccessKeyRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun revokeAccessKey(id: String, accessToken: String) = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/me/access-keys/${encodePath(id)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun rotateAccessKey(id: String, accessToken: String): RotateAccessKeyResponse = withContext(Dispatchers.IO) {
+        val payload = RotateAccessKeyRequest()
+        val (body, code) = client.request(
+            path = "/api/v1/me/access-keys/${encodePath(id)}/rotate",
+            method = "POST",
+            body = client.encodeBody(payload, RotateAccessKeyRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchMCPConfig(accessToken: String): MCPConfigResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/integrations/mcp", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    /** Returns null when the caller lacks admin permission (HTTP 403). */
+    suspend fun fetchServiceTokens(accessToken: String): List<AccessKeySummary>? = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw("/api/v1/admin/tokens", accessToken = accessToken)
+        if (code == 403) return@withContext null
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        AccountIntegrationsLogic.activeServiceTokens(decode<AccessKeysListResponse>(body).tokens)
+    }
+
+    suspend fun createServiceToken(
+        serviceAccountName: String,
+        label: String,
+        scopes: List<String>,
+        accessToken: String,
+    ): CreateServiceTokenResponse = withContext(Dispatchers.IO) {
+        val payload = CreateServiceTokenRequest(
+            serviceAccountName = serviceAccountName,
+            label = label,
+            scopes = scopes,
+        )
+        val (body, code) = client.request(
+            path = "/api/v1/admin/tokens",
+            method = "POST",
+            body = client.encodeBody(payload, CreateServiceTokenRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun revokeServiceToken(id: String, accessToken: String) = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/admin/tokens/${encodePath(id)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun fetchArchivedCourses(accessToken: String): List<ArchivedCourseRow> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/settings/archived-courses", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<ArchivedCoursesListResponse>(body).courses
+    }
+
+    suspend fun restoreArchivedCourse(courseCode: String, accessToken: String) = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/settings/archived-courses/${encodePath(courseCode)}/restore",
+            method = "POST",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun deleteArchivedCoursePermanently(courseCode: String, accessToken: String) = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/settings/archived-courses/${encodePath(courseCode)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
 }

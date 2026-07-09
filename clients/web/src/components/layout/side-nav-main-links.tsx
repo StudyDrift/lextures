@@ -20,6 +20,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Store,
   UsersRound,
 } from 'lucide-react'
 import { useInboxUnreadCount } from '../../context/use-inbox-unread'
@@ -51,6 +52,7 @@ export function SideNavMainLinks() {
     ffLearningPaths,
     ffCompletionCredentials,
     ffCatalogIntegration,
+    ffCourseMarketplace,
     ffLibrary,
     ffConferenceScheduling,
     ragNotebookEnabled,
@@ -117,6 +119,11 @@ export function SideNavMainLinks() {
       {ffCatalogIntegration ? (
         <SideNavLink to="/catalog" icon={<GraduationCap className="h-5 w-5" />}>
           Course catalog
+        </SideNavLink>
+      ) : null}
+      {ffCourseMarketplace ? (
+        <SideNavLink to="/marketplace" icon={<Store className="h-5 w-5" />}>
+          Marketplace
         </SideNavLink>
       ) : null}
       {ffLibrary ? (

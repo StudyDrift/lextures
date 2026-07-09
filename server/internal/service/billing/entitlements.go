@@ -15,3 +15,11 @@ func UserHasCourseAccess(ctx context.Context, pool *pgxpool.Pool, userID, course
 	}
 	return repoBilling.HasCourseAccess(ctx, pool, userID, courseID)
 }
+
+// UserMarketplaceAccess reports whether the user owns/has claimed a marketplace course (plan MKT1).
+func UserMarketplaceAccess(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID) (bool, error) {
+	if pool == nil {
+		return false, nil
+	}
+	return repoBilling.MarketplaceAccess(ctx, pool, userID, courseID)
+}

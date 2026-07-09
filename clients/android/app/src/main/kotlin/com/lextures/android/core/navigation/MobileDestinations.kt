@@ -221,6 +221,7 @@ data class MobilePlatformFeatures(
     val studentProgressEnabled: Boolean = true,
     val ffMobileInstructorInsights: Boolean = true,
     val ffMobileCourseSettings: Boolean = false,
+    val ffMobileCreateCourse: Boolean = false,
     val ffConsortiumSharing: Boolean = false,
     val graderAgentEnabled: Boolean = false,
     val ffPlagiarismChecks: Boolean = false,
@@ -228,6 +229,10 @@ data class MobilePlatformFeatures(
     val learnerProfileEnabled: Boolean = false,
     val ffMobileLearnerProfile: Boolean = true,
     val introCourseEnabled: Boolean = false,
+    val ffApiTokens: Boolean = false,
+    val ffCalendarFeeds: Boolean = true,
+    val ffMobileSettingsIntegrations: Boolean = false,
+    val ffMobileAdminSettings: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -300,6 +305,7 @@ data class MobilePlatformFeatures(
             studentProgressEnabled = features?.studentProgressEnabled != false,
             ffMobileInstructorInsights = features?.ffMobileInstructorInsights != false,
             ffMobileCourseSettings = features?.ffMobileCourseSettings == true,
+            ffMobileCreateCourse = features?.ffMobileCreateCourse == true,
             ffConsortiumSharing = features?.ffConsortiumSharing == true,
             graderAgentEnabled = features?.graderAgentEnabled == true,
             ffPlagiarismChecks = features?.ffPlagiarismChecks == true,
@@ -307,6 +313,10 @@ data class MobilePlatformFeatures(
             learnerProfileEnabled = features?.learnerProfileEnabled == true,
             ffMobileLearnerProfile = features?.ffMobileLearnerProfile != false,
             introCourseEnabled = features?.introCourseEnabled != false,
+            ffApiTokens = features?.ffApiTokens == true,
+            ffCalendarFeeds = features?.ffCalendarFeeds != false,
+            ffMobileSettingsIntegrations = features?.ffMobileSettingsIntegrations == true,
+            ffMobileAdminSettings = features?.ffMobileAdminSettings == true,
         )
     }
 }

@@ -33,6 +33,8 @@ struct ProfileView: View {
                             ProfileOfflineSyncCard()
                         }
                         ProfilePersonalCard()
+                        IntegrationsEntryCard()
+                        ArchivedCoursesAdminEntryCard()
                         ProfileDepthCards()
                         LearnerProfileEntryCard()
                         ProfileOfflineStorageCard(
@@ -79,6 +81,12 @@ struct ProfileView: View {
             }
             .navigationDestination(for: LearnerProfileRoute.self) { _ in
                 LearnerProfileView()
+            }
+            .navigationDestination(for: IntegrationsRoute.self) { _ in
+                IntegrationsView()
+            }
+            .navigationDestination(for: ArchivedCoursesAdminRoute.self) { _ in
+                ArchivedCoursesAdminView()
             }
             .navigationDestination(for: MoreHubRoute.self) { _ in
                 MoreHubView()

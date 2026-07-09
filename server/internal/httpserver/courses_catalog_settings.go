@@ -37,6 +37,11 @@ type putCatalogPinBody struct {
 	Pinned   bool   `json:"pinned"`
 }
 
+type putCatalogHiddenBody struct {
+	CourseID string `json:"courseId"`
+	Hidden   bool   `json:"hidden"`
+}
+
 type pinnedCoursesResponse struct {
 	Courses []course.PinnedCourseSummary   `json:"courses"`
 	Rows    [][]course.PinnedCourseSummary `json:"rows"`
@@ -345,6 +350,39 @@ func (d Deps) handlePutCourseCatalogPin() http.HandlerFunc {
 				return
 			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save pin.")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func (d Deps) handlePutCourseCatalogHidden() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			w.Header().Set("Allow", http.MethodPut)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		var body putCatalogHiddenBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		courseID, err := uuid.Parse(strings.TrimSpace(body.CourseID))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid courseId.")
+			return
+		}
+		if err := course.SetUserCourseHidden(r.Context(), d.Pool, userID, courseID, body.Hidden); err != nil {
+			if strings.Contains(err.Error(), "not in your catalog") {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save hidden state.")
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)

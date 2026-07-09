@@ -364,7 +364,8 @@ enum CourseSettingsLogic {
                 ? form.courseHomeContentItemId.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
                 : nil,
             courseTimezone: form.courseTimezone.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
-            gradeLevel: form.gradeLevel.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+            gradeLevel: form.gradeLevel.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+            termId: nil
         )
     }
 

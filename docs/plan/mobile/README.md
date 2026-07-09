@@ -212,7 +212,7 @@ link-out to web for credential entry and deep authoring**, consistent with the d
 | [M13.6 Grading agents](./M13.6-course-grading-agents.md) | `grading-agents` (flag) | **P2** |
 | [M13.7 Plagiarism & AI-authorship](./M13.7-course-plagiarism-settings.md) | `plagiarism` (flag) | **P2** |
 | [M13.8 Accessibility (alt-text) review](./M13.8-course-accessibility-review.md) | `accessibility` (flag) | **P2** |
-| [M13.9 Translations & localization](./M13.9-course-translations-localization.md) | `translations` (flag) | **P2** |
+| [M13.9 Translations & localization](../completed/mobile/M13.9-course-translations-localization.md) | `translations` (flag) | **P2** ✅ |
 | [M13.10 Import / export & backup](../completed/mobile/M13.10-course-import-export.md) | `import-export` | **P2** ✅ |
 | [M13.11 Blueprint (curriculum sync)](../completed/mobile/M13.11-course-blueprint-sync.md) | `blueprint` | **P2** ✅ |
 | [M13.12 Archived content](../completed/mobile/M13.12-course-archived-content.md) | `archive` | **P2** ✅ |
@@ -221,7 +221,7 @@ link-out to web for credential entry and deep authoring**, consistent with the d
 
 | Story | Web source (settings view) | Permission | Disposition |
 |---|---|---|---|
-| [M14.1 Account integrations & API access](./M14.1-account-integrations-api-access.md) | `integrations` (keys, calendar subs, MCP, service tokens) | user (service tokens: `rbac:manage`) | **P1** (user-facing) |
+| [M14.1 Account integrations & API access](../completed/mobile/M14.1-account-integrations-api-access.md) | `integrations` (keys, calendar subs, MCP, service tokens) | user (service tokens: `rbac:manage`) | **P1** ✅ |
 | [M14.2 Roles & permissions](./M14.2-roles-permissions-admin.md) | `roles` | `rbac:manage` | **P2** (read + guarded assign) |
 | [M14.3 People / user management](./M14.3-people-user-management.md) | `people` | `rbac:manage` | **P2** |
 | [M14.4 Organizations, units & terms](./M14.4-organizations-units-terms.md) | `organizations`/`org-units`/`terms` | `rbac:manage` / `tenant:org-units:admin` | **P2** |
@@ -230,12 +230,12 @@ link-out to web for credential entry and deep authoring**, consistent with the d
 | [M14.7 AI models, prompts & reports](./M14.7-ai-models-prompts-reports.md) | `ai-models`/`ai-prompts`/`ai-reports` | `rbac:manage` | **P2** |
 | [M14.8 Integrations & provisioning admin](./M14.8-integrations-provisioning-admin.md) | `lti-tools`/`scim-provisioning`/`cloud-providers`/`lrs-integrations`/`oer-providers` (flags) | `rbac:manage` | **P2** (status + link-out) |
 | [M14.9 Transcripts & advising config](./M14.9-transcripts-advising-config.md) | `transcripts`/`advising` (flags) | `rbac:manage` | **P2** |
-| [M14.10 Global archived courses](./M14.10-global-archived-courses.md) | `archive` | `rbac:manage` | **P2** |
+| [M14.10 Global archived courses](../completed/mobile/M14.10-global-archived-courses.md) | `archive` | `rbac:manage` | **P2** ✅ |
 
 > **Sequencing note.** [M13.1](../completed/mobile/M13.1-course-settings-general.md) is the keystone for M13 — it
 > lands the course-settings shell (drawer entry, permission gate, save/unsaved-changes scaffold,
 > flag-aware section list) that M13.2–M13.12 plug into. For M14,
-> [M14.1](./M14.1-account-integrations-api-access.md) (user-facing) ships first; the admin views
+> [M14.1](../completed/mobile/M14.1-account-integrations-api-access.md) (user-facing) ships first; the admin views
 > (M14.2–M14.10) share a `mobile_admin_settings` flag and lead with read/status before edit.
 
 ### Stays web-only (reachable via in-app web view)

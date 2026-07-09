@@ -22,18 +22,27 @@ func TestWriteJSON(t *testing.T) {
 	}
 }
 
-func TestWriteJSON_Forbidden(t *testing.T) {
+func TestWritePaymentRequired(t *testing.T) {
 	t.Parallel()
 	rr := httptest.NewRecorder()
-	WriteJSON(rr, 403, CodeForbidden, "You do not have permission for this action.")
-	if rr.Code != 403 {
+	WritePaymentRequired(rr, "Purchase required.", "/marketplace/paid")
+	if rr.Code != 402 {
 		t.Fatalf("status: %d", rr.Code)
 	}
-	var b Body
-	if err := json.NewDecoder(rr.Body).Decode(&b); err != nil {
+	var payload struct {
+		Error struct {
+			Code    string `json:"code"`
+			Message string `json:"message"`
+		} `json:"error"`
+		CheckoutHint string `json:"checkoutHint"`
+	}
+	if err := json.NewDecoder(rr.Body).Decode(&payload); err != nil {
 		t.Fatal(err)
 	}
-	if b.Error.Code != CodeForbidden {
-		t.Fatalf("code: %q", b.Error.Code)
+	if payload.Error.Code != CodePaymentRequired {
+		t.Fatalf("code: %q", payload.Error.Code)
+	}
+	if payload.CheckoutHint != "/marketplace/paid" {
+		t.Fatalf("hint: %q", payload.CheckoutHint)
 	}
 }

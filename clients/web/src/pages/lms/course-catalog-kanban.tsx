@@ -23,6 +23,7 @@ import { CourseCatalogPinButton } from './course-catalog-pin-button'
 import {
   buildKanbanBoardState,
   courseCatalogStatusLabel,
+  isUserCatalogHidden,
   resolveKanbanColumn,
 } from './course-catalog-status'
 import { isKanbanColumnId, KANBAN_COLUMN_IDS, type KanbanColumnId } from '../../lib/course-catalog-types'
@@ -31,7 +32,7 @@ const KANBAN_COLUMN_HINTS: Record<KanbanColumnId, string> = {
   todo: 'Draft and upcoming courses',
   'in-progress': 'Active courses',
   done: 'Ended courses',
-  hidden: 'Outside visibility window',
+  hidden: 'Hidden from your catalog or outside visibility window',
 }
 
 function columnDropId(columnId: KanbanColumnId): string {
@@ -49,7 +50,7 @@ function boardToColumnIds(board: Record<KanbanColumnId, CoursePublic[]>): Record
     todo: board.todo.map((c) => c.id),
     'in-progress': board['in-progress'].map((c) => c.id),
     done: board.done.map((c) => c.id),
-    hidden: board.hidden.map((c) => c.id),
+    hidden: board.hidden.filter((c) => isUserCatalogHidden(c)).map((c) => c.id),
   }
 }
 
@@ -338,6 +339,7 @@ type Props = {
   onColumnLabelsChange: (labels: KanbanColumnLabels) => void
   onNicknameChange: (courseId: string, nickname: string | null) => void
   onPinnedChange: (courseId: string, pinned: boolean) => void
+  onHiddenChange: (courseId: string, hidden: boolean) => void
   onBoardChange: (columns: Record<KanbanColumnId, string[]>) => Promise<void>
 }
 
@@ -349,6 +351,7 @@ export function CourseCatalogKanbanBoard({
   onColumnLabelsChange,
   onNicknameChange,
   onPinnedChange,
+  onHiddenChange,
   onBoardChange,
 }: Props) {
   const courseById = useMemo(() => new Map(courses.map((c) => [c.id, c])), [courses])
@@ -404,11 +407,25 @@ export function CourseCatalogKanbanBoard({
       }
 
       if (!targetColumn) return
+      const previousColumn = (() => {
+        for (const col of KANBAN_COLUMN_IDS) {
+          if (board[col].some((c) => c.id === courseId)) return col
+        }
+        return null
+      })()
       const nextBoard = computeNextBoard(board, courseId, targetColumn, targetIndex)
       setBoard(nextBoard)
+      const moving = courseById.get(courseId)
+      if (moving) {
+        if (targetColumn === 'hidden' && !isUserCatalogHidden(moving)) {
+          onHiddenChange(courseId, true)
+        } else if (previousColumn === 'hidden' && targetColumn !== 'hidden' && isUserCatalogHidden(moving)) {
+          onHiddenChange(courseId, false)
+        }
+      }
       void persistBoard(nextBoard)
     },
-    [board, persistBoard],
+    [board, courseById, onHiddenChange, persistBoard],
   )
 
   const activeCourse = activeCourseId ? courseById.get(activeCourseId) : undefined

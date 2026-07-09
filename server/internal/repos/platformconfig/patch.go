@@ -179,6 +179,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_consortium_sharing", w.FFConsortiumSharing)
 	addBool("ff_self_paced_mode", w.FFSelfPacedMode)
 	addBool("ff_public_catalog", w.FFPublicCatalog)
+	addBool("ff_course_marketplace", w.FFCourseMarketplace)
 	addBool("ff_public_api", w.FFPublicAPI)
 	addBool("ff_stripe_billing", w.FFStripeBilling)
 	addBool("ff_payments_enabled", w.FFPaymentsEnabled)

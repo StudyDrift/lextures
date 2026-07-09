@@ -151,3 +151,8 @@ export const CheckoutCancelPage = lazy(() => import('./pages/checkout/cancel'))
 export const CliAuthPage = lazy(() => import('./pages/cli-auth'))
 export const ExploreCatalogPage = lazy(() => import('./pages/explore-catalog-page'))
 export const ExploreCoursePage = lazy(() => import('./pages/explore-course-page'))
+export const MarketplacePage = lazy(() => import('./pages/marketplace/marketplace-page'))
+export const MarketplaceCoursePage = lazy(() => import('./pages/marketplace/marketplace-course-page'))
+export const MarketplacePurchaseActionPage = lazy(
+  () => import('./pages/marketplace/marketplace-purchase-action-page'),
+)

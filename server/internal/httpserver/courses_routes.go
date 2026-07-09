@@ -10,6 +10,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/catalog-pins", d.handleGetCourseCatalogPins())
 	r.Put("/api/v1/courses/catalog-pins/layout", d.handlePutCourseCatalogPinLayout())
 	r.Put("/api/v1/courses/catalog-pin", d.handlePutCourseCatalogPin())
+	r.Put("/api/v1/courses/catalog-hidden", d.handlePutCourseCatalogHidden())
 	r.Put("/api/v1/courses/catalog-nickname", d.handlePutCourseCatalogNickname())
 	r.Put("/api/v1/courses/catalog-order", d.handlePutCourseCatalogOrder())
 	r.Put("/api/v1/courses/kanban-board", d.handlePutCourseKanbanBoard())

@@ -9,5 +9,6 @@
   "billing.checkout.success.timeout.billingLink": "Open billing settings",
   "billing.checkout.cancel.title": "Checkout cancelled",
   "billing.checkout.cancel.description": "No charge was made. You can return to the course catalog when you are ready.",
-  "billing.checkout.cancel.backToCourses": "Back to courses"
+  "billing.checkout.cancel.backToCourses": "Back to courses",
+  "billing.checkout.cancel.backToCourse": "Back to course"
 }

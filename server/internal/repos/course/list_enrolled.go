@@ -100,6 +100,7 @@ type CoursePublic struct {
 	ViewerPendingEnrollmentID          *string    `json:"viewerPendingEnrollmentId,omitempty"`
 	CatalogNickname               *string          `json:"catalogNickname,omitempty"`
 	CatalogPinned                 bool             `json:"catalogPinned,omitempty"`
+	CatalogHidden                 bool             `json:"catalogHidden,omitempty"`
 	KanbanColumnID                *string          `json:"kanbanColumnId,omitempty"`
 	KanbanSortOrder               *int             `json:"kanbanSortOrder,omitempty"`
 }

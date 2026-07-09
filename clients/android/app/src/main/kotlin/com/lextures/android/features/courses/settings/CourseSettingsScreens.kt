@@ -3,7 +3,6 @@ package com.lextures.android.features.courses.settings
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -138,6 +137,11 @@ fun CourseSettingsHostScreen(
                     course = course,
                     offline = offline,
                 )
+                CourseSettingsLogic.CourseSettingsSection.Translations -> CourseTranslationsSettingsScreen(
+                    session = session,
+                    course = course,
+                    offline = offline,
+                )
                 CourseSettingsLogic.CourseSettingsSection.ImportExport -> CourseImportExportScreen(
                     session = session,
                     course = course,
@@ -154,11 +158,6 @@ fun CourseSettingsHostScreen(
                     course = course,
                     offline = offline,
                     permissions = permissions,
-                )
-                else -> LmsEmptyState(
-                    icon = Icons.Filled.Settings,
-                    title = L.text(sectionLabelRes(selected)),
-                    message = L.text(R.string.mobile_courseSettings_sectionComingSoon),
                 )
             }
         }

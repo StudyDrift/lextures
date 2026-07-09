@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/logging"
+	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 	credrepo "github.com/lextures/lextures/server/internal/repos/credentials"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/learnerprogress"
@@ -26,16 +27,18 @@ type selfPacedCourse struct {
 	CourseMode     string
 	OpenEnrollment bool
 	GatingEnabled  bool
+	PriceCents     int
+	CatalogSlug    *string
 }
 
 // loadSelfPacedCourse fetches the self-paced columns for a course, or nil when not found.
 func (d Deps) loadSelfPacedCourse(r *http.Request, courseCode string) (*selfPacedCourse, error) {
 	var c selfPacedCourse
 	err := d.Pool.QueryRow(r.Context(), `
-SELECT id, course_mode, open_enrollment, module_gating_enabled
+SELECT id, course_mode, open_enrollment, module_gating_enabled, price_cents, catalog_slug
 FROM course.courses
 WHERE course_code = $1
-`, courseCode).Scan(&c.ID, &c.CourseMode, &c.OpenEnrollment, &c.GatingEnabled)
+`, courseCode).Scan(&c.ID, &c.CourseMode, &c.OpenEnrollment, &c.GatingEnabled, &c.PriceCents, &c.CatalogSlug)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
@@ -88,8 +91,20 @@ func (d Deps) handleCourseSelfEnroll() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "This course is not open for self-enrollment.")
 			return
 		}
-		// 15.3 billing: paid self-paced courses must verify an entitlement here and return 402
-		// when absent. Billing is not yet wired, so open-enrollment courses are free for now.
+		// Paid self-paced courses require an active entitlement (plan MKT4 FR-6).
+		hasAccess, accessErr := repoBilling.HasCourseAccess(r.Context(), d.Pool, viewer, c.ID)
+		if accessErr != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify purchase.")
+			return
+		}
+		if !hasAccess {
+			hint := "/marketplace/" + courseCode
+			if c.CatalogSlug != nil && strings.TrimSpace(*c.CatalogSlug) != "" {
+				hint = "/marketplace/" + strings.TrimSpace(*c.CatalogSlug)
+			}
+			apierr.WritePaymentRequired(w, "Purchase required.", hint)
+			return
+		}
 
 		ctx := r.Context()
 		tx, err := d.Pool.BeginTx(ctx, pgx.TxOptions{})

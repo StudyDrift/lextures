@@ -1,0 +1,4 @@
+# Course settings / create / translations logic enums are intentionally large helper surfaces.
+type_body_length:
+  warning: 350
+  error: 750

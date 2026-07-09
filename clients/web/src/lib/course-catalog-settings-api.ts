@@ -126,6 +126,17 @@ export async function putCourseCatalogPin(courseId: string, pinned: boolean): Pr
   throw new Error(readApiErrorMessage(raw))
 }
 
+export async function putCourseCatalogHidden(courseId: string, hidden: boolean): Promise<void> {
+  const res = await authorizedFetch('/api/v1/courses/catalog-hidden', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ courseId, hidden }),
+  })
+  if (res.ok) return
+  const raw: unknown = await res.json().catch(() => ({}))
+  throw new Error(readApiErrorMessage(raw))
+}
+
 export async function putCourseKanbanBoard(columns: Record<KanbanColumnId, string[]>): Promise<void> {
   const res = await authorizedFetch('/api/v1/courses/kanban-board', {
     method: 'PUT',

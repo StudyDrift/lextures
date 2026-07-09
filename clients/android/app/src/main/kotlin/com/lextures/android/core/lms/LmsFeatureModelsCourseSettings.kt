@@ -41,6 +41,7 @@ data class CourseUpdateRequest(
     val courseHomeContentItemId: String? = null,
     val courseTimezone: String? = null,
     val gradeLevel: String? = null,
+    val termId: String? = null,
 )
 
 @Serializable
