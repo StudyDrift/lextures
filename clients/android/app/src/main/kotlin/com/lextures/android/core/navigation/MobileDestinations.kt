@@ -83,6 +83,7 @@ enum class MoreDestination(val labelRes: String) {
     Calendar("mobile_ia_more_calendar"),
     Planner("mobile_ia_more_planner"),
     Catalog("mobile_ia_more_catalog"),
+    Marketplace("mobile_ia_more_marketplace"),
     Paths("mobile_ia_more_paths"),
     Library("mobile_ia_more_library"),
     Reading("mobile_ia_more_reading"),
@@ -198,6 +199,7 @@ data class MobilePlatformFeatures(
     val ffLearningPaths: Boolean = false,
     val selfReflectionEnabled: Boolean = false,
     val ffPublicCatalog: Boolean = false,
+    val ffCourseMarketplace: Boolean = false,
     val ffSelfPacedMode: Boolean = false,
     val ffCourseReviews: Boolean = false,
     val ffCompletionCredentials: Boolean = false,
@@ -282,6 +284,7 @@ data class MobilePlatformFeatures(
             ffLearningPaths = features?.ffLearningPaths == true,
             selfReflectionEnabled = features?.selfReflectionEnabled == true,
             ffPublicCatalog = features?.ffPublicCatalog == true,
+            ffCourseMarketplace = features?.ffCourseMarketplace == true,
             ffSelfPacedMode = features?.ffSelfPacedMode == true,
             ffCourseReviews = features?.ffCourseReviews == true,
             ffCompletionCredentials = features?.ffCompletionCredentials == true,
@@ -473,6 +476,7 @@ object MobileDestinations {
                 add(MoreDestination.Calendar)
                 add(MoreDestination.Planner)
                 add(MoreDestination.Catalog)
+                if (platform.ffCourseMarketplace) add(MoreDestination.Marketplace)
                 add(MoreDestination.Paths)
                 if (platform.ffLibrary) add(MoreDestination.Reading)
                 if (platform.libraryBrowseEnabled) add(MoreDestination.Library)

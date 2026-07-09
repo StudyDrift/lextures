@@ -2923,6 +2923,98 @@ object LmsApi {
             decode(body)
         }
 
+    // Course marketplace (MKT6)
+
+    suspend fun fetchMarketplaceCourses(
+        query: String = "",
+        category: String = "",
+        level: String = "",
+        sort: String = "popular",
+        priceMax: Int? = null,
+        freeOnly: Boolean = false,
+        cursor: String = "",
+        accessToken: String,
+    ): MarketplaceSearchResponse = withContext(Dispatchers.IO) {
+        val params = buildList {
+            val q = query.trim()
+            if (q.isNotEmpty()) add("q=${encodeQuery(q)}")
+            val c = category.trim()
+            if (c.isNotEmpty()) add("category=${encodeQuery(c)}")
+            val l = level.trim()
+            if (l.isNotEmpty()) add("level=${encodeQuery(l)}")
+            val s = sort.trim()
+            if (s.isNotEmpty()) add("sort=${encodeQuery(s)}")
+            priceMax?.let { add("price_max=$it") }
+            if (freeOnly) add("free_only=true")
+            val cur = cursor.trim()
+            if (cur.isNotEmpty()) add("cursor=${encodeQuery(cur)}")
+        }.joinToString("&")
+        val suffix = if (params.isNotEmpty()) "?$params" else ""
+        val (body, code) = client.request(
+            "/api/v1/marketplace/courses$suffix",
+            accessToken = accessToken,
+        )
+        if (code == 404) throw ApiError.HttpStatus(404, "Marketplace is not available.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchMarketplaceCategories(accessToken: String): List<MarketplaceCategory> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request("/api/v1/marketplace/categories", accessToken = accessToken)
+            if (code == 404) return@withContext emptyList()
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<MarketplaceCategoriesResponse>(body).categories
+        }
+
+    suspend fun fetchMarketplaceCourseDetail(slug: String, accessToken: String): MarketplaceCourseDetail? =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/marketplace/courses/${encodePath(slug)}",
+                accessToken = accessToken,
+            )
+            if (code == 404) return@withContext null
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun claimMarketplaceCourse(slug: String, accessToken: String): MarketplaceClaimResult =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/marketplace/courses/${encodePath(slug)}/claim",
+                method = "POST",
+                body = "{}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchCourseCatalogListing(courseCode: String, accessToken: String): CourseCatalogListing =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/catalog-listing",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<CourseCatalogListingResponse>(body).listing
+        }
+
+    suspend fun putCourseCatalogListing(
+        courseCode: String,
+        body: CourseCatalogListingPutBody,
+        accessToken: String,
+    ): CourseCatalogListing = withContext(Dispatchers.IO) {
+        val (response, code) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/catalog-listing",
+            method = "PUT",
+            body = json.encodeToString(CourseCatalogListingPutBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseCatalogListingResponse>(response).listing
+    }
+
     // Learning paths (M8.2)
 
     suspend fun fetchCatalogPaths(

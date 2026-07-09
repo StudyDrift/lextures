@@ -43,6 +43,15 @@ type ListResult struct {
 	TotalPages int         `json:"totalPages"`
 }
 
+// DashboardStats holds instance-wide people metrics for the admin People page.
+type DashboardStats struct {
+	SignupsLast7Days     int64 `json:"signupsLast7Days"`
+	ActiveAccounts       int64 `json:"activeAccounts"`
+	TotalAccounts        int64 `json:"totalAccounts"`
+	RecentlyActive30Days int64 `json:"recentlyActive30Days"`
+	SuspendedAccounts    int64 `json:"suspendedAccounts"`
+}
+
 func normalizePagination(page, perPage int) (int, int) {
 	if page < 1 {
 		page = 1
@@ -53,6 +62,47 @@ func normalizePagination(page, perPage int) (int, int) {
 		perPage = 25
 	}
 	return page, perPage
+}
+
+// FetchDashboardStats returns aggregate people metrics for the admin dashboard.
+func FetchDashboardStats(ctx context.Context, pool *pgxpool.Pool) (DashboardStats, error) {
+	var stats DashboardStats
+	err := pool.QueryRow(ctx, `
+SELECT
+    COUNT(*)::bigint AS total_accounts,
+    COUNT(*) FILTER (
+        WHERE u.deactivated_at IS NULL AND NOT u.login_blocked
+    )::bigint AS active_accounts,
+    COUNT(*) FILTER (
+        WHERE u.deactivated_at IS NOT NULL OR u.login_blocked
+    )::bigint AS suspended_accounts,
+    COUNT(*) FILTER (
+        WHERE u.created_at >= NOW() - INTERVAL '7 days'
+    )::bigint AS signups_last_7_days
+FROM "user".users u
+WHERE u.account_type <> 'system'
+  AND u.email NOT ILIKE '%@erased.invalid'
+`).Scan(
+		&stats.TotalAccounts,
+		&stats.ActiveAccounts,
+		&stats.SuspendedAccounts,
+		&stats.SignupsLast7Days,
+	)
+	if err != nil {
+		return DashboardStats{}, err
+	}
+	err = pool.QueryRow(ctx, `
+SELECT COUNT(DISTINCT ua.user_id)::bigint
+FROM "user".user_audit ua
+INNER JOIN "user".users u ON u.id = ua.user_id
+WHERE ua.occurred_at >= NOW() - INTERVAL '30 days'
+  AND u.account_type <> 'system'
+  AND u.email NOT ILIKE '%@erased.invalid'
+`).Scan(&stats.RecentlyActive30Days)
+	if err != nil {
+		return DashboardStats{}, err
+	}
+	return stats, nil
 }
 
 // Search returns users matching free text across the instance. Requires a non-empty query.

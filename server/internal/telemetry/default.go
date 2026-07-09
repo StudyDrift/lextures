@@ -88,6 +88,27 @@ func RecordMarketplaceRefund() {
 	}
 }
 
+// RecordMyPurchasesView records a My purchases list view (plan MKT5).
+func RecordMyPurchasesView() {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordMyPurchasesView()
+	}
+}
+
+// RecordPurchasedBadgeRender records that a courses list included purchased badges (plan MKT5).
+func RecordPurchasedBadgeRender() {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordPurchasedBadgeRender()
+	}
+}
+
+// RecordPublicMarketplaceList records an unauthenticated public marketplace list view (plan MKT7).
+func RecordPublicMarketplaceList() {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordPublicMarketplaceList()
+	}
+}
+
 // RecordAIProvider records an AI provider call on the default instance
 // (plan 16.7 / 17.7 §11). No-op when telemetry is not initialised.
 func RecordAIProvider(provider, model, outcome string, seconds, costDollars float64) {

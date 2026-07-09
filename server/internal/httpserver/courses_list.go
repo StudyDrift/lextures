@@ -9,11 +9,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/auth"
+	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/orgunit"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 type coursesListResponse struct {
@@ -154,6 +156,38 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 		if err := course.AttachUserCatalogMeta(ctx, d.Pool, userID, courses); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 			return
+		}
+		// Marketplace purchase indicator (plan MKT5). Failure degrades gracefully — hide badges.
+		if d.effectiveConfig().FFCourseMarketplace && len(courses) > 0 {
+			ids := make([]uuid.UUID, 0, len(courses))
+			for _, c := range courses {
+				id, err := uuid.Parse(c.ID)
+				if err != nil {
+					continue
+				}
+				ids = append(ids, id)
+			}
+			purchased, err := repoBilling.PurchasedCourseMap(ctx, d.Pool, userID, ids)
+			if err != nil {
+				slog.Warn("courses list: purchased map failed", "err", err)
+			} else {
+				badgeCount := 0
+				for i := range courses {
+					id, err := uuid.Parse(courses[i].ID)
+					if err != nil {
+						continue
+					}
+					if src, ok := purchased[id]; ok {
+						courses[i].AcquiredViaMarketplace = true
+						s := src
+						courses[i].AcquisitionSource = &s
+						badgeCount++
+					}
+				}
+				if badgeCount > 0 {
+					telemetry.RecordPurchasedBadgeRender()
+				}
+			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(coursesListResponse{Courses: courses})

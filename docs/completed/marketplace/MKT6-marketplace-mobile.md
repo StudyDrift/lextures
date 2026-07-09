@@ -1,6 +1,6 @@
 # MKT6 — Marketplace on Mobile (iOS + Android)
 
-> Implementation plan. Source: [docs/plan/marketplace/README.md](README.md). Part of the Marketplace epic.
+> Implementation plan. Source: [docs/plan/marketplace/README.md](../../plan/marketplace/README.md). Part of the Marketplace epic.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Marketplace |
 | **Severity** | MAJOR |
 | **Markets** | SL (primary) · HE · K12 |
-| **Status (today)** | MISSING |
+| **Status (today)** | SHIPPED |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Mobile platform team (iOS + Android) |
 | **Depends on** | MKT1, MKT2, MKT3, MKT4, MKT5 |
@@ -173,5 +173,5 @@ Not AI-touching.
 ## 19. References
 
 - Existing files: `clients/android/app/src/main/kotlin/com/lextures/android/core/navigation/MobileDestinations.kt` (`MoreDestination`, `moreDestinations`, `MobilePlatformFeatures`), `core/lms/LmsApi.kt`, `features/courses/settings/CourseSettingsScreens.kt`; `clients/ios/Lextures/Core/Routing/MobileDestinations.swift` (`MoreDestination`, `moreDestinations`), `Core/LMS/LMSFeatureModelsPlatform.swift`, `Features/Courses/Settings/CourseSettingsHostView.swift`; string resources `res/values*/strings.xml`, `Resources/Localizable.xcstrings`, `clients/mobile/locales/*.json`.
-- Related plans: [MKT1](../../completed/marketplace/MKT1-marketplace-platform-foundation.md)–[MKT5](MKT5-purchased-indicator-courses.md); `docs/plan/mobile/README.md`, `docs/MOBILE_PLAN.md`.
+- Related plans: [MKT1](MKT1-marketplace-platform-foundation.md)–[MKT5](MKT5-purchased-indicator-courses.md); `docs/plan/mobile/README.md`, `docs/MOBILE_PLAN.md`.
 - External standards: Apple App Store Review Guidelines §3.1 (In-App Purchase), Google Play Payments policy, StoreKit 2, Google Play Billing Library.

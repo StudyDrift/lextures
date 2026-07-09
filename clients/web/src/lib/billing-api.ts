@@ -53,6 +53,30 @@ export async function fetchMyEntitlements(): Promise<Entitlement[]> {
   return data.entitlements ?? []
 }
 
+export type CoursePurchase = {
+  courseCode: string
+  courseId: string
+  title: string
+  priceCents: number
+  currency: string
+  source: string
+  acquiredAt: string
+  receiptUrl?: string
+  entitlementId: string
+}
+
+export async function fetchMyPurchases(): Promise<CoursePurchase[]> {
+  const res = await authorizedFetch('/api/v1/me/purchases')
+  if (res.status === 404) {
+    return []
+  }
+  if (!res.ok) {
+    throw new Error('Could not load purchases.')
+  }
+  const data = (await res.json()) as { purchases?: CoursePurchase[] }
+  return data.purchases ?? []
+}
+
 export async function fetchMyTransactions(): Promise<Transaction[]> {
   const res = await authorizedFetch('/api/v1/me/transactions')
   if (res.status === 404) {

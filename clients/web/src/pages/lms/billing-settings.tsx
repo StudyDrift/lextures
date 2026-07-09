@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ExternalLink, Loader2 } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { fetchMyEntitlements, fetchMyTransactions, formatMoney, openBillingPortal, type Entitlement, type Transaction } from '../../lib/billing-api'
@@ -23,7 +24,7 @@ function entitlementLabel(e: Entitlement): string {
 
 export default function BillingSettingsPage() {
   const titleId = useId()
-  const { ffStripeBilling, ffPaymentsEnabled, loading: featuresLoading } = usePlatformFeatures()
+  const { ffStripeBilling, ffPaymentsEnabled, ffCourseMarketplace, loading: featuresLoading } = usePlatformFeatures()
   const [entitlements, setEntitlements] = useState<Entitlement[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [me, setMe] = useState<MeProfile | null>(null)
@@ -132,6 +133,16 @@ export default function BillingSettingsPage() {
 
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           <h2 className="text-lg font-medium text-slate-900 dark:text-neutral-100">Purchase history</h2>
+          {ffCourseMarketplace ? (
+            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+              <Link
+                to="/me/purchases"
+                className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300"
+              >
+                View marketplace purchases
+              </Link>
+            </p>
+          ) : null}
           {loading ? (
             <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">Loading…</p>
           ) : transactions.length > 0 ? (

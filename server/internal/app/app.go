@@ -47,6 +47,7 @@ import (
 	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
 	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
 	learnerprofilederivers "github.com/lextures/lextures/server/internal/service/learnerprofile/derivers"
+	marketplacecoursesservice "github.com/lextures/lextures/server/internal/service/marketplacecourses"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
@@ -228,6 +229,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 
 		introCourseSvc = introcourseservice.New(pool)
 		introcourseservice.RegisterMetrics(tel.Metrics.Registry())
+		marketplacecoursesservice.RegisterMetrics(tel.Metrics.Registry())
 		background.RegisterIntroCourseJobs(jobRegistry, introCourseSvc, platform)
 		if merged.IntroCourseEnabled {
 			if _, err := introCourseSvc.EnsureProvisioned(ctx, merged); err != nil {

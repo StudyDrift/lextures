@@ -1,0 +1,49 @@
+{
+  "slug": "m1.welcome.knowledge-check",
+  "title": "Module 1 knowledge check",
+  "sort_order": 2,
+  "markdown": "Two quick questions about official marketplace courses.",
+  "content_version": 1,
+  "questions": [
+    {
+      "id": "m1-q1",
+      "prompt": "How do learners get access to an official marketplace course?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "They claim it from the marketplace (opt-in)",
+        "Every account is auto-enrolled at signup",
+        "Only Global Admins can enroll them",
+        "They must pay via Stripe first"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q2",
+      "prompt": "Official marketplace courses in this epic are priced at:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "$0 (free)",
+        "A monthly subscription",
+        "Whatever the instructor sets at checkout",
+        "Institution license only"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q3",
+      "prompt": "Official marketplace course content is authored in the repository as Markdown and JSON.",
+      "questionType": "true_false",
+      "choices": ["True", "False"],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

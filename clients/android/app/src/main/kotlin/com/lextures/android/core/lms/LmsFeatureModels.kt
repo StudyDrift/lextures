@@ -466,6 +466,7 @@ data class PlatformFeatures(
     val ffLearningPaths: Boolean? = null,
     val selfReflectionEnabled: Boolean? = null,
     val ffPublicCatalog: Boolean? = null,
+    val ffCourseMarketplace: Boolean? = null,
     val ffSelfPacedMode: Boolean? = null,
     val ffCourseReviews: Boolean? = null,
     val ffCompletionCredentials: Boolean? = null,

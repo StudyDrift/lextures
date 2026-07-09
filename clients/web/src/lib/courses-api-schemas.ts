@@ -100,6 +100,8 @@ export const courseSchema = z
       })
       .optional(),
     orgId: z.string().optional(),
+    acquiredViaMarketplace: z.boolean().optional(),
+    acquisitionSource: z.string().nullable().optional(),
   })
   .passthrough()
   .transform((c) => ({

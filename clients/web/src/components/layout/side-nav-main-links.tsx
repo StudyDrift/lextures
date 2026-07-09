@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Sparkles,
   Store,
+  ShoppingBag,
   UsersRound,
 } from 'lucide-react'
 import { useInboxUnreadCount } from '../../context/use-inbox-unread'
@@ -80,7 +81,8 @@ export function SideNavMainLinks() {
     ffResearchConsent ||
     ffAccessibilityIntake ||
     ffStripeBilling ||
-    ffRevenueShare
+    ffRevenueShare ||
+    ffCourseMarketplace
 
   return (
     <>
@@ -186,6 +188,11 @@ export function SideNavMainLinks() {
           {ffStripeBilling ? (
             <SideNavLink to="/me/billing" icon={<CreditCard className="h-5 w-5" />}>
               Billing
+            </SideNavLink>
+          ) : null}
+          {ffCourseMarketplace ? (
+            <SideNavLink to="/me/purchases" icon={<ShoppingBag className="h-5 w-5" />}>
+              My purchases
             </SideNavLink>
           ) : null}
           {ffRevenueShare ? (

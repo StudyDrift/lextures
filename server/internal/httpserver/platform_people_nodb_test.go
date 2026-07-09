@@ -28,6 +28,13 @@ func TestAdminPeople_UnauthenticatedReturns401(t *testing.T) {
 	if rr.Code != http.StatusUnauthorized {
 		t.Fatalf("report status = %d, want 401", rr.Code)
 	}
+
+	rr = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/api/v1/admin/people/stats", nil)
+	d.handleAdminPeopleStats()(rr, r)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("stats status = %d, want 401", rr.Code)
+	}
 }
 
 func TestAdminPeople_SearchEmptyQueryReturnsEmptyList(t *testing.T) {

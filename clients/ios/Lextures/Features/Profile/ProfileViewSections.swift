@@ -164,6 +164,12 @@ struct ProfileMoreDestinationScreen: View {
             } else {
                 MoreDestinationPlaceholder(destination: destination)
             }
+        } else if destination == .marketplace {
+            if shell.platformFeatures.ffCourseMarketplace {
+                MarketplaceView()
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
         } else if destination == .paths {
             if shell.platformFeatures.ffLearningPaths {
                 MyPathsView()

@@ -816,5 +816,17 @@
   "marketplace.cta.processing": "Processing…",
   "marketplace.cta.alreadyOwned": "You already own this course.",
   "marketplace.error.retry": "Something went wrong. Try again.",
-  "marketplace.success.processing": "Your enrollment is processing; we'll email you when it's ready."
+  "marketplace.success.processing": "Your enrollment is processing; we'll email you when it's ready.",
+  "courses.badge.purchased": "Purchased",
+  "courses.badge.free": "Free",
+  "courses.filter.purchased": "Purchased",
+  "purchases.title": "My purchases",
+  "purchases.subtitle": "Courses you claimed or bought through the marketplace.",
+  "purchases.empty": "You haven't enrolled through the marketplace yet",
+  "purchases.emptyBody": "Browse the marketplace to find free and paid courses.",
+  "purchases.receipt": "Receipt",
+  "purchases.error": "Could not load purchases.",
+  "purchases.source.free": "Free claim",
+  "purchases.source.stripe": "Paid",
+  "purchases.source.comp": "Complimentary"
 }

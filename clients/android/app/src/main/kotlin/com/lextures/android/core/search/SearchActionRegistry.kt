@@ -103,6 +103,7 @@ object SearchActionRegistry {
         MoreDestination.Calendar -> "/calendar"
         MoreDestination.Planner -> "/todos"
         MoreDestination.Catalog -> "/catalog"
+        MoreDestination.Marketplace -> "/marketplace"
         MoreDestination.Paths -> "/paths"
         MoreDestination.Library -> "/library"
         MoreDestination.Reading -> "/reading"
@@ -139,6 +140,7 @@ object SearchActionRegistry {
         MoreDestination.Calendar -> R.string.mobile_ia_more_calendar
         MoreDestination.Planner -> R.string.mobile_ia_more_planner
         MoreDestination.Catalog -> R.string.mobile_ia_more_catalog
+        MoreDestination.Marketplace -> R.string.mobile_ia_more_marketplace
         MoreDestination.Paths -> R.string.mobile_ia_more_paths
         MoreDestination.Library -> R.string.mobile_ia_more_library
         MoreDestination.Reading -> R.string.mobile_ia_more_reading

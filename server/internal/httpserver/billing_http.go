@@ -17,6 +17,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/notifications"
 	"github.com/lextures/lextures/server/internal/service/paymentprovider"
 	repoPayments "github.com/lextures/lextures/server/internal/repos/payments"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 const billingCheckoutRateLimitPerMinute = 10
@@ -56,6 +57,7 @@ func (d Deps) registerBillingRoutes(r chi.Router) {
 	r.Post("/api/v1/billing/checkout", d.handleBillingCheckout())
 	r.Get("/api/v1/billing/portal", d.handleBillingPortal())
 	r.Get("/api/v1/me/entitlements", d.handleMyEntitlements())
+	r.Get("/api/v1/me/purchases", d.handleMyPurchases())
 	r.Get("/api/v1/internal/entitlements/check", d.handleInternalEntitlementCheck())
 	r.Post("/api/v1/webhooks/stripe", d.handleStripeWebhook())
 }
@@ -255,6 +257,66 @@ func (d Deps) handleMyEntitlements() http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"entitlements": items})
+	}
+}
+
+type purchaseJSON struct {
+	CourseCode        string  `json:"courseCode"`
+	CourseID          string  `json:"courseId"`
+	Title             string  `json:"title"`
+	PriceCents        int     `json:"priceCents"`
+	Currency          string  `json:"currency"`
+	Source            string  `json:"source"`
+	AcquiredAt        string  `json:"acquiredAt"`
+	ReceiptURL        *string `json:"receiptUrl,omitempty"`
+	EntitlementID     string  `json:"entitlementId"`
+}
+
+func (d Deps) handleMyPurchases() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		if d.courseMarketplaceOff(w) {
+			return
+		}
+		if d.Pool == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database unavailable.")
+			return
+		}
+		rows, err := repoBilling.ListMyPurchases(r.Context(), d.Pool, userID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load purchases.")
+			return
+		}
+		billingURL := strings.TrimRight(d.effectiveConfig().PublicWebOrigin, "/") + "/me/billing"
+		items := make([]purchaseJSON, 0, len(rows))
+		for _, row := range rows {
+			item := purchaseJSON{
+				CourseCode:    row.CourseCode,
+				CourseID:      row.CourseID.String(),
+				Title:         row.Title,
+				PriceCents:    row.AmountPaidCents,
+				Currency:      row.Currency,
+				Source:        row.AcquisitionSource,
+				AcquiredAt:    row.AcquiredAt.UTC().Format(time.RFC3339),
+				EntitlementID: row.EntitlementID.String(),
+			}
+			if row.HasReceipt {
+				u := billingURL
+				item.ReceiptURL = &u
+			}
+			items = append(items, item)
+		}
+		telemetry.RecordMyPurchasesView()
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"purchases": items})
 	}
 }
 

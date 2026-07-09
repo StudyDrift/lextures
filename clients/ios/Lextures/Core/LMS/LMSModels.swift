@@ -24,6 +24,8 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var published: Bool?
     var catalogNickname: String?
     var catalogPinned: Bool?
+    var acquiredViaMarketplace: Bool?
+    var acquisitionSource: String?
     var notebookEnabled: Bool?
     var calendarEnabled: Bool?
     var officeHoursEnabled: Bool?

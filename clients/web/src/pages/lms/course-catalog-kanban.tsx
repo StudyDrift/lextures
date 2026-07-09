@@ -18,6 +18,8 @@ import type { CoursePublic } from '../../lib/courses-api'
 import type { KanbanColumnLabels } from '../../lib/course-catalog-settings-api'
 import { formatRelativeCompact } from '../../lib/format-datetime'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
+import { CoursePurchasedBadge } from '../../components/ui/course-purchased-badge'
+import { shouldShowPurchasedBadge } from '../../lib/course-purchased-badge'
 import { CourseCatalogNicknameEditor } from './course-catalog-nickname-editor'
 import { CourseCatalogPinButton } from './course-catalog-pin-button'
 import {
@@ -27,6 +29,7 @@ import {
   resolveKanbanColumn,
 } from './course-catalog-status'
 import { isKanbanColumnId, KANBAN_COLUMN_IDS, type KanbanColumnId } from '../../lib/course-catalog-types'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 
 const KANBAN_COLUMN_HINTS: Record<KanbanColumnId, string> = {
   todo: 'Draft and upcoming courses',
@@ -106,6 +109,8 @@ function KanbanDraggableCard({
   const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
   const lifecycleLabel = courseCatalogStatusLabel(course)
   const showLifecyclePill = resolveKanbanColumn(course) === 'hidden'
+  const { ffCourseMarketplace } = usePlatformFeatures()
+  const showPurchased = shouldShowPurchasedBadge(ffCourseMarketplace, course)
 
   return (
     <article
@@ -151,9 +156,10 @@ function KanbanDraggableCard({
           >
             Open course
           </Link>
-          {showLifecyclePill ? (
-            <div className="mt-2">
-              <CourseCatalogStatusPill label={lifecycleLabel} />
+          {(showLifecyclePill || showPurchased) ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1">
+              {showLifecyclePill ? <CourseCatalogStatusPill label={lifecycleLabel} /> : null}
+              {showPurchased ? <CoursePurchasedBadge /> : null}
             </div>
           ) : null}
           <dl className="mt-2 space-y-1 text-xs text-slate-500 dark:text-neutral-400">

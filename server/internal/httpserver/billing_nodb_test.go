@@ -20,6 +20,7 @@ func TestBilling_Unauthenticated(t *testing.T) {
 		path   string
 	}{
 		{http.MethodGet, "/api/v1/me/entitlements"},
+		{http.MethodGet, "/api/v1/me/purchases"},
 		{http.MethodPost, "/api/v1/billing/checkout"},
 		{http.MethodGet, "/api/v1/billing/portal"},
 	}

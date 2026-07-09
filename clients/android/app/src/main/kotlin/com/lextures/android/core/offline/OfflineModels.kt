@@ -50,6 +50,7 @@ object OfflineCacheKey {
     fun pathProgress(pathId: String): String = "paths:progress:$pathId"
     fun catalogPaths(query: String): String = "paths:catalog:$query"
     fun catalogCourses(key: String): String = "catalog:courses:$key"
+    fun marketplaceCourses(key: String): String = "marketplace:courses:$key"
     fun catalogCourseDetail(slug: String): String = "catalog:course:$slug"
     fun catalogCategories(): String = "catalog:categories"
     fun studyStats(): String = "insights:study-stats"

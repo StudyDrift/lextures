@@ -69,6 +69,7 @@ enum OfflineCacheKey {
     static func pathProgress(_ pathId: String) -> String { "paths:progress:\(pathId)" }
     static func catalogPaths(query: String) -> String { "paths:catalog:\(query)" }
     static func catalogCourses(key: String) -> String { "catalog:courses:\(key)" }
+    static func marketplaceCourses(key: String) -> String { "marketplace:courses:\(key)" }
     static func catalogCourseDetail(slug: String) -> String { "catalog:course:\(slug)" }
     static func catalogCategories() -> String { "catalog:categories" }
     static func studyStats() -> String { "insights:study-stats" }

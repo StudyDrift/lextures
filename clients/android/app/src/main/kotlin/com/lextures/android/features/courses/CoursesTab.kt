@@ -54,7 +54,9 @@ import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.CourseCreateLogic
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
+import com.lextures.android.core.lms.MarketplaceLogic
 import com.lextures.android.core.navigation.MobilePlatformFeatures
+import com.lextures.android.core.i18n.L
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.core.offline.fetchCoursesCached
 import com.lextures.android.core.routing.DeepLinkDestination
@@ -254,7 +256,14 @@ fun CoursesTab(
                     item { LmsErrorBanner(message) }
                 }
                 items(filtered, key = { it.id }) { course ->
-                    CourseRowCard(course = course, onClick = { openCourse = course })
+                    CourseRowCard(
+                        course = course,
+                        onClick = { openCourse = course },
+                        showPurchasedBadge = MarketplaceLogic.shouldShowPurchasedBadge(
+                            features = shell?.platformFeatures ?: MobilePlatformFeatures(),
+                            course = course,
+                        ),
+                    )
                 }
             }
         }
@@ -262,16 +271,32 @@ fun CoursesTab(
 }
 
 @Composable
-fun CourseRowCard(course: CourseSummary, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun CourseRowCard(
+    course: CourseSummary,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    showPurchasedBadge: Boolean = false,
+) {
     LmsCard(modifier = modifier, onClick = onClick) {
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             LmsCoverTile(key = course.courseCode, icon = Icons.AutoMirrored.Filled.MenuBook, size = 52)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = course.displayTitle,
-                    style = LexturesType.display(16),
-                    color = textPrimary(),
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = course.displayTitle,
+                        style = LexturesType.display(16),
+                        color = textPrimary(),
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (showPurchasedBadge) {
+                        Text(
+                            text = L.text(R.string.mobile_courses_purchasedBadge),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = accentColor(),
+                        )
+                    }
+                }
                 Text(
                     text = course.courseCode.uppercase(),
                     fontSize = 11.sp,

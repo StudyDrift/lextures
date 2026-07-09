@@ -215,6 +215,10 @@ export type CoursePublic = {
   /** Manual kanban column override for the signed-in user. */
   kanbanColumnId?: 'todo' | 'in-progress' | 'done' | 'hidden' | null
   kanbanSortOrder?: number | null
+  /** True when the viewer has an active marketplace course_purchase entitlement (plan MKT5). */
+  acquiredViaMarketplace?: boolean
+  /** free | stripe | comp when acquiredViaMarketplace. */
+  acquisitionSource?: 'free' | 'stripe' | 'comp' | string | null
 }
 
 export type OrgTerm = {

@@ -39,6 +39,14 @@ export type PersonActivity = {
   occurredAt: string
 }
 
+export type PeopleDashboardStats = {
+  signupsLast7Days: number
+  activeAccounts: number
+  totalAccounts: number
+  recentlyActive30Days: number
+  suspendedAccounts: number
+}
+
 export type PersonReport = {
   id: string
   email: string
@@ -79,6 +87,11 @@ export function personDisplayName(row: {
   const full = [row.firstName?.trim(), row.lastName?.trim()].filter(Boolean).join(' ')
   if (full) return full
   return row.email
+}
+
+export async function fetchPeopleStats(): Promise<PeopleDashboardStats> {
+  const res = await authorizedFetch('/api/v1/admin/people/stats')
+  return parseJson(res)
 }
 
 export async function searchPeople(params: {

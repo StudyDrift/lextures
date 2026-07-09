@@ -47,6 +47,7 @@ object SearchPathNavigator {
             "todos" -> SearchNavigationTarget.MoreTarget(MoreDestination.Planner)
             "portfolios" -> SearchNavigationTarget.MoreTarget(MoreDestination.Portfolio)
             "catalog" -> SearchNavigationTarget.MoreTarget(MoreDestination.Catalog)
+            "marketplace" -> SearchNavigationTarget.MoreTarget(MoreDestination.Marketplace)
             "paths" -> SearchNavigationTarget.MoreTarget(MoreDestination.Paths)
             "library" -> SearchNavigationTarget.MoreTarget(MoreDestination.Library)
             "reading" -> SearchNavigationTarget.MoreTarget(MoreDestination.Reading)

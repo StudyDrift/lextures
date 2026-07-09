@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D0A9FAECDAC84B0BAB6A3362 /* MarketplaceLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF6B8928E1A4CA98C5126C7 /* MarketplaceLogicTests.swift */; };
 		00A8F2B1B91449D0AA3262AA /* LMSFeatureModelsCourseReviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA33DC9A4C4C46A491F49B8C /* LMSFeatureModelsCourseReviews.swift */; };
 		00B7B462ADE045FAA3A58A34 /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2DA4D336164BC7B7BE40F5 /* EditProfileView.swift */; };
 		0100276F7E7143AAA7D1C311 /* LMSFeatureModelsCourseGradingAgents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934E44EC276841C7853423B1 /* LMSFeatureModelsCourseGradingAgents.swift */; };
@@ -21,6 +22,7 @@
 		05C822E4A6FB4B1C93C919FE /* PathsCatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C773B58B304F444290782FDA /* PathsCatalogView.swift */; };
 		064247EC758C4026A6F7900F /* PortfolioLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 594B7081078148CC8E53DBF2 /* PortfolioLogic.swift */; };
 		06BD198722C743BEBF6BD41F /* CourseLandingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C45D59650B849E3893C4A43 /* CourseLandingView.swift */; };
+		2301C98D9E9C4C86B9D37BF5 /* MarketplaceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ADD5584777452085361E80 /* MarketplaceDetailView.swift */; };
 		06C13259B24A4A5C9C2F5376 /* ReportCardListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F391ABE9DBCE42EC86E662F5 /* ReportCardListView.swift */; };
 		073241E7223646B98B9C6F11 /* LMSAPIProctoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E1EF6DBE9644CB8C8FAB92 /* LMSAPIProctoring.swift */; };
 		0780319353494E05AF4A4764 /* PostComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78CAEBF0EC1F4D9289F00805 /* PostComposerView.swift */; };
@@ -166,6 +168,7 @@
 		592927191A54478690F32CB4 /* OfficeHoursView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4BEAB081354D58BD3E18E9 /* OfficeHoursView.swift */; };
 		59813AE27D4F4796A50630FE /* CourseCreateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F18223EBA4F48DE9B74D0DC /* CourseCreateView.swift */; };
 		59E50B34C02B42E49D5B3962 /* CatalogLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2282D8E6134199A0B79214 /* CatalogLogic.swift */; };
+		AA6AA07D71CA4A6E87F51C5A /* MarketplaceLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C7F7EEE94465C9047B88E /* MarketplaceLogic.swift */; };
 		5A9AD55FD1DD4D71A82448CA /* SearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D85ED7D6E22E433A8971F816 /* SearchTests.swift */; };
 		5B2CCC705F2F482FA94759B4 /* LMSAPIReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2920C390D36E424AB6764613 /* LMSAPIReader.swift */; };
 		5C28A76C43A24D4F8C1570EB /* LMSAPICourseImportExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC042785B63467DAF6C394D /* LMSAPICourseImportExport.swift */; };
@@ -237,6 +240,7 @@
 		83470C1421444694B6E1519B /* WhiteboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB65802CB8AB4044815F997D /* WhiteboardView.swift */; };
 		83701F5D7BFD4BF48C77C9FE /* OnboardingModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDF4C1046ECE48D5B2883082 /* OnboardingModelsTests.swift */; };
 		8475C66744B3435F9BD7BE28 /* LMSFeatureModelsCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D7EB0B604543258B9ACFFD /* LMSFeatureModelsCatalog.swift */; };
+		0B12989AA825459FAECF8DA4 /* LMSFeatureModelsMarketplace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910AB6722CC74BA5B3A26FC2 /* LMSFeatureModelsMarketplace.swift */; };
 		848CA3E720C445DD9591232A /* LMSFeatureModelsLive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32264357BA9249FD96BBA629 /* LMSFeatureModelsLive.swift */; };
 		849E204BFD3F4E72BB53D87B /* AnnouncementsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 539D8FC378DD4579BE8657CD /* AnnouncementsViews.swift */; };
 		85294C930A25441585A3578D /* GradeCalculator+MyGrades.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1404AF60487B4BA4B1E66B95 /* GradeCalculator+MyGrades.swift */; };
@@ -295,6 +299,7 @@
 		A002782D9EBE40B4A61AE1DC /* InsightsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ECF058C7E0A4A339E52DC5B /* InsightsLogic.swift */; };
 		A1796B52674C4FEB9CCF4566 /* LMSAPIOutcomes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A57503541FC446FBBB24DBB /* LMSAPIOutcomes.swift */; };
 		A18EA580F68E4151B96B46FD /* LMSAPICatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2585C929F8CD45708F26DFE3 /* LMSAPICatalog.swift */; };
+		528A6B7F9D954E8FBA5A50D4 /* LMSAPIMarketplace.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E2243A464AF8A1DD4C46 /* LMSAPIMarketplace.swift */; };
 		A1F08EDBEE514FE39A9889B0 /* ParentAttendanceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6479EB49E8554D97B41B2514 /* ParentAttendanceDetailView.swift */; };
 		A341239BECDB41AD995093B6 /* CourseSectionsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA33829CD6D1446A927626EA /* CourseSectionsLogic.swift */; };
 		A37C5765E20C48529041F626 /* ReviewReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3947CBD0D68E429CA633CB00 /* ReviewReminderScheduler.swift */; };
@@ -404,6 +409,7 @@
 		D678E331C68B40D4AAE47B48 /* WalletLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1165020976CC4C1AB4EAB2C9 /* WalletLogic.swift */; };
 		D7622F0196F84A4FA8BB24C5 /* AssignmentLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6553FF998A5D44D8815D4EA6 /* AssignmentLogic.swift */; };
 		D85F22FB53B44FB098AD89F0 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A197668CF34E829AF5B0C9 /* CatalogView.swift */; };
+		E39FC44E98134C1E957EAA3B /* MarketplaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917D2415C99D4A079346792D /* MarketplaceView.swift */; };
 		DA571388F9084154877C4AC3 /* PlannerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C4BFE84EA94CECB537A274 /* PlannerModel.swift */; };
 		DADDEE4600EF4C9BBF366DF4 /* LMSFeatureModelsInsights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0555C90C8D2A47E48035FFB5 /* LMSFeatureModelsInsights.swift */; };
 		DAE61D7B54004A708BFD2E23 /* CourseSectionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A9A2DDA0AB4D57BDAEBBC7 /* CourseSectionsSettingsView.swift */; };
@@ -432,6 +438,7 @@
 		E371439511454942B7FAD9E0 /* AuthConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F34B5925EB4F5B9ECE9A3D /* AuthConstants.swift */; };
 		E42D87655B694A74A3A50DFC /* FeedChannelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB297BF884124BCA9BF9277A /* FeedChannelView.swift */; };
 		E4323DDB8FE14902B7DC582B /* CourseSettingsHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED08C436146E498196189686 /* CourseSettingsHostView.swift */; };
+		09D20DFDBADC446F9B258D4E /* CourseMarketplaceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4198D52F8A2746B19832C488 /* CourseMarketplaceSettingsView.swift */; };
 		E43B2DC2B9F84DBB9D4CF474 /* CourseGradesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4C131F3DB2424BBBC304C8 /* CourseGradesView.swift */; };
 		E46F318871C64FCF95897A58 /* PushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653147F2512A4D3F8A2F37BD /* PushManager.swift */; };
 		E4830C92C4744B7895E43F27 /* AuthAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD4EBF81BF24945AA8542ED /* AuthAPI.swift */; };
@@ -507,6 +514,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BCF6B8928E1A4CA98C5126C7 /* MarketplaceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketplaceLogicTests.swift; sourceTree = "<group>"; };
 		00EC85060AF14CFC9992C34D /* NotebookDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookDrawing.swift; sourceTree = "<group>"; };
 		01C1F33B615E4358A283E06D /* MyBookingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyBookingsView.swift; sourceTree = "<group>"; };
 		01EF13AB5A014F75AFD55452 /* CourseFilesSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseFilesSocket.swift; sourceTree = "<group>"; };
@@ -576,14 +584,17 @@
 		24ABF0D72A0F4E68AFE46459 /* UnsavedChangesBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnsavedChangesBanner.swift; sourceTree = "<group>"; };
 		24F03355B1EC4D28AD17C246 /* EvaluationFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationFormView.swift; sourceTree = "<group>"; };
 		2585C929F8CD45708F26DFE3 /* LMSAPICatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICatalog.swift; sourceTree = "<group>"; };
+		F632E2243A464AF8A1DD4C46 /* LMSAPIMarketplace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIMarketplace.swift; sourceTree = "<group>"; };
 		25B55FB39E304E0A9589A4D7 /* DashboardInsightsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardInsightsSection.swift; sourceTree = "<group>"; };
 		25D7EB0B604543258B9ACFFD /* LMSFeatureModelsCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsCatalog.swift; sourceTree = "<group>"; };
+		910AB6722CC74BA5B3A26FC2 /* LMSFeatureModelsMarketplace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsMarketplace.swift; sourceTree = "<group>"; };
 		26A4D021FF0F47CABC9199EF /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
 		26E06A1C13A64C51A44C6F70 /* PlannerLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerLogic.swift; sourceTree = "<group>"; };
 		2920C390D36E424AB6764613 /* LMSAPIReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIReader.swift; sourceTree = "<group>"; };
 		2BC6E58AE4394A498ABC04C9 /* OutboxStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutboxStore.swift; sourceTree = "<group>"; };
 		2C0128E8C38F4A41982AA031 /* CourseGradingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseGradingSettingsView.swift; sourceTree = "<group>"; };
 		2C2282D8E6134199A0B79214 /* CatalogLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogLogic.swift; sourceTree = "<group>"; };
+		C83C7F7EEE94465C9047B88E /* MarketplaceLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketplaceLogic.swift; sourceTree = "<group>"; };
 		2C84BE3F768E4EAA9A507885 /* LearnerProfileEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnerProfileEntryCard.swift; sourceTree = "<group>"; };
 		2CCFAC5A258C41EC9569FBBE /* CoursePeopleLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleLogicTests.swift; sourceTree = "<group>"; };
 		2D960A9BE4D9469FAD7DFB1C /* WalletLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletLogicTests.swift; sourceTree = "<group>"; };
@@ -720,6 +731,7 @@
 		6B2DA4D336164BC7B7BE40F5 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
 		6B4C131F3DB2424BBBC304C8 /* CourseGradesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseGradesView.swift; sourceTree = "<group>"; };
 		6C45D59650B849E3893C4A43 /* CourseLandingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseLandingView.swift; sourceTree = "<group>"; };
+		A8ADD5584777452085361E80 /* MarketplaceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketplaceDetailView.swift; sourceTree = "<group>"; };
 		6D76604532F1449B926C8338 /* CourseArchivedContentLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseArchivedContentLogic.swift; sourceTree = "<group>"; };
 		6D7D6D00609B41939B46971D /* QuizQuestionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizQuestionViews.swift; sourceTree = "<group>"; };
 		6D85736BD41249E28BF58E26 /* DueReminderScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueReminderScheduler.swift; sourceTree = "<group>"; };
@@ -952,6 +964,7 @@
 		E6F6659866ED4634886E28B0 /* MasteryLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasteryLogicTests.swift; sourceTree = "<group>"; };
 		E731E1E154684A9CA2344756 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		E8A197668CF34E829AF5B0C9 /* CatalogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogView.swift; sourceTree = "<group>"; };
+		917D2415C99D4A079346792D /* MarketplaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketplaceView.swift; sourceTree = "<group>"; };
 		E8DCD2E7F53047E2B30431F4 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		E97F42DBE3294ED8A942AC2B /* CredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsView.swift; sourceTree = "<group>"; };
 		EA30EEAEC47649299A09C251 /* LMSAPIPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIPaths.swift; sourceTree = "<group>"; };
@@ -960,6 +973,7 @@
 		EC5EBD342E1447A19A3C381F /* DateFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatting.swift; sourceTree = "<group>"; };
 		ECC71574D34D4A7AB586CF8B /* CoursePlagiarismLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePlagiarismLogic.swift; sourceTree = "<group>"; };
 		ED08C436146E498196189686 /* CourseSettingsHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSettingsHostView.swift; sourceTree = "<group>"; };
+		4198D52F8A2746B19832C488 /* CourseMarketplaceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMarketplaceSettingsView.swift; sourceTree = "<group>"; };
 		ED80285F418647ED9256C36B /* CredentialDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialDetailView.swift; sourceTree = "<group>"; };
 		ED9D8644720F4CD8BD9C0FF6 /* I18nTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = I18nTests.swift; sourceTree = "<group>"; };
 		EDE7D89D3BFC4AACB11984DE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -1133,6 +1147,7 @@
 				3F9CCC738BA5433B9D4E94E2 /* CoursePlagiarismSettingsView.swift */,
 				D5A9A2DDA0AB4D57BDAEBBC7 /* CourseSectionsSettingsView.swift */,
 				ED08C436146E498196189686 /* CourseSettingsHostView.swift */,
+				4198D52F8A2746B19832C488 /* CourseMarketplaceSettingsView.swift */,
 				2214C640134D40DC9C33E5C5 /* CourseTranslationsSettingsView.swift */,
 			);
 			path = Settings;
@@ -1389,6 +1404,7 @@
 				07D335A4DF3D4A479292F36B /* Behavior */,
 				CEC53FC9ECD44C8B922C5076 /* Billing */,
 				943FEEAE805F4DF59D5D3AF6 /* Catalog */,
+				EDEC9F285BC1401698B16907 /* Marketplace */,
 				B38B0039FBEE4E6280A418F0 /* Courses */,
 				30B3C2091D584388A375327B /* Credentials */,
 				8C58A39292444FCD9C44ABD2 /* Dashboard */,
@@ -1598,6 +1614,7 @@
 				7499E077CFB041E69E4BD535 /* BillingLogicTests.swift */,
 				8B2A70DEC5C94203BCCA3800 /* BiometricGateTests.swift */,
 				BE3F5F746E4B490A816F4A80 /* CatalogLogicTests.swift */,
+				BCF6B8928E1A4CA98C5126C7 /* MarketplaceLogicTests.swift */,
 				B3272C26920540ECA8A0FF0D /* ConferenceLogicTests.swift */,
 				B81D249038DE46BF9FCFCBC7 /* CourseAccessibilityReviewLogicTests.swift */,
 				4EBF9250C486422EBCC92FDF /* CourseArchivedContentLogicTests.swift */,
@@ -1667,6 +1684,15 @@
 				04299EEC67D8442AB1DFA003 /* GroupSpaceView.swift */,
 			);
 			path = Groups;
+			sourceTree = "<group>";
+		};
+		EDEC9F285BC1401698B16907 /* Marketplace */ = {
+			isa = PBXGroup;
+			children = (
+				917D2415C99D4A079346792D /* MarketplaceView.swift */,
+				A8ADD5584777452085361E80 /* MarketplaceDetailView.swift */,
+			);
+			path = Marketplace;
 			sourceTree = "<group>";
 		};
 		943FEEAE805F4DF59D5D3AF6 /* Catalog */ = {
@@ -1868,6 +1894,7 @@
 				197C3FDB8C5E410A9330517E /* BehaviorLogic.swift */,
 				0EEA7E6C239A45A1AEC0C6E9 /* BillingLogic.swift */,
 				2C2282D8E6134199A0B79214 /* CatalogLogic.swift */,
+				C83C7F7EEE94465C9047B88E /* MarketplaceLogic.swift */,
 				0FA5301A13EE4510A4472DEC /* ConferenceLogic.swift */,
 				4224300C6D2742CDA0A2D4B8 /* CourseAccessibilityReviewLogic.swift */,
 				6D76604532F1449B926C8338 /* CourseArchivedContentLogic.swift */,
@@ -1906,6 +1933,7 @@
 				3C9C54EDFD6B4CE19A06F54C /* LMSAPIBehavior.swift */,
 				BA5656AA77374F73A2DE8B44 /* LMSAPIBilling.swift */,
 				2585C929F8CD45708F26DFE3 /* LMSAPICatalog.swift */,
+				F632E2243A464AF8A1DD4C46 /* LMSAPIMarketplace.swift */,
 				78AEDC7EEBA648CDB2C28BE9 /* LMSAPICourseAccessibility.swift */,
 				1803C1B12DD047729D31DE75 /* LMSAPICourseArchivedContent.swift */,
 				A98F8221BE25492E95619330 /* LMSAPICourseBlueprint.swift */,
@@ -1950,6 +1978,7 @@
 				1CC3B7A2292D49728CF61576 /* LMSFeatureModelsBehavior.swift */,
 				460D157D84E14473BF1E724B /* LMSFeatureModelsBilling.swift */,
 				25D7EB0B604543258B9ACFFD /* LMSFeatureModelsCatalog.swift */,
+				910AB6722CC74BA5B3A26FC2 /* LMSFeatureModelsMarketplace.swift */,
 				C45D2C2E9D9649179B273013 /* LMSFeatureModelsCourseAccessibility.swift */,
 				78ED505F2F8D413895BFBE0A /* LMSFeatureModelsCourseCreate.swift */,
 				1751095126FD4281A9CC7A47 /* LMSFeatureModelsCourseGrading.swift */,
@@ -2174,6 +2203,7 @@
 				D0BB160C68E94D16823BCE26 /* BillingLogicTests.swift in Sources */,
 				D2C5CF2072DE46ECB20FF44F /* BiometricGateTests.swift in Sources */,
 				6AA02BB8F63D47869FC3B5A4 /* CatalogLogicTests.swift in Sources */,
+				D0A9FAECDAC84B0BAB6A3362 /* MarketplaceLogicTests.swift in Sources */,
 				4E8298C5B47F469A87EB2836 /* ConferenceLogicTests.swift in Sources */,
 				99A63B273DAD4B548596319F /* CourseAccessibilityReviewLogicTests.swift in Sources */,
 				156314ECAA6549679DAC45F3 /* CourseArchivedContentLogicTests.swift in Sources */,
@@ -2273,6 +2303,7 @@
 				A6439075EF5041B6809181DD /* BehaviorLogic.swift in Sources */,
 				2F895E53D36245EDA94484EA /* BillingLogic.swift in Sources */,
 				59E50B34C02B42E49D5B3962 /* CatalogLogic.swift in Sources */,
+				AA6AA07D71CA4A6E87F51C5A /* MarketplaceLogic.swift in Sources */,
 				72667AEC191940AF90236F94 /* ConferenceLogic.swift in Sources */,
 				C3922043B09E4B889C7DF6B8 /* CourseAccessibilityReviewLogic.swift in Sources */,
 				F02FDFB333134D2E9769FB6A /* CourseArchivedContentLogic.swift in Sources */,
@@ -2311,6 +2342,7 @@
 				CC303F3E6D2043279591A930 /* LMSAPIBehavior.swift in Sources */,
 				E265E6D6A38846D3A50F7C0D /* LMSAPIBilling.swift in Sources */,
 				A18EA580F68E4151B96B46FD /* LMSAPICatalog.swift in Sources */,
+				528A6B7F9D954E8FBA5A50D4 /* LMSAPIMarketplace.swift in Sources */,
 				FF1CA11AB550414AB51EB94B /* LMSAPICourseAccessibility.swift in Sources */,
 				4A717543FE924611BAB17768 /* LMSAPICourseArchivedContent.swift in Sources */,
 				4C0F557CCC6A438ABD60E25B /* LMSAPICourseBlueprint.swift in Sources */,
@@ -2355,6 +2387,7 @@
 				E0360DF7266046B1AC1AEBF2 /* LMSFeatureModelsBehavior.swift in Sources */,
 				3D0DD0988C554F7480D79807 /* LMSFeatureModelsBilling.swift in Sources */,
 				8475C66744B3435F9BD7BE28 /* LMSFeatureModelsCatalog.swift in Sources */,
+				0B12989AA825459FAECF8DA4 /* LMSFeatureModelsMarketplace.swift in Sources */,
 				B474395B89CE424FA99141DD /* LMSFeatureModelsCourseAccessibility.swift in Sources */,
 				EFA959727C4941259E9FC0B0 /* LMSFeatureModelsCourseCreate.swift in Sources */,
 				547F8EE30E1A43688694E37A /* LMSFeatureModelsCourseGrading.swift in Sources */,
@@ -2462,7 +2495,9 @@
 				ADBA5870BA5145B48DF840E1 /* CheckoutReturnHandler.swift in Sources */,
 				F6F71DE0460F40A490133341 /* PurchaseFlow.swift in Sources */,
 				D85F22FB53B44FB098AD89F0 /* CatalogView.swift in Sources */,
+				E39FC44E98134C1E957EAA3B /* MarketplaceView.swift in Sources */,
 				06BD198722C743BEBF6BD41F /* CourseLandingView.swift in Sources */,
+				2301C98D9E9C4C86B9D37BF5 /* MarketplaceDetailView.swift in Sources */,
 				A7EC2638AAC84A2F98C98A4F /* ReviewComposer.swift in Sources */,
 				A8B7C7F1A2CA43B09BEED97D /* ContentPageView.swift in Sources */,
 				3B00FCB948584DA2B4C32489 /* CourseAttendanceView.swift in Sources */,
@@ -2499,6 +2534,7 @@
 				AC014E572E8A449281003787 /* CoursePlagiarismSettingsView.swift in Sources */,
 				DAE61D7B54004A708BFD2E23 /* CourseSectionsSettingsView.swift in Sources */,
 				E4323DDB8FE14902B7DC582B /* CourseSettingsHostView.swift in Sources */,
+				09D20DFDBADC446F9B258D4E /* CourseMarketplaceSettingsView.swift in Sources */,
 				181F3CC5B1C24784BA0C61D5 /* CourseTranslationsSettingsView.swift in Sources */,
 				A74693D4D59B44BBBD40B5E4 /* TakeAttendanceView.swift in Sources */,
 				86B77DB03211497B9B417309 /* VibeActivityView.swift in Sources */,

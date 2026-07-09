@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/prerender-courses.mjs",
+    "prerender": "node scripts/prerender-courses.mjs",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test scripts/prerender-courses.test.mjs src/lib/document-head.test.mjs src/lib/marketplace-api.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.548.0",

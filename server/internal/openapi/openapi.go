@@ -298,6 +298,66 @@ const spec = `{
         }
       }
     },
+    "/api/v1/public/marketplace/courses": {
+      "get": {
+        "tags": ["public-marketplace"],
+        "summary": "Unauthenticated public marketplace course list (plan MKT7)",
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "category", "in": "query", "schema": { "type": "string" } },
+          { "name": "level", "in": "query", "schema": { "type": "string", "enum": ["beginner", "intermediate", "advanced"] } },
+          { "name": "language", "in": "query", "schema": { "type": "string" } },
+          { "name": "price_max", "in": "query", "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "free_only", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["popular", "rating", "newest", "relevance", "price"] } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 50 } }
+        ],
+        "responses": {
+          "200": { "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } — no owned field" },
+          "400": { "description": "Invalid filter" },
+          "404": { "description": "Marketplace feature disabled" }
+        }
+      }
+    },
+    "/api/v1/public/marketplace/categories": {
+      "get": {
+        "tags": ["public-marketplace"],
+        "summary": "Public marketplace category facets (plan MKT7)",
+        "responses": {
+          "200": { "description": "{ categories: [{ category, count }] }" },
+          "404": { "description": "Marketplace feature disabled" }
+        }
+      }
+    },
+    "/api/v1/public/marketplace/courses/{slug}": {
+      "get": {
+        "tags": ["public-marketplace"],
+        "summary": "Public marketplace course detail with JSON-LD (plan MKT7)",
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ course, whatsIncluded, jsonLd }" },
+          "404": { "description": "Not listed, unpublished, or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/public/marketplace/courses/{slug}/reviews": {
+      "get": {
+        "tags": ["public-marketplace"],
+        "summary": "Public marketplace course reviews by slug (plan MKT7)",
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "{ summary, reviews, nextCursor? }" },
+          "404": { "description": "Not listed or feature disabled" }
+        }
+      }
+    },
     "/api/v1/marketplace/categories": {
       "get": {
         "tags": ["courses"],
@@ -356,6 +416,20 @@ const spec = `{
           "401": { "description": "Sign in required" },
           "404": { "description": "Not listed, feature disabled, or payments disabled" },
           "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/me/purchases": {
+      "get": {
+        "tags": ["billing"],
+        "summary": "List the caller's active marketplace course purchases (plan MKT5)",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "{ purchases: [{ courseCode, courseId, title, priceCents, currency, source, acquiredAt, receiptUrl?, entitlementId }] }"
+          },
+          "401": { "description": "Sign in required" },
+          "404": { "description": "Marketplace feature disabled" }
         }
       }
     },

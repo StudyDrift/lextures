@@ -103,6 +103,9 @@ type CoursePublic struct {
 	CatalogHidden                 bool             `json:"catalogHidden,omitempty"`
 	KanbanColumnID                *string          `json:"kanbanColumnId,omitempty"`
 	KanbanSortOrder               *int             `json:"kanbanSortOrder,omitempty"`
+	// Marketplace acquisition for the viewer (plan MKT5). Derived from active course_purchase.
+	AcquiredViaMarketplace bool    `json:"acquiredViaMarketplace,omitempty"`
+	AcquisitionSource      *string `json:"acquisitionSource,omitempty"` // free | stripe | comp
 }
 
 // coursePublicSelect is columns for `course.courses` joined to `tenant.terms` (alias `tr`) for public APIs.

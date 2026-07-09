@@ -320,3 +320,172 @@ WHERE user_id = $1 AND course_id = $2 AND entitlement_type = 'course_purchase'
 		t.Fatal("expected no row updated on second refund")
 	}
 }
+
+func TestPurchasedCourseMap_Pg(t *testing.T) {
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		t.Skip("DATABASE_URL")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	if err := migrate.RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
+		t.Fatalf("migrate: %v", err)
+	}
+	pool, err := db.NewPool(ctx, dsn)
+	if err != nil {
+		t.Fatalf("pool: %v", err)
+	}
+	defer pool.Close()
+
+	var userID uuid.UUID
+	if err := pool.QueryRow(ctx, `SELECT id FROM "user".users LIMIT 1`).Scan(&userID); err != nil {
+		t.Fatalf("user: %v", err)
+	}
+	rows, err := pool.Query(ctx, `SELECT id FROM course.courses LIMIT 3`)
+	if err != nil {
+		t.Fatalf("courses: %v", err)
+	}
+	defer rows.Close()
+	var ids []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			t.Fatalf("scan: %v", err)
+		}
+		ids = append(ids, id)
+	}
+	if len(ids) < 2 {
+		t.Skip("need at least two courses")
+	}
+	activeID, refundID := ids[0], ids[1]
+	var otherID uuid.UUID
+	if len(ids) > 2 {
+		otherID = ids[2]
+	} else {
+		otherID = uuid.New()
+	}
+
+	_, _ = pool.Exec(ctx, `
+DELETE FROM billing.user_entitlements
+WHERE user_id = $1 AND course_id = ANY($2::uuid[]) AND entitlement_type = 'course_purchase'
+`, userID, []uuid.UUID{activeID, refundID})
+
+	_, created, err := CreateCourseGrantIdempotent(ctx, pool, CourseGrantInput{
+		UserID:            userID,
+		CourseID:          activeID,
+		AcquisitionSource: AcquisitionFree,
+		AmountPaidCents:   0,
+	})
+	if err != nil || !created {
+		t.Fatalf("free grant: created=%v err=%v", created, err)
+	}
+	_, created, err = CreateCourseGrantIdempotent(ctx, pool, CourseGrantInput{
+		UserID:            userID,
+		CourseID:          refundID,
+		AcquisitionSource: AcquisitionStripe,
+		AmountPaidCents:   1500,
+		Currency:          "usd",
+	})
+	if err != nil || !created {
+		t.Fatalf("paid grant: created=%v err=%v", created, err)
+	}
+	if _, err := RefundCourseEntitlement(ctx, pool, userID, refundID); err != nil {
+		t.Fatalf("refund: %v", err)
+	}
+
+	m, err := PurchasedCourseMap(ctx, pool, userID, []uuid.UUID{activeID, refundID, otherID})
+	if err != nil {
+		t.Fatalf("PurchasedCourseMap: %v", err)
+	}
+	if src, ok := m[activeID]; !ok || src != AcquisitionFree {
+		t.Fatalf("active free: got %q ok=%v", src, ok)
+	}
+	if _, ok := m[refundID]; ok {
+		t.Fatal("refunded course must not appear in PurchasedCourseMap")
+	}
+	if _, ok := m[otherID]; ok {
+		t.Fatal("unrelated course must not appear")
+	}
+	empty, err := PurchasedCourseMap(ctx, pool, userID, nil)
+	if err != nil || len(empty) != 0 {
+		t.Fatalf("empty map: %#v err=%v", empty, err)
+	}
+}
+
+func TestListMyPurchases_Pg(t *testing.T) {
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		t.Skip("DATABASE_URL")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	if err := migrate.RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
+		t.Fatalf("migrate: %v", err)
+	}
+	pool, err := db.NewPool(ctx, dsn)
+	if err != nil {
+		t.Fatalf("pool: %v", err)
+	}
+	defer pool.Close()
+
+	var userID, courseID uuid.UUID
+	var courseCode, title string
+	if err := pool.QueryRow(ctx, `SELECT id FROM "user".users LIMIT 1`).Scan(&userID); err != nil {
+		t.Fatalf("user: %v", err)
+	}
+	if err := pool.QueryRow(ctx, `
+SELECT id, course_code, title FROM course.courses LIMIT 1
+`).Scan(&courseID, &courseCode, &title); err != nil {
+		t.Skip("no course")
+	}
+	_, _ = pool.Exec(ctx, `
+DELETE FROM billing.user_entitlements
+WHERE user_id = $1 AND course_id = $2 AND entitlement_type = 'course_purchase'
+`, userID, courseID)
+
+	_, created, err := CreateCourseGrantIdempotent(ctx, pool, CourseGrantInput{
+		UserID:            userID,
+		CourseID:          courseID,
+		AcquisitionSource: AcquisitionComp,
+		AmountPaidCents:   0,
+	})
+	if err != nil || !created {
+		t.Fatalf("grant: created=%v err=%v", created, err)
+	}
+
+	list, err := ListMyPurchases(ctx, pool, userID)
+	if err != nil {
+		t.Fatalf("ListMyPurchases: %v", err)
+	}
+	found := false
+	for _, p := range list {
+		if p.CourseID == courseID {
+			found = true
+			if p.CourseCode != courseCode || p.Title != title {
+				t.Fatalf("metadata mismatch: %+v", p)
+			}
+			if p.AcquisitionSource != AcquisitionComp {
+				t.Fatalf("source: %q", p.AcquisitionSource)
+			}
+			if p.HasReceipt {
+				t.Fatal("comp/free should not have receipt")
+			}
+		}
+	}
+	if !found {
+		t.Fatal("expected purchase in list")
+	}
+
+	if _, err := RefundCourseEntitlement(ctx, pool, userID, courseID); err != nil {
+		t.Fatalf("refund: %v", err)
+	}
+	list2, err := ListMyPurchases(ctx, pool, userID)
+	if err != nil {
+		t.Fatalf("ListMyPurchases after refund: %v", err)
+	}
+	for _, p := range list2 {
+		if p.CourseID == courseID {
+			t.Fatal("refunded purchase must not appear")
+		}
+	}
+}

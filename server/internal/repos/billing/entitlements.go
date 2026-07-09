@@ -257,6 +257,89 @@ SELECT EXISTS (
 	return ok, err
 }
 
+// PurchasedCourseMap returns acquisition_source for each courseID the user acquired via an
+// active course_purchase entitlement (plan MKT5). Refunded/expired rows are excluded.
+// Subscription-only access does not count as a marketplace purchase indicator.
+// On empty input returns an empty map (not nil) so callers can range safely.
+func PurchasedCourseMap(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, courseIDs []uuid.UUID) (map[uuid.UUID]string, error) {
+	out := make(map[uuid.UUID]string, len(courseIDs))
+	if len(courseIDs) == 0 {
+		return out, nil
+	}
+	rows, err := pool.Query(ctx, `
+SELECT DISTINCT ON (e.course_id) e.course_id, COALESCE(e.acquisition_source, 'stripe')
+FROM billing.user_entitlements e
+WHERE e.user_id = $1
+  AND e.status = 'active'
+  AND (e.valid_until IS NULL OR e.valid_until > NOW())
+  AND e.entitlement_type = 'course_purchase'
+  AND e.course_id = ANY($2::uuid[])
+ORDER BY e.course_id, e.created_at DESC
+`, userID, courseIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id uuid.UUID
+		var src string
+		if err := rows.Scan(&id, &src); err != nil {
+			return nil, err
+		}
+		out[id] = src
+	}
+	return out, rows.Err()
+}
+
+// CoursePurchase is a marketplace acquisition with course metadata for "My purchases" (plan MKT5).
+type CoursePurchase struct {
+	EntitlementID     uuid.UUID
+	CourseID          uuid.UUID
+	CourseCode        string
+	Title             string
+	AmountPaidCents   int
+	Currency          string
+	AcquisitionSource string
+	AcquiredAt        time.Time
+	HasReceipt        bool // true when amount > 0 (paid) — client links to /me/billing
+}
+
+// ListMyPurchases returns active course_purchase entitlements for the user, newest first.
+func ListMyPurchases(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]CoursePurchase, error) {
+	rows, err := pool.Query(ctx, `
+SELECT e.id, e.course_id, c.course_code, c.title,
+       e.amount_paid_cents, e.currency, COALESCE(e.acquisition_source, 'stripe'), e.created_at
+FROM billing.user_entitlements e
+JOIN course.courses c ON c.id = e.course_id
+WHERE e.user_id = $1
+  AND e.status = 'active'
+  AND (e.valid_until IS NULL OR e.valid_until > NOW())
+  AND e.entitlement_type = 'course_purchase'
+  AND e.course_id IS NOT NULL
+ORDER BY e.created_at DESC
+`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []CoursePurchase
+	for rows.Next() {
+		var p CoursePurchase
+		if err := rows.Scan(
+			&p.EntitlementID, &p.CourseID, &p.CourseCode, &p.Title,
+			&p.AmountPaidCents, &p.Currency, &p.AcquisitionSource, &p.AcquiredAt,
+		); err != nil {
+			return nil, err
+		}
+		p.HasReceipt = p.AmountPaidCents > 0 || p.AcquisitionSource == AcquisitionStripe
+		out = append(out, p)
+	}
+	if out == nil {
+		out = []CoursePurchase{}
+	}
+	return out, rows.Err()
+}
+
 // OwnedCourseIDs returns the subset of courseIDs the user owns via marketplace access
 // (active course_purchase for that course, or any active subscription). Used by MKT3
 // to overlay `owned` on a cached storefront page in one round-trip.

@@ -44,10 +44,13 @@ type Metrics struct {
 	marketplaceStorefrontViews *prometheus.CounterVec
 	marketplaceDetailViews     *prometheus.CounterVec
 	marketplaceFacetUsage      *prometheus.CounterVec
-	marketplaceClaimTotal      *prometheus.CounterVec
-	marketplaceCheckoutCreated *prometheus.CounterVec
+	marketplaceClaimTotal        *prometheus.CounterVec
+	marketplaceCheckoutCreated   *prometheus.CounterVec
 	marketplacePurchaseCompleted *prometheus.CounterVec
-	marketplaceRefundTotal     *prometheus.CounterVec
+	marketplaceRefundTotal       *prometheus.CounterVec
+	myPurchasesViews             *prometheus.CounterVec
+	purchasedBadgeRenders        *prometheus.CounterVec
+	publicMarketplaceListTotal   *prometheus.CounterVec
 }
 
 // NewMetrics builds a self-contained registry (not the global default, so tests
@@ -163,6 +166,21 @@ func NewMetrics(deployColor ...string) *Metrics {
 			Name:      "marketplace_refund_total",
 			Help:      "Marketplace course purchase refunds processed (plan MKT4).",
 		}, []string{}),
+		myPurchasesViews: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "my_purchases_view_total",
+			Help:      "My purchases list views (plan MKT5).",
+		}, []string{}),
+		purchasedBadgeRenders: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "purchased_badge_render_total",
+			Help:      "Courses list responses that included at least one purchased badge (plan MKT5).",
+		}, []string{}),
+		publicMarketplaceListTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "public_marketplace_list_total",
+			Help:      "Unauthenticated public marketplace list views (plan MKT7).",
+		}, []string{}),
 	}
 
 	reg.MustRegister(
@@ -185,6 +203,9 @@ func NewMetrics(deployColor ...string) *Metrics {
 		m.marketplaceCheckoutCreated,
 		m.marketplacePurchaseCompleted,
 		m.marketplaceRefundTotal,
+		m.myPurchasesViews,
+		m.purchasedBadgeRenders,
+		m.publicMarketplaceListTotal,
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
@@ -362,6 +383,30 @@ func (m *Metrics) RecordMarketplaceRefund() {
 		return
 	}
 	m.marketplaceRefundTotal.WithLabelValues().Inc()
+}
+
+// RecordMyPurchasesView increments my_purchases_view_total (plan MKT5).
+func (m *Metrics) RecordMyPurchasesView() {
+	if m == nil || m.myPurchasesViews == nil {
+		return
+	}
+	m.myPurchasesViews.WithLabelValues().Inc()
+}
+
+// RecordPurchasedBadgeRender increments purchased_badge_render_total (plan MKT5).
+func (m *Metrics) RecordPurchasedBadgeRender() {
+	if m == nil || m.purchasedBadgeRenders == nil {
+		return
+	}
+	m.purchasedBadgeRenders.WithLabelValues().Inc()
+}
+
+// RecordPublicMarketplaceList increments public_marketplace_list_total (plan MKT7).
+func (m *Metrics) RecordPublicMarketplaceList() {
+	if m == nil || m.publicMarketplaceListTotal == nil {
+		return
+	}
+	m.publicMarketplaceListTotal.WithLabelValues().Inc()
 }
 
 func boolLabel(v bool) string {

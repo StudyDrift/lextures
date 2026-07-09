@@ -25,6 +25,7 @@ object CourseSettingsLogic {
     enum class CourseSettingsSection(val labelRes: String) {
         General("mobile_courseSettings_section_general"),
         Features("mobile_courseSettings_section_features"),
+        Marketplace("mobile_courseSettings_section_marketplace"),
         Sections("mobile_courseSettings_section_sections"),
         Grading("mobile_courseSettings_section_grading"),
         Outcomes("mobile_courseSettings_section_outcomes"),
@@ -43,6 +44,7 @@ object CourseSettingsLogic {
     ): List<CourseSettingsSection> = buildList {
         add(CourseSettingsSection.General)
         add(CourseSettingsSection.Features)
+        if (features.ffCourseMarketplace) add(CourseSettingsSection.Marketplace)
         if (course.isSectionsEnabled) add(CourseSettingsSection.Sections)
         add(CourseSettingsSection.Grading)
         add(CourseSettingsSection.Outcomes)
