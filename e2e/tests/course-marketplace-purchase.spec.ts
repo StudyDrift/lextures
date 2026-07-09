@@ -99,7 +99,7 @@ async function putListing(
 }
 
 test.describe('MKT4 marketplace purchase', () => {
-  test('free claim enrolls and is idempotent; paid claim returns 402', async ({ request }) => {
+  test('free claim enrolls and is idempotent; paid claim returns 402', async () => {
     const admin = await getAdminToken()
     await setCourseMarketplaceFlag(admin, true)
 
@@ -126,7 +126,11 @@ test.describe('MKT4 marketplace purchase', () => {
     })
 
     const email = uniqueEmail('mkt4-learner')
-    const { token } = await apiSignup(request, email, PASSWORD)
+    const { access_token: token } = await apiSignup({
+      email,
+      password: PASSWORD,
+      displayName: 'MKT4 Learner',
+    })
 
     const claim1 = await fetch(`${API_BASE}/api/v1/marketplace/courses/${freeSlug}/claim`, {
       method: 'POST',
@@ -179,7 +183,7 @@ test.describe('MKT4 marketplace purchase', () => {
     expect([400, 404]).toContain(freeCheckout.status)
   })
 
-  test('UI free claim navigates into course', async ({ page, request }) => {
+  test('UI free claim navigates into course', async ({ page }) => {
     const admin = await getAdminToken()
     await setCourseMarketplaceFlag(admin, true)
 
@@ -195,7 +199,11 @@ test.describe('MKT4 marketplace purchase', () => {
     })
 
     const email = uniqueEmail('mkt4-ui')
-    const { token } = await apiSignup(request, email, PASSWORD)
+    const { access_token: token } = await apiSignup({
+      email,
+      password: PASSWORD,
+      displayName: 'MKT4 UI Learner',
+    })
     await injectToken(page, token)
 
     await page.goto(`/marketplace/${slug}`)
