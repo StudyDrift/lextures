@@ -1,13 +1,13 @@
 -- Per-user hidden courses on the Courses catalog (orthogonal to kanban placement).
 
-CREATE TABLE course.user_course_catalog_hidden (
+CREATE TABLE IF NOT EXISTS course.user_course_catalog_hidden (
     user_id   UUID NOT NULL REFERENCES "user".users (id) ON DELETE CASCADE,
     course_id UUID NOT NULL REFERENCES course.courses (id) ON DELETE CASCADE,
     hidden_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id, course_id)
 );
 
-CREATE INDEX idx_user_course_catalog_hidden_user
+CREATE INDEX IF NOT EXISTS idx_user_course_catalog_hidden_user
     ON course.user_course_catalog_hidden (user_id, hidden_at DESC);
 
 COMMENT ON TABLE course.user_course_catalog_hidden IS

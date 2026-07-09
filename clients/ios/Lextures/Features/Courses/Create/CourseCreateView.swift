@@ -86,13 +86,13 @@ struct CourseCreateView: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             HStack(spacing: 8) {
-                ForEach(CourseCreateLogic.WizardStep.allCases) { s in
-                    let active = s <= step
+                ForEach(CourseCreateLogic.WizardStep.allCases) { wizardStep in
+                    let active = wizardStep <= step
                     VStack(alignment: .leading, spacing: 4) {
                         Capsule()
                             .fill(active ? LexturesTheme.accent(for: colorScheme) : LexturesTheme.textSecondary(for: colorScheme).opacity(0.25))
                             .frame(height: 4)
-                        Text(L.text(String.LocalizationValue(s.finishLabelKey(isCompetency: isCompetency))))
+                        Text(L.text(String.LocalizationValue(wizardStep.finishLabelKey(isCompetency: isCompetency))))
                             .font(.caption2)
                             .foregroundStyle(active ? LexturesTheme.textPrimary(for: colorScheme) : LexturesTheme.textSecondary(for: colorScheme))
                             .lineLimit(1)

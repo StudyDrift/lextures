@@ -9,5 +9,6 @@
   "billing.checkout.success.timeout.billingLink": "فتح إعدادات الفوترة",
   "billing.checkout.cancel.title": "تم إلغاء الدفع",
   "billing.checkout.cancel.description": "لم يتم خصم أي مبلغ. يمكنك العودة إلى كتالوج المقررات عندما تكون جاهزًا.",
-  "billing.checkout.cancel.backToCourses": "العودة إلى المقررات"
+  "billing.checkout.cancel.backToCourses": "العودة إلى المقررات",
+  "billing.checkout.cancel.backToCourse": "Back to course"
 }

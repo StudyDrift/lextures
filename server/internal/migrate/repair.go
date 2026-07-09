@@ -53,6 +53,8 @@ var demoChecksumRepairMigrations = []struct {
 	{362, "362_intro_course_grading.sql"},
 	// LP09 adaptivity sub-flags; idempotent ADD COLUMN IF NOT EXISTS.
 	{363, "363_lp_adaptivity_flags.sql"},
+	// Idempotent CREATE TABLE/INDEX IF NOT EXISTS; parallel CI migrates may race before the version row lands.
+	{367, "367_user_course_catalog_hidden.sql"},
 }
 
 // repairMigration289RenumberCollision fixes dev/demo DBs that applied grading_agent as v289

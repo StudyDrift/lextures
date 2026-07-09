@@ -9,5 +9,6 @@
   "billing.checkout.success.timeout.billingLink": "Ouvrir les paramètres de facturation",
   "billing.checkout.cancel.title": "Paiement annulé",
   "billing.checkout.cancel.description": "Aucun débit n'a été effectué. Vous pouvez revenir au catalogue de cours quand vous êtes prêt.",
-  "billing.checkout.cancel.backToCourses": "Retour aux cours"
+  "billing.checkout.cancel.backToCourses": "Retour aux cours",
+  "billing.checkout.cancel.backToCourse": "Back to course"
 }

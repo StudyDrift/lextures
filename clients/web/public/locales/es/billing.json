@@ -9,5 +9,6 @@
   "billing.checkout.success.timeout.billingLink": "Abrir configuración de facturación",
   "billing.checkout.cancel.title": "Pago cancelado",
   "billing.checkout.cancel.description": "No se realizó ningún cargo. Puede volver al catálogo de cursos cuando esté listo.",
-  "billing.checkout.cancel.backToCourses": "Volver a los cursos"
+  "billing.checkout.cancel.backToCourses": "Volver a los cursos",
+  "billing.checkout.cancel.backToCourse": "Back to course"
 }

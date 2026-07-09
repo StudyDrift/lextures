@@ -83,7 +83,8 @@ enum CourseCreateLogic {
                 ),
                 TemplateSection(
                     heading: "Classroom expectations",
-                    markdown: "Norms for participation, discussion, academic honesty, and communication.\n\n1. **Respect** — listen and assume good intent.\n2. **Readiness** — arrive with materials.\n3. **Integrity** — cite sources; complete your own work.\n"
+                    markdown: "Norms for participation, discussion, academic honesty, and communication.\n\n" +
+                        "1. **Respect** — listen and assume good intent.\n2. **Readiness** — arrive with materials.\n3. **Integrity** — cite sources; complete your own work.\n"
                 ),
                 TemplateSection(
                     heading: "Contact & support",
@@ -131,7 +132,8 @@ enum CourseCreateLogic {
             sections: [
                 TemplateSection(
                     heading: "How this course works",
-                    markdown: "Explain that learners move at their own speed and where modules, due dates (if any), and checkpoints live.\n\n- **Estimated time:**\n- **Recommended pace:**\n- **Hard deadlines (if any):**\n"
+                    markdown: "Explain that learners move at their own speed and where modules, due dates (if any), and checkpoints live.\n\n" +
+                        "- **Estimated time:**\n- **Recommended pace:**\n- **Hard deadlines (if any):**\n"
                 ),
                 TemplateSection(
                     heading: "Learning goals",

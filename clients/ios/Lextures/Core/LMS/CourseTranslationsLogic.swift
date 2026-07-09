@@ -54,10 +54,10 @@ enum CourseTranslationsLogic {
         var seen = Set<String>()
         var out: [String] = []
         for tag in cached + current {
-            let n = normalizeLocaleTag(tag)
-            guard isValidLocaleTag(n), !seen.contains(n) else { continue }
-            seen.insert(n)
-            out.append(n)
+            let normalized = normalizeLocaleTag(tag)
+            guard isValidLocaleTag(normalized), !seen.contains(normalized) else { continue }
+            seen.insert(normalized)
+            out.append(normalized)
         }
         return out
     }
@@ -254,10 +254,10 @@ enum CourseTranslationsLogic {
         _ entries: [CourseGlossaryEntry],
         query: String
     ) -> [CourseGlossaryEntry] {
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return entries }
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !needle.isEmpty else { return entries }
         return entries.filter {
-            $0.sourceTerm.lowercased().contains(q) || $0.targetTerm.lowercased().contains(q)
+            $0.sourceTerm.lowercased().contains(needle) || $0.targetTerm.lowercased().contains(needle)
         }
     }
 
@@ -325,9 +325,9 @@ enum CourseTranslationsLogic {
         _ items: [CourseTranslationListItem],
         query: String
     ) -> [CourseTranslationListItem] {
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return items }
-        return items.filter { $0.title.lowercased().contains(q) }
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !needle.isEmpty else { return items }
+        return items.filter { $0.title.lowercased().contains(needle) }
     }
 
     static func unpublishedCount(_ items: [CourseTranslationListItem]) -> Int {

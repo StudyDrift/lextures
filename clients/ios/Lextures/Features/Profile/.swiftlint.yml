@@ -1,0 +1,4 @@
+# Integrations and profile admin screens are intentionally large single-file SwiftUI views.
+type_body_length:
+  warning: 350
+  error: 750
