@@ -371,7 +371,7 @@ struct DashboardView: View {
     private var reviewCard: some View {
         if let stats = model.reviewStats {
             NavigationLink(value: ReviewRoute()) {
-                LMSCard(accent: LexturesTheme.primary) {
+                LMSCard {
                     HStack(spacing: 12) {
                         Image(systemName: "rectangle.stack.fill")
                             .font(.title3.weight(.semibold))

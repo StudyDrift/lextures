@@ -43,6 +43,7 @@ import { CourseAccessibilitySettingsSection } from './course-accessibility-setti
 import { CoursePlagiarismSettingsSection } from './course-plagiarism-settings-section'
 import { CourseGradingAgentsSection } from './course-grading-agents-section'
 import { CourseConsortiumSettingsSection } from './course-consortium-settings-section'
+import { CourseMarketplaceSettingsSection } from './course-marketplace-settings-section'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { CourseHeroImage } from '../../components/course-hero-image'
@@ -179,6 +180,7 @@ export default function CourseSettings() {
     altTextEnforcementEnabled,
     ffPlagiarismChecks,
     ffConsortiumSharing,
+    ffCourseMarketplace,
     graderAgentEnabled,
     loading: featuresLoading,
   } = usePlatformFeatures()
@@ -1446,6 +1448,13 @@ export default function CourseSettings() {
               />
               {ffConsortiumSharing ? (
                 <CourseConsortiumSettingsSection courseCode={courseCode} />
+              ) : null}
+              {ffCourseMarketplace ? (
+                <CourseMarketplaceSettingsSection
+                  courseCode={courseCode}
+                  courseTitle={course.title}
+                  heroImageUrl={course.heroImageUrl}
+                />
               ) : null}
             </>
           )}

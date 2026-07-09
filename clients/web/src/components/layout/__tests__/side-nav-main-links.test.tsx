@@ -9,6 +9,7 @@ const platformFeaturesMock = vi.fn(() => ({
   accommodationsEngineEnabled: false,
   ffEportfolio: false,
   ragNotebookEnabled: true,
+  ffCourseMarketplace: false,
 }))
 
 vi.mock('../../../context/use-inbox-unread', () => ({
@@ -32,6 +33,7 @@ describe('SideNavMainLinks', () => {
       accommodationsEngineEnabled: false,
       ffEportfolio: false,
       ragNotebookEnabled: true,
+      ffCourseMarketplace: false,
     })
   })
 
@@ -56,6 +58,7 @@ describe('SideNavMainLinks', () => {
       accommodationsEngineEnabled: false,
       ffEportfolio: false,
       ragNotebookEnabled: false,
+      ffCourseMarketplace: false,
     })
 
     render(
@@ -74,6 +77,7 @@ describe('SideNavMainLinks', () => {
       accommodationsEngineEnabled: false,
       ffEportfolio: true,
       ragNotebookEnabled: true,
+      ffCourseMarketplace: false,
     })
 
     render(
@@ -85,5 +89,43 @@ describe('SideNavMainLinks', () => {
     )
 
     expect(screen.getByRole('link', { name: /^my portfolio$/i })).toHaveAttribute('href', '/portfolios')
+  })
+
+  it('shows Marketplace when course marketplace is enabled', () => {
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: true,
+      ffCourseMarketplace: true,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: /^marketplace$/i })).toHaveAttribute('href', '/marketplace')
+  })
+
+  it('hides Marketplace when course marketplace is disabled', () => {
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: true,
+      ffCourseMarketplace: false,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('link', { name: /^marketplace$/i })).not.toBeInTheDocument()
   })
 })

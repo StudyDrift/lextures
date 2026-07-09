@@ -31,7 +31,7 @@ func TestDecodeCatalogCursor_Invalid(t *testing.T) {
 }
 
 func TestValidCatalogSort(t *testing.T) {
-	for _, s := range []string{"popular", "rating", "newest", "relevance"} {
+	for _, s := range []string{"popular", "rating", "newest", "relevance", "price"} {
 		if !ValidCatalogSort(s) {
 			t.Fatalf("%q should be valid", s)
 		}

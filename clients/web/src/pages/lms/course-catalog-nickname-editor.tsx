@@ -14,6 +14,8 @@ type Props = {
   titleClassName?: string
   /** Hero/tile already shows the display title — keep footer to official title + edit only. */
   compact?: boolean
+  /** Increment to open the rename dialog from an external control (e.g. actions menu). */
+  openRequest?: number
   onNicknameChange: (courseId: string, nickname: string | null) => void
 }
 
@@ -22,6 +24,7 @@ export function CourseCatalogNicknameEditor({
   className = '',
   titleClassName = '',
   compact = false,
+  openRequest = 0,
   onNicknameChange,
 }: Props) {
   const [open, setOpen] = useState(false)
@@ -36,6 +39,13 @@ export function CourseCatalogNicknameEditor({
     inputRef.current?.focus()
     inputRef.current?.select()
   }, [open])
+
+  useEffect(() => {
+    if (!openRequest) return
+    setDraft(course.catalogNickname ?? '')
+    setError(null)
+    setOpen(true)
+  }, [openRequest, course.catalogNickname])
 
   async function save() {
     const trimmed = draft.trim()

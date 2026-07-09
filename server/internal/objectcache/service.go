@@ -130,11 +130,16 @@ func (s *Service) InvalidateCourseEnrollments(ctx context.Context, courseID stri
 }
 
 // InvalidateCatalog removes all catalog page caches (publish/unpublish).
+// Also clears marketplace storefront listing pages (plan MKT3) so listing toggles
+// and price changes appear promptly.
 func (s *Service) InvalidateCatalog(ctx context.Context) error {
 	if !s.active() {
 		return nil
 	}
-	return s.redis.DelByPrefix(ctx, prefix+"catalog:page:")
+	if err := s.redis.DelByPrefix(ctx, prefix+"catalog:page:"); err != nil {
+		return err
+	}
+	return s.redis.DelByPrefix(ctx, prefix+"marketplace:page:")
 }
 
 // InvalidateUserCalendar removes calendar feed caches for a user.

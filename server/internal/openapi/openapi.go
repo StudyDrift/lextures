@@ -274,6 +274,151 @@ const spec = `{
         "responses": { "200": { "description": "WebSocket upgrade" }, "503": { "description": "realtime not configured" } }
       }
     },
+    "/api/v1/marketplace/courses": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Authenticated marketplace storefront course list (plan MKT3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "category", "in": "query", "schema": { "type": "string" } },
+          { "name": "level", "in": "query", "schema": { "type": "string", "enum": ["beginner", "intermediate", "advanced"] } },
+          { "name": "language", "in": "query", "schema": { "type": "string" } },
+          { "name": "price_max", "in": "query", "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "free_only", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["popular", "rating", "newest", "relevance", "price"] } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 50 } }
+        ],
+        "responses": {
+          "200": { "description": "{ courses: MarketplaceCard[], total, nextCursor }" },
+          "400": { "description": "Invalid filter" },
+          "401": { "description": "Sign in required" },
+          "404": { "description": "Marketplace feature disabled" }
+        }
+      }
+    },
+    "/api/v1/marketplace/categories": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Marketplace category facets for listed courses (plan MKT3)",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "{ categories: [{ category, count }] }" },
+          "401": { "description": "Sign in required" },
+          "404": { "description": "Marketplace feature disabled" }
+        }
+      }
+    },
+    "/api/v1/marketplace/courses/{slug}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Marketplace course detail by catalog slug or course code (plan MKT3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ course, owned, priceCents, priceCurrency, listPriceCents, whatsIncluded, rating }" },
+          "401": { "description": "Sign in required" },
+          "404": { "description": "Not listed, unpublished, or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/marketplace/courses/{slug}/claim": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Claim a free marketplace course (entitlement + enrollment) (plan MKT4)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ enrolled, entitlementId, alreadyOwned?, firstItemId?, courseCode }" },
+          "401": { "description": "Sign in required" },
+          "402": { "description": "Paid course — use checkout; body includes checkoutHint" },
+          "404": { "description": "Not listed or feature disabled" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/marketplace/courses/{slug}/checkout": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Start Stripe Checkout for a paid marketplace course (plan MKT4)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ checkoutUrl, sessionId } or { alreadyOwned, courseCode, courseId }" },
+          "400": { "description": "Free course — use claim instead" },
+          "401": { "description": "Sign in required" },
+          "404": { "description": "Not listed, feature disabled, or payments disabled" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/catalog-listing": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Catalog and marketplace listing settings for a course",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "listing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "listing": { "$ref": "#/components/schemas/CatalogListing" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "put": {
+        "tags": ["courses"],
+        "summary": "Update public catalog and marketplace listing settings",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CatalogListingBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated listing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "listing": { "$ref": "#/components/schemas/CatalogListing" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid input" },
+          "403": { "description": "Forbidden" },
+          "422": { "description": "Cannot list unpublished course in marketplace" }
+        }
+      }
+    },
     "/api/v1/courses/{course_code}/course-context": {
       "post": {
         "tags": ["courses", "me"],
@@ -770,6 +915,36 @@ const spec = `{
   "components": {
     "securitySchemes": {
       "bearerAuth": { "type": "http", "scheme": "bearer" }
+    },
+    "schemas": {
+      "CatalogListing": {
+        "type": "object",
+        "properties": {
+          "isPublic": { "type": "boolean" },
+          "category": { "type": "string", "nullable": true },
+          "difficultyLevel": { "type": "string", "nullable": true },
+          "language": { "type": "string" },
+          "priceCents": { "type": "integer" },
+          "priceCurrency": { "type": "string" },
+          "slug": { "type": "string" },
+          "marketplaceListed": { "type": "boolean" },
+          "publishState": { "type": "string", "enum": ["draft", "published"] },
+          "activePurchaseCount": { "type": "integer" }
+        }
+      },
+      "CatalogListingBody": {
+        "type": "object",
+        "properties": {
+          "isPublic": { "type": "boolean" },
+          "category": { "type": "string", "nullable": true },
+          "difficultyLevel": { "type": "string", "nullable": true },
+          "language": { "type": "string" },
+          "priceCents": { "type": "integer" },
+          "priceCurrency": { "type": "string" },
+          "slug": { "type": "string" },
+          "marketplaceListed": { "type": "boolean" }
+        }
+      }
     }
   }
 }`

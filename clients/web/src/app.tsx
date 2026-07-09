@@ -168,6 +168,16 @@ export default function App() {
             <Route path="/admin/ccr/achievements" element={<Pages.AdminCCRAchievementsPage />} />
             <Route path="/admin/quarantine" element={<Pages.AdminQuarantinePage />} />
             <Route path="/catalog" element={<Pages.CourseCatalogPage />} />
+            <Route path="/marketplace" element={<Pages.MarketplacePage />} />
+            <Route path="/marketplace/:slug" element={<Pages.MarketplaceCoursePage />} />
+            <Route
+              path="/marketplace/:slug/claim"
+              element={<Pages.MarketplacePurchaseActionPage />}
+            />
+            <Route
+              path="/marketplace/:slug/checkout"
+              element={<Pages.MarketplacePurchaseActionPage />}
+            />
             <Route path="/portfolios" element={<Pages.MyPortfoliosPage />} />
             <Route path="/portfolios/:pid/content/:aid" element={<Pages.PortfolioArtifactContentPage />} />
             <Route path="/portfolios/:pid" element={<Pages.PortfolioEditorPage />} />

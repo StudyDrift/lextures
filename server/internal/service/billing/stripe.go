@@ -17,9 +17,12 @@ import (
 	"github.com/stripe/stripe-go/v81/webhook"
 
 	"github.com/lextures/lextures/server/internal/config"
+	"github.com/lextures/lextures/server/internal/courseroles"
 	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
+	repoCourse "github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/paymentprovider"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 // CheckoutRequest is the learner checkout payload.
@@ -237,7 +240,29 @@ func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stri
 			}
 		}
 	}
+	// Marketplace paid path: enroll + refresh grants after entitlement (plan MKT4 FR-4).
+	// Idempotent — safe on webhook retries even when entitlement was already created.
+	if courseID != nil && entType == repoBilling.TypeCoursePurchase {
+		if err := enrollCoursePurchase(ctx, pool, userID, *courseID); err != nil {
+			return nil, err
+		}
+		if created && amount > 0 {
+			telemetry.RecordMarketplacePurchaseCompleted()
+		}
+	}
 	return &WebhookResult{EventType: string(event.Type), Created: created}, nil
+}
+
+func enrollCoursePurchase(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID) error {
+	code, err := repoCourse.GetCourseCodeByID(ctx, pool, courseID)
+	if err != nil {
+		return err
+	}
+	if code == nil || strings.TrimSpace(*code) == "" {
+		return nil
+	}
+	_, err = courseroles.EnrollStudentWithGrants(ctx, pool, courseID, userID, *code)
+	return err
 }
 
 func handleInvoicePaymentSucceeded(ctx context.Context, pool *pgxpool.Pool, event stripe.Event) (*WebhookResult, error) {
@@ -319,21 +344,33 @@ func handleChargeRefunded(ctx context.Context, pool *pgxpool.Pool, event stripe.
 	if err := json.Unmarshal(event.Data.Raw, &ch); err != nil {
 		return nil, err
 	}
-	if opts.TaxCollectionEnabled {
-		rawCourse := strings.TrimSpace(ch.Metadata["course_id"])
-		if cid, err := uuid.Parse(rawCourse); err == nil {
-			_, _ = repoBilling.ReverseEntitlementTaxByCourse(ctx, pool, cid)
+	rawCourse := strings.TrimSpace(ch.Metadata["course_id"])
+	rawUser := strings.TrimSpace(ch.Metadata["user_id"])
+	var courseID uuid.UUID
+	var userID uuid.UUID
+	if rawCourse != "" {
+		if id, err := uuid.Parse(rawCourse); err == nil {
+			courseID = id
 		}
 	}
-	if !opts.RevenueShareEnabled {
-		return &WebhookResult{EventType: string(event.Type)}, nil
+	if rawUser != "" {
+		if id, err := uuid.Parse(rawUser); err == nil {
+			userID = id
+		}
 	}
-	rawCourse := strings.TrimSpace(ch.Metadata["course_id"])
-	if rawCourse == "" {
-		return &WebhookResult{EventType: string(event.Type)}, nil
+	// Prefer user+course refund (plan MKT4 FR-8); fall back to tax reverse by course.
+	if userID != uuid.Nil && courseID != uuid.Nil {
+		refunded, err := repoBilling.RefundCourseEntitlement(ctx, pool, userID, courseID)
+		if err != nil {
+			return nil, err
+		}
+		if refunded {
+			telemetry.RecordMarketplaceRefund()
+		}
+	} else if opts.TaxCollectionEnabled && courseID != uuid.Nil {
+		_, _ = repoBilling.ReverseEntitlementTaxByCourse(ctx, pool, courseID)
 	}
-	courseID, err := uuid.Parse(rawCourse)
-	if err != nil {
+	if !opts.RevenueShareEnabled || courseID == uuid.Nil {
 		return &WebhookResult{EventType: string(event.Type)}, nil
 	}
 	refundAmount := int(ch.AmountRefunded)

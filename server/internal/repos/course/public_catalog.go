@@ -36,18 +36,19 @@ type CatalogCategory struct {
 	Count    int    `json:"count"`
 }
 
-// Valid sort modes for the public catalog.
+// Valid sort modes for the public catalog / marketplace storefront.
 const (
 	CatalogSortPopular   = "popular"
 	CatalogSortRating    = "rating"
 	CatalogSortNewest    = "newest"
 	CatalogSortRelevance = "relevance"
+	// CatalogSortPrice is defined in marketplace_storefront.go (MKT3).
 )
 
 // ValidCatalogSort reports whether s is a supported catalog sort mode.
 func ValidCatalogSort(s string) bool {
 	switch s {
-	case CatalogSortPopular, CatalogSortRating, CatalogSortNewest, CatalogSortRelevance:
+	case CatalogSortPopular, CatalogSortRating, CatalogSortNewest, CatalogSortRelevance, CatalogSortPrice:
 		return true
 	default:
 		return false
@@ -203,6 +204,8 @@ func ListPublicCatalog(
 		orderBy = "c.average_rating DESC NULLS LAST, c.enrollment_count DESC, c.created_at DESC"
 	case CatalogSortNewest:
 		orderBy = "c.created_at DESC, c.id DESC"
+	case CatalogSortPrice:
+		orderBy = "c.price_cents ASC, c.created_at DESC, c.id DESC"
 	case CatalogSortRelevance:
 		if q != "" {
 			rankPh := add(q)

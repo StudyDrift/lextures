@@ -450,6 +450,10 @@ type Config struct {
 	// FFPublicCatalog enables the public, unauthenticated course catalog and search (plan 15.1).
 	// Managed in Settings → Global platform (not process env).
 	FFPublicCatalog bool
+	// FFCourseMarketplace enables the in-app course marketplace/storefront (plan MKT1).
+	// Distinct from FFMarketplace (plugin/OAuth app marketplace, plan 16.9). Default ON.
+	// Managed in Settings → Global platform (not process env).
+	FFCourseMarketplace bool
 	// FFPublicAPI enables the versioned public REST API for third-party integrations (plan 16.1).
 	// Managed in Settings → Global platform (not process env).
 	FFPublicAPI bool

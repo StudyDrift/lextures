@@ -5,8 +5,19 @@ import { isKanbanColumnId } from '../../lib/course-catalog-types'
 export type { KanbanColumnId }
 export type CourseCatalogStatusLabel = 'Draft' | 'Upcoming' | 'Active' | 'Ended'
 
+export function isUserCatalogHidden(course: CoursePublic): boolean {
+  return Boolean(course.catalogHidden)
+}
+
+export function shouldShowInKanbanHiddenColumn(course: CoursePublic): boolean {
+  return isUserCatalogHidden(course) || isCourseCatalogHidden(course)
+}
+
 export function resolveKanbanColumn(course: CoursePublic): KanbanColumnId {
-  if (isKanbanColumnId(course.kanbanColumnId)) return course.kanbanColumnId
+  if (shouldShowInKanbanHiddenColumn(course)) return 'hidden'
+  if (isKanbanColumnId(course.kanbanColumnId) && course.kanbanColumnId !== 'hidden') {
+    return course.kanbanColumnId
+  }
   return courseKanbanColumn(course)
 }
 
@@ -60,7 +71,6 @@ export function isCourseCatalogHidden(c: CoursePublic): boolean {
 }
 
 export function courseKanbanColumn(c: CoursePublic): KanbanColumnId {
-  if (isCourseCatalogHidden(c)) return 'hidden'
   const status = courseCatalogStatusLabel(c)
   switch (status) {
     case 'Draft':

@@ -37,6 +37,17 @@ func CatalogPageKey(f repoCourse.PublicCatalogFilter) string {
 	return prefix + "catalog:page:" + hex.EncodeToString(sum[:8])
 }
 
+// MarketplacePageKey caches a marketplace storefront listing page (without ownership).
+func MarketplacePageKey(f repoCourse.MarketplaceFilter) string {
+	raw := fmt.Sprintf("q=%s|cat=%s|lang=%s|lvl=%s|sort=%s|lim=%d|off=%d|free=%t",
+		f.Q, f.Category, f.Language, f.Level, f.Sort, f.Limit, f.Offset, f.FreeOnly)
+	if f.PriceMax != nil {
+		raw += fmt.Sprintf("|pm=%d", *f.PriceMax)
+	}
+	sum := sha256.Sum256([]byte(raw))
+	return prefix + "marketplace:page:" + hex.EncodeToString(sum[:8])
+}
+
 // UserCalendarKey caches a generated iCal body for a user (all courses or scoped).
 func UserCalendarKey(userID string, courseID *string) string {
 	if courseID != nil && strings.TrimSpace(*courseID) != "" {

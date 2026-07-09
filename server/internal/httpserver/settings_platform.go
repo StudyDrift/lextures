@@ -11,6 +11,7 @@ import (
 	"github.com/lextures/lextures/server/internal/crypto/appsecrets"
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 const placeholderSecretResponse = "••••••••••••"
@@ -59,128 +60,129 @@ type platformSettingsJSON struct {
 	OneRosterEnabled            bool `json:"oneRosterEnabled"`
 	ScimEnabled                 bool `json:"scimEnabled"`
 
-	OIDCSSOEnabled                  bool `json:"oidcSsoEnabled"`
-	CleverSSOEnabled                bool `json:"cleverSsoEnabled"`
-	ClassLinkSSOEnabled             bool `json:"classlinkSsoEnabled"`
-	MagicLinkEnabled                bool `json:"magicLinkEnabled"`
-	MagicLinkEnrolledOnly           bool `json:"magicLinkEnrolledOnly"`
-	SessionManagementUIEnabled      bool `json:"sessionManagementUiEnabled"`
-	EmailNotificationsEnabled       bool `json:"emailNotificationsEnabled"`
-	PushNotificationsEnabled        bool `json:"pushNotificationsEnabled"`
-	VirtualClassroomEnabled         bool `json:"virtualClassroomEnabled"`
-	DRMEnabled                      bool `json:"drmEnabled"`
-	VideoTranscodingEnabled         bool `json:"videoTranscodingEnabled"`
-	AutoCaptioningEnabled           bool `json:"autoCaptioningEnabled"`
-	VideoCaptionsEnabled            bool `json:"videoCaptionsEnabled"`
-	StorageQuotasEnabled            bool `json:"storageQuotasEnabled"`
-	AtRiskAlertsEnabled             bool `json:"atRiskAlertsEnabled"`
-	AvScanningEnabled               bool `json:"avScanningEnabled"`
-	ClamAVStub                      bool `json:"clamavStub"`
-	H5PEnabled                      bool `json:"h5pEnabled"`
-	ScormIngestionEnabled           bool `json:"scormIngestionEnabled"`
-	OERLibraryEnabled               bool `json:"oerLibraryEnabled"`
-	OERStub                         bool `json:"oerStub"`
-	ItemAnalysisEnabled             bool `json:"itemAnalysisEnabled"`
-	StudentProgressEnabled          bool `json:"studentProgressEnabled"`
-	EngagementTrackingEnabled       bool `json:"engagementTrackingEnabled"`
-	SelfReflectionEnabled           bool `json:"selfReflectionEnabled"`
-	LearnerProfileEnabled           bool `json:"learnerProfileEnabled"`
-	LpAdaptRecommendationsEnabled   bool `json:"lpAdaptRecommendationsEnabled"`
-	LpAdaptReviewEnabled            bool `json:"lpAdaptReviewEnabled"`
-	LpAdaptModalityEnabled          bool `json:"lpAdaptModalityEnabled"`
-	LpAdaptTutorEnabled             bool `json:"lpAdaptTutorEnabled"`
-	IntroCourseEnabled              bool `json:"introCourseEnabled"`
-	OutcomesReportEnabled           bool `json:"outcomesReportEnabled"`
-	InstructorInsightsEnabled       bool `json:"instructorInsightsEnabled"`
-	XAPIEmissionEnabled             bool `json:"xapiEmissionEnabled"`
-	EquationEditorEnabled           bool `json:"equationEditorEnabled"`
-	ReadingLevelEnabled             bool `json:"readingLevelEnabled"`
-	GraderAgentEnabled              bool `json:"graderAgentEnabled"`
-	GraderAgentReviewInboxEnabled   bool `json:"graderAgentReviewInboxEnabled"`
+	OIDCSSOEnabled                     bool `json:"oidcSsoEnabled"`
+	CleverSSOEnabled                   bool `json:"cleverSsoEnabled"`
+	ClassLinkSSOEnabled                bool `json:"classlinkSsoEnabled"`
+	MagicLinkEnabled                   bool `json:"magicLinkEnabled"`
+	MagicLinkEnrolledOnly              bool `json:"magicLinkEnrolledOnly"`
+	SessionManagementUIEnabled         bool `json:"sessionManagementUiEnabled"`
+	EmailNotificationsEnabled          bool `json:"emailNotificationsEnabled"`
+	PushNotificationsEnabled           bool `json:"pushNotificationsEnabled"`
+	VirtualClassroomEnabled            bool `json:"virtualClassroomEnabled"`
+	DRMEnabled                         bool `json:"drmEnabled"`
+	VideoTranscodingEnabled            bool `json:"videoTranscodingEnabled"`
+	AutoCaptioningEnabled              bool `json:"autoCaptioningEnabled"`
+	VideoCaptionsEnabled               bool `json:"videoCaptionsEnabled"`
+	StorageQuotasEnabled               bool `json:"storageQuotasEnabled"`
+	AtRiskAlertsEnabled                bool `json:"atRiskAlertsEnabled"`
+	AvScanningEnabled                  bool `json:"avScanningEnabled"`
+	ClamAVStub                         bool `json:"clamavStub"`
+	H5PEnabled                         bool `json:"h5pEnabled"`
+	ScormIngestionEnabled              bool `json:"scormIngestionEnabled"`
+	OERLibraryEnabled                  bool `json:"oerLibraryEnabled"`
+	OERStub                            bool `json:"oerStub"`
+	ItemAnalysisEnabled                bool `json:"itemAnalysisEnabled"`
+	StudentProgressEnabled             bool `json:"studentProgressEnabled"`
+	EngagementTrackingEnabled          bool `json:"engagementTrackingEnabled"`
+	SelfReflectionEnabled              bool `json:"selfReflectionEnabled"`
+	LearnerProfileEnabled              bool `json:"learnerProfileEnabled"`
+	LpAdaptRecommendationsEnabled      bool `json:"lpAdaptRecommendationsEnabled"`
+	LpAdaptReviewEnabled               bool `json:"lpAdaptReviewEnabled"`
+	LpAdaptModalityEnabled             bool `json:"lpAdaptModalityEnabled"`
+	LpAdaptTutorEnabled                bool `json:"lpAdaptTutorEnabled"`
+	IntroCourseEnabled                 bool `json:"introCourseEnabled"`
+	OutcomesReportEnabled              bool `json:"outcomesReportEnabled"`
+	InstructorInsightsEnabled          bool `json:"instructorInsightsEnabled"`
+	XAPIEmissionEnabled                bool `json:"xapiEmissionEnabled"`
+	EquationEditorEnabled              bool `json:"equationEditorEnabled"`
+	ReadingLevelEnabled                bool `json:"readingLevelEnabled"`
+	GraderAgentEnabled                 bool `json:"graderAgentEnabled"`
+	GraderAgentReviewInboxEnabled      bool `json:"graderAgentReviewInboxEnabled"`
 	GraderAgentSuggestModeEnabled      bool `json:"graderAgentSuggestModeEnabled"`
 	GraderAgentTextEntryGradingEnabled bool `json:"graderAgentTextEntryGradingEnabled"`
 	GraderAgentVisionGradingEnabled    bool `json:"graderAgentVisionGradingEnabled"`
 	GraderAgentRunFiltersEnabled       bool `json:"graderAgentRunFiltersEnabled"`
 	GraderAgentCostEstimateEnabled     bool `json:"graderAgentCostEstimateEnabled"`
 	GraderAgentCancelRunEnabled        bool `json:"graderAgentCancelRunEnabled"`
-	CodeExecutionEnabled            bool `json:"codeExecutionEnabled"`
-	AltTextEnforcementEnabled       bool `json:"altTextEnforcementEnabled"`
-	FFAltTextEnforcement            bool `json:"ffAltTextEnforcement"`
-	SpeechToTextEnabled             bool `json:"speechToTextEnabled"`
-	AccommodationsEngineEnabled     bool `json:"accommodationsEngineEnabled"`
-	FFAccommodationsEngine          bool `json:"ffAccommodationsEngine"`
-	ReadAloudEnabled                bool `json:"readAloudEnabled"`
-	FFReadAloud                     bool `json:"ffReadAloud"`
-	TranslationMemoryEnabled        bool `json:"translationMemoryEnabled"`
-	ReportExportEnabled             bool `json:"reportExportEnabled"`
-	CoppaWorkflowEnabled            bool `json:"coppaWorkflowEnabled"`
-	IsoIsmsEnabled                  bool `json:"isoIsmsEnabled"`
-	AdminAuditLogEnabled            bool `json:"adminAuditLogEnabled"`
-	AdminConsoleEnabled             bool `json:"adminConsoleEnabled"`
-	ImpersonationEnabled            bool `json:"impersonationEnabled"`
-	BulkCsvImportEnabled            bool `json:"bulkCsvImportEnabled"`
-	AdminSearchEnabled              bool `json:"adminSearchEnabled"`
-	EmailTemplateEditorEnabled      bool `json:"emailTemplateEditorEnabled"`
-	MaintenanceBannerEnabled        bool `json:"maintenanceBannerEnabled"`
-	CustomFieldsEnabled             bool `json:"customFieldsEnabled"`
-	SeatManagementEnabled           bool `json:"seatManagementEnabled"`
-	DataResidencyEnabled            bool `json:"dataResidencyEnabled"`
-	RTLEnabled                      bool `json:"rtlEnabled"`
-	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
-	FFParentPortal                  bool `json:"ffParentPortal"`
-	FFParentPortalV2                bool `json:"ffParentPortalV2"`
-	FFReportCards                   bool `json:"ffReportCards"`
-	FFLibrary                       bool `json:"ffLibrary"`
-	FFBroadcasts                    bool `json:"ffBroadcasts"`
-	FFConferenceScheduling          bool `json:"ffConferenceScheduling"`
-	FFDemographics                  bool `json:"ffDemographics"`
-	FFContentFilterIntegration      bool `json:"ffContentFilterIntegration"`
-	FFSISIntegration                bool `json:"ffSisIntegration"`
-	FFCatalogIntegration            bool `json:"ffCatalogIntegration"`
-	FFEnrollmentStateMachine        bool `json:"ffEnrollmentStateMachine"`
-	FFGradeSubmission               bool `json:"ffGradeSubmission"`
-	FFWhatifGrades                  bool `json:"ffWhatifGrades"`
-	FFGradeCurving                  bool `json:"ffGradeCurving"`
-	FFPlagiarismChecks              bool `json:"ffPlagiarismChecks"`
-	FFIncompleteGradeWorkflow       bool `json:"ffIncompleteGradeWorkflow"`
-	FFAcademicCalendar              bool `json:"ffAcademicCalendar"`
-	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
-	FFProctoringIntegration         bool `json:"ffProctoringIntegration"`
-	FFCoCurricularTranscript        bool `json:"ffCoCurricularTranscript"`
-	FFEportfolio                    bool `json:"ffEportfolio"`
-	FFBookstoreIntegration          bool `json:"ffBookstoreIntegration"`
-	FFTranscripts                   bool `json:"ffTranscripts"`
-	FFWebhooks                      bool `json:"ffWebhooks"`
-	FFZapierConnector               bool `json:"ffZapierConnector"`
-	FFAdvisingIntegration           bool `json:"ffAdvisingIntegration"`
-	FFResearchConsent               bool `json:"ffResearchConsent"`
-	FFAccessibilityIntake           bool `json:"ffAccessibilityIntake"`
-	FFCEUTracking                   bool `json:"ffCeuTracking"`
-	FFConsortiumSharing             bool `json:"ffConsortiumSharing"`
-	FFSelfPacedMode                 bool `json:"ffSelfPacedMode"`
-	FFPublicCatalog                 bool `json:"ffPublicCatalog"`
-	FFPublicAPI                     bool `json:"ffPublicApi"`
-	FFStripeBilling                 bool `json:"ffStripeBilling"`
-	FFPaymentsEnabled               bool `json:"ffPaymentsEnabled"`
-	FFRevenueShare                  bool `json:"ffRevenueShare"`
-	FFTaxCollection                 bool `json:"ffTaxCollection"`
-	FFLearningPaths                 bool `json:"ffLearningPaths"`
-	FFConditionalRelease            bool `json:"ffConditionalRelease"`
-	FFPeerReview                    bool `json:"ffPeerReview"`
-	FFCompletionCredentials         bool `json:"ffCompletionCredentials"`
-	FFCourseReviews                 bool `json:"ffCourseReviews"`
-	FFGamification                  bool `json:"ffGamification"`
-	FFOnboardingFlow                bool `json:"ffOnboardingFlow"`
-	FFStudyReminders                bool `json:"ffStudyReminders"`
-	FFAIStudyBuddy                  bool `json:"ffAiStudyBuddy"`
-	FFLessonGenerator               bool `json:"ffLessonGenerator"`
-	FFPersistentTutor               bool `json:"ffPersistentTutor"`
-	FFAPITokens                     bool `json:"ffApiTokens"`
-	FFBotSlack                      bool `json:"ffBotSlack"`
-	FFBotTeams                      bool `json:"ffBotTeams"`
-	FFBotDiscord                    bool `json:"ffBotDiscord"`
-	FFCalendarFeeds                 bool `json:"ffCalendarFeeds"`
-	FFRedisCache                    bool `json:"ffRedisCache"`
+	CodeExecutionEnabled               bool `json:"codeExecutionEnabled"`
+	AltTextEnforcementEnabled          bool `json:"altTextEnforcementEnabled"`
+	FFAltTextEnforcement               bool `json:"ffAltTextEnforcement"`
+	SpeechToTextEnabled                bool `json:"speechToTextEnabled"`
+	AccommodationsEngineEnabled        bool `json:"accommodationsEngineEnabled"`
+	FFAccommodationsEngine             bool `json:"ffAccommodationsEngine"`
+	ReadAloudEnabled                   bool `json:"readAloudEnabled"`
+	FFReadAloud                        bool `json:"ffReadAloud"`
+	TranslationMemoryEnabled           bool `json:"translationMemoryEnabled"`
+	ReportExportEnabled                bool `json:"reportExportEnabled"`
+	CoppaWorkflowEnabled               bool `json:"coppaWorkflowEnabled"`
+	IsoIsmsEnabled                     bool `json:"isoIsmsEnabled"`
+	AdminAuditLogEnabled               bool `json:"adminAuditLogEnabled"`
+	AdminConsoleEnabled                bool `json:"adminConsoleEnabled"`
+	ImpersonationEnabled               bool `json:"impersonationEnabled"`
+	BulkCsvImportEnabled               bool `json:"bulkCsvImportEnabled"`
+	AdminSearchEnabled                 bool `json:"adminSearchEnabled"`
+	EmailTemplateEditorEnabled         bool `json:"emailTemplateEditorEnabled"`
+	MaintenanceBannerEnabled           bool `json:"maintenanceBannerEnabled"`
+	CustomFieldsEnabled                bool `json:"customFieldsEnabled"`
+	SeatManagementEnabled              bool `json:"seatManagementEnabled"`
+	DataResidencyEnabled               bool `json:"dataResidencyEnabled"`
+	RTLEnabled                         bool `json:"rtlEnabled"`
+	SecurityDisclosureModuleEnabled    bool `json:"securityDisclosureModuleEnabled"`
+	FFParentPortal                     bool `json:"ffParentPortal"`
+	FFParentPortalV2                   bool `json:"ffParentPortalV2"`
+	FFReportCards                      bool `json:"ffReportCards"`
+	FFLibrary                          bool `json:"ffLibrary"`
+	FFBroadcasts                       bool `json:"ffBroadcasts"`
+	FFConferenceScheduling             bool `json:"ffConferenceScheduling"`
+	FFDemographics                     bool `json:"ffDemographics"`
+	FFContentFilterIntegration         bool `json:"ffContentFilterIntegration"`
+	FFSISIntegration                   bool `json:"ffSisIntegration"`
+	FFCatalogIntegration               bool `json:"ffCatalogIntegration"`
+	FFEnrollmentStateMachine           bool `json:"ffEnrollmentStateMachine"`
+	FFGradeSubmission                  bool `json:"ffGradeSubmission"`
+	FFWhatifGrades                     bool `json:"ffWhatifGrades"`
+	FFGradeCurving                     bool `json:"ffGradeCurving"`
+	FFPlagiarismChecks                 bool `json:"ffPlagiarismChecks"`
+	FFIncompleteGradeWorkflow          bool `json:"ffIncompleteGradeWorkflow"`
+	FFAcademicCalendar                 bool `json:"ffAcademicCalendar"`
+	FFCourseEvaluations                bool `json:"ffCourseEvaluations"`
+	FFProctoringIntegration            bool `json:"ffProctoringIntegration"`
+	FFCoCurricularTranscript           bool `json:"ffCoCurricularTranscript"`
+	FFEportfolio                       bool `json:"ffEportfolio"`
+	FFBookstoreIntegration             bool `json:"ffBookstoreIntegration"`
+	FFTranscripts                      bool `json:"ffTranscripts"`
+	FFWebhooks                         bool `json:"ffWebhooks"`
+	FFZapierConnector                  bool `json:"ffZapierConnector"`
+	FFAdvisingIntegration              bool `json:"ffAdvisingIntegration"`
+	FFResearchConsent                  bool `json:"ffResearchConsent"`
+	FFAccessibilityIntake              bool `json:"ffAccessibilityIntake"`
+	FFCEUTracking                      bool `json:"ffCeuTracking"`
+	FFConsortiumSharing                bool `json:"ffConsortiumSharing"`
+	FFSelfPacedMode                    bool `json:"ffSelfPacedMode"`
+	FFPublicCatalog                    bool `json:"ffPublicCatalog"`
+	FFCourseMarketplace                bool `json:"ffCourseMarketplace"`
+	FFPublicAPI                        bool `json:"ffPublicApi"`
+	FFStripeBilling                    bool `json:"ffStripeBilling"`
+	FFPaymentsEnabled                  bool `json:"ffPaymentsEnabled"`
+	FFRevenueShare                     bool `json:"ffRevenueShare"`
+	FFTaxCollection                    bool `json:"ffTaxCollection"`
+	FFLearningPaths                    bool `json:"ffLearningPaths"`
+	FFConditionalRelease               bool `json:"ffConditionalRelease"`
+	FFPeerReview                       bool `json:"ffPeerReview"`
+	FFCompletionCredentials            bool `json:"ffCompletionCredentials"`
+	FFCourseReviews                    bool `json:"ffCourseReviews"`
+	FFGamification                     bool `json:"ffGamification"`
+	FFOnboardingFlow                   bool `json:"ffOnboardingFlow"`
+	FFStudyReminders                   bool `json:"ffStudyReminders"`
+	FFAIStudyBuddy                     bool `json:"ffAiStudyBuddy"`
+	FFLessonGenerator                  bool `json:"ffLessonGenerator"`
+	FFPersistentTutor                  bool `json:"ffPersistentTutor"`
+	FFAPITokens                        bool `json:"ffApiTokens"`
+	FFBotSlack                         bool `json:"ffBotSlack"`
+	FFBotTeams                         bool `json:"ffBotTeams"`
+	FFBotDiscord                       bool `json:"ffBotDiscord"`
+	FFCalendarFeeds                    bool `json:"ffCalendarFeeds"`
+	FFRedisCache                       bool `json:"ffRedisCache"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -270,169 +272,170 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 		merged := platformconfig.Merge(d.Config, dbRow)
 		sources := platformconfig.ResolveSources(d.Config, dbRow)
 		out := platformSettingsJSON{
-			SAMLSSOEnabled:                  merged.SAMLSSOEnabled,
-			SAMLPublicBaseURL:               merged.SAMLPublicBaseURL,
-			SAMLSPEntityID:                  merged.SAMLSPEntityID,
-			SAMLSPX509PEM:                   merged.SAMLSPX509PEM,
-			SAMLSPPrivateKeyPEM:             maskPEMIfSet(merged.SAMLSPPrivateKeyPEM),
-			AnnotationEnabled:               merged.AnnotationEnabled,
-			FeedbackMediaEnabled:            merged.FeedbackMediaEnabled,
-			BlindGradingEnabled:             merged.BlindGradingEnabled,
-			ModeratedGradingEnabled:         merged.ModeratedGradingEnabled,
-			OriginalityDetectionEnabled:     merged.OriginalityDetectionEnabled,
-			OriginalityStubExternal:         merged.OriginalityStubExternal,
-			GradePostingPoliciesEnabled:     merged.GradePostingPoliciesEnabled,
-			GradebookCSVEnabled:             merged.GradebookCSVEnabled,
-			ResubmissionWorkflowEnabled:     merged.ResubmissionWorkflowEnabled,
-			LTIEnabled:                      merged.LTIEnabled,
-			OneRosterEnabled:                merged.OneRosterEnabled,
-			ScimEnabled:                     merged.ScimEnabled,
-			OIDCSSOEnabled:                  merged.OIDCSSOEnabled,
-			CleverSSOEnabled:                merged.CleverSSOEnabled,
-			ClassLinkSSOEnabled:             merged.ClassLinkSSOEnabled,
-			MagicLinkEnabled:                merged.MagicLinkEnabled,
-			MagicLinkEnrolledOnly:           merged.MagicLinkEnrolledOnly,
-			SessionManagementUIEnabled:      merged.SessionManagementUIEnabled,
-			EmailNotificationsEnabled:       merged.EmailNotificationsEnabled,
-			PushNotificationsEnabled:        merged.PushNotificationsEnabled,
-			VirtualClassroomEnabled:         merged.VirtualClassroomEnabled,
-			DRMEnabled:                      merged.DRMEnabled,
-			VideoTranscodingEnabled:         merged.VideoTranscodingEnabled,
-			AutoCaptioningEnabled:           merged.AutoCaptioningEnabled,
-			VideoCaptionsEnabled:            merged.VideoCaptionsEnabled,
-			StorageQuotasEnabled:            merged.StorageQuotasEnabled,
-			AtRiskAlertsEnabled:             merged.AtRiskAlertsEnabled,
-			AvScanningEnabled:               merged.AvScanningEnabled,
-			ClamAVStub:                      merged.ClamAVStub,
-			H5PEnabled:                      merged.H5PEnabled,
-			ScormIngestionEnabled:           merged.ScormIngestionEnabled,
-			OERLibraryEnabled:               merged.OERLibraryEnabled,
-			OERStub:                         merged.OERStub,
-			ItemAnalysisEnabled:             merged.ItemAnalysisEnabled,
-			StudentProgressEnabled:          merged.StudentProgressEnabled,
-			EngagementTrackingEnabled:       merged.EngagementTrackingEnabled,
-			SelfReflectionEnabled:           merged.SelfReflectionEnabled,
-			LearnerProfileEnabled:           merged.LearnerProfileEnabled,
-			LpAdaptRecommendationsEnabled:   merged.LpAdaptRecommendationsEnabled,
-			LpAdaptReviewEnabled:            merged.LpAdaptReviewEnabled,
-			LpAdaptModalityEnabled:          merged.LpAdaptModalityEnabled,
-			LpAdaptTutorEnabled:             merged.LpAdaptTutorEnabled,
-			IntroCourseEnabled:              merged.IntroCourseEnabled,
-			OutcomesReportEnabled:           merged.OutcomesReportEnabled,
-			InstructorInsightsEnabled:       merged.InstructorInsightsEnabled,
-			XAPIEmissionEnabled:             merged.XAPIEmissionEnabled,
-			EquationEditorEnabled:           merged.EquationEditorEnabled,
-			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
-			GraderAgentEnabled:              merged.GraderAgentEnabled,
-			GraderAgentReviewInboxEnabled:   merged.GraderAgentReviewInboxEnabled,
+			SAMLSSOEnabled:                     merged.SAMLSSOEnabled,
+			SAMLPublicBaseURL:                  merged.SAMLPublicBaseURL,
+			SAMLSPEntityID:                     merged.SAMLSPEntityID,
+			SAMLSPX509PEM:                      merged.SAMLSPX509PEM,
+			SAMLSPPrivateKeyPEM:                maskPEMIfSet(merged.SAMLSPPrivateKeyPEM),
+			AnnotationEnabled:                  merged.AnnotationEnabled,
+			FeedbackMediaEnabled:               merged.FeedbackMediaEnabled,
+			BlindGradingEnabled:                merged.BlindGradingEnabled,
+			ModeratedGradingEnabled:            merged.ModeratedGradingEnabled,
+			OriginalityDetectionEnabled:        merged.OriginalityDetectionEnabled,
+			OriginalityStubExternal:            merged.OriginalityStubExternal,
+			GradePostingPoliciesEnabled:        merged.GradePostingPoliciesEnabled,
+			GradebookCSVEnabled:                merged.GradebookCSVEnabled,
+			ResubmissionWorkflowEnabled:        merged.ResubmissionWorkflowEnabled,
+			LTIEnabled:                         merged.LTIEnabled,
+			OneRosterEnabled:                   merged.OneRosterEnabled,
+			ScimEnabled:                        merged.ScimEnabled,
+			OIDCSSOEnabled:                     merged.OIDCSSOEnabled,
+			CleverSSOEnabled:                   merged.CleverSSOEnabled,
+			ClassLinkSSOEnabled:                merged.ClassLinkSSOEnabled,
+			MagicLinkEnabled:                   merged.MagicLinkEnabled,
+			MagicLinkEnrolledOnly:              merged.MagicLinkEnrolledOnly,
+			SessionManagementUIEnabled:         merged.SessionManagementUIEnabled,
+			EmailNotificationsEnabled:          merged.EmailNotificationsEnabled,
+			PushNotificationsEnabled:           merged.PushNotificationsEnabled,
+			VirtualClassroomEnabled:            merged.VirtualClassroomEnabled,
+			DRMEnabled:                         merged.DRMEnabled,
+			VideoTranscodingEnabled:            merged.VideoTranscodingEnabled,
+			AutoCaptioningEnabled:              merged.AutoCaptioningEnabled,
+			VideoCaptionsEnabled:               merged.VideoCaptionsEnabled,
+			StorageQuotasEnabled:               merged.StorageQuotasEnabled,
+			AtRiskAlertsEnabled:                merged.AtRiskAlertsEnabled,
+			AvScanningEnabled:                  merged.AvScanningEnabled,
+			ClamAVStub:                         merged.ClamAVStub,
+			H5PEnabled:                         merged.H5PEnabled,
+			ScormIngestionEnabled:              merged.ScormIngestionEnabled,
+			OERLibraryEnabled:                  merged.OERLibraryEnabled,
+			OERStub:                            merged.OERStub,
+			ItemAnalysisEnabled:                merged.ItemAnalysisEnabled,
+			StudentProgressEnabled:             merged.StudentProgressEnabled,
+			EngagementTrackingEnabled:          merged.EngagementTrackingEnabled,
+			SelfReflectionEnabled:              merged.SelfReflectionEnabled,
+			LearnerProfileEnabled:              merged.LearnerProfileEnabled,
+			LpAdaptRecommendationsEnabled:      merged.LpAdaptRecommendationsEnabled,
+			LpAdaptReviewEnabled:               merged.LpAdaptReviewEnabled,
+			LpAdaptModalityEnabled:             merged.LpAdaptModalityEnabled,
+			LpAdaptTutorEnabled:                merged.LpAdaptTutorEnabled,
+			IntroCourseEnabled:                 merged.IntroCourseEnabled,
+			OutcomesReportEnabled:              merged.OutcomesReportEnabled,
+			InstructorInsightsEnabled:          merged.InstructorInsightsEnabled,
+			XAPIEmissionEnabled:                merged.XAPIEmissionEnabled,
+			EquationEditorEnabled:              merged.EquationEditorEnabled,
+			ReadingLevelEnabled:                merged.ReadingLevelEnabled,
+			GraderAgentEnabled:                 merged.GraderAgentEnabled,
+			GraderAgentReviewInboxEnabled:      merged.GraderAgentReviewInboxEnabled,
 			GraderAgentSuggestModeEnabled:      merged.GraderAgentSuggestModeEnabled,
 			GraderAgentTextEntryGradingEnabled: merged.GraderAgentTextEntryGradingEnabled,
 			GraderAgentVisionGradingEnabled:    merged.GraderAgentVisionGradingEnabled,
 			GraderAgentRunFiltersEnabled:       merged.GraderAgentRunFiltersEnabled,
 			GraderAgentCostEstimateEnabled:     merged.GraderAgentCostEstimateEnabled,
 			GraderAgentCancelRunEnabled:        merged.GraderAgentCancelRunEnabled,
-			CodeExecutionEnabled:            merged.CodeExecutionEnabled,
-			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
-			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
-			SpeechToTextEnabled:             merged.SpeechToTextEnabled,
-			AccommodationsEngineEnabled:     merged.AccommodationsEngineEnabled,
-			FFAccommodationsEngine:          merged.FFAccommodationsEngine,
-			ReadAloudEnabled:                merged.ReadAloudEnabled,
-			FFReadAloud:                     merged.FFReadAloud,
-			TranslationMemoryEnabled:        merged.TranslationMemoryEnabled,
-			ReportExportEnabled:             merged.ReportExportEnabled,
-			CoppaWorkflowEnabled:            merged.CoppaWorkflowEnabled,
-			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
-			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
-			AdminConsoleEnabled:             merged.AdminConsoleEnabled,
-			ImpersonationEnabled:            merged.ImpersonationEnabled,
-			BulkCsvImportEnabled:            merged.BulkCsvImportEnabled,
-			AdminSearchEnabled:              merged.AdminSearchEnabled,
-			EmailTemplateEditorEnabled:      merged.EmailTemplateEditorEnabled,
-			MaintenanceBannerEnabled:        merged.MaintenanceBannerEnabled,
-			CustomFieldsEnabled:             merged.CustomFieldsEnabled,
-			SeatManagementEnabled:           merged.SeatManagementEnabled,
-			DataResidencyEnabled:            merged.DataResidencyEnabled,
-			RTLEnabled:                      merged.RTLEnabled,
-			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
-			FFParentPortal:                  merged.FFParentPortal,
-			FFParentPortalV2:                merged.FFParentPortalV2,
-			FFReportCards:                   merged.FFReportCards,
-			FFLibrary:                       merged.FFLibrary,
-			FFBroadcasts:                    merged.FFBroadcasts,
-			FFConferenceScheduling:          merged.FFConferenceScheduling,
-			FFDemographics:                  merged.FFDemographics,
-			FFContentFilterIntegration:      merged.FFContentFilterIntegration,
-			FFSISIntegration:                merged.FFSISIntegration,
-			FFCatalogIntegration:            merged.FFCatalogIntegration,
-			FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
-			FFGradeSubmission:               merged.FFGradeSubmission,
-			FFWhatifGrades:                  merged.FFWhatifGrades,
-			FFGradeCurving:                  merged.FFGradeCurving,
-			FFPlagiarismChecks:              merged.FFPlagiarismChecks,
-			FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
-			FFAcademicCalendar:              merged.FFAcademicCalendar,
-			FFCourseEvaluations:             merged.FFCourseEvaluations,
-			FFProctoringIntegration:         merged.FFProctoringIntegration,
-			FFCoCurricularTranscript:        merged.FFCoCurricularTranscript,
-			FFEportfolio:                    merged.FFEportfolio,
-			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
-			FFTranscripts:                   merged.FFTranscripts,
-			FFWebhooks:                      merged.FFWebhooks,
-			FFZapierConnector:               merged.FFZapierConnector,
-			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
-			FFResearchConsent:               merged.FFResearchConsent,
-			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
-			FFCEUTracking:                   merged.FFCEUTracking,
-			FFConsortiumSharing:             merged.FFConsortiumSharing,
-			FFSelfPacedMode:                 merged.FFSelfPacedMode,
-			FFPublicCatalog:                 merged.FFPublicCatalog,
-			FFPublicAPI:                     merged.FFPublicAPI,
-			FFStripeBilling:                 merged.FFStripeBilling,
-			FFPaymentsEnabled:               merged.FFPaymentsEnabled,
-			FFRevenueShare:                  merged.FFRevenueShare,
-			FFTaxCollection:                 merged.FFTaxCollection,
-			FFLearningPaths:                 merged.FFLearningPaths,
-			FFConditionalRelease:            merged.FFConditionalRelease,
-			FFPeerReview:                    merged.FFPeerReview,
-			FFCompletionCredentials:         merged.FFCompletionCredentials,
-			FFCourseReviews:                 merged.FFCourseReviews,
-			FFGamification:                  merged.FFGamification,
-			FFOnboardingFlow:                merged.FFOnboardingFlow,
-			FFStudyReminders:                merged.FFStudyReminders,
-			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
-			FFLessonGenerator:               merged.FFLessonGenerator,
-			FFPersistentTutor:               merged.FFPersistentTutor,
-			FFAPITokens:                     merged.FFAPITokens,
-			FFBotSlack:                      merged.FFBotSlack,
-			FFBotTeams:                      merged.FFBotTeams,
-			FFBotDiscord:                    merged.FFBotDiscord,
-			FFCalendarFeeds:                 merged.FFCalendarFeeds,
-			FFRedisCache:                    merged.FFRedisCache,
-			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
-			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
-			DPAPortalEnabled:                merged.DPAPortalEnabled,
-			SOC2ModuleEnabled:               merged.SOC2ModuleEnabled,
-			FFReadingPreferences:            merged.FFReadingPreferences,
-			FFClassroomSignals:              merged.FFClassroomSignals,
-			FFLibraryIntegration:            merged.FFLibraryIntegration,
-			DiagnosticAssessmentsEnabled:    merged.DiagnosticAssessmentsEnabled,
-			SRSPracticeEnabled:              merged.SRSPracticeEnabled,
-			IRTCatModeEnabled:               merged.IRTCatModeEnabled,
-			AdaptiveLearnerModelEnabled:     merged.AdaptiveLearnerModelEnabled,
-			LearnerModelEMAAlpha:            merged.LearnerModelEMAAlpha,
-			GDPRModuleEnabled:               merged.GDPRModuleEnabled,
-			CCPAModuleEnabled:               merged.CCPAModuleEnabled,
-			StatePrivacyEnabled:             merged.StatePrivacyEnabled,
-			BackupModuleEnabled:             merged.BackupModuleEnabled,
-			FFUiMode:                        merged.FFUiMode,
-			MFAEnabled:                      merged.MFAEnabled,
-			MFAEnforcement:                  merged.MFAEnforcement,
-			SMTPHost:                        merged.SMTPHost,
-			SMTPPort:                        int(merged.SMTPPort),
-			SMTPFrom:                        merged.SMTPFrom,
-			SMTPUser:                        merged.SMTPUser,
-			SMTPPassword:                    smtpPasswordMasked(dbRow, merged.SMTPPassword),
+			CodeExecutionEnabled:               merged.CodeExecutionEnabled,
+			AltTextEnforcementEnabled:          merged.AltTextEnforcementEnabled,
+			FFAltTextEnforcement:               merged.FFAltTextEnforcement,
+			SpeechToTextEnabled:                merged.SpeechToTextEnabled,
+			AccommodationsEngineEnabled:        merged.AccommodationsEngineEnabled,
+			FFAccommodationsEngine:             merged.FFAccommodationsEngine,
+			ReadAloudEnabled:                   merged.ReadAloudEnabled,
+			FFReadAloud:                        merged.FFReadAloud,
+			TranslationMemoryEnabled:           merged.TranslationMemoryEnabled,
+			ReportExportEnabled:                merged.ReportExportEnabled,
+			CoppaWorkflowEnabled:               merged.CoppaWorkflowEnabled,
+			IsoIsmsEnabled:                     merged.IsoIsmsEnabled,
+			AdminAuditLogEnabled:               merged.AdminAuditLogEnabled,
+			AdminConsoleEnabled:                merged.AdminConsoleEnabled,
+			ImpersonationEnabled:               merged.ImpersonationEnabled,
+			BulkCsvImportEnabled:               merged.BulkCsvImportEnabled,
+			AdminSearchEnabled:                 merged.AdminSearchEnabled,
+			EmailTemplateEditorEnabled:         merged.EmailTemplateEditorEnabled,
+			MaintenanceBannerEnabled:           merged.MaintenanceBannerEnabled,
+			CustomFieldsEnabled:                merged.CustomFieldsEnabled,
+			SeatManagementEnabled:              merged.SeatManagementEnabled,
+			DataResidencyEnabled:               merged.DataResidencyEnabled,
+			RTLEnabled:                         merged.RTLEnabled,
+			SecurityDisclosureModuleEnabled:    merged.SecurityDisclosureModuleEnabled,
+			FFParentPortal:                     merged.FFParentPortal,
+			FFParentPortalV2:                   merged.FFParentPortalV2,
+			FFReportCards:                      merged.FFReportCards,
+			FFLibrary:                          merged.FFLibrary,
+			FFBroadcasts:                       merged.FFBroadcasts,
+			FFConferenceScheduling:             merged.FFConferenceScheduling,
+			FFDemographics:                     merged.FFDemographics,
+			FFContentFilterIntegration:         merged.FFContentFilterIntegration,
+			FFSISIntegration:                   merged.FFSISIntegration,
+			FFCatalogIntegration:               merged.FFCatalogIntegration,
+			FFEnrollmentStateMachine:           merged.FFEnrollmentStateMachine,
+			FFGradeSubmission:                  merged.FFGradeSubmission,
+			FFWhatifGrades:                     merged.FFWhatifGrades,
+			FFGradeCurving:                     merged.FFGradeCurving,
+			FFPlagiarismChecks:                 merged.FFPlagiarismChecks,
+			FFIncompleteGradeWorkflow:          merged.FFIncompleteGradeWorkflow,
+			FFAcademicCalendar:                 merged.FFAcademicCalendar,
+			FFCourseEvaluations:                merged.FFCourseEvaluations,
+			FFProctoringIntegration:            merged.FFProctoringIntegration,
+			FFCoCurricularTranscript:           merged.FFCoCurricularTranscript,
+			FFEportfolio:                       merged.FFEportfolio,
+			FFBookstoreIntegration:             merged.FFBookstoreIntegration,
+			FFTranscripts:                      merged.FFTranscripts,
+			FFWebhooks:                         merged.FFWebhooks,
+			FFZapierConnector:                  merged.FFZapierConnector,
+			FFAdvisingIntegration:              merged.FFAdvisingIntegration,
+			FFResearchConsent:                  merged.FFResearchConsent,
+			FFAccessibilityIntake:              merged.FFAccessibilityIntake,
+			FFCEUTracking:                      merged.FFCEUTracking,
+			FFConsortiumSharing:                merged.FFConsortiumSharing,
+			FFSelfPacedMode:                    merged.FFSelfPacedMode,
+			FFPublicCatalog:                    merged.FFPublicCatalog,
+			FFCourseMarketplace:                merged.FFCourseMarketplace,
+			FFPublicAPI:                        merged.FFPublicAPI,
+			FFStripeBilling:                    merged.FFStripeBilling,
+			FFPaymentsEnabled:                  merged.FFPaymentsEnabled,
+			FFRevenueShare:                     merged.FFRevenueShare,
+			FFTaxCollection:                    merged.FFTaxCollection,
+			FFLearningPaths:                    merged.FFLearningPaths,
+			FFConditionalRelease:               merged.FFConditionalRelease,
+			FFPeerReview:                       merged.FFPeerReview,
+			FFCompletionCredentials:            merged.FFCompletionCredentials,
+			FFCourseReviews:                    merged.FFCourseReviews,
+			FFGamification:                     merged.FFGamification,
+			FFOnboardingFlow:                   merged.FFOnboardingFlow,
+			FFStudyReminders:                   merged.FFStudyReminders,
+			FFAIStudyBuddy:                     merged.FFAIStudyBuddy,
+			FFLessonGenerator:                  merged.FFLessonGenerator,
+			FFPersistentTutor:                  merged.FFPersistentTutor,
+			FFAPITokens:                        merged.FFAPITokens,
+			FFBotSlack:                         merged.FFBotSlack,
+			FFBotTeams:                         merged.FFBotTeams,
+			FFBotDiscord:                       merged.FFBotDiscord,
+			FFCalendarFeeds:                    merged.FFCalendarFeeds,
+			FFRedisCache:                       merged.FFRedisCache,
+			LRSAnonymizeActors:                 merged.LRSAnonymizeActors,
+			FERPAWorkflowEnabled:               merged.FERPAWorkflowEnabled,
+			DPAPortalEnabled:                   merged.DPAPortalEnabled,
+			SOC2ModuleEnabled:                  merged.SOC2ModuleEnabled,
+			FFReadingPreferences:               merged.FFReadingPreferences,
+			FFClassroomSignals:                 merged.FFClassroomSignals,
+			FFLibraryIntegration:               merged.FFLibraryIntegration,
+			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,
+			SRSPracticeEnabled:                 merged.SRSPracticeEnabled,
+			IRTCatModeEnabled:                  merged.IRTCatModeEnabled,
+			AdaptiveLearnerModelEnabled:        merged.AdaptiveLearnerModelEnabled,
+			LearnerModelEMAAlpha:               merged.LearnerModelEMAAlpha,
+			GDPRModuleEnabled:                  merged.GDPRModuleEnabled,
+			CCPAModuleEnabled:                  merged.CCPAModuleEnabled,
+			StatePrivacyEnabled:                merged.StatePrivacyEnabled,
+			BackupModuleEnabled:                merged.BackupModuleEnabled,
+			FFUiMode:                           merged.FFUiMode,
+			MFAEnabled:                         merged.MFAEnabled,
+			MFAEnforcement:                     merged.MFAEnforcement,
+			SMTPHost:                           merged.SMTPHost,
+			SMTPPort:                           int(merged.SMTPPort),
+			SMTPFrom:                           merged.SMTPFrom,
+			SMTPUser:                           merged.SMTPUser,
+			SMTPPassword:                       smtpPasswordMasked(dbRow, merged.SMTPPassword),
 			Sources: platformSourcesJSON{
 				SAMLSSOEnabled:              src(sources.SAMLSSOEnabled),
 				SAMLPublicBaseURL:           src(sources.SAMLPublicBaseURL),
@@ -485,133 +488,134 @@ type putPlatformBody struct {
 	OneRosterEnabled            *bool `json:"oneRosterEnabled"`
 	ScimEnabled                 *bool `json:"scimEnabled"`
 
-	OIDCSSOEnabled                  *bool `json:"oidcSsoEnabled"`
-	CleverSSOEnabled                *bool `json:"cleverSsoEnabled"`
-	ClassLinkSSOEnabled             *bool `json:"classlinkSsoEnabled"`
-	MagicLinkEnabled                *bool `json:"magicLinkEnabled"`
-	MagicLinkEnrolledOnly           *bool `json:"magicLinkEnrolledOnly"`
-	SessionManagementUIEnabled      *bool `json:"sessionManagementUiEnabled"`
-	EmailNotificationsEnabled       *bool `json:"emailNotificationsEnabled"`
-	PushNotificationsEnabled        *bool `json:"pushNotificationsEnabled"`
-	VirtualClassroomEnabled         *bool `json:"virtualClassroomEnabled"`
-	DRMEnabled                      *bool `json:"drmEnabled"`
-	VideoTranscodingEnabled         *bool `json:"videoTranscodingEnabled"`
-	AutoCaptioningEnabled           *bool `json:"autoCaptioningEnabled"`
-	VideoCaptionsEnabled            *bool `json:"videoCaptionsEnabled"`
-	StorageQuotasEnabled            *bool `json:"storageQuotasEnabled"`
-	AtRiskAlertsEnabled             *bool `json:"atRiskAlertsEnabled"`
-	AvScanningEnabled               *bool `json:"avScanningEnabled"`
-	ClamAVStub                      *bool `json:"clamavStub"`
-	H5PEnabled                      *bool `json:"h5pEnabled"`
-	ScormIngestionEnabled           *bool `json:"scormIngestionEnabled"`
-	OERLibraryEnabled               *bool `json:"oerLibraryEnabled"`
-	OERStub                         *bool `json:"oerStub"`
-	ItemAnalysisEnabled             *bool `json:"itemAnalysisEnabled"`
-	StudentProgressEnabled          *bool `json:"studentProgressEnabled"`
-	EngagementTrackingEnabled       *bool `json:"engagementTrackingEnabled"`
-	SelfReflectionEnabled           *bool `json:"selfReflectionEnabled"`
-	LearnerProfileEnabled           *bool `json:"learnerProfileEnabled"`
-	LpAdaptRecommendationsEnabled   *bool `json:"lpAdaptRecommendationsEnabled"`
-	LpAdaptReviewEnabled            *bool `json:"lpAdaptReviewEnabled"`
-	LpAdaptModalityEnabled          *bool `json:"lpAdaptModalityEnabled"`
-	LpAdaptTutorEnabled             *bool `json:"lpAdaptTutorEnabled"`
-	IntroCourseEnabled              *bool `json:"introCourseEnabled"`
-	OutcomesReportEnabled           *bool `json:"outcomesReportEnabled"`
-	InstructorInsightsEnabled       *bool `json:"instructorInsightsEnabled"`
-	XAPIEmissionEnabled             *bool `json:"xapiEmissionEnabled"`
-	EquationEditorEnabled           *bool `json:"equationEditorEnabled"`
-	ReadingLevelEnabled             *bool `json:"readingLevelEnabled"`
-	GraderAgentEnabled              *bool `json:"graderAgentEnabled"`
-	GraderAgentReviewInboxEnabled   *bool `json:"graderAgentReviewInboxEnabled"`
+	OIDCSSOEnabled                     *bool `json:"oidcSsoEnabled"`
+	CleverSSOEnabled                   *bool `json:"cleverSsoEnabled"`
+	ClassLinkSSOEnabled                *bool `json:"classlinkSsoEnabled"`
+	MagicLinkEnabled                   *bool `json:"magicLinkEnabled"`
+	MagicLinkEnrolledOnly              *bool `json:"magicLinkEnrolledOnly"`
+	SessionManagementUIEnabled         *bool `json:"sessionManagementUiEnabled"`
+	EmailNotificationsEnabled          *bool `json:"emailNotificationsEnabled"`
+	PushNotificationsEnabled           *bool `json:"pushNotificationsEnabled"`
+	VirtualClassroomEnabled            *bool `json:"virtualClassroomEnabled"`
+	DRMEnabled                         *bool `json:"drmEnabled"`
+	VideoTranscodingEnabled            *bool `json:"videoTranscodingEnabled"`
+	AutoCaptioningEnabled              *bool `json:"autoCaptioningEnabled"`
+	VideoCaptionsEnabled               *bool `json:"videoCaptionsEnabled"`
+	StorageQuotasEnabled               *bool `json:"storageQuotasEnabled"`
+	AtRiskAlertsEnabled                *bool `json:"atRiskAlertsEnabled"`
+	AvScanningEnabled                  *bool `json:"avScanningEnabled"`
+	ClamAVStub                         *bool `json:"clamavStub"`
+	H5PEnabled                         *bool `json:"h5pEnabled"`
+	ScormIngestionEnabled              *bool `json:"scormIngestionEnabled"`
+	OERLibraryEnabled                  *bool `json:"oerLibraryEnabled"`
+	OERStub                            *bool `json:"oerStub"`
+	ItemAnalysisEnabled                *bool `json:"itemAnalysisEnabled"`
+	StudentProgressEnabled             *bool `json:"studentProgressEnabled"`
+	EngagementTrackingEnabled          *bool `json:"engagementTrackingEnabled"`
+	SelfReflectionEnabled              *bool `json:"selfReflectionEnabled"`
+	LearnerProfileEnabled              *bool `json:"learnerProfileEnabled"`
+	LpAdaptRecommendationsEnabled      *bool `json:"lpAdaptRecommendationsEnabled"`
+	LpAdaptReviewEnabled               *bool `json:"lpAdaptReviewEnabled"`
+	LpAdaptModalityEnabled             *bool `json:"lpAdaptModalityEnabled"`
+	LpAdaptTutorEnabled                *bool `json:"lpAdaptTutorEnabled"`
+	IntroCourseEnabled                 *bool `json:"introCourseEnabled"`
+	OutcomesReportEnabled              *bool `json:"outcomesReportEnabled"`
+	InstructorInsightsEnabled          *bool `json:"instructorInsightsEnabled"`
+	XAPIEmissionEnabled                *bool `json:"xapiEmissionEnabled"`
+	EquationEditorEnabled              *bool `json:"equationEditorEnabled"`
+	ReadingLevelEnabled                *bool `json:"readingLevelEnabled"`
+	GraderAgentEnabled                 *bool `json:"graderAgentEnabled"`
+	GraderAgentReviewInboxEnabled      *bool `json:"graderAgentReviewInboxEnabled"`
 	GraderAgentSuggestModeEnabled      *bool `json:"graderAgentSuggestModeEnabled"`
 	GraderAgentTextEntryGradingEnabled *bool `json:"graderAgentTextEntryGradingEnabled"`
 	GraderAgentVisionGradingEnabled    *bool `json:"graderAgentVisionGradingEnabled"`
 	GraderAgentRunFiltersEnabled       *bool `json:"graderAgentRunFiltersEnabled"`
 	GraderAgentCostEstimateEnabled     *bool `json:"graderAgentCostEstimateEnabled"`
 	GraderAgentCancelRunEnabled        *bool `json:"graderAgentCancelRunEnabled"`
-	CodeExecutionEnabled            *bool `json:"codeExecutionEnabled"`
-	AltTextEnforcementEnabled       *bool `json:"altTextEnforcementEnabled"`
-	FFAltTextEnforcement            *bool `json:"ffAltTextEnforcement"`
-	SpeechToTextEnabled             *bool `json:"speechToTextEnabled"`
-	AccommodationsEngineEnabled     *bool `json:"accommodationsEngineEnabled"`
-	FFAccommodationsEngine          *bool `json:"ffAccommodationsEngine"`
-	ReadAloudEnabled                *bool `json:"readAloudEnabled"`
-	FFReadAloud                     *bool `json:"ffReadAloud"`
-	TranslationMemoryEnabled        *bool `json:"translationMemoryEnabled"`
-	ReportExportEnabled             *bool `json:"reportExportEnabled"`
-	CoppaWorkflowEnabled            *bool `json:"coppaWorkflowEnabled"`
-	GDPRModuleEnabled               *bool `json:"gdprModuleEnabled"`
-	CCPAModuleEnabled               *bool `json:"ccpaModuleEnabled"`
-	StatePrivacyEnabled             *bool `json:"statePrivacyEnabled"`
-	IsoIsmsEnabled                  *bool `json:"isoIsmsEnabled"`
-	AdminAuditLogEnabled            *bool `json:"adminAuditLogEnabled"`
-	AdminConsoleEnabled             *bool `json:"adminConsoleEnabled"`
-	ImpersonationEnabled            *bool `json:"impersonationEnabled"`
-	BulkCsvImportEnabled            *bool `json:"bulkCsvImportEnabled"`
-	AdminSearchEnabled              *bool `json:"adminSearchEnabled"`
-	EmailTemplateEditorEnabled      *bool `json:"emailTemplateEditorEnabled"`
-	MaintenanceBannerEnabled        *bool `json:"maintenanceBannerEnabled"`
-	CustomFieldsEnabled             *bool `json:"customFieldsEnabled"`
-	SeatManagementEnabled           *bool `json:"seatManagementEnabled"`
-	DataResidencyEnabled            *bool `json:"dataResidencyEnabled"`
-	BackupModuleEnabled             *bool `json:"backupModuleEnabled"`
-	RTLEnabled                      *bool `json:"rtlEnabled"`
-	SecurityDisclosureModuleEnabled *bool `json:"securityDisclosureModuleEnabled"`
-	FFUiMode                        *bool `json:"ffUiMode"`
-	FFParentPortal                  *bool `json:"ffParentPortal"`
-	FFParentPortalV2                *bool `json:"ffParentPortalV2"`
-	FFReportCards                   *bool `json:"ffReportCards"`
-	FFLibrary                       *bool `json:"ffLibrary"`
-	FFBroadcasts                    *bool `json:"ffBroadcasts"`
-	FFConferenceScheduling          *bool `json:"ffConferenceScheduling"`
-	FFDemographics                  *bool `json:"ffDemographics"`
-	FFContentFilterIntegration      *bool `json:"ffContentFilterIntegration"`
-	FFSISIntegration                *bool `json:"ffSisIntegration"`
-	FFCatalogIntegration            *bool `json:"ffCatalogIntegration"`
-	FFEnrollmentStateMachine        *bool `json:"ffEnrollmentStateMachine"`
-	FFGradeSubmission               *bool `json:"ffGradeSubmission"`
-	FFWhatifGrades                  *bool `json:"ffWhatifGrades"`
-	FFGradeCurving                  *bool `json:"ffGradeCurving"`
-	FFPlagiarismChecks              *bool `json:"ffPlagiarismChecks"`
-	FFIncompleteGradeWorkflow       *bool `json:"ffIncompleteGradeWorkflow"`
-	FFAcademicCalendar              *bool `json:"ffAcademicCalendar"`
-	FFCourseEvaluations             *bool `json:"ffCourseEvaluations"`
-	FFProctoringIntegration         *bool `json:"ffProctoringIntegration"`
-	FFCoCurricularTranscript        *bool `json:"ffCoCurricularTranscript"`
-	FFEportfolio                    *bool `json:"ffEportfolio"`
-	FFBookstoreIntegration          *bool `json:"ffBookstoreIntegration"`
-	FFTranscripts                   *bool `json:"ffTranscripts"`
-	FFWebhooks                      *bool `json:"ffWebhooks"`
-	FFZapierConnector               *bool `json:"ffZapierConnector"`
-	FFAdvisingIntegration           *bool `json:"ffAdvisingIntegration"`
-	FFResearchConsent               *bool `json:"ffResearchConsent"`
-	FFAccessibilityIntake           *bool `json:"ffAccessibilityIntake"`
-	FFCEUTracking                   *bool `json:"ffCeuTracking"`
-	FFConsortiumSharing             *bool `json:"ffConsortiumSharing"`
-	FFSelfPacedMode                 *bool `json:"ffSelfPacedMode"`
-	FFPublicCatalog                 *bool `json:"ffPublicCatalog"`
-	FFPublicAPI                     *bool `json:"ffPublicApi"`
-	FFStripeBilling                 *bool `json:"ffStripeBilling"`
-	FFPaymentsEnabled               *bool `json:"ffPaymentsEnabled"`
-	FFRevenueShare                  *bool `json:"ffRevenueShare"`
-	FFTaxCollection                 *bool `json:"ffTaxCollection"`
-	FFLearningPaths                 *bool `json:"ffLearningPaths"`
-	FFConditionalRelease            *bool `json:"ffConditionalRelease"`
-	FFPeerReview                    *bool `json:"ffPeerReview"`
-	FFCompletionCredentials         *bool `json:"ffCompletionCredentials"`
-	FFCourseReviews                 *bool `json:"ffCourseReviews"`
-	FFGamification                  *bool `json:"ffGamification"`
-	FFOnboardingFlow                *bool `json:"ffOnboardingFlow"`
-	FFStudyReminders                *bool `json:"ffStudyReminders"`
-	FFAIStudyBuddy                  *bool `json:"ffAiStudyBuddy"`
-	FFLessonGenerator               *bool `json:"ffLessonGenerator"`
-	FFPersistentTutor               *bool `json:"ffPersistentTutor"`
-	FFAPITokens                     *bool `json:"ffApiTokens"`
-	FFBotSlack                      *bool `json:"ffBotSlack"`
-	FFBotTeams                      *bool `json:"ffBotTeams"`
-	FFBotDiscord                    *bool `json:"ffBotDiscord"`
-	FFCalendarFeeds                 *bool `json:"ffCalendarFeeds"`
-	FFRedisCache                    *bool `json:"ffRedisCache"`
+	CodeExecutionEnabled               *bool `json:"codeExecutionEnabled"`
+	AltTextEnforcementEnabled          *bool `json:"altTextEnforcementEnabled"`
+	FFAltTextEnforcement               *bool `json:"ffAltTextEnforcement"`
+	SpeechToTextEnabled                *bool `json:"speechToTextEnabled"`
+	AccommodationsEngineEnabled        *bool `json:"accommodationsEngineEnabled"`
+	FFAccommodationsEngine             *bool `json:"ffAccommodationsEngine"`
+	ReadAloudEnabled                   *bool `json:"readAloudEnabled"`
+	FFReadAloud                        *bool `json:"ffReadAloud"`
+	TranslationMemoryEnabled           *bool `json:"translationMemoryEnabled"`
+	ReportExportEnabled                *bool `json:"reportExportEnabled"`
+	CoppaWorkflowEnabled               *bool `json:"coppaWorkflowEnabled"`
+	GDPRModuleEnabled                  *bool `json:"gdprModuleEnabled"`
+	CCPAModuleEnabled                  *bool `json:"ccpaModuleEnabled"`
+	StatePrivacyEnabled                *bool `json:"statePrivacyEnabled"`
+	IsoIsmsEnabled                     *bool `json:"isoIsmsEnabled"`
+	AdminAuditLogEnabled               *bool `json:"adminAuditLogEnabled"`
+	AdminConsoleEnabled                *bool `json:"adminConsoleEnabled"`
+	ImpersonationEnabled               *bool `json:"impersonationEnabled"`
+	BulkCsvImportEnabled               *bool `json:"bulkCsvImportEnabled"`
+	AdminSearchEnabled                 *bool `json:"adminSearchEnabled"`
+	EmailTemplateEditorEnabled         *bool `json:"emailTemplateEditorEnabled"`
+	MaintenanceBannerEnabled           *bool `json:"maintenanceBannerEnabled"`
+	CustomFieldsEnabled                *bool `json:"customFieldsEnabled"`
+	SeatManagementEnabled              *bool `json:"seatManagementEnabled"`
+	DataResidencyEnabled               *bool `json:"dataResidencyEnabled"`
+	BackupModuleEnabled                *bool `json:"backupModuleEnabled"`
+	RTLEnabled                         *bool `json:"rtlEnabled"`
+	SecurityDisclosureModuleEnabled    *bool `json:"securityDisclosureModuleEnabled"`
+	FFUiMode                           *bool `json:"ffUiMode"`
+	FFParentPortal                     *bool `json:"ffParentPortal"`
+	FFParentPortalV2                   *bool `json:"ffParentPortalV2"`
+	FFReportCards                      *bool `json:"ffReportCards"`
+	FFLibrary                          *bool `json:"ffLibrary"`
+	FFBroadcasts                       *bool `json:"ffBroadcasts"`
+	FFConferenceScheduling             *bool `json:"ffConferenceScheduling"`
+	FFDemographics                     *bool `json:"ffDemographics"`
+	FFContentFilterIntegration         *bool `json:"ffContentFilterIntegration"`
+	FFSISIntegration                   *bool `json:"ffSisIntegration"`
+	FFCatalogIntegration               *bool `json:"ffCatalogIntegration"`
+	FFEnrollmentStateMachine           *bool `json:"ffEnrollmentStateMachine"`
+	FFGradeSubmission                  *bool `json:"ffGradeSubmission"`
+	FFWhatifGrades                     *bool `json:"ffWhatifGrades"`
+	FFGradeCurving                     *bool `json:"ffGradeCurving"`
+	FFPlagiarismChecks                 *bool `json:"ffPlagiarismChecks"`
+	FFIncompleteGradeWorkflow          *bool `json:"ffIncompleteGradeWorkflow"`
+	FFAcademicCalendar                 *bool `json:"ffAcademicCalendar"`
+	FFCourseEvaluations                *bool `json:"ffCourseEvaluations"`
+	FFProctoringIntegration            *bool `json:"ffProctoringIntegration"`
+	FFCoCurricularTranscript           *bool `json:"ffCoCurricularTranscript"`
+	FFEportfolio                       *bool `json:"ffEportfolio"`
+	FFBookstoreIntegration             *bool `json:"ffBookstoreIntegration"`
+	FFTranscripts                      *bool `json:"ffTranscripts"`
+	FFWebhooks                         *bool `json:"ffWebhooks"`
+	FFZapierConnector                  *bool `json:"ffZapierConnector"`
+	FFAdvisingIntegration              *bool `json:"ffAdvisingIntegration"`
+	FFResearchConsent                  *bool `json:"ffResearchConsent"`
+	FFAccessibilityIntake              *bool `json:"ffAccessibilityIntake"`
+	FFCEUTracking                      *bool `json:"ffCeuTracking"`
+	FFConsortiumSharing                *bool `json:"ffConsortiumSharing"`
+	FFSelfPacedMode                    *bool `json:"ffSelfPacedMode"`
+	FFPublicCatalog                    *bool `json:"ffPublicCatalog"`
+	FFCourseMarketplace                *bool `json:"ffCourseMarketplace"`
+	FFPublicAPI                        *bool `json:"ffPublicApi"`
+	FFStripeBilling                    *bool `json:"ffStripeBilling"`
+	FFPaymentsEnabled                  *bool `json:"ffPaymentsEnabled"`
+	FFRevenueShare                     *bool `json:"ffRevenueShare"`
+	FFTaxCollection                    *bool `json:"ffTaxCollection"`
+	FFLearningPaths                    *bool `json:"ffLearningPaths"`
+	FFConditionalRelease               *bool `json:"ffConditionalRelease"`
+	FFPeerReview                       *bool `json:"ffPeerReview"`
+	FFCompletionCredentials            *bool `json:"ffCompletionCredentials"`
+	FFCourseReviews                    *bool `json:"ffCourseReviews"`
+	FFGamification                     *bool `json:"ffGamification"`
+	FFOnboardingFlow                   *bool `json:"ffOnboardingFlow"`
+	FFStudyReminders                   *bool `json:"ffStudyReminders"`
+	FFAIStudyBuddy                     *bool `json:"ffAiStudyBuddy"`
+	FFLessonGenerator                  *bool `json:"ffLessonGenerator"`
+	FFPersistentTutor                  *bool `json:"ffPersistentTutor"`
+	FFAPITokens                        *bool `json:"ffApiTokens"`
+	FFBotSlack                         *bool `json:"ffBotSlack"`
+	FFBotTeams                         *bool `json:"ffBotTeams"`
+	FFBotDiscord                       *bool `json:"ffBotDiscord"`
+	FFCalendarFeeds                    *bool `json:"ffCalendarFeeds"`
+	FFRedisCache                       *bool `json:"ffRedisCache"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -656,6 +660,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			return
 		}
 		prevIntroCourseEnabled := d.effectiveConfig().IntroCourseEnabled
+		prevCourseMarketplace := d.effectiveConfig().FFCourseMarketplace
 		b, _ := io.ReadAll(r.Body)
 		_ = r.Body.Close()
 		var body putPlatformBody
@@ -941,6 +946,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffconsortiumsharing", body.FFConsortiumSharing, func(v bool) { wr.FFConsortiumSharing = &v })
 		setBool("ffselfpacedmode", body.FFSelfPacedMode, func(v bool) { wr.FFSelfPacedMode = &v })
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
+		setBool("ffcoursemarketplace", body.FFCourseMarketplace, func(v bool) { wr.FFCourseMarketplace = &v })
 		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
 		setBool("ffpaymentsenabled", body.FFPaymentsEnabled, func(v bool) { wr.FFPaymentsEnabled = &v })
@@ -1003,6 +1009,14 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		if d.Platform != nil {
 			d.Platform.Reload(merged)
 		}
+		// Marketplace flag state metric (plan MKT1 observability).
+		telemetry.SetMarketplaceFlagState(merged.FFCourseMarketplace)
+		if wr.FFCourseMarketplace != nil && merged.FFCourseMarketplace != prevCourseMarketplace {
+			slog.Info("course marketplace flag toggled",
+				"enabled", merged.FFCourseMarketplace,
+				"actor_id", actorID.String(),
+			)
+		}
 		if wr.IntroCourseEnabled != nil && merged.IntroCourseEnabled != prevIntroCourseEnabled {
 			d.recordIntroCourseAdminAudit(r, actorID, "toggle_flag", map[string]any{
 				"action":  "toggle_flag",
@@ -1021,169 +1035,170 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 
 		sources := platformconfig.ResolveSources(d.Config, dbRow)
 		out := platformSettingsJSON{
-			SAMLSSOEnabled:                  merged.SAMLSSOEnabled,
-			SAMLPublicBaseURL:               merged.SAMLPublicBaseURL,
-			SAMLSPEntityID:                  merged.SAMLSPEntityID,
-			SAMLSPX509PEM:                   merged.SAMLSPX509PEM,
-			SAMLSPPrivateKeyPEM:             maskPEMIfSet(merged.SAMLSPPrivateKeyPEM),
-			AnnotationEnabled:               merged.AnnotationEnabled,
-			FeedbackMediaEnabled:            merged.FeedbackMediaEnabled,
-			BlindGradingEnabled:             merged.BlindGradingEnabled,
-			ModeratedGradingEnabled:         merged.ModeratedGradingEnabled,
-			OriginalityDetectionEnabled:     merged.OriginalityDetectionEnabled,
-			OriginalityStubExternal:         merged.OriginalityStubExternal,
-			GradePostingPoliciesEnabled:     merged.GradePostingPoliciesEnabled,
-			GradebookCSVEnabled:             merged.GradebookCSVEnabled,
-			ResubmissionWorkflowEnabled:     merged.ResubmissionWorkflowEnabled,
-			LTIEnabled:                      merged.LTIEnabled,
-			OneRosterEnabled:                merged.OneRosterEnabled,
-			ScimEnabled:                     merged.ScimEnabled,
-			OIDCSSOEnabled:                  merged.OIDCSSOEnabled,
-			CleverSSOEnabled:                merged.CleverSSOEnabled,
-			ClassLinkSSOEnabled:             merged.ClassLinkSSOEnabled,
-			MagicLinkEnabled:                merged.MagicLinkEnabled,
-			MagicLinkEnrolledOnly:           merged.MagicLinkEnrolledOnly,
-			SessionManagementUIEnabled:      merged.SessionManagementUIEnabled,
-			EmailNotificationsEnabled:       merged.EmailNotificationsEnabled,
-			PushNotificationsEnabled:        merged.PushNotificationsEnabled,
-			VirtualClassroomEnabled:         merged.VirtualClassroomEnabled,
-			DRMEnabled:                      merged.DRMEnabled,
-			VideoTranscodingEnabled:         merged.VideoTranscodingEnabled,
-			AutoCaptioningEnabled:           merged.AutoCaptioningEnabled,
-			VideoCaptionsEnabled:            merged.VideoCaptionsEnabled,
-			StorageQuotasEnabled:            merged.StorageQuotasEnabled,
-			AtRiskAlertsEnabled:             merged.AtRiskAlertsEnabled,
-			AvScanningEnabled:               merged.AvScanningEnabled,
-			ClamAVStub:                      merged.ClamAVStub,
-			H5PEnabled:                      merged.H5PEnabled,
-			ScormIngestionEnabled:           merged.ScormIngestionEnabled,
-			OERLibraryEnabled:               merged.OERLibraryEnabled,
-			OERStub:                         merged.OERStub,
-			ItemAnalysisEnabled:             merged.ItemAnalysisEnabled,
-			StudentProgressEnabled:          merged.StudentProgressEnabled,
-			EngagementTrackingEnabled:       merged.EngagementTrackingEnabled,
-			SelfReflectionEnabled:           merged.SelfReflectionEnabled,
-			LearnerProfileEnabled:           merged.LearnerProfileEnabled,
-			LpAdaptRecommendationsEnabled:   merged.LpAdaptRecommendationsEnabled,
-			LpAdaptReviewEnabled:            merged.LpAdaptReviewEnabled,
-			LpAdaptModalityEnabled:          merged.LpAdaptModalityEnabled,
-			LpAdaptTutorEnabled:             merged.LpAdaptTutorEnabled,
-			IntroCourseEnabled:              merged.IntroCourseEnabled,
-			OutcomesReportEnabled:           merged.OutcomesReportEnabled,
-			InstructorInsightsEnabled:       merged.InstructorInsightsEnabled,
-			XAPIEmissionEnabled:             merged.XAPIEmissionEnabled,
-			EquationEditorEnabled:           merged.EquationEditorEnabled,
-			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
-			GraderAgentEnabled:              merged.GraderAgentEnabled,
-			GraderAgentReviewInboxEnabled:   merged.GraderAgentReviewInboxEnabled,
+			SAMLSSOEnabled:                     merged.SAMLSSOEnabled,
+			SAMLPublicBaseURL:                  merged.SAMLPublicBaseURL,
+			SAMLSPEntityID:                     merged.SAMLSPEntityID,
+			SAMLSPX509PEM:                      merged.SAMLSPX509PEM,
+			SAMLSPPrivateKeyPEM:                maskPEMIfSet(merged.SAMLSPPrivateKeyPEM),
+			AnnotationEnabled:                  merged.AnnotationEnabled,
+			FeedbackMediaEnabled:               merged.FeedbackMediaEnabled,
+			BlindGradingEnabled:                merged.BlindGradingEnabled,
+			ModeratedGradingEnabled:            merged.ModeratedGradingEnabled,
+			OriginalityDetectionEnabled:        merged.OriginalityDetectionEnabled,
+			OriginalityStubExternal:            merged.OriginalityStubExternal,
+			GradePostingPoliciesEnabled:        merged.GradePostingPoliciesEnabled,
+			GradebookCSVEnabled:                merged.GradebookCSVEnabled,
+			ResubmissionWorkflowEnabled:        merged.ResubmissionWorkflowEnabled,
+			LTIEnabled:                         merged.LTIEnabled,
+			OneRosterEnabled:                   merged.OneRosterEnabled,
+			ScimEnabled:                        merged.ScimEnabled,
+			OIDCSSOEnabled:                     merged.OIDCSSOEnabled,
+			CleverSSOEnabled:                   merged.CleverSSOEnabled,
+			ClassLinkSSOEnabled:                merged.ClassLinkSSOEnabled,
+			MagicLinkEnabled:                   merged.MagicLinkEnabled,
+			MagicLinkEnrolledOnly:              merged.MagicLinkEnrolledOnly,
+			SessionManagementUIEnabled:         merged.SessionManagementUIEnabled,
+			EmailNotificationsEnabled:          merged.EmailNotificationsEnabled,
+			PushNotificationsEnabled:           merged.PushNotificationsEnabled,
+			VirtualClassroomEnabled:            merged.VirtualClassroomEnabled,
+			DRMEnabled:                         merged.DRMEnabled,
+			VideoTranscodingEnabled:            merged.VideoTranscodingEnabled,
+			AutoCaptioningEnabled:              merged.AutoCaptioningEnabled,
+			VideoCaptionsEnabled:               merged.VideoCaptionsEnabled,
+			StorageQuotasEnabled:               merged.StorageQuotasEnabled,
+			AtRiskAlertsEnabled:                merged.AtRiskAlertsEnabled,
+			AvScanningEnabled:                  merged.AvScanningEnabled,
+			ClamAVStub:                         merged.ClamAVStub,
+			H5PEnabled:                         merged.H5PEnabled,
+			ScormIngestionEnabled:              merged.ScormIngestionEnabled,
+			OERLibraryEnabled:                  merged.OERLibraryEnabled,
+			OERStub:                            merged.OERStub,
+			ItemAnalysisEnabled:                merged.ItemAnalysisEnabled,
+			StudentProgressEnabled:             merged.StudentProgressEnabled,
+			EngagementTrackingEnabled:          merged.EngagementTrackingEnabled,
+			SelfReflectionEnabled:              merged.SelfReflectionEnabled,
+			LearnerProfileEnabled:              merged.LearnerProfileEnabled,
+			LpAdaptRecommendationsEnabled:      merged.LpAdaptRecommendationsEnabled,
+			LpAdaptReviewEnabled:               merged.LpAdaptReviewEnabled,
+			LpAdaptModalityEnabled:             merged.LpAdaptModalityEnabled,
+			LpAdaptTutorEnabled:                merged.LpAdaptTutorEnabled,
+			IntroCourseEnabled:                 merged.IntroCourseEnabled,
+			OutcomesReportEnabled:              merged.OutcomesReportEnabled,
+			InstructorInsightsEnabled:          merged.InstructorInsightsEnabled,
+			XAPIEmissionEnabled:                merged.XAPIEmissionEnabled,
+			EquationEditorEnabled:              merged.EquationEditorEnabled,
+			ReadingLevelEnabled:                merged.ReadingLevelEnabled,
+			GraderAgentEnabled:                 merged.GraderAgentEnabled,
+			GraderAgentReviewInboxEnabled:      merged.GraderAgentReviewInboxEnabled,
 			GraderAgentSuggestModeEnabled:      merged.GraderAgentSuggestModeEnabled,
 			GraderAgentTextEntryGradingEnabled: merged.GraderAgentTextEntryGradingEnabled,
 			GraderAgentVisionGradingEnabled:    merged.GraderAgentVisionGradingEnabled,
 			GraderAgentRunFiltersEnabled:       merged.GraderAgentRunFiltersEnabled,
 			GraderAgentCostEstimateEnabled:     merged.GraderAgentCostEstimateEnabled,
 			GraderAgentCancelRunEnabled:        merged.GraderAgentCancelRunEnabled,
-			CodeExecutionEnabled:            merged.CodeExecutionEnabled,
-			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
-			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
-			SpeechToTextEnabled:             merged.SpeechToTextEnabled,
-			AccommodationsEngineEnabled:     merged.AccommodationsEngineEnabled,
-			FFAccommodationsEngine:          merged.FFAccommodationsEngine,
-			ReadAloudEnabled:                merged.ReadAloudEnabled,
-			FFReadAloud:                     merged.FFReadAloud,
-			TranslationMemoryEnabled:        merged.TranslationMemoryEnabled,
-			ReportExportEnabled:             merged.ReportExportEnabled,
-			CoppaWorkflowEnabled:            merged.CoppaWorkflowEnabled,
-			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
-			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
-			AdminConsoleEnabled:             merged.AdminConsoleEnabled,
-			ImpersonationEnabled:            merged.ImpersonationEnabled,
-			BulkCsvImportEnabled:            merged.BulkCsvImportEnabled,
-			AdminSearchEnabled:              merged.AdminSearchEnabled,
-			EmailTemplateEditorEnabled:      merged.EmailTemplateEditorEnabled,
-			MaintenanceBannerEnabled:        merged.MaintenanceBannerEnabled,
-			CustomFieldsEnabled:             merged.CustomFieldsEnabled,
-			SeatManagementEnabled:           merged.SeatManagementEnabled,
-			DataResidencyEnabled:            merged.DataResidencyEnabled,
-			RTLEnabled:                      merged.RTLEnabled,
-			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
-			FFParentPortal:                  merged.FFParentPortal,
-			FFParentPortalV2:                merged.FFParentPortalV2,
-			FFReportCards:                   merged.FFReportCards,
-			FFLibrary:                       merged.FFLibrary,
-			FFBroadcasts:                    merged.FFBroadcasts,
-			FFConferenceScheduling:          merged.FFConferenceScheduling,
-			FFDemographics:                  merged.FFDemographics,
-			FFContentFilterIntegration:      merged.FFContentFilterIntegration,
-			FFSISIntegration:                merged.FFSISIntegration,
-			FFCatalogIntegration:            merged.FFCatalogIntegration,
-			FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
-			FFGradeSubmission:               merged.FFGradeSubmission,
-			FFWhatifGrades:                  merged.FFWhatifGrades,
-			FFGradeCurving:                  merged.FFGradeCurving,
-			FFPlagiarismChecks:              merged.FFPlagiarismChecks,
-			FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
-			FFAcademicCalendar:              merged.FFAcademicCalendar,
-			FFCourseEvaluations:             merged.FFCourseEvaluations,
-			FFProctoringIntegration:         merged.FFProctoringIntegration,
-			FFCoCurricularTranscript:        merged.FFCoCurricularTranscript,
-			FFEportfolio:                    merged.FFEportfolio,
-			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
-			FFTranscripts:                   merged.FFTranscripts,
-			FFWebhooks:                      merged.FFWebhooks,
-			FFZapierConnector:               merged.FFZapierConnector,
-			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
-			FFResearchConsent:               merged.FFResearchConsent,
-			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
-			FFCEUTracking:                   merged.FFCEUTracking,
-			FFConsortiumSharing:             merged.FFConsortiumSharing,
-			FFSelfPacedMode:                 merged.FFSelfPacedMode,
-			FFPublicCatalog:                 merged.FFPublicCatalog,
-			FFPublicAPI:                     merged.FFPublicAPI,
-			FFStripeBilling:                 merged.FFStripeBilling,
-			FFPaymentsEnabled:               merged.FFPaymentsEnabled,
-			FFRevenueShare:                  merged.FFRevenueShare,
-			FFTaxCollection:                 merged.FFTaxCollection,
-			FFLearningPaths:                 merged.FFLearningPaths,
-			FFConditionalRelease:            merged.FFConditionalRelease,
-			FFPeerReview:                    merged.FFPeerReview,
-			FFCompletionCredentials:         merged.FFCompletionCredentials,
-			FFCourseReviews:                 merged.FFCourseReviews,
-			FFGamification:                  merged.FFGamification,
-			FFOnboardingFlow:                merged.FFOnboardingFlow,
-			FFStudyReminders:                merged.FFStudyReminders,
-			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
-			FFLessonGenerator:               merged.FFLessonGenerator,
-			FFPersistentTutor:               merged.FFPersistentTutor,
-			FFAPITokens:                     merged.FFAPITokens,
-			FFBotSlack:                      merged.FFBotSlack,
-			FFBotTeams:                      merged.FFBotTeams,
-			FFBotDiscord:                    merged.FFBotDiscord,
-			FFCalendarFeeds:                 merged.FFCalendarFeeds,
-			FFRedisCache:                    merged.FFRedisCache,
-			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
-			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
-			DPAPortalEnabled:                merged.DPAPortalEnabled,
-			SOC2ModuleEnabled:               merged.SOC2ModuleEnabled,
-			FFReadingPreferences:            merged.FFReadingPreferences,
-			FFClassroomSignals:              merged.FFClassroomSignals,
-			FFLibraryIntegration:            merged.FFLibraryIntegration,
-			DiagnosticAssessmentsEnabled:    merged.DiagnosticAssessmentsEnabled,
-			SRSPracticeEnabled:              merged.SRSPracticeEnabled,
-			IRTCatModeEnabled:               merged.IRTCatModeEnabled,
-			AdaptiveLearnerModelEnabled:     merged.AdaptiveLearnerModelEnabled,
-			LearnerModelEMAAlpha:            merged.LearnerModelEMAAlpha,
-			GDPRModuleEnabled:               merged.GDPRModuleEnabled,
-			CCPAModuleEnabled:               merged.CCPAModuleEnabled,
-			StatePrivacyEnabled:             merged.StatePrivacyEnabled,
-			BackupModuleEnabled:             merged.BackupModuleEnabled,
-			FFUiMode:                        merged.FFUiMode,
-			MFAEnabled:                      merged.MFAEnabled,
-			MFAEnforcement:                  merged.MFAEnforcement,
-			SMTPHost:                        merged.SMTPHost,
-			SMTPPort:                        int(merged.SMTPPort),
-			SMTPFrom:                        merged.SMTPFrom,
-			SMTPUser:                        merged.SMTPUser,
-			SMTPPassword:                    smtpPasswordMasked(dbRow, merged.SMTPPassword),
+			CodeExecutionEnabled:               merged.CodeExecutionEnabled,
+			AltTextEnforcementEnabled:          merged.AltTextEnforcementEnabled,
+			FFAltTextEnforcement:               merged.FFAltTextEnforcement,
+			SpeechToTextEnabled:                merged.SpeechToTextEnabled,
+			AccommodationsEngineEnabled:        merged.AccommodationsEngineEnabled,
+			FFAccommodationsEngine:             merged.FFAccommodationsEngine,
+			ReadAloudEnabled:                   merged.ReadAloudEnabled,
+			FFReadAloud:                        merged.FFReadAloud,
+			TranslationMemoryEnabled:           merged.TranslationMemoryEnabled,
+			ReportExportEnabled:                merged.ReportExportEnabled,
+			CoppaWorkflowEnabled:               merged.CoppaWorkflowEnabled,
+			IsoIsmsEnabled:                     merged.IsoIsmsEnabled,
+			AdminAuditLogEnabled:               merged.AdminAuditLogEnabled,
+			AdminConsoleEnabled:                merged.AdminConsoleEnabled,
+			ImpersonationEnabled:               merged.ImpersonationEnabled,
+			BulkCsvImportEnabled:               merged.BulkCsvImportEnabled,
+			AdminSearchEnabled:                 merged.AdminSearchEnabled,
+			EmailTemplateEditorEnabled:         merged.EmailTemplateEditorEnabled,
+			MaintenanceBannerEnabled:           merged.MaintenanceBannerEnabled,
+			CustomFieldsEnabled:                merged.CustomFieldsEnabled,
+			SeatManagementEnabled:              merged.SeatManagementEnabled,
+			DataResidencyEnabled:               merged.DataResidencyEnabled,
+			RTLEnabled:                         merged.RTLEnabled,
+			SecurityDisclosureModuleEnabled:    merged.SecurityDisclosureModuleEnabled,
+			FFParentPortal:                     merged.FFParentPortal,
+			FFParentPortalV2:                   merged.FFParentPortalV2,
+			FFReportCards:                      merged.FFReportCards,
+			FFLibrary:                          merged.FFLibrary,
+			FFBroadcasts:                       merged.FFBroadcasts,
+			FFConferenceScheduling:             merged.FFConferenceScheduling,
+			FFDemographics:                     merged.FFDemographics,
+			FFContentFilterIntegration:         merged.FFContentFilterIntegration,
+			FFSISIntegration:                   merged.FFSISIntegration,
+			FFCatalogIntegration:               merged.FFCatalogIntegration,
+			FFEnrollmentStateMachine:           merged.FFEnrollmentStateMachine,
+			FFGradeSubmission:                  merged.FFGradeSubmission,
+			FFWhatifGrades:                     merged.FFWhatifGrades,
+			FFGradeCurving:                     merged.FFGradeCurving,
+			FFPlagiarismChecks:                 merged.FFPlagiarismChecks,
+			FFIncompleteGradeWorkflow:          merged.FFIncompleteGradeWorkflow,
+			FFAcademicCalendar:                 merged.FFAcademicCalendar,
+			FFCourseEvaluations:                merged.FFCourseEvaluations,
+			FFProctoringIntegration:            merged.FFProctoringIntegration,
+			FFCoCurricularTranscript:           merged.FFCoCurricularTranscript,
+			FFEportfolio:                       merged.FFEportfolio,
+			FFBookstoreIntegration:             merged.FFBookstoreIntegration,
+			FFTranscripts:                      merged.FFTranscripts,
+			FFWebhooks:                         merged.FFWebhooks,
+			FFZapierConnector:                  merged.FFZapierConnector,
+			FFAdvisingIntegration:              merged.FFAdvisingIntegration,
+			FFResearchConsent:                  merged.FFResearchConsent,
+			FFAccessibilityIntake:              merged.FFAccessibilityIntake,
+			FFCEUTracking:                      merged.FFCEUTracking,
+			FFConsortiumSharing:                merged.FFConsortiumSharing,
+			FFSelfPacedMode:                    merged.FFSelfPacedMode,
+			FFPublicCatalog:                    merged.FFPublicCatalog,
+			FFCourseMarketplace:                merged.FFCourseMarketplace,
+			FFPublicAPI:                        merged.FFPublicAPI,
+			FFStripeBilling:                    merged.FFStripeBilling,
+			FFPaymentsEnabled:                  merged.FFPaymentsEnabled,
+			FFRevenueShare:                     merged.FFRevenueShare,
+			FFTaxCollection:                    merged.FFTaxCollection,
+			FFLearningPaths:                    merged.FFLearningPaths,
+			FFConditionalRelease:               merged.FFConditionalRelease,
+			FFPeerReview:                       merged.FFPeerReview,
+			FFCompletionCredentials:            merged.FFCompletionCredentials,
+			FFCourseReviews:                    merged.FFCourseReviews,
+			FFGamification:                     merged.FFGamification,
+			FFOnboardingFlow:                   merged.FFOnboardingFlow,
+			FFStudyReminders:                   merged.FFStudyReminders,
+			FFAIStudyBuddy:                     merged.FFAIStudyBuddy,
+			FFLessonGenerator:                  merged.FFLessonGenerator,
+			FFPersistentTutor:                  merged.FFPersistentTutor,
+			FFAPITokens:                        merged.FFAPITokens,
+			FFBotSlack:                         merged.FFBotSlack,
+			FFBotTeams:                         merged.FFBotTeams,
+			FFBotDiscord:                       merged.FFBotDiscord,
+			FFCalendarFeeds:                    merged.FFCalendarFeeds,
+			FFRedisCache:                       merged.FFRedisCache,
+			LRSAnonymizeActors:                 merged.LRSAnonymizeActors,
+			FERPAWorkflowEnabled:               merged.FERPAWorkflowEnabled,
+			DPAPortalEnabled:                   merged.DPAPortalEnabled,
+			SOC2ModuleEnabled:                  merged.SOC2ModuleEnabled,
+			FFReadingPreferences:               merged.FFReadingPreferences,
+			FFClassroomSignals:                 merged.FFClassroomSignals,
+			FFLibraryIntegration:               merged.FFLibraryIntegration,
+			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,
+			SRSPracticeEnabled:                 merged.SRSPracticeEnabled,
+			IRTCatModeEnabled:                  merged.IRTCatModeEnabled,
+			AdaptiveLearnerModelEnabled:        merged.AdaptiveLearnerModelEnabled,
+			LearnerModelEMAAlpha:               merged.LearnerModelEMAAlpha,
+			GDPRModuleEnabled:                  merged.GDPRModuleEnabled,
+			CCPAModuleEnabled:                  merged.CCPAModuleEnabled,
+			StatePrivacyEnabled:                merged.StatePrivacyEnabled,
+			BackupModuleEnabled:                merged.BackupModuleEnabled,
+			FFUiMode:                           merged.FFUiMode,
+			MFAEnabled:                         merged.MFAEnabled,
+			MFAEnforcement:                     merged.MFAEnforcement,
+			SMTPHost:                           merged.SMTPHost,
+			SMTPPort:                           int(merged.SMTPPort),
+			SMTPFrom:                           merged.SMTPFrom,
+			SMTPUser:                           merged.SMTPUser,
+			SMTPPassword:                       smtpPasswordMasked(dbRow, merged.SMTPPassword),
 			Sources: platformSourcesJSON{
 				SAMLSSOEnabled:              src(sources.SAMLSSOEnabled),
 				SAMLPublicBaseURL:           src(sources.SAMLPublicBaseURL),

@@ -44,9 +44,9 @@ import (
 	botsservice "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/integrations"
-	learnerprofilederivers "github.com/lextures/lextures/server/internal/service/learnerprofile/derivers"
 	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
 	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
+	learnerprofilederivers "github.com/lextures/lextures/server/internal/service/learnerprofile/derivers"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
@@ -128,6 +128,8 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	if err := merged.Validate(); err != nil {
 		return fmt.Errorf("app: effective configuration invalid (environment + database settings): %w", err)
 	}
+	// marketplace_flag_state on config load (plan MKT1 observability).
+	telemetry.SetMarketplaceFlagState(merged.FFCourseMarketplace)
 	platform := platformstate.New(merged)
 
 	storage, storageErr := filestorage.New(filestorage.BackendConfig{

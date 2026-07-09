@@ -29,16 +29,25 @@ var durationBuckets = []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5
 type Metrics struct {
 	registry *prometheus.Registry
 
-	httpRequests        *prometheus.CounterVec
-	httpDuration        *prometheus.HistogramVec
-	httpInFlight        prometheus.Gauge
-	aiProviderCalls     *prometheus.CounterVec
-	aiProviderLatency   *prometheus.HistogramVec
-	aiProviderCostTotal *prometheus.CounterVec
-		businessEvents      *prometheus.CounterVec
-		bannerActive        *prometheus.GaugeVec
-		healthChecks        *prometheus.CounterVec
-	buildInfo           *prometheus.GaugeVec
+	httpRequests         *prometheus.CounterVec
+	httpDuration         *prometheus.HistogramVec
+	httpInFlight         prometheus.Gauge
+	aiProviderCalls      *prometheus.CounterVec
+	aiProviderLatency    *prometheus.HistogramVec
+	aiProviderCostTotal  *prometheus.CounterVec
+	businessEvents       *prometheus.CounterVec
+	bannerActive         *prometheus.GaugeVec
+	healthChecks         *prometheus.CounterVec
+	buildInfo            *prometheus.GaugeVec
+	marketplaceFlagState       *prometheus.GaugeVec
+	marketplaceListingSaved    *prometheus.CounterVec
+	marketplaceStorefrontViews *prometheus.CounterVec
+	marketplaceDetailViews     *prometheus.CounterVec
+	marketplaceFacetUsage      *prometheus.CounterVec
+	marketplaceClaimTotal      *prometheus.CounterVec
+	marketplaceCheckoutCreated *prometheus.CounterVec
+	marketplacePurchaseCompleted *prometheus.CounterVec
+	marketplaceRefundTotal     *prometheus.CounterVec
 }
 
 // NewMetrics builds a self-contained registry (not the global default, so tests
@@ -109,6 +118,51 @@ func NewMetrics(deployColor ...string) *Metrics {
 			Help:        "Build metadata; always 1, labels carry version and environment.",
 			ConstLabels: constLabels,
 		}, []string{"version", "env"}),
+		marketplaceFlagState: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Name:      "marketplace_flag_state",
+			Help:      "Whether the in-app course marketplace flag is enabled (1) or disabled (0) (plan MKT1).",
+		}, []string{"enabled"}),
+		marketplaceListingSaved: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "marketplace_listing_saved_total",
+			Help:      "Course marketplace listing saves by listed and free state (plan MKT2).",
+		}, []string{"listed", "free"}),
+		marketplaceStorefrontViews: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "marketplace_storefront_view_total",
+			Help:      "Authenticated marketplace storefront list views (plan MKT3).",
+		}, []string{}),
+		marketplaceDetailViews: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "marketplace_detail_view_total",
+			Help:      "Marketplace course detail views by ownership (plan MKT3).",
+		}, []string{"owned"}),
+		marketplaceFacetUsage: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "marketplace_facet_usage_total",
+			Help:      "Marketplace storefront searches that used a filter facet (plan MKT3).",
+		}, []string{}),
+		marketplaceClaimTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "marketplace_claim_total",
+			Help:      "Marketplace free-claim attempts by result (plan MKT4).",
+		}, []string{"result"}),
+		marketplaceCheckoutCreated: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "marketplace_checkout_created",
+			Help:      "Marketplace paid checkout sessions created (plan MKT4).",
+		}, []string{}),
+		marketplacePurchaseCompleted: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "marketplace_purchase_completed",
+			Help:      "Marketplace paid purchases completed via webhook (plan MKT4).",
+		}, []string{}),
+		marketplaceRefundTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "marketplace_refund_total",
+			Help:      "Marketplace course purchase refunds processed (plan MKT4).",
+		}, []string{}),
 	}
 
 	reg.MustRegister(
@@ -122,6 +176,15 @@ func NewMetrics(deployColor ...string) *Metrics {
 		m.bannerActive,
 		m.healthChecks,
 		m.buildInfo,
+		m.marketplaceFlagState,
+		m.marketplaceListingSaved,
+		m.marketplaceStorefrontViews,
+		m.marketplaceDetailViews,
+		m.marketplaceFacetUsage,
+		m.marketplaceClaimTotal,
+		m.marketplaceCheckoutCreated,
+		m.marketplacePurchaseCompleted,
+		m.marketplaceRefundTotal,
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
@@ -217,4 +280,93 @@ func (m *Metrics) IncHealthCheck(endpoint, status string) {
 		status = "unknown"
 	}
 	m.healthChecks.WithLabelValues(endpoint, status).Inc()
+}
+
+// SetMarketplaceFlagState records the course marketplace platform flag (plan MKT1).
+// Emits marketplace_flag_state{enabled="true"|"false"} with value 1 for the active state.
+func (m *Metrics) SetMarketplaceFlagState(enabled bool) {
+	if m == nil || m.marketplaceFlagState == nil {
+		return
+	}
+	m.marketplaceFlagState.WithLabelValues("true").Set(0)
+	m.marketplaceFlagState.WithLabelValues("false").Set(0)
+	if enabled {
+		m.marketplaceFlagState.WithLabelValues("true").Set(1)
+	} else {
+		m.marketplaceFlagState.WithLabelValues("false").Set(1)
+	}
+}
+
+// RecordMarketplaceListingSaved increments marketplace_listing_saved_total (plan MKT2).
+func (m *Metrics) RecordMarketplaceListingSaved(listed, free bool) {
+	if m == nil || m.marketplaceListingSaved == nil {
+		return
+	}
+	m.marketplaceListingSaved.WithLabelValues(boolLabel(listed), boolLabel(free)).Inc()
+}
+
+// RecordMarketplaceStorefrontView increments marketplace_storefront_view_total (plan MKT3).
+func (m *Metrics) RecordMarketplaceStorefrontView() {
+	if m == nil || m.marketplaceStorefrontViews == nil {
+		return
+	}
+	m.marketplaceStorefrontViews.WithLabelValues().Inc()
+}
+
+// RecordMarketplaceDetailView increments marketplace_detail_view_total{owned} (plan MKT3).
+func (m *Metrics) RecordMarketplaceDetailView(owned bool) {
+	if m == nil || m.marketplaceDetailViews == nil {
+		return
+	}
+	m.marketplaceDetailViews.WithLabelValues(boolLabel(owned)).Inc()
+}
+
+// RecordMarketplaceFacetUsage increments marketplace_facet_usage_total (plan MKT3).
+func (m *Metrics) RecordMarketplaceFacetUsage() {
+	if m == nil || m.marketplaceFacetUsage == nil {
+		return
+	}
+	m.marketplaceFacetUsage.WithLabelValues().Inc()
+}
+
+// RecordMarketplaceClaim increments marketplace_claim_total{result} (plan MKT4).
+func (m *Metrics) RecordMarketplaceClaim(result string) {
+	if m == nil || m.marketplaceClaimTotal == nil {
+		return
+	}
+	if result == "" {
+		result = "unknown"
+	}
+	m.marketplaceClaimTotal.WithLabelValues(result).Inc()
+}
+
+// RecordMarketplaceCheckoutCreated increments marketplace_checkout_created (plan MKT4).
+func (m *Metrics) RecordMarketplaceCheckoutCreated() {
+	if m == nil || m.marketplaceCheckoutCreated == nil {
+		return
+	}
+	m.marketplaceCheckoutCreated.WithLabelValues().Inc()
+}
+
+// RecordMarketplacePurchaseCompleted increments marketplace_purchase_completed (plan MKT4).
+func (m *Metrics) RecordMarketplacePurchaseCompleted() {
+	if m == nil || m.marketplacePurchaseCompleted == nil {
+		return
+	}
+	m.marketplacePurchaseCompleted.WithLabelValues().Inc()
+}
+
+// RecordMarketplaceRefund increments marketplace_refund_total (plan MKT4).
+func (m *Metrics) RecordMarketplaceRefund() {
+	if m == nil || m.marketplaceRefundTotal == nil {
+		return
+	}
+	m.marketplaceRefundTotal.WithLabelValues().Inc()
+}
+
+func boolLabel(v bool) string {
+	if v {
+		return "true"
+	}
+	return "false"
 }

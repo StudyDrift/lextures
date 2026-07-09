@@ -28,7 +28,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { BookOpen, Plus } from 'lucide-react'
+import { BookOpen, Eye, EyeOff, Plus } from 'lucide-react'
 import { KeyboardSensor as SharedKeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyboardSensorConfig'
 import { useCanvasImport } from '../../context/canvas-import-context'
 import { CourseCatalogImportFromCourseModal } from './course-catalog-import-from-course-modal'
@@ -41,6 +41,15 @@ import { courseCatalogStatusLabel } from './course-catalog-status'
 import { courseCatalogDescriptionBlurb, courseCatalogDisplayTitle } from './course-catalog-display'
 import { CourseCatalogNicknameEditor } from './course-catalog-nickname-editor'
 import { CourseCatalogPinButton } from './course-catalog-pin-button'
+import { CourseCatalogActionsMenu } from './course-catalog-actions-menu'
+import {
+  buildCatalogSections,
+  catalogEmptyStateKind,
+  countUserHiddenCourses,
+  filterCatalogCourses,
+  isUserCatalogHidden,
+  type CatalogSection,
+} from './course-catalog-hidden'
 import {
   DEFAULT_KANBAN_COLUMN_LABELS,
   fetchCourseCatalogSettings,
@@ -72,7 +81,21 @@ export type { CoursePublic } from '../../lib/courses-api'
 
 type CatalogNicknameChangeHandler = (courseId: string, nickname: string | null) => void
 type CatalogPinnedChangeHandler = (courseId: string, pinned: boolean) => void
+type CatalogHiddenChangeHandler = (courseId: string, hidden: boolean) => void
 type CatalogInvitationResolvedHandler = (courseId: string, approved: boolean) => void
+
+function CourseCatalogHiddenBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+      <EyeOff className="h-3 w-3" aria-hidden />
+      Hidden
+    </span>
+  )
+}
+
+function catalogRevealedHiddenClass(course: CoursePublic, showHidden: boolean): string {
+  return showHidden && isUserCatalogHidden(course) ? 'opacity-70' : ''
+}
 
 function courseInvitationPending(course: CoursePublic): boolean {
   return Boolean(
@@ -198,12 +221,6 @@ function useCatalogSortablePointerGuard(isDragging: boolean) {
   return { pointerGuardRef, justFinishedDraggingRef, onPointerDownCapture }
 }
 
-type CatalogSection = {
-  key: string
-  title: string
-  items: CoursePublic[]
-}
-
 type SortableCourseProps = {
   listeners: Record<string, unknown>
   setNodeRef: (node: HTMLElement | null) => void
@@ -263,15 +280,21 @@ function CourseCard({
   sortable,
   catalogDragActive,
   suppressNavigateAfterDragRef,
+  showHiddenRevealed,
+  renameRequest,
   onNicknameChange,
   onPinnedChange,
+  onHiddenChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
   catalogDragActive: boolean
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
+  showHiddenRevealed: boolean
+  renameRequest?: number
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onHiddenChange: CatalogHiddenChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
   sortable?: SortableCourseProps
 }) {
@@ -292,8 +315,14 @@ function CourseCard({
         <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
       </span>
       {!invitationPending ? (
-        <span className="absolute end-3 top-3 z-10">
+        <span className="absolute end-3 top-3 z-10 flex items-center gap-1">
           <CourseCatalogPinButton course={course} onPinnedChange={onPinnedChange} />
+          <CourseCatalogActionsMenu
+            course={course}
+            variant="overlay"
+            onPinnedChange={onPinnedChange}
+            onHiddenChange={onHiddenChange}
+          />
         </span>
       ) : null}
       <div className="absolute inset-x-0 bottom-0 p-4 pt-10">
@@ -332,6 +361,7 @@ function CourseCard({
       style={sortable?.style}
       className={[
         'flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow dark:border-neutral-700 dark:bg-neutral-900',
+        catalogRevealedHiddenClass(course, showHiddenRevealed),
         sortable ? 'touch-none cursor-grab active:cursor-grabbing' : '',
         sortable?.isDragging ? 'shadow-md shadow-slate-900/10 ring-2 ring-indigo-400/40' : '',
       ]
@@ -340,6 +370,11 @@ function CourseCard({
       onPointerDownCapture={sortable?.onPointerDownCapture}
       {...(sortable ? sortable.listeners : {})}
     >
+      {showHiddenRevealed && isUserCatalogHidden(course) ? (
+        <div className="border-b border-slate-100 px-4 py-2 dark:border-neutral-800">
+          <CourseCatalogHiddenBadge />
+        </div>
+      ) : null}
       <div className={invitationMutedClass}>
         {invitationPending ? (
           <div className="relative block" aria-label={`${displayTitle} — invitation pending`}>
@@ -362,6 +397,7 @@ function CourseCard({
           <CourseCatalogNicknameEditor
             course={course}
             compact
+            openRequest={renameRequest}
             onNicknameChange={onNicknameChange}
           />
         </div>
@@ -397,14 +433,18 @@ function SortableCourseCard({
   course,
   catalogDragActive,
   suppressNavigateAfterDragRef,
+  showHiddenRevealed,
   onNicknameChange,
   onPinnedChange,
+  onHiddenChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
 } & CatalogCourseDragProps & {
+  showHiddenRevealed: boolean
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onHiddenChange: CatalogHiddenChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -425,8 +465,10 @@ function SortableCourseCard({
         course={course}
         catalogDragActive={catalogDragActive}
         suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+        showHiddenRevealed={showHiddenRevealed}
         onNicknameChange={onNicknameChange}
         onPinnedChange={onPinnedChange}
+        onHiddenChange={onHiddenChange}
         onInvitationResolved={onInvitationResolved}
         sortable={{
           listeners: listeners as Record<string, unknown>,
@@ -447,15 +489,23 @@ function CourseListRow({
   sortable,
   catalogDragActive,
   suppressNavigateAfterDragRef,
+  showHiddenRevealed,
+  renameRequest,
+  onRenameRequest,
   onNicknameChange,
   onPinnedChange,
+  onHiddenChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
   catalogDragActive: boolean
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
+  showHiddenRevealed: boolean
+  renameRequest?: number
+  onRenameRequest?: () => void
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onHiddenChange: CatalogHiddenChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
   sortable?: SortableCourseProps
 }) {
@@ -492,6 +542,7 @@ function CourseListRow({
       style={sortable?.style}
       className={[
         'flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow dark:border-neutral-700 dark:bg-neutral-900',
+        catalogRevealedHiddenClass(course, showHiddenRevealed),
         sortable ? 'touch-none cursor-grab active:cursor-grabbing' : '',
         sortable?.isDragging ? 'shadow-md shadow-slate-900/10 ring-2 ring-indigo-400/40' : '',
       ]
@@ -530,9 +581,11 @@ function CourseListRow({
             <CourseCatalogNicknameEditor
               course={course}
               titleClassName="text-base font-semibold leading-snug text-slate-900 line-clamp-1 dark:text-neutral-100"
+              openRequest={renameRequest}
               onNicknameChange={onNicknameChange}
             />
             <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
+            {showHiddenRevealed && isUserCatalogHidden(course) ? <CourseCatalogHiddenBadge /> : null}
           </div>
           {invitationPending && course.viewerPendingEnrollmentId ? (
             <CourseEnrollmentInvitationActions
@@ -555,8 +608,14 @@ function CourseListRow({
           ) : null}
         </div>
         {!invitationPending ? (
-          <div className="flex shrink-0 items-start pt-1">
+          <div className="flex shrink-0 items-start gap-1 pt-1">
             <CourseCatalogPinButton course={course} variant="inline" onPinnedChange={onPinnedChange} />
+            <CourseCatalogActionsMenu
+              course={course}
+              onPinnedChange={onPinnedChange}
+              onHiddenChange={onHiddenChange}
+              onRenameRequest={onRenameRequest}
+            />
           </div>
         ) : null}
       </div>
@@ -568,16 +627,21 @@ function SortableCourseListRow({
   course,
   catalogDragActive,
   suppressNavigateAfterDragRef,
+  showHiddenRevealed,
   onNicknameChange,
   onPinnedChange,
+  onHiddenChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
 } & CatalogCourseDragProps & {
+  showHiddenRevealed: boolean
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onHiddenChange: CatalogHiddenChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
 }) {
+  const [renameRequest, setRenameRequest] = useState(0)
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
   })
@@ -595,8 +659,12 @@ function SortableCourseListRow({
       course={course}
       catalogDragActive={catalogDragActive}
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+      showHiddenRevealed={showHiddenRevealed}
+      renameRequest={renameRequest}
+      onRenameRequest={() => setRenameRequest((n) => n + 1)}
       onNicknameChange={onNicknameChange}
       onPinnedChange={onPinnedChange}
+      onHiddenChange={onHiddenChange}
       onInvitationResolved={onInvitationResolved}
       sortable={{
         listeners: listeners as Record<string, unknown>,
@@ -616,15 +684,19 @@ function CourseGalleryTile({
   sortable,
   catalogDragActive,
   suppressNavigateAfterDragRef,
+  showHiddenRevealed,
   onNicknameChange,
   onPinnedChange,
+  onHiddenChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
   catalogDragActive: boolean
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
+  showHiddenRevealed: boolean
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onHiddenChange: CatalogHiddenChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
   sortable?: SortableCourseProps
 }) {
@@ -660,6 +732,7 @@ function CourseGalleryTile({
       style={sortable?.style}
       className={[
         'overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow dark:border-neutral-700 dark:bg-neutral-900',
+        catalogRevealedHiddenClass(course, showHiddenRevealed),
         sortable ? 'touch-none cursor-grab active:cursor-grabbing' : '',
         sortable?.isDragging ? 'shadow-md shadow-slate-900/10 ring-2 ring-indigo-400/40' : '',
       ]
@@ -668,6 +741,11 @@ function CourseGalleryTile({
       onPointerDownCapture={sortable?.onPointerDownCapture}
       {...(sortable ? sortable.listeners : {})}
     >
+      {showHiddenRevealed && isUserCatalogHidden(course) ? (
+        <div className="border-b border-slate-100 px-3 py-1.5 dark:border-neutral-800">
+          <CourseCatalogHiddenBadge />
+        </div>
+      ) : null}
       <div className={invitationMutedClass}>
       {invitationPending ? (
         <div className="relative block aspect-[4/3]" aria-hidden>
@@ -697,8 +775,14 @@ function CourseGalleryTile({
           <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
         </span>
         {!invitationPending ? (
-          <span className="absolute end-2 top-2 z-10">
+          <span className="absolute end-2 top-2 z-10 flex items-center gap-1">
             <CourseCatalogPinButton course={course} onPinnedChange={onPinnedChange} />
+            <CourseCatalogActionsMenu
+              course={course}
+              variant="overlay"
+              onPinnedChange={onPinnedChange}
+              onHiddenChange={onHiddenChange}
+            />
           </span>
         ) : null}
         <h2 className="absolute inset-x-0 bottom-0 p-3 text-sm font-semibold leading-snug text-white drop-shadow-sm line-clamp-2">
@@ -728,14 +812,18 @@ function SortableCourseGalleryTile({
   course,
   catalogDragActive,
   suppressNavigateAfterDragRef,
+  showHiddenRevealed,
   onNicknameChange,
   onPinnedChange,
+  onHiddenChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
 } & CatalogCourseDragProps & {
+  showHiddenRevealed: boolean
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onHiddenChange: CatalogHiddenChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -755,8 +843,10 @@ function SortableCourseGalleryTile({
       course={course}
       catalogDragActive={catalogDragActive}
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+      showHiddenRevealed={showHiddenRevealed}
       onNicknameChange={onNicknameChange}
       onPinnedChange={onPinnedChange}
+      onHiddenChange={onHiddenChange}
       onInvitationResolved={onInvitationResolved}
       sortable={{
         listeners: listeners as Record<string, unknown>,
@@ -791,15 +881,23 @@ function CourseTableRow({
   sortable,
   catalogDragActive,
   suppressNavigateAfterDragRef,
+  showHiddenRevealed,
+  renameRequest,
+  onRenameRequest,
   onNicknameChange,
   onPinnedChange,
+  onHiddenChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
   catalogDragActive: boolean
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
+  showHiddenRevealed: boolean
+  renameRequest?: number
+  onRenameRequest?: () => void
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onHiddenChange: CatalogHiddenChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
   sortable?: SortableCourseProps
 }) {
@@ -834,6 +932,7 @@ function CourseTableRow({
       style={sortable?.style}
       className={[
         'grid grid-cols-[minmax(0,2.2fr)_minmax(5.5rem,auto)_minmax(0,1.1fr)_minmax(5.5rem,auto)_minmax(4.5rem,auto)] gap-3 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0 dark:border-neutral-800',
+        catalogRevealedHiddenClass(course, showHiddenRevealed),
         sortable ? 'touch-none cursor-grab bg-white active:cursor-grabbing dark:bg-neutral-900' : 'bg-white dark:bg-neutral-900',
         sortable?.isDragging ? 'relative z-20 shadow-md ring-2 ring-indigo-400/40' : '',
       ]
@@ -844,12 +943,14 @@ function CourseTableRow({
     >
       <div className="flex min-w-0 items-start gap-2">
         <div className="min-w-0 flex-1">
-          <div className={invitationMutedClass}>
+          <div className={`flex flex-wrap items-center gap-2 ${invitationMutedClass}`}>
             <CourseCatalogNicknameEditor
               course={course}
               titleClassName="font-semibold text-slate-900 dark:text-neutral-100"
+              openRequest={renameRequest}
               onNicknameChange={onNicknameChange}
             />
+            {showHiddenRevealed && isUserCatalogHidden(course) ? <CourseCatalogHiddenBadge /> : null}
           </div>
           {invitationPending && course.viewerPendingEnrollmentId ? (
             <CourseEnrollmentInvitationActions
@@ -869,7 +970,15 @@ function CourseTableRow({
           )}
         </div>
         {!invitationPending ? (
-          <CourseCatalogPinButton course={course} variant="inline" onPinnedChange={onPinnedChange} />
+          <div className="flex shrink-0 items-start gap-1">
+            <CourseCatalogPinButton course={course} variant="inline" onPinnedChange={onPinnedChange} />
+            <CourseCatalogActionsMenu
+              course={course}
+              onPinnedChange={onPinnedChange}
+              onHiddenChange={onHiddenChange}
+              onRenameRequest={onRenameRequest}
+            />
+          </div>
         ) : null}
       </div>
       <div className={`self-center ${invitationMutedClass}`}>
@@ -892,16 +1001,21 @@ function SortableCourseTableRow({
   course,
   catalogDragActive,
   suppressNavigateAfterDragRef,
+  showHiddenRevealed,
   onNicknameChange,
   onPinnedChange,
+  onHiddenChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
 } & CatalogCourseDragProps & {
+  showHiddenRevealed: boolean
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onHiddenChange: CatalogHiddenChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
 }) {
+  const [renameRequest, setRenameRequest] = useState(0)
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
   })
@@ -919,8 +1033,12 @@ function SortableCourseTableRow({
       course={course}
       catalogDragActive={catalogDragActive}
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+      showHiddenRevealed={showHiddenRevealed}
+      renameRequest={renameRequest}
+      onRenameRequest={() => setRenameRequest((n) => n + 1)}
       onNicknameChange={onNicknameChange}
       onPinnedChange={onPinnedChange}
+      onHiddenChange={onHiddenChange}
       onInvitationResolved={onInvitationResolved}
       sortable={{
         listeners: listeners as Record<string, unknown>,
@@ -947,6 +1065,7 @@ export default function Courses() {
   const [termFilter, setTermFilter] = useState<string>('')
   const [termList, setTermList] = useState<OrgTerm[]>([])
   const [gradeLevelFilter, setGradeLevelFilter] = useState<string>('')
+  const [showHidden, setShowHidden] = useState(false)
   const [catalogView, setCatalogView] = useState<CourseCatalogView>('cards')
   const [kanbanColumnLabels, setKanbanColumnLabels] = useState<KanbanColumnLabels>(DEFAULT_KANBAN_COLUMN_LABELS)
   const [hiddenColumnExpanded, setHiddenColumnExpanded] = useState(false)
@@ -1023,6 +1142,23 @@ export default function Courses() {
     )
   }, [])
 
+  const handleHiddenChange = useCallback((courseId: string, hidden: boolean) => {
+    setCourses(
+      (prev) =>
+        prev?.map((course) =>
+          course.id === courseId
+            ? {
+                ...course,
+                catalogHidden: hidden,
+                catalogPinned: hidden ? false : course.catalogPinned,
+                kanbanColumnId: hidden ? null : course.kanbanColumnId,
+                kanbanSortOrder: hidden ? null : course.kanbanSortOrder,
+              }
+            : course,
+        ) ?? prev,
+    )
+  }, [])
+
   const handleInvitationResolved = useCallback((courseId: string, approved: boolean) => {
     if (!approved) {
       setCourses((prev) => prev?.filter((course) => course.id !== courseId) ?? prev)
@@ -1061,18 +1197,36 @@ export default function Courses() {
     setCourses((prev) => {
       if (!prev) return prev
       const placementById = new Map<string, { columnId: KanbanColumnId; sortOrder: number }>()
+      const hiddenIds = new Set(columns.hidden ?? [])
       for (const columnId of Object.keys(columns) as KanbanColumnId[]) {
+        if (columnId === 'hidden') continue
         columns[columnId].forEach((courseId, sortOrder) => {
           placementById.set(courseId, { columnId, sortOrder })
         })
       }
       return prev.map((course) => {
+        const hidden = hiddenIds.has(course.id)
         const placement = placementById.get(course.id)
+        if (hidden) {
+          return {
+            ...course,
+            catalogHidden: true,
+            catalogPinned: false,
+            kanbanColumnId: null,
+            kanbanSortOrder: null,
+          }
+        }
         if (!placement) {
-          return { ...course, kanbanColumnId: null, kanbanSortOrder: null }
+          return {
+            ...course,
+            catalogHidden: false,
+            kanbanColumnId: null,
+            kanbanSortOrder: null,
+          }
         }
         return {
           ...course,
+          catalogHidden: false,
           kanbanColumnId: placement.columnId,
           kanbanSortOrder: placement.sortOrder,
         }
@@ -1115,38 +1269,21 @@ export default function Courses() {
     useSensor(SharedKeyboardSensor, defaultKeyboardSensorOptions),
   )
 
-  const courseIds = useMemo(() => (courses ?? []).map((c) => c.id), [courses])
+  const hiddenCount = useMemo(() => countUserHiddenCourses(courses ?? []), [courses])
+  const visibleCourses = useMemo(
+    () => filterCatalogCourses(courses ?? [], showHidden),
+    [courses, showHidden],
+  )
+  const courseIds = useMemo(() => visibleCourses.map((c) => c.id), [visibleCourses])
+  const emptyStateKind = useMemo(
+    () => catalogEmptyStateKind(courses, showHidden),
+    [courses, showHidden],
+  )
 
   const catalogSections = useMemo((): CatalogSection[] | null => {
-    if (!courses?.length || termFilter !== '' || catalogView === 'status') return null
-    if (!courses.some((c) => c.termId)) return null
-    const ongoing = courses.filter((c) => !c.termId)
-    const termOrder = [...termList].sort((a, b) => (a.startDate < b.startDate ? 1 : -1))
-    const sections: CatalogSection[] = []
-    if (ongoing.length > 0) {
-      sections.push({ key: 'ongoing', title: 'Ongoing / Self-paced', items: ongoing })
-    }
-    const seen = new Set<string>()
-    for (const t of termOrder) {
-      const items = courses.filter((c) => c.termId === t.id)
-      if (items.length === 0) continue
-      sections.push({ key: t.id, title: t.name, items })
-      seen.add(t.id)
-    }
-    const orphan = courses.filter((c) => c.termId && !seen.has(c.termId))
-    if (orphan.length > 0) {
-      const byId = new Map<string, CoursePublic[]>()
-      for (const c of orphan) {
-        const id = c.termId!
-        byId.set(id, [...(byId.get(id) ?? []), c])
-      }
-      for (const [id, items] of byId) {
-        const label = items[0]?.term?.name ?? 'Term'
-        sections.push({ key: id, title: label, items })
-      }
-    }
-    return sections
-  }, [courses, termFilter, termList, catalogView])
+    if (!courses?.length || catalogView === 'status') return null
+    return buildCatalogSections(courses, termList, { termFilter, showHidden })
+  }, [courses, termFilter, termList, catalogView, showHidden])
 
   const clearSuppressNavigateAfterDragSoon = useCallback(() => {
     window.setTimeout(() => {
@@ -1171,20 +1308,23 @@ export default function Courses() {
     (event: DragEndEvent) => {
       const { active, over } = event
       finishCatalogDrag()
-      if (!over || active.id === over.id || !courses?.length) return
+      if (!over || active.id === over.id || visibleCourses.length === 0) return
       setError(null)
-      const oldIndex = courses.findIndex((c) => c.id === active.id)
-      const newIndex = courses.findIndex((c) => c.id === over.id)
+      const oldIndex = visibleCourses.findIndex((c) => c.id === active.id)
+      const newIndex = visibleCourses.findIndex((c) => c.id === over.id)
       if (oldIndex < 0 || newIndex < 0) return
       const previous = courses
-      const next = arrayMove(previous, oldIndex, newIndex)
+      const reorderedVisible = arrayMove(visibleCourses, oldIndex, newIndex)
+      const visibleIdOrder = reorderedVisible.map((c) => c.id)
+      const hiddenTail = (courses ?? []).filter((c) => !visibleIdOrder.includes(c.id))
+      const next = [...reorderedVisible, ...hiddenTail]
       setCourses(next)
       void putCourseCatalogOrder(next.map((c) => c.id)).catch(() => {
         setCourses(previous)
         setError('Could not save course order. Try again.')
       })
     },
-    [courses, finishCatalogDrag],
+    [courses, finishCatalogDrag, visibleCourses],
   )
 
   const handleDragCancel = useCallback(() => {
@@ -1195,55 +1335,24 @@ export default function Courses() {
 
   const renderSortableCourse = useCallback(
     (course: CoursePublic) => {
+      const shared = {
+        catalogDragActive,
+        suppressNavigateAfterDragRef,
+        showHiddenRevealed: showHidden,
+        onNicknameChange: handleNicknameChange,
+        onPinnedChange: handlePinnedChange,
+        onHiddenChange: handleHiddenChange,
+        onInvitationResolved: handleInvitationResolved,
+      }
       switch (catalogView) {
         case 'cards':
-          return (
-            <SortableCourseCard
-              key={course.id}
-              course={course}
-              catalogDragActive={catalogDragActive}
-              suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
-              onNicknameChange={handleNicknameChange}
-              onPinnedChange={handlePinnedChange}
-              onInvitationResolved={handleInvitationResolved}
-            />
-          )
+          return <SortableCourseCard key={course.id} course={course} {...shared} />
         case 'gallery':
-          return (
-            <SortableCourseGalleryTile
-              key={course.id}
-              course={course}
-              catalogDragActive={catalogDragActive}
-              suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
-              onNicknameChange={handleNicknameChange}
-              onPinnedChange={handlePinnedChange}
-              onInvitationResolved={handleInvitationResolved}
-            />
-          )
+          return <SortableCourseGalleryTile key={course.id} course={course} {...shared} />
         case 'table':
-          return (
-            <SortableCourseTableRow
-              key={course.id}
-              course={course}
-              catalogDragActive={catalogDragActive}
-              suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
-              onNicknameChange={handleNicknameChange}
-              onPinnedChange={handlePinnedChange}
-              onInvitationResolved={handleInvitationResolved}
-            />
-          )
+          return <SortableCourseTableRow key={course.id} course={course} {...shared} />
         case 'list':
-          return (
-            <SortableCourseListRow
-              key={course.id}
-              course={course}
-              catalogDragActive={catalogDragActive}
-              suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
-              onNicknameChange={handleNicknameChange}
-              onPinnedChange={handlePinnedChange}
-              onInvitationResolved={handleInvitationResolved}
-            />
-          )
+          return <SortableCourseListRow key={course.id} course={course} {...shared} />
         case 'status':
           return null
         default: {
@@ -1252,7 +1361,15 @@ export default function Courses() {
         }
       }
     },
-    [catalogDragActive, catalogView, handleInvitationResolved, handleNicknameChange, handlePinnedChange],
+    [
+      catalogDragActive,
+      catalogView,
+      handleHiddenChange,
+      handleInvitationResolved,
+      handleNicknameChange,
+      handlePinnedChange,
+      showHidden,
+    ],
   )
 
   const renderCourseItems = useCallback(
@@ -1327,7 +1444,23 @@ export default function Courses() {
         </p>
       )}
 
-      <div className="mt-6 flex flex-wrap gap-4">
+      <div className="mt-6 flex flex-wrap items-end gap-4">
+        {hiddenCount > 0 ? (
+          <button
+            type="button"
+            aria-pressed={showHidden}
+            onClick={() => setShowHidden((value) => !value)}
+            className={[
+              'inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color]',
+              showHidden
+                ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-500/40 dark:bg-indigo-950/40 dark:text-indigo-200'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-600 dark:hover:bg-neutral-800',
+            ].join(' ')}
+          >
+            {showHidden ? <Eye className="h-4 w-4" aria-hidden /> : <EyeOff className="h-4 w-4" aria-hidden />}
+            Show hidden ({hiddenCount})
+          </button>
+        ) : null}
         {orgId && termList.length > 0 && (
           <div className="min-w-48 max-w-sm flex-1">
             <label htmlFor="course-catalog-term-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
@@ -1387,7 +1520,7 @@ export default function Courses() {
 
       {courses === null && !error && <CoursesCatalogSkeleton />}
 
-      {courses && courses.length === 0 && !error && (
+      {emptyStateKind === 'none' && !error && (
         <div className="mt-8">
           {showCourseCreateActions ? (
             <EmptyState
@@ -1406,6 +1539,20 @@ export default function Courses() {
         </div>
       )}
 
+      {emptyStateKind === 'all-hidden' && !error && (
+        <div className="mt-8">
+          <EmptyState
+            icon={EyeOff}
+            title="All your courses are hidden"
+            body="You hid every course from this page. Show hidden courses to bring them back, or open a course from a direct link."
+            primaryAction={{
+              label: 'Show hidden',
+              onClick: () => setShowHidden(true),
+            }}
+          />
+        </div>
+      )}
+
       {courses && courses.length > 0 && catalogView === 'status' && (
         <CourseCatalogKanbanBoard
           courses={courses}
@@ -1415,11 +1562,12 @@ export default function Courses() {
           onColumnLabelsChange={handleKanbanColumnLabelsChange}
           onNicknameChange={handleNicknameChange}
           onPinnedChange={handlePinnedChange}
+          onHiddenChange={handleHiddenChange}
           onBoardChange={handleKanbanBoardChange}
         />
       )}
 
-      {courses && courses.length > 0 && catalogView !== 'status' && catalogSections && (
+      {emptyStateKind === 'has-visible' && catalogView !== 'status' && catalogSections && (
         <DndContext
           id={COURSE_GRID_SORT_ID}
           sensors={sensors}
@@ -1446,7 +1594,7 @@ export default function Courses() {
         </DndContext>
       )}
 
-      {courses && courses.length > 0 && catalogView !== 'status' && !catalogSections && (
+      {emptyStateKind === 'has-visible' && catalogView !== 'status' && !catalogSections && (
         <DndContext
           id={COURSE_GRID_SORT_ID}
           sensors={sensors}
@@ -1456,7 +1604,7 @@ export default function Courses() {
           onDragCancel={handleDragCancel}
         >
           <SortableContext items={courseIds} strategy={sortStrategy}>
-            {renderCourseItems(courses, 'mt-8')}
+            {renderCourseItems(visibleCourses, 'mt-8')}
           </SortableContext>
         </DndContext>
       )}

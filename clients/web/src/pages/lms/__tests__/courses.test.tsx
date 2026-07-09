@@ -32,6 +32,28 @@ vi.mock('../../../lib/jwt-payload', () => ({
   decodeJwtPayload: () => ({ org_id: '' }),
 }))
 
+vi.mock('../../../context/course-pinned-context', () => ({
+  useCoursePins: () => ({
+    pinnedCourses: [],
+    pinnedRows: [],
+    pinnedCourseIds: new Set<string>(),
+    flashPinnedCourseId: null,
+    loading: false,
+    togglingCourseId: null,
+    refreshPinned: vi.fn(),
+    togglePin: vi.fn(),
+    reorderPinnedRows: vi.fn(),
+  }),
+  toPinnedSummary: (course: unknown) => course,
+}))
+
+vi.mock('../../../context/course-hidden-context', () => ({
+  useCourseHidden: () => ({
+    togglingCourseId: null,
+    toggleHidden: vi.fn(),
+  }),
+}))
+
 describe('Courses page', () => {
   beforeEach(() => {
     authorizedFetch.mockImplementation(async (path: unknown) => {

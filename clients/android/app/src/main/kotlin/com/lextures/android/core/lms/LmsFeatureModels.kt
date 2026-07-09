@@ -489,6 +489,7 @@ data class PlatformFeatures(
     val studentProgressEnabled: Boolean? = null,
     val ffMobileInstructorInsights: Boolean? = null,
     val ffMobileCourseSettings: Boolean? = null,
+    val ffMobileCreateCourse: Boolean? = null,
     val ffConsortiumSharing: Boolean? = null,
     val graderAgentEnabled: Boolean? = null,
     val ffPlagiarismChecks: Boolean? = null,
@@ -496,6 +497,10 @@ data class PlatformFeatures(
     val learnerProfileEnabled: Boolean? = null,
     val ffMobileLearnerProfile: Boolean? = null,
     val introCourseEnabled: Boolean? = null,
+    val ffApiTokens: Boolean? = null,
+    val ffCalendarFeeds: Boolean? = null,
+    val ffMobileSettingsIntegrations: Boolean? = null,
+    val ffMobileAdminSettings: Boolean? = null,
 )
 
 @Serializable

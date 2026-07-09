@@ -62,7 +62,7 @@ struct IntroCourseEntryCard: View {
 
     private func activeCard(_ progress: IntroCourseProgress) -> some View {
         let isNotStarted = state == .notStarted
-        return LMSCard(accent: LexturesTheme.primary) {
+        return LMSCard {
             if let cacheLabel {
                 StalenessChip(label: cacheLabel)
             }

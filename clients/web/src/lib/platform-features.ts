@@ -86,6 +86,7 @@ export type PlatformFeaturesSnapshot = {
   ffPaymentsEnabled?: boolean
   ffRevenueShare?: boolean
   ffTaxCollection?: boolean
+  ffCourseMarketplace?: boolean
   ffLearningPaths?: boolean
   ffConditionalRelease?: boolean
   ffPeerReview?: boolean
@@ -184,6 +185,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffPaymentsEnabled: false,
   ffRevenueShare: false,
   ffTaxCollection: false,
+  ffCourseMarketplace: true,
   ffLearningPaths: false,
   ffConditionalRelease: false,
   ffPeerReview: false,

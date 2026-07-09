@@ -14,7 +14,16 @@ struct CoursesListView: View {
     @State private var deepLinkedCourse: CourseSummary?
     @State private var deepLinkSection: CourseDeepLinkSection?
     @State private var deepLinkItemId: String?
+    @State private var showCreateCourse = false
     @Bindable private var realtime = RealtimeManager.shared
+
+    private var canCreateCourse: Bool {
+        CourseCreateLogic.shouldShowNewCourseAction(
+            permissions: shell.permissions,
+            features: shell.platformFeatures,
+            isOnline: NetworkMonitor.shared.isOnline
+        )
+    }
 
     private var filteredCourses: [CourseSummary] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -70,12 +79,26 @@ struct CoursesListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .globalDrawerToolbar()
             .toolbar {
-                if shell.iaRedesignEnabled && shell.universalSearchEnabled {
-                    ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    if shell.iaRedesignEnabled && shell.universalSearchEnabled {
                         Button { shell.showUniversalSearch = true } label: {
                             Image(systemName: "magnifyingglass")
                         }
                         .accessibilityLabel(L.text("mobile.ia.search"))
+                    }
+                    if canCreateCourse {
+                        Button { showCreateCourse = true } label: {
+                            Image(systemName: "plus")
+                        }
+                        .accessibilityLabel(L.text("mobile.createCourse.title"))
+                    }
+                }
+            }
+            .sheet(isPresented: $showCreateCourse) {
+                CourseCreateView(existingCourses: courses) { created in
+                    Task {
+                        await load(force: true)
+                        deepLinkedCourse = created
                     }
                 }
             }

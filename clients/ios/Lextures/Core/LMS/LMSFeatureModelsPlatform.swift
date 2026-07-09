@@ -58,6 +58,7 @@ struct PlatformFeatures: Decodable {
     var studentProgressEnabled: Bool?
     var ffMobileInstructorInsights: Bool?
     var ffMobileCourseSettings: Bool?
+    var ffMobileCreateCourse: Bool?
     var ffConsortiumSharing: Bool?
     var graderAgentEnabled: Bool?
     var ffPlagiarismChecks: Bool?
@@ -65,4 +66,8 @@ struct PlatformFeatures: Decodable {
     var learnerProfileEnabled: Bool?
     var ffMobileLearnerProfile: Bool?
     var introCourseEnabled: Bool?
+    var ffApiTokens: Bool?
+    var ffCalendarFeeds: Bool?
+    var ffMobileSettingsIntegrations: Bool?
+    var ffMobileAdminSettings: Bool?
 }

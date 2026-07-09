@@ -230,6 +230,7 @@ ORDER BY column_id ASC, sort_order ASC
 }
 
 // ReplaceUserKanbanBoard replaces all kanban placements for enrolled courses provided in columns.
+// Courses in the hidden column are stored in user_course_catalog_hidden, not kanban_placement.
 func ReplaceUserKanbanBoard(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, columns map[string][]uuid.UUID) error {
 	for col := range columns {
 		if _, ok := ValidKanbanColumnIDs[col]; !ok {
@@ -244,12 +245,17 @@ func ReplaceUserKanbanBoard(ctx context.Context, pool *pgxpool.Pool, userID uuid
 
 	seen := map[uuid.UUID]struct{}{}
 	var toInsert []UserKanbanPlacement
+	var toHide []uuid.UUID
 	for col, ids := range columns {
 		for i, id := range ids {
 			if _, dup := seen[id]; dup {
 				return fmt.Errorf("duplicate course in kanban board")
 			}
 			seen[id] = struct{}{}
+			if col == "hidden" {
+				toHide = append(toHide, id)
+				continue
+			}
 			toInsert = append(toInsert, UserKanbanPlacement{
 				CourseID:  id,
 				ColumnID:  col,
@@ -257,28 +263,24 @@ func ReplaceUserKanbanBoard(ctx context.Context, pool *pgxpool.Pool, userID uuid
 			})
 		}
 	}
-	if len(toInsert) == 0 {
-		if _, err := tx.Exec(ctx, `DELETE FROM course.user_course_kanban_placement WHERE user_id = $1`, userID); err != nil {
-			return err
-		}
-		return tx.Commit(ctx)
-	}
 
-	idList := make([]uuid.UUID, 0, len(toInsert))
+	allIDs := make([]uuid.UUID, 0, len(seen))
 	for id := range seen {
-		idList = append(idList, id)
+		allIDs = append(allIDs, id)
 	}
-	var enrolled int
-	if err := tx.QueryRow(ctx, `
+	if len(allIDs) > 0 {
+		var enrolled int
+		if err := tx.QueryRow(ctx, `
 SELECT COUNT(DISTINCT e.course_id)
 FROM course.course_enrollments e
 WHERE e.user_id = $1 AND e.course_id = ANY($2::uuid[])
   AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
-`, userID, idList).Scan(&enrolled); err != nil {
-		return err
-	}
-	if enrolled != len(idList) {
-		return fmt.Errorf("one or more courses are not in your catalog")
+`, userID, allIDs).Scan(&enrolled); err != nil {
+			return err
+		}
+		if enrolled != len(allIDs) {
+			return fmt.Errorf("one or more courses are not in your catalog")
+		}
 	}
 
 	if _, err := tx.Exec(ctx, `DELETE FROM course.user_course_kanban_placement WHERE user_id = $1`, userID); err != nil {
@@ -292,6 +294,36 @@ VALUES ($1, $2, $3, $4, now())
 			return err
 		}
 	}
+
+	hideSet := map[uuid.UUID]struct{}{}
+	for _, id := range toHide {
+		hideSet[id] = struct{}{}
+	}
+	for id := range seen {
+		if _, hide := hideSet[id]; hide {
+			if _, err := tx.Exec(ctx, `
+INSERT INTO course.user_course_catalog_hidden (user_id, course_id, hidden_at)
+VALUES ($1, $2, now())
+ON CONFLICT (user_id, course_id) DO UPDATE SET hidden_at = now()
+`, userID, id); err != nil {
+				return err
+			}
+			if _, err := tx.Exec(ctx, `
+DELETE FROM course.user_course_catalog_pins
+WHERE user_id = $1 AND course_id = $2
+`, userID, id); err != nil {
+				return err
+			}
+			continue
+		}
+		if _, err := tx.Exec(ctx, `
+DELETE FROM course.user_course_catalog_hidden
+WHERE user_id = $1 AND course_id = $2
+`, userID, id); err != nil {
+			return err
+		}
+	}
+
 	return tx.Commit(ctx)
 }
 
@@ -337,6 +369,74 @@ VALUES ($1, $2, $3)
 `, userID, id, i); err != nil {
 			return err
 		}
+	}
+	return tx.Commit(ctx)
+}
+
+// ListUserCatalogHiddenIDs returns course ids the user has hidden from their catalog.
+func ListUserCatalogHiddenIDs(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := pool.Query(ctx, `
+SELECT course_id
+FROM course.user_course_catalog_hidden
+WHERE user_id = $1
+ORDER BY hidden_at DESC
+`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []uuid.UUID
+	for rows.Next() {
+		var courseID uuid.UUID
+		if err := rows.Scan(&courseID); err != nil {
+			return nil, err
+		}
+		out = append(out, courseID)
+	}
+	return out, rows.Err()
+}
+
+// SetUserCourseHidden hides or unhides one enrolled course for the user.
+// Hiding also unpins the course and clears any kanban placement.
+func SetUserCourseHidden(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID, hidden bool) error {
+	if !hidden {
+		_, err := pool.Exec(ctx, `
+DELETE FROM course.user_course_catalog_hidden
+WHERE user_id = $1 AND course_id = $2
+`, userID, courseID)
+		return err
+	}
+	enrolled, err := userIsEnrolledInCatalog(ctx, pool, userID, courseID)
+	if err != nil {
+		return err
+	}
+	if !enrolled {
+		return fmt.Errorf("course is not in your catalog")
+	}
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	if _, err := tx.Exec(ctx, `
+INSERT INTO course.user_course_catalog_hidden (user_id, course_id, hidden_at)
+VALUES ($1, $2, now())
+ON CONFLICT (user_id, course_id) DO UPDATE SET hidden_at = now()
+`, userID, courseID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `
+DELETE FROM course.user_course_catalog_pins
+WHERE user_id = $1 AND course_id = $2
+`, userID, courseID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `
+DELETE FROM course.user_course_kanban_placement
+WHERE user_id = $1 AND course_id = $2
+`, userID, courseID); err != nil {
+		return err
 	}
 	return tx.Commit(ctx)
 }
@@ -608,13 +708,24 @@ func AttachUserCatalogMeta(ctx context.Context, pool *pgxpool.Pool, userID uuid.
 	if err != nil {
 		return err
 	}
+	hiddenIDs, err := ListUserCatalogHiddenIDs(ctx, pool, userID)
+	if err != nil {
+		return err
+	}
 	placementByCourse := map[string]UserKanbanPlacement{}
 	for _, p := range placements {
+		if p.ColumnID == "hidden" {
+			continue
+		}
 		placementByCourse[p.CourseID.String()] = p
 	}
 	pinned := map[string]struct{}{}
 	for _, id := range pinIDs {
 		pinned[id.String()] = struct{}{}
+	}
+	hidden := map[string]struct{}{}
+	for _, id := range hiddenIDs {
+		hidden[id.String()] = struct{}{}
 	}
 	for i := range courses {
 		if nick, ok := nicknames[courses[i].ID]; ok {
@@ -629,6 +740,9 @@ func AttachUserCatalogMeta(ctx context.Context, pool *pgxpool.Pool, userID uuid.
 		}
 		if _, ok := pinned[courses[i].ID]; ok {
 			courses[i].CatalogPinned = true
+		}
+		if _, ok := hidden[courses[i].ID]; ok {
+			courses[i].CatalogHidden = true
 		}
 	}
 	return nil

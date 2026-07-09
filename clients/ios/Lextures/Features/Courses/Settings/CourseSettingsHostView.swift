@@ -111,6 +111,8 @@ struct CourseSettingsHostView: View {
             CoursePlagiarismSettingsView(course: course)
         case .accessibility:
             CourseAccessibilityReviewView(course: course)
+        case .translations:
+            CourseTranslationsSettingsView(course: course)
         case .outcomes:
             CourseOutcomesSettingsView(course: course)
         case .importExport:

@@ -4,6 +4,7 @@ import { CommandPaletteProvider } from '../command-palette/command-palette-provi
 import { KeyboardShortcutsProvider } from '../keyboard-shortcuts/keyboard-shortcuts-provider'
 import { CourseFeedUnreadProvider } from '../../context/course-feed-unread-provider'
 import { CoursePinnedProvider } from '../../context/course-pinned-context'
+import { CourseHiddenProvider } from '../../context/course-hidden-context'
 import { InboxNotificationsProvider } from '../../context/inbox-notifications-provider'
 import { CanvasImportProvider } from '../../context/canvas-import-context'
 import { InboxUnreadProvider } from '../../context/inbox-unread-provider'
@@ -102,6 +103,7 @@ export function AppShell() {
     <InboxUnreadProvider>
       <CanvasImportProvider>
       <CoursePinnedProvider>
+      <CourseHiddenProvider>
       <InboxNotificationsProvider>
       <CourseFeedUnreadProvider>
         <CommandPaletteProvider>
@@ -117,6 +119,7 @@ export function AppShell() {
         </CommandPaletteProvider>
       </CourseFeedUnreadProvider>
       </InboxNotificationsProvider>
+      </CourseHiddenProvider>
       </CoursePinnedProvider>
       </CanvasImportProvider>
     </InboxUnreadProvider>

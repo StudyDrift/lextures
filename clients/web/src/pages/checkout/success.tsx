@@ -4,11 +4,17 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { checkEntitlement, fetchMyEntitlements } from '../../lib/billing-api'
 import { authorizedFetch } from '../../lib/api'
+import { marketplaceCoursePath } from '../../lib/marketplace-api'
+
+const POLL_ATTEMPTS = 20
+const POLL_INTERVAL_MS = 1000
 
 export default function CheckoutSuccessPage() {
   const { t } = useTranslation('billing')
   const [params] = useSearchParams()
   const courseId = params.get('course_id') ?? ''
+  const courseCode = params.get('course_code') ?? ''
+  const slug = params.get('slug') ?? ''
   const [status, setStatus] = useState<'verifying' | 'ready' | 'timeout'>('verifying')
 
   useEffect(() => {
@@ -39,11 +45,11 @@ export default function CheckoutSuccessPage() {
       } catch {
         // keep polling briefly
       }
-      if (attempts >= 10) {
+      if (attempts >= POLL_ATTEMPTS) {
         if (!cancelled) setStatus('timeout')
         return
       }
-      window.setTimeout(() => void poll(), 1000)
+      window.setTimeout(() => void poll(), POLL_INTERVAL_MS)
     }
 
     void poll()
@@ -52,13 +58,24 @@ export default function CheckoutSuccessPage() {
     }
   }, [courseId])
 
+  const continueTo = courseCode
+    ? marketplaceCoursePath(courseCode)
+    : courseId
+      ? `/courses/${encodeURIComponent(courseId)}`
+      : '/'
+  const fallbackTo = slug
+    ? `/marketplace/${encodeURIComponent(slug)}`
+    : courseCode
+      ? marketplaceCoursePath(courseCode)
+      : '/me/billing'
+
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 text-center">
       {status === 'verifying' ? (
         <>
-          <Loader2 className="h-10 w-10 animate-spin text-indigo-600" aria-hidden />
+          <Loader2 className="h-10 w-10 motion-safe:animate-spin text-indigo-600" aria-hidden />
           <h1 className="mt-4 text-2xl font-semibold">{t('billing.checkout.success.verifying.title')}</h1>
-          <p className="mt-2 text-slate-600 dark:text-neutral-400">
+          <p className="mt-2 text-slate-600 dark:text-neutral-400" aria-live="polite">
             {t('billing.checkout.success.verifying.description')}
           </p>
         </>
@@ -72,7 +89,7 @@ export default function CheckoutSuccessPage() {
             {t('billing.checkout.success.ready.description')}
           </p>
           <Link
-            to={courseId ? `/courses/${courseId}` : '/'}
+            to={continueTo}
             className="mt-6 inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
           >
             {t('billing.checkout.success.ready.continue')}
@@ -82,10 +99,10 @@ export default function CheckoutSuccessPage() {
       {status === 'timeout' ? (
         <>
           <h1 className="text-2xl font-semibold">{t('billing.checkout.success.timeout.title')}</h1>
-          <p className="mt-2 text-slate-600 dark:text-neutral-400">
+          <p className="mt-2 text-slate-600 dark:text-neutral-400" role="status">
             {t('billing.checkout.success.timeout.description')}
           </p>
-          <Link to="/me/billing" className="mt-6 text-sm font-medium text-indigo-600 hover:underline">
+          <Link to={fallbackTo} className="mt-6 text-sm font-medium text-indigo-600 hover:underline">
             {t('billing.checkout.success.timeout.billingLink')}
           </Link>
         </>

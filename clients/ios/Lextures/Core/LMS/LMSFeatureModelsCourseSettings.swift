@@ -47,6 +47,7 @@ struct CourseUpdateRequest: Codable, Equatable {
     var courseHomeContentItemId: String?
     var courseTimezone: String?
     var gradeLevel: String?
+    var termId: String?
 }
 
 struct CourseMarkdownThemePatch: Codable, Equatable {

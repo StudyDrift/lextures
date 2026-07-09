@@ -381,7 +381,7 @@ struct MyGradesResponse: Codable {
 
 // MARK: - Syllabus
 
-struct SyllabusSection: Decodable, Identifiable, Hashable {
+struct SyllabusSection: Codable, Identifiable, Hashable {
     var id: String
     var heading: String
     var markdown: String

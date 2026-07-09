@@ -399,6 +399,7 @@ struct MobilePlatformFeatures: Equatable {
     var studentProgressEnabled = true
     var ffMobileInstructorInsights = true
     var ffMobileCourseSettings = false
+    var ffMobileCreateCourse = false
     var ffConsortiumSharing = false
     var graderAgentEnabled = false
     var ffPlagiarismChecks = false
@@ -406,6 +407,10 @@ struct MobilePlatformFeatures: Equatable {
     var learnerProfileEnabled = false
     var ffMobileLearnerProfile = true
     var introCourseEnabled = false
+    var ffApiTokens = false
+    var ffCalendarFeeds = true
+    var ffMobileSettingsIntegrations = false
+    var ffMobileAdminSettings = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -461,13 +466,18 @@ struct MobilePlatformFeatures: Equatable {
             studentProgressEnabled: features?.studentProgressEnabled != false,
             ffMobileInstructorInsights: features?.ffMobileInstructorInsights != false,
             ffMobileCourseSettings: features?.ffMobileCourseSettings == true,
+            ffMobileCreateCourse: features?.ffMobileCreateCourse == true,
             ffConsortiumSharing: features?.ffConsortiumSharing == true,
             graderAgentEnabled: features?.graderAgentEnabled == true,
             ffPlagiarismChecks: features?.ffPlagiarismChecks == true,
             altTextEnforcementEnabled: features?.altTextEnforcementEnabled == true,
             learnerProfileEnabled: features?.learnerProfileEnabled == true,
             ffMobileLearnerProfile: features?.ffMobileLearnerProfile != false,
-            introCourseEnabled: features?.introCourseEnabled != false
+            introCourseEnabled: features?.introCourseEnabled != false,
+            ffApiTokens: features?.ffApiTokens == true,
+            ffCalendarFeeds: features?.ffCalendarFeeds != false,
+            ffMobileSettingsIntegrations: features?.ffMobileSettingsIntegrations == true,
+            ffMobileAdminSettings: features?.ffMobileAdminSettings == true
         )
     }
 
