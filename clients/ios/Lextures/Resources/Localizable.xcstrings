@@ -24860,31 +24860,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instructor alert threshold (% similarity)"
+            "value": "Instructor alert threshold (%% similarity)"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instructor alert threshold (% similarity)"
+            "value": "Instructor alert threshold (%% similarity)"
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "⟦Instructor alert threshold (% similarity)⟧"
+            "value": "⟦Instructor alert threshold (%% similarity)⟧"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instructor alert threshold (% similarity)"
+            "value": "Instructor alert threshold (%% similarity)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instructor alert threshold (% similarity)"
+            "value": "Instructor alert threshold (%% similarity)"
           }
         }
       }
