@@ -42,7 +42,7 @@ func TestFetchDashboardStats_MatchesDirectCounts_Pg(t *testing.T) {
 	if err != nil {
 		t.Fatalf("begin tx: %v", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	stats, err := fetchDashboardStats(ctx, tx)
 	if err != nil {
