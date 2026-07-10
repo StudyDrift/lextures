@@ -1,0 +1,21 @@
+code: C-AIESS1
+title: AI Essentials
+catalog_slug: ai-essentials
+catalog_category: Technology
+difficulty_level: beginner
+catalog_language: en
+summary: Understand AI, use it well, and reason about its limits. No coding. Free.
+outcomes:
+  - Define and distinguish artificial intelligence, machine learning, deep learning, and generative AI, and give an everyday example of each
+  - Explain in plain language how a machine-learning model learns from data (training vs. inference) and how a large language model produces text (next-token prediction)
+  - Judge fit — decide when AI is and is not appropriate for a task, and name at least three limitations (hallucination, bias, no ground-truth understanding, data/privacy constraints)
+  - Prompt and evaluate — write a clear, iterated prompt and critically verify the output instead of trusting it blindly
+  - Reason about responsibility — describe the NIST AI RMF trustworthiness characteristics and apply a short responsible-use checklist, including human oversight and privacy
+  - Recognize impact — identify where AI appears in common tools and how it is changing everyday work
+estimated_minutes: 300
+price_cents: 0
+is_public: true
+marketplace_listed: true
+hero_image: assets/ai-essentials-banner.jpg
+content_version: 1
+short_code: LEX-MC-AIESS1

@@ -1,0 +1,97 @@
+{
+  "slug": "m1.getting-started.knowledge-check",
+  "title": "Module 1 knowledge check",
+  "sort_order": 5,
+  "markdown": "Five questions on programs, REPL vs scripts, and print. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m1-q1",
+      "prompt": "What does this display?\n\n```python\nprint(\"Hi\")\n```",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Hi",
+        "\"Hi\"",
+        "print(Hi)",
+        "Nothing (no output)"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q2",
+      "prompt": "Which best describes a REPL?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "An interactive prompt where you type code and see results immediately",
+        "Only a way to install Python",
+        "A file extension for images",
+        "A type of loop that never ends"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q3",
+      "prompt": "A .py file is a script you can run with python3 hello.py (or python hello.py on some systems).",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q4",
+      "prompt": "What is the role of a line that starts with # in Python?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "It is a comment ignored by Python",
+        "It prints the rest of the line",
+        "It ends the program",
+        "It marks a string"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q5",
+      "prompt": "You want to try one line of Python with no file. The best first option in this course is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Use an online Python 3 interpreter or the local REPL",
+        "Buy a paid IDE license first",
+        "Install a third-party package manager before any code",
+        "Write machine code by hand"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q6",
+      "prompt": "It is safe to paste API keys and passwords into a free online Python interpreter.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

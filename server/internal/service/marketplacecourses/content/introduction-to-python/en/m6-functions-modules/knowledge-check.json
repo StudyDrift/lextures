@@ -1,0 +1,99 @@
+{
+  "slug": "m6.functions-modules.knowledge-check",
+  "title": "Module 6 knowledge check",
+  "sort_order": 5,
+  "markdown": "Functions, return values, and imports. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m6-q1",
+      "prompt": "What does this display?\n\n```python\ndef f(x):\n    return x + 1\nprint(f(3))\n```",
+      "questionType": "multiple_choice",
+      "choices": [
+        "4",
+        "3",
+        "x + 1",
+        "None"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q2",
+      "prompt": "Which statement correctly imports and uses the math module's sqrt?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "import math; print(math.sqrt(9))",
+        "import sqrt; print(sqrt(9))",
+        "math = import; print(sqrt(9))",
+        "from 9 import math"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q3",
+      "prompt": "A docstring is a string literal placed as the first statement in a function body to document it.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q4",
+      "prompt": "If a function has no return statement, a call to it yields:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "None",
+        "0",
+        "False",
+        "An error always"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q5",
+      "prompt": "What does print(celsius_to_fahrenheit(0)) display if the function returns c * 9 / 5 + 32?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "32.0",
+        "0",
+        "212.0",
+        "9"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q6",
+      "prompt": "statistics.mean([1, 2, 3]) evaluates to:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "2",
+        "3",
+        "1",
+        "6"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

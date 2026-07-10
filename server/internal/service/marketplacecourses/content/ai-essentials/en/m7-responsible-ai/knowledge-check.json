@@ -1,0 +1,114 @@
+{
+  "slug": "m7.responsible-ai.knowledge-check",
+  "title": "Module 7 knowledge check",
+  "sort_order": 5,
+  "markdown": "Map scenarios to NIST trustworthiness characteristics and responsible practice.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m7-q1",
+      "prompt": "Which source defines the trustworthiness characteristics used in this module?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "NIST AI Risk Management Framework",
+        "A single vendor marketing page",
+        "An anonymous forum post",
+        "A random product changelog"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q2",
+      "prompt": "\"Fair \u2014 with harmful bias managed\" is best matched to which concern?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Systematic unfair outcomes tied to data or design",
+        "Making the UI purple",
+        "Increasing GPU count only",
+        "Deleting all logs forever"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q3",
+      "prompt": "Human oversight in a customer-email drafting scenario most nearly means:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A person reviews or approves messages before they send when stakes warrant it",
+        "Never reading what the model wrote",
+        "Turning off all spell-check",
+        "Publishing every draft automatically"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q4",
+      "prompt": "Privacy-enhanced AI practice includes minimizing unnecessary personal data in prompts and tools.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q5",
+      "prompt": "If a chatbot invents a fake policy quote in a support draft, which characteristic is most directly at risk?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Valid and reliable",
+        "Making the font larger",
+        "Unlimited free compute",
+        "Removing all human roles"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q6",
+      "prompt": "A practical way to keep learning after this course is to:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Return to primary sources like the Stanford HAI AI Index and NIST AI RMF for updates",
+        "Trust every social headline without checking dates",
+        "Assume AGI shipped last Tuesday",
+        "Ignore privacy policies"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q7",
+      "prompt": "Accountable and transparent practice includes:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Clarifying who is responsible and what the system's limits are",
+        "Hiding all failure modes from users forever",
+        "Claiming the model is always right",
+        "Banning human review"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

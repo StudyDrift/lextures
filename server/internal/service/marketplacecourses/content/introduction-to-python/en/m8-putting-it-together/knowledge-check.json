@@ -1,0 +1,114 @@
+{
+  "slug": "m8.putting-it-together.knowledge-check",
+  "title": "Module 8 knowledge check",
+  "sort_order": 5,
+  "markdown": "Design, style, and debugging. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m8-q1",
+      "prompt": "According to PEP 8 basics in this course, ordinary function names should use:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "snake_case like compute_total",
+        "SCREAMING names only",
+        "spaces in the name",
+        "a leading digit"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m8-q2",
+      "prompt": "A good first debugging step when a program crashes is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Read the exception type and line number",
+        "Delete all the code and start over immediately",
+        "Ignore the traceback",
+        "Install unrelated packages"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m8-q3",
+      "prompt": "random.randint(1, 20) can return both 1 and 20.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m8-q4",
+      "prompt": "Which is a common beginner bug this course warned about?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Using = when you meant == in a condition",
+        "Using too many comments",
+        "Importing math",
+        "Using f-strings"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m8-q5",
+      "prompt": "When designing from a spec, a useful early step is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "List inputs/outputs and break the work into steps",
+        "Write the entire UI theme first",
+        "Avoid running any code until the file is 500 lines",
+        "Skip validation forever"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m8-q6",
+      "prompt": "This course intentionally deferred which topic?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Object-oriented programming and web frameworks",
+        "print() and variables",
+        "if and for",
+        "Reading text files"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m8-q7",
+      "prompt": "What does this display?\n\n```python\nguess = 7\nif guess == 7:\n    print(\"ok\")\n```",
+      "questionType": "multiple_choice",
+      "choices": [
+        "ok",
+        "7",
+        "guess == 7",
+        "Nothing (no output)"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

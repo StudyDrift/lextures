@@ -1,0 +1,97 @@
+{
+  "slug": "m3.banking-saving.knowledge-check",
+  "title": "Module 3 knowledge check",
+  "sort_order": 4,
+  "markdown": "Six questions on accounts, APY, compounding, and FDIC insurance. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m3-q1",
+      "prompt": "When comparing savings accounts, APY is useful because it:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Reflects effective yearly yield including compounding",
+        "Guarantees stock-market returns",
+        "Is the same as a credit score",
+        "Only applies to credit cards"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q2",
+      "prompt": "FDIC insurance protects deposits at an insured bank up to the standard limit if the bank fails.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q3",
+      "prompt": "Compound interest means you earn interest on:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Principal plus previously earned interest",
+        "Only the original principal forever",
+        "Someone else's debt",
+        "Unpaid parking tickets"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q4",
+      "prompt": "A checking account is typically best for:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Everyday spending and bill pay",
+        "Guaranteeing high investment returns",
+        "Avoiding all fees in every case",
+        "Replacing insurance"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q5",
+      "prompt": "FDIC deposit insurance guarantees that stock investments cannot lose value.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q6",
+      "prompt": "Which official tool helps explore compound growth with illustrative inputs?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Investor.gov Compound Interest Calculator",
+        "A random social-media stock tip",
+        "A guaranteed-return cold call",
+        "An anonymous chat rumor"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

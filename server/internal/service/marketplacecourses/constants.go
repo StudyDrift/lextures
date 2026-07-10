@@ -9,7 +9,16 @@ const (
 	GradePolicyGraderAgent    = "grader_agent"
 
 	defaultLocale = "en"
+
+	// HarnessSmokeDir is the MC0 pipeline smoke course; validated in CI but not
+	// provisioned on deploy (not real catalog inventory).
+	HarnessSmokeDir = "harness-smoke"
 )
 
 // SystemPublisherID is the platform publisher for official courses.
 var SystemPublisherID = mcrepo.SystemPublisherID
+
+// IsDeployCourse reports whether a content directory should be provisioned on API startup / deploy.
+func IsDeployCourse(dirSlug string) bool {
+	return dirSlug != HarnessSmokeDir
+}

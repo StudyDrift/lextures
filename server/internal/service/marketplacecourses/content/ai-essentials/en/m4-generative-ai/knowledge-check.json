@@ -1,0 +1,97 @@
+{
+  "slug": "m4.generative-ai.knowledge-check",
+  "title": "Module 4 knowledge check",
+  "sort_order": 4,
+  "markdown": "How LLMs generate text \u2014 and what they do not do.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m4-q1",
+      "prompt": "A large language model chooses each next word by predicting likely continuations from patterns in its training data, not by looking up verified facts.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q2",
+      "prompt": "A token in an LLM is best described as:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A chunk of text the model processes (often a word piece)",
+        "A cryptographic password the model invents",
+        "Proof of human understanding",
+        "A guaranteed citation"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q3",
+      "prompt": "Which claim is most accurate about LLMs?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "They can produce fluent text that is still factually wrong",
+        "They never hallucinate",
+        "They always cite primary sources correctly",
+        "They replace the need for human review in medicine by default"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q4",
+      "prompt": "When you chat with a typical consumer LLM product, you are usually:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Running inference on a pre-trained model",
+        "Retraining the entire model from zero with each message",
+        "Performing unsupervised clustering of your ISP",
+        "Creating AGI"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q5",
+      "prompt": "Example AI outputs shown in educational materials should be treated as possibly wrong illustrations, not guaranteed truth.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q6",
+      "prompt": "Generative models for images and audio:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Can also reflect training-data patterns and biases, and need critical review",
+        "Are always unbiased",
+        "Cannot be misleading",
+        "Require no privacy caution"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

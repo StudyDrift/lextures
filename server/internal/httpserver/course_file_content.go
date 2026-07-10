@@ -11,7 +11,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
+	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/imageproxy"
 )
@@ -28,8 +30,13 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		courseCode, _, ok := d.requireCourseAccess(w, r)
-		if !ok {
+		if d.Pool == nil {
+			_, _, _ = d.requireCourseAccess(w, r)
+			return
+		}
+		courseCode := strings.TrimSpace(chi.URLParam(r, "course_code"))
+		if courseCode == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing course code.")
 			return
 		}
 		fileID, err := uuid.Parse(chi.URLParam(r, "file_id"))
@@ -44,6 +51,13 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 		}
 		if row == nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+			return
+		}
+
+		// Enrolled users may read any course file. Storefront/catalog hero images are
+		// also readable without enrollment when they match the course's hero_image_url
+		// (marketplace cards and the public www storefront need this).
+		if !d.canReadCourseFileContent(w, r, courseCode, row) {
 			return
 		}
 		if !d.gateObjectDownload(w, r, row.StorageKey) {
@@ -96,10 +110,53 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 			}
 		}
 		w.Header().Set("Content-Type", ct)
-		w.Header().Set("Cache-Control", "private, max-age=86400")
+		if d.isPublicStorefrontHero(r, courseCode, row) {
+			w.Header().Set("Cache-Control", "public, max-age=86400")
+		} else {
+			w.Header().Set("Cache-Control", "private, max-age=86400")
+		}
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(b)
 	}
+}
+
+// canReadCourseFileContent authorizes GET …/course-files/{id}/content.
+// Enrolled users may read any file for the course. The course hero image is also
+// readable without enrollment when the course is published and marketplace-listed
+// or publicly catalogued (storefront / www cards).
+func (d Deps) canReadCourseFileContent(w http.ResponseWriter, r *http.Request, courseCode string, row *coursefiles.Row) bool {
+	if row == nil {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+		return false
+	}
+	if viewer, ok := d.optionalUserID(r); ok {
+		has, err := enrollment.UserHasAccess(r.Context(), d.Pool, courseCode, viewer)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify course access.")
+			return false
+		}
+		if has {
+			return true
+		}
+	}
+	if d.isPublicStorefrontHero(r, courseCode, row) {
+		return true
+	}
+	// Fall back to the normal enrolled-access path (writes 401/404 as appropriate).
+	_, _, ok := d.requireCourseAccess(w, r)
+	return ok
+}
+
+func (d Deps) isPublicStorefrontHero(r *http.Request, courseCode string, row *coursefiles.Row) bool {
+	if row == nil || d.Pool == nil {
+		return false
+	}
+	readable, err := course.IsStorefrontHeroReadable(r.Context(), d.Pool, courseCode)
+	if err != nil || !readable {
+		return false
+	}
+	isHero, err := course.IsCourseHeroFile(r.Context(), d.Pool, courseCode, row.ID)
+	return err == nil && isHero
 }
 
 const courseFileImageResizeMaxDim = 2048

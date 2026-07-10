@@ -1,0 +1,35 @@
+{
+  "require_acceptance": false,
+  "sections": [
+    {
+      "id": "overview",
+      "heading": "Course overview",
+      "markdown": "**Personal Finance** is a free, self-paced introduction to money basics for adults and older teens (about grades 9+).\n\n- **Estimated time:** about 5–7 hours\n- **Format:** 7 modules with short readings, knowledge checks, applied assignments, and a capstone plan\n- **Price:** Free — claim it from the marketplace\n- **Scope:** **US-focused** educational content grounded in government and nonprofit sources (CFPB, Investor.gov, FDIC, MyMoney.gov, IRS, and others)\n\n> **Educational disclaimer:** This course is for **education only**. It is **not** personalized financial, tax, investment, or legal advice. Verify current figures at the official links in each lesson. For decisions about your situation, consider a qualified professional.\n\nYou will practice budgeting, saving, credit and debt basics, investing fundamentals, big-expense planning, and fraud protection — without product pitches or affiliate links."
+    },
+    {
+      "id": "outcomes",
+      "heading": "What you'll learn",
+      "markdown": "By the end of Personal Finance, you will be able to:\n\n1. **Set goals** — write SMART financial goals and distinguish needs from wants aligned to personal values.\n2. **Budget** — build and maintain a monthly budget (e.g., 50/30/20 or zero-based), track cash flow, and size an emergency fund.\n3. **Bank & save** — choose appropriate accounts; explain interest, APY, **compound growth**, and **FDIC deposit insurance**.\n4. **Manage credit & debt** — read a credit report and score, explain APR, and build a debt-payoff plan (avalanche vs. snowball).\n5. **Understand investing basics** — explain compound interest, risk/return, diversification, index funds, and **tax-advantaged retirement accounts**, and recognize **investment-fraud red flags**.\n6. **Plan for big items** — describe the basics of taxes, insurance, and major expenses (housing, vehicles, student aid) and how to prepare.\n7. **Protect yourself** — spot scams and identity theft, respond appropriately, and find **trustworthy** sources of help."
+    },
+    {
+      "id": "modules",
+      "heading": "Module guide",
+      "markdown": "| Module | Focus |\n|---|---|\n| 1. Money Mindset & Goals | Values, needs vs. wants, SMART goals, MyMoney Five |\n| 2. Budgeting & Cash Flow | Income/expenses, 50/30/20, emergency fund, budget assignment |\n| 3. Banking & Saving | Accounts, APY, compounding, FDIC insurance |\n| 4. Credit & Debt | Scores/reports, APR, avalanche vs. snowball, debt-payoff plan |\n| 5. Investing Basics | Risk/return, diversification, retirement accounts, fraud red flags, compounding exercise |\n| 6. Big Expenses, Taxes & Insurance | Tax basics, insurance types, housing/vehicles/student aid |\n| 7. Protecting Your Money & Next Steps | Scams, safe habits, trustworthy help, capstone plan |"
+    },
+    {
+      "id": "grading",
+      "heading": "Grading & completion",
+      "markdown": "- **Knowledge checks** (each module) are auto-scored multiple-choice and true/false questions. Low stakes; unlimited attempts; instant feedback.\n- **Monthly Budget** (Module 2) — auto-graded (`completion_full`), 10 points.\n- **Debt-Payoff Plan** (Module 4) — auto-graded (`completion_full`), 10 points.\n- **Compounding Exercise** (Module 5) — auto-graded (`completion_full`), 10 points.\n- **Capstone: My Simple Financial Plan** (Module 7) — auto-graded (`grader_agent`), 15 points. Feedback comments on completeness and clarity only — **not** personalized financial advice.\n\nThere are no due dates. Work at your own pace. Course completion expects finishing the final knowledge check and submitting the capstone.\n\nAssignments use **illustrative figures only** — never real account numbers, SSNs, or other sensitive data."
+    },
+    {
+      "id": "trust",
+      "heading": "A note on trust",
+      "markdown": "Financial content online is full of sales pitches and conflicting advice. This course cites **government and nonprofit** sources only (for example [CFPB](https://www.consumerfinance.gov/), [Investor.gov](https://www.investor.gov/), [FDIC Money Smart](https://www.fdic.gov/consumer-resource-center/money-smart-adults), [MyMoney.gov](https://www.mymoney.gov/), [IRS.gov](https://www.irs.gov/), and [Khan Academy Personal Finance](https://www.khanacademy.org/college-careers-more/personal-finance)). We take **no product or vendor position** and include **no affiliate links**.\n\nHow to spot financial misinformation: guaranteed high returns with little risk, pressure to act immediately, requests for secrecy or unusual payment methods, and \"tips\" that push a specific product without disclosing conflicts. Prefer primary .gov and established nonprofit education sites."
+    },
+    {
+      "id": "help",
+      "heading": "Getting help & going deeper",
+      "markdown": "Authoritative free resources used throughout this course:\n\n- [Consumer Financial Protection Bureau (CFPB)](https://www.consumerfinance.gov/)\n- [Investor.gov (U.S. SEC)](https://www.investor.gov/) — including the [Compound Interest Calculator](https://www.investor.gov/financial-tools-calculators/calculators/compound-interest-calculator)\n- [MyMoney.gov](https://www.mymoney.gov/) and [MyMoney Five](https://www.mymoney.gov/mymoney-five-tools)\n- [FDIC Money Smart for Adults](https://www.fdic.gov/consumer-resource-center/money-smart-adults)\n- [Khan Academy — Personal Finance](https://www.khanacademy.org/college-careers-more/personal-finance)\n- [AnnualCreditReport.com](https://www.annualcreditreport.com/) (federally authorized free credit reports)\n- [IRS.gov](https://www.irs.gov/)\n- [Bogleheads Wiki — Getting Started](https://www.bogleheads.org/wiki/Getting_started)\n\nIf you need individualized advice, seek a qualified professional. This course cannot replace that."
+    }
+  ]
+}

@@ -49,6 +49,7 @@ type GradingConfig struct {
 	Group              string
 	GradePolicy        string
 	MaxAttempts        int
+	UnlimitedAttempts  bool
 	GradeAttemptPolicy string
 	SubmissionModes    []string
 }
@@ -402,6 +403,7 @@ func loadQuizFixture(filePath, moduleDir string) (QuizFixture, error) {
 		Group              string                          `json:"group"`
 		GradePolicy        string                          `json:"grade_policy"`
 		MaxAttempts        int                             `json:"max_attempts"`
+		UnlimitedAttempts  bool                            `json:"unlimited_attempts"`
 		GradeAttemptPolicy string                          `json:"grade_attempt_policy"`
 		ContentVersion     int                             `json:"content_version"`
 		Questions          []coursemodulequiz.QuizQuestion `json:"questions"`
@@ -421,6 +423,7 @@ func loadQuizFixture(filePath, moduleDir string) (QuizFixture, error) {
 			Group:              strings.TrimSpace(raw.Group),
 			GradePolicy:        strings.TrimSpace(raw.GradePolicy),
 			MaxAttempts:        raw.MaxAttempts,
+			UnlimitedAttempts:  raw.UnlimitedAttempts,
 			GradeAttemptPolicy: strings.TrimSpace(raw.GradeAttemptPolicy),
 		},
 		ModuleDir: moduleDir,
@@ -441,7 +444,11 @@ func loadQuizFixture(filePath, moduleDir string) (QuizFixture, error) {
 	if q.Grading.Group == "" {
 		q.Grading.Group = "Quizzes"
 	}
-	if q.Grading.MaxAttempts <= 0 {
+	if q.Grading.UnlimitedAttempts {
+		if q.Grading.MaxAttempts <= 0 {
+			q.Grading.MaxAttempts = 1 // DB NOT NULL; ignored when unlimited
+		}
+	} else if q.Grading.MaxAttempts <= 0 {
 		q.Grading.MaxAttempts = 3
 	}
 	if q.Grading.GradeAttemptPolicy == "" {

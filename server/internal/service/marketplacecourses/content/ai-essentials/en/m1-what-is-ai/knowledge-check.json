@@ -1,0 +1,99 @@
+{
+  "slug": "m1.what-is-ai.knowledge-check",
+  "title": "Module 1 knowledge check",
+  "sort_order": 5,
+  "markdown": "Five questions on AI terminology and narrow vs. general AI. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m1-q1",
+      "prompt": "Which statement best distinguishes machine learning from traditional programming?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "The system learns rules from examples/data instead of being given the rules explicitly.",
+        "It always uses a neural network.",
+        "It never makes mistakes.",
+        "It requires no data."
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q2",
+      "prompt": "Which term is the broadest umbrella?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Artificial intelligence",
+        "Deep learning",
+        "Generative AI",
+        "Tokenization"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q3",
+      "prompt": "A spam filter that improves from labeled past emails is primarily an example of:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Machine learning",
+        "AGI",
+        "Hand-written rules only",
+        "Quantum computing"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q4",
+      "prompt": "Most consumer AI products today are examples of artificial general intelligence (AGI).",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q5",
+      "prompt": "The \"AI effect\" refers to:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Successful AI techniques becoming ordinary software people stop calling \"AI.\"",
+        "AI systems always improving forever without new data.",
+        "The requirement that all AI must be generative.",
+        "A law that bans narrow AI."
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q6",
+      "prompt": "Which is the best everyday example of generative AI?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A writing assistant that drafts an email from a short instruction",
+        "A calculator adding two numbers with a fixed algorithm",
+        "A thermostat using a single temperature threshold",
+        "A paper dictionary"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

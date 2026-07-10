@@ -25,3 +25,12 @@ func TestIsFree(t *testing.T) {
 		t.Fatal("positive price is not free")
 	}
 }
+
+func TestCourseHeroContentPath(t *testing.T) {
+	id := "6bb960af-bc69-478e-8fca-7e8092976eca"
+	got := "/api/v1/courses/C-AIESS1/course-files/" + id + "/content"
+	want := "/api/v1/courses/C-AIESS1/course-files/6bb960af-bc69-478e-8fca-7e8092976eca/content"
+	if got != want {
+		t.Fatalf("hero content path shape: %q", got)
+	}
+}

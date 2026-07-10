@@ -1,0 +1,99 @@
+{
+  "slug": "m2.budgeting-cash-flow.knowledge-check",
+  "title": "Module 2 knowledge check",
+  "sort_order": 5,
+  "markdown": "Six questions on budgeting, 50/30/20, and emergency funds. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m2-q1",
+      "prompt": "In the 50/30/20 guideline, the 20% is intended for:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Savings and debt repayment",
+        "Rent",
+        "Entertainment",
+        "Groceries"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q2",
+      "prompt": "Positive cash flow means:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Income exceeds expenses over the period",
+        "You have no wants",
+        "Credit score is above 800",
+        "You never use a budget"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q3",
+      "prompt": "In zero-based budgeting, \"zero\" primarily means:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Every planned dollar is assigned a job",
+        "Your bank balance must be exactly $0",
+        "You cannot save",
+        "You ignore irregular income"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q4",
+      "prompt": "An emergency fund is primarily for vacations and shopping sprees.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q5",
+      "prompt": "Which is the best reason to track expenses for a few weeks?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "To see where money actually goes compared with the plan",
+        "To share account passwords with friends",
+        "To avoid ever adjusting a budget",
+        "To replace all insurance"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q6",
+      "prompt": "50/30/20 should be treated as:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A flexible guideline that may need local adjustment",
+        "A federal law",
+        "The only valid budget method",
+        "A stock-picking rule"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}
