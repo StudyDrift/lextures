@@ -56,10 +56,10 @@ func isolatedOrg(t *testing.T, ctx context.Context, pool *pgxpool.Pool) uuid.UUI
 	if err != nil {
 		t.Fatalf("org: %v", err)
 	}
+	// Only clear the license row. Leave users/org in place — deleting users mid-suite
+	// races with other packages that snapshot instance-wide user counts.
 	t.Cleanup(func() {
 		_, _ = pool.Exec(context.Background(), `DELETE FROM tenant.licenses WHERE org_id = $1`, row.ID)
-		_, _ = pool.Exec(context.Background(), `DELETE FROM "user".users WHERE org_id = $1`, row.ID)
-		_, _ = pool.Exec(context.Background(), `DELETE FROM tenant.organizations WHERE id = $1`, row.ID)
 	})
 	return row.ID
 }
