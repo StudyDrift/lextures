@@ -208,6 +208,9 @@ jobs:
         run: npm run lint
 
       - name: Build
+        env:
+          # Public marketplace API may not be deployed yet; prerender uses SKIP until then.
+          SKIP_COURSE_PRERENDER: "1"
         run: npm run build
 
   contrast-check:

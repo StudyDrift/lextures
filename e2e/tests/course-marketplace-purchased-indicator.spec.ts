@@ -187,7 +187,7 @@ test.describe('MKT5 purchased indicator', () => {
 
     await injectToken(page, token)
     await page.goto('/courses')
-    await expect(page.getByText(title)).toBeVisible()
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible()
     await expect(page.getByTestId('course-purchased-badge')).toHaveCount(0)
   })
 })
