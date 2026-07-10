@@ -26,6 +26,21 @@ func TestIsFree(t *testing.T) {
 	}
 }
 
+func TestParseHeroFileIDFromURL(t *testing.T) {
+	id := "75782c7e-8410-4ac5-8f88-61a3290b938e"
+	got, ok := ParseHeroFileIDFromURL("/api/v1/courses/C-AIESS1/course-files/" + id + "/content")
+	if !ok {
+		t.Fatal("expected parse ok")
+	}
+	if got.String() != id {
+		t.Fatalf("got %s want %s", got, id)
+	}
+	_, ok = ParseHeroFileIDFromURL("/course-card-hero.png")
+	if ok {
+		t.Fatal("expected non-course-file URL to fail")
+	}
+}
+
 func TestCourseHeroContentPath(t *testing.T) {
 	id := "6bb960af-bc69-478e-8fca-7e8092976eca"
 	got := "/api/v1/courses/C-AIESS1/course-files/" + id + "/content"

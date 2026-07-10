@@ -52,6 +52,48 @@ WHERE course_code = $1
 	return ok, err
 }
 
+// ParseHeroFileIDFromURL extracts the course-files UUID from a hero_image_url value.
+func ParseHeroFileIDFromURL(heroURL string) (uuid.UUID, bool) {
+	heroURL = strings.TrimSpace(heroURL)
+	const needle = "/course-files/"
+	i := strings.Index(heroURL, needle)
+	if i < 0 {
+		return uuid.UUID{}, false
+	}
+	rest := heroURL[i+len(needle):]
+	rest = strings.TrimSuffix(rest, "/content")
+	if j := strings.IndexByte(rest, '/'); j >= 0 {
+		rest = rest[:j]
+	}
+	if j := strings.IndexByte(rest, '?'); j >= 0 {
+		rest = rest[:j]
+	}
+	id, err := uuid.Parse(strings.TrimSpace(rest))
+	if err != nil {
+		return uuid.UUID{}, false
+	}
+	return id, true
+}
+
+// GetStorefrontHeroFileID returns the file UUID referenced by hero_image_url, if any.
+func GetStorefrontHeroFileID(ctx context.Context, pool *pgxpool.Pool, courseCode string) (uuid.UUID, bool, error) {
+	var heroURL *string
+	err := pool.QueryRow(ctx, `
+SELECT hero_image_url FROM course.courses WHERE course_code = $1
+`, courseCode).Scan(&heroURL)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return uuid.UUID{}, false, nil
+	}
+	if err != nil {
+		return uuid.UUID{}, false, err
+	}
+	if heroURL == nil {
+		return uuid.UUID{}, false, nil
+	}
+	id, ok := ParseHeroFileIDFromURL(*heroURL)
+	return id, ok, nil
+}
+
 // IsCourseHeroFile reports whether fileID is the course's configured hero_image_url target.
 func IsCourseHeroFile(ctx context.Context, pool *pgxpool.Pool, courseCode string, fileID uuid.UUID) (bool, error) {
 	var heroURL *string

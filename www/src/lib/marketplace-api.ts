@@ -81,6 +81,14 @@ export class MarketplaceApiError extends Error {
   }
 }
 
+function requireMarketplaceSlug(slug: string): string {
+  const trimmed = slug.trim()
+  if (!trimmed) {
+    throw new MarketplaceApiError(404, 'Course not found')
+  }
+  return trimmed
+}
+
 export function buildMarketplaceParams(query: MarketplaceQuery = {}): string {
   const params = new URLSearchParams()
   if (query.q) params.set('q', query.q)
@@ -134,8 +142,9 @@ export async function fetchPublicMarketplaceCategories(): Promise<MarketplaceCat
 export async function fetchPublicMarketplaceCourse(
   slug: string,
 ): Promise<PublicMarketplaceCourseDetail> {
+  const normalized = requireMarketplaceSlug(slug)
   return fetchJSON<PublicMarketplaceCourseDetail>(
-    `/api/v1/public/marketplace/courses/${encodeURIComponent(slug)}`,
+    `/api/v1/public/marketplace/courses/${encodeURIComponent(normalized)}`,
   )
 }
 
@@ -143,12 +152,13 @@ export async function fetchPublicMarketplaceReviews(
   slug: string,
   opts: { cursor?: string; limit?: number } = {},
 ): Promise<CourseReviewsResponse> {
+  const normalized = requireMarketplaceSlug(slug)
   const params = new URLSearchParams()
   if (opts.cursor) params.set('cursor', opts.cursor)
   if (typeof opts.limit === 'number') params.set('limit', String(opts.limit))
   const qs = params.toString()
   const data = await fetchJSON<CourseReviewsResponse>(
-    `/api/v1/public/marketplace/courses/${encodeURIComponent(slug)}/reviews${qs ? `?${qs}` : ''}`,
+    `/api/v1/public/marketplace/courses/${encodeURIComponent(normalized)}/reviews${qs ? `?${qs}` : ''}`,
   )
   return {
     summary: data.summary,

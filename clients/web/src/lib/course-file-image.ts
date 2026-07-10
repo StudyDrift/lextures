@@ -1,3 +1,5 @@
+import { apiUrl, authorizedFetch } from './api'
+
 /** Parse `#w=…&h=…` display size appended to image URLs in Markdown (TipTap round-trip). */
 export function stripImageDisplayFragment(src: string): {
   base: string
@@ -50,4 +52,20 @@ export function resolveAuthorizedFetchPath(src: string): string {
   } catch {
     return base
   }
+}
+
+/**
+ * Load a course-file image blob. Storefront/catalog hero images are readable without
+ * a session; enrolled-only files fall back to `authorizedFetch` after a 401.
+ */
+export async function fetchCourseFileImageBlob(src: string): Promise<Blob> {
+  const path = resolveAuthorizedFetchPath(src)
+  const publicRes = await fetch(apiUrl(path))
+  if (publicRes.ok) return publicRes.blob()
+  if (publicRes.status !== 401) {
+    throw new Error(String(publicRes.status))
+  }
+  const authedRes = await authorizedFetch(path)
+  if (!authedRes.ok) throw new Error(String(authedRes.status))
+  return authedRes.blob()
 }

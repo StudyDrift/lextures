@@ -32,6 +32,17 @@ function enrollHandoffUrl(slug) {
   return `https://self.lextures.com/explore/${encodeURIComponent(slug)}?ref=www-courses`
 }
 
+function requireMarketplaceSlug(slug) {
+  const trimmed = slug.trim()
+  if (!trimmed) {
+    const err = new Error('Course not found')
+    err.name = 'MarketplaceApiError'
+    err.status = 404
+    throw err
+  }
+  return trimmed
+}
+
 describe('marketplace-api helpers', () => {
   it('formats free and paid prices', () => {
     assert.equal(formatMarketplacePrice(0, 'usd'), 'Free')
@@ -58,5 +69,11 @@ describe('marketplace-api helpers', () => {
       enrollHandoffUrl('intro-python'),
       'https://self.lextures.com/explore/intro-python?ref=www-courses',
     )
+  })
+
+  it('rejects empty marketplace slug', () => {
+    assert.throws(() => requireMarketplaceSlug(''), /Course not found/)
+    assert.throws(() => requireMarketplaceSlug('   '), /Course not found/)
+    assert.equal(requireMarketplaceSlug(' intro-python '), 'intro-python')
   })
 })

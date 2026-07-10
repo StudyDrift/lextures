@@ -21,15 +21,17 @@ cleanupOutdatedCaches()
 // SPA navigation fallback: serve index.html for all navigation requests
 registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html')))
 
-// Cache-first for static assets (JS, CSS, fonts, images)
+// Cache-first for static assets (JS, CSS, fonts, images). Skip /api/ URLs so
+// authenticated course-file blobs are never served from a stale image cache.
 registerRoute(
-  ({ request }) =>
-    request.destination === 'script' ||
-    request.destination === 'style' ||
-    request.destination === 'font' ||
-    request.destination === 'image',
+  ({ request, url }) =>
+    !url.pathname.startsWith('/api/') &&
+    (request.destination === 'script' ||
+      request.destination === 'style' ||
+      request.destination === 'font' ||
+      request.destination === 'image'),
   new CacheFirst({
-    cacheName: 'static-assets-v1',
+    cacheName: 'static-assets-v2',
     plugins: [
       new ExpirationPlugin({ maxEntries: 150, maxAgeSeconds: 30 * 24 * 60 * 60 }),
     ],
@@ -44,7 +46,7 @@ registerRoute(
     !url.pathname.includes('/push') &&
     !url.pathname.includes('/vapid'),
   new NetworkFirst({
-    cacheName: 'api-cache-v1',
+    cacheName: 'api-cache-v2',
     networkTimeoutSeconds: 10,
     plugins: [
       new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 10 * 60 }),

@@ -1,9 +1,17 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   courseFileContentPathname,
+  fetchCourseFileImageBlob,
   needsAuthenticatedCourseImageSrc,
   resolveAuthorizedFetchPath,
 } from '../course-file-image'
+
+vi.mock('../api', () => ({
+  apiUrl: (path: string) => `http://api.test${path}`,
+  authorizedFetch: vi.fn(),
+}))
+
+import { authorizedFetch } from '../api'
 
 describe('courseFileContentPathname', () => {
   const courseFile =
@@ -38,5 +46,48 @@ describe('resolveAuthorizedFetchPath', () => {
     const src =
       '/api/v1/courses/C-WLCOME/course-files/6528692e-282a-4a23-94f7-d12c52082e59/content?w=640&h=320&q=85'
     expect(resolveAuthorizedFetchPath(src)).toBe(src)
+  })
+})
+
+describe('fetchCourseFileImageBlob', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.mocked(authorizedFetch).mockReset()
+  })
+
+  it('returns the public blob without auth when the storefront hero is readable', async () => {
+    const blob = new Blob(['hero'], { type: 'image/jpeg' })
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, blob: () => Promise.resolve(blob) }),
+    )
+
+    const out = await fetchCourseFileImageBlob(
+      '/api/v1/courses/C-AIESS1/course-files/75782c7e-8410-4ac5-8f88-61a3290b938e/content',
+    )
+
+    expect(out).toBe(blob)
+    expect(authorizedFetch).not.toHaveBeenCalled()
+  })
+
+  it('falls back to authorizedFetch after a 401', async () => {
+    const blob = new Blob(['private'], { type: 'image/png' })
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 401, blob: () => Promise.resolve(new Blob()) }),
+    )
+    vi.mocked(authorizedFetch).mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(blob),
+    } as Response)
+
+    const out = await fetchCourseFileImageBlob(
+      '/api/v1/courses/C-TEST/course-files/00000000-0000-4000-8000-000000000099/content',
+    )
+
+    expect(out).toBe(blob)
+    expect(authorizedFetch).toHaveBeenCalledWith(
+      '/api/v1/courses/C-TEST/course-files/00000000-0000-4000-8000-000000000099/content',
+    )
   })
 })

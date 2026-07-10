@@ -1,6 +1,8 @@
 import { type ComponentPropsWithoutRef, useEffect, useState } from 'react'
-import { authorizedFetch } from '../lib/api'
-import { needsAuthenticatedCourseImageSrc, resolveAuthorizedFetchPath } from '../lib/course-file-image'
+import {
+  fetchCourseFileImageBlob,
+  needsAuthenticatedCourseImageSrc,
+} from '../lib/course-file-image'
 import { courseHeroImageSrc, type CourseHeroImageSize } from '../lib/course-hero-image-url'
 
 type Props = ComponentPropsWithoutRef<'img'> & {
@@ -23,11 +25,7 @@ export function CourseHeroImage({ src, size = 'full', className, alt = '', ...pr
       setResolvedSrc(fetchSrc ?? undefined)
       return
     }
-    void authorizedFetch(resolveAuthorizedFetchPath(fetchSrc))
-      .then((r) => {
-        if (!r.ok) throw new Error(String(r.status))
-        return r.blob()
-      })
+    void fetchCourseFileImageBlob(fetchSrc)
       .then((blob) => {
         if (cancelled) return
         blobUrl = URL.createObjectURL(blob)

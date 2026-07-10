@@ -3,10 +3,9 @@ import Image from '@tiptap/extension-image'
 import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { authorizedFetch } from '../../../lib/api'
 import {
+  fetchCourseFileImageBlob,
   needsAuthenticatedCourseImageSrc,
-  resolveAuthorizedFetchPath,
   stripImageDisplayFragment,
 } from '../../../lib/course-file-image'
 import { DECORATIVE_IMAGE_TITLE } from '../../../lib/image-alt-validation'
@@ -66,12 +65,7 @@ function CourseImageNodeView(props: NodeViewProps) {
       return
     }
     /* eslint-enable react-hooks/set-state-in-effect */
-    const path = resolveAuthorizedFetchPath(src)
-    void authorizedFetch(path)
-      .then((r) => {
-        if (!r.ok) throw new Error(String(r.status))
-        return r.blob()
-      })
+    void fetchCourseFileImageBlob(src)
       .then((blob) => {
         if (cancelled) return
         blobUrl = URL.createObjectURL(blob)
