@@ -1,4 +1,3 @@
-export const DEMO_ORIGIN = 'https://demo.lextures.com'
 export const SELF_LEARNER_ORIGIN = 'https://self.lextures.com'
 export const TENANT_HOST_SUFFIX = 'lextures.com'
 
@@ -10,7 +9,6 @@ export function tenantOrigin(schoolCode: string) {
 }
 
 export const SITE_LINKS = {
-  demo: `${DEMO_ORIGIN}/`,
   selfLearner: `${SELF_LEARNER_ORIGIN}/`,
   github: 'https://github.com/StudyDrift/lextures',
   institutionInquiryEmail: 'chase@lextures.com',

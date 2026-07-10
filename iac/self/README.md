@@ -8,8 +8,6 @@ Multi-cloud production IaC for Lextures. Choose a **deployment tier** that match
 | **small** | Oracle Cloud (OCI) | ~300 students, ~15 teachers | **$0/mo** (Always Free) |
 | **enterprise** | AWS | Multi-school / district, EKS + managed services | ~$900+/mo |
 
-The demo environment (`iac/demo/`) remains a minimal DigitalOcean droplet for trials and is unchanged by this stack.
-
 ## Architecture (small tier — DigitalOcean)
 
 ```mermaid
@@ -342,7 +340,7 @@ Then in **Settings → Intro course**, click **Resync content**, or trigger the 
 
 ## Next steps (not in Terraform)
 
-- **Small tier:** CI/CD to push images and run `docker compose` on the droplet (similar to demo deploy workflow)
+- **Small tier:** CI/CD to push images and run `docker compose` on the droplet (see deploy-self workflow)
 - **Enterprise tier:** Kubernetes manifests / Helm chart for Go API and React web
 - AWS Load Balancer Controller + Ingress for public traffic (`/health/ready` health checks)
 - External Secrets Operator to inject Secrets Manager values into pods

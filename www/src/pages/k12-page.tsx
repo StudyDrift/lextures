@@ -60,7 +60,7 @@ export function K12Page() {
         title="Standards, rosters, and accommodations built in"
         lead="For teachers, district administrators, and parents: standards-based grading, automatic accommodations, roster sync, and an optional parent portal — so compliance work happens in the system, not in side spreadsheets."
         primaryHref="/get-started"
-        primaryLabel="Try the demo"
+        primaryLabel="Try it free"
         secondaryHref="/parents"
         secondaryLabel="For parents"
       />
@@ -87,9 +87,9 @@ export function K12Page() {
 
       <AudienceCta
         title="See the teacher and parent views"
-        body="The demo walks through standards alignment, adaptive quizzes, accommodation profiles, and how a district enables the parent portal for linked families."
-        primaryHref={SITE_LINKS.demo}
-        primaryLabel="Open demo.lextures.com"
+        body="The hosted app walks through standards alignment, adaptive quizzes, accommodation profiles, and how a district enables the parent portal for linked families."
+        primaryHref={SITE_LINKS.selfLearner}
+        primaryLabel="Open self.lextures.com"
         secondaryHref="/docs"
         secondaryLabel="Read the docs"
       />

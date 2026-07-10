@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 CERT_DIR="/etc/nginx/certs"
-TLS_CN="${TLS_CERT_CN:-demo.lextures.com}"
+TLS_CN="${TLS_CERT_CN:-self.lextures.com}"
 mkdir -p "$CERT_DIR"
 if [ ! -f "$CERT_DIR/server.crt" ] || [ ! -f "$CERT_DIR/server.key" ]; then
   # Self-signed cert: works with Cloudflare SSL "Full" (not "Full (strict)").

@@ -31,7 +31,7 @@ There is no allowlist, no DNS/IP validation, no block on private/link-local rang
 
 This is a classic SSRF primitive, and it carries student PII as the payload:
 
-- **Cloud metadata theft**: point the webhook at `http://169.254.169.254/latest/meta-data/...` (the demo droplet and any IMDSv1 host) to harvest instance credentials — a direct pivot to cloud-account compromise, the ShinyHunters end-goal.
+- **Cloud metadata theft**: point the webhook at `http://169.254.169.254/latest/meta-data/...` (any IMDSv1 host) to harvest instance credentials — a direct pivot to cloud-account compromise, the ShinyHunters end-goal.
 - **Internal network probing**: target `http://postgres:8080`, `http://rabbitmq:15672`, or other service-mesh hosts. The response status code is recorded on the request row (`WebhookResponseCode`), giving a blind-to-semi-blind oracle.
 - **PII exfiltration over plaintext** `http://`.
 

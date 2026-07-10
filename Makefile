@@ -188,7 +188,7 @@ e2e-teardown:
 lighthouse-dashboard-dark:
 	cd e2e && npm run lighthouse:dashboard:dark
 
-# Terraform fmt + validate for iac/demo and iac/self (no cloud credentials).
+# Terraform fmt + validate for iac/self (no cloud credentials).
 iac-check:
 	bash iac/scripts/terraform-check.sh
 

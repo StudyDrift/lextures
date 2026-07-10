@@ -8,7 +8,7 @@ import (
 	"github.com/lextures/lextures/server"
 )
 
-// TestRepairMigration345RenumberCollision_Integration simulates the demo droplet DB that
+// TestRepairMigration345RenumberCollision_Integration simulates a deploy droplet DB that
 // applied submission_annotation_anchor as v345 before plan 17.10 renumbered deploy tracking
 // to 345 and the anchor migration to 346.
 func TestRepairMigration345RenumberCollision_Integration(t *testing.T) {
