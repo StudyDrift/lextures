@@ -35,6 +35,7 @@ struct PlatformFeatures: Decodable {
     var ffLearningPaths: Bool?
     var selfReflectionEnabled: Bool?
     var ffPublicCatalog: Bool?
+    var ffCourseMarketplace: Bool?
     var ffSelfPacedMode: Bool?
     var ffCourseReviews: Bool?
     var ffCompletionCredentials: Bool?

@@ -161,6 +161,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     case calendar
     case planner
     case catalog
+    case marketplace
     case paths
     case library
     case reading
@@ -186,6 +187,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
         case .calendar: return L.text("mobile.ia.more.calendar")
         case .planner: return L.text("mobile.ia.more.planner")
         case .catalog: return L.text("mobile.ia.more.catalog")
+        case .marketplace: return L.text("mobile.ia.more.marketplace")
         case .paths: return L.text("mobile.ia.more.paths")
         case .library: return L.text("mobile.ia.more.library")
         case .reading: return L.text("mobile.ia.more.reading")
@@ -207,6 +209,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
         case .calendar: return "calendar"
         case .planner: return "list.bullet.rectangle"
         case .catalog: return "books.vertical"
+        case .marketplace: return "bag"
         case .paths: return "point.topleft.down.to.point.bottomright.curvepath"
         case .library: return "books.vertical.fill"
         case .reading: return "book.fill"
@@ -376,6 +379,7 @@ struct MobilePlatformFeatures: Equatable {
     var ffLearningPaths = false
     var selfReflectionEnabled = false
     var ffPublicCatalog = false
+    var ffCourseMarketplace = false
     var ffSelfPacedMode = false
     var ffCourseReviews = false
     var ffCompletionCredentials = false
@@ -443,6 +447,7 @@ struct MobilePlatformFeatures: Equatable {
             ffLearningPaths: features?.ffLearningPaths == true,
             selfReflectionEnabled: features?.selfReflectionEnabled == true,
             ffPublicCatalog: features?.ffPublicCatalog == true,
+            ffCourseMarketplace: features?.ffCourseMarketplace == true,
             ffSelfPacedMode: features?.ffSelfPacedMode == true,
             ffCourseReviews: features?.ffCourseReviews == true,
             ffCompletionCredentials: features?.ffCompletionCredentials == true,
@@ -634,6 +639,31 @@ enum MobileDestinations {
         }
     }
 
+    private static func standardLearningMoreDestinations(
+        platform: MobilePlatformFeatures
+    ) -> [MoreDestination] {
+        var out: [MoreDestination] = []
+        if TutorLogic.askAiEnabled(platform: platform) { out.append(.askAi) }
+        if platform.ffPeerReview { out.append(.peerReviews) }
+        out.append(.reportCards)
+        if platform.selfReflectionEnabled { out.append(.insights) }
+        out += [.calendar, .planner, .catalog]
+        if platform.ffCourseMarketplace { out.append(.marketplace) }
+        out.append(.paths)
+        if platform.ffLibrary { out.append(.reading) }
+        if platform.libraryBrowseEnabled { out.append(.library) }
+        if WalletLogic.walletEnabled(platform) {
+            out.append(.wallet)
+        } else if platform.ffCompletionCredentials {
+            out.append(.credentials)
+        }
+        if platform.ffGamification { out.append(.gamification) }
+        if platform.ffEportfolio { out.append(.portfolio) }
+        if AdvisingLogic.advisingEnabled(platform) { out.append(.advising) }
+        out.append(.settings)
+        return out
+    }
+
     static func moreDestinations(
         context: MobileRoleContext,
         platform: MobilePlatformFeatures,
@@ -654,22 +684,7 @@ enum MobileDestinations {
                 out.append(.settings)
                 return out
             }
-            if TutorLogic.askAiEnabled(platform: platform) { out.append(.askAi) }
-            if platform.ffPeerReview { out.append(.peerReviews) }
-            out.append(.reportCards)
-            if platform.selfReflectionEnabled { out.append(.insights) }
-            out += [.calendar, .planner, .catalog, .paths]
-            if platform.ffLibrary { out.append(.reading) }
-            if platform.libraryBrowseEnabled { out.append(.library) }
-            if WalletLogic.walletEnabled(platform) {
-                out.append(.wallet)
-            } else if platform.ffCompletionCredentials {
-                out.append(.credentials)
-            }
-            if platform.ffGamification { out.append(.gamification) }
-            if platform.ffEportfolio { out.append(.portfolio) }
-            if AdvisingLogic.advisingEnabled(platform) { out.append(.advising) }
-            out.append(.settings)
+            return standardLearningMoreDestinations(platform: platform)
         case .teaching:
             out += [.calendar, .planner]
             if platform.libraryBrowseEnabled { out.append(.library) }

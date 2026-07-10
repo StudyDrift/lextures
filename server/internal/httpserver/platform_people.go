@@ -29,6 +29,7 @@ import (
 
 func (d Deps) registerPlatformPeopleRoutes(r chi.Router) {
 	r.Get("/api/v1/admin/people", d.handleAdminPeopleSearch())
+	r.Get("/api/v1/admin/people/stats", d.handleAdminPeopleStats())
 	r.Post("/api/v1/admin/people/invite", d.handleAdminPeopleInvite())
 	r.Get("/api/v1/admin/people/{userId}/report", d.handleAdminPeopleReport())
 	r.Patch("/api/v1/admin/people/{userId}", d.handleAdminPeoplePatch())
@@ -55,6 +56,25 @@ func parsePlatformPeopleListParams(r *http.Request) platformpeople.ListParams {
 		}
 	}
 	return p
+}
+
+func (d Deps) handleAdminPeopleStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		if _, ok := d.adminRbacUser(w, r); !ok {
+			return
+		}
+		stats, err := platformpeople.FetchDashboardStats(r.Context(), d.Pool)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load people stats.")
+			return
+		}
+		writeJSON(w, http.StatusOK, stats)
+	}
 }
 
 func (d Deps) handleAdminPeopleSearch() http.HandlerFunc {

@@ -10,7 +10,7 @@
 | **Section** | Marketplace |
 | **Severity** | MINOR |
 | **Markets** | SL (primary) · HE · K12 |
-| **Status (today)** | MISSING |
+| **Status (today)** | SHIPPED |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Web platform team |
 | **Depends on** | MKT4 |

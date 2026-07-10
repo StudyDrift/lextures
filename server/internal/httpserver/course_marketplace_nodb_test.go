@@ -33,3 +33,14 @@ func TestCourseMarketplaceOff_WhenEnabled(t *testing.T) {
 		t.Fatalf("unexpected body written when flag on: %s", rr.Body.String())
 	}
 }
+
+func TestMyPurchases_Unauthenticated(t *testing.T) {
+	d := Deps{Config: config.Config{FFCourseMarketplace: true}}
+	h := NewHandler(d)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/me/purchases", nil)
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("want 401 got %d", w.Code)
+	}
+}

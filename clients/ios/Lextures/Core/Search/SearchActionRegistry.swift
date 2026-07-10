@@ -107,6 +107,7 @@ enum SearchActionRegistry {
         case .calendar: return "/calendar"
         case .planner: return "/todos"
         case .catalog: return "/catalog"
+        case .marketplace: return "/marketplace"
         case .paths: return "/paths"
         case .library: return "/library"
         case .reading: return "/reading"

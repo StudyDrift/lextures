@@ -129,6 +129,7 @@ fun ProfileTab(
     var openPathLandingSlug by remember { mutableStateOf<String?>(null) }
     var openPathCourse by remember { mutableStateOf<com.lextures.android.core.lms.CourseSummary?>(null) }
     var openCatalogCourseSlug by remember { mutableStateOf<String?>(null) }
+    var openMarketplaceSlug by remember { mutableStateOf<String?>(null) }
     var showBilling by remember { mutableStateOf(false) }
     var openCredential by remember { mutableStateOf<com.lextures.android.core.lms.IssuedCredentialSummary?>(null) }
     var openPortfolioId by remember { mutableStateOf<String?>(null) }
@@ -435,6 +436,26 @@ fun ProfileTab(
                             shell = shell,
                             onOpenCourse = { openCatalogCourseSlug = it },
                             onOpenPath = { openCatalogPathSlug = it },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Marketplace) {
+                if (shell.platformFeatures.ffCourseMarketplace) {
+                    when {
+                        openMarketplaceSlug != null -> com.lextures.android.features.marketplace.MarketplaceDetailScreen(
+                            session = session,
+                            shell = shell,
+                            slug = openMarketplaceSlug!!,
+                            onBack = { openMarketplaceSlug = null },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        else -> com.lextures.android.features.marketplace.MarketplaceScreen(
+                            session = session,
+                            shell = shell,
+                            onOpenCourse = { openMarketplaceSlug = it },
                             modifier = Modifier.fillMaxSize(),
                         )
                     }

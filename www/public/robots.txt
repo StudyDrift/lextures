@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Allow: /courses
+Allow: /courses/
+
+Sitemap: https://lextures.com/sitemap.xml

@@ -56,6 +56,8 @@ enum SearchPathNavigator {
             return .more(.portfolio)
         case "catalog":
             return .more(.catalog)
+        case "marketplace":
+            return .more(.marketplace)
         case "paths":
             return .more(.paths)
         case "library":

@@ -1,0 +1,20 @@
+{
+  "require_acceptance": false,
+  "sections": [
+    {
+      "id": "overview",
+      "heading": "Course overview",
+      "markdown": "**Marketplace Harness Smoke Test** is a minimal official free course used to verify the MC0 authoring and provisioning pipeline.\n\n- **Estimated time:** about 15 minutes\n- **Format:** One short module with a page, a reflection assignment, and a knowledge check\n- **Price:** Free — claim it from the marketplace\n\nThis course is not a subject curriculum; it exists so deploys and CI can prove idempotent provisioning end-to-end."
+    },
+    {
+      "id": "outcomes",
+      "heading": "What you'll learn",
+      "markdown": "By the end of this course, you will be able to:\n\n1. **Explain** what an official marketplace course is\n2. **Complete** a short auto-scored knowledge check"
+    },
+    {
+      "id": "grading",
+      "heading": "Grading & completion",
+      "markdown": "- The knowledge-check quiz is auto-scored\n- The reflection assignment awards full credit on a good-faith text submission\n\nThere are no due dates. Work at your own pace."
+    }
+  ]
+}

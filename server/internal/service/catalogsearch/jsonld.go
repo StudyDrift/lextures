@@ -2,6 +2,7 @@ package catalogsearch
 
 import (
 	"fmt"
+	"strings"
 
 	repoCourse "github.com/lextures/lextures/server/internal/repos/course"
 )
@@ -12,8 +13,18 @@ const ProviderName = "Lextures"
 // BuildCourseJSONLD produces a Schema.org Course object (with a nested
 // CourseInstance and Offer) for a public course landing page (plan 15.1, FR-5).
 // baseURL is the public site origin (e.g. "https://lextures.com"), used to build
-// the canonical course URL; it may be empty.
+// the canonical course URL; it may be empty. URLs use the /explore/ path prefix
+// (in-app public catalog).
 func BuildCourseJSONLD(c repoCourse.PublicCatalogCourse, baseURL string) map[string]any {
+	return BuildCourseJSONLDAt(c, baseURL, "/explore/")
+}
+
+// BuildCourseJSONLDAt is like BuildCourseJSONLD but lets callers choose the
+// path prefix (e.g. "/courses/" for the www marketplace storefront, plan MKT7/MKT10).
+func BuildCourseJSONLDAt(c repoCourse.PublicCatalogCourse, baseURL, pathPrefix string) map[string]any {
+	if pathPrefix == "" {
+		pathPrefix = "/explore/"
+	}
 	ld := map[string]any{
 		"@context":    "https://schema.org",
 		"@type":       "Course",
@@ -25,7 +36,7 @@ func BuildCourseJSONLD(c repoCourse.PublicCatalogCourse, baseURL string) map[str
 		},
 	}
 	if baseURL != "" && c.Slug != "" {
-		ld["url"] = baseURL + "/explore/" + c.Slug
+		ld["url"] = strings.TrimRight(baseURL, "/") + pathPrefix + c.Slug
 	}
 	if c.Category != nil && *c.Category != "" {
 		ld["about"] = *c.Category

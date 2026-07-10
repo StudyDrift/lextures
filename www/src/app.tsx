@@ -8,6 +8,8 @@ import { QuoteSection } from './components/home/quote-section'
 import { WorkflowSection } from './components/home/workflow-section'
 import { BlogIndex } from './pages/blog-index'
 import { BlogPost } from './pages/blog-post'
+import { CourseDetailPage } from './pages/course-detail-page'
+import { CoursesPage } from './pages/courses-page'
 import { DocsIndex } from './pages/docs-index'
 import { DocsPost } from './pages/docs-post'
 import { ParentsPage } from './pages/parents-page'
@@ -98,6 +100,8 @@ export default function App() {
   if (route === '/k-12') return <K12Page />
   if (route === '/self-learner') return <SelfLearnerPage />
   if (route === '/pricing') return <PricingPage />
+  if (route === '/courses') return <CoursesPage />
+  if (route.startsWith('/courses/')) return <CourseDetailPage slug={route.slice('/courses/'.length)} />
   if (route === '/request-information') return <RequestInformationPage />
   if (route === '/blog') return <BlogIndex />
   if (route.startsWith('/blog/')) return <BlogPost slug={route.slice('/blog/'.length)} />

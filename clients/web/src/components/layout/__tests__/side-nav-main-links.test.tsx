@@ -108,6 +108,7 @@ describe('SideNavMainLinks', () => {
     )
 
     expect(screen.getByRole('link', { name: /^marketplace$/i })).toHaveAttribute('href', '/marketplace')
+    expect(screen.getByRole('link', { name: /^my purchases$/i })).toHaveAttribute('href', '/me/purchases')
   })
 
   it('hides Marketplace when course marketplace is disabled', () => {
@@ -127,5 +128,6 @@ describe('SideNavMainLinks', () => {
     )
 
     expect(screen.queryByRole('link', { name: /^marketplace$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^my purchases$/i })).not.toBeInTheDocument()
   })
 })

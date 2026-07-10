@@ -111,6 +111,7 @@ private fun moreLabelRes(destination: MoreDestination): Int = when (destination)
     MoreDestination.Calendar -> R.string.mobile_ia_more_calendar
     MoreDestination.Planner -> R.string.mobile_ia_more_planner
     MoreDestination.Catalog -> R.string.mobile_ia_more_catalog
+    MoreDestination.Marketplace -> R.string.mobile_ia_more_marketplace
     MoreDestination.Paths -> R.string.mobile_ia_more_paths
     MoreDestination.Library -> R.string.mobile_ia_more_library
     MoreDestination.Reading -> R.string.mobile_ia_more_reading

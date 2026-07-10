@@ -85,3 +85,11 @@ func TestBuildCourseJSONLD_FreeCourse(t *testing.T) {
 		t.Fatalf("expected no aggregateRating when unrated")
 	}
 }
+
+func TestBuildCourseJSONLDAt_MarketplacePath(t *testing.T) {
+	c := repoCourse.PublicCatalogCourse{Slug: "intro-python", Title: "Intro to Python"}
+	ld := BuildCourseJSONLDAt(c, "https://lextures.com/", "/courses/")
+	if ld["url"] != "https://lextures.com/courses/intro-python" {
+		t.Fatalf("url = %v", ld["url"])
+	}
+}

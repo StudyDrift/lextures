@@ -181,7 +181,12 @@ struct CoursesListView: View {
 
 struct CourseRowCard: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(AppShellModel.self) private var shell
     let course: CourseSummary
+
+    private var showPurchasedBadge: Bool {
+        MarketplaceLogic.shouldShowPurchasedBadge(features: shell.platformFeatures, course: course)
+    }
 
     var body: some View {
         LMSCard {
@@ -189,9 +194,17 @@ struct CourseRowCard: View {
                 LMSCoverTile(key: course.courseCode, systemImage: "book.fill", size: 52)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(course.displayTitle)
-                        .font(LexturesTheme.displayFont(16))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(course.displayTitle)
+                            .font(LexturesTheme.displayFont(16))
+                            .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                        if showPurchasedBadge {
+                            Text(L.text("mobile.courses.purchasedBadge"))
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                                .accessibilityLabel(L.text("mobile.courses.purchasedBadge"))
+                        }
+                    }
                     Text(course.courseCode.uppercased())
                         .font(.caption2.weight(.semibold))
                         .tracking(0.8)

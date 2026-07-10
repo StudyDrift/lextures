@@ -26,6 +26,7 @@ enum CourseSettingsLogic {
     enum CourseSettingsSection: String, CaseIterable, Identifiable, Hashable {
         case general
         case features
+        case marketplace
         case sections
         case grading
         case outcomes
@@ -43,6 +44,7 @@ enum CourseSettingsLogic {
             switch self {
             case .general: return "mobile.courseSettings.section.general"
             case .features: return "mobile.courseSettings.section.features"
+            case .marketplace: return "mobile.courseSettings.section.marketplace"
             case .sections: return "mobile.courseSettings.section.sections"
             case .grading: return "mobile.courseSettings.section.grading"
             case .outcomes: return "mobile.courseSettings.section.outcomes"
@@ -62,6 +64,7 @@ enum CourseSettingsLogic {
             switch self {
             case .general: return "info.circle"
             case .features: return "slider.horizontal.3"
+            case .marketplace: return "bag"
             case .sections: return "square.grid.2x2"
             case .grading: return "scalemass"
             case .outcomes: return "target"
@@ -81,6 +84,9 @@ enum CourseSettingsLogic {
         features: MobilePlatformFeatures
     ) -> [CourseSettingsSection] {
         var sections: [CourseSettingsSection] = [.general, .features]
+        if features.ffCourseMarketplace {
+            sections.append(.marketplace)
+        }
         if course.isSectionsEnabled {
             sections.append(.sections)
         }

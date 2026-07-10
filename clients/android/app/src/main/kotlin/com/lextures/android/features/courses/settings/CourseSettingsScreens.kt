@@ -105,6 +105,10 @@ fun CourseSettingsHostScreen(
                     platformFeatures = platformFeatures,
                     onCourseUpdated = onCourseUpdated,
                 )
+                CourseSettingsLogic.CourseSettingsSection.Marketplace -> CourseMarketplaceSettingsScreen(
+                    session = session,
+                    course = course,
+                )
                 CourseSettingsLogic.CourseSettingsSection.Sections -> CourseSectionsSettingsScreen(
                     session = session,
                     course = course,
@@ -167,6 +171,7 @@ fun CourseSettingsHostScreen(
 private fun sectionLabelRes(section: CourseSettingsLogic.CourseSettingsSection): Int = when (section) {
     CourseSettingsLogic.CourseSettingsSection.General -> R.string.mobile_courseSettings_section_general
     CourseSettingsLogic.CourseSettingsSection.Features -> R.string.mobile_courseSettings_section_features
+    CourseSettingsLogic.CourseSettingsSection.Marketplace -> R.string.mobile_courseSettings_section_marketplace
     CourseSettingsLogic.CourseSettingsSection.Sections -> R.string.mobile_courseSettings_section_sections
     CourseSettingsLogic.CourseSettingsSection.Grading -> R.string.mobile_courseSettings_section_grading
     CourseSettingsLogic.CourseSettingsSection.Outcomes -> R.string.mobile_courseSettings_section_outcomes

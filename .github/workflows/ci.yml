@@ -50,6 +50,9 @@ jobs:
       - name: Migration lint (plan 17.10)
         run: go run ./cmd/migrate-lint
 
+      - name: Marketplace courses content validate (MC0)
+        run: go run ./cmd/marketplace-courses-validate
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
@@ -205,6 +208,9 @@ jobs:
         run: npm run lint
 
       - name: Build
+        env:
+          # Public marketplace API may not be deployed yet; prerender uses SKIP until then.
+          SKIP_COURSE_PRERENDER: "1"
         run: npm run build
 
   contrast-check:

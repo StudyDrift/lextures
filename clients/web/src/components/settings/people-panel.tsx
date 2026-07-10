@@ -8,23 +8,121 @@ import {
   MailPlus,
   Search,
   Trash2,
+  UserCheck,
   UserMinus,
   UserPlus,
+  Users,
+  UserX,
 } from 'lucide-react'
 import { formatDateTime } from '../../lib/format'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import {
   deletePerson,
+  fetchPeopleStats,
   fetchPersonReport,
   invitePerson,
   patchPerson,
   personDisplayName,
   searchPeople,
   type PaginatedPeople,
+  type PeopleDashboardStats,
   type PersonReport,
 } from '../../lib/people-api'
 
 const PAGE_SIZES = [25, 50, 100]
+
+function formatCount(value: number): string {
+  return value.toLocaleString()
+}
+
+function PeopleStatsCard({
+  label,
+  value,
+  hint,
+  icon: Icon,
+}: {
+  label: string
+  value: number | null
+  hint?: string
+  icon: typeof Users
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          {label}
+        </p>
+        <Icon className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
+      </div>
+      <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+        {value == null ? '—' : formatCount(value)}
+      </p>
+      {hint ? (
+        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">{hint}</p>
+      ) : null}
+    </div>
+  )
+}
+
+function PeopleDashboardCards({
+  stats,
+  loading,
+  error,
+}: {
+  stats: PeopleDashboardStats | null
+  loading: boolean
+  error: string | null
+}) {
+  if (error) {
+    return (
+      <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        {error}
+      </p>
+    )
+  }
+
+  const value = (key: keyof PeopleDashboardStats): number | null =>
+    loading || !stats ? null : stats[key]
+
+  return (
+    <section aria-labelledby="people-dashboard-heading" className="space-y-3">
+      <h3 id="people-dashboard-heading" className="sr-only">
+        People overview
+      </h3>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <PeopleStatsCard
+          label="New signups"
+          hint="Past 7 days"
+          value={value('signupsLast7Days')}
+          icon={UserPlus}
+        />
+        <PeopleStatsCard
+          label="Active accounts"
+          hint="Can sign in"
+          value={value('activeAccounts')}
+          icon={UserCheck}
+        />
+        <PeopleStatsCard
+          label="Active this month"
+          hint="Learning activity in 30 days"
+          value={value('recentlyActive30Days')}
+          icon={Users}
+        />
+        <PeopleStatsCard
+          label="Total accounts"
+          value={value('totalAccounts')}
+          icon={Users}
+        />
+        <PeopleStatsCard
+          label="Suspended"
+          hint="Blocked from signing in"
+          value={value('suspendedAccounts')}
+          icon={UserX}
+        />
+      </div>
+    </section>
+  )
+}
 
 function statusLabel(active: boolean): string {
   return active ? 'Active' : 'Suspended'
@@ -238,6 +336,27 @@ export function PeoplePanel() {
   const [inviteLast, setInviteLast] = useState('')
   const [inviting, setInviting] = useState(false)
 
+  const [stats, setStats] = useState<PeopleDashboardStats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+  const [statsError, setStatsError] = useState<string | null>(null)
+
+  const loadStats = useCallback(async () => {
+    setStatsLoading(true)
+    setStatsError(null)
+    try {
+      setStats(await fetchPeopleStats())
+    } catch (e) {
+      setStatsError(e instanceof Error ? e.message : 'Failed to load people stats.')
+      setStats(null)
+    } finally {
+      setStatsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadStats()
+  }, [loadStats])
+
   const loadSearch = useCallback(async () => {
     const query = submittedQ.trim()
     if (!query) {
@@ -319,6 +438,7 @@ export function PeoplePanel() {
       setQ(email)
       setSubmittedQ(email)
       setPage(1)
+      void loadStats()
     } catch (err) {
       toastMutationError(err instanceof Error ? err.message : 'Could not invite user.')
     } finally {
@@ -336,7 +456,7 @@ export function PeoplePanel() {
       await patchPerson(userId, { active })
       toastSaveOk(active ? 'Account reactivated.' : 'Account suspended.')
       if (selectedUserId === userId) await loadReport(userId)
-      await loadSearch()
+      await Promise.all([loadSearch(), loadStats()])
     } catch (e) {
       toastMutationError(e instanceof Error ? e.message : 'Update failed.')
     } finally {
@@ -351,7 +471,7 @@ export function PeoplePanel() {
       await deletePerson(userId)
       toastSaveOk('Account deleted.')
       closePerson()
-      await loadSearch()
+      await Promise.all([loadSearch(), loadStats()])
     } catch (e) {
       toastMutationError(e instanceof Error ? e.message : 'Delete failed.')
     } finally {
@@ -387,6 +507,8 @@ export function PeoplePanel() {
 
   return (
     <div className="mt-6 space-y-6">
+      <PeopleDashboardCards stats={stats} loading={statsLoading} error={statsError} />
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <p className="text-sm text-slate-600 dark:text-neutral-400">
           Search users by first name, last name, or email. Results are not shown until you search.

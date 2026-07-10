@@ -32,6 +32,8 @@ data class CourseSummary(
     val published: Boolean? = null,
     val catalogNickname: String? = null,
     val catalogPinned: Boolean = false,
+    val acquiredViaMarketplace: Boolean = false,
+    val acquisitionSource: String? = null,
     val notebookEnabled: Boolean? = null,
     val calendarEnabled: Boolean? = null,
     val officeHoursEnabled: Boolean? = null,

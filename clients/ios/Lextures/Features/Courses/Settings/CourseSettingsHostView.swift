@@ -101,6 +101,8 @@ struct CourseSettingsHostView: View {
             CourseGeneralSettingsView(course: course, onCourseUpdated: onCourseUpdated)
         case .features:
             CourseFeaturesSettingsView(course: course, onCourseUpdated: onCourseUpdated)
+        case .marketplace:
+            CourseMarketplaceSettingsView(course: course)
         case .sections:
             CourseSectionsSettingsView(course: course, onCourseUpdated: onCourseUpdated)
         case .grading:
@@ -121,8 +123,6 @@ struct CourseSettingsHostView: View {
             CourseBlueprintSettingsView(course: course, onCourseUpdated: onCourseUpdated)
         case .archive:
             CourseArchivedContentView(course: course)
-        default:
-            CourseSettingsPlaceholderView(section: selectedSection)
         }
     }
 
@@ -130,19 +130,5 @@ struct CourseSettingsHostView: View {
         defer { permissionsLoaded = true }
         guard let token = session.accessToken else { return }
         permissions = (try? await LMSAPI.fetchMyPermissions(accessToken: token)) ?? shell.permissions
-    }
-}
-
-private struct CourseSettingsPlaceholderView: View {
-    @Environment(\.colorScheme) private var colorScheme
-    let section: CourseSettingsLogic.CourseSettingsSection
-
-    var body: some View {
-        LMSEmptyState(
-            systemImage: "desktopcomputer",
-            title: section.label,
-            message: L.text("mobile.courseSettings.sectionComingSoon")
-        )
-        .padding(24)
     }
 }

@@ -1,0 +1,17 @@
+code: C-MCSMOK
+title: Marketplace Harness Smoke Test
+catalog_slug: harness-smoke
+catalog_category: Platform
+difficulty_level: beginner
+catalog_language: en
+summary: A minimal official free course that proves the marketplace authoring and provisioning harness (MC0).
+outcomes:
+  - Explain what an official marketplace course is
+  - Complete a short knowledge check
+estimated_minutes: 15
+price_cents: 0
+is_public: true
+marketplace_listed: true
+hero_image: ""
+content_version: 1
+short_code: LEX-MC-SMOKE

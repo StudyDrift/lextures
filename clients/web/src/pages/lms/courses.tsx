@@ -72,10 +72,14 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { heroImageObjectStyle } from '../../lib/hero-image-position'
 import { formatRelativeCompact } from '../../lib/format-datetime'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
+import { CoursePurchasedBadge } from '../../components/ui/course-purchased-badge'
+import { shouldShowPurchasedBadge } from '../../lib/course-purchased-badge'
 import { canCreateCourses } from '../../lib/rbac-api'
 import { CourseHeroImage } from '../../components/course-hero-image'
 import type { CourseHeroImageSize } from '../../lib/course-hero-image-url'
 import { CourseEnrollmentInvitationActions } from '../../components/enrollment/course-enrollment-invitation-actions'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { useTranslation } from 'react-i18next'
 
 export type { CoursePublic } from '../../lib/courses-api'
 
@@ -84,11 +88,22 @@ type CatalogPinnedChangeHandler = (courseId: string, pinned: boolean) => void
 type CatalogHiddenChangeHandler = (courseId: string, hidden: boolean) => void
 type CatalogInvitationResolvedHandler = (courseId: string, approved: boolean) => void
 
+function CatalogPurchasedBadge({
+  course,
+  overlay = false,
+}: {
+  course: CoursePublic
+  overlay?: boolean
+}) {
+  const { ffCourseMarketplace } = usePlatformFeatures()
+  if (!shouldShowPurchasedBadge(ffCourseMarketplace, course)) return null
+  return <CoursePurchasedBadge overlay={overlay} />
+}
+
 function CourseCatalogHiddenBadge() {
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
-      <EyeOff className="h-3 w-3" aria-hidden />
-      Hidden
+      <EyeOff className="h-3 w-3" aria-hidden />      Hidden
     </span>
   )
 }
@@ -311,8 +326,9 @@ function CourseCard({
         className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
         aria-hidden
       />
-      <span className="absolute start-3 top-3">
+      <span className="absolute start-3 top-3 flex flex-wrap items-center gap-1.5">
         <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
+        <CatalogPurchasedBadge course={course} overlay />
       </span>
       {!invitationPending ? (
         <span className="absolute end-3 top-3 z-10 flex items-center gap-1">
@@ -585,6 +601,7 @@ function CourseListRow({
               onNicknameChange={onNicknameChange}
             />
             <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
+            <CatalogPurchasedBadge course={course} />
             {showHiddenRevealed && isUserCatalogHidden(course) ? <CourseCatalogHiddenBadge /> : null}
           </div>
           {invitationPending && course.viewerPendingEnrollmentId ? (
@@ -771,8 +788,9 @@ function CourseGalleryTile({
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
           aria-hidden
         />
-        <span className="absolute start-2 top-2">
+        <span className="absolute start-2 top-2 flex flex-wrap items-center gap-1">
           <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
+          <CatalogPurchasedBadge course={course} overlay />
         </span>
         {!invitationPending ? (
           <span className="absolute end-2 top-2 z-10 flex items-center gap-1">
@@ -981,8 +999,9 @@ function CourseTableRow({
           </div>
         ) : null}
       </div>
-      <div className={`self-center ${invitationMutedClass}`}>
+      <div className={`self-center flex flex-wrap items-center gap-1 ${invitationMutedClass}`}>
         <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
+        <CatalogPurchasedBadge course={course} />
       </div>
       <span className={`self-center truncate text-slate-600 dark:text-neutral-400 ${invitationMutedClass}`}>
         {formatCourseTermLabel(course)}
@@ -1056,6 +1075,8 @@ function SortableCourseTableRow({
 export default function Courses() {
   const { allows, loading: permLoading } = usePermissions()
   const showCourseCreateActions = canCreateCourses(allows, permLoading)
+  const { ffCourseMarketplace } = usePlatformFeatures()
+  const { t } = useTranslation('common')
   const coursesRevision = useCoursesRevision()
   const bumpCoursesRevision = useBumpCoursesRevision()
   const { open: openCanvasImport } = useCanvasImport()
@@ -1066,6 +1087,7 @@ export default function Courses() {
   const [termList, setTermList] = useState<OrgTerm[]>([])
   const [gradeLevelFilter, setGradeLevelFilter] = useState<string>('')
   const [showHidden, setShowHidden] = useState(false)
+  const [purchasedOnly, setPurchasedOnly] = useState(false)
   const [catalogView, setCatalogView] = useState<CourseCatalogView>('cards')
   const [kanbanColumnLabels, setKanbanColumnLabels] = useState<KanbanColumnLabels>(DEFAULT_KANBAN_COLUMN_LABELS)
   const [hiddenColumnExpanded, setHiddenColumnExpanded] = useState(false)
@@ -1270,10 +1292,20 @@ export default function Courses() {
   )
 
   const hiddenCount = useMemo(() => countUserHiddenCourses(courses ?? []), [courses])
-  const visibleCourses = useMemo(
-    () => filterCatalogCourses(courses ?? [], showHidden),
-    [courses, showHidden],
+  const purchasedCount = useMemo(
+    () =>
+      ffCourseMarketplace
+        ? (courses ?? []).filter((c) => c.acquiredViaMarketplace).length
+        : 0,
+    [courses, ffCourseMarketplace],
   )
+  const visibleCourses = useMemo(() => {
+    let list = filterCatalogCourses(courses ?? [], showHidden)
+    if (ffCourseMarketplace && purchasedOnly) {
+      list = list.filter((c) => c.acquiredViaMarketplace)
+    }
+    return list
+  }, [courses, showHidden, ffCourseMarketplace, purchasedOnly])
   const courseIds = useMemo(() => visibleCourses.map((c) => c.id), [visibleCourses])
   const emptyStateKind = useMemo(
     () => catalogEmptyStateKind(courses, showHidden),
@@ -1282,8 +1314,16 @@ export default function Courses() {
 
   const catalogSections = useMemo((): CatalogSection[] | null => {
     if (!courses?.length || catalogView === 'status') return null
-    return buildCatalogSections(courses, termList, { termFilter, showHidden })
-  }, [courses, termFilter, termList, catalogView, showHidden])
+    const sections = buildCatalogSections(courses, termList, { termFilter, showHidden })
+    if (!sections) return null
+    if (!ffCourseMarketplace || !purchasedOnly) return sections
+    return sections
+      .map((sec) => ({
+        ...sec,
+        items: sec.items.filter((c) => c.acquiredViaMarketplace),
+      }))
+      .filter((sec) => sec.items.length > 0)
+  }, [courses, termFilter, termList, catalogView, showHidden, ffCourseMarketplace, purchasedOnly])
 
   const clearSuppressNavigateAfterDragSoon = useCallback(() => {
     window.setTimeout(() => {
@@ -1461,6 +1501,30 @@ export default function Courses() {
             Show hidden ({hiddenCount})
           </button>
         ) : null}
+        {ffCourseMarketplace ? (
+          <button
+            type="button"
+            aria-pressed={purchasedOnly}
+            onClick={() => setPurchasedOnly((value) => !value)}
+            className={[
+              'inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color]',
+              purchasedOnly
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-950/40 dark:text-emerald-200'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-600 dark:hover:bg-neutral-800',
+            ].join(' ')}
+          >
+            {t('courses.filter.purchased')}
+            {purchasedCount > 0 ? ` (${purchasedCount})` : ''}
+          </button>
+        ) : null}
+        {ffCourseMarketplace ? (
+          <Link
+            to="/me/purchases"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+          >
+            {t('purchases.title')}
+          </Link>
+        ) : null}
         {orgId && termList.length > 0 && (
           <div className="min-w-48 max-w-sm flex-1">
             <label htmlFor="course-catalog-term-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
@@ -1553,9 +1617,29 @@ export default function Courses() {
         </div>
       )}
 
-      {courses && courses.length > 0 && catalogView === 'status' && (
+      {emptyStateKind === 'has-visible' &&
+        purchasedOnly &&
+        visibleCourses.length === 0 &&
+        !error && (
+          <div className="mt-8">
+            <EmptyState
+              icon={BookOpen}
+              title={t('purchases.empty')}
+              body={t('purchases.emptyBody')}
+              primaryAction={{ label: t('marketplace.title'), to: '/marketplace' }}
+            />
+          </div>
+        )}
+
+      {emptyStateKind === 'has-visible' &&
+        !(purchasedOnly && visibleCourses.length === 0) &&
+        catalogView === 'status' && (
         <CourseCatalogKanbanBoard
-          courses={courses}
+          courses={
+            ffCourseMarketplace && purchasedOnly
+              ? courses!.filter((c) => c.acquiredViaMarketplace)
+              : courses!
+          }
           columnLabels={kanbanColumnLabels}
           hiddenColumnExpanded={hiddenColumnExpanded}
           onHiddenColumnExpandedChange={handleHiddenColumnExpandedChange}
@@ -1567,7 +1651,10 @@ export default function Courses() {
         />
       )}
 
-      {emptyStateKind === 'has-visible' && catalogView !== 'status' && catalogSections && (
+      {emptyStateKind === 'has-visible' &&
+        !(purchasedOnly && visibleCourses.length === 0) &&
+        catalogView !== 'status' &&
+        catalogSections && (
         <DndContext
           id={COURSE_GRID_SORT_ID}
           sensors={sensors}
@@ -1594,7 +1681,10 @@ export default function Courses() {
         </DndContext>
       )}
 
-      {emptyStateKind === 'has-visible' && catalogView !== 'status' && !catalogSections && (
+      {emptyStateKind === 'has-visible' &&
+        !(purchasedOnly && visibleCourses.length === 0) &&
+        catalogView !== 'status' &&
+        !catalogSections && (
         <DndContext
           id={COURSE_GRID_SORT_ID}
           sensors={sensors}
