@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Search, Star } from 'lucide-react'
+import { CourseHeroImage } from '../components/course-hero-image'
 import {
   fetchPublicCatalogCategories,
   formatPrice,
@@ -39,10 +40,11 @@ function CourseCard({ course }: { course: PublicCatalogCourse }) {
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-[box-shadow,background-color,color,border-color] hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900">
       {course.heroImageUrl ? (
-        <img
+        <CourseHeroImage
           src={course.heroImageUrl}
+          size="catalog-card"
           alt=""
-          className="lex-content-img h-40 w-full object-cover"
+          className="h-40 w-full object-cover"
           loading="lazy"
         />
       ) : (

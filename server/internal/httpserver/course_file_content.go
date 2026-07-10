@@ -48,6 +48,11 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load file.")
 			return
 		}
+		if row == nil {
+			if d.redirectStaleStorefrontHero(w, r, courseCode, fileID) {
+				return
+			}
+		}
 
 		// Public storefront/catalog hero images are readable without enrollment.
 		// Everything else requires course access first so unauthenticated callers
@@ -120,6 +125,28 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(b)
 	}
+}
+
+// redirectStaleStorefrontHero sends clients to the current hero file when a storefront
+// course still references an old hero UUID (e.g. after reprovisioning).
+func (d Deps) redirectStaleStorefrontHero(w http.ResponseWriter, r *http.Request, courseCode string, requested uuid.UUID) bool {
+	if d.Pool == nil {
+		return false
+	}
+	readable, err := course.IsStorefrontHeroReadable(r.Context(), d.Pool, courseCode)
+	if err != nil || !readable {
+		return false
+	}
+	current, ok, err := course.GetStorefrontHeroFileID(r.Context(), d.Pool, courseCode)
+	if err != nil || !ok || current == requested {
+		return false
+	}
+	target := "/api/v1/courses/" + courseCode + "/course-files/" + current.String() + "/content"
+	if q := r.URL.RawQuery; q != "" {
+		target += "?" + q
+	}
+	http.Redirect(w, r, target, http.StatusFound)
+	return true
 }
 
 func (d Deps) isPublicStorefrontHero(r *http.Request, courseCode string, row *coursefiles.Row) bool {

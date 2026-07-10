@@ -54,11 +54,19 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
   })
 
   useEffect(() => {
+    const normalizedSlug = slug.trim()
+    if (!normalizedSlug) {
+      setLoading(false)
+      setNotFound(true)
+      setError(null)
+      return
+    }
+
     setLoading(true)
     setError(null)
     setNotFound(false)
     let cancelled = false
-    fetchPublicMarketplaceCourse(slug)
+    fetchPublicMarketplaceCourse(normalizedSlug)
       .then(d => {
         if (cancelled) return
         setDetail(d)
@@ -75,7 +83,7 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
         setError(e instanceof Error ? e.message : COURSES_COPY.errorBody)
       })
 
-    fetchPublicMarketplaceReviews(slug, { limit: 20 })
+    fetchPublicMarketplaceReviews(normalizedSlug, { limit: 20 })
       .then(r => {
         if (cancelled) return
         setReviews(r.reviews)

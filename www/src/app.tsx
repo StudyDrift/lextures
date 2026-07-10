@@ -90,6 +90,12 @@ function resolveRoute(pathname: string, hash: string): string {
   return pathname !== '/' ? pathname : '/'
 }
 
+/** Slug from `/courses/:slug`, or `''` for `/courses/` with no slug. */
+function courseDetailSlug(route: string): string | null {
+  if (!route.startsWith('/courses/')) return null
+  return route.slice('/courses/'.length).replace(/\/+$/, '')
+}
+
 export default function App() {
   const hash = useHashRoute()
   const route = resolveRoute(window.location.pathname, hash)
@@ -101,7 +107,10 @@ export default function App() {
   if (route === '/self-learner') return <SelfLearnerPage />
   if (route === '/pricing') return <PricingPage />
   if (route === '/courses') return <CoursesPage />
-  if (route.startsWith('/courses/')) return <CourseDetailPage slug={route.slice('/courses/'.length)} />
+  const courseSlug = courseDetailSlug(route)
+  if (courseSlug !== null) {
+    return courseSlug ? <CourseDetailPage slug={courseSlug} /> : <CoursesPage />
+  }
   if (route === '/request-information') return <RequestInformationPage />
   if (route === '/blog') return <BlogIndex />
   if (route.startsWith('/blog/')) return <BlogPost slug={route.slice('/blog/'.length)} />

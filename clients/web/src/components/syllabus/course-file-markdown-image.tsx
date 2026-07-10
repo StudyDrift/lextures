@@ -1,9 +1,8 @@
 import type { CSSProperties } from 'react'
 import { useEffect, useState } from 'react'
-import { authorizedFetch } from '../../lib/api'
 import {
+  fetchCourseFileImageBlob,
   needsAuthenticatedCourseImageSrc,
-  resolveAuthorizedFetchPath,
   stripImageDisplayFragment,
 } from '../../lib/course-file-image'
 
@@ -33,12 +32,7 @@ export function CourseFileMarkdownImage({ src, alt, className, style }: CourseFi
       return
     }
     /* eslint-enable react-hooks/set-state-in-effect */
-    const path = resolveAuthorizedFetchPath(src)
-    void authorizedFetch(path)
-      .then((r) => {
-        if (!r.ok) throw new Error(String(r.status))
-        return r.blob()
-      })
+    void fetchCourseFileImageBlob(src)
       .then((blob) => {
         if (cancelled) return
         blobUrl = URL.createObjectURL(blob)
