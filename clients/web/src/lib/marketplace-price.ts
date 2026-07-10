@@ -1,5 +1,14 @@
 /** Marketplace price helpers (plan MKT2). */
 
+import {
+  isZeroDecimalCurrency,
+  majorUnitsToMinorUnits,
+  maxCatalogMinorUnits,
+  MAX_MARKETPLACE_PRICE_MAJOR_ZERO_DECIMAL,
+  minorUnitsToMajorUnits,
+  stripeMinimumMinorUnits,
+} from './currency-exponent'
+
 export const MAX_MARKETPLACE_PRICE_MAJOR = 99_999.99
 
 export const MARKETPLACE_CURRENCIES = [
@@ -21,21 +30,30 @@ export const MARKETPLACE_CURRENCIES = [
 
 export type MarketplaceCurrencyCode = (typeof MARKETPLACE_CURRENCIES)[number]['code']
 
-/** Convert major units (e.g. 19.99) to integer cents. */
-export function majorUnitsToPriceCents(amount: string): number | null {
-  const trimmed = amount.trim()
-  if (!trimmed) return 0
-  if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return null
-  const value = Number.parseFloat(trimmed)
-  if (!Number.isFinite(value) || value < 0) return null
-  if (value > MAX_MARKETPLACE_PRICE_MAJOR) return null
-  return Math.round(value * 100)
+function amountPattern(currency: string): RegExp {
+  return isZeroDecimalCurrency(currency) ? /^\d+$/ : /^\d+(\.\d{1,2})?$/
 }
 
-/** Convert integer cents to a major-unit string for form inputs. */
-export function priceCentsToMajorUnits(priceCents: number): string {
+function maxMajorUnits(currency: string): number {
+  return isZeroDecimalCurrency(currency) ? MAX_MARKETPLACE_PRICE_MAJOR_ZERO_DECIMAL : MAX_MARKETPLACE_PRICE_MAJOR
+}
+
+/** Convert major units (e.g. 19.99 USD or 1000 JPY) to Stripe smallest units. */
+export function majorUnitsToPriceCents(amount: string, currency = 'usd'): number | null {
+  const trimmed = amount.trim()
+  if (!trimmed) return 0
+  if (!amountPattern(currency).test(trimmed)) return null
+  const value = Number.parseFloat(trimmed)
+  if (!Number.isFinite(value) || value < 0) return null
+  if (value > maxMajorUnits(currency)) return null
+  return majorUnitsToMinorUnits(value, currency)
+}
+
+/** Convert Stripe smallest units to a major-unit string for form inputs. */
+export function priceCentsToMajorUnits(priceCents: number, currency = 'usd'): string {
   if (priceCents <= 0) return ''
-  return (priceCents / 100).toFixed(2)
+  const major = minorUnitsToMajorUnits(priceCents, currency)
+  return isZeroDecimalCurrency(currency) ? String(Math.round(major)) : major.toFixed(2)
 }
 
 export function formatMarketplacePrice(
@@ -45,23 +63,31 @@ export function formatMarketplacePrice(
   freeLabel = 'Free',
 ): string {
   if (priceCents <= 0) return freeLabel
+  const major = minorUnitsToMajorUnits(priceCents, currency)
   try {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency.toUpperCase(),
-    }).format(priceCents / 100)
+    }).format(major)
   } catch {
-    return `${currency.toUpperCase()} ${(priceCents / 100).toFixed(2)}`
+    return isZeroDecimalCurrency(currency)
+      ? `${currency.toUpperCase()} ${Math.round(major)}`
+      : `${currency.toUpperCase()} ${major.toFixed(2)}`
   }
 }
 
-export function validateMarketplaceAmount(amount: string): string | null {
+export function validateMarketplaceAmount(amount: string, currency = 'usd'): string | null {
   if (!amount.trim()) return null
-  const cents = majorUnitsToPriceCents(amount)
-  if (cents === null) return 'Enter a valid amount with up to two decimal places.'
+  const cents = majorUnitsToPriceCents(amount, currency)
+  if (cents === null) {
+    return isZeroDecimalCurrency(currency)
+      ? 'Enter a valid whole-number amount.'
+      : 'Enter a valid amount with up to two decimal places.'
+  }
   if (cents < 0) return 'Price cannot be negative.'
-  if (cents > 0 && cents < 50) return 'Paid courses must be at least $0.50 (or equivalent).'
-  if (cents > Math.round(MAX_MARKETPLACE_PRICE_MAJOR * 100)) {
+  const min = stripeMinimumMinorUnits(currency)
+  if (cents > 0 && cents < min) return 'Paid courses must be at least $0.50 (or equivalent).'
+  if (cents > maxCatalogMinorUnits(currency)) {
     return 'Price exceeds the maximum allowed amount.'
   }
   return null

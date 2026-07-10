@@ -81,26 +81,37 @@ object MarketplaceLogic {
             .take(limit)
             .toList()
 
-    fun majorUnitsToPriceCents(amount: String): Int? {
+    fun majorUnitsToPriceCents(amount: String, currency: String = "usd"): Int? {
         val trimmed = amount.trim()
         if (trimmed.isEmpty()) return 0
-        if (!Regex("""^\d+(\.\d{1,2})?$""").matches(trimmed)) return null
+        val pattern = if (CurrencyExponent.isZeroDecimal(currency)) """^\d+$""" else """^\d+(\.\d{1,2})?$"""
+        if (!Regex(pattern).matches(trimmed)) return null
         val value = trimmed.toDoubleOrNull() ?: return null
-        if (value < 0 || value > MAX_PRICE_MAJOR) return null
-        return Math.round(value * 100.0).toInt()
+        val maxMajor = if (CurrencyExponent.isZeroDecimal(currency)) {
+            CurrencyExponent.MAX_PRICE_MAJOR_ZERO_DECIMAL
+        } else {
+            MAX_PRICE_MAJOR
+        }
+        if (value < 0 || value > maxMajor) return null
+        return CurrencyExponent.majorUnitsToMinorUnits(value, currency)
     }
 
-    fun priceCentsToMajorUnits(priceCents: Int): String {
+    fun priceCentsToMajorUnits(priceCents: Int, currency: String = "usd"): String {
         if (priceCents <= 0) return ""
-        return String.format("%.2f", priceCents / 100.0)
+        val major = CurrencyExponent.minorUnitsToMajorUnits(priceCents, currency)
+        return if (CurrencyExponent.isZeroDecimal(currency)) {
+            Math.round(major).toString()
+        } else {
+            String.format("%.2f", major)
+        }
     }
 
-    fun validateAmount(amount: String): String? {
+    fun validateAmount(amount: String, currency: String = "usd"): String? {
         if (amount.trim().isEmpty()) return null
-        val cents = majorUnitsToPriceCents(amount) ?: return "invalid"
+        val cents = majorUnitsToPriceCents(amount, currency) ?: return "invalid"
         if (cents < 0) return "negative"
         if (cents > 0 && cents < MIN_PAID_CENTS) return "min"
-        if (cents > Math.round(MAX_PRICE_MAJOR * 100).toInt()) return "max"
+        if (cents > CurrencyExponent.maxCatalogMinorUnits(currency)) return "max"
         return null
     }
 

@@ -62,7 +62,9 @@ final class MarketplaceLogicTests: XCTestCase {
     func testMajorUnitsAndValidation() {
         XCTAssertEqual(MarketplaceLogic.majorUnitsToPriceCents(""), 0)
         XCTAssertEqual(MarketplaceLogic.majorUnitsToPriceCents("19.99"), 1999)
+        XCTAssertEqual(MarketplaceLogic.majorUnitsToPriceCents("1000", currency: "jpy"), 1000)
         XCTAssertNil(MarketplaceLogic.majorUnitsToPriceCents("abc"))
+        XCTAssertNil(MarketplaceLogic.majorUnitsToPriceCents("1000.50", currency: "jpy"))
         XCTAssertNil(MarketplaceLogic.validateAmount(""))
         XCTAssertEqual(MarketplaceLogic.validateAmount("12.345"), "invalid")
         XCTAssertEqual(MarketplaceLogic.validateAmount("0.10"), "min")

@@ -20,7 +20,8 @@ object PathsLogic {
     fun formatPrice(cents: Int, currency: String = "USD"): String {
         val formatter = java.text.NumberFormat.getCurrencyInstance()
         formatter.currency = java.util.Currency.getInstance(currency)
-        return formatter.format(cents / 100.0)
+        val major = CurrencyExponent.minorUnitsToMajorUnits(cents, currency)
+        return formatter.format(major)
     }
 
     fun formatDuration(minutes: Int): String = when {

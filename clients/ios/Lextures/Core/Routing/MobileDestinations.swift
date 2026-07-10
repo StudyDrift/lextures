@@ -415,6 +415,7 @@ struct MobilePlatformFeatures: Equatable {
     var ffCalendarFeeds = true
     var ffMobileSettingsIntegrations = false
     var ffMobileAdminSettings = false
+    var ffFeedback = true
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -482,7 +483,8 @@ struct MobilePlatformFeatures: Equatable {
             ffApiTokens: features?.ffApiTokens == true,
             ffCalendarFeeds: features?.ffCalendarFeeds != false,
             ffMobileSettingsIntegrations: features?.ffMobileSettingsIntegrations == true,
-            ffMobileAdminSettings: features?.ffMobileAdminSettings == true
+            ffMobileAdminSettings: features?.ffMobileAdminSettings == true,
+            ffFeedback: features?.ffFeedback != false
         )
     }
 

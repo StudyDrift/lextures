@@ -44,6 +44,8 @@ const (
 	EventCustomFieldDefinitionChange = "custom_field_definition_change"
 	EventLearnerProfileControl       = "learner_profile_control"
 	EventIntroCourseAdmin            = "intro_course_admin"
+	EventFeedbackAdminRead           = "feedback_admin_read"
+	EventFeedbackAdminUpdate         = "feedback_admin_update"
 )
 
 var ErrNotFound = errors.New("adminaudit: event not found")

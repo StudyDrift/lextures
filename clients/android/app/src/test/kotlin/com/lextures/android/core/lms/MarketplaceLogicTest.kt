@@ -60,7 +60,9 @@ class MarketplaceLogicTest {
     fun majorUnitsToPriceCents() {
         assertEquals(0, MarketplaceLogic.majorUnitsToPriceCents(""))
         assertEquals(1999, MarketplaceLogic.majorUnitsToPriceCents("19.99"))
+        assertEquals(1000, MarketplaceLogic.majorUnitsToPriceCents("1000", "jpy"))
         assertNull(MarketplaceLogic.majorUnitsToPriceCents("abc"))
+        assertNull(MarketplaceLogic.majorUnitsToPriceCents("1000.50", "jpy"))
     }
 
     @Test

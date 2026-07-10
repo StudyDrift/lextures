@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/gdpr"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	platformpeople "github.com/lextures/lextures/server/internal/repos/platformpeople"
+	pfrepo "github.com/lextures/lextures/server/internal/repos/productfeedback"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	userrepo "github.com/lextures/lextures/server/internal/repos/user"
 	auditservice "github.com/lextures/lextures/server/internal/service/adminaudit"
@@ -372,6 +373,7 @@ func (d Deps) handleAdminPeopleDelete() http.HandlerFunc {
 		if d.LearnerProfileService != nil {
 			_ = d.LearnerProfileService.Erase(ctx, targetID)
 		}
+		_ = pfrepo.DeleteByUser(ctx, d.Pool, targetID)
 		if err := gdpr.AnonymiseUser(ctx, d.Pool, targetID); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete user account.")
 			return

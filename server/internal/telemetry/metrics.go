@@ -51,6 +51,9 @@ type Metrics struct {
 	myPurchasesViews             *prometheus.CounterVec
 	purchasedBadgeRenders        *prometheus.CounterVec
 	publicMarketplaceListTotal   *prometheus.CounterVec
+	feedbackSubmittedTotal       *prometheus.CounterVec
+	feedbackSubmitErrorsTotal    *prometheus.CounterVec
+	feedbackAdminListLatency     prometheus.Histogram
 }
 
 // NewMetrics builds a self-contained registry (not the global default, so tests
@@ -181,6 +184,22 @@ func NewMetrics(deployColor ...string) *Metrics {
 			Name:      "public_marketplace_list_total",
 			Help:      "Unauthenticated public marketplace list views (plan MKT7).",
 		}, []string{}),
+		feedbackSubmittedTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "feedback_submitted_total",
+			Help:      "Product feedback submissions by source and category (plan FB0).",
+		}, []string{"source", "category"}),
+		feedbackSubmitErrorsTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "feedback_submit_errors_total",
+			Help:      "Failed or rejected product feedback submissions (plan FB0).",
+		}, []string{}),
+		feedbackAdminListLatency: prometheus.NewHistogram(prometheus.HistogramOpts{
+			Namespace: namespace,
+			Name:      "feedback_admin_list_latency_seconds",
+			Help:      "Admin feedback list query latency in seconds (plan FB0).",
+			Buckets:   durationBuckets,
+		}),
 	}
 
 	reg.MustRegister(
@@ -206,6 +225,9 @@ func NewMetrics(deployColor ...string) *Metrics {
 		m.myPurchasesViews,
 		m.purchasedBadgeRenders,
 		m.publicMarketplaceListTotal,
+		m.feedbackSubmittedTotal,
+		m.feedbackSubmitErrorsTotal,
+		m.feedbackAdminListLatency,
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
@@ -407,6 +429,36 @@ func (m *Metrics) RecordPublicMarketplaceList() {
 		return
 	}
 	m.publicMarketplaceListTotal.WithLabelValues().Inc()
+}
+
+// RecordFeedbackSubmitted increments feedback_submitted_total (plan FB0).
+func (m *Metrics) RecordFeedbackSubmitted(source, category string) {
+	if m == nil || m.feedbackSubmittedTotal == nil {
+		return
+	}
+	if source == "" {
+		source = "unknown"
+	}
+	if category == "" {
+		category = "other"
+	}
+	m.feedbackSubmittedTotal.WithLabelValues(source, category).Inc()
+}
+
+// RecordFeedbackSubmitError increments feedback_submit_errors_total (plan FB0).
+func (m *Metrics) RecordFeedbackSubmitError() {
+	if m == nil || m.feedbackSubmitErrorsTotal == nil {
+		return
+	}
+	m.feedbackSubmitErrorsTotal.WithLabelValues().Inc()
+}
+
+// ObserveFeedbackAdminList records feedback_admin_list_latency_seconds (plan FB0).
+func (m *Metrics) ObserveFeedbackAdminList(seconds float64) {
+	if m == nil || m.feedbackAdminListLatency == nil {
+		return
+	}
+	m.feedbackAdminListLatency.Observe(seconds)
 }
 
 func boolLabel(v bool) string {

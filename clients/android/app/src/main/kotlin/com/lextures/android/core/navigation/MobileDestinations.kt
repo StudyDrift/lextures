@@ -235,6 +235,7 @@ data class MobilePlatformFeatures(
     val ffCalendarFeeds: Boolean = true,
     val ffMobileSettingsIntegrations: Boolean = false,
     val ffMobileAdminSettings: Boolean = false,
+    val ffFeedback: Boolean = true,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -320,6 +321,7 @@ data class MobilePlatformFeatures(
             ffCalendarFeeds = features?.ffCalendarFeeds != false,
             ffMobileSettingsIntegrations = features?.ffMobileSettingsIntegrations == true,
             ffMobileAdminSettings = features?.ffMobileAdminSettings == true,
+            ffFeedback = features?.ffFeedback != false,
         )
     }
 }

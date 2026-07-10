@@ -4132,4 +4132,18 @@ object LmsApi {
         )
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
     }
+
+    // Product feedback (FB3)
+
+    suspend fun submitFeedback(body: SubmitFeedbackRequest, accessToken: String): SubmitFeedbackResponse =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(body, SubmitFeedbackRequest.serializer())
+            val (responseBody, _) = client.request(
+                path = "/api/v1/feedback",
+                method = "POST",
+                body = payload,
+                accessToken = accessToken,
+            )
+            decode(responseBody)
+        }
 }

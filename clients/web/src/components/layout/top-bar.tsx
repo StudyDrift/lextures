@@ -3,6 +3,9 @@ import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState } from 'rea
 import { ChevronDown, LogOut, Menu, User } from 'lucide-react'
 import { Link, matchPath, useLocation, useNavigate } from 'react-router-dom'
 const AiTutorMenu = lazy(() => import('../tutor-panel').then((m) => ({ default: m.AiTutorMenu })))
+const FeedbackWidgetMenu = lazy(() =>
+  import('../feedback/feedback-widget').then((m) => ({ default: m.FeedbackWidgetMenu })),
+)
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { setCourseViewAs, useCourseViewAs } from '../../lib/course-view-as'
 import { apiUrl, authorizedFetch } from '../../lib/api'
@@ -311,6 +314,9 @@ export function TopBar() {
           </Suspense>
         ) : null}
         <CanvasImportHeaderWidget />
+        <Suspense fallback={null}>
+          <FeedbackWidgetMenu />
+        </Suspense>
         <HelpWidgetMenu />
         <NotificationsDrawerTrigger open={notificationsOpen} onOpen={() => setNotificationsOpen(true)} />
         <CourseEnrollmentViewDropdown />

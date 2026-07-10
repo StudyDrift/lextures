@@ -33,6 +33,11 @@ describe('ICU plural forms (plan 11.1 AC-3)', () => {
     ).toBe('Next up: Welcome & Getting Oriented')
   })
 
+  it('interpolates feedback message counter', async () => {
+    await i18n.changeLanguage('en')
+    expect(i18n.t('feedback.message.counter', { count: 12, max: 5000 })).toBe('12 / 5000')
+  })
+
   it.each([
     ['en', 1, '1 assignment'],
     ['en', 2, '2 assignments'],

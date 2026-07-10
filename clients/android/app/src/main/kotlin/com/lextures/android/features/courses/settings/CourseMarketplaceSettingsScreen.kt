@@ -73,7 +73,7 @@ fun CourseMarketplaceSettingsScreen(
             val data = LmsApi.fetchCourseCatalogListing(course.courseCode, token)
             listing = data
             marketplaceListed = data.marketplaceListed
-            amount = MarketplaceLogic.priceCentsToMajorUnits(data.priceCents)
+            amount = MarketplaceLogic.priceCentsToMajorUnits(data.priceCents, data.priceCurrency.ifBlank { "usd" })
             currency = data.priceCurrency.ifBlank { "usd" }
             amountError = null
         } catch (_: Exception) {
@@ -191,7 +191,7 @@ fun CourseMarketplaceSettingsScreen(
                         val previewCents = if (amount.trim().isEmpty()) {
                             0
                         } else {
-                            MarketplaceLogic.majorUnitsToPriceCents(amount) ?: current.priceCents
+                            MarketplaceLogic.majorUnitsToPriceCents(amount, currency) ?: current.priceCents
                         }
                         Text(
                             MarketplaceLogic.formatPrice(
@@ -208,7 +208,7 @@ fun CourseMarketplaceSettingsScreen(
                 Button(
                     onClick = {
                         val token = accessToken ?: return@Button
-                        val validation = MarketplaceLogic.validateAmount(amount)
+                        val validation = MarketplaceLogic.validateAmount(amount, currency)
                         if (validation != null) {
                             amountError = when (validation) {
                                 "min" -> L.text(context, localePrefs, R.string.mobile_courseSettings_marketplace_amountMin)
@@ -220,7 +220,7 @@ fun CourseMarketplaceSettingsScreen(
                         val nextCents = if (amount.trim().isEmpty()) {
                             0
                         } else {
-                            MarketplaceLogic.majorUnitsToPriceCents(amount) ?: current.priceCents
+                            MarketplaceLogic.majorUnitsToPriceCents(amount, currency) ?: current.priceCents
                         }
                         saving = true
                         savedMessage = null
@@ -239,7 +239,7 @@ fun CourseMarketplaceSettingsScreen(
                                 )
                                 listing = updated
                                 marketplaceListed = updated.marketplaceListed
-                                amount = MarketplaceLogic.priceCentsToMajorUnits(updated.priceCents)
+                                amount = MarketplaceLogic.priceCentsToMajorUnits(updated.priceCents, updated.priceCurrency.ifBlank { "usd" })
                                 currency = updated.priceCurrency.ifBlank { "usd" }
                                 savedMessage = L.text(context, localePrefs, R.string.mobile_courseSettings_marketplace_saved)
                             } catch (_: Exception) {

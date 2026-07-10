@@ -112,6 +112,7 @@ export type PlatformSettingsPayload = {
   ffReportCards: boolean
   ffPublicCatalog: boolean
   ffCourseMarketplace: boolean
+  ffFeedback: boolean
   ffSelfPacedMode: boolean
   ffPublicApi: boolean
   ffContentFilterIntegration: boolean

@@ -20,6 +20,7 @@ import (
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
 	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
 	lprepo "github.com/lextures/lextures/server/internal/repos/learnerprofile"
+	pfrepo "github.com/lextures/lextures/server/internal/repos/productfeedback"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/service/coursereviews"
 	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
@@ -131,6 +132,9 @@ func ApproveDSAR(ctx context.Context, pool *pgxpool.Pool, id, adminID uuid.UUID)
 		}
 		if err := icrepo.DeleteCompletionByUser(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: erase intro course completion: %w", err)
+		}
+		if err := pfrepo.DeleteByUser(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: erase product feedback: %w", err)
 		}
 		if err := repo.AnonymiseUser(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: anonymise user: %w", err)
@@ -263,13 +267,14 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	}
 
 	type archiveDoc struct {
-		UserID         string           `json:"userId"`
-		Profile        profileRow       `json:"profile"`
-		Consents       []consentSummary `json:"consents"`
-		CustomFields   map[string]any   `json:"customFields,omitempty"`
-		AIInferenceLog []map[string]any `json:"aiInferenceLog,omitempty"`
-		LearnerProfile any              `json:"learnerProfile,omitempty"`
-		ExportedAt     string           `json:"exportedAt"`
+		UserID          string           `json:"userId"`
+		Profile         profileRow       `json:"profile"`
+		Consents        []consentSummary `json:"consents"`
+		CustomFields    map[string]any   `json:"customFields,omitempty"`
+		AIInferenceLog  []map[string]any `json:"aiInferenceLog,omitempty"`
+		LearnerProfile  any              `json:"learnerProfile,omitempty"`
+		ProductFeedback []map[string]any `json:"productFeedback,omitempty"`
+		ExportedAt      string           `json:"exportedAt"`
 	}
 
 	cs := make([]consentSummary, 0, len(consents))
@@ -286,6 +291,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 
 	aiLog := dsarAIInferenceSummary(ctx, pool, os.Getenv("JWT_SECRET"), userID)
 	learnerProfileExport := dsarLearnerProfileExport(ctx, pool, userID)
+	productFeedbackExport := dsarProductFeedbackExport(ctx, pool, userID)
 
 	var customFields map[string]any
 	if len(customRaw) > 0 {
@@ -293,13 +299,14 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	}
 
 	doc := archiveDoc{
-		UserID:         userID.String(),
-		Profile:        p,
-		Consents:       cs,
-		CustomFields:   customFields,
-		AIInferenceLog: aiLog,
-		LearnerProfile: learnerProfileExport,
-		ExportedAt:     time.Now().UTC().Format(time.RFC3339),
+		UserID:          userID.String(),
+		Profile:         p,
+		Consents:        cs,
+		CustomFields:    customFields,
+		AIInferenceLog:  aiLog,
+		LearnerProfile:  learnerProfileExport,
+		ProductFeedback: productFeedbackExport,
+		ExportedAt:      time.Now().UTC().Format(time.RFC3339),
 	}
 	b, err := json.Marshal(doc)
 	if err != nil {
@@ -338,6 +345,26 @@ func dsarLearnerProfileExport(ctx context.Context, pool *pgxpool.Pool, userID uu
 		return nil
 	}
 	return doc
+}
+
+func dsarProductFeedbackExport(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) []map[string]any {
+	rows, err := pfrepo.ListForUserExport(ctx, pool, userID)
+	if err != nil {
+		return nil
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, map[string]any{
+			"id":        r.ID.String(),
+			"message":   r.Message,
+			"category":  r.Category,
+			"source":    r.Source,
+			"status":    r.Status,
+			"context":   r.Context,
+			"createdAt": r.CreatedAt.UTC().Format(time.RFC3339),
+		})
+	}
+	return out
 }
 
 func dsarAIInferenceSummary(ctx context.Context, pool *pgxpool.Pool, secret string, userID uuid.UUID) []map[string]any {

@@ -90,7 +90,7 @@ struct CourseMarketplaceSettingsView: View {
                                     if amount.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                         return 0
                                     }
-                                    return MarketplaceLogic.majorUnitsToPriceCents(amount) ?? listing?.priceCents ?? 0
+                                    return MarketplaceLogic.majorUnitsToPriceCents(amount, currency: currency) ?? listing?.priceCents ?? 0
                                 }()
                                 Text(MarketplaceLogic.formatPrice(cents: previewCents, currency: currency))
                                     .font(.caption)
@@ -127,7 +127,7 @@ struct CourseMarketplaceSettingsView: View {
             let data = try await LMSAPI.fetchCourseCatalogListing(courseCode: course.courseCode, accessToken: token)
             listing = data
             marketplaceListed = data.marketplaceListed
-            amount = MarketplaceLogic.priceCentsToMajorUnits(data.priceCents)
+            amount = MarketplaceLogic.priceCentsToMajorUnits(data.priceCents, currency: data.priceCurrency.isEmpty ? "usd" : data.priceCurrency)
             currency = data.priceCurrency.isEmpty ? "usd" : data.priceCurrency
             amountError = nil
         } catch {
@@ -138,7 +138,7 @@ struct CourseMarketplaceSettingsView: View {
 
     private func save() async {
         guard let token = session.accessToken, let listing else { return }
-        if let validation = MarketplaceLogic.validateAmount(amount) {
+        if let validation = MarketplaceLogic.validateAmount(amount, currency: currency) {
             amountError = switch validation {
             case "min": L.text("mobile.courseSettings.marketplace.amountMin")
             case "max": L.text("mobile.courseSettings.marketplace.amountMax")
@@ -151,7 +151,7 @@ struct CourseMarketplaceSettingsView: View {
         if amount.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             nextCents = 0
         } else {
-            nextCents = MarketplaceLogic.majorUnitsToPriceCents(amount) ?? listing.priceCents
+            nextCents = MarketplaceLogic.majorUnitsToPriceCents(amount, currency: currency) ?? listing.priceCents
         }
         saving = true
         savedMessage = nil
@@ -170,7 +170,7 @@ struct CourseMarketplaceSettingsView: View {
             )
             self.listing = updated
             marketplaceListed = updated.marketplaceListed
-            amount = MarketplaceLogic.priceCentsToMajorUnits(updated.priceCents)
+            amount = MarketplaceLogic.priceCentsToMajorUnits(updated.priceCents, currency: updated.priceCurrency.isEmpty ? "usd" : updated.priceCurrency)
             currency = updated.priceCurrency.isEmpty ? "usd" : updated.priceCurrency
             savedMessage = L.text("mobile.courseSettings.marketplace.saved")
         } catch {

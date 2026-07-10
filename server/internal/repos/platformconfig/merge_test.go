@@ -111,4 +111,17 @@ func TestMerge_CourseMarketplaceDBOverridesDefault(t *testing.T) {
 	}
 }
 
+// Plan FB0: FFFeedback defaults ON when platform settings row is unset.
+func TestMerge_FeedbackDefaultOnWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if !got.FFFeedback {
+		t.Fatal("expected FFFeedback true (default ON) when DB unset")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFFeedback: &off})
+	if got.FFFeedback {
+		t.Fatal("expected DB false to disable feedback")
+	}
+}
+
 func ptr(s string) *string { return &s }

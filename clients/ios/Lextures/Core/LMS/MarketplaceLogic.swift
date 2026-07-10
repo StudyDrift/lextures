@@ -122,30 +122,35 @@ enum MarketplaceLogic {
             .map { String($0) }
     }
 
-    static func majorUnitsToPriceCents(_ amount: String) -> Int? {
+    static func majorUnitsToPriceCents(_ amount: String, currency: String = "usd") -> Int? {
         let trimmed = amount.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty { return 0 }
-        guard trimmed.range(of: #"^\d+(\.\d{1,2})?$"#, options: .regularExpression) != nil,
+        let pattern = CurrencyExponent.isZeroDecimal(currency) ? #"^\d+$"# : #"^\d+(\.\d{1,2})?$"#
+        let maxMajor = CurrencyExponent.isZeroDecimal(currency) ? CurrencyExponent.maxPriceMajorZeroDecimal : maxPriceMajor
+        guard trimmed.range(of: pattern, options: .regularExpression) != nil,
               let value = Double(trimmed),
               value >= 0,
-              value <= maxPriceMajor else {
+              value <= maxMajor else {
             return nil
         }
-        return Int((value * 100).rounded())
+        return CurrencyExponent.majorUnitsToMinorUnits(value, currency: currency)
     }
 
-    static func priceCentsToMajorUnits(_ priceCents: Int) -> String {
+    static func priceCentsToMajorUnits(_ priceCents: Int, currency: String = "usd") -> String {
         if priceCents <= 0 { return "" }
-        return String(format: "%.2f", Double(priceCents) / 100.0)
+        let major = CurrencyExponent.minorUnitsToMajorUnits(priceCents, currency: currency)
+        return CurrencyExponent.isZeroDecimal(currency)
+            ? String(Int(major.rounded()))
+            : String(format: "%.2f", major)
     }
 
-    static func validateAmount(_ amount: String) -> String? {
+    static func validateAmount(_ amount: String, currency: String = "usd") -> String? {
         let trimmed = amount.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty { return nil }
-        guard let cents = majorUnitsToPriceCents(trimmed) else { return "invalid" }
+        guard let cents = majorUnitsToPriceCents(trimmed, currency: currency) else { return "invalid" }
         if cents < 0 { return "negative" }
         if cents > 0 && cents < minPaidCents { return "min" }
-        if cents > Int((maxPriceMajor * 100).rounded()) { return "max" }
+        if cents > CurrencyExponent.maxCatalogMinorUnits(currency) { return "max" }
         return nil
     }
 

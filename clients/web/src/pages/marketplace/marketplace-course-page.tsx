@@ -15,6 +15,7 @@ import {
 } from '../../lib/marketplace-api'
 import { EmptyState } from '../../components/ui/empty-state'
 import { LmsPage } from '../lms/lms-page'
+import { formatMarketplacePrice } from '../../lib/marketplace-price'
 import { MarketplacePriceBadge } from './marketplace-price-badge'
 
 export default function MarketplaceCoursePage() {
@@ -83,10 +84,7 @@ export default function MarketplaceCoursePage() {
   } else if (isFree) {
     ctaLabel = t('marketplace.enrollFree')
   } else {
-    const priceText = new Intl.NumberFormat(i18n.language, {
-      style: 'currency',
-      currency: priceCurrency.toUpperCase(),
-    }).format(priceCents / 100)
+    const priceText = formatMarketplacePrice(priceCents, priceCurrency, i18n.language, '')
     ctaLabel = t('marketplace.buy', { price: priceText })
   }
   if (ctaPending) {

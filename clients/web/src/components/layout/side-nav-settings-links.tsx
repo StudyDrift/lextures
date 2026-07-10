@@ -23,6 +23,7 @@ import {
   Users,
   Workflow,
   Lock,
+  MessageSquare,
   Sparkles,
 } from 'lucide-react'
 import { SideNavAdminLinks } from './side-nav-admin-links'
@@ -62,6 +63,7 @@ export function SideNavSettingsLinks() {
     ffCoCurricularTranscript,
     gdprModuleEnabled,
     learnerProfileEnabled,
+    ffFeedback,
   } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
@@ -292,6 +294,15 @@ export function SideNavSettingsLinks() {
               >
                 Global platform
               </SideNavLink>
+              {ffFeedback && (
+                <SideNavLink
+                  to="/settings/feedback"
+                  className={() => (view === 'feedback' ? sideNavActiveClass : '')}
+                  icon={<MessageSquare className="h-5 w-5" />}
+                >
+                  Feedback
+                </SideNavLink>
+              )}
               <SideNavLink
                 to="/settings/archive"
                 className={() => (view === 'archive' ? sideNavActiveClass : '')}

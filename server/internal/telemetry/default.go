@@ -109,6 +109,27 @@ func RecordPublicMarketplaceList() {
 	}
 }
 
+// RecordFeedbackSubmitted records a product feedback submission (plan FB0).
+func RecordFeedbackSubmitted(source, category string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordFeedbackSubmitted(source, category)
+	}
+}
+
+// RecordFeedbackSubmitError records a failed feedback submission (plan FB0).
+func RecordFeedbackSubmitError() {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordFeedbackSubmitError()
+	}
+}
+
+// ObserveFeedbackAdminList records admin feedback list latency (plan FB0).
+func ObserveFeedbackAdminList(seconds float64) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.ObserveFeedbackAdminList(seconds)
+	}
+}
+
 // RecordAIProvider records an AI provider call on the default instance
 // (plan 16.7 / 17.7 §11). No-op when telemetry is not initialised.
 func RecordAIProvider(provider, model, outcome string, seconds, costDollars float64) {

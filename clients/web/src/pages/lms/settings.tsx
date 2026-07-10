@@ -39,6 +39,7 @@ import { ArchivedCoursesPanel } from '../../components/settings/archived-courses
 import { PeoplePanel } from '../../components/settings/people-panel'
 import { CoursesPanel } from '../../components/settings/courses-panel'
 import { IntroCoursePanel } from '../../components/settings/intro-course-panel'
+import { FeedbackAdminPanel } from '../../components/settings/feedback-admin-panel'
 import { AiReportsPanel } from '../../components/settings/ai-reports-panel'
 import { LmsPage } from './lms-page'
 import OrgBranding from './admin/org-branding'
@@ -50,6 +51,7 @@ import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 
 function isSystemSettingsPath(pathname: string): boolean {
   if (pathname.startsWith('/settings/ai/')) return true
+  if (pathname.startsWith('/settings/feedback')) return true
   return (
     pathname === '/settings/roles' ||
     pathname === '/settings/lti-tools' ||
@@ -468,7 +470,8 @@ export default function Settings() {
           activeView === 'archive' ||
           activeView === 'people' ||
           activeView === 'courses' ||
-          activeView === 'intro-course'
+          activeView === 'intro-course' ||
+          activeView === 'feedback'
             ? 'max-w-4xl'
             : activeView === 'integrations'
               ? 'max-w-3xl'
@@ -1035,6 +1038,23 @@ export default function Settings() {
               <IntroCoursePanel />
             </RequirePermission>
           </div>
+        )}
+
+        {activeView === 'feedback' && (
+          <RequirePermission
+            permission={PERM_RBAC_MANAGE}
+            fallback={
+              <div>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Feedback</h2>
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                  You need permission to review feedback (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              </div>
+            }
+          >
+            <FeedbackAdminPanel />
+          </RequirePermission>
         )}
 
         {activeView === 'organizations' && (

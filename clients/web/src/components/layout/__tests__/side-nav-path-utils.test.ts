@@ -19,6 +19,8 @@ describe('settingsViewFromPathname', () => {
     expect(settingsViewFromPathname('/settings/roles')).toBe('roles')
     expect(settingsViewFromPathname('/settings/archive')).toBe('archive')
     expect(settingsViewFromPathname('/settings/intro-course')).toBe('intro-course')
+    expect(settingsViewFromPathname('/settings/feedback')).toBe('feedback')
+    expect(settingsViewFromPathname('/settings/feedback/abc-123')).toBe('feedback')
   })
 
   it('defaults to account for unknown settings paths', () => {

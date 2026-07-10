@@ -603,6 +603,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Let learners discover and enroll in courses through an in-app storefront. Instructors opt individual courses in from course settings. Distinct from the plugin marketplace.',
   },
   {
+    key: 'ffFeedback',
+    label: 'In-app product feedback',
+    description:
+      'Let signed-in users submit product feedback from web and mobile clients. Admins triage submissions from the feedback queue.',
+  },
+  {
     key: 'ffReadAloud',
     label: 'Read-aloud (text-to-speech)',
     description:

@@ -7,6 +7,7 @@ import (
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/currency"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/telemetry"
 )
@@ -116,21 +117,13 @@ func (d Deps) handlePutCourseCatalogListing() http.HandlerFunc {
 				body.Category = &cat
 			}
 		}
-		if body.PriceCents < 0 {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Price cannot be negative.")
-			return
-		}
-		if body.PriceCents > course.MaxCatalogPriceCents {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Price exceeds the maximum allowed amount.")
-			return
-		}
-		currency := course.NormalizePriceCurrency(body.PriceCurrency)
-		if body.PriceCurrency != "" && !course.ValidPriceCurrency(currency) {
+		priceCurrency := course.NormalizePriceCurrency(body.PriceCurrency)
+		if body.PriceCurrency != "" && !course.ValidPriceCurrency(priceCurrency) {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Unsupported currency.")
 			return
 		}
-		if body.PriceCents > 0 && body.PriceCents < course.StripeMinimumPriceCents {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Paid courses must be at least $0.50 (or equivalent).")
+		if err := currency.ValidateCatalogPrice(body.PriceCents, priceCurrency); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
 
@@ -154,7 +147,7 @@ func (d Deps) handlePutCourseCatalogListing() http.HandlerFunc {
 			DifficultyLevel:   body.DifficultyLevel,
 			Language:          body.Language,
 			PriceCents:        body.PriceCents,
-			PriceCurrency:     currency,
+			PriceCurrency:     priceCurrency,
 			Slug:              body.Slug,
 			MarketplaceListed: marketplaceListed,
 		})
