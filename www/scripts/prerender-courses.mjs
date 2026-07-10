@@ -32,6 +32,16 @@ const SKIP = process.env.SKIP_COURSE_PRERENDER === '1'
 const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/assets/lextures-mark.svg`
 const CONCURRENCY = 6
 
+/** Turn API-relative asset paths into absolute URLs on the self-learner origin. */
+function resolveApiAssetUrl(url, apiBase = API_BASE) {
+  if (!url) return null
+  const trimmed = String(url).trim()
+  if (!trimmed) return null
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+  if (trimmed.startsWith('/')) return `${apiBase}${trimmed}`
+  return trimmed
+}
+
 const STATIC_ROUTES = [
   { loc: '/', priority: '1.0' },
   { loc: '/pricing', priority: '0.8' },
@@ -256,7 +266,7 @@ async function main() {
         title: `${c.title} — Lextures`,
         description: truncateMeta(c.description || c.title),
         canonical: `${SITE_ORIGIN}/courses/${encodeURIComponent(slug)}`,
-        image: c.heroImageUrl || DEFAULT_OG_IMAGE,
+        image: resolveApiAssetUrl(c.heroImageUrl) || DEFAULT_OG_IMAGE,
         jsonLd: detail.jsonLd || null,
       })
       const dir = path.join(DIST, 'courses', slug)
@@ -283,6 +293,7 @@ export {
   injectHead,
   buildSitemap,
   buildRobots,
+  resolveApiAssetUrl,
 }
 
 const isMain =

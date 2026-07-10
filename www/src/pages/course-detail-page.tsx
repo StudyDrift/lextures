@@ -7,6 +7,7 @@ import { EnrollPanel } from '../components/courses/enroll-panel'
 import { ReviewList } from '../components/courses/review-list'
 import { WhatsIncluded } from '../components/courses/whats-included'
 import { MarketingPageShell } from '../components/marketing-page-shell'
+import { resolveApiAssetUrl } from '../lib/api-base'
 import { COURSES_COPY } from '../lib/courses-copy'
 import { truncateMetaDescription } from '../lib/document-head'
 import {
@@ -43,7 +44,8 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
     ? truncateMetaDescription(course.description || COURSES_COPY.pageDescription)
     : COURSES_COPY.pageDescription
   const canonical = `${SITE_ORIGIN}/courses/${encodeURIComponent(slug)}`
-  const image = course?.heroImageUrl || undefined
+  const heroImageUrl = resolveApiAssetUrl(course?.heroImageUrl)
+  const image = heroImageUrl || undefined
 
   useDocumentHead({
     title,
@@ -206,9 +208,9 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
                 borderRadius: 'var(--radius-card)',
               }}
             >
-              {course.heroImageUrl ? (
+              {heroImageUrl ? (
                 <img
-                  src={course.heroImageUrl}
+                  src={heroImageUrl}
                   alt=""
                   className="h-full w-full object-cover"
                 />

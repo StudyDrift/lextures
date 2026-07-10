@@ -6,6 +6,7 @@ import {
   buildSitemap,
   escapeHtml,
   injectHead,
+  resolveApiAssetUrl,
   truncateMeta,
 } from './prerender-courses.mjs'
 
@@ -93,5 +94,17 @@ describe('buildRobots', () => {
     const txt = buildRobots()
     assert.match(txt, /Allow: \/courses/)
     assert.match(txt, /Sitemap: https:\/\/lextures.com\/sitemap.xml/)
+  })
+})
+
+describe('resolveApiAssetUrl', () => {
+  it('prefixes API-relative hero image paths with self.lextures.com', () => {
+    assert.equal(
+      resolveApiAssetUrl(
+        '/api/v1/courses/C-AIESS1/course-files/ff993800-114b-4316-ba70-27406837f8a5/content',
+        'https://self.lextures.com',
+      ),
+      'https://self.lextures.com/api/v1/courses/C-AIESS1/course-files/ff993800-114b-4316-ba70-27406837f8a5/content',
+    )
   })
 })

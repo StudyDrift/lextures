@@ -1,3 +1,4 @@
+import { resolveApiAssetUrl } from '../../lib/api-base'
 import { formatMarketplacePrice, type PublicMarketplaceCourse } from '../../lib/marketplace-api'
 import { COURSES_COPY } from '../../lib/courses-copy'
 
@@ -77,6 +78,7 @@ export function CourseCard({ course }: CourseCardProps) {
   const href = `/courses/${encodeURIComponent(course.slug || course.courseCode)}`
   const price = formatMarketplacePrice(course.priceCents, course.priceCurrency, COURSES_COPY.free)
   const accessibleName = `${course.title}, ${price}`
+  const heroImageUrl = resolveApiAssetUrl(course.heroImageUrl)
 
   return (
     <li>
@@ -92,9 +94,9 @@ export function CourseCard({ course }: CourseCardProps) {
         aria-label={accessibleName}
       >
         <div className="aspect-[16/9] w-full overflow-hidden" style={{ backgroundColor: 'var(--paper)' }}>
-          {course.heroImageUrl ? (
+          {heroImageUrl ? (
             <img
-              src={course.heroImageUrl}
+              src={heroImageUrl}
               alt=""
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
