@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	serverdata "github.com/lextures/lextures/server"
 	"github.com/lextures/lextures/server/internal/db"
 	"github.com/lextures/lextures/server/internal/migrate"
@@ -32,7 +33,18 @@ func TestFetchDashboardStats_MatchesDirectCounts_Pg(t *testing.T) {
 	}
 	defer pool.Close()
 
-	stats, err := FetchDashboardStats(ctx, pool)
+	// REPEATABLE READ snapshot so stats + verification counts stay consistent
+	// while parallel package tests insert/delete users on the shared CI database.
+	tx, err := pool.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel:   pgx.RepeatableRead,
+		AccessMode: pgx.ReadOnly,
+	})
+	if err != nil {
+		t.Fatalf("begin tx: %v", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	stats, err := fetchDashboardStats(ctx, tx)
 	if err != nil {
 		t.Fatalf("FetchDashboardStats: %v", err)
 	}
@@ -40,7 +52,7 @@ func TestFetchDashboardStats_MatchesDirectCounts_Pg(t *testing.T) {
 	var direct struct {
 		total, active, suspended, signups7d, recent30d int64
 	}
-	err = pool.QueryRow(ctx, `
+	err = tx.QueryRow(ctx, `
 SELECT
     COUNT(*)::bigint,
     COUNT(*) FILTER (WHERE u.deactivated_at IS NULL AND NOT u.login_blocked)::bigint,
@@ -53,7 +65,7 @@ WHERE `+humanUserFilter).Scan(
 	if err != nil {
 		t.Fatalf("direct user counts: %v", err)
 	}
-	err = pool.QueryRow(ctx, `
+	err = tx.QueryRow(ctx, `
 SELECT COUNT(DISTINCT ua.user_id)::bigint
 FROM "user".user_audit ua
 INNER JOIN "user".users u ON u.id = ua.user_id
@@ -77,5 +89,10 @@ WHERE ua.occurred_at >= NOW() - INTERVAL '30 days'
 	}
 	if stats.RecentlyActive30Days != direct.recent30d {
 		t.Fatalf("recentlyActive30Days = %d, want %d", stats.RecentlyActive30Days, direct.recent30d)
+	}
+
+	// Smoke the public pool entrypoint (non-snapshot); must not error.
+	if _, err := FetchDashboardStats(ctx, pool); err != nil {
+		t.Fatalf("FetchDashboardStats(pool): %v", err)
 	}
 }

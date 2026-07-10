@@ -2,13 +2,11 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Search, Star } from 'lucide-react'
 import { CourseHeroImage } from '../components/course-hero-image'
+import { formatPrice, type PublicCatalogCategory, type PublicCatalogCourse } from '../lib/public-catalog-api'
 import {
-  fetchPublicCatalogCategories,
-  formatPrice,
-  searchPublicCatalog,
-  type PublicCatalogCategory,
-  type PublicCatalogCourse,
-} from '../lib/public-catalog-api'
+  fetchExploreCatalogCategories,
+  searchExploreCatalog,
+} from '../lib/public-explore-api'
 
 const LEVELS = [
   { value: '', label: 'Any level' },
@@ -133,7 +131,7 @@ export default function ExploreCatalogPage() {
   }, [queryText, setParams])
 
   useEffect(() => {
-    void fetchPublicCatalogCategories()
+    void fetchExploreCatalogCategories()
       .then(setCategories)
       .catch(() => setCategories([]))
   }, [])
@@ -157,7 +155,7 @@ export default function ExploreCatalogPage() {
     let cancelled = false
     setLoading(true)
     setError(null)
-    searchPublicCatalog({
+    searchExploreCatalog({
       q,
       category,
       level,
@@ -184,7 +182,7 @@ export default function ExploreCatalogPage() {
 
   const loadMore = useCallback(() => {
     if (!nextCursor) return
-    searchPublicCatalog({ q, category, level, sort, cursor: nextCursor, ...priceParams(price) })
+    searchExploreCatalog({ q, category, level, sort, cursor: nextCursor, ...priceParams(price) })
       .then((res) => {
         setCourses((prev) => [...prev, ...res.courses])
         setNextCursor(res.nextCursor)

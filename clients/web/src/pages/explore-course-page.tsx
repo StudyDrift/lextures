@@ -3,16 +3,17 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Star } from 'lucide-react'
 import { CourseHeroImage } from '../components/course-hero-image'
 import { CourseReviewsSection } from '../components/reviews/course-reviews-section'
-import { fetchPublicCourseReviews, type ReviewsListResponse } from '../lib/course-reviews-api'
+import { type ReviewsListResponse } from '../lib/course-reviews-api'
+import {
+  fetchExploreCourse,
+  fetchExploreCourseReviews,
+} from '../lib/public-explore-api'
+import { formatPrice } from '../lib/public-catalog-api'
 import {
   setAffiliateRefCookie,
   trackAffiliateClick,
 } from '../lib/revenue-share-api'
-import {
-  fetchPublicCatalogCourse,
-  formatPrice,
-  type PublicCatalogCourseDetail,
-} from '../lib/public-catalog-api'
+import type { PublicCatalogCourseDetail } from '../lib/public-catalog-api'
 
 const JSON_LD_ID = 'catalog-course-jsonld'
 
@@ -48,8 +49,8 @@ export default function ExploreCoursePage() {
     let cancelled = false
     setLoading(true)
     Promise.all([
-      fetchPublicCatalogCourse(slug),
-      fetchPublicCourseReviews(slug).catch(() => null),
+      fetchExploreCourse(slug),
+      fetchExploreCourseReviews(slug).catch(() => null),
     ])
       .then(([d, r]) => {
         if (!cancelled) {
@@ -168,7 +169,7 @@ export default function ExploreCoursePage() {
                 {formatPrice(course.priceCents)}
               </span>
               <Link
-                to="/signup"
+                to={`/marketplace/${encodeURIComponent(course.slug)}`}
                 aria-describedby={priceId}
                 className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
               >

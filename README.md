@@ -21,8 +21,8 @@
   <a href="/CODE_OF_CONDUCT.md">
     <img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="Contributor Covenant 2.1" />
   </a>
-  <a href="https://github.com/StudyDrift/lextures/actions/workflows/deploy-demo.yml">
-    <img src="https://github.com/StudyDrift/lextures/actions/workflows/deploy-demo.yml/badge.svg" alt="Deploy Demo GitHub Action status." />
+  <a href="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self.yml">
+    <img src="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self.yml/badge.svg" alt="Deploy Self GitHub Action status." />
   </a>
 </p>
 <p align="center">

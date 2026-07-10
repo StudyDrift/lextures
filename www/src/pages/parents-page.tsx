@@ -15,7 +15,7 @@ export function ParentsPage() {
         title="See your child's grades and due dates in one place"
         lead="When your district enables the parent portal, you get read-only access to each linked child's courses, assignment scores, and upcoming work — without logging in as your student."
         primaryHref="/get-started"
-        primaryLabel="Try the demo"
+        primaryLabel="Try it free"
         secondaryHref="/k-12"
         secondaryLabel="K–12 overview"
       />
@@ -66,7 +66,7 @@ export function ParentsPage() {
       <AudienceCta
         title="Ask your school if Lextures is in use"
         body="Parents access Lextures through their district or school — not a separate consumer signup. If your school runs Lextures, they can provision your parent account and link it to your children."
-        primaryHref={SITE_LINKS.demo}
+        primaryHref={SITE_LINKS.selfLearner}
         primaryLabel="See a sample parent view"
         secondaryHref="/docs"
         secondaryLabel="Read the docs"

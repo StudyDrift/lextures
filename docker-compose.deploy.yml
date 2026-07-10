@@ -2,7 +2,7 @@
 # nginx publishes 80 (HTTP) and 443 (HTTPS for Cloudflare Full); API and DB stay on the Docker network.
 #   Put LEXTURES_SERVER_IMAGE and LEXTURES_WEB_IMAGE in .env (CI does this) or export them before `up`.
 #   docker compose -f docker-compose.deploy.yml --env-file .env up -d
-#   VITE_API_URL should match the public origin (e.g. https://demo.lextures.com behind Cloudflare).
+#   VITE_API_URL should match the public origin (e.g. https://self.lextures.com behind Cloudflare).
 
 services:
   postgres:
@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: studydrift
     volumes:
-      # Host path is created by demo cloud-init on the attached DO block volume (/mnt/lextures-db).
+      # Host path is created by cloud-init on the attached block volume (/mnt/lextures-db).
       - /mnt/lextures-db/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U studydrift -d studydrift"]
@@ -60,7 +60,7 @@ services:
       # First password Global Admin only when signup email matches (see docs/getting-started.md).
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
       RUN_MIGRATIONS: "true"
-      # Demo DB may retain checksums from migrations 120/135 after follow-up PR edits; align before migrate.
+      # Deploy DB may retain checksums from migrations 120/135 after follow-up PR edits; align before migrate.
       MIGRATE_REPAIR_CHECKSUMS: "1"
       PORT: "8080"
       COURSE_FILES_ROOT: /mnt/lextures-db/course-files
@@ -96,7 +96,7 @@ services:
     image: ${LEXTURES_WEB_IMAGE:?LEXTURES_WEB_IMAGE is required}
     restart: unless-stopped
     environment:
-      TLS_CERT_CN: ${TLS_CERT_CN:-demo.lextures.com}
+      TLS_CERT_CN: ${TLS_CERT_CN:-self.lextures.com}
     depends_on:
       server:
         condition: service_healthy

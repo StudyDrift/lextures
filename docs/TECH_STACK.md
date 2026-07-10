@@ -273,7 +273,7 @@ Worth knowing before copying — many are **optional** for a smaller greenfield 
 | **Compliance** | FERPA, GDPR, COPPA, CCPA routes and audit logs |
 | **Mobile** | Android/iOS clients + shared API |
 | **Marketing site** | `www/` separate Vite app |
-| **IaC** | `iac/` Terraform for demo/production clouds |
+| **IaC** | `iac/` Terraform for self/production clouds |
 
 ---
 

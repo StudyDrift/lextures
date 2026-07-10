@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/auth"
 	serverdata "github.com/lextures/lextures/server"
 	"github.com/lextures/lextures/server/internal/config"
@@ -26,34 +27,68 @@ func TestUtilizationPercent(t *testing.T) {
 	}
 }
 
-func TestCheckCanActivate_Unlimited_Pg(t *testing.T) {
+func testPool(t *testing.T) (*pgxpool.Pool, context.Context, context.CancelFunc) {
+	t.Helper()
 	if os.Getenv("DATABASE_URL") == "" {
 		t.Skip("DATABASE_URL")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
 	dsn := os.Getenv("DATABASE_URL")
 	if err := migrate.RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
+		cancel()
 		t.Fatalf("migrate: %v", err)
 	}
 	pool, err := db.NewPool(ctx, dsn)
 	if err != nil {
+		cancel()
 		t.Fatalf("pool: %v", err)
 	}
-	defer pool.Close()
+	return pool, ctx, cancel
+}
 
-	orgID := organization.SeedDefaultOrgID
-	_, _ = pool.Exec(ctx, `DELETE FROM tenant.licenses WHERE org_id = $1`, orgID)
+// isolatedOrg creates a dedicated org so parallel package tests cannot race on
+// SeedDefaultOrgID seat counts / license rows.
+func isolatedOrg(t *testing.T, ctx context.Context, pool *pgxpool.Pool) uuid.UUID {
+	t.Helper()
+	uniq := uuid.NewString()[:8]
+	slug := "licsvc-" + uniq
+	row, err := organization.Create(ctx, pool, "LicenseSvc "+uniq, slug, nil, nil, "", nil)
+	if err != nil {
+		t.Fatalf("org: %v", err)
+	}
+	// Only clear the license row. Leave users/org in place — deleting users mid-suite
+	// races with other packages that snapshot instance-wide user counts.
+	t.Cleanup(func() {
+		_, _ = pool.Exec(context.Background(), `DELETE FROM tenant.licenses WHERE org_id = $1`, row.ID)
+	})
+	return row.ID
+}
+
+func insertLearnerInOrg(t *testing.T, ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, email string) uuid.UUID {
+	t.Helper()
 	ph, err := auth.HashPassword("longpassword0")
 	if err != nil {
 		t.Fatal(err)
 	}
-	em := "seat-unlim-" + time.Now().Format("150405") + "@e.com"
-	row, err := user.InsertUser(ctx, pool, em, ph, nil)
+	row, err := user.InsertUser(ctx, pool, email, ph, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	uid := uuid.MustParse(row.ID)
+	if _, err := pool.Exec(ctx, `UPDATE "user".users SET org_id = $1 WHERE id = $2`, orgID, uid); err != nil {
+		t.Fatalf("move user to org: %v", err)
+	}
+	return uid
+}
+
+func TestCheckCanActivate_Unlimited_Pg(t *testing.T) {
+	pool, ctx, cancel := testPool(t)
+	defer cancel()
+	defer pool.Close()
+
+	orgID := isolatedOrg(t, ctx, pool)
+	// No license row → Effective defaults to unlimited.
+	uid := insertLearnerInOrg(t, ctx, pool, orgID, "seat-unlim-"+uuid.NewString()[:8]+"@e.com")
 
 	svc := New(pool, config.Config{SeatManagementEnabled: true})
 	if err := svc.CheckCanActivate(ctx, uid, orgID); err != nil {
@@ -62,31 +97,13 @@ func TestCheckCanActivate_Unlimited_Pg(t *testing.T) {
 }
 
 func TestCheckCanActivate_AtLimit_Pg(t *testing.T) {
-	if os.Getenv("DATABASE_URL") == "" {
-		t.Skip("DATABASE_URL")
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	pool, ctx, cancel := testPool(t)
 	defer cancel()
-	dsn := os.Getenv("DATABASE_URL")
-	if err := migrate.RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
-		t.Fatalf("migrate: %v", err)
-	}
-	pool, err := db.NewPool(ctx, dsn)
-	if err != nil {
-		t.Fatalf("pool: %v", err)
-	}
 	defer pool.Close()
 
-	orgID := organization.SeedDefaultOrgID
-	ph, err := auth.HashPassword("longpassword0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	em1 := "seat-a-" + time.Now().Format("150405") + "@e.com"
-	u1, err := user.InsertUser(ctx, pool, em1, ph, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	orgID := isolatedOrg(t, ctx, pool)
+	_ = insertLearnerInOrg(t, ctx, pool, orgID, "seat-a-"+uuid.NewString()[:8]+"@e.com")
+
 	if err := licenserepo.RefreshUsedSeats(ctx, pool, orgID); err != nil {
 		t.Fatal(err)
 	}
@@ -94,19 +111,15 @@ func TestCheckCanActivate_AtLimit_Pg(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if used < 1 {
+		t.Fatalf("expected at least one learner seat, got %d", used)
+	}
 	max := used
-	_, err = licenserepo.Upsert(ctx, pool, orgID, licenserepo.Patch{MaxSeats: &max, Tier: strPtr("starter")})
-	if err != nil {
+	if _, err := licenserepo.Upsert(ctx, pool, orgID, licenserepo.Patch{MaxSeats: &max, Tier: strPtr("starter")}); err != nil {
 		t.Fatal(err)
 	}
 
-	em2 := "seat-b-" + time.Now().Format("150405") + "@e.com"
-	u2, err := user.InsertUser(ctx, pool, em2, ph, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	uid2 := uuid.MustParse(u2.ID)
-	_ = u1
+	uid2 := insertLearnerInOrg(t, ctx, pool, orgID, "seat-b-"+uuid.NewString()[:8]+"@e.com")
 
 	svc := New(pool, config.Config{SeatManagementEnabled: true})
 	if err := svc.CheckCanActivate(ctx, uid2, orgID); err != ErrSeatLimitReached {

@@ -8,8 +8,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+// rowQuerier is implemented by *pgxpool.Pool and pgx.Tx.
+type rowQuerier interface {
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
 
 
 
@@ -66,8 +72,12 @@ func normalizePagination(page, perPage int) (int, int) {
 
 // FetchDashboardStats returns aggregate people metrics for the admin dashboard.
 func FetchDashboardStats(ctx context.Context, pool *pgxpool.Pool) (DashboardStats, error) {
+	return fetchDashboardStats(ctx, pool)
+}
+
+func fetchDashboardStats(ctx context.Context, q rowQuerier) (DashboardStats, error) {
 	var stats DashboardStats
-	err := pool.QueryRow(ctx, `
+	err := q.QueryRow(ctx, `
 SELECT
     COUNT(*)::bigint AS total_accounts,
     COUNT(*) FILTER (
@@ -91,7 +101,7 @@ WHERE u.account_type <> 'system'
 	if err != nil {
 		return DashboardStats{}, err
 	}
-	err = pool.QueryRow(ctx, `
+	err = q.QueryRow(ctx, `
 SELECT COUNT(DISTINCT ua.user_id)::bigint
 FROM "user".user_audit ua
 INNER JOIN "user".users u ON u.id = ua.user_id

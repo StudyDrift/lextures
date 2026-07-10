@@ -35,7 +35,6 @@ Each finding below has its own file with a full problem statement, exact file/li
 | [SEC-17](SEC-17-bearer-token-hashing.md) | Medium | SCIM / OneRoster bearer tokens stored as unsalted SHA-256 | Server / provisioning |
 | [SEC-18](SEC-18-katex-dompurify.md) | Medium | KaTeX HTML rendered via `dangerouslySetInnerHTML` without sanitization | Web client |
 | [SEC-19](SEC-19-dev-db-credentials.md) | Medium | Hardcoded dev DB credentials + host-exposed Postgres port | Infra |
-| [SEC-20](SEC-20-demo-ssh-and-cloudflare-bypass.md) | Low | Demo droplet: SSH open to world + Cloudflare origin bypass | Infra |
 | [SEC-21](SEC-21-hardcoded-debug-path.md) | Low | Hardcoded developer-machine debug path in shipped binary | Server |
 | [SEC-22](SEC-22-sso-jit-teacher-role.md) | Low | SSO JIT provisioning trusts self-asserted Teacher role | Server / SSO |
 | [SEC-23](SEC-23-login-timing-oracle.md) | Low | Login timing oracle enables user enumeration | Server / auth |
@@ -50,7 +49,7 @@ Each finding below has its own file with a full problem statement, exact file/li
 
 **Next sprint:** SEC-08, SEC-10, SEC-11, SEC-12, SEC-15, SEC-16, SEC-17, SEC-18.
 
-**Following quarter:** SEC-13, SEC-14, SEC-19, SEC-20–SEC-27 as capacity allows.
+**Following quarter:** SEC-13, SEC-14, SEC-19, SEC-21–SEC-27 as capacity allows.
 
 ## What was checked and found acceptable
 

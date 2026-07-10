@@ -58,9 +58,9 @@ export function HigherEdPage() {
       <AudienceHero
         eyebrow="Higher education"
         title="Assessment and records that hold up under review"
-        lead="For registrars, deans, and faculty running multi-section courses: adaptive quizzing, LTI integration with major LMS platforms, enrollment states, and grade audit logs — self-hosted on Postgres or on the hosted demo."
+        lead="For registrars, deans, and faculty running multi-section courses: adaptive quizzing, LTI integration with major LMS platforms, enrollment states, and grade audit logs — self-hosted on Postgres or on the hosted app at self.lextures.com."
         primaryHref="/get-started"
-        primaryLabel="Try the demo"
+        primaryLabel="Try it free"
         secondaryHref={SITE_LINKS.github}
         secondaryLabel="Browse the source"
       />
@@ -97,10 +97,10 @@ export function HigherEdPage() {
       />
 
       <AudienceCta
-        title="Walk the flows on the live demo"
-        body="The hosted demo includes instructor and student views — gradebook, adaptive quizzes, blueprint sync, and LTI configuration — so your team can evaluate before deploying on your own infrastructure."
-        primaryHref={SITE_LINKS.demo}
-        primaryLabel="Open demo.lextures.com"
+        title="Walk the flows on the live app"
+        body="The hosted app at self.lextures.com includes instructor and student views — gradebook, adaptive quizzes, blueprint sync, and LTI configuration — so your team can evaluate before deploying on your own infrastructure."
+        primaryHref={SITE_LINKS.selfLearner}
+        primaryLabel="Open self.lextures.com"
         secondaryHref="/pricing"
         secondaryLabel="Hosted vs self-host pricing"
       />

@@ -1,5 +1,5 @@
 # Run tests, lint, and builds for the Go API, browser clients, and related checks on pull requests targeting main.
-# Does not run on direct pushes to main (see deploy-demo.yml for that path).
+# Does not run on direct pushes to main (see deploy-self.yml for that path).
 
 name: CI
 

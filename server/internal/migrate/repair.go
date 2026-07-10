@@ -22,7 +22,7 @@ func migrateRepairChecksumsEnabled() bool {
 }
 
 // demoChecksumRepairMigrations lists versions whose SQL files may legitimately drift
-// from what the demo droplet (or a persistent dev DB) recorded (abbreviated deploys,
+// from what a deploy droplet (or a persistent dev DB) recorded (abbreviated deploys,
 // follow-up PR edits) while remaining idempotent (IF NOT EXISTS / ON CONFLICT DO NOTHING).
 // When MIGRATE_REPAIR_CHECKSUMS is enabled (docker-compose.yml and docker-compose.deploy.yml),
 // stored checksums are updated to match the embedded files so migrate can proceed.

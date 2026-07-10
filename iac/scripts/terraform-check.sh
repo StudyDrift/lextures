@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Validate Terraform formatting and configuration for iac/demo and iac/self.
+# Validate Terraform formatting and configuration for iac/self.
 # Used locally (`make iac-check`) and in CI. Does not require cloud credentials.
 
 set -euo pipefail
@@ -23,7 +23,6 @@ check_stack() {
   (cd "$dir" && "$TF" validate -no-color)
 }
 
-check_stack "$ROOT/iac/demo"
 check_stack "$ROOT/iac/self"
 
 echo "iac-check: ok"
