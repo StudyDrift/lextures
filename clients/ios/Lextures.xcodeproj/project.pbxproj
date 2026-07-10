@@ -168,6 +168,7 @@
 		592927191A54478690F32CB4 /* OfficeHoursView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4BEAB081354D58BD3E18E9 /* OfficeHoursView.swift */; };
 		59813AE27D4F4796A50630FE /* CourseCreateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F18223EBA4F48DE9B74D0DC /* CourseCreateView.swift */; };
 		59E50B34C02B42E49D5B3962 /* CatalogLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2282D8E6134199A0B79214 /* CatalogLogic.swift */; };
+		E7C8D9A01B2C4D5E6F708192 /* CurrencyExponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C8D9A02B2C4D5E6F708192 /* CurrencyExponent.swift */; };
 		AA6AA07D71CA4A6E87F51C5A /* MarketplaceLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83C7F7EEE94465C9047B88E /* MarketplaceLogic.swift */; };
 		5A9AD55FD1DD4D71A82448CA /* SearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D85ED7D6E22E433A8971F816 /* SearchTests.swift */; };
 		5B2CCC705F2F482FA94759B4 /* LMSAPIReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2920C390D36E424AB6764613 /* LMSAPIReader.swift */; };
@@ -501,6 +502,13 @@
 		FF053C7EB1A141B8928E9898 /* WhatsWorkingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91C4D5C0254647239A864716 /* WhatsWorkingView.swift */; };
 		FF138435770349F390E0B875 /* I18nTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9D8644720F4CD8BD9C0FF6 /* I18nTests.swift */; };
 		FF1CA11AB550414AB51EB94B /* LMSAPICourseAccessibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78AEDC7EEBA648CDB2C28BE9 /* LMSAPICourseAccessibility.swift */; };
+
+		8BFB01C2D3E4F5061728394 /* LMSFeatureModelsFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFB01D3E4F5061728394A5 /* LMSFeatureModelsFeedback.swift */; };
+		8BFB02C2D3E4F5061728394 /* LMSAPIFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFB02D3E4F5061728394A5 /* LMSAPIFeedback.swift */; };
+		8BFB03C2D3E4F5061728394 /* FeedbackLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFB03D3E4F5061728394A5 /* FeedbackLogic.swift */; };
+		8BFB04C2D3E4F5061728394 /* ShareFeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFB04D3E4F5061728394A5 /* ShareFeedbackView.swift */; };
+		8BFB05C2D3E4F5061728394 /* ShareFeedbackEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFB05D3E4F5061728394A5 /* ShareFeedbackEntryCard.swift */; };
+		8BFB06C2D3E4F5061728394 /* FeedbackLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFB06D3E4F5061728394A5 /* FeedbackLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -594,6 +602,7 @@
 		2BC6E58AE4394A498ABC04C9 /* OutboxStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutboxStore.swift; sourceTree = "<group>"; };
 		2C0128E8C38F4A41982AA031 /* CourseGradingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseGradingSettingsView.swift; sourceTree = "<group>"; };
 		2C2282D8E6134199A0B79214 /* CatalogLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogLogic.swift; sourceTree = "<group>"; };
+		E7C8D9A02B2C4D5E6F708192 /* CurrencyExponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyExponent.swift; sourceTree = "<group>"; };
 		C83C7F7EEE94465C9047B88E /* MarketplaceLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketplaceLogic.swift; sourceTree = "<group>"; };
 		2C84BE3F768E4EAA9A507885 /* LearnerProfileEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnerProfileEntryCard.swift; sourceTree = "<group>"; };
 		2CCFAC5A258C41EC9569FBBE /* CoursePeopleLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleLogicTests.swift; sourceTree = "<group>"; };
@@ -1012,6 +1021,13 @@
 		FF0402784D154120BE00574F /* MobileIaPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileIaPreferences.swift; sourceTree = "<group>"; };
 		FF04CEDFBEE249DBA47EEB0B /* LMSFeatureModelsIntroCourse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsIntroCourse.swift; sourceTree = "<group>"; };
 		FFAF6471BACC4CE4A22E27F6 /* MobileProfileDepthPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileProfileDepthPreferences.swift; sourceTree = "<group>"; };
+
+		8BFB01D3E4F5061728394A5 /* LMSFeatureModelsFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsFeedback.swift; sourceTree = "<group>"; };
+		8BFB02D3E4F5061728394A5 /* LMSAPIFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIFeedback.swift; sourceTree = "<group>"; };
+		8BFB03D3E4F5061728394A5 /* FeedbackLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackLogic.swift; sourceTree = "<group>"; };
+		8BFB04D3E4F5061728394A5 /* ShareFeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareFeedbackView.swift; sourceTree = "<group>"; };
+		8BFB05D3E4F5061728394A5 /* ShareFeedbackEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareFeedbackEntryCard.swift; sourceTree = "<group>"; };
+		8BFB06D3E4F5061728394A5 /* FeedbackLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1035,6 +1051,7 @@
 		029927E4F879434FA36100DE /* Profile */ = {
 			isa = PBXGroup;
 			children = (
+				8BFB05D3E4F5061728394A5 /* ShareFeedbackEntryCard.swift */,
 				8B735D3E4F5061728394A5 /* ArchivedCoursesAdminEntryCard.swift */,
 				96CC6039A7C74DD087D8CD0A /* BiometricLockView.swift */,
 				3534D71B71614AF598442F72 /* DeviceSessionsView.swift */,
@@ -1397,6 +1414,7 @@
 		5FD4367FBF4B4225BB2007EF /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8BFB07FB015C6D7E8F901234567 /* Feedback */,
 				8B72SET015C6D7E8F901234567 /* Settings */,
 				1DBE498B95AA437A9984CD24 /* Advising */,
 				8364F89E6A134BD2A501EB94 /* Assignments */,
@@ -1603,6 +1621,7 @@
 		8D3F9FB222A34107B54468F2 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8BFB06D3E4F5061728394A5 /* FeedbackLogicTests.swift */,
 				8B736D3E4F5061728394A5 /* ArchivedCoursesAdminLogicTests.swift */,
 				D264344C703A4CFD911FAE21 /* AccessibilitySupportTests.swift */,
 				4228BF7684D94CBA86E43539 /* AccountIntegrationsLogicTests.swift */,
@@ -1883,6 +1902,9 @@
 		D7AC7435149B4B17A073AD6F /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8BFB03D3E4F5061728394A5 /* FeedbackLogic.swift */,
+				8BFB02D3E4F5061728394A5 /* LMSAPIFeedback.swift */,
+				8BFB01D3E4F5061728394A5 /* LMSFeatureModelsFeedback.swift */,
 				8B733D3E4F5061728394A5 /* ArchivedCoursesAdminLogic.swift */,
 				8B732D3E4F5061728394A5 /* LMSAPIAdmin.swift */,
 				8B731D3E4F5061728394A5 /* LMSFeatureModelsArchivedCoursesAdmin.swift */,
@@ -1894,6 +1916,7 @@
 				197C3FDB8C5E410A9330517E /* BehaviorLogic.swift */,
 				0EEA7E6C239A45A1AEC0C6E9 /* BillingLogic.swift */,
 				2C2282D8E6134199A0B79214 /* CatalogLogic.swift */,
+				E7C8D9A02B2C4D5E6F708192 /* CurrencyExponent.swift */,
 				C83C7F7EEE94465C9047B88E /* MarketplaceLogic.swift */,
 				0FA5301A13EE4510A4472DEC /* ConferenceLogic.swift */,
 				4224300C6D2742CDA0A2D4B8 /* CourseAccessibilityReviewLogic.swift */,
@@ -2104,6 +2127,15 @@
 			path = Offline;
 			sourceTree = "<group>";
 		};
+
+		8BFB07FB015C6D7E8F901234567 /* Feedback */ = {
+			isa = PBXGroup;
+			children = (
+				8BFB04D3E4F5061728394A5 /* ShareFeedbackView.swift */,
+			);
+			path = Feedback;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -2201,6 +2233,7 @@
 				5DA35E801776491AB26C20B0 /* AuthCallbackParserTests.swift in Sources */,
 				FD104670F232412EB6D4A149 /* BehaviorLogicTests.swift in Sources */,
 				D0BB160C68E94D16823BCE26 /* BillingLogicTests.swift in Sources */,
+				8BFB06C2D3E4F5061728394 /* FeedbackLogicTests.swift in Sources */,
 				D2C5CF2072DE46ECB20FF44F /* BiometricGateTests.swift in Sources */,
 				6AA02BB8F63D47869FC3B5A4 /* CatalogLogicTests.swift in Sources */,
 				D0A9FAECDAC84B0BAB6A3362 /* MarketplaceLogicTests.swift in Sources */,
@@ -2303,6 +2336,7 @@
 				A6439075EF5041B6809181DD /* BehaviorLogic.swift in Sources */,
 				2F895E53D36245EDA94484EA /* BillingLogic.swift in Sources */,
 				59E50B34C02B42E49D5B3962 /* CatalogLogic.swift in Sources */,
+				E7C8D9A01B2C4D5E6F708192 /* CurrencyExponent.swift in Sources */,
 				AA6AA07D71CA4A6E87F51C5A /* MarketplaceLogic.swift in Sources */,
 				72667AEC191940AF90236F94 /* ConferenceLogic.swift in Sources */,
 				C3922043B09E4B889C7DF6B8 /* CourseAccessibilityReviewLogic.swift in Sources */,
@@ -2645,6 +2679,11 @@
 				9BE964C269B0408DA4C85132 /* DeviceSessionsView.swift in Sources */,
 				00B7B462ADE045FAA3A58A34 /* EditProfileView.swift in Sources */,
 				76F7286A8C96465A89B772D3 /* IntegrationsEntryCard.swift in Sources */,
+				8BFB01C2D3E4F5061728394 /* LMSFeatureModelsFeedback.swift in Sources */,
+				8BFB02C2D3E4F5061728394 /* LMSAPIFeedback.swift in Sources */,
+				8BFB03C2D3E4F5061728394 /* FeedbackLogic.swift in Sources */,
+				8BFB04C2D3E4F5061728394 /* ShareFeedbackView.swift in Sources */,
+				8BFB05C2D3E4F5061728394 /* ShareFeedbackEntryCard.swift in Sources */,
 				4A6D178906354F2A9A6C7DAA /* IntegrationsView.swift in Sources */,
 				36B9D09F3DFF419AB62C83C7 /* LearnerProfileEntryCard.swift in Sources */,
 				161A6A79CBE64A6AB5C73420 /* MyAccommodationsView.swift in Sources */,

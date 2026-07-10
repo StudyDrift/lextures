@@ -8,6 +8,7 @@ import (
 
 	"github.com/jung-kurt/gofpdf"
 
+	"github.com/lextures/lextures/server/internal/currency"
 	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 )
 
@@ -191,7 +192,6 @@ func InvoicePDFFromEntitlement(ent *repoBilling.EntitlementWithTax, inv *repoBil
 	}
 }
 
-func formatCurrency(cents int, currency string) string {
-	sym := strings.ToUpper(currency)
-	return fmt.Sprintf("%s %.2f", sym, float64(cents)/100)
+func formatCurrency(cents int, currencyCode string) string {
+	return currency.FormatAmount(cents, currencyCode)
 }

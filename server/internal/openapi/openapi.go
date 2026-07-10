@@ -971,6 +971,110 @@ const spec = `{
         }
       }
     },
+    "/api/v1/feedback": {
+      "post": {
+        "tags": ["me"],
+        "summary": "Submit in-app product feedback (plan FB0)",
+        "description": "Creates one feedback.submissions row for the authenticated user. Requires ffFeedback enabled.",
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["message", "source"],
+                "properties": {
+                  "message": { "type": "string", "maxLength": 5000 },
+                  "category": { "type": "string", "enum": ["bug", "idea", "question", "praise", "other"] },
+                  "source": { "type": "string", "enum": ["web", "ios", "android"] },
+                  "app_version": { "type": "string" },
+                  "context": {
+                    "type": "object",
+                    "properties": {
+                      "route": { "type": "string" },
+                      "locale": { "type": "string" },
+                      "viewport": { "type": "string" }
+                    }
+                  },
+                  "idempotency_key": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "{ id, created_at }" },
+          "400": { "description": "Validation error" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Feature disabled" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/admin/feedback": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "List product feedback submissions (plan FB0)",
+        "description": "Paginated, filterable feedback queue. Requires global:app:rbac:manage.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "category", "in": "query", "schema": { "type": "string" } },
+          { "name": "source", "in": "query", "schema": { "type": "string" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 25, "maximum": 100 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ items, next_cursor?, total? }" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/admin/feedback/{id}": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Get product feedback detail (plan FB0)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } } ],
+        "responses": {
+          "200": { "description": "Full feedback record with submitter context" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "patch": {
+        "tags": ["admin"],
+        "summary": "Update product feedback status or admin note (plan FB0)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } } ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "enum": ["new", "triaged", "in_progress", "resolved", "wont_fix", "archived"] },
+                  "admin_note": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated feedback detail" },
+          "400": { "description": "Invalid input" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
     "/api/v1/settings/roles": {
       "get": {
         "tags": ["settings"],

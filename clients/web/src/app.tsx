@@ -217,6 +217,7 @@ export default function App() {
             <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
             <Route path="/settings/ai" element={<Navigate to="/settings/ai/models" replace />} />
             <Route path="/settings/ai/:aiSection" element={<Pages.Settings />} />
+            <Route path="/settings/feedback/:id" element={<Pages.Settings />} />
             <Route path="/settings/:tab" element={<Pages.Settings />} />
           </Route>
         </Route>

@@ -15,6 +15,8 @@ struct ProfileView: View {
     @State private var notificationPrefsNav = false
     @State private var editProfileNav = false
     @State private var learnerProfileNav = false
+    @State private var showShareFeedback = false
+    @State private var feedbackSuccessMessage: String?
     @State private var localeError: String?
 
     var body: some View {
@@ -37,6 +39,16 @@ struct ProfileView: View {
                         ArchivedCoursesAdminEntryCard()
                         ProfileDepthCards()
                         LearnerProfileEntryCard()
+                        ShareFeedbackEntryCard {
+                            showShareFeedback = true
+                        }
+                        if let feedbackSuccessMessage {
+                            Text(feedbackSuccessMessage)
+                                .font(.footnote.weight(.medium))
+                                .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .accessibilityLabel(feedbackSuccessMessage)
+                        }
                         ProfileOfflineStorageCard(
                             confirmingClearCache: $confirmingClearCache,
                             confirmingClearSearchHistory: $confirmingClearSearchHistory
@@ -131,6 +143,11 @@ struct ProfileView: View {
             }
             .navigationDestination(isPresented: $learnerProfileNav) {
                 LearnerProfileView()
+            }
+            .sheet(isPresented: $showShareFeedback) {
+                ShareFeedbackView(isPresented: $showShareFeedback) {
+                    feedbackSuccessMessage = L.text("mobile.feedback.success")
+                }
             }
             .onAppear {
                 openPendingMoreDestinationIfNeeded()

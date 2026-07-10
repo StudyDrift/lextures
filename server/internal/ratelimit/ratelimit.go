@@ -98,6 +98,11 @@ func (l *Limiter) IPKey(ip, group string) string {
 	return "rl:ip:" + l.hashIP(ip) + ":" + group
 }
 
+// UserKey builds the Redis key for a per-user limit (rl:user:{id}:{group}).
+func (l *Limiter) UserKey(userID, group string) string {
+	return "rl:user:" + userID + ":" + group
+}
+
 // TokenKey builds the Redis key for a per-token limit (rl:token:{id}:api).
 func (l *Limiter) TokenKey(tokenID, group string) string {
 	return "rl:token:" + tokenID + ":" + group

@@ -53,7 +53,7 @@ export function CourseMarketplaceSettingsSection({
       const data = await fetchCourseCatalogListing(courseCode)
       setListing(data)
       setMarketplaceListed(data.marketplaceListed)
-      setAmount(priceCentsToMajorUnits(data.priceCents))
+      setAmount(priceCentsToMajorUnits(data.priceCents, data.priceCurrency || 'usd'))
       setCurrency(data.priceCurrency || 'usd')
       setAmountError(null)
     } catch (e) {
@@ -69,8 +69,8 @@ export function CourseMarketplaceSettingsSection({
 
   const priceCentsDraft = useMemo(() => {
     if (!amount.trim()) return 0
-    return majorUnitsToPriceCents(amount) ?? listing?.priceCents ?? 0
-  }, [amount, listing?.priceCents])
+    return majorUnitsToPriceCents(amount, currency) ?? listing?.priceCents ?? 0
+  }, [amount, currency, listing?.priceCents])
 
   const previewPriceLabel = formatMarketplacePrice(
     priceCentsDraft,
@@ -81,7 +81,7 @@ export function CourseMarketplaceSettingsSection({
 
   const isDirty = useMemo(() => {
     if (!listing) return false
-    const nextCents = amount.trim() ? (majorUnitsToPriceCents(amount) ?? listing.priceCents) : 0
+    const nextCents = amount.trim() ? (majorUnitsToPriceCents(amount, currency) ?? listing.priceCents) : 0
     return (
       marketplaceListed !== listing.marketplaceListed ||
       nextCents !== listing.priceCents ||
@@ -91,7 +91,7 @@ export function CourseMarketplaceSettingsSection({
 
   async function persistListing() {
     if (!listing) return
-    const nextCents = amount.trim() ? (majorUnitsToPriceCents(amount) ?? listing.priceCents) : 0
+    const nextCents = amount.trim() ? (majorUnitsToPriceCents(amount, currency) ?? listing.priceCents) : 0
     const updated = await putCourseCatalogListing(
       courseCode,
       {
@@ -103,7 +103,7 @@ export function CourseMarketplaceSettingsSection({
     )
     setListing(updated)
     setMarketplaceListed(updated.marketplaceListed)
-    setAmount(priceCentsToMajorUnits(updated.priceCents))
+    setAmount(priceCentsToMajorUnits(updated.priceCents, updated.priceCurrency || 'usd'))
     setCurrency(updated.priceCurrency || 'usd')
     toastSaveOk(t('course.settings.marketplace.saved'))
   }
@@ -112,14 +112,14 @@ export function CourseMarketplaceSettingsSection({
     e.preventDefault()
     if (!listing || !canEdit) return
 
-    const validationError = validateMarketplaceAmount(amount)
+    const validationError = validateMarketplaceAmount(amount, currency)
     if (validationError) {
       setAmountError(validationError)
       return
     }
     setAmountError(null)
 
-    const nextCents = amount.trim() ? (majorUnitsToPriceCents(amount) ?? 0) : 0
+    const nextCents = amount.trim() ? (majorUnitsToPriceCents(amount, currency) ?? 0) : 0
     const priceChanged = nextCents !== listing.priceCents || currency !== (listing.priceCurrency || 'usd')
     if (priceChanged && listing.activePurchaseCount > 0) {
       const ok = await confirm({

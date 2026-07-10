@@ -146,6 +146,7 @@ type Row struct {
 	FFSelfPacedMode                 *bool
 	FFPublicCatalog                 *bool
 	FFCourseMarketplace             *bool
+	FFFeedback                      *bool
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFPaymentsEnabled               *bool
@@ -328,6 +329,7 @@ type Write struct {
 	FFSelfPacedMode                 *bool
 	FFPublicCatalog                 *bool
 	FFCourseMarketplace             *bool
+	FFFeedback                      *bool
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFPaymentsEnabled               *bool
@@ -507,6 +509,7 @@ SELECT
 	ff_self_paced_mode,
 	ff_public_catalog,
 	ff_course_marketplace,
+	ff_feedback,
 	ff_public_api,
 	ff_stripe_billing,
 	ff_payments_enabled,
@@ -680,6 +683,7 @@ WHERE id = 1
 		&r.FFSelfPacedMode,
 		&r.FFPublicCatalog,
 		&r.FFCourseMarketplace,
+		&r.FFFeedback,
 		&r.FFPublicAPI,
 		&r.FFStripeBilling,
 		&r.FFPaymentsEnabled,
@@ -945,6 +949,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_self_paced_mode,
 	ff_public_catalog,
 	ff_course_marketplace,
+	ff_feedback,
 	updated_at
 ) VALUES (
 	1,
@@ -954,7 +959,7 @@ INSERT INTO settings.platform_app_settings (
 	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114, $115, $116, $117, $118, $119, $120,
 	$121, $122, $123, $124, $125, $126, $127, $128, $129, $130, $131, $132, $133, $134, $135, $136, $137, $138, $139, $140,
 	$141, $142, $143, $144, $145, $146, $147, $148, $149, $150, $151, $152, $153, $154, $155, $156, $157, $158, $159, $160,
-	$161, $162, $163, $164, $165, $166, $167, $168,
+	$161, $162, $163, $164, $165, $166, $167, $168, $169,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -1119,6 +1124,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_self_paced_mode = COALESCE(EXCLUDED.ff_self_paced_mode, settings.platform_app_settings.ff_self_paced_mode),
 	ff_public_catalog = COALESCE(EXCLUDED.ff_public_catalog, settings.platform_app_settings.ff_public_catalog),
 	ff_course_marketplace = COALESCE(EXCLUDED.ff_course_marketplace, settings.platform_app_settings.ff_course_marketplace),
+	ff_feedback = COALESCE(EXCLUDED.ff_feedback, settings.platform_app_settings.ff_feedback),
 	ff_public_api = COALESCE(EXCLUDED.ff_public_api, settings.platform_app_settings.ff_public_api),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
@@ -1297,6 +1303,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFSelfPacedMode,
 		w.FFPublicCatalog,
 		w.FFCourseMarketplace,
+		w.FFFeedback,
 	)
 	if err != nil {
 		return nil, err

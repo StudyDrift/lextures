@@ -41,6 +41,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
@@ -117,6 +118,8 @@ fun ProfileTab(
     var showResearchStudies by remember { mutableStateOf(false) }
     var showLearnerProfile by remember { mutableStateOf(false) }
     var showIntegrations by remember { mutableStateOf(false) }
+    var showShareFeedback by remember { mutableStateOf(false) }
+    var feedbackSuccessMessage by remember { mutableStateOf<String?>(null) }
     var showArchivedCoursesAdmin by remember { mutableStateOf(false) }
     var personalDetailsVisible by remember { mutableStateOf(false) }
     var researchVisible by remember { mutableStateOf(false) }
@@ -144,6 +147,7 @@ fun ProfileTab(
     val biometricGate = remember { BiometricGate.get(context) }
     val offline = remember { OfflineService.get(context) }
     val pendingCount by offline.pendingCount.collectAsState()
+    val isOnline by offline.networkMonitor.isOnline.collectAsState()
     val storageBytes by offline.storageBytes.collectAsState()
     val outboxItems by offline.outboxItems.collectAsState()
     val scope = rememberCoroutineScope()
@@ -796,6 +800,28 @@ fun ProfileTab(
             }
         }
 
+        if (com.lextures.android.core.lms.FeedbackLogic.feedbackEnabled(shell.platformFeatures)) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Chat,
+                    title = L.text(R.string.mobile_feedback_entry),
+                    subtitle = L.text(R.string.mobile_feedback_entrySubtitle),
+                    onClick = { showShareFeedback = true },
+                )
+            }
+        }
+
+        feedbackSuccessMessage?.let { message ->
+            LmsCard {
+                Text(
+                    text = message,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = accentColor(),
+                )
+            }
+        }
+
         if (pendingCount > 0) {
             LmsCard {
                 Text(text = "Pending sync", style = LexturesType.display(17), color = textPrimary())
@@ -1290,6 +1316,18 @@ fun ProfileTab(
             },
             dismissButton = {
                 TextButton(onClick = { confirmingClearSearchHistory = false }) { Text("Cancel") }
+            },
+        )
+    }
+
+    if (showShareFeedback) {
+        com.lextures.android.features.feedback.ShareFeedbackSheet(
+            session = session,
+            localePrefs = localePreferences,
+            isOnline = isOnline,
+            onDismiss = { showShareFeedback = false },
+            onSuccess = {
+                feedbackSuccessMessage = L.text(context, localePreferences, R.string.mobile_feedback_success)
             },
         )
     }

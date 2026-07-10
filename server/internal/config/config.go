@@ -454,6 +454,9 @@ type Config struct {
 	// Distinct from FFMarketplace (plugin/OAuth app marketplace, plan 16.9). Default ON.
 	// Managed in Settings → Global platform (not process env).
 	FFCourseMarketplace bool
+	// FFFeedback enables in-app product feedback submission (plan FB0). Default ON.
+	// Managed in Settings → Global platform (not process env).
+	FFFeedback bool
 	// FFPublicAPI enables the versioned public REST API for third-party integrations (plan 16.1).
 	// Managed in Settings → Global platform (not process env).
 	FFPublicAPI bool

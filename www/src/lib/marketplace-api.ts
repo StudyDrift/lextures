@@ -167,19 +167,28 @@ export async function fetchPublicMarketplaceReviews(
   }
 }
 
+const ZERO_DECIMAL_CURRENCIES = new Set(['jpy'])
+
+function minorUnitFactor(currency: string): number {
+  return ZERO_DECIMAL_CURRENCIES.has(currency.toLowerCase().trim()) ? 1 : 100
+}
+
 export function formatMarketplacePrice(
   priceCents: number,
   currency: string,
   freeLabel = 'Free',
 ): string {
   if (priceCents <= 0) return freeLabel
+  const major = priceCents / minorUnitFactor(currency)
   try {
     return new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency: currency.toUpperCase(),
-    }).format(priceCents / 100)
+    }).format(major)
   } catch {
-    return `${currency.toUpperCase()} ${(priceCents / 100).toFixed(2)}`
+    return ZERO_DECIMAL_CURRENCIES.has(currency.toLowerCase())
+      ? `${currency.toUpperCase()} ${Math.round(major)}`
+      : `${currency.toUpperCase()} ${major.toFixed(2)}`
   }
 }
 

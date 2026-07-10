@@ -25,11 +25,11 @@ enum PathsLogic {
     }
 
     static func formatPrice(cents: Int, currency: String = "USD") -> String {
-        let amount = Decimal(cents) / 100
+        let major = CurrencyExponent.minorUnitsToMajorUnits(cents, currency: currency)
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.currencyCode = currency
-        return formatter.string(from: amount as NSDecimalNumber) ?? "\(cents)"
+        return formatter.string(from: NSNumber(value: major)) ?? "\(cents)"
     }
 
     static func formatDuration(minutes: Int) -> String {

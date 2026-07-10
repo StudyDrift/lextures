@@ -71,4 +71,5 @@ struct PlatformFeatures: Decodable {
     var ffCalendarFeeds: Bool?
     var ffMobileSettingsIntegrations: Bool?
     var ffMobileAdminSettings: Bool?
+    var ffFeedback: Bool?
 }

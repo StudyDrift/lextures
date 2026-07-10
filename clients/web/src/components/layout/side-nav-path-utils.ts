@@ -25,11 +25,13 @@ export type SettingsNavView =
   | 'people'
   | 'courses'
   | 'intro-course'
+  | 'feedback'
 
 export function settingsViewFromPathname(pathname: string): SettingsNavView {
   if (pathname.startsWith('/settings/ai/system-prompts')) return 'ai-prompts'
   if (pathname.startsWith('/settings/ai/reports')) return 'ai-reports'
   if (pathname.startsWith('/settings/ai/models')) return 'ai-models'
+  if (pathname.startsWith('/settings/feedback')) return 'feedback'
   const m = matchPath({ path: '/settings/:tab', end: true }, pathname)
   const raw = m?.params.tab
   if (
@@ -53,7 +55,8 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
     raw === 'archive' ||
     raw === 'people' ||
     raw === 'courses' ||
-    raw === 'intro-course'
+    raw === 'intro-course' ||
+    raw === 'feedback'
   )
     return raw
   return 'account'

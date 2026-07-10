@@ -117,6 +117,7 @@ export type PlatformFeatures = {
   aiDisclosureEnabled: boolean
   openRouterConfigured: boolean
   ragNotebookEnabled: boolean
+  ffFeedback: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -224,6 +225,7 @@ const defaultFeatures: PlatformFeatures = {
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
   ragNotebookEnabled: false,
+  ffFeedback: true,
   loading: true,
   refresh: async () => {},
 }
@@ -330,6 +332,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
   ragNotebookEnabled: false,
+  ffFeedback: true,
   })
   const [loading, setLoading] = useState(true)
 
@@ -443,6 +446,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           aiDisclosureEnabled: data.aiDisclosureEnabled === true,
           openRouterConfigured: data.openRouterConfigured === true,
           ragNotebookEnabled: data.ragNotebookEnabled === true,
+          ffFeedback: data.ffFeedback !== false,
         }
         setFeatures({
           ...next,
@@ -511,6 +515,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           aiDisclosureEnabled: next.aiDisclosureEnabled === true,
           openRouterConfigured: next.openRouterConfigured === true,
           ragNotebookEnabled: next.ragNotebookEnabled === true,
+          ffFeedback: next.ffFeedback !== false,
         })
         setPlatformFeaturesSnapshot(next)
       }

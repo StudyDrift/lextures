@@ -161,6 +161,7 @@ type platformSettingsJSON struct {
 	FFSelfPacedMode                    bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                    bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                bool `json:"ffCourseMarketplace"`
+	FFFeedback                         bool `json:"ffFeedback"`
 	FFPublicAPI                        bool `json:"ffPublicApi"`
 	FFStripeBilling                    bool `json:"ffStripeBilling"`
 	FFPaymentsEnabled                  bool `json:"ffPaymentsEnabled"`
@@ -390,6 +391,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFSelfPacedMode:                    merged.FFSelfPacedMode,
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
+			FFFeedback:                         merged.FFFeedback,
 			FFPublicAPI:                        merged.FFPublicAPI,
 			FFStripeBilling:                    merged.FFStripeBilling,
 			FFPaymentsEnabled:                  merged.FFPaymentsEnabled,
@@ -594,6 +596,7 @@ type putPlatformBody struct {
 	FFSelfPacedMode                    *bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                    *bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                *bool `json:"ffCourseMarketplace"`
+	FFFeedback                         *bool `json:"ffFeedback"`
 	FFPublicAPI                        *bool `json:"ffPublicApi"`
 	FFStripeBilling                    *bool `json:"ffStripeBilling"`
 	FFPaymentsEnabled                  *bool `json:"ffPaymentsEnabled"`
@@ -947,6 +950,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffselfpacedmode", body.FFSelfPacedMode, func(v bool) { wr.FFSelfPacedMode = &v })
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffcoursemarketplace", body.FFCourseMarketplace, func(v bool) { wr.FFCourseMarketplace = &v })
+		setBool("fffeedback", body.FFFeedback, func(v bool) { wr.FFFeedback = &v })
 		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
 		setBool("ffpaymentsenabled", body.FFPaymentsEnabled, func(v bool) { wr.FFPaymentsEnabled = &v })
@@ -1153,6 +1157,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFSelfPacedMode:                    merged.FFSelfPacedMode,
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
+			FFFeedback:                         merged.FFFeedback,
 			FFPublicAPI:                        merged.FFPublicAPI,
 			FFStripeBilling:                    merged.FFStripeBilling,
 			FFPaymentsEnabled:                  merged.FFPaymentsEnabled,

@@ -502,6 +502,7 @@ data class PlatformFeatures(
     val ffCalendarFeeds: Boolean? = null,
     val ffMobileSettingsIntegrations: Boolean? = null,
     val ffMobileAdminSettings: Boolean? = null,
+    val ffFeedback: Boolean? = null,
 )
 
 @Serializable

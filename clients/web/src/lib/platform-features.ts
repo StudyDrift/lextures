@@ -104,6 +104,7 @@ export type PlatformFeaturesSnapshot = {
   aiDisclosureEnabled?: boolean
   openRouterConfigured?: boolean
   ragNotebookEnabled?: boolean
+  ffFeedback?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -203,6 +204,7 @@ const defaults: PlatformFeaturesSnapshot = {
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
   ragNotebookEnabled: false,
+  ffFeedback: true,
 }
 
 let loaded = false

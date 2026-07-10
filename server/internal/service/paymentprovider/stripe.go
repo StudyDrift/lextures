@@ -3,6 +3,7 @@ package paymentprovider
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -80,6 +81,12 @@ func (p *StripeProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 	if len(paymentMethods) > 0 {
 		params.PaymentMethodTypes = stripe.StringSlice(paymentMethods)
 	}
+	slog.Info(
+		"stripe checkout session amount",
+		"currency", currency,
+		"unit_amount", req.PriceCents,
+		"course_id", req.CourseID,
+	)
 	sess, err := checkoutsession.New(params)
 	if err != nil {
 		return nil, err
