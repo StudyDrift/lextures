@@ -1,6 +1,6 @@
 # MC1 — AI Essentials (Course Content & Assessments)
 
-> Implementation plan. Source: [docs/plan/marketplace-courses/README.md](README.md). A first-party, **free** marketplace course provisioned via the [MC0](../../completed/marketplace-courses/MC0-authoring-provisioning-foundation.md) harness.
+> Implementation plan. Source: [docs/plan/marketplace-courses/README.md](../../plan/marketplace-courses/README.md). A first-party, **free** marketplace course provisioned via the [MC0](MC0-authoring-provisioning-foundation.md) harness.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Marketplace Courses |
 | **Severity** | MAJOR |
 | **Markets** | SL (primary) · HE · K12 (grades 9+) |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETED |
 | **Estimated effort** | M (2–4w authoring + review) |
 | **Owner (proposed)** | Content team + AI/ML SME reviewer |
 | **Depends on** | MC0 |
@@ -131,7 +131,7 @@ None new. Served by existing course, storefront (MKT3), claim (MKT4), and quiz e
 
 ## 14. UI / UX
 
-Renders through existing storefront card, course landing, syllabus, module reader, and quiz player. Card copy: *"AI Essentials — Understand AI, use it well, and reason about its limits. No coding. Free."* Hero image: neutral, abstract "network" illustration with alt text. "Official" badge if MC0 §18 resolves.
+Renders through existing storefront card, course landing, syllabus, module reader, and quiz player. Card copy: *"AI Essentials — Understand AI, use it well, and reason about its limits. No coding. Free."* Hero image: embedded abstract network banner (`assets/ai-essentials-banner.jpg`), provisioned into course-files and wired to `hero_image_url` (same pattern as the intro course). "Official" badge if MC0 §18 resolves.
 
 ## 15. AI / ML Considerations
 
@@ -165,4 +165,4 @@ Authoritative, free (or free-to-audit) sources backing the content. All URLs con
 - **NIST AI Risk Management Framework (AI RMF 1.0)** — trustworthiness characteristics used in Modules 6–7 — https://www.nist.gov/itl/ai-risk-management-framework
 - **Stanford HAI — AI Index Report** — annually updated, citable statistics on the state of AI — https://hai.stanford.edu/ai-index
 - **Vaswani et al., "Attention Is All You Need" (2017)** — the transformer paper underpinning modern LLMs (referenced, not required reading) — https://arxiv.org/abs/1706.03762
-- Internal: [MC0](../../completed/marketplace-courses/MC0-authoring-provisioning-foundation.md) (harness), `../marketplace/README.md` (commerce), `server/internal/service/introcourse` (pattern).
+- Internal: [MC0](MC0-authoring-provisioning-foundation.md) (harness), `../marketplace/` (commerce), `server/internal/service/introcourse` (pattern).

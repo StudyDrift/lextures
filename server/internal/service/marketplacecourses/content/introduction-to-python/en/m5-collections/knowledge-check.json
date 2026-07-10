@@ -1,0 +1,99 @@
+{
+  "slug": "m5.collections.knowledge-check",
+  "title": "Module 5 knowledge check",
+  "sort_order": 5,
+  "markdown": "Choose structures and predict list/dict behavior. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m5-q1",
+      "prompt": "You need to look up a value by a unique key. The best built-in structure is a:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "dictionary",
+        "list",
+        "tuple",
+        "set"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q2",
+      "prompt": "What does this display?\n\n```python\nprint([10, 20, 30][1])\n```",
+      "questionType": "multiple_choice",
+      "choices": [
+        "20",
+        "10",
+        "30",
+        "[10, 20]"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q3",
+      "prompt": "What does print([1, 2, 3][0:2]) display?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "[1, 2]",
+        "[0, 1]",
+        "[1, 2, 3]",
+        "1"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q4",
+      "prompt": "Tuples are mutable: you can assign point[0] = 99 on point = (3, 4).",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q5",
+      "prompt": "Which structure best stores a collection of unique tags with fast membership tests?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "set",
+        "list only",
+        "int",
+        "bool"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q6",
+      "prompt": "After d = {\"a\": 1}; d[\"b\"] = 2; what is d[\"a\"]?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "1",
+        "2",
+        "\"a\"",
+        "Error"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

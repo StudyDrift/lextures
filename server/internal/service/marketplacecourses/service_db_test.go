@@ -3,6 +3,7 @@ package marketplacecourses
 import (
 	"context"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	serverdata "github.com/lextures/lextures/server"
+	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/db"
 	"github.com/lextures/lextures/server/internal/migrate"
 )
@@ -20,7 +22,7 @@ func TestEnsureProvisioned_CreateAndIdempotent_Pg(t *testing.T) {
 	svc := New(pool)
 	resetHarnessCourse(t, pool)
 
-	first, err := svc.EnsureProvisioned(ctx, "harness-smoke")
+	first, err := svc.EnsureProvisioned(ctx, config.Config{}, "harness-smoke")
 	if err != nil {
 		t.Fatalf("first provision: %v", err)
 	}
@@ -82,7 +84,7 @@ WHERE course_slug = 'harness-smoke' AND slug = 'm1.welcome.what-is-this'
 		t.Fatal(err)
 	}
 
-	second, err := svc.EnsureProvisioned(ctx, "harness-smoke")
+	second, err := svc.EnsureProvisioned(ctx, config.Config{}, "harness-smoke")
 	if err != nil {
 		t.Fatalf("second provision: %v", err)
 	}
@@ -124,7 +126,7 @@ func TestEnsureProvisioned_ContentVersionResync_Pg(t *testing.T) {
 	svc := New(pool)
 	resetHarnessCourse(t, pool)
 
-	first, err := svc.EnsureProvisioned(ctx, "harness-smoke")
+	first, err := svc.EnsureProvisioned(ctx, config.Config{}, "harness-smoke")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +157,7 @@ WHERE structure_item_id = $1
 		t.Fatal(err)
 	}
 
-	second, err := svc.EnsureProvisioned(ctx, "harness-smoke")
+	second, err := svc.EnsureProvisioned(ctx, config.Config{}, "harness-smoke")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -202,7 +204,7 @@ func TestEnsureProvisioned_Concurrent_Pg(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			svc := New(pool)
-			if _, err := svc.EnsureProvisioned(ctx, "harness-smoke"); err != nil {
+			if _, err := svc.EnsureProvisioned(ctx, config.Config{}, "harness-smoke"); err != nil {
 				errs <- err
 			}
 		}()
@@ -230,7 +232,7 @@ func TestEnsureProvisioned_DoesNotResetEnrollmentCount_Pg(t *testing.T) {
 	svc := New(pool)
 	resetHarnessCourse(t, pool)
 
-	c, err := svc.EnsureProvisioned(ctx, "harness-smoke")
+	c, err := svc.EnsureProvisioned(ctx, config.Config{}, "harness-smoke")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,7 +241,7 @@ UPDATE course.courses SET enrollment_count = 42, average_rating = 4.50 WHERE id 
 `, c.ID); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := svc.EnsureProvisioned(ctx, "harness-smoke"); err != nil {
+	if _, err := svc.EnsureProvisioned(ctx, config.Config{}, "harness-smoke"); err != nil {
 		t.Fatal(err)
 	}
 	var enroll int
@@ -254,6 +256,164 @@ SELECT enrollment_count, average_rating FROM course.courses WHERE id = $1
 	}
 	if rating == nil || *rating != 4.5 {
 		t.Fatalf("average_rating reset: %v", rating)
+	}
+}
+
+func TestEnsureProvisioned_AIEssentialsHeroBanner_Pg(t *testing.T) {
+	pool := testPool(t)
+	ctx := context.Background()
+	svc := New(pool)
+	resetCourseBySlug(t, pool, "ai-essentials")
+
+	root := t.TempDir()
+	cfg := config.Config{CourseFilesRoot: root}
+	first, err := svc.EnsureProvisioned(ctx, cfg, "ai-essentials")
+	if err != nil {
+		t.Fatalf("provision: %v", err)
+	}
+
+	var heroURL, objectPos *string
+	if err := pool.QueryRow(ctx, `
+SELECT hero_image_url, hero_image_object_position FROM course.courses WHERE id = $1
+`, first.ID).Scan(&heroURL, &objectPos); err != nil {
+		t.Fatal(err)
+	}
+	if heroURL == nil || !strings.Contains(*heroURL, "/course-files/") || !strings.HasSuffix(*heroURL, "/content") {
+		t.Fatalf("expected hero_image_url course-files content path, got %#v", heroURL)
+	}
+	if objectPos == nil || *objectPos != heroBannerObjectPosition {
+		t.Fatalf("object position: %#v", objectPos)
+	}
+
+	var fileCount int
+	if err := pool.QueryRow(ctx, `
+SELECT COUNT(*) FROM course.course_files
+WHERE course_id = $1 AND original_filename = 'ai-essentials-banner.jpg'
+`, first.ID).Scan(&fileCount); err != nil {
+		t.Fatal(err)
+	}
+	if fileCount != 1 {
+		t.Fatalf("banner file rows: %d", fileCount)
+	}
+
+	second, err := svc.EnsureProvisioned(ctx, cfg, "ai-essentials")
+	if err != nil {
+		t.Fatalf("re-provision: %v", err)
+	}
+	var heroURL2 *string
+	if err := pool.QueryRow(ctx, `
+SELECT hero_image_url FROM course.courses WHERE id = $1
+`, second.ID).Scan(&heroURL2); err != nil {
+		t.Fatal(err)
+	}
+	if heroURL2 == nil || *heroURL2 != *heroURL {
+		t.Fatalf("hero URL changed on re-provision: %v vs %v", heroURL, heroURL2)
+	}
+}
+
+func TestEnsureProvisioned_IntroductionToPythonHeroBanner_Pg(t *testing.T) {
+	pool := testPool(t)
+	ctx := context.Background()
+	svc := New(pool)
+	resetCourseBySlug(t, pool, "introduction-to-python")
+
+	root := t.TempDir()
+	cfg := config.Config{CourseFilesRoot: root}
+	first, err := svc.EnsureProvisioned(ctx, cfg, "introduction-to-python")
+	if err != nil {
+		t.Fatalf("provision: %v", err)
+	}
+
+	var heroURL *string
+	var category, difficulty string
+	var price int
+	var listed bool
+	if err := pool.QueryRow(ctx, `
+SELECT hero_image_url, catalog_category, difficulty_level, price_cents, marketplace_listed
+FROM course.courses WHERE id = $1
+`, first.ID).Scan(&heroURL, &category, &difficulty, &price, &listed); err != nil {
+		t.Fatal(err)
+	}
+	if heroURL == nil || !strings.Contains(*heroURL, "/course-files/") || !strings.HasSuffix(*heroURL, "/content") {
+		t.Fatalf("expected hero_image_url course-files content path, got %#v", heroURL)
+	}
+	if category != "Programming" || difficulty != "beginner" || price != 0 || !listed {
+		t.Fatalf("catalog fields: category=%s difficulty=%s price=%d listed=%v", category, difficulty, price, listed)
+	}
+
+	var fileCount int
+	if err := pool.QueryRow(ctx, `
+SELECT COUNT(*) FROM course.course_files
+WHERE course_id = $1 AND original_filename = 'introduction-to-python-banner.jpg'
+`, first.ID).Scan(&fileCount); err != nil {
+		t.Fatal(err)
+	}
+	if fileCount != 1 {
+		t.Fatalf("banner file rows: %d", fileCount)
+	}
+
+	var moduleCount int
+	if err := pool.QueryRow(ctx, `
+SELECT COUNT(*) FROM course.course_structure_items
+WHERE course_id = $1 AND kind = 'module' AND parent_id IS NULL AND NOT archived
+`, first.ID).Scan(&moduleCount); err != nil {
+		t.Fatal(err)
+	}
+	if moduleCount != 8 {
+		t.Fatalf("modules: %d", moduleCount)
+	}
+}
+
+func TestEnsureProvisioned_PersonalFinanceHeroBanner_Pg(t *testing.T) {
+	pool := testPool(t)
+	ctx := context.Background()
+	svc := New(pool)
+	resetCourseBySlug(t, pool, "personal-finance")
+
+	root := t.TempDir()
+	cfg := config.Config{CourseFilesRoot: root}
+	first, err := svc.EnsureProvisioned(ctx, cfg, "personal-finance")
+	if err != nil {
+		t.Fatalf("provision: %v", err)
+	}
+
+	var heroURL *string
+	var category, difficulty string
+	var price int
+	var listed bool
+	if err := pool.QueryRow(ctx, `
+SELECT hero_image_url, catalog_category, difficulty_level, price_cents, marketplace_listed
+FROM course.courses WHERE id = $1
+`, first.ID).Scan(&heroURL, &category, &difficulty, &price, &listed); err != nil {
+		t.Fatal(err)
+	}
+	if heroURL == nil || !strings.Contains(*heroURL, "/course-files/") || !strings.HasSuffix(*heroURL, "/content") {
+		t.Fatalf("expected hero_image_url course-files content path, got %#v", heroURL)
+	}
+	if category != "Life Skills" || difficulty != "beginner" || price != 0 || !listed {
+		t.Fatalf("catalog fields: category=%s difficulty=%s price=%d listed=%v", category, difficulty, price, listed)
+	}
+
+	var fileCount int
+	if err := pool.QueryRow(ctx, `
+SELECT COUNT(*) FROM course.course_files
+WHERE course_id = $1 AND original_filename = 'personal-finance-banner.jpg'
+`, first.ID).Scan(&fileCount); err != nil {
+		t.Fatal(err)
+	}
+	if fileCount != 1 {
+		t.Fatalf("banner file rows: %d", fileCount)
+	}
+
+	var moduleCount int
+	if err := pool.QueryRow(ctx, `
+SELECT COUNT(*) FROM course.course_structure_items
+WHERE course_id = $1 AND kind = 'module' AND parent_id IS NULL AND NOT archived
+`, first.ID).Scan(&moduleCount); err != nil {
+		t.Fatal(err)
+	}
+	if moduleCount != 7 {
+		t.Fatalf("modules: %d", moduleCount)
 	}
 }
 
@@ -278,12 +438,21 @@ func testPool(t *testing.T) *pgxpool.Pool {
 
 func resetHarnessCourse(t *testing.T, pool *pgxpool.Pool) {
 	t.Helper()
+	resetCourseBySlug(t, pool, "harness-smoke")
+}
+
+func resetCourseBySlug(t *testing.T, pool *pgxpool.Pool, catalogSlug string) {
+	t.Helper()
 	ctx := context.Background()
-	if _, err := pool.Exec(ctx, `DELETE FROM course.courses WHERE short_code = 'LEX-MC-SMOKE'`); err != nil {
-		t.Fatalf("reset harness course: %v", err)
+	manifest, err := LoadManifest(catalogSlug)
+	if err != nil {
+		t.Fatalf("load manifest %s: %v", catalogSlug, err)
 	}
-	// Ledger rows cascade from course delete; also clear orphaned ledger if any.
-	if _, err := pool.Exec(ctx, `DELETE FROM settings.marketplace_courses WHERE slug = 'harness-smoke'`); err != nil {
-		t.Fatalf("reset ledger: %v", err)
+	if _, err := pool.Exec(ctx, `DELETE FROM course.courses WHERE short_code = $1 OR catalog_slug = $2 OR course_code = $3`,
+		manifest.ShortCode, manifest.CatalogSlug, manifest.Code); err != nil {
+		t.Fatalf("reset course %s: %v", catalogSlug, err)
+	}
+	if _, err := pool.Exec(ctx, `DELETE FROM settings.marketplace_courses WHERE slug = $1`, catalogSlug); err != nil {
+		t.Fatalf("reset ledger %s: %v", catalogSlug, err)
 	}
 }

@@ -29,9 +29,9 @@ Net: this epic is **~80% content authoring + a thin generalized provisioner**, a
 | ID | Title | Effort | Depends on |
 |---|---|---|---|
 | [MC0](../../completed/marketplace-courses/MC0-authoring-provisioning-foundation.md) | Official-course authoring & provisioning foundation | M | MKT4 (shipped), introcourse harness |
-| [MC1](MC1-ai-essentials.md) | **AI Essentials** — course content & assessments | M | MC0 |
-| [MC2](MC2-introduction-to-python.md) | **Introduction to Python** — course content & assessments | M | MC0 |
-| [MC3](MC3-personal-finance.md) | **Personal Finance** — course content & assessments | M | MC0 |
+| [MC1](../../completed/marketplace-courses/MC1-ai-essentials.md) | **AI Essentials** — course content & assessments | M | MC0 |
+| [MC2](../../completed/marketplace-courses/MC2-introduction-to-python.md) | **Introduction to Python** — course content & assessments | M | MC0 |
+| [MC3](../../completed/marketplace-courses/MC3-personal-finance.md) | **Personal Finance** — course content & assessments | M | MC0 |
 
 ## Sequencing
 

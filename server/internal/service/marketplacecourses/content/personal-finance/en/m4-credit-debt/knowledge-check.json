@@ -1,0 +1,99 @@
+{
+  "slug": "m4.credit-debt.knowledge-check",
+  "title": "Module 4 knowledge check",
+  "sort_order": 5,
+  "markdown": "Six questions on credit, APR, and payoff methods. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m4-q1",
+      "prompt": "The debt-avalanche method pays extra toward the debt with the:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Highest interest rate first",
+        "Smallest balance first",
+        "Longest term",
+        "Newest account"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q2",
+      "prompt": "The federally authorized site for free credit reports is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "AnnualCreditReport.com",
+        "A random social network",
+        "Any paid \"free score\" ad",
+        "A cold-call number"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q3",
+      "prompt": "APR is best described as:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A yearly measure of borrowing cost useful for comparing credit products",
+        "Your credit score",
+        "A type of savings bond",
+        "A tax refund"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q4",
+      "prompt": "The debt-snowball method focuses extra payments on the smallest balance first.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q5",
+      "prompt": "A credit report is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A record of credit accounts and payment history",
+        "A list of stocks you must buy",
+        "An FDIC insurance certificate",
+        "A monthly budget template"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m4-q6",
+      "prompt": "When using either payoff method, you should still:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Pay at least the minimums on all debts",
+        "Ignore all minimums",
+        "Close every account immediately without a plan",
+        "Share your SSN in class submissions"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

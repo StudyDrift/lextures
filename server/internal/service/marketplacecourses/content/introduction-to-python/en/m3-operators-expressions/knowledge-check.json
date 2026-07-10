@@ -1,0 +1,114 @@
+{
+  "slug": "m3.operators-expressions.knowledge-check",
+  "title": "Module 3 knowledge check",
+  "sort_order": 4,
+  "markdown": "Evaluate expressions and precedence. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m3-q1",
+      "prompt": "What does print(3 + 4 * 2) display?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "11",
+        "14",
+        "10",
+        "24"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q2",
+      "prompt": "What does print(7 // 2) display?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "3",
+        "3.5",
+        "1",
+        "7"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q3",
+      "prompt": "What does print(\"ab\" * 2) display?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "abab",
+        "ab2",
+        "ab ab",
+        "Error"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q4",
+      "prompt": "In Python 3, 7 / 2 evaluates to 3.5 (a float).",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q5",
+      "prompt": "What does print(len(\"hi\")) display?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "2",
+        "3",
+        "\"hi\"",
+        "1"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q6",
+      "prompt": "What does print(True and False) display?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "False",
+        "True",
+        "True and False",
+        "0"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q7",
+      "prompt": "Which expression forces addition before multiplication?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "(3 + 4) * 2",
+        "3 + 4 * 2",
+        "3 + (4 * 2)",
+        "3 ++ 4 * 2"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

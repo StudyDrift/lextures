@@ -1,0 +1,99 @@
+{
+  "slug": "m7.protecting-money-next-steps.knowledge-check",
+  "title": "Module 7 knowledge check",
+  "sort_order": 5,
+  "markdown": "Six questions on scams, trust, and next steps. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m7-q1",
+      "prompt": "Which is a common scam red flag?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Urgent pressure to pay with gift cards and keep it secret",
+        "A written syllabus from a .gov education site",
+        "Checking your free credit report annually",
+        "Comparing APYs on insured savings accounts"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q2",
+      "prompt": "A trustworthy place for U.S. consumer money education is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "CFPB (consumerfinance.gov)",
+        "An unsolicited DM promising guaranteed riches",
+        "A stranger asking for your SSN in chat",
+        "A pop-up that demands remote access now"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q3",
+      "prompt": "Identity theft means someone uses your personal information without permission to commit fraud.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q4",
+      "prompt": "If you get a scary message claiming to be your bank, you should:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Contact the bank using a phone number or app you know is official",
+        "Immediately send payment to the message's instructions",
+        "Share your password so they can \"verify\" you",
+        "Ignore all future account monitoring"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q5",
+      "prompt": "A simple financial plan should include at least:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A SMART goal, budget snapshot, emergency target, next money step, and a fraud-protection habit",
+        "Only stock tips",
+        "Only your SSN",
+        "Only a list of influencers"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q6",
+      "prompt": "This course's educational disclaimer means:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Content is educational and not personalized financial/tax/legal advice",
+        "The course files your taxes for you",
+        "The course guarantees investment returns",
+        "You must buy a featured product"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

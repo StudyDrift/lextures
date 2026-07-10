@@ -1,0 +1,99 @@
+{
+  "slug": "m3.neural-networks.knowledge-check",
+  "title": "Module 3 knowledge check",
+  "sort_order": 4,
+  "markdown": "Why deep learning took off, and what it can and cannot do.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m3-q1",
+      "prompt": "In plain language, \"deep\" in deep learning refers to:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Many layers in a neural network",
+        "Always using the deepest ocean data",
+        "Models that never make errors",
+        "Requiring a human brain implant"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q2",
+      "prompt": "Which trio best explains why modern deep learning became practical?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Large datasets, more compute, and better methods/architectures",
+        "Eliminating all need for data",
+        "Banning statistical methods",
+        "Replacing electricity with wishful thinking"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q3",
+      "prompt": "A fluent neural-network output is guaranteed to be factually correct.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q4",
+      "prompt": "Deep learning is often comparatively strong at:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Pattern recognition in images, audio, or text when relevant data is plentiful",
+        "Proving mathematical theorems with zero error by default",
+        "Guaranteeing fair outcomes without evaluation",
+        "Running without any computational cost"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q5",
+      "prompt": "A common risk of deep models trained on skewed data is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Amplifying bias present in the training data",
+        "Automatically deleting all bias forever",
+        "Becoming AGI overnight",
+        "Never needing human oversight"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m3-q6",
+      "prompt": "Most learners and professionals using chatbots are typically:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Running inference on models trained by others",
+        "Training a new foundation model from scratch each prompt",
+        "Performing unsupervised clustering of their keyboard",
+        "Building AGI in the browser"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

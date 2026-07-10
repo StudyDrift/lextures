@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/imageproxy"
@@ -28,8 +29,13 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		courseCode, _, ok := d.requireCourseAccess(w, r)
-		if !ok {
+		if d.Pool == nil {
+			_, _, _ = d.requireCourseAccess(w, r)
+			return
+		}
+		courseCode := strings.TrimSpace(chi.URLParam(r, "course_code"))
+		if courseCode == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing course code.")
 			return
 		}
 		fileID, err := uuid.Parse(chi.URLParam(r, "file_id"))
@@ -42,9 +48,19 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load file.")
 			return
 		}
-		if row == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
-			return
+
+		// Public storefront/catalog hero images are readable without enrollment.
+		// Everything else requires course access first so unauthenticated callers
+		// get 401 (not 404) even when the file id does not exist.
+		publicHero := row != nil && d.isPublicStorefrontHero(r, courseCode, row)
+		if !publicHero {
+			if _, _, ok := d.requireCourseAccess(w, r); !ok {
+				return
+			}
+			if row == nil {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+				return
+			}
 		}
 		if !d.gateObjectDownload(w, r, row.StorageKey) {
 			return
@@ -96,10 +112,26 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 			}
 		}
 		w.Header().Set("Content-Type", ct)
-		w.Header().Set("Cache-Control", "private, max-age=86400")
+		if publicHero {
+			w.Header().Set("Cache-Control", "public, max-age=86400")
+		} else {
+			w.Header().Set("Cache-Control", "private, max-age=86400")
+		}
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(b)
 	}
+}
+
+func (d Deps) isPublicStorefrontHero(r *http.Request, courseCode string, row *coursefiles.Row) bool {
+	if row == nil || d.Pool == nil {
+		return false
+	}
+	readable, err := course.IsStorefrontHeroReadable(r.Context(), d.Pool, courseCode)
+	if err != nil || !readable {
+		return false
+	}
+	isHero, err := course.IsCourseHeroFile(r.Context(), d.Pool, courseCode, row.ID)
+	return err == nil && isHero
 }
 
 const courseFileImageResizeMaxDim = 2048

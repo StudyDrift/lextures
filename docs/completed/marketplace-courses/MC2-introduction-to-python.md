@@ -1,6 +1,6 @@
 # MC2 — Introduction to Python (Course Content & Assessments)
 
-> Implementation plan. Source: [docs/plan/marketplace-courses/README.md](README.md). A first-party, **free** marketplace course provisioned via the [MC0](../../completed/marketplace-courses/MC0-authoring-provisioning-foundation.md) harness.
+> Implementation plan. Source: [docs/plan/marketplace-courses/README.md](../../plan/marketplace-courses/README.md). A first-party, **free** marketplace course provisioned via the [MC0](MC0-authoring-provisioning-foundation.md) harness.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Marketplace Courses |
 | **Severity** | MAJOR |
 | **Markets** | SL (primary) · HE · K12 (grades 8+) |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETED |
 | **Estimated effort** | M (3–4w authoring + review) |
 | **Owner (proposed)** | Content team + software-engineering SME reviewer |
 | **Depends on** | MC0 |
@@ -175,4 +175,4 @@ Authoritative, free sources backing the content. All URLs confirmed reachable du
 - **CS50's Introduction to Programming with Python (CS50P)** — Harvard, free via OpenCourseWare — https://cs50.harvard.edu/python/
 - **Automate the Boring Stuff with Python** — Al Sweigart; full book free to read online (CC-licensed) — https://automatetheboringstuff.com/
 - **Python Standard Library reference** (official) — for `math`, `random`, `statistics`, file I/O — https://docs.python.org/3/library/index.html
-- Internal: [MC0](../../completed/marketplace-courses/MC0-authoring-provisioning-foundation.md) (harness), `../marketplace/README.md` (commerce), `server/internal/service/introcourse` (pattern).
+- Internal: [MC0](MC0-authoring-provisioning-foundation.md) (harness), `../marketplace/` (commerce), `server/internal/service/introcourse` (pattern).

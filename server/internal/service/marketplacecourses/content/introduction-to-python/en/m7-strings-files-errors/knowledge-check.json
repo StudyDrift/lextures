@@ -1,0 +1,99 @@
+{
+  "slug": "m7.strings-files-errors.knowledge-check",
+  "title": "Module 7 knowledge check",
+  "sort_order": 5,
+  "markdown": "Strings, files, and exceptions. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m7-q1",
+      "prompt": "What does print(\"  hi  \".strip()) display?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "hi",
+        "  hi  ",
+        "\"hi\"",
+        "Error"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q2",
+      "prompt": "Why prefer with open(...) as f: when reading a file?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "The file is closed automatically when the block ends",
+        "It makes Python 2 code",
+        "It disables exceptions",
+        "It encrypts the file"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q3",
+      "prompt": "Opening a missing path for reading typically raises:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "FileNotFoundError",
+        "TypeError",
+        "SyntaxError",
+        "KeyError"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q4",
+      "prompt": "Calling s.lower() permanently changes the original string object in place.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q5",
+      "prompt": "What does print(\"a,b\".split(\",\")) display?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "['a', 'b']",
+        "a,b",
+        "['a,b']",
+        "a b"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m7-q6",
+      "prompt": "int(\"hi\") raises which exception?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "ValueError",
+        "FileNotFoundError",
+        "KeyError",
+        "IndentationError"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

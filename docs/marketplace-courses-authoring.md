@@ -37,7 +37,7 @@ Directory name is usually the `catalog_slug` (e.g. `ai-essentials`).
 | `price_cents` | **Must be `0`** for this epic |
 | `is_public` | SEO catalog listing (optional) |
 | `marketplace_listed` | **Must be `true`** |
-| `hero_image` | Optional asset path (reserved) |
+| `hero_image` | Optional path to an embedded banner under `assets/` (e.g. `assets/ai-essentials-banner.jpg`). When set for a known course, provisioning writes the file into course-files and sets `hero_image_url`. |
 | `content_version` | Course-level ledger version |
 | `short_code` | Stable idempotency key (`LEX-MC-…`) |
 
@@ -71,14 +71,23 @@ make marketplace-courses-validate
 
 # Provision (requires DATABASE_URL)
 cd server && go run ./cmd/provision-marketplace-courses --migrate
+cd server && go run ./cmd/provision-marketplace-courses --deploy
 cd server && go run ./cmd/provision-marketplace-courses --only harness-smoke
+cd server && go run ./cmd/provision-marketplace-courses --only ai-essentials
+cd server && go run ./cmd/provision-marketplace-courses --only introduction-to-python
+cd server && go run ./cmd/provision-marketplace-courses --only personal-finance
 ```
 
+`--deploy` matches API startup (official courses only; skips `harness-smoke`).
+With no `--only` / `--deploy`, every embedded course including the smoke fixture is provisioned.
 ## Runbook
 
-- **Deploy:** run `provision-marketplace-courses --migrate` alongside `provision-intro-course`.
+- **Deploy:** API startup provisions official courses automatically when
+  `FFCourseMarketplace` is on (default), via `EnsureDeployProvisioned` (skips
+  `harness-smoke`). You can also run the CLI explicitly:
+  `provision-marketplace-courses --migrate` (alongside `provision-intro-course`).
 - **Unlist:** `UPDATE course.courses SET marketplace_listed = false, marketplace_listed_at = NULL WHERE catalog_slug = '…';`
-- **Re-sync after edit:** bump item `content_version`, merge, re-run provisioner.
+- **Re-sync after edit:** bump item `content_version`, merge, re-run provisioner (or restart API).
 - **Hide per tenant/user:** existing catalog hide (`catalog_user_prefs` / W07) applies.
 - **Attribution:** courses are `is_official = true` and owned by the system publisher
   (`publisher@system.lextures.invalid`).

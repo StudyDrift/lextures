@@ -137,8 +137,10 @@ Reuse existing structure tables (`course.course_structure_items`, `module_conten
 
 ## 15. Rollout Plan
 
-- **Feature flag:** reuse `FFCourseMarketplace` (default ON). Optionally gate official-course *provisioning* behind a config `ProvisionOfficialCourses` (default ON in prod) to allow tenants to opt out.
-- **Sequencing:** migration → deploy code → run `provision-marketplace-courses --migrate` → verify storefront → (per course) flip `is_public` if used for SEO.
+- **Feature flag:** reuse `FFCourseMarketplace` (default ON). API startup runs
+  `EnsureDeployProvisioned` when the flag is on (skips the harness-smoke fixture).
+- **Sequencing:** migration → deploy code (startup provisions official courses) → verify storefront → (per course) flip `is_public` if used for SEO.
+  Optional explicit CLI: `provision-marketplace-courses --migrate`.
 - **Dogfood:** provision to staging; internal claim + complete run-through of one course before GA.
 - **GA criteria:** all three courses validate green (incl. link-check), claim + quiz + assignment work end-to-end, a11y (axe) pass on rendered pages.
 - **Rollback:** set `marketplace_listed=false` (hides from storefront) without deleting; full rollback drops the two ledger tables (down migration) and unlists.
@@ -175,5 +177,5 @@ Reuse existing structure tables (`course.course_structure_items`, `module_conten
 - Quiz model: `server/internal/models/coursemodulequiz/types.go`; `server/internal/repos/coursemodulequizzes`.
 - Commerce reuse: `../../completed/marketplace/` (MKT1–MKT5), `docs/completed/marketplace/MKT4-course-purchase-entitlement-flow.md`, `server/internal/repos/billing/entitlements.go`.
 - Catalog columns: `server/migrations/276_public_course_catalog.sql`, `368_course_marketplace.sql`.
-- Course payloads that consume this harness: [MC1](../../plan/marketplace-courses/MC1-ai-essentials.md), [MC2](../../plan/marketplace-courses/MC2-introduction-to-python.md), [MC3](../../plan/marketplace-courses/MC3-personal-finance.md).
+- Course payloads that consume this harness: [MC1](MC1-ai-essentials.md), [MC2](MC2-introduction-to-python.md), [MC3](MC3-personal-finance.md).
 - Authoring guide: [docs/marketplace-courses-authoring.md](../../marketplace-courses-authoring.md).

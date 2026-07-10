@@ -1,0 +1,99 @@
+{
+  "slug": "m5.prompting.knowledge-check",
+  "title": "Module 5 knowledge check",
+  "sort_order": 5,
+  "markdown": "Strong vs. weak prompts, hallucination, and when not to use AI.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m5-q1",
+      "prompt": "Which prompt is stronger for a useful draft?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Draft a 120-word customer email announcing a Friday loyalty discount; friendly tone; do not invent features; one clear call to action.",
+        "Write something good.",
+        "Be creative about stuff.",
+        "Make it viral."
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q2",
+      "prompt": "Hallucination in generative AI usually means:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Confident-sounding output that is false or unsupported",
+        "The model running out of electricity",
+        "A user typing too slowly",
+        "Guaranteed correct citations"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q3",
+      "prompt": "A good verification habit is to:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Check important claims against a reliable source before acting",
+        "Always trust fluent text",
+        "Never iterate a prompt",
+        "Paste confidential HR files into any chatbot"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q4",
+      "prompt": "You should paste confidential personal data into third-party AI tools whenever it might save time.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q5",
+      "prompt": "When is AI often a poor fit without expert review?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "High-stakes decisions that require guaranteed correctness",
+        "Brainstorming informal blog title ideas you will edit",
+        "Rephrasing a public paragraph for clarity",
+        "Listing synonyms for a common word"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q6",
+      "prompt": "Iteration in prompting means:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Deliberately revising the prompt and comparing results",
+        "Submitting the first output to a court as evidence",
+        "Training a new foundation model overnight",
+        "Deleting all constraints"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

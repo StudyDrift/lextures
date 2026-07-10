@@ -1,0 +1,99 @@
+{
+  "slug": "m2.variables-types-input.knowledge-check",
+  "title": "Module 2 knowledge check",
+  "sort_order": 4,
+  "markdown": "Predict-the-output, types, and a common input bug. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m2-q1",
+      "prompt": "What does print(3 + 4 * 2) display? (We use this again in Module 3 \u2014 same precedence.)",
+      "questionType": "multiple_choice",
+      "choices": [
+        "11",
+        "14",
+        "10",
+        "24"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q2",
+      "prompt": "age = input('Age: ') then if age > 18: raises TypeError. The fix is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Convert with int(age) before comparing",
+        "Use == instead of >",
+        "Remove the colon after 18",
+        "Rename the variable age"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q3",
+      "prompt": "What is the type of the value returned by input(\"Name: \")?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "str",
+        "int",
+        "bool",
+        "float"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q4",
+      "prompt": "In Python, True and False must be capitalized that way.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q5",
+      "prompt": "What does this display?\n\n```python\nx = 2\nprint(f\"x is {x}\")\n```",
+      "questionType": "multiple_choice",
+      "choices": [
+        "x is 2",
+        "x is {x}",
+        "f\"x is 2\"",
+        "Error"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q6",
+      "prompt": "After name = \"Ada\", what does type(name) report?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "<class 'str'>",
+        "<class 'int'>",
+        "<class 'bool'>",
+        "<class 'float'>"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

@@ -4,6 +4,7 @@ package course
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,6 +33,43 @@ SELECT marketplace_listed FROM course.courses WHERE id = $1
 		return false, nil
 	}
 	return listed, err
+}
+
+// IsStorefrontHeroReadable reports whether a course's hero image may be served without
+// enrollment — published courses that are marketplace-listed and/or publicly catalogued.
+func IsStorefrontHeroReadable(ctx context.Context, pool *pgxpool.Pool, courseCode string) (bool, error) {
+	var ok bool
+	err := pool.QueryRow(ctx, `
+SELECT TRUE
+FROM course.courses
+WHERE course_code = $1
+  AND published = TRUE
+  AND (marketplace_listed = TRUE OR is_public = TRUE)
+`, courseCode).Scan(&ok)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, nil
+	}
+	return ok, err
+}
+
+// IsCourseHeroFile reports whether fileID is the course's configured hero_image_url target.
+func IsCourseHeroFile(ctx context.Context, pool *pgxpool.Pool, courseCode string, fileID uuid.UUID) (bool, error) {
+	var heroURL *string
+	err := pool.QueryRow(ctx, `
+SELECT hero_image_url FROM course.courses WHERE course_code = $1
+`, courseCode).Scan(&heroURL)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	if heroURL == nil {
+		return false, nil
+	}
+	want := strings.TrimSpace(*heroURL)
+	got := "/api/v1/courses/" + courseCode + "/course-files/" + fileID.String() + "/content"
+	return want == got, nil
 }
 
 // GetMarketplaceListing loads marketplace columns plus publish state and pricing.

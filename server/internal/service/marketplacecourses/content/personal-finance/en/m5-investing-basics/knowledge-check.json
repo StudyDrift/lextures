@@ -1,0 +1,99 @@
+{
+  "slug": "m5.investing-basics.knowledge-check",
+  "title": "Module 5 knowledge check",
+  "sort_order": 5,
+  "markdown": "Six questions on investing basics and fraud red flags. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m5-q1",
+      "prompt": "Which is a classic investment-fraud red flag?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Guaranteed high returns with little or no risk",
+        "A diversified low-cost index fund",
+        "A written prospectus",
+        "An SEC-registered adviser"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q2",
+      "prompt": "Diversification primarily means:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Spreading investments so one outcome does not dominate results",
+        "Putting everything into one tip",
+        "Avoiding all saving",
+        "Guaranteeing profits"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q3",
+      "prompt": "This course recommends specific stocks to buy this week.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q4",
+      "prompt": "Contribution limits for retirement accounts should be verified at:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Official sources such as IRS.gov for the current year",
+        "An anonymous social post from years ago",
+        "A guaranteed-return cold call",
+        "A meme"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q5",
+      "prompt": "An index fund is designed to:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Track a market index (often with relatively low costs)",
+        "Guarantee you cannot lose money",
+        "Replace FDIC insurance",
+        "Eliminate the need for a budget"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m5-q6",
+      "prompt": "Compounding is especially powerful when:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Time is long and contributions continue",
+        "You only invest for one day",
+        "Someone guarantees returns",
+        "You ignore fees forever without looking"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

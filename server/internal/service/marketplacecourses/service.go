@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/lextures/lextures/server/internal/config"
 	mcrepo "github.com/lextures/lextures/server/internal/repos/marketplacecourses"
 )
 
@@ -34,7 +36,7 @@ func New(pool *pgxpool.Pool) *Service {
 }
 
 // EnsureProvisioned idempotently creates or reconciles one official marketplace course by slug.
-func (s *Service) EnsureProvisioned(ctx context.Context, courseSlug string) (Course, error) {
+func (s *Service) EnsureProvisioned(ctx context.Context, cfg config.Config, courseSlug string) (Course, error) {
 	if s == nil || s.Pool == nil {
 		return Course{}, fmt.Errorf("marketplace courses: database unavailable")
 	}
@@ -52,7 +54,7 @@ func (s *Service) EnsureProvisioned(ctx context.Context, courseSlug string) (Cou
 
 	started := time.Now()
 	slug := spec.Manifest.CatalogSlug
-	out, created, report, err := s.provisionLocked(ctx, spec)
+	out, created, report, err := s.provisionLocked(ctx, cfg, spec)
 	if err != nil {
 		recordProvision(slug, "error", started)
 		return Course{}, err
@@ -82,14 +84,27 @@ func (s *Service) EnsureProvisioned(ctx context.Context, courseSlug string) (Cou
 }
 
 // EnsureAllProvisioned provisions every embedded marketplace course.
-func (s *Service) EnsureAllProvisioned(ctx context.Context) ([]Course, error) {
+func (s *Service) EnsureAllProvisioned(ctx context.Context, cfg config.Config) ([]Course, error) {
+	return s.ensureProvisionedDirs(ctx, cfg, nil)
+}
+
+// EnsureDeployProvisioned provisions official catalog courses for API startup / deploy.
+// Skips harness-smoke (CI-only fixture).
+func (s *Service) EnsureDeployProvisioned(ctx context.Context, cfg config.Config) ([]Course, error) {
+	return s.ensureProvisionedDirs(ctx, cfg, IsDeployCourse)
+}
+
+func (s *Service) ensureProvisionedDirs(ctx context.Context, cfg config.Config, include func(string) bool) ([]Course, error) {
 	slugs, err := ListCourseSlugs()
 	if err != nil {
 		return nil, err
 	}
 	var out []Course
 	for _, dir := range slugs {
-		c, err := s.EnsureProvisioned(ctx, dir)
+		if include != nil && !include(dir) {
+			continue
+		}
+		c, err := s.EnsureProvisioned(ctx, cfg, dir)
 		if err != nil {
 			return out, fmt.Errorf("%s: %w", dir, err)
 		}
@@ -98,7 +113,7 @@ func (s *Service) EnsureAllProvisioned(ctx context.Context) ([]Course, error) {
 	return out, nil
 }
 
-func (s *Service) provisionLocked(ctx context.Context, spec *CourseSpec) (Course, bool, ContentSyncReport, error) {
+func (s *Service) provisionLocked(ctx context.Context, cfg config.Config, spec *CourseSpec) (Course, bool, ContentSyncReport, error) {
 	tx, err := s.Pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return Course{}, false, ContentSyncReport{}, err
@@ -180,6 +195,9 @@ func (s *Service) provisionLocked(ctx context.Context, spec *CourseSpec) (Course
 	if err := mcrepo.SyncLearningOutcomes(ctx, tx, courseID, spec.Manifest.Outcomes); err != nil {
 		return Course{}, false, ContentSyncReport{}, err
 	}
+	if err := EnsureHeroBanner(ctx, tx, courseID, spec.Manifest.Code, spec.Manifest.CatalogSlug, courseFilesRoot(cfg)); err != nil {
+		return Course{}, false, ContentSyncReport{}, err
+	}
 
 	report, err := SyncContent(ctx, tx, courseID, spec)
 	if err != nil {
@@ -196,4 +214,11 @@ func (s *Service) provisionLocked(ctx context.Context, spec *CourseSpec) (Course
 		CatalogSlug: spec.Manifest.CatalogSlug,
 		ShortCode:   spec.Manifest.ShortCode,
 	}, created, report, nil
+}
+
+func courseFilesRoot(cfg config.Config) string {
+	if root := strings.TrimSpace(cfg.CourseFilesRoot); root != "" {
+		return root
+	}
+	return "data/course-files"
 }

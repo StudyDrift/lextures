@@ -1,0 +1,114 @@
+{
+  "slug": "m6.limitations-bias.knowledge-check",
+  "title": "Module 6 knowledge check",
+  "sort_order": 4,
+  "markdown": "Bias sources, privacy habits, and related risks.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m6-q1",
+      "prompt": "A hiring model rates candidates from one neighborhood lower. The most likely root cause is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Bias present in the historical training data",
+        "The model is broken in a random way with no data link",
+        "Too little compute alone",
+        "Pure randomness with no connection to inputs"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q2",
+      "prompt": "Which is a privacy \"don't\"?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Paste health records into a consumer chatbot",
+        "Minimize data shared for the task",
+        "Follow your organization's approved-tool policy",
+        "Assume prompts may be logged unless told otherwise"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q3",
+      "prompt": "Prompt injection, in plain language, is when:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Untrusted text tries to override a system's instructions",
+        "You buy more GPUs",
+        "A model refuses to answer any question",
+        "You verify a fact in an encyclopedia"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q4",
+      "prompt": "Fluent AI answers can still be factually wrong.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q5",
+      "prompt": "Managing harmful bias is emphasized as part of trustworthy AI in:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "The NIST AI Risk Management Framework",
+        "A random social media meme",
+        "The requirement that all AI must be free of any software bugs forever",
+        "AGI product manuals from 1990"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q6",
+      "prompt": "A practical response to energy and cost concerns is to:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Use the smallest tool that meets the need and avoid unnecessary heavy calls",
+        "Always train a new foundation model for every email",
+        "Ignore organizational tool guidance",
+        "Treat every vendor benchmark as eternally true"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q7",
+      "prompt": "Which limitation is real for today's generative systems?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "No guaranteed ground-truth understanding of the world",
+        "They never reflect training-data bias",
+        "They cannot produce fluent text",
+        "They always cite primary sources correctly"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

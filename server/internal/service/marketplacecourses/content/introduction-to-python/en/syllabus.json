@@ -1,0 +1,35 @@
+{
+  "require_acceptance": false,
+  "sections": [
+    {
+      "id": "overview",
+      "heading": "Course overview",
+      "markdown": "**Introduction to Python** is a free, self-paced, hands-on course for absolute beginners. You will go from \"what is a program?\" to writing a small working program of your own.\n\n- **Estimated time:** about 8–12 hours\n- **Format:** 8 modules with runnable examples, knowledge checks, four coding assignments, and a capstone\n- **Price:** Free — claim it from the marketplace\n- **Who it's for:** complete beginners, career switchers, students (HE / grades 8+), and self-learners\n\nEvery module includes code you can run. Assessments mix predict-the-output quizzes with write-the-code assignments. Syntax and semantics follow the [official Python 3 tutorial](https://docs.python.org/3/tutorial/index.html); style guidance follows [PEP 8](https://peps.python.org/pep-0008/)."
+    },
+    {
+      "id": "outcomes",
+      "heading": "What you'll learn",
+      "markdown": "By the end of Introduction to Python, you will be able to:\n\n1. **Run Python** via an interactive interpreter (REPL) and by executing a `.py` file, using an online tool or a local install.\n2. **Use core types & I/O** — variables; `int`, `float`, `str`, `bool`; type conversion; `input()`; and formatted output with f-strings.\n3. **Control flow** — implement logic with `if/elif/else`, boolean/comparison operators, and `while`/`for` loops (with `range`, `break`, `continue`).\n4. **Collections** — store and manipulate data with lists, tuples, dictionaries, and sets, including indexing, slicing, and iteration.\n5. **Functions & modules** — write reusable functions with parameters/return values and import from the standard library (`math`, `random`, `statistics`).\n6. **Data & files** — use string methods, read/write text files, and handle errors with `try`/`except`.\n7. **Style & debugging** — apply PEP 8 basics, read a small program, and diagnose common beginner errors.\n8. **Build** — design and write a small, complete program from a specification (capstone)."
+    },
+    {
+      "id": "before",
+      "heading": "Before you start",
+      "markdown": "Pick **one** way to run Python — you do not need both:\n\n1. **Online (zero install):** use a free browser interpreter such as the [Python.org shell](https://www.python.org/shell/) or another free online REPL. Do **not** paste passwords, API keys, or personal data into online tools.\n2. **Local install:** download Python 3 from [python.org](https://www.python.org/) and run `.py` files from a terminal.\n\nNothing else to buy. This course uses the **standard library only** (no third-party packages)."
+    },
+    {
+      "id": "modules",
+      "heading": "Module guide",
+      "markdown": "| Module | Focus |\n|---|---|\n| 1. Getting Started | What a program is; run code online; install Python; REPL; `print()`; `.py` files |\n| 2. Variables, Types & Input | Naming; `int`/`float`/`str`/`bool`; conversion; `input()`; f-strings |\n| 3. Operators & Expressions | Arithmetic, comparison, boolean; precedence; strings; `len()` |\n| 4. Making Decisions & Looping | `if`/`elif`/`else`; `while`/`for`; `range`; `break`/`continue`; coding assignment |\n| 5. Collections | Lists, tuples, dicts, sets; indexing & slicing; coding assignment |\n| 6. Functions & Modules | `def`, `return`, scope; `import`; `math`/`random`/`statistics`; coding assignment |\n| 7. Strings, Files & Errors | String methods; files; `with`; `try`/`except`; coding assignment |\n| 8. Putting It Together | Design; PEP 8; debugging; **capstone**; where to go next |"
+    },
+    {
+      "id": "grading",
+      "heading": "Grading & completion",
+      "markdown": "- **Knowledge checks** (each module) are auto-scored. They mix concept questions with **predict-the-output** and **spot-the-bug** items. Unlimited attempts; instant feedback.\n- **Coding assignments** (Modules 4–7) are write-the-code tasks (~10 points each), graded `grader_agent` / completion for good-faith submissions that match the expected behavior and self-check.\n- **Capstone** (Module 8) is a complete small program (~20 points), graded `grader_agent`.\n\nThere are no due dates. Work at your own pace. Course completion expects finishing the final knowledge check and submitting the capstone.\n\nRun assignment code yourself in your interpreter or local Python, then submit the code (and any short notes the prompt asks for)."
+    },
+    {
+      "id": "help",
+      "heading": "Getting help & going deeper",
+      "markdown": "Authoritative free resources used throughout this course:\n\n- [The Python Tutorial](https://docs.python.org/3/tutorial/index.html) (Python Software Foundation)\n- [Python.org](https://www.python.org/) — downloads and getting started\n- [PEP 8 — Style Guide for Python Code](https://peps.python.org/pep-0008/)\n- [Python for Everybody (PY4E)](https://www.py4e.com/) — free book, videos, and exercises\n- [CS50's Introduction to Programming with Python (CS50P)](https://cs50.harvard.edu/python/) — Harvard, free via OpenCourseWare\n- [Automate the Boring Stuff with Python](https://automatetheboringstuff.com/) — free online book (CC-licensed)\n- [Python Standard Library](https://docs.python.org/3/library/index.html) — `math`, `random`, `statistics`, file I/O"
+    }
+  ]
+}

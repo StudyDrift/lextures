@@ -1,0 +1,99 @@
+{
+  "slug": "m6.big-expenses-taxes-insurance.knowledge-check",
+  "title": "Module 6 knowledge check",
+  "sort_order": 4,
+  "markdown": "Six questions on taxes, insurance, and big expenses. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m6-q1",
+      "prompt": "For current U.S. federal tax figures and forms, the best starting place is:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "IRS.gov",
+        "A viral social post",
+        "An anonymous text tip",
+        "A guaranteed refund cold call"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q2",
+      "prompt": "Withholding on a paycheck is best described as:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Money held from pay toward taxes",
+        "A type of stock dividend",
+        "FDIC insurance",
+        "A credit score factor only"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q3",
+      "prompt": "Renters insurance primarily helps with:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Belongings and related risks for renters",
+        "Guaranteeing investment returns",
+        "Eliminating all taxes",
+        "Raising APR on purpose"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q4",
+      "prompt": "This course replaces the need to file taxes or consult a tax professional when your situation is complex.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q5",
+      "prompt": "When comparing cars, a complete budget should include:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Insurance, fuel/maintenance, and other ownership costs \u2014 not only the purchase price",
+        "Only the down payment",
+        "Only the color of the car",
+        "Only social-media likes"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m6-q6",
+      "prompt": "Matching insurance to risk means:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Covering losses you could not easily afford while understanding deductibles and requirements",
+        "Buying every product a salesperson mentions",
+        "Avoiding all insurance always",
+        "Using insurance as a stock tip"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

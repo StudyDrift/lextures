@@ -1,0 +1,22 @@
+code: C-PERFIN
+title: Personal Finance
+catalog_slug: personal-finance
+catalog_category: Life Skills
+difficulty_level: beginner
+catalog_language: en
+summary: Budget, save, manage credit, and invest with confidence. Vendor-neutral, from trusted public sources. Free.
+outcomes:
+  - Set goals — write SMART financial goals and distinguish needs from wants aligned to personal values
+  - Budget — build and maintain a monthly budget (e.g., 50/30/20 or zero-based), track cash flow, and size an emergency fund
+  - Bank & save — choose appropriate accounts; explain interest, APY, compound growth, and FDIC deposit insurance
+  - Manage credit & debt — read a credit report and score, explain APR, and build a debt-payoff plan (avalanche vs. snowball)
+  - Understand investing basics — explain compound interest, risk/return, diversification, index funds, and tax-advantaged retirement accounts, and recognize investment-fraud red flags
+  - Plan for big items — describe the basics of taxes, insurance, and major expenses (housing, vehicles, student aid) and how to prepare
+  - Protect yourself — spot scams and identity theft, respond appropriately, and find trustworthy sources of help
+estimated_minutes: 360
+price_cents: 0
+is_public: true
+marketplace_listed: true
+hero_image: assets/personal-finance-banner.jpg
+content_version: 1
+short_code: LEX-MC-PERFIN

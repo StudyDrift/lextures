@@ -384,8 +384,12 @@ RETURNING id
 	}
 	if needsBody {
 		maxAttempts := quiz.Grading.MaxAttempts
-		unlimited := false
-		if maxAttempts <= 0 {
+		unlimited := quiz.Grading.UnlimitedAttempts
+		if unlimited {
+			if maxAttempts <= 0 {
+				maxAttempts = 1
+			}
+		} else if maxAttempts <= 0 {
 			maxAttempts = 3
 		}
 		if _, err := tx.Exec(ctx, `

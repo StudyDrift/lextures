@@ -1,0 +1,99 @@
+{
+  "slug": "m2.how-machines-learn.knowledge-check",
+  "title": "Module 2 knowledge check",
+  "sort_order": 4,
+  "markdown": "Check your understanding of data, training vs. inference, and learning types.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m2-q1",
+      "prompt": "Using a trained model to classify a brand-new email as spam or not is primarily:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Inference",
+        "Training from scratch",
+        "Unsupervised clustering of the entire internet",
+        "AGI"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q2",
+      "prompt": "A feature in machine learning is best described as:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "An input signal or measurable property the model uses",
+        "A marketing slogan",
+        "Proof that the model understands ethics",
+        "A human teacher sitting next to the computer"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q3",
+      "prompt": "Predicting house prices from past sales with known prices is an example of:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Supervised learning",
+        "Reinforcement learning only",
+        "AGI",
+        "Random guessing with no data"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q4",
+      "prompt": "Grouping customers into segments without pre-assigned labels is closest to:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Unsupervised learning",
+        "Supervised classification with perfect labels",
+        "Hand-writing every rule",
+        "Inference without a model"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q5",
+      "prompt": "Overfitting means a model performs perfectly on new, unseen data by definition.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m2-q6",
+      "prompt": "Which statement is most accurate?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A trained model captures patterns learned from data; it is not a verified fact database.",
+        "Training and inference are the same step.",
+        "Features are optional for all ML systems.",
+        "Reinforcement learning never uses rewards."
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

@@ -239,6 +239,14 @@ func Run(ctx context.Context, fsys fs.FS) error {
 				slog.Warn("intro course backfill enqueue failed", "err", err)
 			}
 		}
+		if merged.FFCourseMarketplace {
+			mcSvc := marketplacecoursesservice.New(pool)
+			if courses, err := mcSvc.EnsureDeployProvisioned(ctx, merged); err != nil {
+				slog.Warn("marketplace courses startup provision failed", "err", err)
+			} else if len(courses) > 0 {
+				slog.Info("marketplace courses startup provision complete", "count", len(courses))
+			}
+		}
 	}
 	deps := httpserver.Deps{
 		Pool:                      pool,

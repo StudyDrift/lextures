@@ -1,6 +1,6 @@
 # MC3 — Personal Finance (Course Content & Assessments)
 
-> Implementation plan. Source: [docs/plan/marketplace-courses/README.md](README.md). A first-party, **free** marketplace course provisioned via the [MC0](../../completed/marketplace-courses/MC0-authoring-provisioning-foundation.md) harness.
+> Implementation plan. Source: [docs/plan/marketplace-courses/README.md](../../plan/marketplace-courses/README.md). A first-party, **free** marketplace course provisioned via the [MC0](MC0-authoring-provisioning-foundation.md) harness.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Marketplace Courses |
 | **Severity** | MAJOR |
 | **Markets** | SL (primary) · HE · K12 (grades 9+) |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETED |
 | **Estimated effort** | M (3–4w authoring + review) |
 | **Owner (proposed)** | Content team + personal-finance SME reviewer |
 | **Depends on** | MC0 |
@@ -139,7 +139,7 @@ None new. Served by existing course/storefront/claim/quiz endpoints.
 
 ## 14. UI / UX
 
-Existing storefront card, syllabus (with disclaimer), module reader, and quiz player. Card copy: *"Personal Finance — Budget, save, manage credit, and invest with confidence. Vendor-neutral, from trusted public sources. Free."* Budget/plan templates render as Markdown tables (accessible headers). Hero image: neutral finance motif with alt text. The educational-only disclaimer appears on the landing page and each money-decision module's first page (FR-4).
+Existing storefront card, syllabus (with disclaimer), module reader, and quiz player. Card copy: *"Personal Finance — Budget, save, manage credit, and invest with confidence. Vendor-neutral, from trusted public sources. Free."* Budget/plan templates render as Markdown tables (accessible headers). Hero image: embedded neutral finance-motif banner (`assets/personal-finance-banner.jpg`), provisioned into course-files and wired to `hero_image_url` (same pattern as other official marketplace courses). The educational-only disclaimer appears on the landing page and each money-decision module's first page (FR-4).
 
 ## 15. AI / ML Considerations
 
@@ -176,4 +176,4 @@ Authoritative government/nonprofit sources backing the content. All URLs confirm
 - **AnnualCreditReport.com** — the federally authorized site for free credit reports (Module 4) — https://www.annualcreditreport.com/
 - **IRS.gov** — official source for tax basics, filing, and current figures (Module 6; per FR-7) — https://www.irs.gov/
 - **Bogleheads Wiki — Getting Started** — respected nonprofit community primer on low-cost, diversified investing — https://www.bogleheads.org/wiki/Getting_started
-- Internal: [MC0](../../completed/marketplace-courses/MC0-authoring-provisioning-foundation.md) (harness), `../marketplace/README.md` (commerce), `server/internal/service/introcourse` (pattern).
+- Internal: [MC0](MC0-authoring-provisioning-foundation.md) (harness), `../../plan/marketplace/README.md` (commerce), `server/internal/service/introcourse` (pattern).

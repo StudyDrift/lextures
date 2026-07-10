@@ -1,0 +1,99 @@
+{
+  "slug": "m1.money-mindset-goals.knowledge-check",
+  "title": "Module 1 knowledge check",
+  "sort_order": 6,
+  "markdown": "Six questions on values, needs/wants, SMART goals, and MyMoney Five. Unlimited attempts.",
+  "content_version": 1,
+  "unlimited_attempts": true,
+  "max_attempts": 1,
+  "questions": [
+    {
+      "id": "m1-q1",
+      "prompt": "Which is the best example of a SMART financial goal?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Save $50 each payday for 6 months toward a $600 car-repair buffer",
+        "Be better with money someday",
+        "Get rich quickly",
+        "Never spend on anything fun"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q2",
+      "prompt": "In the needs vs. wants framework, a \"want\" is best described as:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Optional spending that adds comfort or enjoyment",
+        "Any expense over $20",
+        "Only luxury brand purchases",
+        "Taxes and required insurance"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q3",
+      "prompt": "Which theme is part of the MyMoney Five framework?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Protect",
+        "Speculate",
+        "Day-trade",
+        "Ignore debt"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q4",
+      "prompt": "Needs and wants are always identical for every household.",
+      "questionType": "true_false",
+      "choices": [
+        "True",
+        "False"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 1,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q5",
+      "prompt": "The \"T\" in SMART goals stands for:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Time-bound",
+        "Taxable",
+        "Temporary",
+        "Theoretical"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q6",
+      "prompt": "MyMoney Five is primarily intended as:",
+      "questionType": "multiple_choice",
+      "choices": [
+        "A federal framework for organizing core money skills",
+        "A list of stocks to buy",
+        "A credit-card rewards program",
+        "A tax form"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

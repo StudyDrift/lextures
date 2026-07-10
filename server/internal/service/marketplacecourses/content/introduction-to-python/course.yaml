@@ -1,0 +1,23 @@
+code: C-INTPY1
+title: Introduction to Python
+catalog_slug: introduction-to-python
+catalog_category: Programming
+difficulty_level: beginner
+catalog_language: en
+summary: Learn to code from zero. Hands-on, no experience needed. Free.
+outcomes:
+  - Run Python via an interactive interpreter (REPL) and by executing a .py file, using an online tool or a local install
+  - Use core types and I/O — variables; int, float, str, bool; type conversion; input(); and formatted output with f-strings
+  - Control flow — implement logic with if/elif/else, boolean/comparison operators, and while/for loops (with range, break, continue)
+  - Collections — store and manipulate data with lists, tuples, dictionaries, and sets, including indexing, slicing, and iteration
+  - Functions and modules — write reusable functions with parameters/return values and import from the standard library (math, random, statistics)
+  - Data and files — use string methods, read/write text files, and handle errors with try/except
+  - Style and debugging — apply PEP 8 basics, read a small program, and diagnose common beginner errors
+  - Build — design and write a small, complete program from a specification (capstone)
+estimated_minutes: 600
+price_cents: 0
+is_public: true
+marketplace_listed: true
+hero_image: assets/introduction-to-python-banner.jpg
+content_version: 1
+short_code: LEX-MC-INTPY1

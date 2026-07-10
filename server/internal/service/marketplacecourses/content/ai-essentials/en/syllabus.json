@@ -1,0 +1,35 @@
+{
+  "require_acceptance": false,
+  "sections": [
+    {
+      "id": "overview",
+      "heading": "Course overview",
+      "markdown": "**AI Essentials** is a free, self-paced introduction to artificial intelligence for adults and older teens. No coding or advanced math is required.\n\n- **Estimated time:** about 4\u20136 hours\n- **Format:** 7 modules with short readings, knowledge checks, one Prompt Lab, and a capstone analysis\n- **Price:** Free \u2014 claim it from the marketplace\n- **Who it's for:** curious professionals, students (HE / grades 9+), and self-learners who want a credible, non-hype mental model of AI\n\nYou will learn what AI is, how machines learn, how generative tools work, how to prompt and verify outputs, and how to reason about bias, privacy, and responsible use \u2014 grounded in sources such as [Elements of AI](https://www.elementsofai.com/), [Google's Machine Learning Crash Course](https://developers.google.com/machine-learning/crash-course), and the [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)."
+    },
+    {
+      "id": "outcomes",
+      "heading": "What you'll learn",
+      "markdown": "By the end of AI Essentials, you will be able to:\n\n1. **Define and distinguish** artificial intelligence, machine learning, deep learning, and generative AI, and give an everyday example of each.\n2. **Explain in plain language** how a machine-learning model \"learns\" from data (training vs. inference) and how a large language model produces text (next-token prediction).\n3. **Judge fit** \u2014 decide when AI is and is not appropriate for a task, and name at least three limitations (hallucination, bias, no ground-truth understanding, data/privacy constraints).\n4. **Prompt and evaluate** \u2014 write a clear, iterated prompt and critically verify the output instead of trusting it blindly.\n5. **Reason about responsibility** \u2014 describe the NIST AI RMF trustworthiness characteristics and apply a short responsible-use checklist, including human oversight and privacy.\n6. **Recognize impact** \u2014 identify where AI appears in common tools and how it is changing everyday work."
+    },
+    {
+      "id": "modules",
+      "heading": "Module guide",
+      "markdown": "| Module | Focus |\n|---|---|\n| 1. What Is AI? | AI vs. ML vs. DL vs. GenAI; narrow vs. general |\n| 2. How Machines Learn | Data, training vs. inference, learning types |\n| 3. Neural Networks & Deep Learning | Layers, why \"deep,\" strengths and limits |\n| 4. Generative AI & LLMs | Tokens, next-word prediction, what LLMs do not do |\n| 5. Prompting & Working with AI Tools | Strong prompts, iteration, verification (Prompt Lab) |\n| 6. Limitations, Bias & Risks | Bias, hallucination, privacy, misuse |\n| 7. Responsible & Practical AI | NIST trustworthiness; careers; capstone |"
+    },
+    {
+      "id": "grading",
+      "heading": "Grading & completion",
+      "markdown": "- **Knowledge checks** (each module) are auto-scored multiple-choice and true/false questions. They are low-stakes with unlimited attempts and instant feedback.\n- **Prompt Lab** (Module 5) is an auto-graded reflection (`grader_agent`) worth 10 points.\n- **Capstone: Responsible AI Use-Case Analysis** (Module 7) is an auto-graded analysis (`grader_agent`) worth 15 points.\n\nThere are no due dates. Work at your own pace. Course completion expects finishing the final knowledge check and submitting the capstone."
+    },
+    {
+      "id": "safety",
+      "heading": "How to use AI tools safely in this course",
+      "markdown": "- **Do not paste** personal, confidential, or proprietary data into third-party AI tools.\n- **Verify** important claims against trusted sources before acting on them.\n- **Cite** sources when you reuse ideas or quotes in your own work.\n- Treat AI output as a draft that may be wrong \u2014 not as ground truth."
+    },
+    {
+      "id": "help",
+      "heading": "Getting help & going deeper",
+      "markdown": "Authoritative free resources used throughout this course:\n\n- [Elements of AI](https://www.elementsofai.com/) (University of Helsinki & MinnaLearn)\n- [Google Machine Learning Crash Course](https://developers.google.com/machine-learning/crash-course)\n- [AI for Everyone](https://www.deeplearning.ai/courses/ai-for-everyone) (DeepLearning.AI)\n- [Generative AI for Everyone](https://www.coursera.org/learn/generative-ai-for-everyone) (DeepLearning.AI / Coursera)\n- [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)\n- [Stanford HAI AI Index](https://hai.stanford.edu/ai-index)\n- [Attention Is All You Need](https://arxiv.org/abs/1706.03762) (transformer paper; optional deep dive)\n\nDated statistics live on the \"State of AI\" page in Module 7 so they can be refreshed without rewriting the whole course."
+    }
+  ]
+}
