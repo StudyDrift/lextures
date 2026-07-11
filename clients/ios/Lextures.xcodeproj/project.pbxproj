@@ -509,6 +509,19 @@
 		8BFB04C2D3E4F5061728394 /* ShareFeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFB04D3E4F5061728394A5 /* ShareFeedbackView.swift */; };
 		8BFB05C2D3E4F5061728394 /* ShareFeedbackEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFB05D3E4F5061728394A5 /* ShareFeedbackEntryCard.swift */; };
 		8BFB06C2D3E4F5061728394 /* FeedbackLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFB06D3E4F5061728394A5 /* FeedbackLogicTests.swift */; };
+
+		8B741C2D3E4F5061728394 /* LMSFeatureModelsRolesPermissionsAdmin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B741D3E4F5061728394A5 /* LMSFeatureModelsRolesPermissionsAdmin.swift */; };
+		8B742C2D3E4F5061728394 /* RolesPermissionsAdminLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B742D3E4F5061728394A5 /* RolesPermissionsAdminLogic.swift */; };
+		8B743C2D3E4F5061728394 /* RolesPermissionsAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B743D3E4F5061728394A5 /* RolesPermissionsAdminView.swift */; };
+		8B744C2D3E4F5061728394 /* RolesPermissionsAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B744D3E4F5061728394A5 /* RolesPermissionsAdminEntryCard.swift */; };
+		8B745C2D3E4F5061728394 /* RolesPermissionsAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B745D3E4F5061728394A5 /* RolesPermissionsAdminLogicTests.swift */; };
+
+		8B751C2D3E4F5061728394 /* LMSFeatureModelsPeopleAdmin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B751D3E4F5061728394A5 /* LMSFeatureModelsPeopleAdmin.swift */; };
+		8B752C2D3E4F5061728394 /* PeopleAdminLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B752D3E4F5061728394A5 /* PeopleAdminLogic.swift */; };
+		8B753C2D3E4F5061728394 /* PeopleAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B753D3E4F5061728394A5 /* PeopleAdminView.swift */; };
+		8B754C2D3E4F5061728394 /* UserDetailAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B754D3E4F5061728394A5 /* UserDetailAdminView.swift */; };
+		8B755C2D3E4F5061728394 /* PeopleAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B755D3E4F5061728394A5 /* PeopleAdminEntryCard.swift */; };
+		8B756C2D3E4F5061728394 /* PeopleAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B756D3E4F5061728394A5 /* PeopleAdminLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1028,6 +1041,19 @@
 		8BFB04D3E4F5061728394A5 /* ShareFeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareFeedbackView.swift; sourceTree = "<group>"; };
 		8BFB05D3E4F5061728394A5 /* ShareFeedbackEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareFeedbackEntryCard.swift; sourceTree = "<group>"; };
 		8BFB06D3E4F5061728394A5 /* FeedbackLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackLogicTests.swift; sourceTree = "<group>"; };
+
+		8B741D3E4F5061728394A5 /* LMSFeatureModelsRolesPermissionsAdmin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsRolesPermissionsAdmin.swift; sourceTree = "<group>"; };
+		8B742D3E4F5061728394A5 /* RolesPermissionsAdminLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesPermissionsAdminLogic.swift; sourceTree = "<group>"; };
+		8B743D3E4F5061728394A5 /* RolesPermissionsAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesPermissionsAdminView.swift; sourceTree = "<group>"; };
+		8B744D3E4F5061728394A5 /* RolesPermissionsAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesPermissionsAdminEntryCard.swift; sourceTree = "<group>"; };
+		8B745D3E4F5061728394A5 /* RolesPermissionsAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesPermissionsAdminLogicTests.swift; sourceTree = "<group>"; };
+
+		8B751D3E4F5061728394A5 /* LMSFeatureModelsPeopleAdmin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsPeopleAdmin.swift; sourceTree = "<group>"; };
+		8B752D3E4F5061728394A5 /* PeopleAdminLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleAdminLogic.swift; sourceTree = "<group>"; };
+		8B753D3E4F5061728394A5 /* PeopleAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleAdminView.swift; sourceTree = "<group>"; };
+		8B754D3E4F5061728394A5 /* UserDetailAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDetailAdminView.swift; sourceTree = "<group>"; };
+		8B755D3E4F5061728394A5 /* PeopleAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleAdminEntryCard.swift; sourceTree = "<group>"; };
+		8B756D3E4F5061728394A5 /* PeopleAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleAdminLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1051,6 +1077,8 @@
 		029927E4F879434FA36100DE /* Profile */ = {
 			isa = PBXGroup;
 			children = (
+				8B755D3E4F5061728394A5 /* PeopleAdminEntryCard.swift */,
+				8B744D3E4F5061728394A5 /* RolesPermissionsAdminEntryCard.swift */,
 				8BFB05D3E4F5061728394A5 /* ShareFeedbackEntryCard.swift */,
 				8B735D3E4F5061728394A5 /* ArchivedCoursesAdminEntryCard.swift */,
 				96CC6039A7C74DD087D8CD0A /* BiometricLockView.swift */,
@@ -1594,6 +1622,9 @@
 		8B72ADM015C6D7E8F901234567 /* Admin */ = {
 			isa = PBXGroup;
 			children = (
+				8B754D3E4F5061728394A5 /* UserDetailAdminView.swift */,
+				8B753D3E4F5061728394A5 /* PeopleAdminView.swift */,
+				8B743D3E4F5061728394A5 /* RolesPermissionsAdminView.swift */,
 				8B734D3E4F5061728394A5 /* ArchivedCoursesAdminView.swift */,
 			);
 			path = Admin;
@@ -1621,6 +1652,8 @@
 		8D3F9FB222A34107B54468F2 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B756D3E4F5061728394A5 /* PeopleAdminLogicTests.swift */,
+				8B745D3E4F5061728394A5 /* RolesPermissionsAdminLogicTests.swift */,
 				8BFB06D3E4F5061728394A5 /* FeedbackLogicTests.swift */,
 				8B736D3E4F5061728394A5 /* ArchivedCoursesAdminLogicTests.swift */,
 				D264344C703A4CFD911FAE21 /* AccessibilitySupportTests.swift */,
@@ -1902,6 +1935,10 @@
 		D7AC7435149B4B17A073AD6F /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B752D3E4F5061728394A5 /* PeopleAdminLogic.swift */,
+				8B751D3E4F5061728394A5 /* LMSFeatureModelsPeopleAdmin.swift */,
+				8B742D3E4F5061728394A5 /* RolesPermissionsAdminLogic.swift */,
+				8B741D3E4F5061728394A5 /* LMSFeatureModelsRolesPermissionsAdmin.swift */,
 				8BFB03D3E4F5061728394A5 /* FeedbackLogic.swift */,
 				8BFB02D3E4F5061728394A5 /* LMSAPIFeedback.swift */,
 				8BFB01D3E4F5061728394A5 /* LMSFeatureModelsFeedback.swift */,
@@ -2227,6 +2264,8 @@
 				BA8C6B804E624263A8A3823D /* AccessibilitySupportTests.swift in Sources */,
 				8FC4B3F7DBAB4B72989E56C5 /* AccountIntegrationsLogicTests.swift in Sources */,
 				8B736C2D3E4F5061728394 /* ArchivedCoursesAdminLogicTests.swift in Sources */,
+				8B745C2D3E4F5061728394 /* RolesPermissionsAdminLogicTests.swift in Sources */,
+				8B756C2D3E4F5061728394 /* PeopleAdminLogicTests.swift in Sources */,
 				2CE6FBFE7A7D40FE82EA5491 /* AdvisingLogicTests.swift in Sources */,
 				C6089046589A42FAAD0B2BE2 /* AnnouncementLogicTests.swift in Sources */,
 				8110EDFE48534F79B8E70867 /* AssignmentLogicTests.swift in Sources */,
@@ -2730,6 +2769,15 @@
 				8B733C2D3E4F5061728394 /* ArchivedCoursesAdminLogic.swift in Sources */,
 				8B734C2D3E4F5061728394 /* ArchivedCoursesAdminView.swift in Sources */,
 				8B735C2D3E4F5061728394 /* ArchivedCoursesAdminEntryCard.swift in Sources */,
+				8B741C2D3E4F5061728394 /* LMSFeatureModelsRolesPermissionsAdmin.swift in Sources */,
+				8B742C2D3E4F5061728394 /* RolesPermissionsAdminLogic.swift in Sources */,
+				8B743C2D3E4F5061728394 /* RolesPermissionsAdminView.swift in Sources */,
+				8B744C2D3E4F5061728394 /* RolesPermissionsAdminEntryCard.swift in Sources */,
+				8B751C2D3E4F5061728394 /* LMSFeatureModelsPeopleAdmin.swift in Sources */,
+				8B752C2D3E4F5061728394 /* PeopleAdminLogic.swift in Sources */,
+				8B753C2D3E4F5061728394 /* PeopleAdminView.swift in Sources */,
+				8B754C2D3E4F5061728394 /* UserDetailAdminView.swift in Sources */,
+				8B755C2D3E4F5061728394 /* PeopleAdminEntryCard.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

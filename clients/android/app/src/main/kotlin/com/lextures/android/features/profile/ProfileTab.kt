@@ -121,6 +121,8 @@ fun ProfileTab(
     var showShareFeedback by remember { mutableStateOf(false) }
     var feedbackSuccessMessage by remember { mutableStateOf<String?>(null) }
     var showArchivedCoursesAdmin by remember { mutableStateOf(false) }
+    var showRolesPermissionsAdmin by remember { mutableStateOf(false) }
+    var showPeopleAdmin by remember { mutableStateOf(false) }
     var personalDetailsVisible by remember { mutableStateOf(false) }
     var researchVisible by remember { mutableStateOf(false) }
     var showMoreHub by remember { mutableStateOf(false) }
@@ -309,6 +311,28 @@ fun ProfileTab(
             shell = shell,
             localePrefs = localePreferences,
             onBack = { showArchivedCoursesAdmin = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showRolesPermissionsAdmin) {
+        com.lextures.android.features.settings.admin.RolesPermissionsAdminScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = { showRolesPermissionsAdmin = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showPeopleAdmin) {
+        com.lextures.android.features.settings.admin.PeopleAdminScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = { showPeopleAdmin = false },
             modifier = modifier,
         )
         return
@@ -785,6 +809,36 @@ fun ProfileTab(
                     title = L.text(R.string.mobile_admin_archivedCourses_title),
                     subtitle = L.text(R.string.mobile_admin_archivedCourses_entry_subtitle),
                     onClick = { showArchivedCoursesAdmin = true },
+                )
+            }
+        }
+
+        if (com.lextures.android.core.lms.RolesPermissionsAdminLogic.shouldShowEntry(
+                shell.platformFeatures,
+                shell.permissions,
+            )
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Person,
+                    title = L.text(R.string.mobile_admin_roles_title),
+                    subtitle = L.text(R.string.mobile_admin_roles_entry_subtitle),
+                    onClick = { showRolesPermissionsAdmin = true },
+                )
+            }
+        }
+
+        if (com.lextures.android.core.lms.PeopleAdminLogic.shouldShowEntry(
+                shell.platformFeatures,
+                shell.permissions,
+            )
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Person,
+                    title = L.text(R.string.mobile_admin_people_title),
+                    subtitle = L.text(R.string.mobile_admin_people_entry_subtitle),
+                    onClick = { showPeopleAdmin = true },
                 )
             }
         }

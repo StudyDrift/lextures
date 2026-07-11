@@ -4133,6 +4133,135 @@ object LmsApi {
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
     }
 
+    // Roles & permissions admin (M14.2)
+
+    suspend fun fetchRoles(accessToken: String): List<RoleWithPermissions> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/settings/roles", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<RolesListResponse>(body).roles
+    }
+
+    suspend fun fetchRoleUsers(roleId: String, accessToken: String): List<RbacUserBrief> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/settings/roles/${encodePath(roleId)}/users",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<RoleUsersResponse>(body).users
+        }
+
+    suspend fun fetchEligibleRoleUsers(
+        roleId: String,
+        query: String?,
+        accessToken: String,
+    ): List<RbacUserBrief> = withContext(Dispatchers.IO) {
+        val trimmed = query?.trim().orEmpty()
+        val path = if (trimmed.isEmpty()) {
+            "/api/v1/settings/roles/${encodePath(roleId)}/users/eligible"
+        } else {
+            "/api/v1/settings/roles/${encodePath(roleId)}/users/eligible?q=${encodeQuery(trimmed)}"
+        }
+        val (body, code) = client.request(path = path, accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<RoleUsersResponse>(body).users
+    }
+
+    suspend fun addUserToRole(roleId: String, userId: String, accessToken: String) = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(
+            RolesPermissionsAdminLogic.addRoleUserRequest(userId),
+            AddRoleUserRequest.serializer(),
+        )
+        val (body, code) = client.request(
+            path = "/api/v1/settings/roles/${encodePath(roleId)}/users",
+            method = "POST",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun removeUserFromRole(roleId: String, userId: String, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/settings/roles/${encodePath(roleId)}/users/${encodePath(userId)}",
+                method = "DELETE",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+
+    // People admin (M14.3)
+
+    suspend fun searchPeople(
+        query: String,
+        page: Int,
+        perPage: Int,
+        accessToken: String,
+    ): PaginatedPeople = withContext(Dispatchers.IO) {
+        val trimmed = query.trim()
+        val path = buildString {
+            append("/api/v1/admin/people?q=${encodeQuery(trimmed)}")
+            append("&page=$page")
+            append("&per_page=$perPage")
+        }
+        val (body, code) = client.request(path = path, accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchPersonReport(userId: String, accessToken: String): PersonReport =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/people/${encodePath(userId)}/report",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun invitePerson(body: InvitePersonRequest, accessToken: String): PersonRow =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(body, InvitePersonRequest.serializer())
+            val (responseBody, code) = client.request(
+                path = "/api/v1/admin/people/invite",
+                method = "POST",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+            decode(responseBody)
+        }
+
+    suspend fun patchPerson(userId: String, active: Boolean, accessToken: String): PersonRow =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(
+                PeopleAdminLogic.patchPersonRequest(active),
+                PatchPersonRequest.serializer(),
+            )
+            val (body, code) = client.request(
+                path = "/api/v1/admin/people/${encodePath(userId)}",
+                method = "PATCH",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun resendPersonInvite(email: String) = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(
+            PeopleAdminLogic.resendInviteRequest(email),
+            ForgotPasswordRequest.serializer(),
+        )
+        val (body, code) = client.request(
+            path = "/api/v1/auth/forgot-password",
+            method = "POST",
+            body = payload,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
     // Product feedback (FB3)
 
     suspend fun submitFeedback(body: SubmitFeedbackRequest, accessToken: String): SubmitFeedbackResponse =
