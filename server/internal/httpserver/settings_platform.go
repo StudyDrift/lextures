@@ -1013,6 +1013,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		if d.Platform != nil {
 			d.Platform.Reload(merged)
 		}
+		d.recordPlatformFeatureAudit(r, actorID, b)
 		// Marketplace flag state metric (plan MKT1 observability).
 		telemetry.SetMarketplaceFlagState(merged.FFCourseMarketplace)
 		if wr.FFCourseMarketplace != nil && merged.FFCourseMarketplace != prevCourseMarketplace {

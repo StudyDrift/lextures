@@ -46,6 +46,60 @@ object LmsApi {
 
     private fun encodePath(value: String): String = encodeQuery(value).replace("+", "%20")
 
+    // Global platform configuration (M14.6)
+
+    suspend fun fetchPlatformSettings(accessToken: String): PlatformSettingsSnapshot =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/settings/platform",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            val settings = decode<PlatformSettingsSnapshot>(body)
+            val (featuresBody, featuresCode) = client.request(
+                path = "/api/v1/platform/features",
+                accessToken = accessToken,
+            )
+            if (featuresCode !in 200..299) {
+                throw ApiError.HttpStatus(featuresCode, parseApiErrorMessage(featuresBody))
+            }
+            PlatformSettingsAdminLogic.applyingEffectiveFeatures(
+                decode<PlatformFeatureStates>(featuresBody),
+                settings,
+            )
+        }
+
+    suspend fun setPlatformFeature(
+        key: String,
+        enabled: Boolean,
+        accessToken: String,
+    ): PlatformSettingsSnapshot = withContext(Dispatchers.IO) {
+        require(PlatformSettingsAdminLogic.FEATURE_DEFINITIONS.any { it.key == key })
+        val requestBody = buildJsonObject {
+            put(key, enabled)
+            put("updateMask", kotlinx.serialization.json.buildJsonArray { add(JsonPrimitive(key)) })
+        }.toString()
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/settings/platform",
+            method = "PUT",
+            body = requestBody,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        val persisted = decode<PlatformSettingsSnapshot>(body)
+        val (featuresBody, featuresCode) = client.request(
+            path = "/api/v1/platform/features",
+            accessToken = accessToken,
+        )
+        if (featuresCode !in 200..299) {
+            throw ApiError.HttpStatus(featuresCode, parseApiErrorMessage(featuresBody))
+        }
+        PlatformSettingsAdminLogic.applyingEffectiveFeatures(
+            decode<PlatformFeatureStates>(featuresBody),
+            persisted,
+        )
+    }
+
     // Courses
 
     suspend fun fetchCourses(accessToken: String): List<CourseSummary> = withContext(Dispatchers.IO) {

@@ -48,6 +48,8 @@ const (
 	EventFeedbackAdminUpdate         = "feedback_admin_update"
 )
 
+const EventPlatformSettingsChange = "platform_settings_change"
+
 var ErrNotFound = errors.New("adminaudit: event not found")
 
 // CheckReadAccess returns true when the user holds the compliance:audit:read permission.

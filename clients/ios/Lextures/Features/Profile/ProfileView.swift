@@ -41,6 +41,7 @@ struct ProfileView: View {
                         PeopleAdminEntryCard()
                         OrgStructureAdminEntryCard()
                         OrgBrandingAdminEntryCard()
+                        PlatformSettingsAdminEntryCard()
                         ProfileDepthCards()
                         LearnerProfileEntryCard()
                         ShareFeedbackEntryCard {
@@ -115,6 +116,9 @@ struct ProfileView: View {
             }
             .navigationDestination(for: OrgBrandingAdminRoute.self) { _ in
                 OrgBrandingAdminView()
+            }
+            .navigationDestination(for: PlatformSettingsAdminRoute.self) { _ in
+                PlatformSettingsView()
             }
             .navigationDestination(for: MoreHubRoute.self) { _ in
                 MoreHubView()
