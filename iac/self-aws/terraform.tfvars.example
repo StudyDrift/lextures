@@ -19,9 +19,13 @@ aws_region   = "us-east-1"
 # web_domain_names        = ["app.example.com"]
 # web_acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
 
-# API only on ECS Fargate (no web container)
-# enable_ecs = true
+# API + web on ECS Fargate (images from .github/workflows/publish-images.yml)
+# enable_ecs   = true
 # server_image = "ghcr.io/YOUR_ORG/lextures/server:latest"
+# web_image    = "ghcr.io/YOUR_ORG/lextures/web:latest"
+# Private GHCR: set both (PAT with read:packages). Leave empty if packages are public.
+# registry_username = ""
+# registry_password = ""
 
 # public_web_origin = "https://app.example.com"  # optional override; default = CloudFront URL
 # jwt_secret        = ""  # empty = auto-generate into Secrets Manager

@@ -1,6 +1,6 @@
-# Static Vite SPA on S3 + CloudFront.
-# Default origin: S3 (private via OAC). API paths are forwarded to the ALB so the
-# browser can use same-origin requests (empty VITE_API_URL).
+# CloudFront front door for the SPA.
+# - web_image empty: S3 origin (static deploy via scripts/deploy-web.sh) + ALB for API paths
+# - web_image set:   ALB origin for everything (ALB path-routes API vs nginx SPA)
 
 locals {
   web_bucket_name = coalesce(
@@ -12,17 +12,11 @@ locals {
   cf_cache_optimized   = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   cf_cache_disabled    = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
   cf_origin_all_viewer = "216adef6-5c7f-47e4-b989-5492eafa07d3" # headers/query/cookies → ALB
-
-  api_path_patterns = [
-    "/api/*",
-    "/health",
-    "/health/*",
-    "/tus/*",
-  ]
 }
 
 resource "aws_s3_bucket" "web" {
-  count = var.enable_static_site ? 1 : 0
+  # Retained whenever enable_static_site is true (even if CloudFront serves the web container).
+  count = local.create_web_bucket ? 1 : 0
 
   bucket        = local.web_bucket_name
   force_destroy = var.web_bucket_force_destroy
@@ -33,7 +27,7 @@ resource "aws_s3_bucket" "web" {
 }
 
 resource "aws_s3_bucket_public_access_block" "web" {
-  count = var.enable_static_site ? 1 : 0
+  count = local.create_web_bucket ? 1 : 0
 
   bucket = aws_s3_bucket.web[0].id
 
@@ -44,7 +38,7 @@ resource "aws_s3_bucket_public_access_block" "web" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "web" {
-  count = var.enable_static_site ? 1 : 0
+  count = local.create_web_bucket ? 1 : 0
 
   bucket = aws_s3_bucket.web[0].id
 
@@ -57,7 +51,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "web" {
 }
 
 resource "aws_s3_bucket_versioning" "web" {
-  count = var.enable_static_site ? 1 : 0
+  count = local.create_web_bucket ? 1 : 0
 
   bucket = aws_s3_bucket.web[0].id
 
@@ -67,7 +61,7 @@ resource "aws_s3_bucket_versioning" "web" {
 }
 
 resource "aws_cloudfront_origin_access_control" "web" {
-  count = var.enable_static_site ? 1 : 0
+  count = local.create_web_bucket ? 1 : 0
 
   name                              = "${local.name_prefix}-web-oac"
   description                       = "OAC for static web bucket"
@@ -81,23 +75,26 @@ resource "aws_cloudfront_distribution" "web" {
 
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "${local.name_prefix} static web"
-  default_root_object = "index.html"
+  comment             = "${local.name_prefix} web"
+  default_root_object = local.use_web_container ? "" : "index.html"
   price_class         = var.cloudfront_price_class
   aliases             = var.web_domain_names
   wait_for_deployment = false
 
-  origin {
-    domain_name              = aws_s3_bucket.web[0].bucket_regional_domain_name
-    origin_id                = "s3-web"
-    origin_access_control_id = aws_cloudfront_origin_access_control.web[0].id
+  dynamic "origin" {
+    for_each = local.create_web_bucket ? [1] : []
+    content {
+      domain_name              = aws_s3_bucket.web[0].bucket_regional_domain_name
+      origin_id                = "s3-web"
+      origin_access_control_id = aws_cloudfront_origin_access_control.web[0].id
+    }
   }
 
   dynamic "origin" {
     for_each = var.enable_ecs ? [1] : []
     content {
       domain_name = aws_lb.main[0].dns_name
-      origin_id   = "alb-api"
+      origin_id   = "alb"
 
       custom_origin_config {
         http_port              = 80
@@ -108,24 +105,27 @@ resource "aws_cloudfront_distribution" "web" {
     }
   }
 
-  # SPA assets (hashed filenames under assets/ get long cache from build tooling + CF).
+  # SPA default: S3 when static-only; ALB (nginx web service) when web_image is set.
   default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    allowed_methods        = local.use_web_container ? ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"] : ["GET", "HEAD", "OPTIONS"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "s3-web"
+    target_origin_id       = local.use_web_container ? "alb" : "s3-web"
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
-    cache_policy_id        = local.cf_cache_optimized
+    # Prefer origin Cache-Control when fronting nginx; disable cache for API-style methods on ALB SPA.
+    cache_policy_id          = local.use_web_container ? local.cf_cache_disabled : local.cf_cache_optimized
+    origin_request_policy_id = local.use_web_container ? local.cf_origin_all_viewer : null
   }
 
-  # Proxy API + health + tus to Fargate via ALB (no cache; forward auth cookies/headers).
+  # When SPA is on S3, proxy API + health + tus to Fargate via ALB (no cache).
+  # When SPA is on Fargate, ALB already path-routes these — still pin no-cache + full viewer forward.
   dynamic "ordered_cache_behavior" {
     for_each = var.enable_ecs ? local.api_path_patterns : []
     content {
       path_pattern             = ordered_cache_behavior.value
       allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
       cached_methods           = ["GET", "HEAD"]
-      target_origin_id         = "alb-api"
+      target_origin_id         = "alb"
       viewer_protocol_policy   = "redirect-to-https"
       compress                 = true
       cache_policy_id          = local.cf_cache_disabled
@@ -133,19 +133,16 @@ resource "aws_cloudfront_distribution" "web" {
     }
   }
 
-  # Client-side routing: missing keys → index.html
-  custom_error_response {
-    error_code            = 403
-    response_code         = 200
-    response_page_path    = "/index.html"
-    error_caching_min_ttl = 0
-  }
-
-  custom_error_response {
-    error_code            = 404
-    response_code         = 200
-    response_page_path    = "/index.html"
-    error_caching_min_ttl = 0
+  # Client-side routing for S3 origin: missing keys → index.html.
+  # nginx try_files already rewrites SPA routes when the origin is the web container.
+  dynamic "custom_error_response" {
+    for_each = local.serve_spa_from_s3 ? [403, 404] : []
+    content {
+      error_code            = custom_error_response.value
+      response_code         = 200
+      response_page_path    = "/index.html"
+      error_caching_min_ttl = 0
+    }
   }
 
   restrictions {
@@ -176,7 +173,7 @@ resource "aws_cloudfront_distribution" "web" {
 }
 
 resource "aws_s3_bucket_policy" "web" {
-  count = var.enable_static_site ? 1 : 0
+  count = local.create_web_bucket ? 1 : 0
 
   bucket = aws_s3_bucket.web[0].id
 

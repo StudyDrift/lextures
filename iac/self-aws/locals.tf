@@ -26,6 +26,15 @@ locals {
   # Public Fargate avoids a ~$32/mo NAT gateway; tasks get public IPs and
   # reach private RDS/Redis inside the VPC. Flip enable_nat_gateway for private tasks.
   api_subnet_ids = var.enable_nat_gateway ? module.vpc.private_subnets : module.vpc.public_subnets
+  web_subnet_ids = local.api_subnet_ids
+
+  # SPA from the GHCR web image on Fargate (ALB path routing); otherwise S3 static deploy.
+  use_web_container = var.enable_ecs && var.web_image != ""
+  use_api_container = var.enable_ecs && var.server_image != ""
+  # Keep the static bucket when enable_static_site so enabling web_image does not destroy it.
+  create_web_bucket = var.enable_static_site
+  # CloudFront default origin is S3 only when we are not using the web container.
+  serve_spa_from_s3 = var.enable_static_site && !local.use_web_container
 
   sqs_queues = {
     canvas_import          = "canvas-course-import"
@@ -33,4 +42,12 @@ locals {
     sms_notification       = "notifications-sms"
     grading_agent          = "grading-agent-run"
   }
+
+  # Path patterns routed to the Go API on the ALB (and CloudFront when S3 is the SPA origin).
+  api_path_patterns = [
+    "/api/*",
+    "/health",
+    "/health/*",
+    "/tus/*",
+  ]
 }

@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
-# Build the Vite SPA and sync it to the self-aws static site bucket, then
-# invalidate CloudFront so clients pick up the new index.html.
+# Deploy the web SPA for self-aws.
+#
+# Modes (auto-detected from terraform outputs):
+#   1) web_image set  → force a new ECS deployment of the nginx web service
+#      (pulls the current image tag, e.g. :latest after publish-images).
+#   2) web_image empty → build the Vite SPA, sync to the static S3 bucket,
+#      and invalidate CloudFront.
 #
 # Usage (from repo root or this directory):
 #   ./iac/self-aws/scripts/deploy-web.sh
 #
 # Env overrides:
-#   WEB_BUCKET     — S3 bucket (default: terraform output web_bucket)
-#   DISTRIBUTION_ID — CloudFront ID (default: terraform output cloudfront_distribution_id)
-#   VITE_API_URL   — leave empty for same-origin via CloudFront (recommended)
+#   WEB_BUCKET      — S3 bucket (static mode; default: terraform output web_bucket)
+#   DISTRIBUTION_ID — CloudFront ID (static mode)
+#   CLUSTER         — ECS cluster (container mode)
+#   WEB_SERVICE     — ECS web service name (container mode)
+#   VITE_API_URL    — leave empty for same-origin via CloudFront (recommended)
 
 set -euo pipefail
 
@@ -18,11 +25,43 @@ WEB_DIR="$ROOT/clients/web"
 
 cd "$TF_DIR"
 
-WEB_BUCKET="${WEB_BUCKET:-$(terraform output -raw web_bucket 2>/dev/null || true)}"
-DISTRIBUTION_ID="${DISTRIBUTION_ID:-$(terraform output -raw cloudfront_distribution_id 2>/dev/null || true)}"
+tf_out() {
+  local key="$1"
+  terraform output -raw "$key" 2>/dev/null || true
+}
+
+USE_WEB_CONTAINER="$(tf_out use_web_container)"
+CLUSTER="${CLUSTER:-$(tf_out ecs_cluster_name)}"
+WEB_SERVICE="${WEB_SERVICE:-$(tf_out ecs_web_service_name)}"
+
+if [[ "${USE_WEB_CONTAINER}" == "true" ]]; then
+  if [[ -z "${CLUSTER}" || "${CLUSTER}" == "null" || -z "${WEB_SERVICE}" || "${WEB_SERVICE}" == "null" ]]; then
+    echo "error: web container mode but ecs_cluster_name / ecs_web_service_name outputs are missing." >&2
+    echo "  Set web_image and apply Terraform first." >&2
+    exit 1
+  fi
+
+  echo "==> Forcing new ECS deployment: cluster=${CLUSTER} service=${WEB_SERVICE}"
+  echo "    (ensure the image tag in web_image was pushed, e.g. after publish-images)"
+  aws ecs update-service \
+    --cluster "${CLUSTER}" \
+    --service "${WEB_SERVICE}" \
+    --force-new-deployment \
+    --no-cli-pager \
+    >/dev/null
+
+  echo "Done. ECS is rolling the web tasks. Public URL:"
+  echo "  https://$(tf_out cloudfront_domain_name 2>/dev/null || echo '<cloudfront-or-alb>')"
+  exit 0
+fi
+
+# --- Static S3 + CloudFront mode ---
+WEB_BUCKET="${WEB_BUCKET:-$(tf_out web_bucket)}"
+DISTRIBUTION_ID="${DISTRIBUTION_ID:-$(tf_out cloudfront_distribution_id)}"
 
 if [[ -z "${WEB_BUCKET}" || "${WEB_BUCKET}" == "null" ]]; then
-  echo "error: WEB_BUCKET is unset and terraform output web_bucket failed. Apply self-aws first." >&2
+  echo "error: WEB_BUCKET is unset and terraform output web_bucket failed." >&2
+  echo "  Either set web_image for ECS mode, or enable_static_site and apply first." >&2
   exit 1
 fi
 
