@@ -4333,6 +4333,114 @@ object LmsApi {
         decode(responseBody)
     }
 
+    // Org branding, AI governance & provider (M14.5)
+
+    suspend fun fetchOrgBranding(orgId: String, accessToken: String): OrgBrandingResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/orgs/${encodePath(orgId)}/branding",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun putOrgBranding(
+        orgId: String,
+        body: OrgBrandingPutRequest,
+        accessToken: String,
+    ): OrgBrandingResponse = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, OrgBrandingPutRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/orgs/${encodePath(orgId)}/branding",
+            method = "PUT",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun uploadOrgBrandingLogo(
+        orgId: String,
+        fileBytes: ByteArray,
+        fileName: String,
+        mimeType: String,
+        accessToken: String,
+    ): OrgBrandingUploadResponse = withContext(Dispatchers.IO) {
+        val body = client.uploadMultipart(
+            path = "/api/v1/orgs/${encodePath(orgId)}/branding/logo",
+            fieldName = "file",
+            fileName = fileName,
+            mimeType = mimeType,
+            fileBytes = fileBytes,
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    suspend fun fetchAIGovernanceConfig(accessToken: String): AIGovernanceConfig =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/ai-config",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun putAIGovernanceConfig(
+        body: AIGovernancePutRequest,
+        accessToken: String,
+    ): AIGovernanceConfig = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, AIGovernancePutRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/admin/ai-config",
+            method = "PUT",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun fetchAIProviderSettings(accessToken: String): AIProviderSettings =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/ai-settings",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun putAIProviderSettings(
+        body: AIProviderSettingsPutRequest,
+        accessToken: String,
+    ): AIProviderSettings = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, AIProviderSettingsPutRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/admin/ai-settings",
+            method = "PUT",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun testAIProviderSettings(accessToken: String): AIProviderTestResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/ai-settings/test",
+                method = "POST",
+                body = "{}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
     // Product feedback (FB3)
 
     suspend fun submitFeedback(body: SubmitFeedbackRequest, accessToken: String): SubmitFeedbackResponse =
