@@ -39,6 +39,7 @@ struct ProfileView: View {
                         ArchivedCoursesAdminEntryCard()
                         RolesPermissionsAdminEntryCard()
                         PeopleAdminEntryCard()
+                        OrgStructureAdminEntryCard()
                         ProfileDepthCards()
                         LearnerProfileEntryCard()
                         ShareFeedbackEntryCard {
@@ -107,6 +108,9 @@ struct ProfileView: View {
             }
             .navigationDestination(for: PeopleAdminRoute.self) { _ in
                 PeopleAdminView()
+            }
+            .navigationDestination(for: OrgStructureAdminRoute.self) { _ in
+                OrgStructureAdminView()
             }
             .navigationDestination(for: MoreHubRoute.self) { _ in
                 MoreHubView()

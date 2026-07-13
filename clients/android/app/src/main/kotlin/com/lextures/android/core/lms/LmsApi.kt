@@ -4262,6 +4262,77 @@ object LmsApi {
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
     }
 
+    // Org structure & terms (M14.4)
+
+    suspend fun fetchAdminOrganizations(accessToken: String): List<AdminOrgRow> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/orgs?limit=${OrgStructureAdminLogic.ORG_LIST_LIMIT}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<AdminOrgsListResponse>(body).organizations.orEmpty()
+        }
+
+    suspend fun fetchOrgUnitTree(orgId: String, accessToken: String): List<OrgUnitTreeNode> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/orgs/${encodePath(orgId)}/units/tree",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<OrgUnitTreeResponse>(body).tree.orEmpty()
+        }
+
+    suspend fun patchOrgUnit(
+        orgId: String,
+        unitId: String,
+        body: PatchOrgUnitRequest,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, PatchOrgUnitRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/admin/orgs/${encodePath(orgId)}/units/${encodePath(unitId)}",
+            method = "PATCH",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+    }
+
+    suspend fun createAcademicTerm(
+        orgId: String,
+        body: CreateAcademicTermRequest,
+        accessToken: String,
+    ): OrgTerm = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, CreateAcademicTermRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/orgs/${encodePath(orgId)}/terms",
+            method = "POST",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun patchAcademicTerm(
+        orgId: String,
+        termId: String,
+        body: PatchAcademicTermRequest,
+        accessToken: String,
+    ): OrgTerm = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, PatchAcademicTermRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/orgs/${encodePath(orgId)}/terms/${encodePath(termId)}",
+            method = "PATCH",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
     // Product feedback (FB3)
 
     suspend fun submitFeedback(body: SubmitFeedbackRequest, accessToken: String): SubmitFeedbackResponse =

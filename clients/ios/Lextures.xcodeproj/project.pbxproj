@@ -522,6 +522,14 @@
 		8B754C2D3E4F5061728394 /* UserDetailAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B754D3E4F5061728394A5 /* UserDetailAdminView.swift */; };
 		8B755C2D3E4F5061728394 /* PeopleAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B755D3E4F5061728394A5 /* PeopleAdminEntryCard.swift */; };
 		8B756C2D3E4F5061728394 /* PeopleAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B756D3E4F5061728394A5 /* PeopleAdminLogicTests.swift */; };
+
+		8B761C2D3E4F5061728394 /* LMSFeatureModelsOrgStructureAdmin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B761D3E4F5061728394A5 /* LMSFeatureModelsOrgStructureAdmin.swift */; };
+		8B762C2D3E4F5061728394 /* OrgStructureAdminLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B762D3E4F5061728394A5 /* OrgStructureAdminLogic.swift */; };
+		8B763C2D3E4F5061728394 /* OrgStructureAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B763D3E4F5061728394A5 /* OrgStructureAdminView.swift */; };
+		8B764C2D3E4F5061728394 /* OrgStructureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B764D3E4F5061728394A5 /* OrgStructureView.swift */; };
+		8B765C2D3E4F5061728394 /* TermsAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B765D3E4F5061728394A5 /* TermsAdminView.swift */; };
+		8B766C2D3E4F5061728394 /* OrgStructureAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B766D3E4F5061728394A5 /* OrgStructureAdminEntryCard.swift */; };
+		8B767C2D3E4F5061728394 /* OrgStructureAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B767D3E4F5061728394A5 /* OrgStructureAdminLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1054,6 +1062,14 @@
 		8B754D3E4F5061728394A5 /* UserDetailAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDetailAdminView.swift; sourceTree = "<group>"; };
 		8B755D3E4F5061728394A5 /* PeopleAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleAdminEntryCard.swift; sourceTree = "<group>"; };
 		8B756D3E4F5061728394A5 /* PeopleAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleAdminLogicTests.swift; sourceTree = "<group>"; };
+
+		8B761D3E4F5061728394A5 /* LMSFeatureModelsOrgStructureAdmin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsOrgStructureAdmin.swift; sourceTree = "<group>"; };
+		8B762D3E4F5061728394A5 /* OrgStructureAdminLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrgStructureAdminLogic.swift; sourceTree = "<group>"; };
+		8B763D3E4F5061728394A5 /* OrgStructureAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrgStructureAdminView.swift; sourceTree = "<group>"; };
+		8B764D3E4F5061728394A5 /* OrgStructureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrgStructureView.swift; sourceTree = "<group>"; };
+		8B765D3E4F5061728394A5 /* TermsAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsAdminView.swift; sourceTree = "<group>"; };
+		8B766D3E4F5061728394A5 /* OrgStructureAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrgStructureAdminEntryCard.swift; sourceTree = "<group>"; };
+		8B767D3E4F5061728394A5 /* OrgStructureAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrgStructureAdminLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1077,6 +1093,7 @@
 		029927E4F879434FA36100DE /* Profile */ = {
 			isa = PBXGroup;
 			children = (
+				8B766D3E4F5061728394A5 /* OrgStructureAdminEntryCard.swift */,
 				8B755D3E4F5061728394A5 /* PeopleAdminEntryCard.swift */,
 				8B744D3E4F5061728394A5 /* RolesPermissionsAdminEntryCard.swift */,
 				8BFB05D3E4F5061728394A5 /* ShareFeedbackEntryCard.swift */,
@@ -1622,6 +1639,9 @@
 		8B72ADM015C6D7E8F901234567 /* Admin */ = {
 			isa = PBXGroup;
 			children = (
+				8B765D3E4F5061728394A5 /* TermsAdminView.swift */,
+				8B764D3E4F5061728394A5 /* OrgStructureView.swift */,
+				8B763D3E4F5061728394A5 /* OrgStructureAdminView.swift */,
 				8B754D3E4F5061728394A5 /* UserDetailAdminView.swift */,
 				8B753D3E4F5061728394A5 /* PeopleAdminView.swift */,
 				8B743D3E4F5061728394A5 /* RolesPermissionsAdminView.swift */,
@@ -1652,6 +1672,7 @@
 		8D3F9FB222A34107B54468F2 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B767D3E4F5061728394A5 /* OrgStructureAdminLogicTests.swift */,
 				8B756D3E4F5061728394A5 /* PeopleAdminLogicTests.swift */,
 				8B745D3E4F5061728394A5 /* RolesPermissionsAdminLogicTests.swift */,
 				8BFB06D3E4F5061728394A5 /* FeedbackLogicTests.swift */,
@@ -1935,6 +1956,8 @@
 		D7AC7435149B4B17A073AD6F /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B762D3E4F5061728394A5 /* OrgStructureAdminLogic.swift */,
+				8B761D3E4F5061728394A5 /* LMSFeatureModelsOrgStructureAdmin.swift */,
 				8B752D3E4F5061728394A5 /* PeopleAdminLogic.swift */,
 				8B751D3E4F5061728394A5 /* LMSFeatureModelsPeopleAdmin.swift */,
 				8B742D3E4F5061728394A5 /* RolesPermissionsAdminLogic.swift */,
@@ -2261,6 +2284,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B767C2D3E4F5061728394 /* OrgStructureAdminLogicTests.swift in Sources */,
 				BA8C6B804E624263A8A3823D /* AccessibilitySupportTests.swift in Sources */,
 				8FC4B3F7DBAB4B72989E56C5 /* AccountIntegrationsLogicTests.swift in Sources */,
 				8B736C2D3E4F5061728394 /* ArchivedCoursesAdminLogicTests.swift in Sources */,
@@ -2339,6 +2363,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B766C2D3E4F5061728394 /* OrgStructureAdminEntryCard.swift in Sources */,
+				8B765C2D3E4F5061728394 /* TermsAdminView.swift in Sources */,
+				8B764C2D3E4F5061728394 /* OrgStructureView.swift in Sources */,
+				8B763C2D3E4F5061728394 /* OrgStructureAdminView.swift in Sources */,
+				8B762C2D3E4F5061728394 /* OrgStructureAdminLogic.swift in Sources */,
+				8B761C2D3E4F5061728394 /* LMSFeatureModelsOrgStructureAdmin.swift in Sources */,
 				45D7E36B2189457DA5E5A67F /* AppDelegate.swift in Sources */,
 				EF91A7CA31C4462B8359FD76 /* LexturesApp.swift in Sources */,
 				543111CB4D8F417E9E2F98DE /* RootView.swift in Sources */,
