@@ -59,7 +59,8 @@ output "ecs_api_service_name" {
 
 output "use_web_container" {
   description = "True when the SPA is served from the web container image on Fargate."
-  value       = local.use_web_container
+  # Boolean is derived via nonsensitive emptiness checks (see locals.tf).
+  value = local.use_web_container
 }
 
 output "sqs_queue_urls" {

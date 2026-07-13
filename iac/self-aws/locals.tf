@@ -29,12 +29,24 @@ locals {
   web_subnet_ids = local.api_subnet_ids
 
   # SPA from the GHCR web image on Fargate (ALB path routing); otherwise S3 static deploy.
-  use_web_container = var.enable_ecs && var.web_image != ""
-  use_api_container = var.enable_ecs && var.server_image != ""
+  # Image refs may be marked sensitive in HCP Terraform workspace variables; emptiness is not
+  # secret and must be non-sensitive for count/for_each. try(nonsensitive(...)) works whether
+  # or not the var is actually sensitive (nonsensitive errors only when the value is not).
+  web_image_set     = try(nonsensitive(var.web_image), var.web_image) != ""
+  server_image_set  = try(nonsensitive(var.server_image), var.server_image) != ""
+  use_web_container = var.enable_ecs && local.web_image_set
+  use_api_container = var.enable_ecs && local.server_image_set
   # Keep the static bucket when enable_static_site so enabling web_image does not destroy it.
   create_web_bucket = var.enable_static_site
   # CloudFront default origin is S3 only when we are not using the web container.
   serve_spa_from_s3 = var.enable_static_site && !local.use_web_container
+
+  # Non-sensitive set for ALB listener rules (for_each keys must not be sensitive).
+  api_listener_path_patterns = (
+    local.use_web_container && local.use_api_container
+    ? toset(local.api_path_patterns)
+    : toset([])
+  )
 
   sqs_queues = {
     canvas_import          = "canvas-course-import"

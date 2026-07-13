@@ -83,7 +83,7 @@ resource "aws_lb_listener" "http" {
 
 # When the SPA is on Fargate, route API/health/tus to the Go service; everything else stays on web.
 resource "aws_lb_listener_rule" "api_paths" {
-  for_each = local.use_web_container && local.use_api_container ? toset(local.api_path_patterns) : toset([])
+  for_each = local.api_listener_path_patterns
 
   listener_arn = aws_lb_listener.http[0].arn
   priority     = 10 + index(local.api_path_patterns, each.value)
