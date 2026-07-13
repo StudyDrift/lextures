@@ -1,7 +1,8 @@
 # Publish small-tier / VM container images to GHCR on every merge to main.
 #
-# Deploy Demo and Deploy Self run after this workflow completes successfully and
-# pull the immutable :<git-sha> tags (see deploy-demo.yml and deploy-self.yml).
+# Deploy Self and Deploy Self AWS run after this workflow completes successfully
+# and pull the immutable :<git-sha> tags (see deploy-self.yml and
+# deploy-self-aws.yml).
 #
 # Images:
 #   ghcr.io/<org>/<repo>/server:latest  (+ :<git-sha>)

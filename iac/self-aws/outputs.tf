@@ -59,7 +59,7 @@ output "ecs_api_service_name" {
 
 output "use_web_container" {
   description = "True when the SPA is served from the web container image on Fargate."
-  # Boolean is derived via nonsensitive emptiness checks (see locals.tf).
+  # Non-sensitive boolean (see locals.tf); deploy-web.sh reads this with terraform output -raw.
   value = local.use_web_container
 }
 
