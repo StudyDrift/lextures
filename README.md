@@ -24,6 +24,9 @@
   <a href="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self.yml">
     <img src="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self.yml/badge.svg" alt="Deploy Self GitHub Action status." />
   </a>
+  <a href="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self-aws.yml">
+    <img src="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self-aws.yml/badge.svg" alt="Deploy Self AWS GitHub Action status." />
+  </a>
 </p>
 <p align="center">
   <a href="https://self.lextures.com/">Start studying</a>

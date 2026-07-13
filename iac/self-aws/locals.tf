@@ -29,11 +29,12 @@ locals {
   web_subnet_ids = local.api_subnet_ids
 
   # SPA from the GHCR web image on Fargate (ALB path routing); otherwise S3 static deploy.
-  # Image refs may be marked sensitive in HCP Terraform workspace variables; emptiness is not
-  # secret and must be non-sensitive for count/for_each. try(nonsensitive(...)) works whether
-  # or not the var is actually sensitive (nonsensitive errors only when the value is not).
-  web_image_set     = try(nonsensitive(var.web_image), var.web_image) != ""
-  server_image_set  = try(nonsensitive(var.server_image), var.server_image) != ""
+  # web_image / server_image are sensitive (variable blocks + HCP). Emptiness is not secret
+  # and must be non-sensitive for count/for_each. Always declare the vars sensitive so
+  # nonsensitive() is valid; do not use try(nonsensitive(x), x) — Terraform treats the
+  # whole try as sensitive if any branch is sensitive.
+  web_image_set     = nonsensitive(var.web_image != "")
+  server_image_set  = nonsensitive(var.server_image != "")
   use_web_container = var.enable_ecs && local.web_image_set
   use_api_container = var.enable_ecs && local.server_image_set
   # Keep the static bucket when enable_static_site so enabling web_image does not destroy it.
@@ -42,10 +43,9 @@ locals {
   serve_spa_from_s3 = var.enable_static_site && !local.use_web_container
 
   # Non-sensitive set for ALB listener rules (for_each keys must not be sensitive).
-  api_listener_path_patterns = (
-    local.use_web_container && local.use_api_container
-    ? toset(local.api_path_patterns)
-    : toset([])
+  # Condition uses non-sensitive booleans above so the ternary result stays non-sensitive.
+  api_listener_path_patterns = toset(
+    local.use_web_container && local.use_api_container ? local.api_path_patterns : []
   )
 
   sqs_queues = {

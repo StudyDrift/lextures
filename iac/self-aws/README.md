@@ -50,7 +50,11 @@ ALB path patterns for the API: `/api/*`, `/health`, `/health/*`, `/tus/*`. The n
 
 ### Deploying new versions
 
-After `publish-images` pushes new GHCR tags (or you push manually):
+**CI (recommended):** [`.github/workflows/deploy-self-aws.yml`](../../.github/workflows/deploy-self-aws.yml) runs after [Publish container images](../../.github/workflows/publish-images.yml) succeeds on `main` (same trigger as Deploy Self). It applies this module with immutable `server_image` / `web_image` tags `ghcr.io/<org>/<repo>/{server,web}:<git-sha>`, which updates ECS task definitions and rolls the services. Manual runs: **Actions → Deploy Self AWS → Run workflow**.
+
+Repository secrets: `TF_TOKEN`, `TF_CLOUD_ORGANIZATION` (shared with Deploy Self). AWS credentials and optional GHCR pull credentials (`registry_username` / `registry_password`) belong in the HCP workspace `lextures-self-aws-production` — use a long-lived PAT for private packages, not `GITHUB_TOKEN` (it expires and would be stored in Secrets Manager).
+
+**Local / force redeploy** after images are already in the registry:
 
 ```bash
 # Roll the nginx SPA (force-new-deployment pulls the tag in web_image)
@@ -60,7 +64,7 @@ After `publish-images` pushes new GHCR tags (or you push manually):
 ./iac/self-aws/scripts/deploy-api.sh
 ```
 
-To pin a new immutable tag, change `server_image` / `web_image` in `terraform.tfvars` and `terraform apply` (creates new task definitions). With `:latest`, the force-deploy scripts above re-pull after a registry push.
+To pin a new immutable tag manually, change `server_image` / `web_image` in `terraform.tfvars` (or HCP vars) and `terraform apply` (creates new task definitions). With `:latest`, the force-deploy scripts above re-pull after a registry push.
 
 If `web_image` is empty, `deploy-web.sh` falls back to build + S3 sync + CloudFront invalidation.
 

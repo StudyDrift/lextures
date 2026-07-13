@@ -109,12 +109,17 @@ variable "server_image" {
   description = "Container image for the Go API (e.g. ghcr.io/org/lextures/server:latest). Leave empty to skip the ECS API service."
   type        = string
   default     = ""
+  # Marked sensitive so HCP/workspace "sensitive" flags are consistent; emptiness is
+  # stripped with nonsensitive() for count/for_each (see locals.tf).
+  sensitive = true
 }
 
 variable "web_image" {
   description = "Container image for the nginx SPA (e.g. ghcr.io/org/lextures/web:latest from publish-images). Leave empty to serve the SPA from S3 via deploy-web.sh instead."
   type        = string
   default     = ""
+  # Same as server_image: always sensitive so nonsensitive() on emptiness always works.
+  sensitive = true
 }
 
 variable "ecs_api_cpu" {
