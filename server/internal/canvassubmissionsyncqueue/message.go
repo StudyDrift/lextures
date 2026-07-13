@@ -2,7 +2,7 @@ package canvassubmissionsyncqueue
 
 import "github.com/google/uuid"
 
-// QueueMessage is the RabbitMQ payload for one Canvas grade push (includes the Canvas token).
+// QueueMessage is the queue payload for one Canvas grade push (includes the Canvas token).
 type QueueMessage struct {
 	JobID             uuid.UUID          `json:"jobId"`
 	UserID            uuid.UUID          `json:"userId"`

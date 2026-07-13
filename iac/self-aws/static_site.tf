@@ -1,0 +1,200 @@
+# Static Vite SPA on S3 + CloudFront.
+# Default origin: S3 (private via OAC). API paths are forwarded to the ALB so the
+# browser can use same-origin requests (empty VITE_API_URL).
+
+locals {
+  web_bucket_name = coalesce(
+    var.web_bucket_name,
+    "${local.name_prefix}-web-${data.aws_caller_identity.current.account_id}"
+  )
+
+  # Managed CloudFront policies (global; IDs are stable across accounts).
+  cf_cache_optimized   = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+  cf_cache_disabled    = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+  cf_origin_all_viewer = "216adef6-5c7f-47e4-b989-5492eafa07d3" # headers/query/cookies → ALB
+
+  api_path_patterns = [
+    "/api/*",
+    "/health",
+    "/health/*",
+    "/tus/*",
+  ]
+}
+
+resource "aws_s3_bucket" "web" {
+  count = var.enable_static_site ? 1 : 0
+
+  bucket        = local.web_bucket_name
+  force_destroy = var.web_bucket_force_destroy
+
+  tags = {
+    Name = local.web_bucket_name
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "web" {
+  count = var.enable_static_site ? 1 : 0
+
+  bucket = aws_s3_bucket.web[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "web" {
+  count = var.enable_static_site ? 1 : 0
+
+  bucket = aws_s3_bucket.web[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+    bucket_key_enabled = true
+  }
+}
+
+resource "aws_s3_bucket_versioning" "web" {
+  count = var.enable_static_site ? 1 : 0
+
+  bucket = aws_s3_bucket.web[0].id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_cloudfront_origin_access_control" "web" {
+  count = var.enable_static_site ? 1 : 0
+
+  name                              = "${local.name_prefix}-web-oac"
+  description                       = "OAC for static web bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+resource "aws_cloudfront_distribution" "web" {
+  count = var.enable_static_site ? 1 : 0
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  comment             = "${local.name_prefix} static web"
+  default_root_object = "index.html"
+  price_class         = var.cloudfront_price_class
+  aliases             = var.web_domain_names
+  wait_for_deployment = false
+
+  origin {
+    domain_name              = aws_s3_bucket.web[0].bucket_regional_domain_name
+    origin_id                = "s3-web"
+    origin_access_control_id = aws_cloudfront_origin_access_control.web[0].id
+  }
+
+  dynamic "origin" {
+    for_each = var.enable_ecs ? [1] : []
+    content {
+      domain_name = aws_lb.main[0].dns_name
+      origin_id   = "alb-api"
+
+      custom_origin_config {
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = "http-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
+    }
+  }
+
+  # SPA assets (hashed filenames under assets/ get long cache from build tooling + CF).
+  default_cache_behavior {
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "s3-web"
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+    cache_policy_id        = local.cf_cache_optimized
+  }
+
+  # Proxy API + health + tus to Fargate via ALB (no cache; forward auth cookies/headers).
+  dynamic "ordered_cache_behavior" {
+    for_each = var.enable_ecs ? local.api_path_patterns : []
+    content {
+      path_pattern             = ordered_cache_behavior.value
+      allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+      cached_methods           = ["GET", "HEAD"]
+      target_origin_id         = "alb-api"
+      viewer_protocol_policy   = "redirect-to-https"
+      compress                 = true
+      cache_policy_id          = local.cf_cache_disabled
+      origin_request_policy_id = local.cf_origin_all_viewer
+    }
+  }
+
+  # Client-side routing: missing keys → index.html
+  custom_error_response {
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 0
+  }
+
+  custom_error_response {
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 0
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  dynamic "viewer_certificate" {
+    for_each = length(var.web_domain_names) == 0 ? [1] : []
+    content {
+      cloudfront_default_certificate = true
+    }
+  }
+
+  dynamic "viewer_certificate" {
+    for_each = length(var.web_domain_names) > 0 ? [1] : []
+    content {
+      acm_certificate_arn      = var.web_acm_certificate_arn
+      ssl_support_method       = "sni-only"
+      minimum_protocol_version = "TLSv1.2_2021"
+    }
+  }
+
+  tags = {
+    Name = "${local.name_prefix}-web"
+  }
+}
+
+resource "aws_s3_bucket_policy" "web" {
+  count = var.enable_static_site ? 1 : 0
+
+  bucket = aws_s3_bucket.web[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowCloudFrontServicePrincipal"
+        Effect    = "Allow"
+        Principal = { Service = "cloudfront.amazonaws.com" }
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.web[0].arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.web[0].arn
+          }
+        }
+      }
+    ]
+  })
+}

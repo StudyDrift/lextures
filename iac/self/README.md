@@ -117,15 +117,18 @@ Sizing defaults differ for `environment = staging` vs `production` (instance cla
 ```
 iac/
 ├── modules/
-│   ├── aws/          # VPC, EKS, RDS, Redis, MQ, S3, Secrets Manager, IRSA, bastion
+│   ├── aws/          # Enterprise: VPC, EKS, RDS, Redis, MQ, S3, Secrets Manager, IRSA, bastion
 │   ├── digitalocean/ # Single droplet + block volume (small tier)
 │   ├── oracle/       # Single OCI A1 VM + block volume (small tier)
 │   ├── azure/        # planned
 │   └── gcp/          # planned
-├── production/       # root module (this directory)
+├── self/             # Multi-cloud root (this directory) — OCI/DO small, optional enterprise AWS
+├── self-aws/         # Lean AWS migration stack: ECS Fargate + RDS + ElastiCache + SQS + S3
 └── scripts/
     └── terraform-check.sh
 ```
+
+For a cost-focused AWS migration **without** Docker-on-EC2 and **without** touching Oracle, use [`iac/self-aws/`](../self-aws/README.md) (SQS instead of Amazon MQ, Fargate for API only, static SPA on S3 + CloudFront).
 
 ## Prerequisites
 

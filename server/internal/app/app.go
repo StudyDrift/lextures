@@ -149,7 +149,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	}
 
 	smsNotificationQueue, smsQueueErr := smsnotificationqueue.NewBus(
-		merged.RabbitMQURL,
+		merged.SmsNotificationQueueURL(),
 		merged.SmsNotificationQueueName,
 		merged.SmsNotificationConcurrency,
 	)
@@ -183,7 +183,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	}
 
 	canvasImportHub := canvasimportevents.New()
-	canvasImportQueue, queueErr := canvasimportqueue.NewBus(merged.RabbitMQURL, merged.CanvasImportQueueName, merged.CanvasImportConcurrency)
+	canvasImportQueue, queueErr := canvasimportqueue.NewBus(merged.CanvasImportQueueURL(), merged.CanvasImportQueueName, merged.CanvasImportConcurrency)
 	if queueErr != nil {
 		return fmt.Errorf("app: canvas import queue: %w", queueErr)
 	}
@@ -192,7 +192,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	canvasSubmissionSyncHub := canvassubmissionsyncevents.New()
 	canvasSubmissionSyncJobs := canvassubmissionsyncjobs.NewRegistry()
 	canvasSubmissionSyncQueue, syncQueueErr := canvassubmissionsyncqueue.NewBus(
-		merged.RabbitMQURL,
+		merged.CanvasSubmissionSyncQueueURL(),
 		merged.CanvasSubmissionSyncQueueName,
 		merged.CanvasSubmissionSyncConcurrency,
 	)
@@ -201,7 +201,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	}
 	defer func() { _ = canvasSubmissionSyncQueue.Close() }()
 
-	gradingAgentQueue, gradingQueueErr := gradingagentqueue.NewBus(merged.RabbitMQURL, "grading.agent.run", 2)
+	gradingAgentQueue, gradingQueueErr := gradingagentqueue.NewBus(merged.GradingAgentQueueURL(), "grading.agent.run", 2)
 	if gradingQueueErr != nil {
 		return fmt.Errorf("app: grading agent queue: %w", gradingQueueErr)
 	}

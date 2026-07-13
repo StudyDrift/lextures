@@ -1,0 +1,29 @@
+project_name = "lextures"
+environment  = "staging"
+aws_region   = "us-east-1"
+
+# Cost-focused defaults (free-tier eligible sizes where AWS still offers them):
+# db_instance_class       = "db.t4g.micro"
+# db_allocated_storage_gb = 20
+# redis_node_type         = "cache.t3.micro"
+# db_multi_az             = false
+# enable_nat_gateway      = false   # public-subnet Fargate; set true for private tasks
+
+# Static web (S3 + CloudFront) — default on
+# enable_static_site = true
+# web_bucket_force_destroy = true  # staging only
+# cloudfront_price_class   = "PriceClass_100"
+#
+# Custom domain (optional). Leave BOTH unset to use the free *.cloudfront.net cert.
+# Request/import a cert in ACM in us-east-1 first, then set the real ARN (12-digit account ID):
+# web_domain_names        = ["app.example.com"]
+# web_acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+
+# API only on ECS Fargate (no web container)
+# enable_ecs = true
+# server_image = "ghcr.io/YOUR_ORG/lextures/server:latest"
+
+# public_web_origin = "https://app.example.com"  # optional override; default = CloudFront URL
+# jwt_secret        = ""  # empty = auto-generate into Secrets Manager
+
+# course_files_bucket_force_destroy = true  # staging only

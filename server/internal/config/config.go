@@ -609,8 +609,18 @@ type Config struct {
 	// (plan 17.2 FR-8 / AC-4). Defaults to 30 seconds.
 	ShutdownTimeoutSecs int
 
+	// QueueBackend selects the durable message bus: "rabbitmq" (default when
+	// RABBITMQ_URL is set), "sqs" (AWS SQS), or "memory" (in-process only).
+	// Empty auto-detects: SQS when QUEUE_BACKEND=sqs or any SQS_*_URL is set and
+	// QUEUE_BACKEND is not rabbitmq; otherwise RabbitMQ when RABBITMQ_URL is set.
+	QueueBackend string
 	// RabbitMQURL is the AMQP connection URL for background job queues (Canvas import, etc.).
 	RabbitMQURL string
+	// SQS queue URLs (full https://sqs.<region>.amazonaws.com/... URLs). Used when QueueBackend is "sqs".
+	SQSCanvasImportURL          string
+	SQSCanvasSubmissionSyncURL  string
+	SQSSmsNotificationURL       string
+	SQSGradingAgentURL          string
 	// CanvasImportQueueName is the RabbitMQ queue for Canvas LMS imports (default canvas.course.import).
 	CanvasImportQueueName string
 	// CanvasImportConcurrency is how many Canvas import jobs the queue consumer processes in parallel.
@@ -864,7 +874,12 @@ func Load() Config {
 		DBPoolMinConns:      intEnvDefault("DB_POOL_MIN_CONNS", 0),
 		ShutdownTimeoutSecs: intEnvDefault("SHUTDOWN_TIMEOUT_SECS", defaultShutdownTimeoutSecs),
 
+		QueueBackend:                    strings.ToLower(firstNonEmptyTrimmed("QUEUE_BACKEND")),
 		RabbitMQURL:                     firstNonEmptyTrimmed("RABBITMQ_URL"),
+		SQSCanvasImportURL:              firstNonEmptyTrimmed("SQS_CANVAS_IMPORT_URL"),
+		SQSCanvasSubmissionSyncURL:      firstNonEmptyTrimmed("SQS_CANVAS_SUBMISSION_SYNC_URL"),
+		SQSSmsNotificationURL:           firstNonEmptyTrimmed("SQS_SMS_NOTIFICATION_URL"),
+		SQSGradingAgentURL:              firstNonEmptyTrimmed("SQS_GRADING_AGENT_URL"),
 		CanvasImportQueueName:           stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
 		CanvasImportConcurrency:         canvasImportConcurrency(),
 		CanvasSubmissionSyncQueueName:   stringDefault(firstNonEmptyTrimmed("CANVAS_SUBMISSION_SYNC_QUEUE_NAME"), "canvas.submission.sync"),
@@ -959,6 +974,58 @@ func (c Config) ClassLinkOIDCConfigured() bool {
 	return strings.TrimSpace(c.ClassLinkOIDCIssuer) != "" &&
 		strings.TrimSpace(c.ClassLinkOIDCClientID) != "" &&
 		strings.TrimSpace(c.ClassLinkOIDCClientSecret) != ""
+}
+
+// resolvedQueueBackend returns rabbitmq | sqs | memory.
+func (c Config) resolvedQueueBackend() string {
+	b := strings.ToLower(strings.TrimSpace(c.QueueBackend))
+	switch b {
+	case "sqs", "rabbitmq", "memory", "none":
+		return b
+	}
+	// Auto-detect: prefer SQS when any SQS URL is configured.
+	if c.SQSCanvasImportURL != "" || c.SQSCanvasSubmissionSyncURL != "" ||
+		c.SQSSmsNotificationURL != "" || c.SQSGradingAgentURL != "" {
+		return "sqs"
+	}
+	if strings.TrimSpace(c.RabbitMQURL) != "" {
+		return "rabbitmq"
+	}
+	return "memory"
+}
+
+// MessageQueueURL picks the connection/queue URL for a named bus.
+// sqsURL is the full SQS queue URL when using AWS; rabbit uses RabbitMQURL + queue name elsewhere.
+// Empty means in-process memory.
+func (c Config) MessageQueueURL(sqsURL string) string {
+	switch c.resolvedQueueBackend() {
+	case "sqs":
+		return strings.TrimSpace(sqsURL)
+	case "memory", "none":
+		return ""
+	default:
+		return strings.TrimSpace(c.RabbitMQURL)
+	}
+}
+
+// CanvasImportQueueURL is the URL passed to canvasimportqueue.NewBus.
+func (c Config) CanvasImportQueueURL() string {
+	return c.MessageQueueURL(c.SQSCanvasImportURL)
+}
+
+// CanvasSubmissionSyncQueueURL is the URL passed to canvassubmissionsyncqueue.NewBus.
+func (c Config) CanvasSubmissionSyncQueueURL() string {
+	return c.MessageQueueURL(c.SQSCanvasSubmissionSyncURL)
+}
+
+// SmsNotificationQueueURL is the URL passed to smsnotificationqueue.NewBus.
+func (c Config) SmsNotificationQueueURL() string {
+	return c.MessageQueueURL(c.SQSSmsNotificationURL)
+}
+
+// GradingAgentQueueURL is the URL passed to gradingagentqueue.NewBus.
+func (c Config) GradingAgentQueueURL() string {
+	return c.MessageQueueURL(c.SQSGradingAgentURL)
 }
 
 // Validate returns an error if required values are missing for a full server start.

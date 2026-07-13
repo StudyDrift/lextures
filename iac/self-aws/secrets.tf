@@ -1,0 +1,52 @@
+resource "random_password" "jwt_secret" {
+  count   = var.jwt_secret == "" ? 1 : 0
+  length  = 48
+  special = false
+}
+
+locals {
+  jwt_secret_value = var.jwt_secret != "" ? var.jwt_secret : random_password.jwt_secret[0].result
+
+  database_url = format(
+    "postgres://%s:%s@%s:%d/%s?sslmode=require",
+    var.db_username,
+    urlencode(random_password.db_master.result),
+    aws_db_instance.postgres.address,
+    aws_db_instance.postgres.port,
+    var.db_name,
+  )
+
+  redis_url = format(
+    "rediss://:%s@%s:%d",
+    urlencode(random_password.redis_auth.result),
+    aws_elasticache_replication_group.redis.primary_endpoint_address,
+    aws_elasticache_replication_group.redis.port,
+  )
+}
+
+resource "aws_secretsmanager_secret" "app" {
+  name                    = "${local.name_prefix}/app"
+  recovery_window_in_days = var.environment == "production" ? 30 : 0
+
+  tags = {
+    Name = "${local.name_prefix}-app"
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "app" {
+  secret_id = aws_secretsmanager_secret.app.id
+  secret_string = jsonencode({
+    DATABASE_URL                   = local.database_url
+    REDIS_URL                      = local.redis_url
+    JWT_SECRET                     = local.jwt_secret_value
+    QUEUE_BACKEND                  = "sqs"
+    SQS_CANVAS_IMPORT_URL          = aws_sqs_queue.main["canvas_import"].url
+    SQS_CANVAS_SUBMISSION_SYNC_URL = aws_sqs_queue.main["canvas_submission_sync"].url
+    SQS_SMS_NOTIFICATION_URL       = aws_sqs_queue.main["sms_notification"].url
+    SQS_GRADING_AGENT_URL          = aws_sqs_queue.main["grading_agent"].url
+    STORAGE_BACKEND                = "s3"
+    STORAGE_BUCKET                 = aws_s3_bucket.course_files.id
+    STORAGE_REGION                 = data.aws_region.current.name
+    AWS_REGION                     = data.aws_region.current.name
+  })
+}

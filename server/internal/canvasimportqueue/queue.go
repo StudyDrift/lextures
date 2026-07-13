@@ -1,4 +1,5 @@
-// Package canvasimportqueue publishes and consumes Canvas import jobs via RabbitMQ or an in-memory fallback.
+// Package canvasimportqueue publishes and consumes Canvas import jobs via
+// RabbitMQ, AWS SQS, or an in-memory fallback.
 package canvasimportqueue
 
 import (
@@ -8,8 +9,7 @@ import (
 	"log/slog"
 	"sync"
 
-	amqp "github.com/rabbitmq/amqp091-go"
-
+	"github.com/lextures/lextures/server/internal/mq"
 	"github.com/lextures/lextures/server/internal/repos/canvasimportjobs"
 )
 
@@ -34,7 +34,9 @@ type Bus struct {
 	concurrency int
 }
 
-// NewBus returns a RabbitMQ-backed bus when url is non-empty, otherwise an in-process memory bus.
+// NewBus returns a durable bus when url is non-empty, otherwise an in-process memory bus.
+// url is either an AMQP URL (RabbitMQ) or a full AWS SQS queue URL.
+// queueName is used for RabbitMQ only (SQS URLs already identify the queue).
 // concurrency is the number of import jobs processed in parallel (minimum 1).
 func NewBus(url, queueName string, concurrency int) (*Bus, error) {
 	if queueName == "" {
@@ -47,11 +49,12 @@ func NewBus(url, queueName string, concurrency int) (*Bus, error) {
 		mem := newMemoryBus(concurrency)
 		return &Bus{pub: mem, con: mem, concurrency: concurrency}, nil
 	}
-	rmq, err := newRabbitBus(url, queueName, concurrency)
+	tr, err := mq.Open(url, queueName, concurrency)
 	if err != nil {
 		return nil, err
 	}
-	return &Bus{pub: rmq, con: rmq, concurrency: concurrency}, nil
+	adapter := &transportAdapter{tr: tr, concurrency: concurrency}
+	return &Bus{pub: adapter, con: adapter, concurrency: concurrency}, nil
 }
 
 // Concurrency returns how many import jobs are processed in parallel.
@@ -86,101 +89,36 @@ func (b *Bus) Close() error {
 	return nil
 }
 
-type rabbitBus struct {
-	url         string
-	queueName   string
+type transportAdapter struct {
+	tr          mq.Transport
 	concurrency int
-	conn        *amqp.Connection
-	ch          *amqp.Channel
 }
 
-func newRabbitBus(url, queueName string, concurrency int) (*rabbitBus, error) {
-	conn, err := amqp.Dial(url)
-	if err != nil {
-		return nil, fmt.Errorf("rabbitmq dial: %w", err)
-	}
-	ch, err := conn.Channel()
-	if err != nil {
-		_ = conn.Close()
-		return nil, fmt.Errorf("rabbitmq channel: %w", err)
-	}
-	if _, err := ch.QueueDeclare(queueName, true, false, false, false, nil); err != nil {
-		_ = ch.Close()
-		_ = conn.Close()
-		return nil, fmt.Errorf("rabbitmq queue declare: %w", err)
-	}
-	return &rabbitBus{url: url, queueName: queueName, concurrency: concurrency, conn: conn, ch: ch}, nil
-}
-
-func (r *rabbitBus) Publish(_ context.Context, msg canvasimportjobs.QueueMessage) error {
+func (a *transportAdapter) Publish(ctx context.Context, msg canvasimportjobs.QueueMessage) error {
 	body, err := json.Marshal(msg)
 	if err != nil {
 		return err
 	}
-	return r.ch.PublishWithContext(context.Background(), "", r.queueName, false, false, amqp.Publishing{
-		ContentType:  "application/json",
-		DeliveryMode: amqp.Persistent,
-		Body:         body,
+	return a.tr.Publish(ctx, body)
+}
+
+func (a *transportAdapter) Consume(ctx context.Context, handler func(canvasimportjobs.QueueMessage) error) error {
+	return a.tr.Consume(ctx, a.concurrency, func(ctx context.Context, body []byte) error {
+		var msg canvasimportjobs.QueueMessage
+		if err := json.Unmarshal(body, &msg); err != nil {
+			slog.Warn("canvas_import_queue: bad message", "err", err)
+			return fmt.Errorf("%w: %v", mq.ErrPoison, err)
+		}
+		if err := handler(msg); err != nil {
+			slog.Warn("canvas_import_queue: handler failed", "job_id", msg.JobID, "err", err)
+			return err
+		}
+		return nil
 	})
 }
 
-func (r *rabbitBus) Consume(ctx context.Context, handler func(canvasimportjobs.QueueMessage) error) error {
-	if err := r.ch.Qos(r.concurrency, 0, false); err != nil {
-		return fmt.Errorf("rabbitmq qos: %w", err)
-	}
-	deliveries, err := r.ch.Consume(r.queueName, "", false, false, false, false, nil)
-	if err != nil {
-		return fmt.Errorf("rabbitmq consume: %w", err)
-	}
-	sem := make(chan struct{}, r.concurrency)
-	var wg sync.WaitGroup
-	defer wg.Wait()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case d, ok := <-deliveries:
-			if !ok {
-				return nil
-			}
-			select {
-			case sem <- struct{}{}:
-			case <-ctx.Done():
-				_ = d.Nack(false, true)
-				return ctx.Err()
-			}
-			wg.Add(1)
-			go func(d amqp.Delivery) {
-				defer func() {
-					<-sem
-					wg.Done()
-				}()
-				var msg canvasimportjobs.QueueMessage
-				if err := json.Unmarshal(d.Body, &msg); err != nil {
-					slog.Warn("canvas_import_queue: bad message", "err", err)
-					_ = d.Nack(false, false)
-					return
-				}
-				if err := handler(msg); err != nil {
-					slog.Warn("canvas_import_queue: handler failed", "job_id", msg.JobID, "err", err)
-					_ = d.Nack(false, true)
-					return
-				}
-				_ = d.Ack(false)
-			}(d)
-		}
-	}
-}
-
-func (r *rabbitBus) Close() error {
-	if r.ch != nil {
-		_ = r.ch.Close()
-	}
-	if r.conn != nil {
-		return r.conn.Close()
-	}
-	return nil
+func (a *transportAdapter) Close() error {
+	return a.tr.Close()
 }
 
 type memoryBus struct {
