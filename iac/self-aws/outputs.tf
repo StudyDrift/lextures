@@ -33,18 +33,33 @@ output "course_files_bucket" {
 }
 
 output "web_bucket" {
-  description = "S3 bucket for the static web SPA (sync clients/web/dist here)."
+  description = "S3 web bucket (created when enable_static_site). Used as the SPA origin only when web_image is empty; otherwise the SPA is the ECS web service."
   value       = try(aws_s3_bucket.web[0].id, null)
 }
 
 output "cloudfront_domain_name" {
-  description = "CloudFront domain for the static SPA (and API proxy when ECS is enabled)."
+  description = "CloudFront domain for the SPA (S3 or ECS web) and API proxy when ECS is enabled."
   value       = try(aws_cloudfront_distribution.web[0].domain_name, null)
 }
 
 output "cloudfront_distribution_id" {
-  description = "CloudFront distribution ID (for cache invalidation after deploys)."
+  description = "CloudFront distribution ID (for cache invalidation after static deploys)."
   value       = try(aws_cloudfront_distribution.web[0].id, null)
+}
+
+output "ecs_web_service_name" {
+  description = "ECS service name for the nginx SPA (null when web_image is empty)."
+  value       = try(aws_ecs_service.web[0].name, null)
+}
+
+output "ecs_api_service_name" {
+  description = "ECS service name for the Go API (null when server_image is empty)."
+  value       = try(aws_ecs_service.api[0].name, null)
+}
+
+output "use_web_container" {
+  description = "True when the SPA is served from the web container image on Fargate."
+  value       = local.use_web_container
 }
 
 output "sqs_queue_urls" {
@@ -60,7 +75,7 @@ output "app_secret_arn" {
 }
 
 output "alb_dns_name" {
-  description = "API ALB DNS name (internal origin for CloudFront /api/*)."
+  description = "ALB DNS name (CloudFront origin for API paths and, when web_image is set, the SPA)."
   value       = try(aws_lb.main[0].dns_name, null)
 }
 

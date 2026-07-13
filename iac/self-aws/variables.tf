@@ -111,6 +111,12 @@ variable "server_image" {
   default     = ""
 }
 
+variable "web_image" {
+  description = "Container image for the nginx SPA (e.g. ghcr.io/org/lextures/web:latest from publish-images). Leave empty to serve the SPA from S3 via deploy-web.sh instead."
+  type        = string
+  default     = ""
+}
+
 variable "ecs_api_cpu" {
   description = "Fargate CPU units for the API task (256 = 0.25 vCPU)."
   type        = number
@@ -128,16 +134,63 @@ variable "ecs_api_desired_count" {
   default = 1
 }
 
+variable "ecs_web_cpu" {
+  description = "Fargate CPU units for the web (nginx) task (256 = 0.25 vCPU)."
+  type        = number
+  default     = 256
+}
+
+variable "ecs_web_memory" {
+  description = "Fargate memory (MiB) for the web task."
+  type        = number
+  default     = 512
+}
+
+variable "ecs_web_desired_count" {
+  type    = number
+  default = 1
+}
+
+variable "registry_username" {
+  description = "Container registry username for private image pulls (e.g. GitHub username for GHCR). Leave empty when images are public."
+  type        = string
+  default     = ""
+}
+
+variable "registry_password" {
+  description = "Container registry password or PAT (GHCR: read:packages). Leave empty when images are public."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "enable_ecs" {
-  description = "Provision ALB + ECS Fargate for the API only. Set false to create only data plane (RDS, Redis, SQS, S3)."
+  description = "Provision ALB + ECS Fargate for the API (and web when web_image is set). Set false to create only data plane (RDS, Redis, SQS, S3)."
   type        = bool
   default     = true
 }
 
 variable "enable_static_site" {
-  description = "Provision S3 + CloudFront for the Vite static web app."
+  description = "Provision CloudFront (and an S3 origin for static SPA deploys when web_image is empty)."
   type        = bool
   default     = true
+}
+
+check "web_image_requires_ecs" {
+  assert {
+    condition     = var.web_image == "" || var.enable_ecs
+    error_message = "web_image requires enable_ecs = true (SPA is served by ECS Fargate behind the ALB)."
+  }
+}
+
+check "registry_credentials_pair" {
+  assert {
+    condition = (
+      (var.registry_username == "" && var.registry_password == "")
+      || (var.registry_username != "" && var.registry_password != "")
+    )
+    error_message = "registry_username and registry_password must both be set or both empty."
+  }
 }
 
 variable "web_bucket_name" {

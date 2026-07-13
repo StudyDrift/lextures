@@ -50,3 +50,29 @@ resource "aws_secretsmanager_secret_version" "app" {
     AWS_REGION                     = data.aws_region.current.name
   })
 }
+
+# Private registry auth for ECS image pulls (e.g. GHCR). JSON shape required by ECS.
+resource "aws_secretsmanager_secret" "registry" {
+  count = var.registry_username != "" && var.registry_password != "" ? 1 : 0
+
+  name                    = "${local.name_prefix}/registry"
+  recovery_window_in_days = var.environment == "production" ? 30 : 0
+
+  tags = {
+    Name = "${local.name_prefix}-registry"
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "registry" {
+  count = length(aws_secretsmanager_secret.registry)
+
+  secret_id = aws_secretsmanager_secret.registry[0].id
+  secret_string = jsonencode({
+    username = var.registry_username
+    password = var.registry_password
+  })
+}
+
+locals {
+  registry_credentials_arn = try(aws_secretsmanager_secret.registry[0].arn, "")
+}
