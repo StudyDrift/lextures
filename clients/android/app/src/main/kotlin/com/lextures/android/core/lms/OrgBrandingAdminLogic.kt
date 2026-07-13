@@ -1,5 +1,7 @@
 package com.lextures.android.core.lms
 
+import androidx.compose.ui.graphics.Color
+import com.lextures.android.core.config.AppConfiguration
 import com.lextures.android.core.navigation.MobilePlatformFeatures
 import com.lextures.android.core.network.ApiError
 import kotlin.math.pow
@@ -8,188 +10,166 @@ import kotlin.math.pow
 object OrgBrandingAdminLogic {
     const val RBAC_MANAGE_PERMISSION = "global:app:rbac:manage"
     const val ORG_UNITS_ADMIN_PERMISSION = "tenant:org:units:admin"
-
-    /** Matches web `PLATFORM_SECRET_PLACEHOLDER` and server `placeholderSecretResponse`. */
-    const val SECRET_PLACEHOLDER = "••••••••••••"
+    const val PLATFORM_SECRET_PLACEHOLDER = "••••••••••••"
     const val DEFAULT_PRIMARY_COLOR = "#4F46E5"
     const val DEFAULT_SECONDARY_COLOR = "#7C3AED"
-    const val DEFAULT_PROVIDER = "openrouter"
-    const val DEFAULT_MODEL_ALIAS = "claude-3-5-sonnet"
-    const val CONTRAST_AA_THRESHOLD = 4.5
+    const val WCAG_CONTRAST_MINIMUM = 4.5
+    const val MAX_LOGO_UPLOAD_BYTES = 4 * 1024 * 1024
 
-    data class FeatureKey(val key: String, val labelResName: String)
+    data class AiFeatureKey(val key: String, val labelResSuffix: String)
 
-    val FEATURE_KEYS: List<FeatureKey> = listOf(
-        FeatureKey("ai_tutor", "mobile_admin_orgBranding_ai_feature_aiTutor"),
-        FeatureKey("rag_notebook", "mobile_admin_orgBranding_ai_feature_notebook"),
-        FeatureKey("syllabus_generation", "mobile_admin_orgBranding_ai_feature_syllabus"),
-        FeatureKey("translation", "mobile_admin_orgBranding_ai_feature_translation"),
-        FeatureKey("quiz_generation", "mobile_admin_orgBranding_ai_feature_quiz"),
-        FeatureKey("lesson_generation", "mobile_admin_orgBranding_ai_feature_lesson"),
+    val AI_FEATURE_KEYS: List<AiFeatureKey> = listOf(
+        AiFeatureKey("ai_tutor", "aiTutor"),
+        AiFeatureKey("rag_notebook", "notebook"),
+        AiFeatureKey("syllabus_generation", "syllabus"),
+        AiFeatureKey("translation", "translation"),
+        AiFeatureKey("quiz_generation", "quiz"),
+        AiFeatureKey("lesson_generation", "lesson"),
     )
 
-    private val providerLabelKeys: Map<String, String> = mapOf(
-        "openrouter" to "mobile_admin_orgBranding_provider_openrouter",
-        "anthropic" to "mobile_admin_orgBranding_provider_anthropic",
-        "openai" to "mobile_admin_orgBranding_provider_openai",
-        "azure_openai" to "mobile_admin_orgBranding_provider_azureOpenai",
-        "bedrock" to "mobile_admin_orgBranding_provider_bedrock",
-        "vertex" to "mobile_admin_orgBranding_provider_vertex",
+    val PROVIDER_LABELS: Map<String, String> = mapOf(
+        "openrouter" to "OpenRouter",
+        "anthropic" to "Anthropic",
+        "openai" to "OpenAI",
+        "azure_openai" to "Azure OpenAI",
+        "bedrock" to "AWS Bedrock",
+        "vertex" to "Google Vertex AI",
     )
+
+    enum class SaveStatus {
+        Idle,
+        Saving,
+        Saved,
+        Error,
+    }
 
     fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean =
         features.ffMobileAdminSettings
 
-    fun canManage(permissions: List<String>): Boolean =
+    fun canManageOrgBranding(permissions: List<String>): Boolean =
         permissions.contains(RBAC_MANAGE_PERMISSION) ||
             permissions.contains(ORG_UNITS_ADMIN_PERMISSION)
 
     fun shouldShowEntry(
         features: MobilePlatformFeatures,
         permissions: List<String>,
-    ): Boolean = adminSettingsEnabled(features) && canManage(permissions)
+    ): Boolean = adminSettingsEnabled(features) && canManageOrgBranding(permissions)
 
     fun canView(
         features: MobilePlatformFeatures,
         permissions: List<String>,
     ): Boolean = shouldShowEntry(features, permissions)
 
-    fun webBrandingPath(): String = "/settings/org-branding"
+    fun webOrgBrandingPath(): String = "/settings/org-branding"
 
     fun resolveOrgId(accessToken: String?, courses: List<CourseSummary>): String? =
         CourseCreateLogic.resolveOrgId(accessToken, courses)
 
-    fun isValidHexColor(value: String): Boolean {
-        val trimmed = value.trim()
-        if (!trimmed.startsWith("#")) return false
-        val hex = trimmed.drop(1)
-        if (hex.length != 3 && hex.length != 6) return false
-        return hex.all { it.isDigit() || it.lowercaseChar() in 'a'..'f' }
+    fun resolveBrandAssetUrl(pathOrUrl: String?): String? {
+        val raw = pathOrUrl?.trim().orEmpty()
+        if (raw.isEmpty()) return null
+        if (raw.startsWith("http://") || raw.startsWith("https://")) return raw
+        val path = if (raw.startsWith("/")) raw else "/$raw"
+        return AppConfiguration.apiUrl(path).toString()
     }
 
-    fun normalizeHexColor(value: String, fallback: String): String {
+    fun normalizedHexColor(value: String): String? {
         val trimmed = value.trim()
-        if (!isValidHexColor(trimmed)) return fallback
-        val hex = trimmed.drop(1)
-        return if (hex.length == 3) {
-            "#" + hex.map { "$it$it" }.joinToString("").uppercase()
-        } else {
-            "#${hex.uppercase()}"
-        }
+        if (!Regex("^#([0-9a-fA-F]{6})$").matches(trimmed)) return null
+        return "#" + trimmed.drop(1).uppercase()
     }
 
-    /** Relative luminance contrast ratio of a hex color against white (WCAG). */
+    fun isValidHexColor(value: String): Boolean = normalizedHexColor(value) != null
+
     fun contrastRatioAgainstWhite(hex: String): Double? {
-        val normalized = normalizeHexColor(hex, "")
-        if (!normalized.startsWith("#") || normalized.length != 7) return null
-        val raw = normalized.drop(1).toLongOrNull(16) ?: return null
-        fun channel(value: Long): Double {
-            val c = value / 255.0
-            return if (c <= 0.03928) c / 12.92 else ((c + 0.055) / 1.055).pow(2.4)
-        }
-        val r = channel((raw shr 16) and 0xFF)
-        val g = channel((raw shr 8) and 0xFF)
-        val b = channel(raw and 0xFF)
-        val l1 = 1.0
-        val l2 = 0.2126 * r + 0.7152 * g + 0.0722 * b
-        val lighter = maxOf(l1, l2)
-        val darker = minOf(l1, l2)
-        return (lighter + 0.05) / (darker + 0.05)
+        val normalized = normalizedHexColor(hex) ?: return null
+        val rgb = normalized.drop(1).toIntOrNull(16) ?: return null
+        val r = ((rgb shr 16) and 0xFF) / 255.0
+        val g = ((rgb shr 8) and 0xFF) / 255.0
+        val b = (rgb and 0xFF) / 255.0
+        fun channel(value: Double): Double =
+            if (value <= 0.03928) value / 12.92 else ((value + 0.055) / 1.055).pow(2.4)
+        val luminance = 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+        return (1.0 + 0.05) / (luminance + 0.05)
     }
 
-    fun hasContrastWarning(
+    fun showsContrastWarning(
         primaryColor: String,
         serverWarning: Boolean,
         serverRatio: Double?,
     ): Boolean {
         if (serverWarning) return true
-        if (serverRatio != null && serverRatio < CONTRAST_AA_THRESHOLD) return true
-        val local = contrastRatioAgainstWhite(primaryColor)
-        return local != null && local < CONTRAST_AA_THRESHOLD
+        if (serverRatio != null && serverRatio < WCAG_CONTRAST_MINIMUM) return true
+        val ratio = contrastRatioAgainstWhite(primaryColor)
+        return ratio != null && ratio < WCAG_CONTRAST_MINIMUM
     }
 
-    fun brandingPutBody(
-        logoUrl: String?,
-        faviconUrl: String?,
-        primaryColor: String,
-        secondaryColor: String,
-        customEmailDisplayName: String?,
-    ): OrgBrandingPutRequest {
-        val email = customEmailDisplayName?.trim()
-        return OrgBrandingPutRequest(
-            logoUrl = logoUrl,
-            faviconUrl = faviconUrl,
-            primaryColor = normalizeHexColor(primaryColor, DEFAULT_PRIMARY_COLOR),
-            secondaryColor = normalizeHexColor(secondaryColor, DEFAULT_SECONDARY_COLOR),
-            customDomain = null,
-            customEmailDisplayName = email?.takeIf { it.isNotEmpty() },
-        )
-    }
-
-    fun isFeatureEnabled(map: Map<String, Boolean>, key: String): Boolean =
-        map[key] != false
-
-    fun featuresEnabledPayload(enabled: Map<String, Boolean>): Map<String, Boolean> =
-        FEATURE_KEYS.associate { it.key to isFeatureEnabled(enabled, it.key) }
-
-    fun parseAllowedModels(text: String): List<String>? {
-        val models = text
-            .split('\n', ',')
+    fun parseAllowedModels(text: String): List<String> =
+        text.split('\n', ',')
             .map { it.trim() }
             .filter { it.isNotEmpty() }
-        return models.takeIf { it.isNotEmpty() }
-    }
 
-    fun allowedModelsText(models: List<String>?): String =
-        models.orEmpty().joinToString("\n")
+    fun allowedModelsText(models: List<String>?): String = models.orEmpty().joinToString("\n")
 
-    fun aiConfigPutBody(
+    fun buildAiConfigSaveRequest(
         enabled: Map<String, Boolean>,
         allowedModelsText: String,
-    ): AIGovernancePutRequest =
-        AIGovernancePutRequest(
-            featuresEnabled = featuresEnabledPayload(enabled),
-            allowedModels = parseAllowedModels(allowedModelsText),
+    ): PutAiConfigRequest {
+        val models = parseAllowedModels(allowedModelsText)
+        val featuresEnabled = AI_FEATURE_KEYS.associate { feature ->
+            feature.key to (enabled[feature.key] != false)
+        }
+        return PutAiConfigRequest(
+            featuresEnabled = featuresEnabled,
+            allowedModels = models.takeIf { it.isNotEmpty() },
         )
-
-    /** Returns the BYOK key to send, or null when empty / still the mask. */
-    fun byokKeyForSave(entered: String): String? {
-        val trimmed = entered.trim()
-        if (trimmed.isEmpty() || trimmed == SECRET_PLACEHOLDER) return null
-        return trimmed
     }
 
-    fun displaySecretField(byokConfigured: Boolean): String =
-        if (byokConfigured) SECRET_PLACEHOLDER else ""
-
-    fun isSecretPlaceholder(value: String): Boolean =
-        value.trim() == SECRET_PLACEHOLDER
-
-    fun providerLabelKey(provider: String): String? = providerLabelKeys[provider]
-
-    fun providerOptions(settings: AIProviderSettings?): List<String> {
-        val list = settings?.providers ?: providerLabelKeys.keys.sorted()
-        return list.ifEmpty { listOf(DEFAULT_PROVIDER) }
-    }
-
-    fun modelAliasOptions(settings: AIProviderSettings?): List<String> {
-        val list = settings?.modelAliases
-            ?: listOf(DEFAULT_MODEL_ALIAS, "gpt-4o", "gemini-1.5-pro")
-        return list.ifEmpty { listOf(DEFAULT_MODEL_ALIAS) }
-    }
-
-    fun aiProviderPutBody(
+    fun buildAiProviderSaveRequest(
         provider: String,
         modelAlias: String,
         fallbackProvider: String,
         byokKey: String,
-    ): AIProviderSettingsPutRequest {
-        val fallback = fallbackProvider.trim()
-        return AIProviderSettingsPutRequest(
-            provider = provider.ifBlank { DEFAULT_PROVIDER },
-            modelAlias = modelAlias.ifBlank { DEFAULT_MODEL_ALIAS },
-            fallbackProvider = fallback.takeIf { it.isNotEmpty() },
-            byokApiKey = byokKeyForSave(byokKey),
+    ): PutAiProviderSettingsRequest {
+        val trimmedFallback = fallbackProvider.trim()
+        val trimmedKey = byokKey.trim()
+        val keyToSend =
+            trimmedKey.takeIf { it.isNotEmpty() && it != PLATFORM_SECRET_PLACEHOLDER }
+        return PutAiProviderSettingsRequest(
+            provider = provider,
+            modelAlias = modelAlias,
+            fallbackProvider = trimmedFallback.takeIf { it.isNotEmpty() },
+            byokApiKey = keyToSend,
+        )
+    }
+
+    fun byokFieldValue(configured: Boolean, draft: String): String =
+        draft.ifEmpty { if (configured) PLATFORM_SECRET_PLACEHOLDER else "" }
+
+    fun shouldSendByokKey(value: String): Boolean {
+        val trimmed = value.trim()
+        return trimmed.isNotEmpty() && trimmed != PLATFORM_SECRET_PLACEHOLDER
+    }
+
+    fun brandingPutRequest(branding: OrgBrandingResponse): PutOrgBrandingRequest =
+        PutOrgBrandingRequest(
+            logoUrl = branding.logoUrl,
+            faviconUrl = branding.faviconUrl,
+            primaryColor = branding.primaryColor,
+            secondaryColor = branding.secondaryColor,
+            customDomain = branding.customDomain,
+            customEmailDisplayName = branding.customEmailDisplayName,
+        )
+
+    fun providerLabel(provider: String): String = PROVIDER_LABELS[provider] ?: provider
+
+    fun colorFromHex(hex: String): Color {
+        val normalized = normalizedHexColor(hex) ?: return Color(0xFF4F46E5)
+        val rgb = normalized.drop(1).toIntOrNull(16) ?: return Color(0xFF4F46E5)
+        return Color(
+            red = ((rgb shr 16) and 0xFF) / 255f,
+            green = ((rgb shr 8) and 0xFF) / 255f,
+            blue = (rgb and 0xFF) / 255f,
         )
     }
 

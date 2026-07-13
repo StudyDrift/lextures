@@ -1,8 +1,8 @@
 package com.lextures.android.core.lms
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-// MARK: - Org branding / AI governance / AI provider admin (M14.5)
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class OrgBrandingResponse(
@@ -17,7 +17,7 @@ data class OrgBrandingResponse(
 )
 
 @Serializable
-data class OrgBrandingPutRequest(
+data class PutOrgBrandingRequest(
     val logoUrl: String? = null,
     val faviconUrl: String? = null,
     val primaryColor: String,
@@ -32,44 +32,41 @@ data class OrgBrandingUploadResponse(
 )
 
 @Serializable
-data class AIGovernanceConfig(
+data class AiConfigResponse(
     val orgId: String? = null,
     val featuresEnabled: Map<String, Boolean>? = null,
     val allowedModels: List<String>? = null,
-    val updatedAt: String? = null,
-    val updatedBy: String? = null,
 )
 
 @Serializable
-data class AIGovernancePutRequest(
+data class PutAiConfigRequest(
     val featuresEnabled: Map<String, Boolean>,
     val allowedModels: List<String>? = null,
 )
 
 @Serializable
-data class AIProviderSettings(
+data class AiProviderSettingsResponse(
     val orgId: String? = null,
     val provider: String? = null,
     val modelAlias: String? = null,
     val fallbackProvider: String? = null,
     val byokConfigured: Boolean? = null,
+    val settings: Map<String, JsonElement>? = null,
     val providers: List<String>? = null,
     val modelAliases: List<String>? = null,
-    val updatedAt: String? = null,
-    val updatedBy: String? = null,
 )
 
 @Serializable
-data class AIProviderSettingsPutRequest(
+data class PutAiProviderSettingsRequest(
     val provider: String,
     val modelAlias: String,
     val fallbackProvider: String? = null,
-    val byokApiKey: String? = null,
+    @SerialName("byokApiKey") val byokApiKey: String? = null,
 )
 
 @Serializable
-data class AIProviderTestResponse(
+data class AiProviderTestResponse(
     val provider: String? = null,
-    val latencyMs: Double? = null,
+    val latencyMs: Int? = null,
     val responsePreview: String? = null,
 )

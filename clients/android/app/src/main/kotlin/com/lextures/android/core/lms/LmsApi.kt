@@ -4333,7 +4333,7 @@ object LmsApi {
         decode(responseBody)
     }
 
-    // Org branding, AI governance & provider (M14.5)
+    // Org branding & AI admin (M14.5)
 
     suspend fun fetchOrgBranding(orgId: String, accessToken: String): OrgBrandingResponse =
         withContext(Dispatchers.IO) {
@@ -4347,25 +4347,25 @@ object LmsApi {
 
     suspend fun putOrgBranding(
         orgId: String,
-        body: OrgBrandingPutRequest,
+        request: PutOrgBrandingRequest,
         accessToken: String,
     ): OrgBrandingResponse = withContext(Dispatchers.IO) {
-        val payload = client.encodeBody(body, OrgBrandingPutRequest.serializer())
-        val (responseBody, code) = client.request(
+        val payload = client.encodeBody(request, PutOrgBrandingRequest.serializer())
+        val (body, code) = client.request(
             path = "/api/v1/orgs/${encodePath(orgId)}/branding",
             method = "PUT",
             body = payload,
             accessToken = accessToken,
         )
-        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
-        decode(responseBody)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
     }
 
     suspend fun uploadOrgBrandingLogo(
         orgId: String,
-        fileBytes: ByteArray,
         fileName: String,
         mimeType: String,
+        fileBytes: ByteArray,
         accessToken: String,
     ): OrgBrandingUploadResponse = withContext(Dispatchers.IO) {
         val body = client.uploadMultipart(
@@ -4379,46 +4379,37 @@ object LmsApi {
         decode(body)
     }
 
-    suspend fun fetchAIGovernanceConfig(accessToken: String): AIGovernanceConfig =
-        withContext(Dispatchers.IO) {
-            val (body, code) = client.request(
-                path = "/api/v1/admin/ai-config",
-                accessToken = accessToken,
-            )
-            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
-            decode(body)
-        }
-
-    suspend fun putAIGovernanceConfig(
-        body: AIGovernancePutRequest,
-        accessToken: String,
-    ): AIGovernanceConfig = withContext(Dispatchers.IO) {
-        val payload = client.encodeBody(body, AIGovernancePutRequest.serializer())
-        val (responseBody, code) = client.request(
-            path = "/api/v1/admin/ai-config",
-            method = "PUT",
-            body = payload,
-            accessToken = accessToken,
-        )
-        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
-        decode(responseBody)
+    suspend fun fetchAiConfig(accessToken: String): AiConfigResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(path = "/api/v1/admin/ai-config", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
     }
 
-    suspend fun fetchAIProviderSettings(accessToken: String): AIProviderSettings =
+    suspend fun putAiConfig(body: PutAiConfigRequest, accessToken: String): AiConfigResponse =
         withContext(Dispatchers.IO) {
-            val (body, code) = client.request(
-                path = "/api/v1/admin/ai-settings",
+            val payload = client.encodeBody(body, PutAiConfigRequest.serializer())
+            val (responseBody, code) = client.request(
+                path = "/api/v1/admin/ai-config",
+                method = "PUT",
+                body = payload,
                 accessToken = accessToken,
             )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+            decode(responseBody)
+        }
+
+    suspend fun fetchAiProviderSettings(accessToken: String): AiProviderSettingsResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(path = "/api/v1/admin/ai-settings", accessToken = accessToken)
             if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
             decode(body)
         }
 
-    suspend fun putAIProviderSettings(
-        body: AIProviderSettingsPutRequest,
+    suspend fun putAiProviderSettings(
+        body: PutAiProviderSettingsRequest,
         accessToken: String,
-    ): AIProviderSettings = withContext(Dispatchers.IO) {
-        val payload = client.encodeBody(body, AIProviderSettingsPutRequest.serializer())
+    ): AiProviderSettingsResponse = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, PutAiProviderSettingsRequest.serializer())
         val (responseBody, code) = client.request(
             path = "/api/v1/admin/ai-settings",
             method = "PUT",
@@ -4429,12 +4420,11 @@ object LmsApi {
         decode(responseBody)
     }
 
-    suspend fun testAIProviderSettings(accessToken: String): AIProviderTestResponse =
+    suspend fun testAiProviderConnection(accessToken: String): AiProviderTestResponse =
         withContext(Dispatchers.IO) {
             val (body, code) = client.request(
                 path = "/api/v1/admin/ai-settings/test",
                 method = "POST",
-                body = "{}",
                 accessToken = accessToken,
             )
             if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))

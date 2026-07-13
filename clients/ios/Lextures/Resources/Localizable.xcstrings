@@ -3848,31 +3848,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "You need rbac:manage or org-units admin permission to manage branding and AI settings."
+            "value": "You need rbac:manage or org-units admin permission to manage org branding and AI settings."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You need rbac:manage or org-units admin permission to manage branding and AI settings."
+            "value": "You need rbac:manage or org-units admin permission to manage org branding and AI settings."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "You need rbac:manage or org-units admin permission to manage branding and AI settings."
+            "value": "[You need rbac:manage or org-units admin permission to manage org branding and AI settings.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "You need rbac:manage or org-units admin permission to manage branding and AI settings."
+            "value": "You need rbac:manage or org-units admin permission to manage org branding and AI settings."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "You need rbac:manage or org-units admin permission to manage branding and AI settings."
+            "value": "You need rbac:manage or org-units admin permission to manage org branding and AI settings."
           }
         }
       }
@@ -3894,7 +3894,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Admin access required"
+            "value": "[Admin access required]"
           }
         },
         "es": {
@@ -3911,75 +3911,75 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.allowedModels": {
+    "mobile.admin.orgBranding.aiGovernance.allowedModels": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allowed models"
+            "value": "Allowed models (one per line; empty = all)"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allowed models"
+            "value": "Allowed models (one per line; empty = all)"
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allowed models"
+            "value": "[Allowed models (one per line; empty = all)]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allowed models"
+            "value": "Allowed models (one per line; empty = all)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allowed models"
+            "value": "Allowed models (one per line; empty = all)"
           }
         }
       }
     },
-    "mobile.admin.orgBranding.ai.allowedModelsHint": {
+    "mobile.admin.orgBranding.aiGovernance.allowedModelsHint": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "One per line; empty = all models allowed."
+            "value": "Leave blank to allow all models supported by your provider."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "One per line; empty = all models allowed."
+            "value": "Leave blank to allow all models supported by your provider."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "One per line; empty = all models allowed."
+            "value": "[Leave blank to allow all models supported by your provider.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "One per line; empty = all models allowed."
+            "value": "Leave blank to allow all models supported by your provider."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "One per line; empty = all models allowed."
+            "value": "Leave blank to allow all models supported by your provider."
           }
         }
       }
     },
-    "mobile.admin.orgBranding.ai.feature.aiTutor": {
+    "mobile.admin.orgBranding.aiGovernance.feature.aiTutor": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -3996,7 +3996,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI Tutor"
+            "value": "[AI Tutor]"
           }
         },
         "es": {
@@ -4013,7 +4013,7 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.feature.lesson": {
+    "mobile.admin.orgBranding.aiGovernance.feature.lesson": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4030,7 +4030,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lesson generator"
+            "value": "[Lesson generator]"
           }
         },
         "es": {
@@ -4047,7 +4047,7 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.feature.notebook": {
+    "mobile.admin.orgBranding.aiGovernance.feature.notebook": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4064,7 +4064,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Notebook AI"
+            "value": "[Notebook AI]"
           }
         },
         "es": {
@@ -4081,7 +4081,7 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.feature.quiz": {
+    "mobile.admin.orgBranding.aiGovernance.feature.quiz": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4098,7 +4098,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quiz generation"
+            "value": "[Quiz generation]"
           }
         },
         "es": {
@@ -4115,7 +4115,7 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.feature.syllabus": {
+    "mobile.admin.orgBranding.aiGovernance.feature.syllabus": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4132,7 +4132,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Syllabus generation"
+            "value": "[Syllabus generation]"
           }
         },
         "es": {
@@ -4149,7 +4149,7 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.feature.translation": {
+    "mobile.admin.orgBranding.aiGovernance.feature.translation": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4166,7 +4166,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Translation"
+            "value": "[Translation]"
           }
         },
         "es": {
@@ -4183,41 +4183,75 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.intro": {
+    "mobile.admin.orgBranding.aiGovernance.intro": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Control which AI features are available for your organization."
+            "value": "Control which AI features are enabled for your organization and which models may be used."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Control which AI features are available for your organization."
+            "value": "Control which AI features are enabled for your organization and which models may be used."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Control which AI features are available for your organization."
+            "value": "[Control which AI features are enabled for your organization and which models may be used.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Control which AI features are available for your organization."
+            "value": "Control which AI features are enabled for your organization and which models may be used."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Control which AI features are available for your organization."
+            "value": "Control which AI features are enabled for your organization and which models may be used."
           }
         }
       }
     },
-    "mobile.admin.orgBranding.ai.save": {
+    "mobile.admin.orgBranding.aiGovernance.loadError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load AI governance settings."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load AI governance settings."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not load AI governance settings.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load AI governance settings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load AI governance settings."
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiGovernance.save": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4234,7 +4268,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Save AI governance"
+            "value": "[Save AI governance]"
           }
         },
         "es": {
@@ -4251,7 +4285,41 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.saved": {
+    "mobile.admin.orgBranding.aiGovernance.saveError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save AI governance settings."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save AI governance settings."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not save AI governance settings.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save AI governance settings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save AI governance settings."
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiGovernance.saved": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4268,7 +4336,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI governance saved."
+            "value": "[AI governance saved.]"
           }
         },
         "es": {
@@ -4285,7 +4353,7 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.title": {
+    "mobile.admin.orgBranding.aiGovernance.title": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4302,7 +4370,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI governance"
+            "value": "[AI governance]"
           }
         },
         "es": {
@@ -4319,36 +4387,580 @@
         }
       }
     },
-    "mobile.admin.orgBranding.ai.unavailable": {
+    "mobile.admin.orgBranding.aiProvider.byokConfigured": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI governance is not available for this organization (feature disabled or permission denied)."
+            "value": "Configured"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI governance is not available for this organization (feature disabled or permission denied)."
+            "value": "Configured"
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI governance is not available for this organization (feature disabled or permission denied)."
+            "value": "[Configured]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI governance is not available for this organization (feature disabled or permission denied)."
+            "value": "Configured"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI governance is not available for this organization (feature disabled or permission denied)."
+            "value": "Configured"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.byokHint": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a new key to replace the stored secret. Leave the placeholder unchanged to keep the current key."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a new key to replace the stored secret. Leave the placeholder unchanged to keep the current key."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Enter a new key to replace the stored secret. Leave the placeholder unchanged to keep the current key.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a new key to replace the stored secret. Leave the placeholder unchanged to keep the current key."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a new key to replace the stored secret. Leave the placeholder unchanged to keep the current key."
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.byokKey": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BYOK API key"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BYOK API key"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[BYOK API key]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BYOK API key"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BYOK API key"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.fallback": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fallback provider"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fallback provider"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Fallback provider]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fallback provider"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fallback provider"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.fallbackNone": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[None]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.intro": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save."
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.loadError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load AI provider settings."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load AI provider settings."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not load AI provider settings.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load AI provider settings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load AI provider settings."
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.modelAlias": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model alias"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model alias"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Model alias]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model alias"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model alias"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.provider": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provider"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provider"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Provider]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provider"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provider"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.save": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Save]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.saveError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save AI provider settings."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save AI provider settings."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not save AI provider settings.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save AI provider settings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save AI provider settings."
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.saved": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI provider settings saved."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI provider settings saved."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[AI provider settings saved.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI provider settings saved."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI provider settings saved."
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.test": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test connection"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test connection"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Test connection]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test connection"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test connection"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.testError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test connection failed."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test connection failed."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Test connection failed.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test connection failed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test connection failed."
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.testSuccess": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected via %1$@ (%2$@ ms): %3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected via %1$@ (%2$@ ms): %3$@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Connected via %1$@ (%2$@ ms): %3$@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected via %1$@ (%2$@ ms): %3$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected via %1$@ (%2$@ ms): %3$@"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.aiProvider.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI provider"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI provider"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[AI provider]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI provider"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI provider"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.branding.configureOnWeb": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure on web"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure on web"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Configure on web]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure on web"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure on web"
           }
         }
       }
@@ -4370,7 +4982,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "This color may not meet WCAG AA contrast against white (need 4.5:1 for normal text)."
+            "value": "[This color may not meet WCAG AA contrast against white (need 4.5:1 for normal text).]"
           }
         },
         "es": {
@@ -4383,40 +4995,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "This color may not meet WCAG AA contrast against white (need 4.5:1 for normal text)."
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.branding.contrastWarningWithRatio": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This color may not meet WCAG AA contrast against white (need 4.5:1). Approx. ratio: %1$s:1."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This color may not meet WCAG AA contrast against white (need 4.5:1). Approx. ratio: %1$s:1."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This color may not meet WCAG AA contrast against white (need 4.5:1). Approx. ratio: %1$s:1."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This color may not meet WCAG AA contrast against white (need 4.5:1). Approx. ratio: %1$s:1."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This color may not meet WCAG AA contrast against white (need 4.5:1). Approx. ratio: %1$s:1."
           }
         }
       }
@@ -4438,7 +5016,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Custom domain"
+            "value": "[Custom domain]"
           }
         },
         "es": {
@@ -4451,40 +5029,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Custom domain"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.branding.customDomainHint": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DNS and domain verification are configured on the web."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DNS and domain verification are configured on the web."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DNS and domain verification are configured on the web."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DNS and domain verification are configured on the web."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DNS and domain verification are configured on the web."
           }
         }
       }
@@ -4494,36 +5038,36 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Not configured"
+            "value": "No custom domain configured."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Not configured"
+            "value": "No custom domain configured."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Not configured"
+            "value": "[No custom domain configured.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Not configured"
+            "value": "No custom domain configured."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Not configured"
+            "value": "No custom domain configured."
           }
         }
       }
     },
-    "mobile.admin.orgBranding.branding.emailDisplayName": {
+    "mobile.admin.orgBranding.branding.emailSender": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4540,7 +5084,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Email display name"
+            "value": "[Email display name]"
           }
         },
         "es": {
@@ -4557,7 +5101,7 @@
         }
       }
     },
-    "mobile.admin.orgBranding.branding.emailDisplayNameHint": {
+    "mobile.admin.orgBranding.branding.emailSenderHint": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4574,7 +5118,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Shown as the sender name on password-reset and similar emails."
+            "value": "[Shown as the sender name on password-reset and similar emails.]"
           }
         },
         "es": {
@@ -4591,7 +5135,7 @@
         }
       }
     },
-    "mobile.admin.orgBranding.branding.emailDisplayNamePlaceholder": {
+    "mobile.admin.orgBranding.branding.emailSenderPlaceholder": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4608,7 +5152,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your District Name"
+            "value": "[Your District Name]"
           }
         },
         "es": {
@@ -4625,70 +5169,70 @@
         }
       }
     },
-    "mobile.admin.orgBranding.branding.intro": {
+    "mobile.admin.orgBranding.branding.fileTooLarge": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, and email sender name shown on sign-in and transactional email."
+            "value": "Logo must be 4 MB or smaller."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, and email sender name shown on sign-in and transactional email."
+            "value": "Logo must be 4 MB or smaller."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, and email sender name shown on sign-in and transactional email."
+            "value": "[Logo must be 4 MB or smaller.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, and email sender name shown on sign-in and transactional email."
+            "value": "Logo must be 4 MB or smaller."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, and email sender name shown on sign-in and transactional email."
+            "value": "Logo must be 4 MB or smaller."
           }
         }
       }
     },
-    "mobile.admin.orgBranding.branding.invalidColor": {
+    "mobile.admin.orgBranding.branding.loadError": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enter valid hex colors (for example #4F46E5)."
+            "value": "Could not load branding."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enter valid hex colors (for example #4F46E5)."
+            "value": "Could not load branding."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enter valid hex colors (for example #4F46E5)."
+            "value": "[Could not load branding.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enter valid hex colors (for example #4F46E5)."
+            "value": "Could not load branding."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enter valid hex colors (for example #4F46E5)."
+            "value": "Could not load branding."
           }
         }
       }
@@ -4710,7 +5254,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo"
+            "value": "[Logo]"
           }
         },
         "es": {
@@ -4744,7 +5288,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "PNG, JPEG, GIF, or SVG. Shown on sign-in and navigation."
+            "value": "[PNG, JPEG, GIF, or SVG. Shown on sign-in and navigation.]"
           }
         },
         "es": {
@@ -4757,74 +5301,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "PNG, JPEG, GIF, or SVG. Shown on sign-in and navigation."
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.branding.logoPreview": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Organization logo preview"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Organization logo preview"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Organization logo preview"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Organization logo preview"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Organization logo preview"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.branding.logoUploaded": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logo uploaded."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logo uploaded."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logo uploaded."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logo uploaded."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Logo uploaded."
           }
         }
       }
@@ -4846,7 +5322,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Preview"
+            "value": "[Preview]"
           }
         },
         "es": {
@@ -4863,7 +5339,7 @@
         }
       }
     },
-    "mobile.admin.orgBranding.branding.previewButton": {
+    "mobile.admin.orgBranding.branding.previewContinue": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4880,7 +5356,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Continue"
+            "value": "[Continue]"
           }
         },
         "es": {
@@ -4893,6 +5369,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Continue"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.branding.previewSignIn": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Sign in]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in"
           }
         }
       }
@@ -4914,7 +5424,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Primary color"
+            "value": "[Primary color]"
           }
         },
         "es": {
@@ -4948,7 +5458,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Save branding"
+            "value": "[Save branding]"
           }
         },
         "es": {
@@ -4961,6 +5471,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Save branding"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.branding.saveError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save branding."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save branding."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not save branding.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save branding."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save branding."
           }
         }
       }
@@ -4982,7 +5526,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Branding saved."
+            "value": "[Branding saved.]"
           }
         },
         "es": {
@@ -5016,7 +5560,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Secondary color"
+            "value": "[Secondary color]"
           }
         },
         "es": {
@@ -5050,7 +5594,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Branding"
+            "value": "[Branding]"
           }
         },
         "es": {
@@ -5063,6 +5607,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Branding"
+          }
+        }
+      }
+    },
+    "mobile.admin.orgBranding.branding.uploadError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not upload logo."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not upload logo."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not upload logo.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not upload logo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not upload logo."
           }
         }
       }
@@ -5084,7 +5662,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Upload logo"
+            "value": "[Upload logo]"
           }
         },
         "es": {
@@ -5118,7 +5696,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uploading…"
+            "value": "[Uploading…]"
           }
         },
         "es": {
@@ -5140,31 +5718,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Update organization branding and review AI governance policy from your phone. Custom domain DNS stays on the web."
+            "value": "Update organization branding and review AI governance and provider settings from your phone. Custom domain DNS setup stays on the web."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Update organization branding and review AI governance policy from your phone. Custom domain DNS stays on the web."
+            "value": "Update organization branding and review AI governance and provider settings from your phone. Custom domain DNS setup stays on the web."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Update organization branding and review AI governance policy from your phone. Custom domain DNS stays on the web."
+            "value": "[Update organization branding and review AI governance and provider settings from your phone. Custom domain DNS setup stays on the web.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Update organization branding and review AI governance policy from your phone. Custom domain DNS stays on the web."
+            "value": "Update organization branding and review AI governance and provider settings from your phone. Custom domain DNS setup stays on the web."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Update organization branding and review AI governance policy from your phone. Custom domain DNS stays on the web."
+            "value": "Update organization branding and review AI governance and provider settings from your phone. Custom domain DNS setup stays on the web."
           }
         }
       }
@@ -5174,65 +5752,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, AI governance, and provider"
+            "value": "Logo, colors, AI governance, and provider settings"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, AI governance, and provider"
+            "value": "Logo, colors, AI governance, and provider settings"
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, AI governance, and provider"
+            "value": "[Logo, colors, AI governance, and provider settings]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, AI governance, and provider"
+            "value": "Logo, colors, AI governance, and provider settings"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logo, colors, AI governance, and provider"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.error": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not load or save org branding settings."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not load or save org branding settings."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not load or save org branding settings."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not load or save org branding settings."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not load or save org branding settings."
+            "value": "Logo, colors, AI governance, and provider settings"
           }
         }
       }
@@ -5242,31 +5786,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your session does not include an organization id."
+            "value": "No organization id is available on your session."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your session does not include an organization id."
+            "value": "No organization id is available on your session."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your session does not include an organization id."
+            "value": "[No organization id is available on your session.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your session does not include an organization id."
+            "value": "No organization id is available on your session."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your session does not include an organization id."
+            "value": "No organization id is available on your session."
           }
         }
       }
@@ -5288,7 +5832,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "No organization"
+            "value": "[No organization]"
           }
         },
         "es": {
@@ -5301,754 +5845,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "No organization"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.anthropic": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anthropic"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anthropic"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anthropic"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anthropic"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anthropic"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.azureOpenai": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Azure OpenAI"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Azure OpenAI"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Azure OpenAI"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Azure OpenAI"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Azure OpenAI"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.bedrock": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AWS Bedrock"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AWS Bedrock"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AWS Bedrock"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AWS Bedrock"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AWS Bedrock"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.byok": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BYOK API key"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BYOK API key"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BYOK API key"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BYOK API key"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BYOK API key"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.byokConfigured": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configured"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configured"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configured"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configured"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configured"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.byokHint": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leave blank to keep the current key. Enter a new key only when rotating."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leave blank to keep the current key. Enter a new key only when rotating."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leave blank to keep the current key. Enter a new key only when rotating."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leave blank to keep the current key. Enter a new key only when rotating."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leave blank to keep the current key. Enter a new key only when rotating."
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.fallback": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fallback provider"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fallback provider"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fallback provider"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fallback provider"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fallback provider"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.fallbackNone": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "None"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "None"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "None"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "None"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "None"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.intro": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose which AI backend serves your organization. BYOK keys are stored encrypted and never returned after save."
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.modelAlias": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Model alias"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Model alias"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Model alias"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Model alias"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Model alias"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.openai": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenAI"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenAI"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenAI"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenAI"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenAI"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.openrouter": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenRouter"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenRouter"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenRouter"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenRouter"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenRouter"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.provider": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Provider"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Provider"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Provider"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Provider"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Provider"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.save": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.saved": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings saved."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings saved."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings saved."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings saved."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings saved."
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.test": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Test connection"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Test connection"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Test connection"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Test connection"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Test connection"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.testSuccess": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connected via %1$s (%2$s ms): %3$s"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connected via %1$s (%2$s ms): %3$s"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connected via %1$s (%2$s ms): %3$s"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connected via %1$s (%2$s ms): %3$s"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connected via %1$s (%2$s ms): %3$s"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.testing": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Testing…"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Testing…"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Testing…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Testing…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Testing…"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.title": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.unavailable": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings are not available (feature disabled or permission denied)."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings are not available (feature disabled or permission denied)."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings are not available (feature disabled or permission denied)."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings are not available (feature disabled or permission denied)."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI provider settings are not available (feature disabled or permission denied)."
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.provider.vertex": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Google Vertex AI"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Google Vertex AI"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Google Vertex AI"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Google Vertex AI"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Google Vertex AI"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.saving": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saving…"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saving…"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saving…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saving…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saving…"
           }
         }
       }
@@ -6070,7 +5866,7 @@
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Org branding & AI"
+            "value": "[Org branding & AI]"
           }
         },
         "es": {
@@ -6083,40 +5879,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Org branding & AI"
-          }
-        }
-      }
-    },
-    "mobile.admin.orgBranding.webTitle": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configure custom domain on web"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configure custom domain on web"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configure custom domain on web"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configure custom domain on web"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configure custom domain on web"
           }
         }
       }

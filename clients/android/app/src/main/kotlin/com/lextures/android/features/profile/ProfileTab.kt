@@ -42,7 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Apartment
-import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Storage
@@ -891,7 +891,7 @@ fun ProfileTab(
         ) {
             LmsCard {
                 SettingsNavRow(
-                    icon = Icons.Filled.Palette,
+                    icon = Icons.Filled.Brush,
                     title = L.text(R.string.mobile_admin_orgBranding_title),
                     subtitle = L.text(R.string.mobile_admin_orgBranding_entry_subtitle),
                     onClick = { showOrgBrandingAdmin = true },

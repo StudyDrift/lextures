@@ -1,8 +1,8 @@
 import Foundation
 
-// MARK: - Org branding / AI governance / AI provider admin (M14.5)
+// MARK: - Org branding admin (M14.5)
 
-struct OrgBrandingResponse: Decodable, Hashable {
+struct OrgBrandingResponse: Codable, Equatable {
     var logoUrl: String?
     var faviconUrl: String?
     var primaryColor: String
@@ -11,49 +11,9 @@ struct OrgBrandingResponse: Decodable, Hashable {
     var customEmailDisplayName: String?
     var contrastWarningPrimary: Bool?
     var contrastRatioPrimary: Double?
-
-    init(
-        logoUrl: String? = nil,
-        faviconUrl: String? = nil,
-        primaryColor: String = OrgBrandingAdminLogic.defaultPrimaryColor,
-        secondaryColor: String = OrgBrandingAdminLogic.defaultSecondaryColor,
-        customDomain: String? = nil,
-        customEmailDisplayName: String? = nil,
-        contrastWarningPrimary: Bool? = nil,
-        contrastRatioPrimary: Double? = nil
-    ) {
-        self.logoUrl = logoUrl
-        self.faviconUrl = faviconUrl
-        self.primaryColor = primaryColor
-        self.secondaryColor = secondaryColor
-        self.customDomain = customDomain
-        self.customEmailDisplayName = customEmailDisplayName
-        self.contrastWarningPrimary = contrastWarningPrimary
-        self.contrastRatioPrimary = contrastRatioPrimary
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case logoUrl, faviconUrl, primaryColor, secondaryColor
-        case customDomain, customEmailDisplayName
-        case contrastWarningPrimary, contrastRatioPrimary
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        logoUrl = try container.decodeIfPresent(String.self, forKey: .logoUrl)
-        faviconUrl = try container.decodeIfPresent(String.self, forKey: .faviconUrl)
-        primaryColor = try container.decodeIfPresent(String.self, forKey: .primaryColor)
-            ?? OrgBrandingAdminLogic.defaultPrimaryColor
-        secondaryColor = try container.decodeIfPresent(String.self, forKey: .secondaryColor)
-            ?? OrgBrandingAdminLogic.defaultSecondaryColor
-        customDomain = try container.decodeIfPresent(String.self, forKey: .customDomain)
-        customEmailDisplayName = try container.decodeIfPresent(String.self, forKey: .customEmailDisplayName)
-        contrastWarningPrimary = try container.decodeIfPresent(Bool.self, forKey: .contrastWarningPrimary)
-        contrastRatioPrimary = try container.decodeIfPresent(Double.self, forKey: .contrastRatioPrimary)
-    }
 }
 
-struct OrgBrandingPutRequest: Encodable {
+struct PutOrgBrandingRequest: Encodable {
     var logoUrl: String?
     var faviconUrl: String?
     var primaryColor: String
@@ -66,52 +26,37 @@ struct OrgBrandingUploadResponse: Decodable {
     var url: String?
 }
 
-struct AIGovernanceConfig: Decodable, Hashable {
+struct AiConfigResponse: Decodable {
     var orgId: String?
     var featuresEnabled: [String: Bool]?
     var allowedModels: [String]?
-    var updatedAt: String?
-    var updatedBy: String?
 }
 
-struct AIGovernancePutRequest: Encodable {
+struct PutAiConfigRequest: Encodable {
     var featuresEnabled: [String: Bool]
     var allowedModels: [String]?
 }
 
-struct AIProviderSettings: Decodable, Hashable {
+struct AiProviderSettingsResponse: Decodable {
     var orgId: String?
     var provider: String?
     var modelAlias: String?
     var fallbackProvider: String?
     var byokConfigured: Bool?
+    var settings: [String: JSONValue]?
     var providers: [String]?
     var modelAliases: [String]?
-    var updatedAt: String?
-    var updatedBy: String?
 }
 
-struct AIProviderSettingsPutRequest: Encodable {
+struct PutAiProviderSettingsRequest: Encodable {
     var provider: String
     var modelAlias: String
     var fallbackProvider: String?
     var byokApiKey: String?
-
-    enum CodingKeys: String, CodingKey {
-        case provider, modelAlias, fallbackProvider, byokApiKey
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(provider, forKey: .provider)
-        try container.encode(modelAlias, forKey: .modelAlias)
-        try container.encodeIfPresent(fallbackProvider, forKey: .fallbackProvider)
-        try container.encodeIfPresent(byokApiKey, forKey: .byokApiKey)
-    }
 }
 
-struct AIProviderTestResponse: Decodable {
+struct AiProviderTestResponse: Decodable {
     var provider: String?
-    var latencyMs: Double?
+    var latencyMs: Int?
     var responsePreview: String?
 }

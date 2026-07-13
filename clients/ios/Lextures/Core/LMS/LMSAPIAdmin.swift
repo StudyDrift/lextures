@@ -265,7 +265,7 @@ extension LMSAPI {
         return try decode(OrgTerm.self, from: data)
     }
 
-    // MARK: - Org branding, AI governance & provider (M14.5)
+    // MARK: - Org branding & AI admin (M14.5)
 
     static func fetchOrgBranding(orgId: String, accessToken: String) async throws -> OrgBrandingResponse {
         let (data, response) = try await client.request(
@@ -281,7 +281,7 @@ extension LMSAPI {
 
     static func putOrgBranding(
         orgId: String,
-        body: OrgBrandingPutRequest,
+        body: PutOrgBrandingRequest,
         accessToken: String
     ) async throws -> OrgBrandingResponse {
         let (data, response) = try await client.request(
@@ -299,9 +299,9 @@ extension LMSAPI {
 
     static func uploadOrgBrandingLogo(
         orgId: String,
-        fileData: Data,
         fileName: String,
         mimeType: String,
+        fileData: Data,
         accessToken: String
     ) async throws -> OrgBrandingUploadResponse {
         let (data, response) = try await client.uploadMultipart(
@@ -318,7 +318,7 @@ extension LMSAPI {
         return try decode(OrgBrandingUploadResponse.self, from: data)
     }
 
-    static func fetchAIGovernanceConfig(accessToken: String) async throws -> AIGovernanceConfig {
+    static func fetchAiConfig(accessToken: String) async throws -> AiConfigResponse {
         let (data, response) = try await client.request(
             path: "/api/v1/admin/ai-config",
             authorized: true,
@@ -327,13 +327,10 @@ extension LMSAPI {
         guard (200 ... 299).contains(response.statusCode) else {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
-        return try decode(AIGovernanceConfig.self, from: data)
+        return try decode(AiConfigResponse.self, from: data)
     }
 
-    static func putAIGovernanceConfig(
-        body: AIGovernancePutRequest,
-        accessToken: String
-    ) async throws -> AIGovernanceConfig {
+    static func putAiConfig(body: PutAiConfigRequest, accessToken: String) async throws -> AiConfigResponse {
         let (data, response) = try await client.request(
             path: "/api/v1/admin/ai-config",
             method: "PUT",
@@ -344,10 +341,10 @@ extension LMSAPI {
         guard (200 ... 299).contains(response.statusCode) else {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
-        return try decode(AIGovernanceConfig.self, from: data)
+        return try decode(AiConfigResponse.self, from: data)
     }
 
-    static func fetchAIProviderSettings(accessToken: String) async throws -> AIProviderSettings {
+    static func fetchAiProviderSettings(accessToken: String) async throws -> AiProviderSettingsResponse {
         let (data, response) = try await client.request(
             path: "/api/v1/admin/ai-settings",
             authorized: true,
@@ -356,13 +353,13 @@ extension LMSAPI {
         guard (200 ... 299).contains(response.statusCode) else {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
-        return try decode(AIProviderSettings.self, from: data)
+        return try decode(AiProviderSettingsResponse.self, from: data)
     }
 
-    static func putAIProviderSettings(
-        body: AIProviderSettingsPutRequest,
+    static func putAiProviderSettings(
+        body: PutAiProviderSettingsRequest,
         accessToken: String
-    ) async throws -> AIProviderSettings {
+    ) async throws -> AiProviderSettingsResponse {
         let (data, response) = try await client.request(
             path: "/api/v1/admin/ai-settings",
             method: "PUT",
@@ -373,10 +370,10 @@ extension LMSAPI {
         guard (200 ... 299).contains(response.statusCode) else {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
-        return try decode(AIProviderSettings.self, from: data)
+        return try decode(AiProviderSettingsResponse.self, from: data)
     }
 
-    static func testAIProviderSettings(accessToken: String) async throws -> AIProviderTestResponse {
+    static func testAiProviderConnection(accessToken: String) async throws -> AiProviderTestResponse {
         let (data, response) = try await client.request(
             path: "/api/v1/admin/ai-settings/test",
             method: "POST",
@@ -386,6 +383,6 @@ extension LMSAPI {
         guard (200 ... 299).contains(response.statusCode) else {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
-        return try decode(AIProviderTestResponse.self, from: data)
+        return try decode(AiProviderTestResponse.self, from: data)
     }
 }

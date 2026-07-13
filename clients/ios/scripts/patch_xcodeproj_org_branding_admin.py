@@ -22,6 +22,7 @@ ENTRIES: list[tuple[str, str, str, str, bool]] = [
 
 APP_SOURCES = "B3991B6DD6F9495DB8B2870B"
 TEST_SOURCES = "693EA1D9511A4AB8B7F10A82"
+ADMIN_GROUP = "8B72ADM015C6D7E8F901234567"
 
 
 def insert_before(text: str, marker: str, block: str) -> str:

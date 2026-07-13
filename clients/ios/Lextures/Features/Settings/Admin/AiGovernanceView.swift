@@ -1,111 +1,156 @@
 import SwiftUI
 
-/// AI governance card: feature toggles and allowed models (M14.5).
+/// AI governance policy toggles and model limits (M14.5).
 struct AiGovernanceView: View {
     @Environment(AuthSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
 
-    @Binding var config: AIGovernanceConfig?
-    @Binding var statusMessage: String?
-    @Binding var errorMessage: String?
-    let available: Bool
-
+    @State private var available = false
     @State private var enabled: [String: Bool] = [:]
     @State private var allowedModelsText = ""
-    @State private var saving = false
+    @State private var loading = true
+    @State private var saveStatus: OrgBrandingAdminLogic.SaveStatus = .idle
 
     var body: some View {
-        LMSCard {
-            VStack(alignment: .leading, spacing: 14) {
-                Text(L.text("mobile.admin.orgBranding.ai.title"))
-                    .font(.headline)
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                Text(L.text("mobile.admin.orgBranding.ai.intro"))
-                    .font(.caption)
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-
-                if !available {
-                    Text(L.text("mobile.admin.orgBranding.ai.unavailable"))
-                        .font(.subheadline)
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                } else {
-                    ForEach(OrgBrandingAdminLogic.featureKeys, id: \.key) { item in
-                        Toggle(isOn: binding(for: item.key)) {
-                            Text(L.dynamicText(item.labelKey))
-                                .font(.subheadline)
-                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                        }
-                        .tint(LexturesTheme.brandTeal)
-                        .frame(minHeight: 44)
-                    }
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(L.text("mobile.admin.orgBranding.ai.allowedModels"))
-                            .font(.subheadline.weight(.medium))
+        Group {
+            if available {
+                LMSCard {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text(L.text("mobile.admin.orgBranding.aiGovernance.title"))
+                            .font(.headline)
                             .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                        TextEditor(text: $allowedModelsText)
-                            .font(.caption.monospaced())
-                            .frame(minHeight: 88)
-                            .padding(8)
-                            .background(LexturesTheme.sceneBackground(for: colorScheme), in: RoundedRectangle(cornerRadius: 10))
-                            .accessibilityLabel(L.text("mobile.admin.orgBranding.ai.allowedModels"))
-                        Text(L.text("mobile.admin.orgBranding.ai.allowedModelsHint"))
-                            .font(.caption2)
-                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                    }
 
-                    Button {
-                        Task { await save() }
-                    } label: {
-                        if saving {
-                            ProgressView().frame(maxWidth: .infinity)
-                        } else {
-                            Text(L.text("mobile.admin.orgBranding.ai.save"))
+                        Text(L.text("mobile.admin.orgBranding.aiGovernance.intro"))
+                            .font(.subheadline)
+                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+
+                        if loading {
+                            ProgressView()
                                 .frame(maxWidth: .infinity)
+                        } else {
+                            featureToggles
+                            allowedModelsField
+                            saveSection
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(LexturesTheme.brandTeal)
-                    .disabled(saving)
-                    .frame(minHeight: 44)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .onAppear { apply(config) }
-        .onChange(of: config) { _, next in apply(next) }
+        .task { await load() }
     }
 
-    private func binding(for key: String) -> Binding<Bool> {
-        Binding(
-            get: { OrgBrandingAdminLogic.isFeatureEnabled(enabled, key: key) },
-            set: { enabled[key] = $0 }
-        )
+    private var featureToggles: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(OrgBrandingAdminLogic.aiFeatureKeys, id: \.key) { feature in
+                Toggle(isOn: Binding(
+                    get: { enabled[feature.key] != false },
+                    set: { enabled[feature.key] = $0 }
+                )) {
+                    Text(L.dynamicText(feature.labelKey))
+                        .font(.subheadline)
+                }
+            }
+        }
     }
 
-    private func apply(_ data: AIGovernanceConfig?) {
-        enabled = data?.featuresEnabled ?? [:]
-        allowedModelsText = OrgBrandingAdminLogic.allowedModelsText(data?.allowedModels)
+    private var allowedModelsField: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(L.text("mobile.admin.orgBranding.aiGovernance.allowedModels"))
+                .font(.subheadline.weight(.semibold))
+            TextEditor(text: $allowedModelsText)
+                .font(.system(.caption, design: .monospaced))
+                .frame(minHeight: 88)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(LexturesTheme.textSecondary(for: colorScheme).opacity(0.3))
+                )
+            Text(L.text("mobile.admin.orgBranding.aiGovernance.allowedModelsHint"))
+                .font(.caption)
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+        }
     }
 
-    @MainActor
+    private var saveSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                Task { await save() }
+            } label: {
+                if case .saving = saveStatus {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                } else {
+                    Text(L.text("mobile.admin.orgBranding.aiGovernance.save"))
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(LexturesTheme.brandTeal)
+            .disabled(loading || saveStatus == .saving)
+
+            switch saveStatus {
+            case .saved:
+                Text(L.text("mobile.admin.orgBranding.aiGovernance.saved"))
+                    .font(.caption)
+                    .foregroundStyle(.green)
+            case .error(let message):
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            default:
+                EmptyView()
+            }
+        }
+    }
+
+    private func load() async {
+        guard let token = session.accessToken else {
+            loading = false
+            return
+        }
+        loading = true
+        defer { loading = false }
+        do {
+            let response = try await LMSAPI.fetchAiConfig(accessToken: token)
+            available = true
+            enabled = response.featuresEnabled ?? [:]
+            allowedModelsText = OrgBrandingAdminLogic.allowedModelsText(response.allowedModels)
+            saveStatus = .idle
+        } catch let error as APIError {
+            if case let .httpStatus(code, _) = error, code == 404 || code == 403 {
+                available = false
+            } else {
+                available = true
+                saveStatus = .error(OrgBrandingAdminLogic.userFacingError(
+                    error,
+                    fallbackKey: "mobile.admin.orgBranding.aiGovernance.loadError"
+                ))
+            }
+        } catch {
+            available = true
+            saveStatus = .error(OrgBrandingAdminLogic.userFacingError(
+                error,
+                fallbackKey: "mobile.admin.orgBranding.aiGovernance.loadError"
+            ))
+        }
+    }
+
     private func save() async {
         guard let token = session.accessToken else { return }
-        saving = true
-        errorMessage = nil
-        statusMessage = nil
-        defer { saving = false }
+        saveStatus = .saving
+        let request = OrgBrandingAdminLogic.buildAiConfigSaveRequest(
+            enabled: enabled,
+            allowedModelsText: allowedModelsText
+        )
         do {
-            let body = OrgBrandingAdminLogic.aiConfigPutBody(
-                enabled: enabled,
-                allowedModelsText: allowedModelsText
-            )
-            let saved = try await LMSAPI.putAIGovernanceConfig(body: body, accessToken: token)
-            config = saved
-            apply(saved)
-            statusMessage = L.text("mobile.admin.orgBranding.ai.saved")
+            let response = try await LMSAPI.putAiConfig(body: request, accessToken: token)
+            enabled = response.featuresEnabled ?? enabled
+            allowedModelsText = OrgBrandingAdminLogic.allowedModelsText(response.allowedModels)
+            saveStatus = .saved
         } catch {
-            errorMessage = OrgBrandingAdminLogic.userFacingError(error)
+            saveStatus = .error(OrgBrandingAdminLogic.userFacingError(
+                error,
+                fallbackKey: "mobile.admin.orgBranding.aiGovernance.saveError"
+            ))
         }
     }
 }
