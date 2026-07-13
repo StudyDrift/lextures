@@ -94,13 +94,13 @@ enum OrgBrandingAdminLogic {
         guard let normalized = normalizedHexColor(hex) else { return nil }
         let hexValue = String(normalized.dropFirst())
         guard let rgb = UInt32(hexValue, radix: 16) else { return nil }
-        let r = Double((rgb >> 16) & 0xFF) / 255.0
-        let g = Double((rgb >> 8) & 0xFF) / 255.0
-        let b = Double(rgb & 0xFF) / 255.0
+        let red = Double((rgb >> 16) & 0xFF) / 255.0
+        let green = Double((rgb >> 8) & 0xFF) / 255.0
+        let blue = Double(rgb & 0xFF) / 255.0
         func channel(_ value: Double) -> Double {
             value <= 0.03928 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4)
         }
-        let luminance = 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+        let luminance = 0.2126 * channel(red) + 0.7152 * channel(green) + 0.0722 * channel(blue)
         return (1.0 + 0.05) / (luminance + 0.05)
     }
 
