@@ -59,7 +59,7 @@ output "ecs_api_service_name" {
 
 output "use_web_container" {
   description = "True when the SPA is served from the web container image on Fargate."
-  # Non-sensitive boolean (see locals.tf); deploy-web.sh reads this with terraform output -raw.
+  # Forced non-sensitive in locals.tf via nonsensitive(sensitive(...)); deploy-web.sh uses -raw.
   value = local.use_web_container
 }
 

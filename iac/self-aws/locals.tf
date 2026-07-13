@@ -29,21 +29,21 @@ locals {
   web_subnet_ids = local.api_subnet_ids
 
   # SPA from the GHCR web image on Fargate (ALB path routing); otherwise S3 static deploy.
-  # web_image / server_image are sensitive (variable blocks + HCP). Emptiness is not secret
-  # and must be non-sensitive for count/for_each. Always declare the vars sensitive so
-  # nonsensitive() is valid; do not use try(nonsensitive(x), x) — Terraform treats the
-  # whole try as sensitive if any branch is sensitive.
-  web_image_set     = nonsensitive(var.web_image != "")
-  server_image_set  = nonsensitive(var.server_image != "")
-  use_web_container = var.enable_ecs && local.web_image_set
-  use_api_container = var.enable_ecs && local.server_image_set
+  #
+  # Topology flags (count/for_each/outputs) must be non-sensitive. Image refs and any
+  # HCP-marked vars (enable_ecs, etc.) can taint expressions. try(nonsensitive(x), x)
+  # does NOT work — try() marks the whole result sensitive if any branch is.
+  # nonsensitive(sensitive(expr)) always works: sensitive() forces the mark, then
+  # nonsensitive() strips it, whether or not expr was already sensitive. Emptiness and
+  # enable toggles are not secrets.
+  use_web_container = nonsensitive(sensitive(var.enable_ecs && var.web_image != ""))
+  use_api_container = nonsensitive(sensitive(var.enable_ecs && var.server_image != ""))
   # Keep the static bucket when enable_static_site so enabling web_image does not destroy it.
   create_web_bucket = var.enable_static_site
   # CloudFront default origin is S3 only when we are not using the web container.
   serve_spa_from_s3 = var.enable_static_site && !local.use_web_container
 
   # Non-sensitive set for ALB listener rules (for_each keys must not be sensitive).
-  # Condition uses non-sensitive booleans above so the ternary result stays non-sensitive.
   api_listener_path_patterns = toset(
     local.use_web_container && local.use_api_container ? local.api_path_patterns : []
   )
