@@ -539,6 +539,11 @@
 		8B776C2D3E4F5061728394 /* AiProviderSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B776D3E4F5061728394A5 /* AiProviderSettingsView.swift */; };
 		8B777C2D3E4F5061728394 /* OrgBrandingAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B777D3E4F5061728394A5 /* OrgBrandingAdminEntryCard.swift */; };
 		8B778C2D3E4F5061728394 /* OrgBrandingAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B778D3E4F5061728394A5 /* OrgBrandingAdminLogicTests.swift */; };
+		8B781C2D3E4F5061728394 /* LMSFeatureModelsPlatformSettingsAdmin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B781D3E4F5061728394A5 /* LMSFeatureModelsPlatformSettingsAdmin.swift */; };
+		8B782C2D3E4F5061728394 /* PlatformSettingsAdminLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B782D3E4F5061728394A5 /* PlatformSettingsAdminLogic.swift */; };
+		8B783C2D3E4F5061728394 /* PlatformSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B783D3E4F5061728394A5 /* PlatformSettingsView.swift */; };
+		8B784C2D3E4F5061728394 /* PlatformSettingsAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B784D3E4F5061728394A5 /* PlatformSettingsAdminEntryCard.swift */; };
+		8B785C2D3E4F5061728394 /* PlatformSettingsAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B785D3E4F5061728394A5 /* PlatformSettingsAdminLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1088,6 +1093,11 @@
 		8B776D3E4F5061728394A5 /* AiProviderSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiProviderSettingsView.swift; sourceTree = "<group>"; };
 		8B777D3E4F5061728394A5 /* OrgBrandingAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrgBrandingAdminEntryCard.swift; sourceTree = "<group>"; };
 		8B778D3E4F5061728394A5 /* OrgBrandingAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrgBrandingAdminLogicTests.swift; sourceTree = "<group>"; };
+		8B781D3E4F5061728394A5 /* LMSFeatureModelsPlatformSettingsAdmin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsPlatformSettingsAdmin.swift; sourceTree = "<group>"; };
+		8B782D3E4F5061728394A5 /* PlatformSettingsAdminLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformSettingsAdminLogic.swift; sourceTree = "<group>"; };
+		8B783D3E4F5061728394A5 /* PlatformSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformSettingsView.swift; sourceTree = "<group>"; };
+		8B784D3E4F5061728394A5 /* PlatformSettingsAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformSettingsAdminEntryCard.swift; sourceTree = "<group>"; };
+		8B785D3E4F5061728394A5 /* PlatformSettingsAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformSettingsAdminLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1111,6 +1121,7 @@
 		029927E4F879434FA36100DE /* Profile */ = {
 			isa = PBXGroup;
 			children = (
+				8B784D3E4F5061728394A5 /* PlatformSettingsAdminEntryCard.swift */,
 				8B777D3E4F5061728394A5 /* OrgBrandingAdminEntryCard.swift */,
 				8B766D3E4F5061728394A5 /* OrgStructureAdminEntryCard.swift */,
 				8B755D3E4F5061728394A5 /* PeopleAdminEntryCard.swift */,
@@ -1658,6 +1669,7 @@
 		8B72ADM015C6D7E8F901234567 /* Admin */ = {
 			isa = PBXGroup;
 			children = (
+				8B783D3E4F5061728394A5 /* PlatformSettingsView.swift */,
 				8B776D3E4F5061728394A5 /* AiProviderSettingsView.swift */,
 				8B775D3E4F5061728394A5 /* AiGovernanceView.swift */,
 				8B774D3E4F5061728394A5 /* OrgBrandingView.swift */,
@@ -1695,6 +1707,7 @@
 		8D3F9FB222A34107B54468F2 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B785D3E4F5061728394A5 /* PlatformSettingsAdminLogicTests.swift */,
 				8B778D3E4F5061728394A5 /* OrgBrandingAdminLogicTests.swift */,
 				8B767D3E4F5061728394A5 /* OrgStructureAdminLogicTests.swift */,
 				8B756D3E4F5061728394A5 /* PeopleAdminLogicTests.swift */,
@@ -1980,6 +1993,8 @@
 		D7AC7435149B4B17A073AD6F /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B782D3E4F5061728394A5 /* PlatformSettingsAdminLogic.swift */,
+				8B781D3E4F5061728394A5 /* LMSFeatureModelsPlatformSettingsAdmin.swift */,
 				8B772D3E4F5061728394A5 /* OrgBrandingAdminLogic.swift */,
 				8B771D3E4F5061728394A5 /* LMSFeatureModelsOrgBrandingAdmin.swift */,
 				8B762D3E4F5061728394A5 /* OrgStructureAdminLogic.swift */,
@@ -2310,6 +2325,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B785C2D3E4F5061728394 /* PlatformSettingsAdminLogicTests.swift in Sources */,
 				8B778C2D3E4F5061728394 /* OrgBrandingAdminLogicTests.swift in Sources */,
 				8B767C2D3E4F5061728394 /* OrgStructureAdminLogicTests.swift in Sources */,
 				BA8C6B804E624263A8A3823D /* AccessibilitySupportTests.swift in Sources */,
@@ -2390,6 +2406,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B784C2D3E4F5061728394 /* PlatformSettingsAdminEntryCard.swift in Sources */,
+				8B783C2D3E4F5061728394 /* PlatformSettingsView.swift in Sources */,
+				8B782C2D3E4F5061728394 /* PlatformSettingsAdminLogic.swift in Sources */,
+				8B781C2D3E4F5061728394 /* LMSFeatureModelsPlatformSettingsAdmin.swift in Sources */,
 				8B777C2D3E4F5061728394 /* OrgBrandingAdminEntryCard.swift in Sources */,
 				8B776C2D3E4F5061728394 /* AiProviderSettingsView.swift in Sources */,
 				8B775C2D3E4F5061728394 /* AiGovernanceView.swift in Sources */,

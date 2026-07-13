@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.VerifiedUser
@@ -127,6 +128,7 @@ fun ProfileTab(
     var showPeopleAdmin by remember { mutableStateOf(false) }
     var showOrgStructureAdmin by remember { mutableStateOf(false) }
     var showOrgBrandingAdmin by remember { mutableStateOf(false) }
+    var showPlatformSettingsAdmin by remember { mutableStateOf(false) }
     var personalDetailsVisible by remember { mutableStateOf(false) }
     var researchVisible by remember { mutableStateOf(false) }
     var showMoreHub by remember { mutableStateOf(false) }
@@ -359,6 +361,17 @@ fun ProfileTab(
             shell = shell,
             localePrefs = localePreferences,
             onBack = { showOrgBrandingAdmin = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showPlatformSettingsAdmin) {
+        com.lextures.android.features.settings.admin.PlatformSettingsScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = { showPlatformSettingsAdmin = false },
             modifier = modifier,
         )
         return
@@ -895,6 +908,21 @@ fun ProfileTab(
                     title = L.text(R.string.mobile_admin_orgBranding_title),
                     subtitle = L.text(R.string.mobile_admin_orgBranding_entry_subtitle),
                     onClick = { showOrgBrandingAdmin = true },
+                )
+            }
+        }
+
+        if (com.lextures.android.core.lms.PlatformSettingsAdminLogic.shouldShowEntry(
+                shell.platformFeatures,
+                shell.permissions,
+            )
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Settings,
+                    title = L.text(R.string.mobile_admin_platform_title),
+                    subtitle = L.text(R.string.mobile_admin_platform_entry_subtitle),
+                    onClick = { showPlatformSettingsAdmin = true },
                 )
             }
         }

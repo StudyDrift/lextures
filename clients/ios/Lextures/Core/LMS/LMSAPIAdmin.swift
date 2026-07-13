@@ -2,6 +2,51 @@ import Foundation
 
 /// Admin settings API (M14.10) — global archived courses.
 extension LMSAPI {
+    // MARK: - Global platform configuration (M14.6)
+
+    static func fetchPlatformSettings(accessToken: String) async throws -> PlatformSettingsSnapshot {
+        async let settingsRequest = client.request(
+            path: "/api/v1/settings/platform",
+            authorized: true,
+            accessToken: accessToken
+        )
+        async let featuresRequest = client.request(
+            path: "/api/v1/platform/features",
+            authorized: true,
+            accessToken: accessToken
+        )
+        let ((settingsData, _), (featuresData, _)) = try await (settingsRequest, featuresRequest)
+        let settings = try decode(PlatformSettingsSnapshot.self, from: settingsData)
+        let features = try decode(PlatformFeatureStates.self, from: featuresData)
+        return PlatformSettingsAdminLogic.applyingEffectiveFeatures(features, to: settings)
+    }
+
+    static func setPlatformFeature(
+        key: String,
+        enabled: Bool,
+        accessToken: String
+    ) async throws -> PlatformSettingsSnapshot {
+        guard PlatformSettingsAdminLogic.featureDefinitions.contains(where: { $0.key == key }) else {
+            throw APIError.invalidResponse
+        }
+        let body = try JSONSerialization.data(withJSONObject: [key: enabled, "updateMask": [key]])
+        let (data, _) = try await client.requestRaw(
+            path: "/api/v1/settings/platform",
+            method: "PUT",
+            bodyData: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        let persisted = try decode(PlatformSettingsSnapshot.self, from: data)
+        let (featuresData, _) = try await client.request(
+            path: "/api/v1/platform/features",
+            authorized: true,
+            accessToken: accessToken
+        )
+        let features = try decode(PlatformFeatureStates.self, from: featuresData)
+        return PlatformSettingsAdminLogic.applyingEffectiveFeatures(features, to: persisted)
+    }
+
     static func fetchArchivedCourses(accessToken: String) async throws -> [ArchivedCourseRow] {
         let (data, response) = try await client.request(
             path: "/api/v1/settings/archived-courses",

@@ -86,4 +86,9 @@ server/bin
 clients/mobile-dev.env
 clients/ios/Config/Development.local.xcconfig
 
+# Marketing lead data (large CSVs / crawl cache) — keep scripts + README tracked
+docs/marketing/**/*.csv
+docs/marketing/data/
+docs/marketing/universities-colleges/
+!docs/marketing/scripts/
 docs/marketing
