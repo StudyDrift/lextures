@@ -69,3 +69,5 @@ If the report shows `NO_FCP`, verify the auth token (`LH_TOKEN`), API availabili
 - The fuse-overlayfs storage driver and iptables-legacy are required for Docker-in-Docker in this environment.
 - Go 1.25 lives at `/usr/local/go/bin` (the system default `go` is 1.22). Setup appends this to `~/.bashrc`; if `go version` shows 1.22, prepend `/usr/local/go/bin` to `PATH`.
 - Run the Go API and web SPA natively (`go run ./cmd/server`, `npm run dev`); only Postgres and RabbitMQ need Docker. The API reads `server/.env` (copy from `server/.env.example`) — it is gitignored, so recreate it if missing.
+
+@RTK.md

@@ -34,9 +34,18 @@ type S3Driver struct {
 }
 
 // NewS3Driver creates an S3Driver. endpoint should be the host[:port] only (no scheme).
+// When AccessKeyID and SecretAccessKey are empty, credentials fall through the
+// default chain (env, shared config, ECS/EC2/IRSA task role) — preferred on AWS.
 func NewS3Driver(cfg S3Config) (*S3Driver, error) {
+	var creds *credentials.Credentials
+	if strings.TrimSpace(cfg.AccessKeyID) != "" && strings.TrimSpace(cfg.SecretAccessKey) != "" {
+		creds = credentials.NewStaticV4(cfg.AccessKeyID, cfg.SecretAccessKey, "")
+	} else {
+		// IAM roles for ECS tasks / EKS IRSA / EC2 instance profiles.
+		creds = credentials.NewIAM("")
+	}
 	opts := &minio.Options{
-		Creds:  credentials.NewStaticV4(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		Creds:  creds,
 		Secure: cfg.UseSSL,
 	}
 	if cfg.Region != "" {

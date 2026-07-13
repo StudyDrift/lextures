@@ -53,11 +53,15 @@ iac/demo/*.tfvars
 iac/demo/crash.log
 iac/demo/override.tf
 
-# Terraform (iac/self)
+# Terraform (iac/self, iac/self-aws)
 iac/self/.terraform/
+iac/self-aws/.terraform/
 iac/self/*.tfstate
 iac/self/*.tfstate.*
 iac/self/terraform.tfvars
+iac/self-aws/*.tfstate
+iac/self-aws/*.tfstate.*
+iac/self-aws/terraform.tfvars
 iac/self/crash.log
 iac/self/override.tf
 *.pem
@@ -92,3 +96,5 @@ docs/marketing/data/
 docs/marketing/universities-colleges/
 !docs/marketing/scripts/
 docs/marketing
+
+terraform.tfvars
