@@ -94,10 +94,10 @@ enum OrgBrandingAdminLogic {
         guard normalized.hasPrefix("#"), normalized.count == 7 else { return nil }
         let hex = String(normalized.dropFirst())
         guard let int = UInt64(hex, radix: 16) else { return nil }
-        let r = Double((int >> 16) & 0xFF) / 255
-        let g = Double((int >> 8) & 0xFF) / 255
-        let b = Double(int & 0xFF) / 255
-        return Color(red: r, green: g, blue: b)
+        let red = Double((int >> 16) & 0xFF) / 255
+        let green = Double((int >> 8) & 0xFF) / 255
+        let blue = Double(int & 0xFF) / 255
+        return Color(red: red, green: green, blue: blue)
     }
 
     /// Relative luminance contrast ratio of a hex color against white (WCAG).
@@ -107,16 +107,18 @@ enum OrgBrandingAdminLogic {
         let raw = String(normalized.dropFirst())
         guard let int = UInt64(raw, radix: 16) else { return nil }
         func channel(_ value: UInt64) -> Double {
-            let c = Double(value) / 255
-            return c <= 0.03928 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)
+            let component = Double(value) / 255
+            return component <= 0.03928
+                ? component / 12.92
+                : pow((component + 0.055) / 1.055, 2.4)
         }
-        let r = channel((int >> 16) & 0xFF)
-        let g = channel((int >> 8) & 0xFF)
-        let b = channel(int & 0xFF)
-        let l1 = 1.0 // white
-        let l2 = 0.2126 * r + 0.7152 * g + 0.0722 * b
-        let lighter = max(l1, l2)
-        let darker = min(l1, l2)
+        let red = channel((int >> 16) & 0xFF)
+        let green = channel((int >> 8) & 0xFF)
+        let blue = channel(int & 0xFF)
+        let whiteLuminance = 1.0
+        let colorLuminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+        let lighter = max(whiteLuminance, colorLuminance)
+        let darker = min(whiteLuminance, colorLuminance)
         return (lighter + 0.05) / (darker + 0.05)
     }
 

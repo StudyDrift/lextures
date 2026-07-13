@@ -59,8 +59,8 @@ struct AiProviderSettingsView: View {
                             .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                         Picker("", selection: $fallbackProvider) {
                             Text(L.text("mobile.admin.orgBranding.provider.fallbackNone")).tag("")
-                            ForEach(providers, id: \.self) { p in
-                                Text(OrgBrandingAdminLogic.providerLabel(for: p)).tag(p)
+                            ForEach(providers, id: \.self) { providerOption in
+                                Text(OrgBrandingAdminLogic.providerLabel(for: providerOption)).tag(providerOption)
                             }
                         }
                         .pickerStyle(.menu)

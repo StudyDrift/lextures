@@ -39,17 +39,17 @@ struct OrgBrandingResponse: Decodable, Hashable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        logoUrl = try c.decodeIfPresent(String.self, forKey: .logoUrl)
-        faviconUrl = try c.decodeIfPresent(String.self, forKey: .faviconUrl)
-        primaryColor = try c.decodeIfPresent(String.self, forKey: .primaryColor)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        logoUrl = try container.decodeIfPresent(String.self, forKey: .logoUrl)
+        faviconUrl = try container.decodeIfPresent(String.self, forKey: .faviconUrl)
+        primaryColor = try container.decodeIfPresent(String.self, forKey: .primaryColor)
             ?? OrgBrandingAdminLogic.defaultPrimaryColor
-        secondaryColor = try c.decodeIfPresent(String.self, forKey: .secondaryColor)
+        secondaryColor = try container.decodeIfPresent(String.self, forKey: .secondaryColor)
             ?? OrgBrandingAdminLogic.defaultSecondaryColor
-        customDomain = try c.decodeIfPresent(String.self, forKey: .customDomain)
-        customEmailDisplayName = try c.decodeIfPresent(String.self, forKey: .customEmailDisplayName)
-        contrastWarningPrimary = try c.decodeIfPresent(Bool.self, forKey: .contrastWarningPrimary)
-        contrastRatioPrimary = try c.decodeIfPresent(Double.self, forKey: .contrastRatioPrimary)
+        customDomain = try container.decodeIfPresent(String.self, forKey: .customDomain)
+        customEmailDisplayName = try container.decodeIfPresent(String.self, forKey: .customEmailDisplayName)
+        contrastWarningPrimary = try container.decodeIfPresent(Bool.self, forKey: .contrastWarningPrimary)
+        contrastRatioPrimary = try container.decodeIfPresent(Double.self, forKey: .contrastRatioPrimary)
     }
 }
 
@@ -102,11 +102,11 @@ struct AIProviderSettingsPutRequest: Encodable {
     }
 
     func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(provider, forKey: .provider)
-        try c.encode(modelAlias, forKey: .modelAlias)
-        try c.encodeIfPresent(fallbackProvider, forKey: .fallbackProvider)
-        try c.encodeIfPresent(byokApiKey, forKey: .byokApiKey)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(provider, forKey: .provider)
+        try container.encode(modelAlias, forKey: .modelAlias)
+        try container.encodeIfPresent(fallbackProvider, forKey: .fallbackProvider)
+        try container.encodeIfPresent(byokApiKey, forKey: .byokApiKey)
     }
 }
 
