@@ -264,4 +264,125 @@ extension LMSAPI {
         }
         return try decode(OrgTerm.self, from: data)
     }
+
+    // MARK: - Org branding & AI admin (M14.5)
+
+    static func fetchOrgBranding(orgId: String, accessToken: String) async throws -> OrgBrandingResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/orgs/\(encodePath(orgId))/branding",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(OrgBrandingResponse.self, from: data)
+    }
+
+    static func putOrgBranding(
+        orgId: String,
+        body: PutOrgBrandingRequest,
+        accessToken: String
+    ) async throws -> OrgBrandingResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/orgs/\(encodePath(orgId))/branding",
+            method: "PUT",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(OrgBrandingResponse.self, from: data)
+    }
+
+    static func uploadOrgBrandingLogo(
+        orgId: String,
+        fileName: String,
+        mimeType: String,
+        fileData: Data,
+        accessToken: String
+    ) async throws -> OrgBrandingUploadResponse {
+        let (data, response) = try await client.uploadMultipart(
+            path: "/api/v1/orgs/\(encodePath(orgId))/branding/logo",
+            fieldName: "file",
+            fileName: fileName,
+            mimeType: mimeType,
+            fileData: fileData,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(OrgBrandingUploadResponse.self, from: data)
+    }
+
+    static func fetchAiConfig(accessToken: String) async throws -> AiConfigResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/ai-config",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AiConfigResponse.self, from: data)
+    }
+
+    static func putAiConfig(body: PutAiConfigRequest, accessToken: String) async throws -> AiConfigResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/ai-config",
+            method: "PUT",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AiConfigResponse.self, from: data)
+    }
+
+    static func fetchAiProviderSettings(accessToken: String) async throws -> AiProviderSettingsResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/ai-settings",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AiProviderSettingsResponse.self, from: data)
+    }
+
+    static func putAiProviderSettings(
+        body: PutAiProviderSettingsRequest,
+        accessToken: String
+    ) async throws -> AiProviderSettingsResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/ai-settings",
+            method: "PUT",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AiProviderSettingsResponse.self, from: data)
+    }
+
+    static func testAiProviderConnection(accessToken: String) async throws -> AiProviderTestResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/ai-settings/test",
+            method: "POST",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AiProviderTestResponse.self, from: data)
+    }
 }

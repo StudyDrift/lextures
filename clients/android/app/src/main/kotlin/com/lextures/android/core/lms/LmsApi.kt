@@ -4333,6 +4333,104 @@ object LmsApi {
         decode(responseBody)
     }
 
+    // Org branding & AI admin (M14.5)
+
+    suspend fun fetchOrgBranding(orgId: String, accessToken: String): OrgBrandingResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/orgs/${encodePath(orgId)}/branding",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun putOrgBranding(
+        orgId: String,
+        request: PutOrgBrandingRequest,
+        accessToken: String,
+    ): OrgBrandingResponse = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(request, PutOrgBrandingRequest.serializer())
+        val (body, code) = client.request(
+            path = "/api/v1/orgs/${encodePath(orgId)}/branding",
+            method = "PUT",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun uploadOrgBrandingLogo(
+        orgId: String,
+        fileName: String,
+        mimeType: String,
+        fileBytes: ByteArray,
+        accessToken: String,
+    ): OrgBrandingUploadResponse = withContext(Dispatchers.IO) {
+        val body = client.uploadMultipart(
+            path = "/api/v1/orgs/${encodePath(orgId)}/branding/logo",
+            fieldName = "file",
+            fileName = fileName,
+            mimeType = mimeType,
+            fileBytes = fileBytes,
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    suspend fun fetchAiConfig(accessToken: String): AiConfigResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(path = "/api/v1/admin/ai-config", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun putAiConfig(body: PutAiConfigRequest, accessToken: String): AiConfigResponse =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(body, PutAiConfigRequest.serializer())
+            val (responseBody, code) = client.request(
+                path = "/api/v1/admin/ai-config",
+                method = "PUT",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+            decode(responseBody)
+        }
+
+    suspend fun fetchAiProviderSettings(accessToken: String): AiProviderSettingsResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(path = "/api/v1/admin/ai-settings", accessToken = accessToken)
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun putAiProviderSettings(
+        body: PutAiProviderSettingsRequest,
+        accessToken: String,
+    ): AiProviderSettingsResponse = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, PutAiProviderSettingsRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/admin/ai-settings",
+            method = "PUT",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun testAiProviderConnection(accessToken: String): AiProviderTestResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/ai-settings/test",
+                method = "POST",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
     // Product feedback (FB3)
 
     suspend fun submitFeedback(body: SubmitFeedbackRequest, accessToken: String): SubmitFeedbackResponse =
