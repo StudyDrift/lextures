@@ -41,6 +41,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Storage
@@ -123,6 +124,7 @@ fun ProfileTab(
     var showArchivedCoursesAdmin by remember { mutableStateOf(false) }
     var showRolesPermissionsAdmin by remember { mutableStateOf(false) }
     var showPeopleAdmin by remember { mutableStateOf(false) }
+    var showOrgStructureAdmin by remember { mutableStateOf(false) }
     var personalDetailsVisible by remember { mutableStateOf(false) }
     var researchVisible by remember { mutableStateOf(false) }
     var showMoreHub by remember { mutableStateOf(false) }
@@ -333,6 +335,17 @@ fun ProfileTab(
             shell = shell,
             localePrefs = localePreferences,
             onBack = { showPeopleAdmin = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showOrgStructureAdmin) {
+        com.lextures.android.features.settings.admin.OrgStructureAdminScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = { showOrgStructureAdmin = false },
             modifier = modifier,
         )
         return
@@ -839,6 +852,21 @@ fun ProfileTab(
                     title = L.text(R.string.mobile_admin_people_title),
                     subtitle = L.text(R.string.mobile_admin_people_entry_subtitle),
                     onClick = { showPeopleAdmin = true },
+                )
+            }
+        }
+
+        if (com.lextures.android.core.lms.OrgStructureAdminLogic.shouldShowEntry(
+                shell.platformFeatures,
+                shell.permissions,
+            )
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Filled.Apartment,
+                    title = L.text(R.string.mobile_admin_orgStructure_title),
+                    subtitle = L.text(R.string.mobile_admin_orgStructure_entry_subtitle),
+                    onClick = { showOrgStructureAdmin = true },
                 )
             }
         }

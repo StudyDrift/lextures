@@ -223,8 +223,8 @@ link-out to web for credential entry and deep authoring**, consistent with the d
 |---|---|---|---|
 | [M14.1 Account integrations & API access](../completed/mobile/M14.1-account-integrations-api-access.md) | `integrations` (keys, calendar subs, MCP, service tokens) | user (service tokens: `rbac:manage`) | **P1** ✅ |
 | [M14.2 Roles & permissions](../completed/mobile/M14.2-roles-permissions-admin.md) | `roles` | `rbac:manage` | **Done** |
-| [M14.3 People / user management](./M14.3-people-user-management.md) | `people` | `rbac:manage` | **P2** |
-| [M14.4 Organizations, units & terms](./M14.4-organizations-units-terms.md) | `organizations`/`org-units`/`terms` | `rbac:manage` / `tenant:org-units:admin` | **P2** |
+| [M14.3 People / user management](../completed/mobile/M14.3-people-user-management.md) | `people` | `rbac:manage` | **Done** |
+| [M14.4 Organizations, units & terms](../completed/mobile/M14.4-organizations-units-terms.md) | `organizations`/`org-units`/`terms` | `rbac:manage` / `tenant:org-units:admin` | **Done** |
 | [M14.5 Branding, AI governance & provider](./M14.5-org-branding-ai-governance.md) | `org-branding` | `rbac:manage` / `tenant:org-units:admin` | **P2** |
 | [M14.6 Global platform config](./M14.6-global-platform-config.md) | `platform` | `rbac:manage` | **P2** (read + guarded flag toggle) |
 | [M14.7 AI models, prompts & reports](./M14.7-ai-models-prompts-reports.md) | `ai-models`/`ai-prompts`/`ai-reports` | `rbac:manage` | **P2** |

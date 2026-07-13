@@ -183,4 +183,85 @@ extension LMSAPI {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
     }
+
+    // MARK: - Org structure & terms (M14.4)
+
+    static func fetchAdminOrganizations(accessToken: String) async throws -> [AdminOrgRow] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/orgs?limit=\(OrgStructureAdminLogic.orgListLimit)",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AdminOrgsListResponse.self, from: data).organizations ?? []
+    }
+
+    static func fetchOrgUnitTree(orgId: String, accessToken: String) async throws -> [OrgUnitTreeNode] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/orgs/\(encodePath(orgId))/units/tree",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(OrgUnitTreeResponse.self, from: data).tree ?? []
+    }
+
+    static func patchOrgUnit(
+        orgId: String,
+        unitId: String,
+        body: PatchOrgUnitRequest,
+        accessToken: String
+    ) async throws {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/orgs/\(encodePath(orgId))/units/\(encodePath(unitId))",
+            method: "PATCH",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+    }
+
+    static func createAcademicTerm(
+        orgId: String,
+        body: CreateAcademicTermRequest,
+        accessToken: String
+    ) async throws -> OrgTerm {
+        let (data, response) = try await client.request(
+            path: "/api/v1/orgs/\(encodePath(orgId))/terms",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(OrgTerm.self, from: data)
+    }
+
+    static func patchAcademicTerm(
+        orgId: String,
+        termId: String,
+        body: PatchAcademicTermRequest,
+        accessToken: String
+    ) async throws -> OrgTerm {
+        let (data, response) = try await client.request(
+            path: "/api/v1/orgs/\(encodePath(orgId))/terms/\(encodePath(termId))",
+            method: "PATCH",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(OrgTerm.self, from: data)
+    }
 }
