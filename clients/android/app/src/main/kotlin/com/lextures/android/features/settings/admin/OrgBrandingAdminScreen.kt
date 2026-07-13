@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -107,6 +108,7 @@ fun OrgBrandingAdminScreen(
 
             if (orgId.isEmpty()) {
                 LmsEmptyState(
+                    icon = Icons.Filled.Apartment,
                     title = L.text(context, localePrefs, R.string.mobile_admin_orgBranding_noOrgTitle),
                     message = L.text(context, localePrefs, R.string.mobile_admin_orgBranding_noOrgMessage),
                 )
