@@ -1,13 +1,13 @@
 import { registerServiceWorker } from './lib/push-notifications'
-import { installChunkLoadRecovery } from './lib/chunk-load-recovery'
 import './i18n'
 import { applyPlatformToDocument } from './lib/platform'
 import { applyUiTheme, readStoredUiTheme } from './lib/ui-theme'
 
 applyPlatformToDocument()
 applyUiTheme(readStoredUiTheme())
-installChunkLoadRecovery()
 
+// Async so recovery helpers stay out of the entry gzip budget.
+void import('./lib/chunk-load-recovery').then((m) => m.installChunkLoadRecovery())
 void registerServiceWorker()
 
 import { StrictMode } from 'react'

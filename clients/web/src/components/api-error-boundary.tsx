@@ -1,9 +1,36 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
-import { isStaleChunkError, reloadForStaleChunkOnce } from '../lib/chunk-load-recovery'
 
 type Props = { children: ReactNode }
 
 type State = { error: Error | null }
+
+const CHUNK_RELOAD_KEY = 'lextures.chunk-load-reload'
+
+/** Keep this inline (no shared import) so the entry chunk stays under budget. */
+function isStaleChunkError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false
+  const msg = error.message || ''
+  return (
+    error.name === 'ChunkLoadError' ||
+    /Failed to fetch dynamically imported module/i.test(msg) ||
+    /Loading chunk [\d]+ failed/i.test(msg) ||
+    /Importing a module script failed/i.test(msg) ||
+    /error loading dynamically imported module/i.test(msg)
+  )
+}
+
+function reloadForStaleChunkOnce(): boolean {
+  try {
+    const raw = sessionStorage.getItem(CHUNK_RELOAD_KEY)
+    const ts = raw ? Number(raw) : NaN
+    if (Number.isFinite(ts) && Date.now() - ts < 30_000) return false
+    sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()))
+  } catch {
+    // ignore quota / private mode
+  }
+  window.location.reload()
+  return true
+}
 
 /**
  * Catches unhandled render errors in the authenticated app shell (e.g. bad API data shapes).

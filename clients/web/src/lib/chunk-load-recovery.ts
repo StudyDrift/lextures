@@ -65,6 +65,33 @@ export function lazyImport<T>(factory: () => Promise<T>): Promise<T> {
   })
 }
 
+function wireServiceWorkerUpdates(): void {
+  if (!('serviceWorker' in navigator)) return
+
+  void navigator.serviceWorker.getRegistration().then((reg) => {
+    if (!reg) return
+    // Activate waiting workers promptly so post-deploy chunk hashes match the page.
+    reg.addEventListener('updatefound', () => {
+      const installing = reg.installing
+      if (!installing) return
+      installing.addEventListener('statechange', () => {
+        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          installing.postMessage({ type: 'SKIP_WAITING' })
+        }
+      })
+    })
+    void reg.update()
+  })
+
+  // When a new SW takes control after skipWaiting, reload once to load matching assets.
+  let refreshing = false
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return
+    refreshing = true
+    window.location.reload()
+  })
+}
+
 /** Install Vite preload + unhandled rejection handlers for chunk failures. */
 export function installChunkLoadRecovery(): void {
   if (typeof window === 'undefined') return
@@ -80,4 +107,6 @@ export function installChunkLoadRecovery(): void {
       event.preventDefault()
     }
   })
+
+  wireServiceWorkerUpdates()
 }
