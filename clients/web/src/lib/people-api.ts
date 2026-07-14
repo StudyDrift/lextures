@@ -94,13 +94,24 @@ export async function fetchPeopleStats(): Promise<PeopleDashboardStats> {
   return parseJson(res)
 }
 
+/** Dashboard segment filters matching GET /api/v1/admin/people?filter=… */
+export type PeopleListFilter =
+  | 'signups_7d'
+  | 'active'
+  | 'recent_30d'
+  | 'total'
+  | 'suspended'
+
 export async function searchPeople(params: {
-  q: string
+  q?: string
+  filter?: PeopleListFilter
   page?: number
   perPage?: number
 }): Promise<PaginatedPeople> {
   const sp = new URLSearchParams()
-  sp.set('q', params.q.trim())
+  const q = params.q?.trim()
+  if (q) sp.set('q', q)
+  if (params.filter) sp.set('filter', params.filter)
   if (params.page) sp.set('page', String(params.page))
   if (params.perPage) sp.set('per_page', String(params.perPage))
   const res = await authorizedFetch(`/api/v1/admin/people?${sp}`)

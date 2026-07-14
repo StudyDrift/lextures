@@ -39,7 +39,8 @@ func (d Deps) registerPlatformPeopleRoutes(r chi.Router) {
 
 func parsePlatformPeopleListParams(r *http.Request) platformpeople.ListParams {
 	p := platformpeople.ListParams{
-		Query: strings.TrimSpace(r.URL.Query().Get("q")),
+		Query:  strings.TrimSpace(r.URL.Query().Get("q")),
+		Filter: strings.TrimSpace(r.URL.Query().Get("filter")),
 	}
 	if v := strings.TrimSpace(r.URL.Query().Get("page")); v != "" {
 		if n, err := strconv.Atoi(v); err == nil {
@@ -89,11 +90,28 @@ func (d Deps) handleAdminPeopleSearch() http.HandlerFunc {
 			return
 		}
 		params := parsePlatformPeopleListParams(r)
+		var (
+			result platformpeople.ListResult
+			err    error
+		)
+		if params.Filter != "" {
+			if platformpeople.NormalizeFilter(params.Filter) == "" {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid filter.")
+				return
+			}
+			result, err = platformpeople.ListByFilter(r.Context(), d.Pool, params)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list users.")
+				return
+			}
+			writeJSON(w, http.StatusOK, result)
+			return
+		}
 		if params.Query == "" {
 			writeJSON(w, http.StatusOK, platformpeople.ListResult{Items: []platformpeople.PersonRow{}})
 			return
 		}
-		result, err := platformpeople.Search(r.Context(), d.Pool, params)
+		result, err = platformpeople.Search(r.Context(), d.Pool, params)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to search users.")
 			return

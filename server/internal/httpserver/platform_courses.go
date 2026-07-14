@@ -14,8 +14,28 @@ import (
 
 func (d Deps) registerPlatformCoursesRoutes(r chi.Router) {
 	r.Get("/api/v1/admin/courses", d.handleAdminCoursesSearch())
+	r.Get("/api/v1/admin/courses/stats", d.handleAdminCoursesStats())
 	r.Get("/api/v1/admin/courses/{courseId}/report", d.handleAdminCoursesReport())
 	r.Post("/api/v1/admin/courses/{courseId}/access", d.handleAdminCoursesAccess())
+}
+
+func (d Deps) handleAdminCoursesStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		if _, ok := d.adminRbacUser(w, r); !ok {
+			return
+		}
+		stats, err := platformcourses.FetchDashboardStats(r.Context(), d.Pool)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course stats.")
+			return
+		}
+		writeJSON(w, http.StatusOK, stats)
+	}
 }
 
 func parsePlatformCoursesListParams(r *http.Request) platformcourses.ListParams {
@@ -26,6 +46,7 @@ func parsePlatformCoursesListParams(r *http.Request) platformcourses.ListParams 
 	p := platformcourses.ListParams{
 		Query:  strings.TrimSpace(r.URL.Query().Get("q")),
 		Status: status,
+		Filter: strings.TrimSpace(r.URL.Query().Get("filter")),
 	}
 	if v := strings.TrimSpace(r.URL.Query().Get("page")); v != "" {
 		if n, err := strconv.Atoi(v); err == nil {
@@ -56,6 +77,19 @@ func (d Deps) handleAdminCoursesSearch() http.HandlerFunc {
 			return
 		}
 		params := parsePlatformCoursesListParams(r)
+		if params.Filter != "" {
+			if platformcourses.NormalizeFilter(params.Filter) == "" {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid filter.")
+				return
+			}
+			result, err := platformcourses.ListByFilter(r.Context(), d.Pool, params)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
+				return
+			}
+			writeJSON(w, http.StatusOK, result)
+			return
+		}
 		if params.Query == "" {
 			writeJSON(w, http.StatusOK, platformcourses.ListResult{Items: []platformcourses.CourseRow{}})
 			return

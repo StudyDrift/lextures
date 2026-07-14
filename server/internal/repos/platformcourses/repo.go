@@ -13,6 +13,56 @@ import (
 	"github.com/lextures/lextures/server/internal/courseroles"
 )
 
+// rowQuerier is implemented by *pgxpool.Pool and pgx.Tx.
+type rowQuerier interface {
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
+// DashboardStats holds instance-wide course metrics for the admin Courses page.
+type DashboardStats struct {
+	CreatedLast7Days int64 `json:"createdLast7Days"`
+	ActiveCourses    int64 `json:"activeCourses"`
+	DraftCourses     int64 `json:"draftCourses"`
+	TotalCourses     int64 `json:"totalCourses"`
+	ArchivedCourses  int64 `json:"archivedCourses"`
+}
+
+// FetchDashboardStats returns aggregate course metrics for the admin dashboard.
+func FetchDashboardStats(ctx context.Context, pool *pgxpool.Pool) (DashboardStats, error) {
+	return fetchDashboardStats(ctx, pool)
+}
+
+func fetchDashboardStats(ctx context.Context, q rowQuerier) (DashboardStats, error) {
+	var stats DashboardStats
+	err := q.QueryRow(ctx, `
+SELECT
+    COUNT(*)::bigint AS total_courses,
+    COUNT(*) FILTER (
+        WHERE c.archived = false AND c.published = true
+    )::bigint AS active_courses,
+    COUNT(*) FILTER (
+        WHERE c.archived = false AND c.published = false
+    )::bigint AS draft_courses,
+    COUNT(*) FILTER (
+        WHERE c.archived = true
+    )::bigint AS archived_courses,
+    COUNT(*) FILTER (
+        WHERE c.created_at >= NOW() - INTERVAL '7 days'
+    )::bigint AS created_last_7_days
+FROM course.courses c
+`).Scan(
+		&stats.TotalCourses,
+		&stats.ActiveCourses,
+		&stats.DraftCourses,
+		&stats.ArchivedCourses,
+		&stats.CreatedLast7Days,
+	)
+	if err != nil {
+		return DashboardStats{}, err
+	}
+	return stats, nil
+}
+
 // CourseRow is a search result row.
 type CourseRow struct {
 	ID              string    `json:"id"`
@@ -29,12 +79,42 @@ type CourseRow struct {
 	UpdatedAt       time.Time `json:"updatedAt"`
 }
 
-// ListParams holds search pagination options.
+// Dashboard filter query values for listing courses behind a stats card.
+const (
+	FilterCreated7d = "created_7d"
+	FilterActive    = "active"
+	FilterDraft     = "draft"
+	FilterTotal     = "total"
+	FilterArchived  = "archived"
+)
+
+// ListParams holds search / filter pagination options.
 type ListParams struct {
-	Query   string
-	Status  string
+	Query  string
+	Status string
+	// Filter restricts results to a dashboard segment (see Filter* constants).
+	// Empty means free-text search only (Query required).
+	Filter  string
 	Page    int
 	PerPage int
+}
+
+// NormalizeFilter returns a known filter constant or empty string if unknown/blank.
+func NormalizeFilter(raw string) string {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case FilterCreated7d, "created_last_7_days", "new_courses":
+		return FilterCreated7d
+	case FilterActive, "active_courses":
+		return FilterActive
+	case FilterDraft, "draft_courses":
+		return FilterDraft
+	case FilterTotal, "total_courses":
+		return FilterTotal
+	case FilterArchived, "archived_courses":
+		return FilterArchived
+	default:
+		return ""
+	}
 }
 
 // ListResult is a paginated search response.
@@ -172,7 +252,83 @@ LIMIT $3 OFFSET $4
 		return ListResult{}, err
 	}
 	defer rows.Close()
+	return scanCourseList(rows, page, perPage)
+}
 
+// ListByFilter returns courses for a dashboard stats segment (optionally narrowed by free text).
+func ListByFilter(ctx context.Context, pool *pgxpool.Pool, p ListParams) (ListResult, error) {
+	filter := NormalizeFilter(p.Filter)
+	if filter == "" {
+		return ListResult{}, fmt.Errorf("platformcourses: invalid filter %q", p.Filter)
+	}
+	page, perPage := normalizePagination(p.Page, p.PerPage)
+	offset := (page - 1) * perPage
+	q := strings.TrimSpace(p.Query)
+
+	// Predicates match FetchDashboardStats segments.
+	where := `TRUE`
+	switch filter {
+	case FilterCreated7d:
+		where = `c.created_at >= NOW() - INTERVAL '7 days'`
+	case FilterActive:
+		where = `c.archived = false AND c.published = true`
+	case FilterDraft:
+		where = `c.archived = false AND c.published = false`
+	case FilterArchived:
+		where = `c.archived = true`
+	case FilterTotal:
+		// no extra predicate
+	}
+
+	args := []any{}
+	if q != "" {
+		like := "%" + strings.ToLower(q) + "%"
+		args = append(args, like)
+		where += fmt.Sprintf(`
+AND (
+    c.course_code ILIKE $%d
+    OR c.title ILIKE $%d
+)`, len(args), len(args))
+	}
+	args = append(args, perPage, offset)
+	limitPh := len(args) - 1
+	offsetPh := len(args)
+
+	sql := fmt.Sprintf(`
+SELECT
+    c.id::text,
+    c.course_code,
+    c.title,
+    c.archived,
+    c.published,
+    c.org_id::text,
+    o.name AS org_name,
+    COALESCE(NULLIF(TRIM(COALESCE(inst.display_name, '')), ''), inst.email) AS instructor_name,
+    c.term_id::text,
+    t.name AS term_name,
+    (SELECT COUNT(*)::bigint FROM course.course_enrollments ce
+     WHERE ce.course_id = c.id AND ce.active) AS enrollment_count,
+    c.created_at,
+    c.updated_at,
+    COUNT(*) OVER () AS total
+FROM course.courses c
+INNER JOIN tenant.organizations o ON o.id = c.org_id
+LEFT JOIN "user".users inst ON inst.id = c.created_by_user_id
+LEFT JOIN tenant.terms t ON t.id = c.term_id
+WHERE %s
+ORDER BY c.created_at DESC, c.title ASC
+LIMIT $%d OFFSET $%d
+`, where, limitPh, offsetPh)
+
+	rows, err := pool.Query(ctx, sql, args...)
+	if err != nil {
+		return ListResult{}, err
+	}
+	defer rows.Close()
+	return scanCourseList(rows, page, perPage)
+}
+
+func scanCourseList(rows pgx.Rows, page, perPage int) (ListResult, error) {
 	var items []CourseRow
 	var total int64
 	for rows.Next() {

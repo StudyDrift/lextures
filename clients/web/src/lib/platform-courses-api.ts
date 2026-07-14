@@ -41,6 +41,14 @@ export type PlatformCourseReport = {
   updatedAt: string
 }
 
+export type CoursesDashboardStats = {
+  createdLast7Days: number
+  activeCourses: number
+  draftCourses: number
+  totalCourses: number
+  archivedCourses: number
+}
+
 async function parseJson<T>(res: Response): Promise<T> {
   const raw: unknown = await res.json().catch(() => ({}))
   if (!res.ok) {
@@ -55,15 +63,31 @@ async function parseJson<T>(res: Response): Promise<T> {
 
 export type PlatformCourseSearchStatus = 'open' | 'active' | 'draft' | 'archived' | 'all'
 
+/** Dashboard segment filters matching GET /api/v1/admin/courses?filter=… */
+export type CoursesListFilter =
+  | 'created_7d'
+  | 'active'
+  | 'draft'
+  | 'total'
+  | 'archived'
+
+export async function fetchCoursesStats(): Promise<CoursesDashboardStats> {
+  const res = await authorizedFetch('/api/v1/admin/courses/stats')
+  return parseJson(res)
+}
+
 export async function searchPlatformCourses(params: {
-  q: string
+  q?: string
   status?: PlatformCourseSearchStatus
+  filter?: CoursesListFilter
   page?: number
   perPage?: number
 }): Promise<PaginatedPlatformCourses> {
   const sp = new URLSearchParams()
-  sp.set('q', params.q.trim())
+  const q = params.q?.trim()
+  if (q) sp.set('q', q)
   if (params.status) sp.set('status', params.status)
+  if (params.filter) sp.set('filter', params.filter)
   if (params.page) sp.set('page', String(params.page))
   if (params.perPage) sp.set('per_page', String(params.perPage))
   const res = await authorizedFetch(`/api/v1/admin/courses?${sp}`)

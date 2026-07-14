@@ -981,10 +981,16 @@ export default function Settings() {
 
         {activeView === 'people' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">People</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-              Search, invite, suspend, and manage user accounts across the platform.
-            </p>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+                  People
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-neutral-400">
+                  Search, invite, suspend, and manage user accounts across the platform.
+                </p>
+              </div>
+            </div>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
