@@ -113,6 +113,7 @@ export type PlatformSettingsPayload = {
   ffPublicCatalog: boolean
   ffCourseMarketplace: boolean
   ffFeedback: boolean
+  ffEmailSes: boolean
   ffSelfPacedMode: boolean
   ffPublicApi: boolean
   ffContentFilterIntegration: boolean
@@ -130,6 +131,10 @@ export type PlatformSettingsPayload = {
   smtpFrom: string
   smtpUser: string
   smtpPassword: string
+  emailProvider: 'smtp' | 'ses'
+  sesRegion: string
+  sesFrom: string
+  sesConfigurationSet: string
   sources: {
     samlSsoEnabled: FieldSource
     samlPublicBaseUrl: FieldSource
@@ -155,5 +160,9 @@ export type PlatformSettingsPayload = {
     smtpFrom: FieldSource
     smtpUser: FieldSource
     smtpPassword: FieldSource
+    emailProvider: FieldSource
+    sesRegion: FieldSource
+    sesFrom: FieldSource
+    sesConfigurationSet: FieldSource
   }
 }

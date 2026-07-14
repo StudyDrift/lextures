@@ -23,6 +23,7 @@ import {
   Users,
   Workflow,
   Lock,
+  Mail,
   MessageSquare,
   Sparkles,
 } from 'lucide-react'
@@ -64,6 +65,7 @@ export function SideNavSettingsLinks() {
     gdprModuleEnabled,
     learnerProfileEnabled,
     ffFeedback,
+    emailTemplateEditorEnabled,
   } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
@@ -294,6 +296,15 @@ export function SideNavSettingsLinks() {
               >
                 Global platform
               </SideNavLink>
+              {emailTemplateEditorEnabled && (
+                <SideNavLink
+                  to="/settings/email-templates"
+                  className={() => (view === 'email-templates' ? sideNavActiveClass : '')}
+                  icon={<Mail className="h-5 w-5" />}
+                >
+                  Email templates
+                </SideNavLink>
+              )}
               {ffFeedback && (
                 <SideNavLink
                   to="/settings/feedback"

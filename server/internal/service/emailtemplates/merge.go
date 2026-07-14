@@ -85,5 +85,22 @@ func MapJobVars(vars map[string]string) map[string]string {
 	if v, ok := vars["expiresAt"]; ok {
 		out["expires_at"] = v
 	}
+	// Bidirectional link ↔ resetUrl for password-reset built-ins vs slot catalog.
+	if v, ok := vars["link"]; ok {
+		if _, has := out["resetUrl"]; !has {
+			out["resetUrl"] = v
+		}
+	}
+	if v, ok := vars["resetUrl"]; ok {
+		if _, has := out["link"]; !has {
+			out["link"] = v
+		}
+	}
+	if v, ok := vars["studentName"]; ok {
+		out["student.name"] = v
+	}
+	if v, ok := vars["orgName"]; ok {
+		out["org.name"] = v
+	}
 	return out
 }

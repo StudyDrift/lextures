@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/crypto/appsecrets"
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
@@ -162,6 +163,7 @@ type platformSettingsJSON struct {
 	FFPublicCatalog                    bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                bool `json:"ffCourseMarketplace"`
 	FFFeedback                         bool `json:"ffFeedback"`
+	FFEmailSES                         bool `json:"ffEmailSes"`
 	FFPublicAPI                        bool `json:"ffPublicApi"`
 	FFStripeBilling                    bool `json:"ffStripeBilling"`
 	FFPaymentsEnabled                  bool `json:"ffPaymentsEnabled"`
@@ -213,6 +215,12 @@ type platformSettingsJSON struct {
 	SMTPUser     string `json:"smtpUser"`
 	SMTPPassword string `json:"smtpPassword"`
 
+	// EmailProvider is "smtp" (default) or "ses" when FFEmailSES is enabled.
+	EmailProvider       string `json:"emailProvider"`
+	SESRegion           string `json:"sesRegion"`
+	SESFrom             string `json:"sesFrom"`
+	SESConfigurationSet string `json:"sesConfigurationSet"`
+
 	Sources platformSourcesJSON `json:"sources"`
 }
 
@@ -243,6 +251,11 @@ type platformSourcesJSON struct {
 	SMTPFrom     string `json:"smtpFrom"`
 	SMTPUser     string `json:"smtpUser"`
 	SMTPPassword string `json:"smtpPassword"`
+
+	EmailProvider       string `json:"emailProvider"`
+	SESRegion           string `json:"sesRegion"`
+	SESFrom             string `json:"sesFrom"`
+	SESConfigurationSet string `json:"sesConfigurationSet"`
 }
 
 func src(s platformconfig.Source) string {
@@ -392,6 +405,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
 			FFFeedback:                         merged.FFFeedback,
+			FFEmailSES:                         merged.FFEmailSES,
 			FFPublicAPI:                        merged.FFPublicAPI,
 			FFStripeBilling:                    merged.FFStripeBilling,
 			FFPaymentsEnabled:                  merged.FFPaymentsEnabled,
@@ -438,6 +452,10 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			SMTPFrom:                           merged.SMTPFrom,
 			SMTPUser:                           merged.SMTPUser,
 			SMTPPassword:                       smtpPasswordMasked(dbRow, merged.SMTPPassword),
+			EmailProvider:                      effectiveEmailProviderJSON(merged),
+			SESRegion:                          merged.SESRegion,
+			SESFrom:                            merged.SESFrom,
+			SESConfigurationSet:                merged.SESConfigurationSet,
 			Sources: platformSourcesJSON{
 				SAMLSSOEnabled:              src(sources.SAMLSSOEnabled),
 				SAMLPublicBaseURL:           src(sources.SAMLPublicBaseURL),
@@ -463,6 +481,10 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				SMTPFrom:                    src(sources.SMTPFrom),
 				SMTPUser:                    src(sources.SMTPUser),
 				SMTPPassword:                src(sources.SMTPPasswordCiphertext),
+				EmailProvider:               src(sources.EmailProvider),
+				SESRegion:                   src(sources.SESRegion),
+				SESFrom:                     src(sources.SESFrom),
+				SESConfigurationSet:         src(sources.SESConfigurationSet),
 			},
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -597,6 +619,7 @@ type putPlatformBody struct {
 	FFPublicCatalog                    *bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                *bool `json:"ffCourseMarketplace"`
 	FFFeedback                         *bool `json:"ffFeedback"`
+	FFEmailSES                         *bool `json:"ffEmailSes"`
 	FFPublicAPI                        *bool `json:"ffPublicApi"`
 	FFStripeBilling                    *bool `json:"ffStripeBilling"`
 	FFPaymentsEnabled                  *bool `json:"ffPaymentsEnabled"`
@@ -642,6 +665,11 @@ type putPlatformBody struct {
 	SMTPUser          *string `json:"smtpUser"`
 	SMTPPassword      *string `json:"smtpPassword"`
 	ClearSMTPPassword bool    `json:"clearSmtpPassword"`
+
+	EmailProvider       *string `json:"emailProvider"`
+	SESRegion           *string `json:"sesRegion"`
+	SESFrom             *string `json:"sesFrom"`
+	SESConfigurationSet *string `json:"sesConfigurationSet"`
 
 	UpdateMask []string `json:"updateMask"`
 }
@@ -765,6 +793,46 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		set("smtpuser", body.SMTPUser != nil, func() {
 			s := strings.TrimSpace(*body.SMTPUser)
 			wr.SMTPUser = &s
+		})
+		var emailProviderErr string
+		set("emailprovider", body.EmailProvider != nil, func() {
+			s := strings.ToLower(strings.TrimSpace(*body.EmailProvider))
+			switch s {
+			case "", "smtp", "ses":
+				if s == "" {
+					s = "smtp"
+				}
+				// SES selection requires the feature flag (effective or being enabled in this request).
+				if s == "ses" {
+					sesAllowed := d.effectiveConfig().FFEmailSES
+					if body.FFEmailSES != nil {
+						sesAllowed = *body.FFEmailSES
+					}
+					if !sesAllowed {
+						emailProviderErr = "emailProvider=ses requires ffEmailSes to be enabled."
+						return
+					}
+				}
+				wr.EmailProvider = &s
+			default:
+				emailProviderErr = "emailProvider must be smtp or ses."
+			}
+		})
+		if emailProviderErr != "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, emailProviderErr)
+			return
+		}
+		set("sesregion", body.SESRegion != nil, func() {
+			s := strings.TrimSpace(*body.SESRegion)
+			wr.SESRegion = &s
+		})
+		set("sesfrom", body.SESFrom != nil, func() {
+			s := strings.TrimSpace(*body.SESFrom)
+			wr.SESFrom = &s
+		})
+		set("sesconfigurationset", body.SESConfigurationSet != nil, func() {
+			s := strings.TrimSpace(*body.SESConfigurationSet)
+			wr.SESConfigurationSet = &s
 		})
 
 		set("samlssoenabled", body.SAMLSSOEnabled != nil, func() {
@@ -951,6 +1019,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffcoursemarketplace", body.FFCourseMarketplace, func(v bool) { wr.FFCourseMarketplace = &v })
 		setBool("fffeedback", body.FFFeedback, func(v bool) { wr.FFFeedback = &v })
+		setBool("ffemailses", body.FFEmailSES, func(v bool) { wr.FFEmailSES = &v })
 		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
 		setBool("ffpaymentsenabled", body.FFPaymentsEnabled, func(v bool) { wr.FFPaymentsEnabled = &v })
@@ -1159,6 +1228,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
 			FFFeedback:                         merged.FFFeedback,
+			FFEmailSES:                         merged.FFEmailSES,
 			FFPublicAPI:                        merged.FFPublicAPI,
 			FFStripeBilling:                    merged.FFStripeBilling,
 			FFPaymentsEnabled:                  merged.FFPaymentsEnabled,
@@ -1205,6 +1275,10 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			SMTPFrom:                           merged.SMTPFrom,
 			SMTPUser:                           merged.SMTPUser,
 			SMTPPassword:                       smtpPasswordMasked(dbRow, merged.SMTPPassword),
+			EmailProvider:                      effectiveEmailProviderJSON(merged),
+			SESRegion:                          merged.SESRegion,
+			SESFrom:                            merged.SESFrom,
+			SESConfigurationSet:                merged.SESConfigurationSet,
 			Sources: platformSourcesJSON{
 				SAMLSSOEnabled:              src(sources.SAMLSSOEnabled),
 				SAMLPublicBaseURL:           src(sources.SAMLPublicBaseURL),
@@ -1230,9 +1304,21 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				SMTPFrom:                    src(sources.SMTPFrom),
 				SMTPUser:                    src(sources.SMTPUser),
 				SMTPPassword:                src(sources.SMTPPasswordCiphertext),
+				EmailProvider:               src(sources.EmailProvider),
+				SESRegion:                   src(sources.SESRegion),
+				SESFrom:                     src(sources.SESFrom),
+				SESConfigurationSet:         src(sources.SESConfigurationSet),
 			},
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}
+}
+
+func effectiveEmailProviderJSON(cfg config.Config) string {
+	p := strings.ToLower(strings.TrimSpace(cfg.EmailProvider))
+	if p == "" {
+		return "smtp"
+	}
+	return p
 }

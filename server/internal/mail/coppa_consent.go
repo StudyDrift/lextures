@@ -1,17 +1,32 @@
 package mail
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"log"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/config"
 )
+
+// CoppaSendOpts carries optional org context for template resolution (ET-2).
+type CoppaSendOpts struct {
+	Branding *BrandingOpts
+	OrgID    *uuid.UUID
+	OrgName  string
+	Context  context.Context
+}
 
 // SendCoppaConsentNotice sends the COPPA direct-notice email to a parent (16 CFR §312.4(c)).
 // When SMTP is not configured it logs the URL and returns nil (dev parity).
 func SendCoppaConsentNotice(c config.Config, parentEmail, studentName, consentURL string, branding *BrandingOpts) error {
+	return SendCoppaConsentNoticeOpts(c, parentEmail, studentName, consentURL, &CoppaSendOpts{Branding: branding})
+}
+
+// SendCoppaConsentNoticeOpts is the opts-aware COPPA notice sender.
+func SendCoppaConsentNoticeOpts(c config.Config, parentEmail, studentName, consentURL string, opts *CoppaSendOpts) error {
 	if strings.TrimSpace(parentEmail) == "" {
 		return ErrInvalidToEmail
 	}
@@ -20,32 +35,80 @@ func SendCoppaConsentNotice(c config.Config, parentEmail, studentName, consentUR
 		return fmt.Errorf("coppa: consentURL does not look like a consent URL: %q", consentURL)
 	}
 
-	host := strings.TrimSpace(c.SMTPHost)
-	if host == "" {
-		log.Printf("mail: coppa consent notice for %q student=%q (SMTP not configured) url=%q", parentEmail, studentName, consentURL)
+	if !DeliveryConfigured(c) {
+		log.Printf("mail: coppa consent notice for %q student=%q (email delivery not configured) url=%q", parentEmail, studentName, consentURL)
 		return nil
 	}
 
-	rendered, err := renderCoppaConsentEmail(studentName, consentURL, branding)
-	if err != nil {
-		return err
+	ctx := context.Background()
+	var orgID *uuid.UUID
+	var branding *BrandingOpts
+	orgName := "Lextures"
+	if opts != nil {
+		if opts.Context != nil {
+			ctx = opts.Context
+		}
+		orgID = opts.OrgID
+		branding = opts.Branding
+		if strings.TrimSpace(opts.OrgName) != "" {
+			orgName = strings.TrimSpace(opts.OrgName)
+		}
+	}
+
+	vars := map[string]string{
+		"student.name": studentName,
+		"org.name":     orgName,
+		"link":         consentURL,
+		"expires_at":   "in 72 hours",
+	}
+	rendered, err := RenderSlot(ctx, orgID, "coppa_consent", vars, branding)
+	if err != nil || (rendered.HTMLBody == "" && rendered.BodyText == "") {
+		rendered, err = renderCoppaConsentEmail(studentName, consentURL, branding)
+		if err != nil {
+			return err
+		}
 	}
 	return SendMultipart(c, parentEmail, rendered.Subject, rendered.BodyText, rendered.HTMLBody, branding)
 }
 
 // SendCoppaConsentConfirmation sends a confirmation after parent approval.
 func SendCoppaConsentConfirmation(c config.Config, parentEmail, studentName string, branding *BrandingOpts) error {
+	return SendCoppaConsentConfirmationOpts(c, parentEmail, studentName, &CoppaSendOpts{Branding: branding})
+}
+
+// SendCoppaConsentConfirmationOpts is the opts-aware COPPA confirmation sender.
+func SendCoppaConsentConfirmationOpts(c config.Config, parentEmail, studentName string, opts *CoppaSendOpts) error {
 	if strings.TrimSpace(parentEmail) == "" {
 		return ErrInvalidToEmail
 	}
-	host := strings.TrimSpace(c.SMTPHost)
-	if host == "" {
-		log.Printf("mail: coppa consent confirmed for parent=%q student=%q (SMTP not configured)", parentEmail, studentName)
+	if !DeliveryConfigured(c) {
+		log.Printf("mail: coppa consent confirmed for parent=%q student=%q (email delivery not configured)", parentEmail, studentName)
 		return nil
 	}
-	rendered, err := renderCoppaConfirmationEmail(studentName, branding)
-	if err != nil {
-		return err
+	ctx := context.Background()
+	var orgID *uuid.UUID
+	var branding *BrandingOpts
+	orgName := "Lextures"
+	if opts != nil {
+		if opts.Context != nil {
+			ctx = opts.Context
+		}
+		orgID = opts.OrgID
+		branding = opts.Branding
+		if strings.TrimSpace(opts.OrgName) != "" {
+			orgName = strings.TrimSpace(opts.OrgName)
+		}
+	}
+	vars := map[string]string{
+		"student.name": studentName,
+		"org.name":     orgName,
+	}
+	rendered, err := RenderSlot(ctx, orgID, "coppa_consent_confirmation", vars, branding)
+	if err != nil || (rendered.HTMLBody == "" && rendered.BodyText == "") {
+		rendered, err = renderCoppaConfirmationEmail(studentName, branding)
+		if err != nil {
+			return err
+		}
 	}
 	return SendMultipart(c, parentEmail, rendered.Subject, rendered.BodyText, rendered.HTMLBody, branding)
 }

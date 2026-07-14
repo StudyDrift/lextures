@@ -18,6 +18,13 @@ function normalizePlatformPayload(data: PlatformSettingsPayload) {
   data.smtpFrom ??= ''
   data.smtpUser ??= ''
   data.smtpPassword ??= ''
+  if (data.emailProvider !== 'ses') {
+    data.emailProvider = 'smtp'
+  }
+  data.sesRegion ??= ''
+  data.sesFrom ??= ''
+  data.sesConfigurationSet ??= ''
+  data.ffEmailSes ??= false
   data.sources = { ...emptyForm().sources, ...data.sources }
 }
 
@@ -135,6 +142,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffPublicCatalog: false,
     ffCourseMarketplace: true,
     ffFeedback: true,
+    ffEmailSes: false,
     ffSelfPacedMode: false,
     ffPublicApi: false,
     ffContentFilterIntegration: false,
@@ -152,6 +160,10 @@ function emptyForm(): PlatformSettingsPayload {
     smtpFrom: '',
     smtpUser: '',
     smtpPassword: '',
+    emailProvider: 'smtp',
+    sesRegion: '',
+    sesFrom: '',
+    sesConfigurationSet: '',
     sources: {
       samlSsoEnabled: 'environment',
       samlPublicBaseUrl: 'environment',
@@ -177,6 +189,10 @@ function emptyForm(): PlatformSettingsPayload {
       smtpFrom: 'environment',
       smtpUser: 'environment',
       smtpPassword: 'environment',
+      emailProvider: 'environment',
+      sesRegion: 'environment',
+      sesFrom: 'environment',
+      sesConfigurationSet: 'environment',
     },
   }
 }
@@ -392,6 +408,18 @@ export function PlatformSettingsPanel() {
         mask.push('clearSmtpPassword')
         body.clearSmtpPassword = true
       }
+      maybe('emailProvider', baseline.emailProvider, form.emailProvider, () => {
+        body.emailProvider = form.emailProvider
+      })
+      maybe('sesRegion', baseline.sesRegion, form.sesRegion, () => {
+        body.sesRegion = form.sesRegion.trim()
+      })
+      maybe('sesFrom', baseline.sesFrom, form.sesFrom, () => {
+        body.sesFrom = form.sesFrom.trim()
+      })
+      maybe('sesConfigurationSet', baseline.sesConfigurationSet, form.sesConfigurationSet, () => {
+        body.sesConfigurationSet = form.sesConfigurationSet.trim()
+      })
 
       if (mask.length === 0) {
         toastSaveOk('No changes to save.')
@@ -433,81 +461,147 @@ export function PlatformSettingsPanel() {
 
       <form className="mt-8 space-y-10" onSubmit={onSubmit}>
         <section>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Outgoing email (SMTP)</h3>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Outgoing email</h3>
           <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
-            Passwords are encrypted in the database using{' '}
-            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">PLATFORM_SECRETS_KEY</code> on the
-            API (32 random bytes, base64). Process{' '}
-            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">SMTP_*</code> environment variables
-            still apply when a field is not set here.
+            Transactional email uses a pluggable provider. SMTP is the default; Amazon SES can be selected when the SES
+            feature flag is enabled. Additional providers can be added on the API without changing notification call
+            sites. SMTP passwords are encrypted with{' '}
+            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">PLATFORM_SECRETS_KEY</code>. Process{' '}
+            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">SMTP_*</code> /{' '}
+            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">SES_*</code> /{' '}
+            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">EMAIL_PROVIDER</code> env vars apply
+            when a field is not set here. SES credentials use the default AWS chain (IAM role or{' '}
+            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">SES_ACCESS_KEY_ID</code>) and are not
+            stored in the database.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
-                SMTP host {sourceBadge(form.sources.smtpHost)}
+                Email provider {sourceBadge(form.sources.emailProvider)}
               </label>
-              <input
-                type="text"
-                autoComplete="off"
-                value={form.smtpHost}
-                onChange={(e) => update('smtpHost', e.target.value)}
-                placeholder="e.g. smtp.sendgrid.net"
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
-                Port {sourceBadge(form.sources.smtpPort)}
-              </label>
-              <input
-                type="number"
-                min={1}
-                max={65535}
-                value={form.smtpPort}
-                onChange={(e) => {
-                  const n = parseInt(e.target.value, 10)
-                  update('smtpPort', Number.isFinite(n) ? n : 587)
-                }}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
-                From address {sourceBadge(form.sources.smtpFrom)}
-              </label>
-              <input
-                type="email"
-                value={form.smtpFrom}
-                onChange={(e) => update('smtpFrom', e.target.value)}
-                placeholder="no-reply@school.edu"
+              <select
+                value={form.emailProvider}
+                onChange={(e) => update('emailProvider', e.target.value === 'ses' ? 'ses' : 'smtp')}
                 className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
-              />
+              >
+                <option value="smtp">SMTP</option>
+                <option value="ses" disabled={!form.ffEmailSes}>
+                  Amazon SES{!form.ffEmailSes ? ' (enable feature flag first)' : ''}
+                </option>
+              </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
-                Username (optional) {sourceBadge(form.sources.smtpUser)}
-              </label>
-              <input
-                type="text"
-                autoComplete="off"
-                value={form.smtpUser}
-                onChange={(e) => update('smtpUser', e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
-                Password (optional) {sourceBadge(form.sources.smtpPassword)}
-              </label>
-              <input
-                type="password"
-                autoComplete="new-password"
-                placeholder={PLATFORM_SECRET_PLACEHOLDER}
-                value={form.smtpPassword}
-                onChange={(e) => update('smtpPassword', e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
-              />
-            </div>
+
+            {form.emailProvider === 'ses' ? (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    SES region {sourceBadge(form.sources.sesRegion)}
+                  </label>
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    value={form.sesRegion}
+                    onChange={(e) => update('sesRegion', e.target.value)}
+                    placeholder="e.g. us-east-1"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    SES from address {sourceBadge(form.sources.sesFrom)}
+                  </label>
+                  <input
+                    type="email"
+                    value={form.sesFrom}
+                    onChange={(e) => update('sesFrom', e.target.value)}
+                    placeholder="no-reply@school.edu (verified in SES)"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    SES configuration set (optional) {sourceBadge(form.sources.sesConfigurationSet)}
+                  </label>
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    value={form.sesConfigurationSet}
+                    onChange={(e) => update('sesConfigurationSet', e.target.value)}
+                    placeholder="optional"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    SMTP host {sourceBadge(form.sources.smtpHost)}
+                  </label>
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    value={form.smtpHost}
+                    onChange={(e) => update('smtpHost', e.target.value)}
+                    placeholder="e.g. smtp.sendgrid.net"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    Port {sourceBadge(form.sources.smtpPort)}
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={65535}
+                    value={form.smtpPort}
+                    onChange={(e) => {
+                      const n = parseInt(e.target.value, 10)
+                      update('smtpPort', Number.isFinite(n) ? n : 587)
+                    }}
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    From address {sourceBadge(form.sources.smtpFrom)}
+                  </label>
+                  <input
+                    type="email"
+                    value={form.smtpFrom}
+                    onChange={(e) => update('smtpFrom', e.target.value)}
+                    placeholder="no-reply@school.edu"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    Username (optional) {sourceBadge(form.sources.smtpUser)}
+                  </label>
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    value={form.smtpUser}
+                    onChange={(e) => update('smtpUser', e.target.value)}
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    Password (optional) {sourceBadge(form.sources.smtpPassword)}
+                  </label>
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder={PLATFORM_SECRET_PLACEHOLDER}
+                    value={form.smtpPassword}
+                    onChange={(e) => update('smtpPassword', e.target.value)}
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </section>
 

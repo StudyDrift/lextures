@@ -206,20 +206,29 @@ func (d Deps) handleAdminEmailTemplatePut() http.HandlerFunc {
 		}
 		slotID := strings.TrimSpace(chi.URLParam(r, "slotId"))
 		var body struct {
-			HTMLBody   string  `json:"htmlBody"`
-			TextBody   *string `json:"textBody"`
-			ReplyTo    *string `json:"replyTo"`
-			SenderName *string `json:"senderName"`
+			SourceMarkdown string  `json:"sourceMarkdown"`
+			HTMLBody       string  `json:"htmlBody"`
+			TextBody       *string `json:"textBody"`
+			ReplyTo        *string `json:"replyTo"`
+			SenderName     *string `json:"senderName"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		if strings.TrimSpace(body.HTMLBody) == "" {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "htmlBody is required.")
+		var result *emailtemplatesvc.SaveResult
+		var err error
+		switch {
+		case strings.TrimSpace(body.SourceMarkdown) != "":
+			// ET-2: Markdown is canonical.
+			result, err = svc.Save(r.Context(), orgID, slotID, body.SourceMarkdown, body.TextBody, body.ReplyTo, body.SenderName, actor)
+		case strings.TrimSpace(body.HTMLBody) != "":
+			// 18.5 / legacy HTML editor until ET-3 lands.
+			result, err = svc.SaveHTML(r.Context(), orgID, slotID, body.HTMLBody, body.TextBody, body.ReplyTo, body.SenderName, actor)
+		default:
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "sourceMarkdown or htmlBody is required.")
 			return
 		}
-		result, err := svc.Save(r.Context(), orgID, slotID, body.HTMLBody, body.TextBody, body.ReplyTo, body.SenderName, actor)
 		if err != nil {
 			if err.Error() == "unknown slot" {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Template slot not found.")
@@ -368,9 +377,10 @@ func (d Deps) handleAdminEmailTemplatePreview() http.HandlerFunc {
 			return
 		}
 		var body struct {
-			HTMLBody   string            `json:"htmlBody"`
-			TextBody   *string           `json:"textBody"`
-			SampleData map[string]string `json:"sampleData"`
+			SourceMarkdown string            `json:"sourceMarkdown"`
+			HTMLBody       string            `json:"htmlBody"`
+			TextBody       *string           `json:"textBody"`
+			SampleData     map[string]string `json:"sampleData"`
 		}
 		if len(bodyBytes) > 0 {
 			if err := json.Unmarshal(bodyBytes, &body); err != nil {
@@ -378,7 +388,8 @@ func (d Deps) handleAdminEmailTemplatePreview() http.HandlerFunc {
 				return
 			}
 		}
-		if strings.TrimSpace(body.HTMLBody) == "" {
+		useMarkdown := strings.TrimSpace(body.SourceMarkdown) != ""
+		if !useMarkdown && strings.TrimSpace(body.HTMLBody) == "" {
 			slot, slotErr := emailtemplates.GetSlot(r.Context(), d.Pool, slotID)
 			if slotErr != nil || slot == nil {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Template slot not found.")
@@ -390,8 +401,18 @@ func (d Deps) handleAdminEmailTemplatePreview() http.HandlerFunc {
 				return
 			}
 			if active != nil {
-				body.HTMLBody = active.HTMLBody
+				if active.SourceMarkdown != nil && strings.TrimSpace(*active.SourceMarkdown) != "" {
+					body.SourceMarkdown = *active.SourceMarkdown
+					useMarkdown = true
+				} else {
+					body.HTMLBody = active.HTMLBody
+				}
 				body.TextBody = active.TextBody
+			} else if strings.TrimSpace(slot.DefaultMarkdown) != "" {
+				body.SourceMarkdown = slot.DefaultMarkdown
+				useMarkdown = true
+				t := slot.DefaultText
+				body.TextBody = &t
 			} else {
 				body.HTMLBody = slot.DefaultHTML
 				t := slot.DefaultText
@@ -406,7 +427,12 @@ func (d Deps) handleAdminEmailTemplatePreview() http.HandlerFunc {
 				return
 			}
 		}
-		preview := svc.Preview(body.HTMLBody, body.TextBody, data)
+		var preview emailtemplatesvc.PreviewResult
+		if useMarkdown {
+			preview = svc.Preview(body.SourceMarkdown, body.TextBody, data)
+		} else {
+			preview = svc.PreviewHTML(body.HTMLBody, body.TextBody, data)
+		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(preview)
 	}

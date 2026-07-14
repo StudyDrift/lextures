@@ -555,6 +555,7 @@ func (d Deps) registerSettingsRoutes(r chi.Router) {
 	r.Put("/api/v1/settings/ai", d.handlePutSettingsAI())
 	r.Get("/api/v1/settings/platform", d.handleGetPlatformSettings())
 	r.Put("/api/v1/settings/platform", d.handlePutPlatformSettings())
+	d.registerPlatformEmailTemplateRoutes(r)
 	r.Get("/api/v1/settings/system-prompts", d.handleListSystemPrompts())
 	r.Put("/api/v1/settings/system-prompts/{key}", d.handlePutSystemPrompt())
 	r.Get("/api/v1/settings/archived-courses", d.handleGetArchivedCourses())

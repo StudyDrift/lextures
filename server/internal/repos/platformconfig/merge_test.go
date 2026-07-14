@@ -111,6 +111,33 @@ func TestMerge_CourseMarketplaceDBOverridesDefault(t *testing.T) {
 	}
 }
 
+func TestMerge_EmailSESDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFEmailSES {
+		t.Fatal("expected FFEmailSES false (default OFF) when DB unset")
+	}
+	if got.EmailProvider != "" && got.EmailProvider != "smtp" {
+		// Empty env leaves EmailProvider empty; runtime normalizes to smtp.
+		t.Fatalf("unexpected EmailProvider %q", got.EmailProvider)
+	}
+	on := true
+	prov := "ses"
+	region := "us-west-2"
+	from := "noreply@example.edu"
+	got = Merge(config.Config{EmailProvider: "smtp", SESRegion: "us-east-1"}, &Row{
+		FFEmailSES:    &on,
+		EmailProvider: &prov,
+		SESRegion:     &region,
+		SESFrom:       &from,
+	})
+	if !got.FFEmailSES {
+		t.Fatal("expected FFEmailSES true from DB")
+	}
+	if got.EmailProvider != "ses" || got.SESRegion != "us-west-2" || got.SESFrom != "noreply@example.edu" {
+		t.Fatalf("got provider=%q region=%q from=%q", got.EmailProvider, got.SESRegion, got.SESFrom)
+	}
+}
+
 // Plan FB0: FFFeedback defaults ON when platform settings row is unset.
 func TestMerge_FeedbackDefaultOnWhenDBUnset(t *testing.T) {
 	got := Merge(config.Config{}, nil)

@@ -223,6 +223,11 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addString("smtp_from", w.SMTPFrom)
 	addString("smtp_user", w.SMTPUser)
 	addBytes("smtp_password_ciphertext", w.SMTPPasswordCiphertext)
+	addBool("ff_email_ses", w.FFEmailSES)
+	addString("email_provider", w.EmailProvider)
+	addString("ses_region", w.SESRegion)
+	addString("ses_from", w.SESFrom)
+	addString("ses_configuration_set", w.SESConfigurationSet)
 
 	if len(sets) == 0 {
 		return nil

@@ -10,6 +10,7 @@ import { OrganizationsPanel } from '../../components/settings/organizations-pane
 import { OrgUnitsPanel } from '../../components/settings/org-units-panel'
 import { TermsSettingsPanel } from '../../components/settings/terms-settings-panel'
 import { PlatformSettingsPanel } from '../../components/settings/platform-settings-panel'
+import { SystemEmailTemplatesPanel } from '../../components/settings/system-email-templates-panel'
 import { ScimSettingsPanel } from '../../components/settings/scim-settings-panel'
 import { CloudProvidersPanel } from '../../components/settings/cloud-providers-panel'
 import { LRSSettingsPanel } from '../../components/settings/lrs-settings-panel'
@@ -56,6 +57,7 @@ function isSystemSettingsPath(pathname: string): boolean {
     pathname === '/settings/roles' ||
     pathname === '/settings/lti-tools' ||
     pathname === '/settings/platform' ||
+    pathname === '/settings/email-templates' ||
     pathname === '/settings/organizations' ||
     pathname === '/settings/org-units' ||
     pathname === '/settings/terms' ||
@@ -151,6 +153,7 @@ export default function Settings() {
     ffTranscripts,
     ffAdvisingIntegration,
     learnerProfileEnabled,
+    emailTemplateEditorEnabled,
     loading: featuresLoading,
   } = usePlatformFeatures()
   const [systemPrompts, setSystemPrompts] = useState<SystemPromptItem[]>([])
@@ -925,6 +928,23 @@ export default function Settings() {
               }
             >
               <PlatformSettingsPanel />
+            </RequirePermission>
+          </div>
+        )}
+
+        {activeView === 'email-templates' && emailTemplateEditorEnabled && (
+          <div>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Email templates</h2>
+            <RequirePermission
+              permission={PERM_RBAC_MANAGE}
+              fallback={
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                  You need permission to edit system email templates (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              }
+            >
+              <SystemEmailTemplatesPanel />
             </RequirePermission>
           </div>
         )}

@@ -29,6 +29,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.MagicLinkEnrolledOnly = mergeBool(db.MagicLinkEnrolledOnly, false)
 	out.SessionManagementUIEnabled = mergeBool(db.SessionManagementUIEnabled, false)
 	out.EmailNotificationsEnabled = mergeBool(db.EmailNotificationsEnabled, false)
+	// SES email provider is opt-in (default off).
+	out.FFEmailSES = mergeBool(db.FFEmailSES, false)
 	out.PushNotificationsEnabled = mergeBool(db.PushNotificationsEnabled, false)
 	out.VirtualClassroomEnabled = mergeBool(db.VirtualClassroomEnabled, def.VirtualClassroomEnabled)
 	out.DRMEnabled = mergeBool(db.DRMEnabled, false)

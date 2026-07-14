@@ -41,8 +41,16 @@ func TestMapJobVars(t *testing.T) {
 		"assignmentName": "Lab 1",
 		"dueAt":          "Friday",
 		"unsubscribeUrl": "https://example.edu/unsub",
+		"link":           "https://example.edu/reset",
+		"studentName":    "Sam",
 	})
 	if out["course.title"] != "Bio" || out["assignment.title"] != "Lab 1" {
 		t.Fatalf("map=%v", out)
+	}
+	if out["resetUrl"] != "https://example.edu/reset" {
+		t.Fatalf("expected link→resetUrl mapping, map=%v", out)
+	}
+	if out["student.name"] != "Sam" {
+		t.Fatalf("expected studentName mapping, map=%v", out)
 	}
 }
