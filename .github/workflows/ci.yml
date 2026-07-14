@@ -1,5 +1,5 @@
 # Run tests, lint, and builds for the Go API, browser clients, and related checks on pull requests targeting main.
-# Does not run on direct pushes to main (see deploy-self.yml for that path).
+# Does not run on direct pushes to main (see deploy-self-aws.yml for that path).
 
 name: CI
 
@@ -613,7 +613,7 @@ jobs:
             deploy:
               - 'deploy/**'
               - 'docker-compose.scale.yml'
-              - '.github/workflows/deploy-self.yml'
+              - '.github/workflows/deploy-self-aws.yml'
 
   deploy-scripts:
     name: Deploy scripts (canary unit tests)
@@ -669,7 +669,6 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: us-east-1
-      TF_VAR_statuspage_api_key: ${{ secrets.STATUSPAGE_API_KEY != '' && secrets.STATUSPAGE_API_KEY || 'plan-only-unused' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -695,17 +694,9 @@ jobs:
           terraform_version: 1.9.0
           terraform_wrapper: false
 
-      - name: Stage Terraform modules for remote execution
+      - name: Terraform init (self-aws)
         if: steps.gate.outputs.skip != 'true'
-        run: |
-          set -euo pipefail
-          rm -f iac/self/modules iac/self/docker-compose.deploy.yml
-          cp -R iac/modules iac/self/modules
-          cp docker-compose.deploy.yml iac/self/docker-compose.deploy.yml
-
-      - name: Terraform init (self)
-        if: steps.gate.outputs.skip != 'true'
-        working-directory: iac/self
+        working-directory: iac/self-aws
         run: |
           set -euo pipefail
           for attempt in 1 2 3 4; do
@@ -718,10 +709,10 @@ jobs:
             sleep 30
           done
 
-      - name: Terraform plan (self)
+      - name: Terraform plan (self-aws)
         id: plan
         if: steps.gate.outputs.skip != 'true'
-        working-directory: iac/self
+        working-directory: iac/self-aws
         run: |
           set -euo pipefail
           terraform plan -no-color -input=false -out=tfplan 2>&1 | tee plan.txt
@@ -738,7 +729,7 @@ jobs:
           script: |
             const plan = `${{ steps.plan.outputs.plan }}`;
             const body = [
-              '## Terraform plan (`iac/self`)',
+              '## Terraform plan (`iac/self-aws`)',
               '',
               '<details><summary>Plan output</summary>',
               '',

@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Apply LB traffic weights for blue/green and canary deploys (plan 17.9 FR-2 / FR-5 / AC-6).
 #
-# Production uses Terraform variables in iac/self/deploy-traffic.tf.
-# Demo/staging may use DigitalOcean weighted backends via the same variables.
+# The Oracle / multi-cloud iac/self stack was removed after the AWS migration.
+# Self-host production deploys use ECS rolling updates via deploy-self-aws
+# (iac/self-aws). Enterprise canary weights, when reintroduced, should live on
+# the enterprise AWS module and be applied from this script.
 #
-# Usage:
-#   deploy/scripts/traffic_split.sh terraform staging 5   # 5% canary / 95% stable
-#   deploy/scripts/traffic_split.sh terraform production 100  # full cutover to green
+# Usage (legacy interface kept for deploy-pipeline docs):
+#   deploy/scripts/traffic_split.sh terraform staging 5
+#   deploy/scripts/traffic_split.sh terraform production 100
 
 set -euo pipefail
 
@@ -14,31 +16,20 @@ MODE="${1:-terraform}"
 ENVIRONMENT="${2:-staging}"
 CANARY_PERCENT="${3:-5}"
 
-STABLE_PERCENT=$((100 - CANARY_PERCENT))
 if [ "$CANARY_PERCENT" -lt 0 ] || [ "$CANARY_PERCENT" -gt 100 ]; then
   echo "canary percent must be 0..100" >&2
   exit 1
 fi
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-
 case "$MODE" in
   terraform)
-    export TF_VAR_deploy_canary_weight="$CANARY_PERCENT"
-    export TF_VAR_deploy_stable_weight="$STABLE_PERCENT"
-    echo "applying traffic split: canary=${CANARY_PERCENT}% stable=${STABLE_PERCENT}% (${ENVIRONMENT})"
-    (
-      cd "$ROOT/iac/self"
-      terraform workspace select "$ENVIRONMENT" 2>/dev/null || terraform workspace new "$ENVIRONMENT"
-      terraform apply -auto-approve \
-        -var="deploy_canary_weight=${CANARY_PERCENT}" \
-        -var="deploy_stable_weight=${STABLE_PERCENT}"
-    )
-  ;;
+    echo "error: traffic_split via Terraform was tied to the removed iac/self stack." >&2
+    echo "Self-host AWS (iac/self-aws) uses ECS rolling deploys via deploy-self-aws." >&2
+    echo "Requested: environment=${ENVIRONMENT} canary=${CANARY_PERCENT}%" >&2
+    exit 1
+    ;;
   *)
     echo "usage: $0 terraform <environment> <canary-percent>" >&2
     exit 1
     ;;
 esac
-
-echo "traffic split applied"

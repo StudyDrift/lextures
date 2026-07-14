@@ -35,4 +35,12 @@ aws_region   = "us-east-1"
 # First password signup with this email gets Global Admin (only when no human users yet):
 # bootstrap_admin_email = "you@example.com"
 
+# Amazon SES (transactional email). Resources are created when ses_domain is set.
+# enable_ses   = true
+# ses_domain   = "example.com"
+# ses_from_email = "no-reply@example.com"   # default: no-reply@<ses_domain>
+# ses_mail_from_subdomain = "bounce"        # optional custom MAIL FROM
+# After apply: terraform output ses_dns_records  → add DKIM CNAMEs (DNS only in Cloudflare)
+# New SES accounts start in sandbox (verified recipients only) until production access is approved.
+
 # course_files_bucket_force_destroy = true  # staging only

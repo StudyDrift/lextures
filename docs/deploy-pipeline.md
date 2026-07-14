@@ -48,14 +48,14 @@ flowchart TD
 
 ## Image tagging (FR-6 / FR-8)
 
-### Small-tier VMs (Oracle / DigitalOcean)
+### Self-host AWS (Fargate)
 
 On every merge to `main`, `.github/workflows/publish-images.yml` pushes multi-arch (`amd64` + `arm64`):
 
 - `ghcr.io/<org>/<repo>/server:latest` and `:git-sha>`
 - `ghcr.io/<org>/<repo>/web:latest` and `:git-sha>`
 
-Set `deploy_server_image` / `deploy_web_image` in `iac/production/terraform.tfvars` to these `:latest` tags (or pin a SHA).
+[`.github/workflows/deploy-self-aws.yml`](../.github/workflows/deploy-self-aws.yml) applies `iac/self-aws` with immutable `server_image` / `web_image` tags `:git-sha>`.
 
 ### Enterprise (EKS)
 

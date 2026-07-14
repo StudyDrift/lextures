@@ -58,13 +58,13 @@ export function EmailTemplateEditor({
 
   return (
     <>
-    <div className="rounded-xl border border-slate-200 dark:border-neutral-700">
-      <div className="flex flex-wrap gap-1 border-b border-slate-200 p-2 dark:border-neutral-700">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50/40 dark:border-neutral-600 dark:bg-neutral-950/30">
+      <div className="flex flex-wrap gap-0.5 border-b border-slate-200 bg-white px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-900">
         <button
           type="button"
           disabled={disabled}
           onClick={() => editor?.chain().focus().toggleBold().run()}
-          className="rounded px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="rounded-md px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-700"
         >
           Bold
         </button>
@@ -72,7 +72,7 @@ export function EmailTemplateEditor({
           type="button"
           disabled={disabled}
           onClick={() => editor?.chain().focus().toggleItalic().run()}
-          className="rounded px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="rounded-md px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-700"
         >
           Italic
         </button>
@@ -84,16 +84,16 @@ export function EmailTemplateEditor({
             setLinkUrl(prev ?? '')
             setLinkDialogOpen(true)
           }}
-          className="rounded px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="rounded-md px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-700"
         >
           Link
         </button>
       </div>
       <EditorContent
         editor={editor}
-        className="prose prose-sm max-w-none px-3 py-2 dark:prose-invert min-h-[220px] focus-within:outline-none"
+        className="prose prose-sm max-w-none min-h-[260px] px-3.5 py-3 focus-within:outline-none dark:prose-invert"
       />
-      <div className="border-t border-slate-200 p-2 text-xs text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+      <div className="border-t border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
         Type <code className="rounded bg-slate-100 px-1 dark:bg-neutral-800">{'{{'}</code> or use merge-field buttons.
       </div>
     </div>
@@ -133,7 +133,7 @@ export function MergeFieldButton({
       type="button"
       disabled={disabled}
       onClick={() => onInsert(token)}
-      className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-800 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
       title={token}
     >
       {label}

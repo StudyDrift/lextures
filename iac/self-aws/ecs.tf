@@ -80,19 +80,30 @@ resource "aws_ecs_task_definition" "api" {
           protocol      = "tcp"
         }]
 
-        environment = [
-          { name = "APP_ENV", value = var.environment == "production" ? "production" : "staging" },
-          { name = "PORT", value = "8080" },
-          { name = "RUN_MIGRATIONS", value = "true" },
-          { name = "PUBLIC_WEB_ORIGIN", value = local.public_origin },
-          { name = "BACKGROUND_JOBS_ENABLED", value = "1" },
-          { name = "SCHEDULER_ENABLED", value = "1" },
-          # First matching password signup gets Global Admin when the human user table is empty.
-          { name = "BOOTSTRAP_ADMIN_EMAIL", value = var.bootstrap_admin_email },
-          # IAM task role — leave keys empty so minio-go / AWS SDK use the instance role.
-          { name = "STORAGE_ACCESS_KEY_ID", value = "" },
-          { name = "STORAGE_SECRET_ACCESS_KEY", value = "" },
-        ]
+        environment = concat(
+          [
+            { name = "APP_ENV", value = var.environment == "production" ? "production" : "staging" },
+            { name = "PORT", value = "8080" },
+            { name = "RUN_MIGRATIONS", value = "true" },
+            { name = "PUBLIC_WEB_ORIGIN", value = local.public_origin },
+            { name = "BACKGROUND_JOBS_ENABLED", value = "1" },
+            { name = "SCHEDULER_ENABLED", value = "1" },
+            # First matching password signup gets Global Admin when the human user table is empty.
+            { name = "BOOTSTRAP_ADMIN_EMAIL", value = var.bootstrap_admin_email },
+            # IAM task role — leave keys empty so minio-go / AWS SDK use the instance role.
+            { name = "STORAGE_ACCESS_KEY_ID", value = "" },
+            { name = "STORAGE_SECRET_ACCESS_KEY", value = "" },
+          ],
+          # SES via task role (no SES_ACCESS_KEY_ID). Platform Settings can still override email_provider.
+          local.ses_enabled ? [
+            { name = "EMAIL_PROVIDER", value = "ses" },
+            { name = "SES_REGION", value = data.aws_region.current.name },
+            { name = "SES_FROM", value = local.ses_from_email },
+            { name = "SES_CONFIGURATION_SET", value = local.ses_config_name },
+            { name = "SES_ACCESS_KEY_ID", value = "" },
+            { name = "SES_SECRET_ACCESS_KEY", value = "" },
+          ] : [],
+        )
 
         secrets = [
           for key in local.app_secret_keys : {

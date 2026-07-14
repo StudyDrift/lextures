@@ -265,6 +265,42 @@ check "web_custom_domain_cert" {
   }
 }
 
+variable "enable_ses" {
+  description = "When true and ses_domain is set, provision SES domain identity, configuration set, and ECS task IAM for transactional email."
+  type        = bool
+  default     = true
+}
+
+variable "ses_domain" {
+  description = "Domain to verify in SES (e.g. lextures.com). Leave empty to skip SES resources (even if enable_ses is true)."
+  type        = string
+  default     = ""
+}
+
+variable "ses_from_email" {
+  description = "Default From address for transactional mail (SES_FROM). Empty defaults to no-reply@<ses_domain> when SES is enabled."
+  type        = string
+  default     = ""
+}
+
+variable "ses_configuration_set_name" {
+  description = "SES configuration set name. Empty uses <project>-<environment>-default."
+  type        = string
+  default     = ""
+}
+
+variable "ses_mail_from_subdomain" {
+  description = "Optional custom MAIL FROM subdomain (e.g. bounce → bounce.example.com). Empty skips custom MAIL FROM."
+  type        = string
+  default     = ""
+}
+
+variable "ses_verify_from_email" {
+  description = "Also create a SES email identity for ses_from_email (verification email sent by AWS). Usually unnecessary once the domain is verified."
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Additional tags applied to all taggable resources."
   type        = map(string)

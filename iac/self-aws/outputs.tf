@@ -111,8 +111,78 @@ output "ecs_cluster_name" {
 }
 
 output "ecs_task_role_arn" {
-  description = "IAM role used by the API task for S3/SQS (instance credentials)."
+  description = "IAM role used by the API task for S3/SQS/SES (instance credentials)."
   value       = aws_iam_role.ecs_task.arn
+}
+
+output "ses_enabled" {
+  description = "True when SES domain identity resources are managed by this stack."
+  value       = local.ses_enabled
+}
+
+output "ses_domain" {
+  description = "SES domain identity (null when SES is disabled)."
+  value       = local.ses_enabled ? var.ses_domain : null
+}
+
+output "ses_from_email" {
+  description = "From address injected as SES_FROM on the API task (null when SES is disabled)."
+  value       = local.ses_enabled ? local.ses_from_email : null
+}
+
+output "ses_configuration_set_name" {
+  description = "SES configuration set name (null when SES is disabled)."
+  value       = local.ses_enabled ? local.ses_config_name : null
+}
+
+output "ses_dkim_tokens" {
+  description = <<-EOT
+    Easy DKIM CNAME tokens for the SES domain. For each token create:
+      Name:  <token>._domainkey.<ses_domain>
+      Type:  CNAME
+      Value: <token>.dkim.amazonses.com
+    Empty when SES is disabled.
+  EOT
+  value = local.ses_enabled ? try(
+    aws_sesv2_email_identity.domain[0].dkim_signing_attributes[0].tokens,
+    [],
+  ) : []
+}
+
+output "ses_mail_from_domain" {
+  description = "Custom MAIL FROM domain when ses_mail_from_subdomain is set (null otherwise)."
+  value       = local.ses_enabled && var.ses_mail_from_subdomain != "" ? "${var.ses_mail_from_subdomain}.${var.ses_domain}" : null
+}
+
+output "ses_dns_records" {
+  description = <<-EOT
+    DNS records to publish for SES (DKIM + optional custom MAIL FROM).
+    Cloudflare: create each as DNS only (grey cloud).
+  EOT
+  value = local.ses_enabled ? concat(
+    [
+      for token in try(aws_sesv2_email_identity.domain[0].dkim_signing_attributes[0].tokens, []) : {
+        purpose = "dkim"
+        type    = "CNAME"
+        name    = "${token}._domainkey.${var.ses_domain}"
+        value   = "${token}.dkim.amazonses.com"
+      }
+    ],
+    var.ses_mail_from_subdomain != "" ? [
+      {
+        purpose = "mail_from_mx"
+        type    = "MX"
+        name    = "${var.ses_mail_from_subdomain}.${var.ses_domain}"
+        value   = "10 feedback-smtp.${data.aws_region.current.name}.amazonses.com"
+      },
+      {
+        purpose = "mail_from_spf"
+        type    = "TXT"
+        name    = "${var.ses_mail_from_subdomain}.${var.ses_domain}"
+        value   = "v=spf1 include:amazonses.com ~all"
+      },
+    ] : [],
+  ) : []
 }
 
 # Sensitive connection strings for one-time bootstrap / debugging (prefer Secrets Manager in production).

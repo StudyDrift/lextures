@@ -97,3 +97,44 @@ resource "aws_iam_role_policy" "ecs_task_sqs" {
     }]
   })
 }
+
+# SES send via task role (no static access keys). Scoped to the verified domain identity.
+resource "aws_iam_role_policy" "ecs_task_ses" {
+  count = local.ses_enabled ? 1 : 0
+
+  name = "${local.name_prefix}-ecs-task-ses"
+  role = aws_iam_role.ecs_task.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "SendEmail"
+        Effect = "Allow"
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail",
+          "ses:SendTemplatedEmail",
+          "ses:SendBulkEmail",
+        ]
+        Resource = compact([
+          aws_sesv2_email_identity.domain[0].arn,
+          try(aws_sesv2_email_identity.from_address[0].arn, ""),
+          # SESv2 SendEmail also authorizes the configuration set ARN in some policies.
+          try(aws_sesv2_configuration_set.main[0].arn, ""),
+        ])
+      },
+      {
+        # Some SES API paths still authorize account-level identity ARNs (v1 style).
+        Sid    = "SendEmailAccountFallback"
+        Effect = "Allow"
+        Action = ["ses:SendEmail", "ses:SendRawEmail"]
+        Resource = [
+          "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.ses_domain}",
+          "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/*@${var.ses_domain}",
+          "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:configuration-set/${local.ses_config_name}",
+        ]
+      },
+    ]
+  })
+}

@@ -96,13 +96,6 @@ export function SideNavSettingsLinks() {
         Account
       </SideNavLink>
       <SideNavLink
-        to="/settings/notifications"
-        className={() => (view === 'notifications' ? sideNavActiveClass : '')}
-        icon={<Bell className="h-5 w-5" />}
-      >
-        Notifications
-      </SideNavLink>
-      <SideNavLink
         to="/settings/integrations"
         className={() => (view === 'integrations' ? sideNavActiveClass : '')}
         icon={<Workflow className="h-5 w-5" />}
@@ -118,6 +111,13 @@ export function SideNavSettingsLinks() {
           Learner Profile
         </SideNavLink>
       )}
+      <SideNavLink
+        to="/settings/notifications"
+        className={() => (view === 'notifications' ? sideNavActiveClass : '')}
+        icon={<Bell className="h-5 w-5" />}
+      >
+        Notifications
+      </SideNavLink>
       {gdprModuleEnabled && (
         <SideNavLink
           to="/privacy-centre"
@@ -135,260 +135,272 @@ export function SideNavSettingsLinks() {
             </p>
           )}
           {(canOrgUnits || canOrgRoles) && (
-            <>
-              {canOrgUnits && (
-                <SideNavLink
-                  to="/settings/org-units"
-                  className={() => (view === 'org-units' ? sideNavActiveClass : '')}
-                  icon={<FolderTree className="h-5 w-5" />}
-                >
-                  Org structure
-                </SideNavLink>
-              )}
-              {(canOrgUnits || canOrgRoles) && (
-                <>
-                  <SideNavLink
-                    to="/settings/terms"
-                    className={() => (view === 'terms' ? sideNavActiveClass : '')}
-                    icon={<CalendarRange className="h-5 w-5" />}
-                  >
-                    Academic terms
-                  </SideNavLink>
-                  <SideNavLink
-                    to="/settings/org-branding"
-                    className={() => (view === 'org-branding' ? sideNavActiveClass : '')}
-                    icon={<Palette className="h-5 w-5" />}
-                  >
-                    Branding
-                  </SideNavLink>
-                </>
-              )}
-            </>
+            <SideNavLink
+              to="/settings/terms"
+              className={() => (view === 'terms' ? sideNavActiveClass : '')}
+              icon={<CalendarRange className="h-5 w-5" />}
+            >
+              Academic terms
+            </SideNavLink>
+          )}
+          {canManageRbac && ffAccessibilityIntake && (
+            <SideNavLink
+              to="/admin/accessibility"
+              className={() =>
+                location.pathname === '/admin/accessibility' ? sideNavActiveClass : ''
+              }
+              icon={<ShieldCheck className="h-5 w-5" />}
+            >
+              Accessibility services
+            </SideNavLink>
+          )}
+          {canManageRbac && ffAdvisingIntegration && (
+            <SideNavLink
+              to="/settings/advising"
+              className={() => (view === 'advising' ? sideNavActiveClass : '')}
+              icon={<GraduationCap className="h-5 w-5" />}
+            >
+              Advising
+            </SideNavLink>
           )}
           {canManageRbac && (
-            <>
-              <SideNavLink
-                to="/settings/people"
-                className={() => (view === 'people' ? sideNavActiveClass : '')}
-                icon={<Users className="h-5 w-5" />}
+            <SideNavLink
+              to="/settings/archive"
+              className={() => (view === 'archive' ? sideNavActiveClass : '')}
+              icon={<Archive className="h-5 w-5" />}
+            >
+              Archive
+            </SideNavLink>
+          )}
+          {canManageRbac && ffBookstoreIntegration && (
+            <SideNavLink
+              to="/admin/bookstore"
+              className={() =>
+                location.pathname === '/admin/bookstore' ? sideNavActiveClass : ''
+              }
+              icon={<Store className="h-5 w-5" />}
+            >
+              Bookstore
+            </SideNavLink>
+          )}
+          {(canOrgUnits || canOrgRoles) && (
+            <SideNavLink
+              to="/settings/org-branding"
+              className={() => (view === 'org-branding' ? sideNavActiveClass : '')}
+              icon={<Palette className="h-5 w-5" />}
+            >
+              Branding
+            </SideNavLink>
+          )}
+          {canManageRbac && (
+            <SideNavLink
+              to="/settings/cloud-providers"
+              className={() => (view === 'cloud-providers' ? sideNavActiveClass : '')}
+              icon={<Link2 className="h-5 w-5" />}
+            >
+              Cloud file pickers
+            </SideNavLink>
+          )}
+          {canManageRbac && ffConsortiumSharing && (
+            <SideNavLink
+              to="/admin/consortium"
+              className={() =>
+                location.pathname === '/admin/consortium' ? sideNavActiveClass : ''
+              }
+              icon={<GraduationCap className="h-5 w-5" />}
+            >
+              Consortium sharing
+            </SideNavLink>
+          )}
+          {canManageRbac && (
+            <SideNavLink
+              to="/settings/courses"
+              className={() => (view === 'courses' ? sideNavActiveClass : '')}
+              icon={<BookOpen className="h-5 w-5" />}
+            >
+              Courses
+            </SideNavLink>
+          )}
+          {canManageRbac && emailTemplateEditorEnabled && (
+            <SideNavLink
+              to="/settings/email-templates"
+              className={() => (view === 'email-templates' ? sideNavActiveClass : '')}
+              icon={<Mail className="h-5 w-5" />}
+            >
+              Email templates
+            </SideNavLink>
+          )}
+          {canManageRbac && ffFeedback && (
+            <SideNavLink
+              to="/settings/feedback"
+              className={() => (view === 'feedback' ? sideNavActiveClass : '')}
+              icon={<MessageSquare className="h-5 w-5" />}
+            >
+              Feedback
+            </SideNavLink>
+          )}
+          {canManageRbac && (
+            <SideNavLink
+              to="/settings/platform"
+              className={() => (view === 'platform' ? sideNavActiveClass : '')}
+              icon={<Settings2 className="h-5 w-5" />}
+            >
+              Global platform
+            </SideNavLink>
+          )}
+          {canManageRbac && (
+            <div className="flex flex-col gap-0.5">
+              <button
+                type="button"
+                onClick={() => setAiOpen((o) => !o)}
+                className={`${sideNavLinkClass} ${
+                  sideNavCollapsed ? 'justify-center' : ''
+                } ${
+                  aiOpen || aiSectionActive
+                    ? 'text-slate-900 dark:text-neutral-50'
+                    : 'text-slate-500 dark:text-neutral-400'
+                }`}
+                aria-expanded={aiOpen}
+                title={sideNavCollapsed ? 'Intelligence' : undefined}
               >
-                People
-              </SideNavLink>
-              <SideNavLink
-                to="/settings/courses"
-                className={() => (view === 'courses' ? sideNavActiveClass : '')}
-                icon={<BookOpen className="h-5 w-5" />}
-              >
-                Courses
-              </SideNavLink>
-              <SideNavLink
-                to="/settings/intro-course"
-                className={() => (view === 'intro-course' ? sideNavActiveClass : '')}
-                icon={<GraduationCap className="h-5 w-5" />}
-              >
-                Intro course
-              </SideNavLink>
-              <SideNavLink
-                to="/settings/roles"
-                className={() => (view === 'roles' ? sideNavActiveClass : '')}
-                icon={<Shield className="h-5 w-5" />}
-              >
-                Roles and Permissions
-              </SideNavLink>
-              <SideNavLink
-                to="/settings/lti-tools"
-                className={() => (view === 'lti-tools' ? sideNavActiveClass : '')}
-                icon={<Plug className="h-5 w-5" />}
-              >
-                LTI tools
-              </SideNavLink>
-              <SideNavLink
-                to="/settings/cloud-providers"
-                className={() => (view === 'cloud-providers' ? sideNavActiveClass : '')}
-                icon={<Link2 className="h-5 w-5" />}
-              >
-                Cloud file pickers
-              </SideNavLink>
-              {xapiEmissionFeatureEnabled() && (
-                <SideNavLink
-                  to="/settings/lrs-integrations"
-                  className={() => (view === 'lrs-integrations' ? sideNavActiveClass : '')}
-                  icon={<Link2 className="h-5 w-5" />}
-                >
-                  Learning Record Stores
-                </SideNavLink>
-              )}
-              {oerLibraryEnabled() && (
-                <SideNavLink
-                  to="/settings/oer-providers"
-                  className={() => (view === 'oer-providers' ? sideNavActiveClass : '')}
-                  icon={<BookOpen className="h-5 w-5" />}
-                >
-                  OER library
-                </SideNavLink>
-              )}
-              {ffTranscripts && (
-                <SideNavLink
-                  to="/settings/transcripts"
-                  className={() => (view === 'transcripts' ? sideNavActiveClass : '')}
-                  icon={<FileText className="h-5 w-5" />}
-                >
-                  Transcripts
-                </SideNavLink>
-              )}
-              {ffAdvisingIntegration && (
-                <SideNavLink
-                  to="/settings/advising"
-                  className={() => (view === 'advising' ? sideNavActiveClass : '')}
-                  icon={<GraduationCap className="h-5 w-5" />}
-                >
-                  Advising
-                </SideNavLink>
-              )}
-              {ffResearchConsent && (
-                <SideNavLink
-                  to="/admin/consent-studies"
-                  className={() =>
-                    location.pathname === '/admin/consent-studies' ? sideNavActiveClass : ''
-                  }
-                  icon={<ShieldCheck className="h-5 w-5" />}
-                >
-                  Research consent
-                </SideNavLink>
-              )}
-              {ffAccessibilityIntake && (
-                <SideNavLink
-                  to="/admin/accessibility"
-                  className={() =>
-                    location.pathname === '/admin/accessibility' ? sideNavActiveClass : ''
-                  }
-                  icon={<ShieldCheck className="h-5 w-5" />}
-                >
-                  Accessibility services
-                </SideNavLink>
-              )}
-              {ffConsortiumSharing && (
-                <SideNavLink
-                  to="/admin/consortium"
-                  className={() =>
-                    location.pathname === '/admin/consortium' ? sideNavActiveClass : ''
-                  }
-                  icon={<GraduationCap className="h-5 w-5" />}
-                >
-                  Consortium sharing
-                </SideNavLink>
-              )}
-              {ffBookstoreIntegration && (
-                <SideNavLink
-                  to="/admin/bookstore"
-                  className={() =>
-                    location.pathname === '/admin/bookstore' ? sideNavActiveClass : ''
-                  }
-                  icon={<Store className="h-5 w-5" />}
-                >
-                  Bookstore
-                </SideNavLink>
-              )}
-              <SideNavLink
-                to="/settings/platform"
-                className={() => (view === 'platform' ? sideNavActiveClass : '')}
-                icon={<Settings2 className="h-5 w-5" />}
-              >
-                Global platform
-              </SideNavLink>
-              {emailTemplateEditorEnabled && (
-                <SideNavLink
-                  to="/settings/email-templates"
-                  className={() => (view === 'email-templates' ? sideNavActiveClass : '')}
-                  icon={<Mail className="h-5 w-5" />}
-                >
-                  Email templates
-                </SideNavLink>
-              )}
-              {ffFeedback && (
-                <SideNavLink
-                  to="/settings/feedback"
-                  className={() => (view === 'feedback' ? sideNavActiveClass : '')}
-                  icon={<MessageSquare className="h-5 w-5" />}
-                >
-                  Feedback
-                </SideNavLink>
-              )}
-              <SideNavLink
-                to="/settings/archive"
-                className={() => (view === 'archive' ? sideNavActiveClass : '')}
-                icon={<Archive className="h-5 w-5" />}
-              >
-                Archive
-              </SideNavLink>
-              <SideNavLink
-                to="/settings/organizations"
-                className={() => (view === 'organizations' ? sideNavActiveClass : '')}
-                icon={<Building2 className="h-5 w-5" />}
-              >
-                Organizations
-              </SideNavLink>
-              {platformScimEnabled && (
-                <SideNavLink
-                  to="/settings/scim-provisioning"
-                  className={() => (view === 'scim-provisioning' ? sideNavActiveClass : '')}
-                  icon={<Link2 className="h-5 w-5" />}
-                >
-                  SCIM provisioning
-                </SideNavLink>
-              )}
-              <div className="flex flex-col gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setAiOpen((o) => !o)}
-                  className={`${sideNavLinkClass} ${
-                    sideNavCollapsed ? 'justify-center' : ''
-                  } ${
-                    aiOpen || aiSectionActive
-                      ? 'text-slate-900 dark:text-neutral-50'
-                      : 'text-slate-500 dark:text-neutral-400'
-                  }`}
-                  aria-expanded={aiOpen}
-                  title={sideNavCollapsed ? 'Intelligence' : undefined}
-                >
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center text-current opacity-90">
-                    <Bot className="h-5 w-5" aria-hidden />
-                  </span>
-                  {!sideNavCollapsed && (
-                    <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
-                      <span className="truncate">Intelligence</span>
-                      <ChevronDown
-                        className={`h-4 w-4 shrink-0 text-current opacity-70 transition-transform duration-200 ease-out ${
-                          aiOpen ? 'rotate-180' : 'rotate-0'
-                        }`}
-                        aria-hidden
-                      />
-                    </span>
-                  )}
-                </button>
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center text-current opacity-90">
+                  <Bot className="h-5 w-5" aria-hidden />
+                </span>
                 {!sideNavCollapsed && (
-                  <div
-                    className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                      aiOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                    }`}
-                  >
-                    <div className="min-h-0 overflow-hidden">
-                      <div className="flex flex-col gap-0.5 pb-0.5">
-                        <SideNavLink to="/settings/ai/models" nested>
-                          Models
-                        </SideNavLink>
-                        <SideNavLink to="/settings/ai/system-prompts" nested>
-                          System Prompts
-                        </SideNavLink>
-                        <SideNavLink to="/settings/ai/reports" nested>
-                          Reports
-                        </SideNavLink>
-                      </div>
+                  <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                    <span className="truncate">Intelligence</span>
+                    <ChevronDown
+                      className={`h-4 w-4 shrink-0 text-current opacity-70 transition-transform duration-200 ease-out ${
+                        aiOpen ? 'rotate-180' : 'rotate-0'
+                      }`}
+                      aria-hidden
+                    />
+                  </span>
+                )}
+              </button>
+              {!sideNavCollapsed && (
+                <div
+                  className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+                    aiOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                  }`}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <div className="flex flex-col gap-0.5 pb-0.5">
+                      <SideNavLink to="/settings/ai/models" nested>
+                        Models
+                      </SideNavLink>
+                      <SideNavLink to="/settings/ai/reports" nested>
+                        Reports
+                      </SideNavLink>
+                      <SideNavLink to="/settings/ai/system-prompts" nested>
+                        System Prompts
+                      </SideNavLink>
                     </div>
                   </div>
-                )}
-              </div>
-            </>
+                </div>
+              )}
+            </div>
+          )}
+          {canManageRbac && (
+            <SideNavLink
+              to="/settings/intro-course"
+              className={() => (view === 'intro-course' ? sideNavActiveClass : '')}
+              icon={<GraduationCap className="h-5 w-5" />}
+            >
+              Intro course
+            </SideNavLink>
+          )}
+          {canManageRbac && xapiEmissionFeatureEnabled() && (
+            <SideNavLink
+              to="/settings/lrs-integrations"
+              className={() => (view === 'lrs-integrations' ? sideNavActiveClass : '')}
+              icon={<Link2 className="h-5 w-5" />}
+            >
+              Learning Record Stores
+            </SideNavLink>
+          )}
+          {canManageRbac && (
+            <SideNavLink
+              to="/settings/lti-tools"
+              className={() => (view === 'lti-tools' ? sideNavActiveClass : '')}
+              icon={<Plug className="h-5 w-5" />}
+            >
+              LTI tools
+            </SideNavLink>
+          )}
+          {canManageRbac && oerLibraryEnabled() && (
+            <SideNavLink
+              to="/settings/oer-providers"
+              className={() => (view === 'oer-providers' ? sideNavActiveClass : '')}
+              icon={<BookOpen className="h-5 w-5" />}
+            >
+              OER library
+            </SideNavLink>
+          )}
+          {canOrgUnits && (
+            <SideNavLink
+              to="/settings/org-units"
+              className={() => (view === 'org-units' ? sideNavActiveClass : '')}
+              icon={<FolderTree className="h-5 w-5" />}
+            >
+              Org structure
+            </SideNavLink>
+          )}
+          {canManageRbac && (
+            <SideNavLink
+              to="/settings/organizations"
+              className={() => (view === 'organizations' ? sideNavActiveClass : '')}
+              icon={<Building2 className="h-5 w-5" />}
+            >
+              Organizations
+            </SideNavLink>
+          )}
+          {canManageRbac && (
+            <SideNavLink
+              to="/settings/people"
+              className={() => (view === 'people' ? sideNavActiveClass : '')}
+              icon={<Users className="h-5 w-5" />}
+            >
+              People
+            </SideNavLink>
+          )}
+          {canManageRbac && ffResearchConsent && (
+            <SideNavLink
+              to="/admin/consent-studies"
+              className={() =>
+                location.pathname === '/admin/consent-studies' ? sideNavActiveClass : ''
+              }
+              icon={<ShieldCheck className="h-5 w-5" />}
+            >
+              Research consent
+            </SideNavLink>
+          )}
+          {canManageRbac && (
+            <SideNavLink
+              to="/settings/roles"
+              className={() => (view === 'roles' ? sideNavActiveClass : '')}
+              icon={<Shield className="h-5 w-5" />}
+            >
+              Roles and Permissions
+            </SideNavLink>
+          )}
+          {canManageRbac && platformScimEnabled && (
+            <SideNavLink
+              to="/settings/scim-provisioning"
+              className={() => (view === 'scim-provisioning' ? sideNavActiveClass : '')}
+              icon={<Link2 className="h-5 w-5" />}
+            >
+              SCIM provisioning
+            </SideNavLink>
+          )}
+          {canManageRbac && ffTranscripts && (
+            <SideNavLink
+              to="/settings/transcripts"
+              className={() => (view === 'transcripts' ? sideNavActiveClass : '')}
+              icon={<FileText className="h-5 w-5" />}
+            >
+              Transcripts
+            </SideNavLink>
           )}
         </>
       )}
