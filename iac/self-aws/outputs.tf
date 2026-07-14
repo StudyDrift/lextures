@@ -60,10 +60,10 @@ output "acm_dns_validation_records" {
   EOT
   value = local.create_web_acm ? [
     for dvo in aws_acm_certificate.web[0].domain_validation_options : {
-      domain  = dvo.domain_name
-      type    = dvo.resource_record_type
-      name    = dvo.resource_record_name
-      value   = dvo.resource_record_value
+      domain = dvo.domain_name
+      type   = dvo.resource_record_type
+      name   = dvo.resource_record_name
+      value  = dvo.resource_record_value
     }
   ] : []
 }
