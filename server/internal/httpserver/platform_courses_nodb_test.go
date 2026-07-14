@@ -28,4 +28,11 @@ func TestAdminCourses_UnauthenticatedReturns401(t *testing.T) {
 	if rr.Code != http.StatusUnauthorized {
 		t.Fatalf("access status = %d, want 401", rr.Code)
 	}
+
+	rr = httptest.NewRecorder()
+	r = httptest.NewRequest(http.MethodGet, "/api/v1/admin/courses/stats", nil)
+	d.handleAdminCoursesStats()(rr, r)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("stats status = %d, want 401", rr.Code)
+	}
 }

@@ -33,11 +33,41 @@ type PersonRow struct {
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
-// ListParams holds search pagination options.
+// Dashboard filter query values for listing users behind a stats card.
+const (
+	FilterSignups7d  = "signups_7d"
+	FilterActive     = "active"
+	FilterRecent30d  = "recent_30d"
+	FilterTotal      = "total"
+	FilterSuspended  = "suspended"
+)
+
+// ListParams holds search / filter pagination options.
 type ListParams struct {
 	Query   string
+	// Filter restricts results to a dashboard segment (see Filter* constants).
+	// Empty means free-text search only (Query required).
+	Filter  string
 	Page    int
 	PerPage int
+}
+
+// NormalizeFilter returns a known filter constant or empty string if unknown/blank.
+func NormalizeFilter(raw string) string {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case FilterSignups7d, "signups_last_7_days", "new_signups":
+		return FilterSignups7d
+	case FilterActive, "active_accounts":
+		return FilterActive
+	case FilterRecent30d, "recently_active_30_days", "active_this_month":
+		return FilterRecent30d
+	case FilterTotal, "total_accounts":
+		return FilterTotal
+	case FilterSuspended, "suspended_accounts":
+		return FilterSuspended
+	default:
+		return ""
+	}
 }
 
 // ListResult is a paginated search response.
@@ -188,7 +218,96 @@ LIMIT $3 OFFSET $4
 		return ListResult{}, err
 	}
 	defer rows.Close()
+	return scanPersonList(rows, page, perPage)
+}
 
+// ListByFilter returns users for a dashboard stats segment (optionally narrowed by free text).
+func ListByFilter(ctx context.Context, pool *pgxpool.Pool, p ListParams) (ListResult, error) {
+	filter := NormalizeFilter(p.Filter)
+	if filter == "" {
+		return ListResult{}, fmt.Errorf("platformpeople: invalid filter %q", p.Filter)
+	}
+	page, perPage := normalizePagination(p.Page, p.PerPage)
+	offset := (page - 1) * perPage
+	q := strings.TrimSpace(p.Query)
+
+	// Base human-account predicates match FetchDashboardStats.
+	where := `
+u.account_type <> 'system'
+AND u.email NOT ILIKE '%@erased.invalid'`
+	switch filter {
+	case FilterSignups7d:
+		where += `
+AND u.created_at >= NOW() - INTERVAL '7 days'`
+	case FilterActive:
+		where += `
+AND u.deactivated_at IS NULL AND NOT u.login_blocked`
+	case FilterSuspended:
+		where += `
+AND (u.deactivated_at IS NOT NULL OR u.login_blocked)`
+	case FilterRecent30d:
+		where += `
+AND EXISTS (
+    SELECT 1 FROM "user".user_audit ua
+    WHERE ua.user_id = u.id
+      AND ua.occurred_at >= NOW() - INTERVAL '30 days'
+)`
+	case FilterTotal:
+		// no extra predicate
+	}
+
+	args := []any{}
+	if q != "" {
+		like := "%" + strings.ToLower(q) + "%"
+		args = append(args, like)
+		where += fmt.Sprintf(`
+AND (
+    u.email ILIKE $%d
+    OR COALESCE(u.first_name, '') ILIKE $%d
+    OR COALESCE(u.last_name, '') ILIKE $%d
+    OR COALESCE(u.display_name, '') ILIKE $%d
+)`, len(args), len(args), len(args), len(args))
+	}
+	args = append(args, perPage, offset)
+	limitPh := len(args) - 1
+	offsetPh := len(args)
+
+	sql := fmt.Sprintf(`
+SELECT
+    u.id::text,
+    u.email,
+    u.first_name,
+    u.last_name,
+    u.display_name,
+    u.org_id::text,
+    o.name AS org_name,
+    COALESCE((
+        SELECT ar.name
+        FROM "user".user_app_roles uar
+        JOIN "user".app_roles ar ON ar.id = uar.role_id
+        WHERE uar.user_id = u.id
+        ORDER BY ar.name
+        LIMIT 1
+    ), '') AS role_name,
+    (u.deactivated_at IS NULL AND NOT u.login_blocked) AS active,
+    u.created_at,
+    COUNT(*) OVER () AS total
+FROM "user".users u
+INNER JOIN tenant.organizations o ON o.id = u.org_id
+WHERE %s
+ORDER BY u.created_at DESC, u.email ASC
+LIMIT $%d OFFSET $%d
+`, where, limitPh, offsetPh)
+
+	rows, err := pool.Query(ctx, sql, args...)
+	if err != nil {
+		return ListResult{}, err
+	}
+	defer rows.Close()
+	return scanPersonList(rows, page, perPage)
+}
+
+func scanPersonList(rows pgx.Rows, page, perPage int) (ListResult, error) {
 	var items []PersonRow
 	var total int64
 	for rows.Next() {
