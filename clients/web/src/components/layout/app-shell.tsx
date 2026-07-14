@@ -24,20 +24,25 @@ import { UiThemeSync } from './ui-theme-sync'
 import { LocaleBootstrapSync } from './locale-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
-
-const MaintenanceStatusBanner = lazy(() =>
-  import('../StatusBanner').then((m) => ({ default: m.StatusBanner })),
-)
-const IncidentStatusBanner = lazy(() =>
-  import('../incident-status-banner').then((m) => ({ default: m.IncidentStatusBanner })),
-)
-const ImpersonationChrome = lazy(() =>
-  import('../impersonation-chrome').then((m) => ({ default: m.ImpersonationChrome })),
-)
 import { OfflineBanner } from '../offline-banner'
 import { SkipLink } from '../skip-link'
 import { useFocusOnRoute } from '../../lib/a11y'
 import { ReadingRuler } from '../a11y/ReadingRuler'
+import { lazyImport } from '../../lib/chunk-load-recovery'
+
+const MaintenanceStatusBanner = lazy(() =>
+  lazyImport(() => import('../StatusBanner').then((m) => ({ default: m.StatusBanner }))),
+)
+const IncidentStatusBanner = lazy(() =>
+  lazyImport(() =>
+    import('../incident-status-banner').then((m) => ({ default: m.IncidentStatusBanner })),
+  ),
+)
+const ImpersonationChrome = lazy(() =>
+  lazyImport(() =>
+    import('../impersonation-chrome').then((m) => ({ default: m.ImpersonationChrome })),
+  ),
+)
 
 function AppShellLayout() {
   const location = useLocation()

@@ -1,10 +1,12 @@
 import { registerServiceWorker } from './lib/push-notifications'
+import { installChunkLoadRecovery } from './lib/chunk-load-recovery'
 import './i18n'
 import { applyPlatformToDocument } from './lib/platform'
 import { applyUiTheme, readStoredUiTheme } from './lib/ui-theme'
 
 applyPlatformToDocument()
 applyUiTheme(readStoredUiTheme())
+installChunkLoadRecovery()
 
 void registerServiceWorker()
 

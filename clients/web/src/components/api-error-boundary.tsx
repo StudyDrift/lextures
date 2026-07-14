@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { isStaleChunkError, reloadForStaleChunkOnce } from '../lib/chunk-load-recovery'
 
 type Props = { children: ReactNode }
 
@@ -7,11 +8,16 @@ type State = { error: Error | null }
 /**
  * Catches unhandled render errors in the authenticated app shell (e.g. bad API data shapes).
  * Network/API failures should still be handled by callers; this avoids a blank screen when something throws.
+ * Lazy-chunk failures after a deploy trigger a single hard reload instead of a dead-end UI.
  */
 export class ApiErrorBoundary extends Component<Props, State> {
   override state: State = { error: null }
 
   static getDerivedStateFromError(error: Error): State {
+    if (isStaleChunkError(error) && reloadForStaleChunkOnce()) {
+      // Keep children mounted while the page reloads.
+      return { error: null }
+    }
     return { error }
   }
 
@@ -31,7 +37,13 @@ export class ApiErrorBoundary extends Component<Props, State> {
             <button
               type="button"
               className="mt-6 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
-              onClick={() => this.setState({ error: null })}
+              onClick={() => {
+                if (isStaleChunkError(this.state.error)) {
+                  window.location.reload()
+                  return
+                }
+                this.setState({ error: null })
+              }}
             >
               Try again
             </button>

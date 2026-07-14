@@ -24,10 +24,34 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return output
 }
 
+function wireServiceWorkerUpdates(reg: ServiceWorkerRegistration): void {
+  // Activate waiting workers promptly so post-deploy chunk hashes match the page.
+  reg.addEventListener('updatefound', () => {
+    const installing = reg.installing
+    if (!installing) return
+    installing.addEventListener('statechange', () => {
+      if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+        installing.postMessage({ type: 'SKIP_WAITING' })
+      }
+    })
+  })
+
+  // When a new SW takes control after skipWaiting, reload once to load matching assets.
+  let refreshing = false
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return
+    refreshing = true
+    window.location.reload()
+  })
+
+  void reg.update()
+}
+
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!('serviceWorker' in navigator)) return null
   try {
     const reg = await navigator.serviceWorker.register(SW_PATH)
+    wireServiceWorkerUpdates(reg)
     return reg
   } catch (err) {
     console.warn('[push] SW registration failed', err)
