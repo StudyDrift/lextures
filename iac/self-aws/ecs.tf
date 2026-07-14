@@ -87,6 +87,8 @@ resource "aws_ecs_task_definition" "api" {
           { name = "PUBLIC_WEB_ORIGIN", value = local.public_origin },
           { name = "BACKGROUND_JOBS_ENABLED", value = "1" },
           { name = "SCHEDULER_ENABLED", value = "1" },
+          # First matching password signup gets Global Admin when the human user table is empty.
+          { name = "BOOTSTRAP_ADMIN_EMAIL", value = var.bootstrap_admin_email },
           # IAM task role — leave keys empty so minio-go / AWS SDK use the instance role.
           { name = "STORAGE_ACCESS_KEY_ID", value = "" },
           { name = "STORAGE_SECRET_ACCESS_KEY", value = "" },

@@ -52,7 +52,7 @@ ALB path patterns for the API: `/api/*`, `/health`, `/health/*`, `/tus/*`. The n
 
 **CI (recommended):** [`.github/workflows/deploy-self-aws.yml`](../../.github/workflows/deploy-self-aws.yml) runs after [Publish container images](../../.github/workflows/publish-images.yml) succeeds on `main` (same trigger as Deploy Self). It applies this module with immutable `server_image` / `web_image` tags `ghcr.io/<org>/<repo>/{server,web}:<git-sha>`, which updates ECS task definitions and rolls the services. Manual runs: **Actions → Deploy Self AWS → Run workflow**.
 
-Repository secrets: `TF_TOKEN`, `TF_CLOUD_ORGANIZATION` (shared with Deploy Self). AWS credentials and optional GHCR pull credentials (`registry_username` / `registry_password`) belong in the HCP workspace `lextures-self-aws-production` — use a long-lived PAT for private packages, not `GITHUB_TOKEN` (it expires and would be stored in Secrets Manager).
+Repository secrets: `TF_TOKEN`, `TF_CLOUD_ORGANIZATION` (shared with Deploy Self). AWS credentials, optional GHCR pull credentials (`registry_username` / `registry_password`), and optional `bootstrap_admin_email` belong in the HCP workspace `lextures-self-aws-production` — use a long-lived PAT for private packages, not `GITHUB_TOKEN` (it expires and would be stored in Secrets Manager).
 
 **Local / force redeploy** after images are already in the registry:
 
@@ -133,6 +133,8 @@ Secrets Manager secret `${project}-${environment}/app` is a JSON object. ECS inj
 | `STORAGE_BUCKET` / `STORAGE_REGION` | Course files |
 
 `PUBLIC_WEB_ORIGIN` on the API task defaults to the CloudFront HTTPS URL (or `public_web_origin` when set).
+
+`BOOTSTRAP_ADMIN_EMAIL` comes from Terraform variable `bootstrap_admin_email` (HCP workspace or `terraform.tfvars`). When non-empty, the **first** password signup whose email matches (trimmed, lowercased) gets Global Admin if no human users exist yet. Leave empty and use `go run ./cmd/bootstrap-admin -email=…` against RDS to promote an account after the fact.
 
 Local / Oracle dev remains unchanged (`RABBITMQ_URL`, local Vite, etc.).
 
