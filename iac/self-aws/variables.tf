@@ -105,6 +105,12 @@ variable "public_web_origin" {
   default     = ""
 }
 
+variable "bootstrap_admin_email" {
+  description = "If set, the first password signup whose email matches (case-insensitive) receives Global Admin when no human users exist yet. Empty disables bootstrap-on-signup (use server/cmd/bootstrap-admin instead)."
+  type        = string
+  default     = ""
+}
+
 variable "server_image" {
   description = "Container image for the Go API (e.g. ghcr.io/org/lextures/server:latest). Leave empty to skip the ECS API service."
   type        = string
