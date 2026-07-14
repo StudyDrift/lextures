@@ -609,6 +609,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Let signed-in users submit product feedback from web and mobile clients. Admins triage submissions from the feedback queue.',
   },
   {
+    key: 'ffEmailSes',
+    label: 'Amazon SES email provider',
+    description:
+      'Allow selecting Amazon SES as the transactional email backend (Settings → Global platform → Outgoing email). Disabled by default; SMTP remains available. Other providers can be added later.',
+  },
+  {
     key: 'ffReadAloud',
     label: 'Read-aloud (text-to-speech)',
     description:

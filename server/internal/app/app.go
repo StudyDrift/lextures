@@ -42,6 +42,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	"github.com/lextures/lextures/server/internal/scheduler"
 	botsservice "github.com/lextures/lextures/server/internal/service/bots"
+	emailtemplatesvc "github.com/lextures/lextures/server/internal/service/emailtemplates"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/integrations"
 	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
@@ -132,6 +133,12 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	// marketplace_flag_state on config load (plan MKT1 observability).
 	telemetry.SetMarketplaceFlagState(merged.FFCourseMarketplace)
 	platform := platformstate.New(merged)
+
+	// ET-2: wire mail.Send* through org → system → code template resolution.
+	// Delivery overrides follow the email template editor feature flag.
+	emailtemplatesvc.WireMailSlotRenderer(pool, func() bool {
+		return platform.Config().EmailTemplateEditorEnabled
+	})
 
 	storage, storageErr := filestorage.New(filestorage.BackendConfig{
 		Backend:         cfg.StorageBackend,

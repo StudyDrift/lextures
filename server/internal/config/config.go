@@ -56,6 +56,26 @@ type Config struct {
 	SMTPPassword string
 	SMTPFrom     string
 
+	// EmailProvider selects the transactional email backend: "smtp" (default) or "ses".
+	// Additional providers can be added without changing call sites (mail.SelectProvider).
+	// Env: EMAIL_PROVIDER; DB override: email_provider.
+	EmailProvider string
+	// FFEmailSES enables the Amazon SES email provider (default off).
+	// When false, EmailProvider=ses is ignored and SMTP is used.
+	// Managed in Settings → Global platform (not process env).
+	FFEmailSES bool
+	// SESRegion is the AWS region for SES API calls (e.g. us-east-1).
+	// Falls back to STORAGE_REGION / AWS_REGION, then us-east-1.
+	SESRegion string
+	// SESFrom is the verified SES From address. Falls back to SMTPFrom.
+	SESFrom string
+	// SESConfigurationSet is an optional SES configuration set name.
+	SESConfigurationSet string
+	// SESAccessKeyID / SESSecretAccessKey are optional static credentials.
+	// When empty, the default AWS credential chain is used (env, shared config, IAM role).
+	SESAccessKeyID     string
+	SESSecretAccessKey string
+
 	LTIEnabled          bool
 	LTIAPIBaseURL       string
 	LTIRSAPrivateKeyPEM string
@@ -749,6 +769,15 @@ func Load() Config {
 		SMTPUser:     firstNonEmptyTrimmed("SMTP_USER"),
 		SMTPPassword: firstNonEmptyTrimmed("SMTP_PASSWORD"),
 		SMTPFrom:     firstNonEmptyTrimmed("SMTP_FROM"),
+
+		EmailProvider:       strings.ToLower(firstNonEmptyTrimmed("EMAIL_PROVIDER")),
+		// Region: SES_REGION, else AWS_REGION. Credentials: optional SES_ACCESS_KEY_ID /
+		// SES_SECRET_ACCESS_KEY; when empty the default AWS chain is used (env, IAM role, …).
+		SESRegion:           firstNonEmptyTrimmed("SES_REGION", "AWS_REGION"),
+		SESFrom:             firstNonEmptyTrimmed("SES_FROM"),
+		SESConfigurationSet: firstNonEmptyTrimmed("SES_CONFIGURATION_SET"),
+		SESAccessKeyID:      firstNonEmptyTrimmed("SES_ACCESS_KEY_ID"),
+		SESSecretAccessKey:  firstNonEmptyTrimmed("SES_SECRET_ACCESS_KEY"),
 
 		LTIAPIBaseURL:       ltiBaseURL,
 		LTIRSAPrivateKeyPEM: firstNonEmptyTrimmed("LTI_RSA_PRIVATE_KEY_PEM"),

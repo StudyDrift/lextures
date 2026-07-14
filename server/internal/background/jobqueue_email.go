@@ -12,6 +12,8 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/mail"
 	"github.com/lextures/lextures/server/internal/repos/jobqueue"
+	"github.com/lextures/lextures/server/internal/repos/organization"
+	emailtemplatesvc "github.com/lextures/lextures/server/internal/service/emailtemplates"
 	learnerprofilesvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
 	"github.com/lextures/lextures/server/internal/service/notifications"
 )
@@ -54,7 +56,8 @@ func (h emailDeliveryHandler) Execute(ctx context.Context, payload json.RawMessa
 	}
 	branding := brandingForRecipient(ctx, h.pool, p.RecipientID)
 	mailBranding := mailBrandingFromRow(branding)
-	rendered, err := mail.RenderTemplate(p.Template, p.TemplateVars, mailBranding)
+	orgID, _ := organization.OrgIDForUser(ctx, h.pool, p.RecipientID)
+	rendered, err := emailtemplatesvc.RenderForDelivery(ctx, h.pool, orgID, p.Template, p.TemplateVars, mailBranding)
 	if err != nil {
 		return err
 	}

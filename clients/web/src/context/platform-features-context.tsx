@@ -118,6 +118,7 @@ export type PlatformFeatures = {
   openRouterConfigured: boolean
   ragNotebookEnabled: boolean
   ffFeedback: boolean
+  ffEmailSes: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -226,6 +227,7 @@ const defaultFeatures: PlatformFeatures = {
   openRouterConfigured: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
+  ffEmailSes: false,
   loading: true,
   refresh: async () => {},
 }
@@ -333,6 +335,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   openRouterConfigured: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
+  ffEmailSes: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -447,6 +450,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           openRouterConfigured: data.openRouterConfigured === true,
           ragNotebookEnabled: data.ragNotebookEnabled === true,
           ffFeedback: data.ffFeedback !== false,
+          ffEmailSes: data.ffEmailSes === true,
         }
         setFeatures({
           ...next,
@@ -516,6 +520,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           openRouterConfigured: next.openRouterConfigured === true,
           ragNotebookEnabled: next.ragNotebookEnabled === true,
           ffFeedback: next.ffFeedback !== false,
+          ffEmailSes: next.ffEmailSes === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

@@ -1,14 +1,8 @@
 package mail
 
 import (
-	"bytes"
-	"encoding/base64"
 	"fmt"
-	"log"
-	"mime/multipart"
 	"net/mail"
-	"net/smtp"
-	"net/textproto"
 	"strings"
 
 	"github.com/lextures/lextures/server/internal/config"
@@ -21,26 +15,27 @@ type BrandingOpts struct {
 	PrimaryColor    string
 }
 
-// SendMultipart sends a multipart alternative email (plain + HTML).
+// SendMultipart sends a multipart alternative email (plain + HTML) via the
+// configured email provider (SMTP by default; SES when enabled and selected).
 func SendMultipart(c config.Config, toEmail, subject, bodyText, htmlBody string, branding *BrandingOpts) error {
 	if len(strings.TrimSpace(toEmail)) == 0 {
 		return ErrInvalidToEmail
 	}
-	host := strings.TrimSpace(c.SMTPHost)
-	if host == "" {
-		log.Printf("mail: would send to %q subject=%q (SMTP not configured)", toEmail, subject)
-		return nil
+
+	fromDisplay := ""
+	if branding != nil && branding.FromDisplayName != nil {
+		fromDisplay = strings.TrimSpace(*branding.FromDisplayName)
 	}
-	from := strings.TrimSpace(c.SMTPFrom)
-	if from == "" {
-		return fmt.Errorf("SMTP_FROM is required when SMTP_HOST is set")
-	}
-	fromAddr, err := mail.ParseAddress(from)
-	if err != nil {
-		return fmt.Errorf("parse SMTP_FROM: %w", err)
-	}
-	if branding != nil && branding.FromDisplayName != nil && strings.TrimSpace(*branding.FromDisplayName) != "" {
-		fromAddr.Name = strings.TrimSpace(*branding.FromDisplayName)
+
+	// Validate From early when delivery is configured so callers get clear errors.
+	if DeliveryConfigured(c) {
+		from := EffectiveFromAddress(c)
+		if from == "" {
+			return fmt.Errorf("from address is required when email delivery is configured")
+		}
+		if _, err := mail.ParseAddress(from); err != nil {
+			return fmt.Errorf("parse from address: %w", err)
+		}
 	}
 
 	color := "#4F46E5"
@@ -57,34 +52,13 @@ func SendMultipart(c config.Config, toEmail, subject, bodyText, htmlBody string,
 		htmlBody = plainToSimpleHTML(bodyText, logoURL, color)
 	}
 
-	boundary := "lextures-boundary-7bit"
-	msg := []string{
-		"To: " + toEmail,
-		"From: " + fromAddr.String(),
-		"Subject: " + subject,
-		"MIME-Version: 1.0",
-		"Content-Type: multipart/alternative; boundary=" + boundary,
-		"",
-		"--" + boundary,
-		"Content-Type: text/plain; charset=utf-8",
-		"",
-		bodyText,
-		"",
-		"--" + boundary,
-		"Content-Type: text/html; charset=utf-8",
-		"",
-		htmlBody,
-		"",
-		"--" + boundary + "--",
-	}
-	data := []byte(strings.Join(msg, "\r\n"))
-
-	addr := fmt.Sprintf("%s:%d", host, c.SMTPPort)
-	if c.SMTPUser != "" && c.SMTPPassword != "" {
-		auth := smtp.PlainAuth("", c.SMTPUser, c.SMTPPassword, host)
-		return smtp.SendMail(addr, auth, fromAddr.Address, []string{toEmail}, data)
-	}
-	return smtp.SendMail(addr, nil, fromAddr.Address, []string{toEmail}, data)
+	return deliver(c, Message{
+		To:              toEmail,
+		Subject:         subject,
+		BodyText:        bodyText,
+		HTMLBody:        htmlBody,
+		FromDisplayName: fromDisplay,
+	})
 }
 
 // SendMultipartWithICS sends plain+HTML email with an optional ICS calendar attachment (plan 13.12).
@@ -95,22 +69,22 @@ func SendMultipartWithICS(c config.Config, toEmail, subject, bodyText, htmlBody 
 	if len(strings.TrimSpace(toEmail)) == 0 {
 		return ErrInvalidToEmail
 	}
-	host := strings.TrimSpace(c.SMTPHost)
-	if host == "" {
-		log.Printf("mail: would send to %q subject=%q with ICS attachment (SMTP not configured)", toEmail, subject)
-		return nil
+
+	fromDisplay := ""
+	if branding != nil && branding.FromDisplayName != nil {
+		fromDisplay = strings.TrimSpace(*branding.FromDisplayName)
 	}
-	from := strings.TrimSpace(c.SMTPFrom)
-	if from == "" {
-		return fmt.Errorf("SMTP_FROM is required when SMTP_HOST is set")
+
+	if DeliveryConfigured(c) {
+		from := EffectiveFromAddress(c)
+		if from == "" {
+			return fmt.Errorf("from address is required when email delivery is configured")
+		}
+		if _, err := mail.ParseAddress(from); err != nil {
+			return fmt.Errorf("parse from address: %w", err)
+		}
 	}
-	fromAddr, err := mail.ParseAddress(from)
-	if err != nil {
-		return fmt.Errorf("parse SMTP_FROM: %w", err)
-	}
-	if branding != nil && branding.FromDisplayName != nil && strings.TrimSpace(*branding.FromDisplayName) != "" {
-		fromAddr.Name = strings.TrimSpace(*branding.FromDisplayName)
-	}
+
 	if htmlBody == "" {
 		color := "#4F46E5"
 		logoURL := ""
@@ -124,50 +98,28 @@ func SendMultipartWithICS(c config.Config, toEmail, subject, bodyText, htmlBody 
 		}
 		htmlBody = plainToSimpleHTML(bodyText, logoURL, color)
 	}
-	if icsFilename == "" {
-		icsFilename = "event.ics"
+
+	return deliver(c, Message{
+		To:              toEmail,
+		Subject:         subject,
+		BodyText:        bodyText,
+		HTMLBody:        htmlBody,
+		FromDisplayName: fromDisplay,
+		ICSContent:      icsContent,
+		ICSFilename:     icsFilename,
+	})
+}
+
+// SendPlain delivers a text-only email (magic link, etc.) via the active provider.
+func SendPlain(c config.Config, toEmail, subject, bodyText string) error {
+	if len(strings.TrimSpace(toEmail)) == 0 {
+		return ErrInvalidToEmail
 	}
-
-	var body bytes.Buffer
-	w := multipart.NewWriter(&body)
-
-	th := make(textproto.MIMEHeader)
-	th.Set("Content-Type", "text/plain; charset=utf-8")
-	tw, _ := w.CreatePart(th)
-	_, _ = tw.Write([]byte(bodyText))
-
-	hh := make(textproto.MIMEHeader)
-	hh.Set("Content-Type", "text/html; charset=utf-8")
-	hw, _ := w.CreatePart(hh)
-	_, _ = hw.Write([]byte(htmlBody))
-
-	ah := make(textproto.MIMEHeader)
-	ah.Set("Content-Type", "text/calendar; charset=utf-8; method=PUBLISH")
-	ah.Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, icsFilename))
-	ah.Set("Content-Transfer-Encoding", "base64")
-	aw, _ := w.CreatePart(ah)
-	enc := make([]byte, base64.StdEncoding.EncodedLen(len(icsContent)))
-	base64.StdEncoding.Encode(enc, []byte(icsContent))
-	_, _ = aw.Write(enc)
-	_ = w.Close()
-
-	msg := []string{
-		"To: " + toEmail,
-		"From: " + fromAddr.String(),
-		"Subject: " + subject,
-		"MIME-Version: 1.0",
-		"Content-Type: multipart/mixed; boundary=" + w.Boundary(),
-		"",
-		body.String(),
-	}
-	data := []byte(strings.Join(msg, "\r\n"))
-
-	addr := fmt.Sprintf("%s:%d", host, c.SMTPPort)
-	if c.SMTPUser != "" && c.SMTPPassword != "" {
-		auth := smtp.PlainAuth("", c.SMTPUser, c.SMTPPassword, host)
-		return smtp.SendMail(addr, auth, fromAddr.Address, []string{toEmail}, data)
-	}
-	return smtp.SendMail(addr, nil, fromAddr.Address, []string{toEmail}, data)
+	return deliver(c, Message{
+		To:       toEmail,
+		Subject:  subject,
+		BodyText: bodyText,
+	})
 }
 
 func plainToSimpleHTML(bodyText, logoURL, _ string) string {

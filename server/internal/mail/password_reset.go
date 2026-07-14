@@ -1,13 +1,12 @@
 package mail
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
-	"net/mail"
-	"net/smtp"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/config"
 )
 
@@ -15,11 +14,17 @@ var (
 	ErrInvalidToEmail = errors.New("invalid to email address")
 )
 
-// PasswordResetOpts carries optional org branding for transactional email (plan 5.7).
+// PasswordResetOpts carries optional org branding for transactional email (plan 5.7 / ET-2).
 type PasswordResetOpts struct {
 	FromDisplayName *string
 	LogoURL         *string
 	PrimaryColor    string
+	// OrgID enables per-org template override resolution (ET-2).
+	OrgID *uuid.UUID
+	// Context for template DB lookups; Background when nil.
+	Context context.Context
+	// FirstName optional merge field.
+	FirstName string
 }
 
 func absPublicURL(cfg config.Config, pathOrURL string) string {
@@ -37,30 +42,50 @@ func absPublicURL(cfg config.Config, pathOrURL string) string {
 	return base + s
 }
 
-// SendPasswordResetEmail sends a reset link when SMTP is configured; if SMTP_HOST is empty, logs the URL and returns nil (Rust parity).
+// SendPasswordResetEmail sends a reset link when email delivery is configured;
+// otherwise logs a dry-run and returns nil (Rust parity). Renders via the
+// template layer (org → system → code) when wired (ET-2).
 func SendPasswordResetEmail(c config.Config, toEmail, resetURL string, opts *PasswordResetOpts) error {
 	if len(toEmail) == 0 {
 		return ErrInvalidToEmail
 	}
 
-	host := strings.TrimSpace(c.SMTPHost)
-	if host == "" {
-		log.Printf("mail: password reset for %q (SMTP not configured; set Global platform email or SMTP_HOST) url=%q", toEmail, resetURL)
-		return nil
-	}
-	from := strings.TrimSpace(c.SMTPFrom)
-	if from == "" {
-		return fmt.Errorf("SMTP_FROM is required when SMTP_HOST is set")
+	ctx := context.Background()
+	var orgID *uuid.UUID
+	var branding *BrandingOpts
+	firstName := ""
+	if opts != nil {
+		if opts.Context != nil {
+			ctx = opts.Context
+		}
+		orgID = opts.OrgID
+		firstName = opts.FirstName
+		branding = &BrandingOpts{
+			FromDisplayName: opts.FromDisplayName,
+			LogoURL:         opts.LogoURL,
+			PrimaryColor:    opts.PrimaryColor,
+		}
 	}
 
-	fromAddr, err := mail.ParseAddress(from)
-	if err != nil {
-		return fmt.Errorf("parse SMTP_FROM: %w", err)
+	vars := map[string]string{
+		"link":            resetURL,
+		"resetUrl":        resetURL,
+		"expires_at":      "in one hour",
+		"user.first_name": firstName,
 	}
-	if opts != nil && opts.FromDisplayName != nil && strings.TrimSpace(*opts.FromDisplayName) != "" {
-		fromAddr.Name = strings.TrimSpace(*opts.FromDisplayName)
+	rendered, err := RenderSlot(ctx, orgID, "password_reset", vars, branding)
+	if err != nil || (rendered.HTMLBody == "" && rendered.BodyText == "") {
+		// Inline fallback (pre-ET-2 body).
+		return sendPasswordResetInline(c, toEmail, resetURL, opts)
 	}
+	subject := rendered.Subject
+	if subject == "" {
+		subject = "Reset your StudyDrift password"
+	}
+	return SendMultipart(c, toEmail, subject, rendered.BodyText, rendered.HTMLBody, branding)
+}
 
+func sendPasswordResetInline(c config.Config, toEmail, resetURL string, opts *PasswordResetOpts) error {
 	subject := "Reset your StudyDrift password"
 	bodyText := fmt.Sprintf(`You requested a password reset for your StudyDrift account.
 
@@ -81,7 +106,7 @@ If you did not request this, you can ignore this message.
 	}
 
 	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
-<html><body style="font-family:system-ui,sans-serif;line-height:1.5;color:#111827;">
+<html lang="en"><body style="font-family:system-ui,sans-serif;line-height:1.5;color:#111827;">
 %s
 <p>You requested a password reset for your StudyDrift account.</p>
 <p><a href="%s" style="color:%s;font-weight:600;">Choose a new password</a> (expires in one hour).</p>
@@ -97,32 +122,13 @@ If you did not request this, you can ignore this message.
 		color,
 	)
 
-	boundary := "lextures-boundary-7bit"
-	msg := []string{
-		"To: " + toEmail,
-		"From: " + fromAddr.String(),
-		"Subject: " + subject,
-		"MIME-Version: 1.0",
-		"Content-Type: multipart/alternative; boundary=" + boundary,
-		"",
-		"--" + boundary,
-		"Content-Type: text/plain; charset=utf-8",
-		"",
-		bodyText,
-		"",
-		"--" + boundary,
-		"Content-Type: text/html; charset=utf-8",
-		"",
-		htmlBody,
-		"",
-		"--" + boundary + "--",
+	var branding *BrandingOpts
+	if opts != nil {
+		branding = &BrandingOpts{
+			FromDisplayName: opts.FromDisplayName,
+			LogoURL:         opts.LogoURL,
+			PrimaryColor:    opts.PrimaryColor,
+		}
 	}
-	data := []byte(strings.Join(msg, "\r\n"))
-
-	addr := fmt.Sprintf("%s:%d", host, c.SMTPPort)
-	if c.SMTPUser != "" && c.SMTPPassword != "" {
-		auth := smtp.PlainAuth("", c.SMTPUser, c.SMTPPassword, host)
-		return smtp.SendMail(addr, auth, fromAddr.Address, []string{toEmail}, data)
-	}
-	return smtp.SendMail(addr, nil, fromAddr.Address, []string{toEmail}, data)
+	return SendMultipart(c, toEmail, subject, bodyText, htmlBody, branding)
 }

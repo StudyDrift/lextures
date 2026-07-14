@@ -105,6 +105,7 @@ export type PlatformFeaturesSnapshot = {
   openRouterConfigured?: boolean
   ragNotebookEnabled?: boolean
   ffFeedback?: boolean
+  ffEmailSes?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -205,6 +206,7 @@ const defaults: PlatformFeaturesSnapshot = {
   openRouterConfigured: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
+  ffEmailSes: false,
 }
 
 let loaded = false

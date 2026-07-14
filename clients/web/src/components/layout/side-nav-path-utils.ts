@@ -11,6 +11,7 @@ export type SettingsNavView =
   | 'roles'
   | 'lti-tools'
   | 'platform'
+  | 'email-templates'
   | 'organizations'
   | 'org-units'
   | 'terms'
@@ -42,6 +43,7 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
     raw === 'roles' ||
     raw === 'lti-tools' ||
     raw === 'platform' ||
+    raw === 'email-templates' ||
     raw === 'organizations' ||
     raw === 'org-units' ||
     raw === 'terms' ||

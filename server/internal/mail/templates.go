@@ -42,6 +42,12 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderDiscussionReply(vars, logo, color)
 	case "password_reset":
 		return renderPasswordResetTemplate(vars, logo, color)
+	case "magic_link":
+		return renderMagicLinkTemplate(vars, logo, color)
+	case "coppa_consent":
+		return renderCoppaConsentEmail(vars["student.name"], firstNonEmpty(vars["link"], vars["consentUrl"]), branding)
+	case "coppa_consent_confirmation":
+		return renderCoppaConfirmationEmail(vars["student.name"], branding)
 	case "daily_digest":
 		return renderDailyDigest(vars, logo, color)
 	case "at_risk_alert":
@@ -173,7 +179,7 @@ View discussion: %s
 }
 
 func renderPasswordResetTemplate(vars map[string]string, logo, color string) (RenderedEmail, error) {
-	resetURL := vars["resetUrl"]
+	resetURL := firstNonEmpty(vars["resetUrl"], vars["link"])
 	subject := "Reset your StudyDrift password"
 	bodyText := fmt.Sprintf(`You requested a password reset.
 
@@ -194,6 +200,41 @@ If you did not request this, you can ignore this message.
 		return RenderedEmail{}, err
 	}
 	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func renderMagicLinkTemplate(vars map[string]string, logo, color string) (RenderedEmail, error) {
+	link := firstNonEmpty(vars["link"], vars["magicUrl"])
+	expires := firstNonEmpty(vars["expires_at"], vars["expiresAt"], "in 15 minutes")
+	subject := "Your StudyDrift sign-in link"
+	bodyText := fmt.Sprintf(`Sign in to your StudyDrift account without a password.
+
+Open this link within 15 minutes (it works only once):
+
+%s
+
+If you did not request this, you can ignore this message.
+`, link)
+	html, err := renderLayout("Sign in", fmt.Sprintf(
+		`<p>Sign in to your StudyDrift account without a password.</p>
+<p><a href="%s" style="color:%s;font-weight:600;">Sign in now</a></p>
+<p style="font-size:13px;color:#6b7280;">This link works once and expires %s. If you did not request it, ignore this email.</p>`,
+		template.HTMLEscapeString(link),
+		color,
+		template.HTMLEscapeString(expires),
+	), logo, "")
+	if err != nil {
+		return RenderedEmail{}, err
+	}
+	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if strings.TrimSpace(v) != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 func renderDailyDigest(vars map[string]string, logo, color string) (RenderedEmail, error) {

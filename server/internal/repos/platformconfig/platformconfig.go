@@ -193,6 +193,13 @@ type Row struct {
 	SMTPUser               *string
 	SMTPPasswordCiphertext []byte
 
+	// Email delivery provider (SMTP default; SES when ff_email_ses is on).
+	FFEmailSES          *bool
+	EmailProvider       *string
+	SESRegion           *string
+	SESFrom             *string
+	SESConfigurationSet *string
+
 	UpdatedAt time.Time
 }
 
@@ -375,6 +382,12 @@ type Write struct {
 	SMTPFrom               *string
 	SMTPUser               *string
 	SMTPPasswordCiphertext *[]byte // nil = leave unchanged in Upsert
+
+	FFEmailSES          *bool
+	EmailProvider       *string
+	SESRegion           *string
+	SESFrom             *string
+	SESConfigurationSet *string
 }
 
 // Get returns the singleton row or (nil, nil) if missing.
@@ -552,6 +565,11 @@ SELECT
 	smtp_from,
 	smtp_user,
 	smtp_password_ciphertext,
+	ff_email_ses,
+	email_provider,
+	ses_region,
+	ses_from,
+	ses_configuration_set,
 	updated_at
 FROM settings.platform_app_settings
 WHERE id = 1
@@ -726,6 +744,11 @@ WHERE id = 1
 		&r.SMTPFrom,
 		&r.SMTPUser,
 		&r.SMTPPasswordCiphertext,
+		&r.FFEmailSES,
+		&r.EmailProvider,
+		&r.SESRegion,
+		&r.SESFrom,
+		&r.SESConfigurationSet,
 		&r.UpdatedAt,
 	)
 	if err == pgx.ErrNoRows {
@@ -1364,6 +1387,18 @@ func Merge(env config.Config, db *Row) config.Config {
 			}
 		}
 	}
+	if db.EmailProvider != nil && strings.TrimSpace(*db.EmailProvider) != "" {
+		out.EmailProvider = strings.ToLower(strings.TrimSpace(*db.EmailProvider))
+	}
+	if db.SESRegion != nil && strings.TrimSpace(*db.SESRegion) != "" {
+		out.SESRegion = strings.TrimSpace(*db.SESRegion)
+	}
+	if db.SESFrom != nil && strings.TrimSpace(*db.SESFrom) != "" {
+		out.SESFrom = strings.TrimSpace(*db.SESFrom)
+	}
+	if db.SESConfigurationSet != nil {
+		out.SESConfigurationSet = strings.TrimSpace(*db.SESConfigurationSet)
+	}
 	return out
 }
 
@@ -1407,6 +1442,11 @@ type Sources struct {
 	SMTPFrom               Source
 	SMTPUser               Source
 	SMTPPasswordCiphertext Source
+
+	EmailProvider       Source
+	SESRegion           Source
+	SESFrom             Source
+	SESConfigurationSet Source
 }
 
 // ResolveSources compares env vs DB row to label each field.
@@ -1440,6 +1480,10 @@ func ResolveSources(env config.Config, db *Row) Sources {
 	s.SMTPFrom = sourceString(env.SMTPFrom, db.SMTPFrom)
 	s.SMTPUser = sourceOptionalStringPtr(db.SMTPUser)
 	s.SMTPPasswordCiphertext = sourceSMTPPasswordCiphertext(db.SMTPPasswordCiphertext)
+	s.EmailProvider = sourceString(env.EmailProvider, db.EmailProvider)
+	s.SESRegion = sourceString(env.SESRegion, db.SESRegion)
+	s.SESFrom = sourceString(env.SESFrom, db.SESFrom)
+	s.SESConfigurationSet = sourceString(env.SESConfigurationSet, db.SESConfigurationSet)
 	return s
 }
 
@@ -1471,6 +1515,10 @@ func sourcesAllEnvironment(env config.Config) Sources {
 		SMTPFrom:                    SourceEnvironment,
 		SMTPUser:                    SourceEnvironment,
 		SMTPPasswordCiphertext:      SourceEnvironment,
+		EmailProvider:               SourceEnvironment,
+		SESRegion:                   SourceEnvironment,
+		SESFrom:                     SourceEnvironment,
+		SESConfigurationSet:         SourceEnvironment,
 	}
 }
 

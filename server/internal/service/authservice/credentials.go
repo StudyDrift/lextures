@@ -298,10 +298,12 @@ func RequestPasswordReset(ctx context.Context, pool *pgxpool.Pool, cfg config.Co
 
 	var mailOpts *mail.PasswordResetOpts
 	if orgID, oerr := organization.OrgIDForUser(ctx, pool, uid); oerr == nil {
+		mailOpts = &mail.PasswordResetOpts{
+			OrgID:   &orgID,
+			Context: ctx,
+		}
 		if br, berr := orgbranding.Get(ctx, pool, orgID); berr == nil && br != nil {
-			mailOpts = &mail.PasswordResetOpts{
-				PrimaryColor: br.PrimaryColor,
-			}
+			mailOpts.PrimaryColor = br.PrimaryColor
 			mailOpts.FromDisplayName = br.CustomEmailDisplayName
 			mailOpts.LogoURL = br.LogoURL
 		}
