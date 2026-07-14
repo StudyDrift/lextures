@@ -120,6 +120,31 @@ export function SideNavAdminLinks() {
         <>
           <SideNavSectionLabel first>Compliance & security</SideNavSectionLabel>
           <SideNavLink
+            to="/admin/compliance/backup"
+            className={() => (active('/admin/compliance/backup') ? sideNavActiveClass : '')}
+            icon={<Archive className="h-5 w-5" />}
+          >
+            Backup operations
+          </SideNavLink>
+          {captionsEnabled ? (
+            <SideNavLink
+              to="/admin/caption-compliance"
+              className={() => (active('/admin/caption-compliance') ? sideNavActiveClass : '')}
+              icon={<Video className="h-5 w-5" />}
+            >
+              Caption compliance
+            </SideNavLink>
+          ) : null}
+          {avScanningEnabled ? (
+            <SideNavLink
+              to="/admin/quarantine"
+              className={() => (active('/admin/quarantine') ? sideNavActiveClass : '')}
+              icon={<Shield className="h-5 w-5" />}
+            >
+              File quarantine
+            </SideNavLink>
+          ) : null}
+          <SideNavLink
             to="/admin/compliance/iso"
             className={() => (active('/admin/compliance/iso') ? sideNavActiveClass : '')}
             icon={<ShieldCheck className="h-5 w-5" />}
@@ -135,31 +160,6 @@ export function SideNavAdminLinks() {
           >
             Security reports
           </SideNavLink>
-          <SideNavLink
-            to="/admin/compliance/backup"
-            className={() => (active('/admin/compliance/backup') ? sideNavActiveClass : '')}
-            icon={<Archive className="h-5 w-5" />}
-          >
-            Backup operations
-          </SideNavLink>
-          {avScanningEnabled ? (
-            <SideNavLink
-              to="/admin/quarantine"
-              className={() => (active('/admin/quarantine') ? sideNavActiveClass : '')}
-              icon={<Shield className="h-5 w-5" />}
-            >
-              File quarantine
-            </SideNavLink>
-          ) : null}
-          {captionsEnabled ? (
-            <SideNavLink
-              to="/admin/caption-compliance"
-              className={() => (active('/admin/caption-compliance') ? sideNavActiveClass : '')}
-              icon={<Video className="h-5 w-5" />}
-            >
-              Caption compliance
-            </SideNavLink>
-          ) : null}
 
           <SideNavSectionLabel>Platform</SideNavSectionLabel>
           <SideNavLink
@@ -173,6 +173,24 @@ export function SideNavAdminLinks() {
           {showIntegrations ? (
             <>
               <SideNavSectionLabel>Integrations</SideNavSectionLabel>
+              {ffContentFilterIntegration ? (
+                <SideNavLink
+                  to={orgPath('/admin/content-filter', orgId)}
+                  className={() => (active('/admin/content-filter') ? sideNavActiveClass : '')}
+                  icon={<Filter className="h-5 w-5" />}
+                >
+                  Content filter
+                </SideNavLink>
+              ) : null}
+              {emailTemplateEditorEnabled ? (
+                <SideNavLink
+                  to={orgPath('/admin/email-templates', orgId)}
+                  className={() => (active('/admin/email-templates') ? sideNavActiveClass : '')}
+                  icon={<Mail className="h-5 w-5" />}
+                >
+                  Email templates
+                </SideNavLink>
+              ) : null}
               {ffSisIntegration ? (
                 <SideNavLink
                   to={orgPath('/admin/sis', orgId)}
@@ -191,30 +209,39 @@ export function SideNavAdminLinks() {
                   Webhooks
                 </SideNavLink>
               ) : null}
-              {emailTemplateEditorEnabled ? (
-                <SideNavLink
-                  to={orgPath('/admin/email-templates', orgId)}
-                  className={() => (active('/admin/email-templates') ? sideNavActiveClass : '')}
-                  icon={<Mail className="h-5 w-5" />}
-                >
-                  Email templates
-                </SideNavLink>
-              ) : null}
-              {ffContentFilterIntegration ? (
-                <SideNavLink
-                  to={orgPath('/admin/content-filter', orgId)}
-                  className={() => (active('/admin/content-filter') ? sideNavActiveClass : '')}
-                  icon={<Filter className="h-5 w-5" />}
-                >
-                  Content filter
-                </SideNavLink>
-              ) : null}
             </>
           ) : null}
 
           {showStudentRecords ? (
             <>
               <SideNavSectionLabel>Student records</SideNavSectionLabel>
+              {ffCoCurricularTranscript && canManageAccommodations ? (
+                <SideNavLink
+                  to="/admin/ccr/achievements"
+                  className={() => (active('/admin/ccr') ? sideNavActiveClass : '')}
+                  icon={<Award className="h-5 w-5" />}
+                >
+                  CCR achievements
+                </SideNavLink>
+              ) : null}
+              {ffGradeSubmission ? (
+                <SideNavLink
+                  to="/admin/final-grades/status"
+                  className={() => (active('/admin/final-grades') ? sideNavActiveClass : '')}
+                  icon={<ClipboardList className="h-5 w-5" />}
+                >
+                  Final grade status
+                </SideNavLink>
+              ) : null}
+              {ffIncompleteGradeWorkflow ? (
+                <SideNavLink
+                  to="/admin/incompletes"
+                  className={() => (active('/admin/incompletes') ? sideNavActiveClass : '')}
+                  icon={<FileSpreadsheet className="h-5 w-5" />}
+                >
+                  Incomplete grades
+                </SideNavLink>
+              ) : null}
               {ffDemographics ? (
                 <>
                   <SideNavLink
@@ -237,39 +264,21 @@ export function SideNavAdminLinks() {
                   </SideNavLink>
                 </>
               ) : null}
-              {ffIncompleteGradeWorkflow ? (
-                <SideNavLink
-                  to="/admin/incompletes"
-                  className={() => (active('/admin/incompletes') ? sideNavActiveClass : '')}
-                  icon={<FileSpreadsheet className="h-5 w-5" />}
-                >
-                  Incomplete grades
-                </SideNavLink>
-              ) : null}
-              {ffGradeSubmission ? (
-                <SideNavLink
-                  to="/admin/final-grades/status"
-                  className={() => (active('/admin/final-grades') ? sideNavActiveClass : '')}
-                  icon={<ClipboardList className="h-5 w-5" />}
-                >
-                  Final grade status
-                </SideNavLink>
-              ) : null}
-              {ffCoCurricularTranscript && canManageAccommodations ? (
-                <SideNavLink
-                  to="/admin/ccr/achievements"
-                  className={() => (active('/admin/ccr') ? sideNavActiveClass : '')}
-                  icon={<Award className="h-5 w-5" />}
-                >
-                  CCR achievements
-                </SideNavLink>
-              ) : null}
             </>
           ) : null}
 
           {showSchoolOperations ? (
             <>
               <SideNavSectionLabel>School operations</SideNavSectionLabel>
+              {ffAcademicCalendar ? (
+                <SideNavLink
+                  to={orgPath('/admin/academic-calendar', orgId)}
+                  className={() => (active('/admin/academic-calendar') ? sideNavActiveClass : '')}
+                  icon={<CalendarRange className="h-5 w-5" />}
+                >
+                  Academic calendar
+                </SideNavLink>
+              ) : null}
               {ffClassroomSignals ? (
                 <>
                   <SideNavLink
@@ -299,15 +308,6 @@ export function SideNavAdminLinks() {
                   </SideNavLink>
                 </>
               ) : null}
-              {ffAcademicCalendar ? (
-                <SideNavLink
-                  to={orgPath('/admin/academic-calendar', orgId)}
-                  className={() => (active('/admin/academic-calendar') ? sideNavActiveClass : '')}
-                  icon={<CalendarRange className="h-5 w-5" />}
-                >
-                  Academic calendar
-                </SideNavLink>
-              ) : null}
               {ffBroadcasts && orgId ? (
                 <SideNavLink
                   to={broadcastsPath}
@@ -320,15 +320,6 @@ export function SideNavAdminLinks() {
               {ffConferenceScheduling ? (
                 <>
                   <SideNavLink
-                    to="/admin/conferences/schedule"
-                    className={() =>
-                      active('/admin/conferences/schedule') ? sideNavActiveClass : ''
-                    }
-                    icon={<CalendarRange className="h-5 w-5" />}
-                  >
-                    Conference schedule
-                  </SideNavLink>
-                  <SideNavLink
                     to="/conferences/availability"
                     className={() =>
                       location.pathname === '/conferences/availability' ? sideNavActiveClass : ''
@@ -337,10 +328,26 @@ export function SideNavAdminLinks() {
                   >
                     Conference availability
                   </SideNavLink>
+                  <SideNavLink
+                    to="/admin/conferences/schedule"
+                    className={() =>
+                      active('/admin/conferences/schedule') ? sideNavActiveClass : ''
+                    }
+                    icon={<CalendarRange className="h-5 w-5" />}
+                  >
+                    Conference schedule
+                  </SideNavLink>
                 </>
               ) : null}
               {ffCourseEvaluations ? (
                 <>
+                  <SideNavLink
+                    to="/admin/evaluations/report"
+                    className={() => (active('/admin/evaluations/report') ? sideNavActiveClass : '')}
+                    icon={<BarChart2 className="h-5 w-5" />}
+                  >
+                    Evaluation report
+                  </SideNavLink>
                   <SideNavLink
                     to="/admin/evaluations/templates"
                     className={() =>
@@ -350,23 +357,7 @@ export function SideNavAdminLinks() {
                   >
                     Evaluation templates
                   </SideNavLink>
-                  <SideNavLink
-                    to="/admin/evaluations/report"
-                    className={() => (active('/admin/evaluations/report') ? sideNavActiveClass : '')}
-                    icon={<BarChart2 className="h-5 w-5" />}
-                  >
-                    Evaluation report
-                  </SideNavLink>
                 </>
-              ) : null}
-              {ffLibrary && orgId ? (
-                <SideNavLink
-                  to={libraryPath}
-                  className={() => (active('/library') ? sideNavActiveClass : '')}
-                  icon={<Library className="h-5 w-5" />}
-                >
-                  Library catalog
-                </SideNavLink>
               ) : null}
               {ffLearningPaths ? (
                 <SideNavLink
@@ -375,6 +366,15 @@ export function SideNavAdminLinks() {
                   icon={<Route className="h-5 w-5" />}
                 >
                   Learning path builder
+                </SideNavLink>
+              ) : null}
+              {ffLibrary && orgId ? (
+                <SideNavLink
+                  to={libraryPath}
+                  className={() => (active('/library') ? sideNavActiveClass : '')}
+                  icon={<Library className="h-5 w-5" />}
+                >
+                  Library catalog
                 </SideNavLink>
               ) : null}
             </>

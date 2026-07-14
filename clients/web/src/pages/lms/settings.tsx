@@ -457,36 +457,38 @@ export default function Settings() {
     <LmsPage title="Settings" description="Account and learning preferences.">
       <div
         className={`mt-8 ${
-          activeView === 'roles' ||
-          activeView === 'lti-tools' ||
-          activeView === 'platform' ||
-          activeView === 'organizations' ||
-          activeView === 'org-units' ||
-          activeView === 'terms' ||
-          activeView === 'org-branding' ||
-          activeView === 'scim-provisioning' ||
-          activeView === 'cloud-providers' ||
-          activeView === 'lrs-integrations' ||
-          activeView === 'oer-providers' ||
-          activeView === 'transcripts' ||
-          activeView === 'advising' ||
-          activeView === 'archive' ||
-          activeView === 'people' ||
-          activeView === 'courses' ||
-          activeView === 'intro-course' ||
-          activeView === 'feedback'
-            ? 'max-w-4xl'
-            : activeView === 'integrations'
-              ? 'max-w-3xl'
-            : activeView === 'ai-prompts'
-              ? 'max-w-3xl'
-              : activeView === 'ai-reports'
-                ? 'max-w-4xl'
-              : activeView === 'account'
+          activeView === 'email-templates'
+            ? 'max-w-none w-full'
+            : activeView === 'roles' ||
+                activeView === 'lti-tools' ||
+                activeView === 'platform' ||
+                activeView === 'organizations' ||
+                activeView === 'org-units' ||
+                activeView === 'terms' ||
+                activeView === 'org-branding' ||
+                activeView === 'scim-provisioning' ||
+                activeView === 'cloud-providers' ||
+                activeView === 'lrs-integrations' ||
+                activeView === 'oer-providers' ||
+                activeView === 'transcripts' ||
+                activeView === 'advising' ||
+                activeView === 'archive' ||
+                activeView === 'people' ||
+                activeView === 'courses' ||
+                activeView === 'intro-course' ||
+                activeView === 'feedback'
+              ? 'max-w-4xl'
+              : activeView === 'integrations'
                 ? 'max-w-3xl'
-              : activeView === 'learner-profile'
-                ? 'max-w-3xl'
-              : 'max-w-xl'
+                : activeView === 'ai-prompts'
+                  ? 'max-w-3xl'
+                  : activeView === 'ai-reports'
+                    ? 'max-w-4xl'
+                    : activeView === 'account'
+                      ? 'max-w-3xl'
+                      : activeView === 'learner-profile'
+                        ? 'max-w-3xl'
+                        : 'max-w-xl'
         }`}
       >
         {activeView === 'ai-models' && (
@@ -934,7 +936,7 @@ export default function Settings() {
 
         {activeView === 'email-templates' && emailTemplateEditorEnabled && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Email templates</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Email templates</h2>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={

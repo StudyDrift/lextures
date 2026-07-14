@@ -1,8 +1,6 @@
 # AWS self-host stack (`iac/self-aws`)
 
-Managed AWS infrastructure for Lextures that **does not** co-locate Postgres, Redis, and RabbitMQ in Docker on a single EC2/VM.
-
-This directory is **independent of Oracle Cloud** (`iac/self` + `iac/modules/oracle`). Applying here does not touch OCI resources.
+Managed AWS infrastructure for Lextures that **does not** co-locate Postgres, Redis, and RabbitMQ in Docker on a single EC2/VM. This is the production self-host path (Fargate + managed data plane).
 
 ## Architecture
 
@@ -23,6 +21,7 @@ flowchart TB
   API --> Redis
   API --> SQS[SQS standard queues + DLQs]
   API --> S3Files[(S3 course files)]
+  API --> SES[Amazon SES]
   SM[Secrets Manager] -.-> API
 ```
 
@@ -34,6 +33,7 @@ flowchart TB
 | Database | **RDS PostgreSQL 16** (`db.t4g.micro` default) | Free-tier eligible size; single-AZ |
 | Cache | **ElastiCache Redis 7** (`cache.t3.micro` default) | Free-tier eligible size; single node; TLS + auth |
 | Queues | **SQS** (4 queues + DLQs) | Always Free: 1M requests/month |
+| Email | **Amazon SES** (when `ses_domain` is set) | Pay per send; sandbox until production access |
 | Files | **S3** (course files) | SSE-S3; IAM task role |
 | Secrets | **Secrets Manager** | `DATABASE_URL`, `REDIS_URL`, JWT, SQS URLs, storage; optional registry pull auth |
 
@@ -50,9 +50,9 @@ ALB path patterns for the API: `/api/*`, `/health`, `/health/*`, `/tus/*`. The n
 
 ### Deploying new versions
 
-**CI (recommended):** [`.github/workflows/deploy-self-aws.yml`](../../.github/workflows/deploy-self-aws.yml) runs after [Publish container images](../../.github/workflows/publish-images.yml) succeeds on `main` (same trigger as Deploy Self). It applies this module with immutable `server_image` / `web_image` tags `ghcr.io/<org>/<repo>/{server,web}:<git-sha>`, which updates ECS task definitions and rolls the services. Manual runs: **Actions → Deploy Self AWS → Run workflow**.
+**CI (recommended):** [`.github/workflows/deploy-self-aws.yml`](../../.github/workflows/deploy-self-aws.yml) runs after [Publish container images](../../.github/workflows/publish-images.yml) succeeds on `main`. It applies this module with immutable `server_image` / `web_image` tags `ghcr.io/<org>/<repo>/{server,web}:<git-sha>`, which updates ECS task definitions and rolls the services. Manual runs: **Actions → Deploy Self AWS → Run workflow**.
 
-Repository secrets: `TF_TOKEN`, `TF_CLOUD_ORGANIZATION` (shared with Deploy Self). AWS credentials, optional GHCR pull credentials (`registry_username` / `registry_password`), and optional `bootstrap_admin_email` belong in the HCP workspace `lextures-self-aws-production` — use a long-lived PAT for private packages, not `GITHUB_TOKEN` (it expires and would be stored in Secrets Manager).
+Repository secrets: `TF_TOKEN`, `TF_CLOUD_ORGANIZATION`. AWS credentials, optional GHCR pull credentials (`registry_username` / `registry_password`), optional `bootstrap_admin_email`, and SES domain settings belong in the HCP workspace `lextures-self-aws-production` — use a long-lived PAT for private packages, not `GITHUB_TOKEN` (it expires and would be stored in Secrets Manager).
 
 **Local / force redeploy** after images are already in the registry:
 
@@ -71,9 +71,10 @@ If `web_image` is empty, `deploy-web.sh` falls back to build + S3 sync + CloudFr
 ## Prerequisites
 
 - Terraform >= 1.5
-- AWS credentials with permission to create VPC, RDS, ElastiCache, SQS, S3, CloudFront, ECS, ALB, IAM, Secrets Manager, CloudWatch Logs
+- AWS credentials with permission to create VPC, RDS, ElastiCache, SQS, S3, SES, CloudFront, ECS, ALB, IAM, Secrets Manager, CloudWatch Logs
 - Container images for the **API** and (recommended) **web** when `enable_ecs = true`
 - For **private** GHCR packages: `registry_username` + `registry_password` (PAT with `read:packages`)
+- For SES: a domain you control (DKIM CNAMEs) and, for open sending, SES production access (out of sandbox)
 - Node.js + npm only if using the static S3 path (`web_image` empty)
 
 ## Quick start
@@ -138,6 +139,30 @@ A full apply without the validation CNAMEs in place waits up to **45 minutes** f
 
 **Existing cert:** set `web_acm_certificate_arn` to a real us-east-1 ACM ARN instead of leaving it empty.
 
+### Amazon SES (transactional email)
+
+When `enable_ses = true` and `ses_domain` is set (e.g. `lextures.com`):
+
+1. Terraform creates a **domain identity**, a **configuration set**, and an **IAM policy** on the ECS task role (`ses:SendEmail` / `ses:SendRawEmail` scoped to that domain).
+2. The API task gets:
+   - `EMAIL_PROVIDER=ses`
+   - `SES_REGION` (stack region)
+   - `SES_FROM` (`ses_from_email`, or `no-reply@<ses_domain>`)
+   - `SES_CONFIGURATION_SET`
+   - empty `SES_ACCESS_KEY_ID` / `SES_SECRET_ACCESS_KEY` (task role credentials)
+3. Publish DNS from `terraform output ses_dns_records` (Easy DKIM CNAMEs; optional custom MAIL FROM if `ses_mail_from_subdomain` is set). Use **DNS only** in Cloudflare.
+4. New SES accounts are in the **sandbox** (verified recipients only) until you request production access in the SES console.
+5. In the app, enable **Settings → Global platform → Amazon SES** (`ffEmailSes`). The API only uses SES when that flag is on **and** `EMAIL_PROVIDER=ses` (the latter is set by Terraform when SES resources exist).
+
+```hcl
+enable_ses     = true
+ses_domain     = "example.com"
+ses_from_email = "no-reply@example.com"
+# ses_mail_from_subdomain = "bounce"  # optional
+```
+
+Leave `ses_domain` empty to skip SES resources (API keeps default SMTP until you configure email in Settings).
+
 ## Application configuration
 
 Secrets Manager secret `${project}-${environment}/app` is a JSON object. ECS injects keys as environment variables:
@@ -152,16 +177,18 @@ Secrets Manager secret `${project}-${environment}/app` is a JSON object. ECS inj
 | `STORAGE_BACKEND` | `s3` |
 | `STORAGE_BUCKET` / `STORAGE_REGION` | Course files |
 
+Plain environment variables (not secrets) when SES is enabled: `EMAIL_PROVIDER`, `SES_REGION`, `SES_FROM`, `SES_CONFIGURATION_SET`.
+
 `PUBLIC_WEB_ORIGIN` on the API task defaults to the CloudFront HTTPS URL (or `public_web_origin` when set).
 
 `BOOTSTRAP_ADMIN_EMAIL` comes from Terraform variable `bootstrap_admin_email` (HCP workspace or `terraform.tfvars`). When non-empty, the **first** password signup whose email matches (trimmed, lowercased) gets Global Admin if no human users exist yet. Leave empty and use `go run ./cmd/bootstrap-admin -email=…` against RDS to promote an account after the fact.
 
-Local / Oracle dev remains unchanged (`RABBITMQ_URL`, local Vite, etc.).
+Local dev remains unchanged (`RABBITMQ_URL`, SMTP or unset email, local Vite, etc.).
 
-## App code changes (SQS)
+## App code notes
 
-- Shared transport: `server/internal/mq` (RabbitMQ **or** SQS by URL scheme)
-- Queue packages use that transport; config via `QUEUE_BACKEND` + `SQS_*_URL`
+- Queues: `server/internal/mq` (RabbitMQ **or** SQS by URL scheme); config via `QUEUE_BACKEND` + `SQS_*_URL`
+- Email: `server/internal/mail` SES provider (`EMAIL_PROVIDER=ses`); credentials via task role unless static keys are set
 - Postgres-backed job queue (ADR 0001) is unchanged
 
 ## Estimated monthly cost (ballpark, us-east-1)
@@ -171,6 +198,7 @@ Local / Oracle dev remains unchanged (`RABBITMQ_URL`, local Vite, etc.).
 | RDS `db.t4g.micro` single-AZ 20 GB | ~$12–15 (often $0 in free tier year 1) |
 | ElastiCache `cache.t3.micro` | ~$12 (often $0 in free tier year 1) |
 | SQS | ~$0 at modest volume |
+| SES | ~$0.10 / 1k emails after free tier |
 | S3 (optional web bucket + course files) | storage + requests (often <$2 early) |
 | CloudFront | free tier 1 TB / 10M requests (year 1), then usage |
 | ALB | ~$16+ |
@@ -178,14 +206,6 @@ Local / Oracle dev remains unchanged (`RABBITMQ_URL`, local Vite, etc.).
 | Fargate web 0.25 vCPU / 0.5 GB × 1 | ~$8–12 |
 | NAT (optional) | ~$32 |
 | **Typical lean total (no NAT, web + API on Fargate)** | **~$65–85** (lower during free tier) |
-
-## Migration notes (Oracle → AWS)
-
-1. Apply this stack (data plane first is fine).
-2. Dump OCI Postgres → restore into RDS.
-3. Sync course files into the course-files S3 bucket; set `web_image` / `server_image` and apply (or use static `deploy-web.sh` if not using the web image).
-4. Point DNS at CloudFront (`cloudfront_domain_name` or custom alias); set `public_web_origin` if needed.
-5. Leave the Oracle stack running until cutover validation is complete — **no resources here modify OCI**.
 
 ## Outputs
 
@@ -200,4 +220,6 @@ terraform output -raw database_url   # sensitive
 terraform output sqs_queue_urls
 terraform output course_files_bucket
 terraform output app_secret_arn
+terraform output ses_dns_records
+terraform output ses_from_email
 ```

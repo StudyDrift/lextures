@@ -21,9 +21,6 @@
   <a href="/CODE_OF_CONDUCT.md">
     <img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="Contributor Covenant 2.1" />
   </a>
-  <a href="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self.yml">
-    <img src="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self.yml/badge.svg" alt="Deploy Self GitHub Action status." />
-  </a>
   <a href="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self-aws.yml">
     <img src="https://github.com/StudyDrift/lextures/actions/workflows/deploy-self-aws.yml/badge.svg" alt="Deploy Self AWS GitHub Action status." />
   </a>
@@ -67,7 +64,7 @@ lextures/
 │   └── mcp/             # Model Context Protocol server
 ├── www/                 # Marketing site (lextures.com)
 ├── e2e/                 # Playwright end-to-end tests
-├── iac/                 # Terraform for self-hosting (AWS, Azure, GCP, Oracle, DigitalOcean)
+├── iac/                 # Terraform self-host stack (AWS; other cloud modules reserved)
 └── docs/                # Architecture, plans, and guides
 ```
 

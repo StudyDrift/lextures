@@ -1,16 +1,15 @@
-# Publish small-tier / VM container images to GHCR on every merge to main.
+# Publish container images to GHCR on every merge to main.
 #
-# Deploy Self and Deploy Self AWS run after this workflow completes successfully
-# and pull the immutable :<git-sha> tags (see deploy-self.yml and
-# deploy-self-aws.yml).
+# Deploy Self AWS runs after this workflow completes successfully and pulls the
+# immutable :<git-sha> tags (see deploy-self-aws.yml).
 #
 # Images:
 #   ghcr.io/<org>/<repo>/server:latest  (+ :<git-sha>)
 #   ghcr.io/<org>/<repo>/web:latest     (+ :<git-sha>)
 #
-# Multi-arch (amd64 + arm64) for DigitalOcean and Oracle A1 VMs.
-# Dockerfiles compile on BUILDPLATFORM (native cross-compile / single Vite build)
-# so arm64 targets are not built under QEMU on amd64 runners.
+# Multi-arch (amd64 + arm64). Dockerfiles compile on BUILDPLATFORM (native
+# cross-compile / single Vite build) so arm64 targets are not built under QEMU
+# on amd64 runners.
 # Web is built with empty VITE_API_URL so the SPA uses the browser origin (nginx proxies /api/).
 
 name: Publish container images

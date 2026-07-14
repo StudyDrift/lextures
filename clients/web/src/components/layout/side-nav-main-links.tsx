@@ -105,19 +105,6 @@ export function SideNavMainLinks() {
           Ask AI
         </SideNavLink>
       ) : null}
-      <SideNavLink to="/review" icon={<RotateCcw className="h-5 w-5" />}>
-        Review practice
-      </SideNavLink>
-      {selfReflectionEnabled ? (
-        <SideNavLink to="/me/study-insights" icon={<Sparkles className="h-5 w-5" />}>
-          Study insights
-        </SideNavLink>
-      ) : null}
-      {ffLearningPaths ? (
-        <SideNavLink to="/my-paths" icon={<Route className="h-5 w-5" />}>
-          My learning paths
-        </SideNavLink>
-      ) : null}
       {ffCatalogIntegration ? (
         <SideNavLink to="/catalog" icon={<GraduationCap className="h-5 w-5" />}>
           Course catalog
@@ -128,18 +115,31 @@ export function SideNavMainLinks() {
           Marketplace
         </SideNavLink>
       ) : null}
+      {ffLearningPaths ? (
+        <SideNavLink to="/my-paths" icon={<Route className="h-5 w-5" />}>
+          My learning paths
+        </SideNavLink>
+      ) : null}
       {ffLibrary ? (
         <SideNavLink to="/reading-log" icon={<Library className="h-5 w-5" />}>
           Reading log
         </SideNavLink>
       ) : null}
+      <SideNavLink to="/review" icon={<RotateCcw className="h-5 w-5" />}>
+        Review practice
+      </SideNavLink>
+      {selfReflectionEnabled ? (
+        <SideNavLink to="/me/study-insights" icon={<Sparkles className="h-5 w-5" />}>
+          Study insights
+        </SideNavLink>
+      ) : null}
 
       <SideNavSectionLabel>Notes & portfolio</SideNavSectionLabel>
-      <SideNavLink to="/notebooks" end icon={<BookMarked className="h-5 w-5" />}>
-        My Notebooks
-      </SideNavLink>
       <SideNavLink to="/notebooks/global" icon={<BookMarked className="h-5 w-5" />}>
         Global notebook
+      </SideNavLink>
+      <SideNavLink to="/notebooks" end icon={<BookMarked className="h-5 w-5" />}>
+        My Notebooks
       </SideNavLink>
       {ffEportfolio ? (
         <SideNavLink to="/portfolios" icon={<FolderOpen className="h-5 w-5" />}>
@@ -150,14 +150,29 @@ export function SideNavMainLinks() {
       {showRecords ? (
         <>
           <SideNavSectionLabel>Records</SideNavSectionLabel>
-          {ffTranscripts ? (
-            <SideNavLink to="/transcripts" icon={<FileText className="h-5 w-5" />}>
-              Transcripts
-            </SideNavLink>
-          ) : null}
           {ffAdvisingIntegration ? (
             <SideNavLink to="/advising-notes" icon={<GraduationCap className="h-5 w-5" />}>
               Advising notes
+            </SideNavLink>
+          ) : null}
+          {ffStripeBilling ? (
+            <SideNavLink to="/me/billing" icon={<CreditCard className="h-5 w-5" />}>
+              Billing
+            </SideNavLink>
+          ) : null}
+          {ffCeuTracking ? (
+            <SideNavLink to="/me/ce-transcript" icon={<FileText className="h-5 w-5" />}>
+              CE transcript
+            </SideNavLink>
+          ) : null}
+          {ffRevenueShare ? (
+            <SideNavLink to="/me/creator/earnings" icon={<DollarSign className="h-5 w-5" />}>
+              Creator earnings
+            </SideNavLink>
+          ) : null}
+          {ffAccessibilityIntake ? (
+            <SideNavLink to="/me/accommodations" icon={<ShieldCheck className="h-5 w-5" />}>
+              My accommodations
             </SideNavLink>
           ) : null}
           {ffCoCurricularTranscript ? (
@@ -170,9 +185,9 @@ export function SideNavMainLinks() {
               My credentials
             </SideNavLink>
           ) : null}
-          {ffCeuTracking ? (
-            <SideNavLink to="/me/ce-transcript" icon={<FileText className="h-5 w-5" />}>
-              CE transcript
+          {ffCourseMarketplace ? (
+            <SideNavLink to="/me/purchases" icon={<ShoppingBag className="h-5 w-5" />}>
+              My purchases
             </SideNavLink>
           ) : null}
           {ffResearchConsent ? (
@@ -180,24 +195,9 @@ export function SideNavMainLinks() {
               Research studies
             </SideNavLink>
           ) : null}
-          {ffAccessibilityIntake ? (
-            <SideNavLink to="/me/accommodations" icon={<ShieldCheck className="h-5 w-5" />}>
-              My accommodations
-            </SideNavLink>
-          ) : null}
-          {ffStripeBilling ? (
-            <SideNavLink to="/me/billing" icon={<CreditCard className="h-5 w-5" />}>
-              Billing
-            </SideNavLink>
-          ) : null}
-          {ffCourseMarketplace ? (
-            <SideNavLink to="/me/purchases" icon={<ShoppingBag className="h-5 w-5" />}>
-              My purchases
-            </SideNavLink>
-          ) : null}
-          {ffRevenueShare ? (
-            <SideNavLink to="/me/creator/earnings" icon={<DollarSign className="h-5 w-5" />}>
-              Creator earnings
+          {ffTranscripts ? (
+            <SideNavLink to="/transcripts" icon={<FileText className="h-5 w-5" />}>
+              Transcripts
             </SideNavLink>
           ) : null}
         </>
@@ -206,23 +206,23 @@ export function SideNavMainLinks() {
       {isParent ? (
         <>
           <SideNavSectionLabel>Family</SideNavSectionLabel>
-          <SideNavLink to="/parent" icon={<UsersRound className="h-5 w-5" />}>
-            Family dashboard
-          </SideNavLink>
           {ffConferenceScheduling ? (
             <SideNavLink to="/parent/conferences" icon={<Calendar className="h-5 w-5" />}>
               Conference booking
             </SideNavLink>
           ) : null}
+          <SideNavLink to="/parent" icon={<UsersRound className="h-5 w-5" />}>
+            Family dashboard
+          </SideNavLink>
         </>
       ) : null}
 
       {(canViewReports || canManageAccommodations) ? (
         <>
           <SideNavSectionLabel>Administration</SideNavSectionLabel>
-          {canViewReports ? (
-            <SideNavLink to="/reports" icon={<BarChart3 className="h-5 w-5" />}>
-              Reports
+          {canManageAccommodations && accommodationsEngineEnabled ? (
+            <SideNavLink to="/admin/accommodations/audit" icon={<Accessibility className="h-5 w-5" />}>
+              Accommodation audit
             </SideNavLink>
           ) : null}
           {canManageAccommodations ? (
@@ -230,9 +230,9 @@ export function SideNavMainLinks() {
               Accommodations
             </SideNavLink>
           ) : null}
-          {canManageAccommodations && accommodationsEngineEnabled ? (
-            <SideNavLink to="/admin/accommodations/audit" icon={<Accessibility className="h-5 w-5" />}>
-              Accommodation audit
+          {canViewReports ? (
+            <SideNavLink to="/reports" icon={<BarChart3 className="h-5 w-5" />}>
+              Reports
             </SideNavLink>
           ) : null}
         </>

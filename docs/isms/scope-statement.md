@@ -14,7 +14,7 @@ The Information Security Management System (ISMS) covers the **Lextures Learning
 | REST API | `server/` |
 | Relational database | PostgreSQL (customer data) |
 | Object storage | Course files and media |
-| Production infrastructure | `iac/production/`, `iac/self/` |
+| Production infrastructure | `iac/self-aws/`, `iac/modules/aws/` |
 | Hosted self-learner app | `self.lextures.com` |
 
 ## Out of scope (v1)

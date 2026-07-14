@@ -70,7 +70,8 @@ describe('SystemEmailTemplatesPanel', () => {
       </I18nProvider>,
     )
     await waitFor(() => {
-      expect(screen.getByText('Passwordless sign-in link')).toBeInTheDocument()
+      // Name appears in the template list and the workspace header.
+      expect(screen.getAllByText('Passwordless sign-in link').length).toBeGreaterThanOrEqual(1)
     })
     await waitFor(() => {
       expect(screen.getByDisplayValue(/Sign in/)).toBeInTheDocument()

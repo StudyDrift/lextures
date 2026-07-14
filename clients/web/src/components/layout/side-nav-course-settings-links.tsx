@@ -48,18 +48,18 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
 
       <SideNavSectionLabel first>Course setup</SideNavSectionLabel>
       <SideNavLink
-        to={`${base}/general`}
-        className={() => (section === 'general' ? sideNavActiveClass : '')}
-        icon={<Info className="h-5 w-5" />}
-      >
-        General
-      </SideNavLink>
-      <SideNavLink
         to={`${base}/features`}
         className={() => (section === 'features' ? sideNavActiveClass : '')}
         icon={<SlidersHorizontal className="h-5 w-5" />}
       >
         Features
+      </SideNavLink>
+      <SideNavLink
+        to={`${base}/general`}
+        className={() => (section === 'general' ? sideNavActiveClass : '')}
+        icon={<Info className="h-5 w-5" />}
+      >
+        General
       </SideNavLink>
       {!courseFeaturesLoading && sectionsEnabled ? (
         <SideNavLink
@@ -79,13 +79,6 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
       >
         Grading
       </SideNavLink>
-      <SideNavLink
-        to={`${base}/outcomes`}
-        className={() => (section === 'outcomes' ? sideNavActiveClass : '')}
-        icon={<Target className="h-5 w-5" />}
-      >
-        Outcomes
-      </SideNavLink>
       {!featuresLoading && graderAgentEnabled ? (
         <SideNavLink
           to={`${base}/grading-agents`}
@@ -95,6 +88,13 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
           Grading agents
         </SideNavLink>
       ) : null}
+      <SideNavLink
+        to={`${base}/outcomes`}
+        className={() => (section === 'outcomes' ? sideNavActiveClass : '')}
+        icon={<Target className="h-5 w-5" />}
+      >
+        Outcomes
+      </SideNavLink>
       {!featuresLoading && ffPlagiarismChecks ? (
         <SideNavLink
           to={`${base}/plagiarism`}
@@ -131,18 +131,18 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
 
       <SideNavSectionLabel>Content & data</SideNavSectionLabel>
       <SideNavLink
-        to={`${base}/import-export`}
-        className={() => (section === 'import-export' ? sideNavActiveClass : '')}
-        icon={<FolderInput className="h-5 w-5" />}
-      >
-        Import / export
-      </SideNavLink>
-      <SideNavLink
         to={`${base}/blueprint`}
         className={() => (section === 'blueprint' ? sideNavActiveClass : '')}
         icon={<BookCopy className="h-5 w-5" />}
       >
         Blueprint
+      </SideNavLink>
+      <SideNavLink
+        to={`${base}/import-export`}
+        className={() => (section === 'import-export' ? sideNavActiveClass : '')}
+        icon={<FolderInput className="h-5 w-5" />}
+      >
+        Import / export
       </SideNavLink>
 
       <SideNavSectionLabel>Lifecycle</SideNavSectionLabel>
