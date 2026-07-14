@@ -132,6 +132,8 @@ public_web_origin = "https://beta.example.com"
    ```
 5. Point the site CNAME: `beta` → CloudFront domain (`terraform output cloudfront_domain_name`), also **DNS only**.
 
+Keep the apex/`self` record **DNS only** (grey cloud). Proxied Cloudflare in front of CloudFront double-caches responses; during an ECS roll a brief `/assets/*` 404 can be stored for a year when the origin sends long `Cache-Control`, which shows up as unstyled pages (CSS/JS URLs returning HTML). If that happens, purge Cloudflare for `/assets/*` (and hard-refresh the browser) after the web tasks are healthy.
+
 A full apply without the validation CNAMEs in place waits up to **45 minutes** for ACM issuance and then fails if DNS is still missing.
 
 **Existing cert:** set `web_acm_certificate_arn` to a real us-east-1 ACM ARN instead of leaving it empty.
