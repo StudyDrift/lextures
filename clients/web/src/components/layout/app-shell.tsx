@@ -24,6 +24,10 @@ import { UiThemeSync } from './ui-theme-sync'
 import { LocaleBootstrapSync } from './locale-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
+import { OfflineBanner } from '../offline-banner'
+import { SkipLink } from '../skip-link'
+import { useFocusOnRoute } from '../../lib/a11y'
+import { ReadingRuler } from '../a11y/ReadingRuler'
 
 const MaintenanceStatusBanner = lazy(() =>
   import('../StatusBanner').then((m) => ({ default: m.StatusBanner })),
@@ -34,10 +38,6 @@ const IncidentStatusBanner = lazy(() =>
 const ImpersonationChrome = lazy(() =>
   import('../impersonation-chrome').then((m) => ({ default: m.ImpersonationChrome })),
 )
-import { OfflineBanner } from '../offline-banner'
-import { SkipLink } from '../skip-link'
-import { useFocusOnRoute } from '../../lib/a11y'
-import { ReadingRuler } from '../a11y/ReadingRuler'
 
 function AppShellLayout() {
   const location = useLocation()

@@ -28,6 +28,8 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   if (!('serviceWorker' in navigator)) return null
   try {
     const reg = await navigator.serviceWorker.register(SW_PATH)
+    // SW update/reload wiring lives in chunk-load-recovery (async-loaded) to keep
+    // the entry gzip budget. Callers that only need push can still register here.
     return reg
   } catch (err) {
     console.warn('[push] SW registration failed', err)

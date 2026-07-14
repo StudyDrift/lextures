@@ -14,6 +14,11 @@ self.addEventListener('message', (event) => {
   }
 })
 
+self.addEventListener('activate', (event) => {
+  // Take control of open tabs so the new precache (new chunk hashes) is used.
+  event.waitUntil(self.clients.claim())
+})
+
 // Precache the app shell (list injected by vite-plugin-pwa)
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
@@ -21,19 +26,33 @@ cleanupOutdatedCaches()
 // SPA navigation fallback: serve index.html for all navigation requests
 registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html')))
 
-// Cache-first for static assets (JS, CSS, fonts, images). Skip /api/ URLs so
-// authenticated course-file blobs are never served from a stale image cache.
+/**
+ * Never cache HTML (or other non-matching types) under script/style URLs.
+ * After a deploy, nginx SPA fallback used to return index.html for missing
+ * hashed chunks; CacheFirst would then serve that HTML forever as "JS".
+ */
+function onlyMatchingContentType(expected: RegExp) {
+  return {
+    cacheWillUpdate: async ({ response }: { response: Response }) => {
+      if (!response || response.status !== 200) return null
+      const ct = response.headers.get('content-type') || ''
+      return expected.test(ct) ? response : null
+    },
+  }
+}
+
+// Fonts + images: cache-first (not fingerprinted the same way as Vite chunks).
+// Scripts and styles are already in the Workbox precache; do NOT runtime-cache
+// them — a transient HTML 200 during deploy would poison the cache.
 registerRoute(
   ({ request, url }) =>
     !url.pathname.startsWith('/api/') &&
-    (request.destination === 'script' ||
-      request.destination === 'style' ||
-      request.destination === 'font' ||
-      request.destination === 'image'),
+    (request.destination === 'font' || request.destination === 'image'),
   new CacheFirst({
-    cacheName: 'static-assets-v2',
+    cacheName: 'static-assets-v3',
     plugins: [
       new ExpirationPlugin({ maxEntries: 150, maxAgeSeconds: 30 * 24 * 60 * 60 }),
+      onlyMatchingContentType(/^(image|font)\//i),
     ],
   }),
 )

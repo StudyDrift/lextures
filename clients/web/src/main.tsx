@@ -6,6 +6,8 @@ import { applyUiTheme, readStoredUiTheme } from './lib/ui-theme'
 applyPlatformToDocument()
 applyUiTheme(readStoredUiTheme())
 
+// Async so recovery helpers stay out of the entry gzip budget.
+void import('./lib/chunk-load-recovery').then((m) => m.installChunkLoadRecovery())
 void registerServiceWorker()
 
 import { StrictMode } from 'react'
