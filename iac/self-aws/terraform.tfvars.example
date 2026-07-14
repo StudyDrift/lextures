@@ -14,9 +14,12 @@ aws_region   = "us-east-1"
 # web_bucket_force_destroy = true  # staging only
 # cloudfront_price_class   = "PriceClass_100"
 #
-# Custom domain (optional). Leave BOTH unset to use the free *.cloudfront.net cert.
-# Request/import a cert in ACM in us-east-1 first, then set the real ARN (12-digit account ID):
-# web_domain_names        = ["app.example.com"]
+# Custom domain (optional). Leave web_domain_names empty for free *.cloudfront.net cert.
+# Terraform will request a DNS-validated ACM cert in us-east-1 when domains are set
+# and web_acm_certificate_arn is empty — then `terraform output acm_dns_validation_records`.
+# web_domain_names  = ["beta.example.com"]
+# public_web_origin = "https://beta.example.com"
+# Optional: use an existing us-east-1 ACM cert instead of letting Terraform create one:
 # web_acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
 
 # API + web on ECS Fargate (images from .github/workflows/publish-images.yml)

@@ -216,17 +216,23 @@ variable "cloudfront_price_class" {
 }
 
 variable "web_domain_names" {
-  description = "Optional custom domain aliases for CloudFront (requires a real web_acm_certificate_arn in us-east-1). Leave empty to use the default *.cloudfront.net certificate."
+  description = <<-EOT
+    Optional custom domain aliases for CloudFront (e.g. ["beta.lextures.com"]).
+    Leave empty to use the default *.cloudfront.net certificate.
+    When set, either leave web_acm_certificate_arn empty (Terraform creates a
+    DNS-validated ACM cert in us-east-1) or pass an existing us-east-1 ACM ARN.
+  EOT
   type        = list(string)
   default     = []
 }
 
 variable "web_acm_certificate_arn" {
   description = <<-EOT
-    ACM certificate ARN in us-east-1 for CloudFront custom domains.
+    Optional existing ACM certificate ARN in us-east-1 for CloudFront custom domains.
     Must be a real ARN with a 12-digit account ID, e.g.:
       arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-    Leave null/empty when web_domain_names is empty (CloudFront default cert).
+    Leave null/empty to either use the default CloudFront cert (when web_domain_names
+    is empty) or let Terraform request and DNS-validate a cert for web_domain_names.
   EOT
   type        = string
   default     = null
@@ -245,13 +251,11 @@ check "web_custom_domain_cert" {
   assert {
     condition = (
       length(var.web_domain_names) == 0
-      || (
-        var.web_acm_certificate_arn != null
-        && var.web_acm_certificate_arn != ""
-        && can(regex("^arn:aws:acm:us-east-1:[0-9]{12}:certificate/[0-9a-fA-F-]+$", var.web_acm_certificate_arn))
-      )
+      || var.web_acm_certificate_arn == null
+      || var.web_acm_certificate_arn == ""
+      || can(regex("^arn:aws:acm:us-east-1:[0-9]{12}:certificate/[0-9a-fA-F-]+$", var.web_acm_certificate_arn))
     )
-    error_message = "When web_domain_names is set, web_acm_certificate_arn must be a real ACM certificate ARN in us-east-1 (not a placeholder)."
+    error_message = "web_acm_certificate_arn must be empty (Terraform-managed cert) or a real ACM ARN in us-east-1 when using custom domains."
   }
 }
 
