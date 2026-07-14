@@ -385,9 +385,8 @@ func RenderForDelivery(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID,
 					RecordFallback()
 				} else if rendered, ok := renderOverride(ctx, pool, slotName, active.HTMLBody, active.TextBody, vars, branding, "org"); ok {
 					return rendered, nil
-				} else {
-					// renderOverride already recorded fallback
 				}
+				// renderOverride already recorded fallback when it returns false
 			}
 		}
 		sys, err := emailtemplatesrepo.GetActiveSystem(ctx, pool, slotName)

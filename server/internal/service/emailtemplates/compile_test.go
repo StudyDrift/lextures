@@ -10,8 +10,7 @@ func TestCompile_formattingAndTokenPreservation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(html, "<strong>Hi</strong>") && !strings.Contains(html, "<strong>Hi</strong>") {
-		// goldmark may emit <strong>Hi</strong>
+	if !strings.Contains(html, "<strong>Hi</strong>") {
 		if !strings.Contains(html, "Hi") || !strings.Contains(html, "strong") {
 			t.Fatalf("expected strong Hi, got %q", html)
 		}
