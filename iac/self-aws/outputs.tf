@@ -47,6 +47,27 @@ output "cloudfront_distribution_id" {
   value       = try(aws_cloudfront_distribution.web[0].id, null)
 }
 
+output "web_acm_certificate_arn" {
+  description = "ACM certificate ARN used by CloudFront for custom domains (managed or external)."
+  value       = local.web_acm_certificate_arn_effective
+}
+
+output "acm_dns_validation_records" {
+  description = <<-EOT
+    DNS records to create for ACM validation when Terraform manages the cert.
+    Add each as a CNAME in your DNS provider (Cloudflare: DNS only / grey cloud).
+    Empty when using an external web_acm_certificate_arn or no custom domains.
+  EOT
+  value = local.create_web_acm ? [
+    for dvo in aws_acm_certificate.web[0].domain_validation_options : {
+      domain  = dvo.domain_name
+      type    = dvo.resource_record_type
+      name    = dvo.resource_record_name
+      value   = dvo.resource_record_value
+    }
+  ] : []
+}
+
 output "ecs_web_service_name" {
   description = "ECS service name for the nginx SPA (null when web_image is empty)."
   value       = try(aws_ecs_service.web[0].name, null)

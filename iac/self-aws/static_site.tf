@@ -161,11 +161,14 @@ resource "aws_cloudfront_distribution" "web" {
   dynamic "viewer_certificate" {
     for_each = length(var.web_domain_names) > 0 ? [1] : []
     content {
-      acm_certificate_arn      = var.web_acm_certificate_arn
+      acm_certificate_arn      = local.web_acm_certificate_arn_effective
       ssl_support_method       = "sni-only"
       minimum_protocol_version = "TLSv1.2_2021"
     }
   }
+
+  # Wait for ACM issuance when Terraform manages the cert (CloudFront rejects PENDING_VALIDATION).
+  depends_on = [aws_acm_certificate_validation.web]
 
   tags = {
     Name = "${local.name_prefix}-web"

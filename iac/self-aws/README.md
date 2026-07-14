@@ -108,15 +108,33 @@ web_image      = "ghcr.io/YOUR_ORG/lextures/web:latest"
 # registry_username / registry_password if GHCR packages are private
 ```
 
-Custom domain (optional). Without these, CloudFront serves HTTPS on `*.cloudfront.net` automatically:
+Custom domain (optional). Without `web_domain_names`, CloudFront serves HTTPS on `*.cloudfront.net` automatically.
+
+**Terraform-managed cert (recommended):** set only the domain list — no certificate UUID needed.
 
 ```hcl
-# 1) Create/validate cert in ACM in us-east-1 (CloudFront requirement)
-# 2) Paste the real ARN (12-digit account ID + certificate UUID):
-web_domain_names        = ["app.example.com"]
-web_acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
-public_web_origin       = "https://app.example.com"
+web_domain_names  = ["beta.example.com"]
+public_web_origin = "https://beta.example.com"
+# web_acm_certificate_arn left empty → ACM cert created in us-east-1
 ```
+
+1. Set `web_domain_names` (and `public_web_origin`) in HCP or tfvars.
+2. Preferred first apply (creates the cert without waiting forever on DNS):
+   ```bash
+   cd iac/self-aws
+   terraform apply -target=aws_acm_certificate.web
+   terraform output acm_dns_validation_records
+   ```
+3. Create each record as a **CNAME** in Cloudflare (**DNS only** / grey cloud).
+4. Full apply (validates cert, attaches it to CloudFront):
+   ```bash
+   terraform apply
+   ```
+5. Point the site CNAME: `beta` → CloudFront domain (`terraform output cloudfront_domain_name`), also **DNS only**.
+
+A full apply without the validation CNAMEs in place waits up to **45 minutes** for ACM issuance and then fails if DNS is still missing.
+
+**Existing cert:** set `web_acm_certificate_arn` to a real us-east-1 ACM ARN instead of leaving it empty.
 
 ## Application configuration
 
