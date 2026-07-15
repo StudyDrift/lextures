@@ -35,6 +35,7 @@ import { CourseGradingSettingsSection } from './course-grading-settings'
 import { CourseFeaturesSection } from './course-features-section'
 import { CourseCaptionPolicySection } from './course-caption-policy-section'
 import { CourseOutcomesSection } from './course-outcomes-section'
+import { CourseBadgesSection } from './course-badges-section'
 import { CourseBlueprintSection } from './course-blueprint-settings'
 import { CourseCrossListingSection } from './course-cross-listing-settings'
 import { CourseSectionsSettingsSection } from './course-sections-settings'
@@ -120,6 +121,7 @@ type SettingsSection =
   | 'grading-agents'
   | 'plagiarism'
   | 'outcomes'
+  | 'badges'
   | 'features'
   | 'accessibility'
   | 'translations'
@@ -161,6 +163,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
   if (seg === 'grading-agents') return 'grading-agents'
   if (seg === 'plagiarism') return 'plagiarism'
   if (seg === 'outcomes') return 'outcomes'
+  if (seg === 'badges') return 'badges'
   if (seg === 'features') return 'features'
   if (seg === 'accessibility') return 'accessibility'
   if (seg === 'translations') return 'translations'
@@ -802,6 +805,10 @@ export default function CourseSettings() {
           ? course?.title
             ? `${course.title} — outcomes`
             : 'Outcomes'
+          : section === 'badges'
+            ? course?.title
+              ? `${course.title} — badges`
+              : 'Badges'
           : section === 'features'
             ? course?.title
               ? `${course.title} — features`
@@ -845,6 +852,8 @@ export default function CourseSettings() {
           ? 'Course-wide plagiarism and AI-authorship check settings, provider, and alert thresholds.'
         : section === 'outcomes'
           ? 'Define learning outcomes, map assignments and quizzes (including individual questions) with measurement and intensity levels, and review class progress from grades and attempts.'
+          : section === 'badges'
+            ? 'Define competency micro-badges tied to outcomes and award signed Open Badges to students who demonstrate mastery.'
           : section === 'features'
             ? 'Choose which course tools appear in the menu and are available to instructors and learners.'
             : section === 'accessibility'
@@ -1434,6 +1443,9 @@ export default function CourseSettings() {
             )
           ) : null}
           {section === 'outcomes' && <CourseOutcomesSection courseCode={courseCode} />}
+          {section === 'badges' && (
+            <CourseBadgesSection courseCode={courseCode} courseId={course.id} />
+          )}
           {section === 'features' && (
             <>
               <CourseCaptionPolicySection

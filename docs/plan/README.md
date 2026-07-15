@@ -40,6 +40,7 @@ One plan per feature gap identified in `[docs/MISSING_FEATURES.md](../MISSING_FE
 - [21 — Mobile, Offline & Cross-Platform](21-mobile-offline-cross-platform/)
 - [LH — Lighthouse remediation](../completed/lighthouse/) (completed; audits from `docs/lighthouse/` reports)
 - [S — Standards & Legal Hardening](standards/) — bullet-proofing FERPA + every jurisdiction's privacy/AI/accessibility law (S01–S21)
+- [AP — AI Multi-Provider / BYOK](ai-providers/) — OpenRouter as one provider among many; platform + org credentials; call-site migration (AP.1–AP.9)
 
 ## Standards & Legal Hardening (2026-07-06)
 

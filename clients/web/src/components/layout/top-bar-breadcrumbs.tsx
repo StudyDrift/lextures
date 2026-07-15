@@ -26,6 +26,7 @@ const COURSE_SETTINGS_LABEL: Record<CourseSettingsSection, string> = {
   'grading-agents': 'Grading agents',
   plagiarism: 'Plagiarism',
   outcomes: 'Outcomes',
+  badges: 'Badges',
   features: 'Features',
   accessibility: 'Accessibility',
   translations: 'Translations',

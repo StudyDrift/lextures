@@ -165,6 +165,18 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Issue verifiable Open Badges 3.0 certificates with PDF download and public verification when learners complete courses or paths.',
   },
   {
+    key: 'ffCompetencyBadges',
+    label: 'Competency micro-badges',
+    description:
+      'Let instructors define and award signed Open Badges for learning outcomes, with public learner backpack pages and independent verification.',
+  },
+  {
+    key: 'badgesDefaultPublic',
+    label: 'New badges public by default',
+    description:
+      'When competency badges are enabled, newly awarded badges default to public (learners can still make them private). Minors stay private.',
+  },
+  {
     key: 'ffConsortiumSharing',
     label: 'Consortium course sharing',
     description:

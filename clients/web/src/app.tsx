@@ -50,6 +50,8 @@ export default function App() {
         <Route path="/paths" element={<Pages.PathsCatalogPage />} />
         <Route path="/paths/:slug" element={<Pages.PathLandingPage />} />
         <Route path="/verify/:token" element={<Pages.CcrVerifyPage />} />
+        <Route path="/badges/:handle/:badgeSlug" element={<Pages.PublicBadgeDetailPage />} />
+        <Route path="/badges/:handle" element={<Pages.PublicBadgeListPage />} />
         <Route path="/explore" element={<Pages.ExploreCatalogPage />} />
         <Route path="/explore/:slug" element={<Pages.ExploreCoursePage />} />
         <Route element={<RequireAuth />}>
@@ -70,6 +72,7 @@ export default function App() {
             <Route path="/me/profile" element={<Pages.MyProfilePage />} />
             <Route path="/me/ccr" element={<Pages.MyCCR />} />
             <Route path="/me/credentials" element={<Pages.MyCredentials />} />
+            <Route path="/me/badges" element={<Pages.MyBadges />} />
             <Route path="/me/ce-transcript" element={<Pages.CeTranscript />} />
             <Route path="/me/billing" element={<Pages.BillingSettingsPage />} />
             <Route path="/me/purchases" element={<Pages.MyPurchasesPage />} />

@@ -158,6 +158,8 @@ type Row struct {
 	FFCompletionCredentials         *bool
 	FFCourseReviews                 *bool
 	FFGamification                  *bool
+	FFCompetencyBadges              *bool
+	BadgesDefaultPublic             *bool
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
@@ -348,6 +350,8 @@ type Write struct {
 	FFCompletionCredentials         *bool
 	FFCourseReviews                 *bool
 	FFGamification                  *bool
+	FFCompetencyBadges              *bool
+	BadgesDefaultPublic             *bool
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
@@ -532,6 +536,8 @@ SELECT
 	ff_completion_credentials,
 	ff_course_reviews,
 	ff_gamification,
+	ff_competency_badges,
+	badges_default_public,
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
@@ -711,6 +717,8 @@ WHERE id = 1
 		&r.FFCompletionCredentials,
 		&r.FFCourseReviews,
 		&r.FFGamification,
+		&r.FFCompetencyBadges,
+		&r.BadgesDefaultPublic,
 		&r.FFOnboardingFlow,
 		&r.FFStudyReminders,
 		&r.FFAIStudyBuddy,
@@ -936,6 +944,8 @@ INSERT INTO settings.platform_app_settings (
 	ff_completion_credentials,
 	ff_course_reviews,
 	ff_gamification,
+	ff_competency_badges,
+	badges_default_public,
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
@@ -982,7 +992,7 @@ INSERT INTO settings.platform_app_settings (
 	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114, $115, $116, $117, $118, $119, $120,
 	$121, $122, $123, $124, $125, $126, $127, $128, $129, $130, $131, $132, $133, $134, $135, $136, $137, $138, $139, $140,
 	$141, $142, $143, $144, $145, $146, $147, $148, $149, $150, $151, $152, $153, $154, $155, $156, $157, $158, $159, $160,
-	$161, $162, $163, $164, $165, $166, $167, $168, $169,
+	$161, $162, $163, $164, $165, $166, $167, $168, $169, $170, $171,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -1118,6 +1128,8 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_completion_credentials = COALESCE(EXCLUDED.ff_completion_credentials, settings.platform_app_settings.ff_completion_credentials),
 	ff_course_reviews = COALESCE(EXCLUDED.ff_course_reviews, settings.platform_app_settings.ff_course_reviews),
 	ff_gamification = COALESCE(EXCLUDED.ff_gamification, settings.platform_app_settings.ff_gamification),
+	ff_competency_badges = COALESCE(EXCLUDED.ff_competency_badges, settings.platform_app_settings.ff_competency_badges),
+	badges_default_public = COALESCE(EXCLUDED.badges_default_public, settings.platform_app_settings.badges_default_public),
 	ff_onboarding_flow = COALESCE(EXCLUDED.ff_onboarding_flow, settings.platform_app_settings.ff_onboarding_flow),
 	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
 	ff_ai_study_buddy = COALESCE(EXCLUDED.ff_ai_study_buddy, settings.platform_app_settings.ff_ai_study_buddy),
@@ -1290,6 +1302,8 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFCompletionCredentials,
 		w.FFCourseReviews,
 		w.FFGamification,
+		w.FFCompetencyBadges,
+		w.BadgesDefaultPublic,
 		w.FFOnboardingFlow,
 		w.FFStudyReminders,
 		w.FFAIStudyBuddy,

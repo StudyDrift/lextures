@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -14,10 +15,43 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/courseoutcomes"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	outrep "github.com/lextures/lextures/server/internal/repos/outcomesreport"
+	badgesvc "github.com/lextures/lextures/server/internal/service/badges"
 )
 
 func (d Deps) outcomesReportEnabled() bool {
 	return d.effectiveConfig().OutcomesReportEnabled
+}
+
+// maybeAutoAwardBadgesAfterOutcomesRefresh awards auto_award definitions for students who met mastery (plan B1).
+func (d Deps) maybeAutoAwardBadgesAfterOutcomesRefresh(ctx context.Context, courseID uuid.UUID) {
+	cfg := d.effectiveConfig()
+	if !cfg.FFCompetencyBadges || d.Pool == nil {
+		return
+	}
+	rows, err := d.Pool.Query(ctx, `
+SELECT DISTINCT user_id, outcome_id
+FROM analytics.outcomes_report_student
+WHERE course_id = $1 AND assessed = TRUE AND met = TRUE
+`, courseID)
+	if err != nil {
+		slog.Warn("badges.auto_award.list_failed", "course_id", courseID.String(), "err", err.Error())
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var userID, outcomeID uuid.UUID
+		if err := rows.Scan(&userID, &outcomeID); err != nil {
+			continue
+		}
+		if err := badgesvc.MaybeAutoAward(ctx, d.Pool, cfg, courseID, userID, outcomeID); err != nil {
+			slog.Warn("badges.auto_award.failed",
+				"course_id", courseID.String(),
+				"user_id", userID.String(),
+				"outcome_id", outcomeID.String(),
+				"err", err.Error(),
+			)
+		}
+	}
 }
 
 func (d Deps) guardOutcomesReport(w http.ResponseWriter) bool {
@@ -338,6 +372,7 @@ func (d Deps) handleCourseOutcomesAnalyticsRefreshPost() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to refresh outcomes report.")
 			return
 		}
+		d.maybeAutoAwardBadgesAfterOutcomesRefresh(ctx, *cid)
 		slog.Info("outcomes_report.refresh",
 			"course_id", cid.String(),
 			"duration_ms", time.Since(start).Milliseconds(),

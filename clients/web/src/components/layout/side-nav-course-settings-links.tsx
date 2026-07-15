@@ -11,6 +11,7 @@ import {
   Bot,
   SlidersHorizontal,
   Target,
+  Award,
   Eye,
   Shield,
 } from 'lucide-react'
@@ -94,6 +95,13 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
         icon={<Target className="h-5 w-5" />}
       >
         Outcomes
+      </SideNavLink>
+      <SideNavLink
+        to={`${base}/badges`}
+        className={() => (section === 'badges' ? sideNavActiveClass : '')}
+        icon={<Award className="h-5 w-5" />}
+      >
+        Badges
       </SideNavLink>
       {!featuresLoading && ffPlagiarismChecks ? (
         <SideNavLink
