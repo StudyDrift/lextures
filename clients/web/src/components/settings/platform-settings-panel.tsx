@@ -104,6 +104,8 @@ function emptyForm(): PlatformSettingsPayload {
     ffConditionalRelease: false,
     ffPeerReview: false,
     ffCompletionCredentials: false,
+    ffCompetencyBadges: false,
+    badgesDefaultPublic: false,
     ffOnboardingFlow: false,
     ffWhatifGrades: false,
     ffGradeCurving: false,

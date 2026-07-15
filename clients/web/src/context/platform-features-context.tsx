@@ -106,6 +106,7 @@ export type PlatformFeatures = {
   ffCompletionCredentials: boolean
   ffCourseReviews: boolean
   ffGamification: boolean
+  ffCompetencyBadges: boolean
   ffOnboardingFlow: boolean
   ffStudyReminders: boolean
   ffAiStudyBuddy: boolean
@@ -215,6 +216,7 @@ const defaultFeatures: PlatformFeatures = {
   ffCompletionCredentials: false,
   ffCourseReviews: false,
   ffGamification: false,
+  ffCompetencyBadges: false,
   ffOnboardingFlow: false,
   ffStudyReminders: false,
   ffAiStudyBuddy: false,
@@ -323,6 +325,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffCompletionCredentials: false,
   ffCourseReviews: false,
   ffGamification: false,
+  ffCompetencyBadges: false,
   ffOnboardingFlow: false,
   ffStudyReminders: false,
   ffAiStudyBuddy: false,
@@ -438,6 +441,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCompletionCredentials: data.ffCompletionCredentials === true,
           ffCourseReviews: data.ffCourseReviews === true,
           ffGamification: data.ffGamification === true,
+          ffCompetencyBadges: data.ffCompetencyBadges === true,
           ffOnboardingFlow: data.ffOnboardingFlow === true,
           ffStudyReminders: data.ffStudyReminders === true,
           ffAiStudyBuddy: data.ffAiStudyBuddy === true,
@@ -508,6 +512,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCompletionCredentials: next.ffCompletionCredentials === true,
           ffCourseReviews: next.ffCourseReviews === true,
           ffGamification: next.ffGamification === true,
+          ffCompetencyBadges: next.ffCompetencyBadges === true,
           ffOnboardingFlow: next.ffOnboardingFlow === true,
           ffStudyReminders: next.ffStudyReminders === true,
           ffAiStudyBuddy: next.ffAiStudyBuddy === true,

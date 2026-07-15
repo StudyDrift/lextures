@@ -175,6 +175,8 @@ type platformSettingsJSON struct {
 	FFCompletionCredentials            bool `json:"ffCompletionCredentials"`
 	FFCourseReviews                    bool `json:"ffCourseReviews"`
 	FFGamification                     bool `json:"ffGamification"`
+	FFCompetencyBadges                 bool `json:"ffCompetencyBadges"`
+	BadgesDefaultPublic                bool `json:"badgesDefaultPublic"`
 	FFOnboardingFlow                   bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                   bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                     bool `json:"ffAiStudyBuddy"`
@@ -417,6 +419,8 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFCompletionCredentials:            merged.FFCompletionCredentials,
 			FFCourseReviews:                    merged.FFCourseReviews,
 			FFGamification:                     merged.FFGamification,
+			FFCompetencyBadges:                 merged.FFCompetencyBadges,
+			BadgesDefaultPublic:                merged.BadgesDefaultPublic,
 			FFOnboardingFlow:                   merged.FFOnboardingFlow,
 			FFStudyReminders:                   merged.FFStudyReminders,
 			FFAIStudyBuddy:                     merged.FFAIStudyBuddy,
@@ -631,6 +635,8 @@ type putPlatformBody struct {
 	FFCompletionCredentials            *bool `json:"ffCompletionCredentials"`
 	FFCourseReviews                    *bool `json:"ffCourseReviews"`
 	FFGamification                     *bool `json:"ffGamification"`
+	FFCompetencyBadges                 *bool `json:"ffCompetencyBadges"`
+	BadgesDefaultPublic                *bool `json:"badgesDefaultPublic"`
 	FFOnboardingFlow                   *bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                   *bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                     *bool `json:"ffAiStudyBuddy"`
@@ -1031,6 +1037,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffcompletioncredentials", body.FFCompletionCredentials, func(v bool) { wr.FFCompletionCredentials = &v })
 		setBool("ffcoursereviews", body.FFCourseReviews, func(v bool) { wr.FFCourseReviews = &v })
 		setBool("ffgamification", body.FFGamification, func(v bool) { wr.FFGamification = &v })
+		setBool("ffcompetencybadges", body.FFCompetencyBadges, func(v bool) { wr.FFCompetencyBadges = &v })
+		setBool("badgesdefaultpublic", body.BadgesDefaultPublic, func(v bool) { wr.BadgesDefaultPublic = &v })
 		setBool("ffonboardingflow", body.FFOnboardingFlow, func(v bool) { wr.FFOnboardingFlow = &v })
 		setBool("ffstudyreminders", body.FFStudyReminders, func(v bool) { wr.FFStudyReminders = &v })
 		setBool("ffaistudybuddy", body.FFAIStudyBuddy, func(v bool) { wr.FFAIStudyBuddy = &v })
@@ -1240,6 +1248,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFCompletionCredentials:            merged.FFCompletionCredentials,
 			FFCourseReviews:                    merged.FFCourseReviews,
 			FFGamification:                     merged.FFGamification,
+			FFCompetencyBadges:                 merged.FFCompetencyBadges,
+			BadgesDefaultPublic:                merged.BadgesDefaultPublic,
 			FFOnboardingFlow:                   merged.FFOnboardingFlow,
 			FFStudyReminders:                   merged.FFStudyReminders,
 			FFAIStudyBuddy:                     merged.FFAIStudyBuddy,

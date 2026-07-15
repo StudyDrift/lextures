@@ -75,6 +75,8 @@ export type PlatformSettingsPayload = {
   ffConditionalRelease: boolean
   ffPeerReview: boolean
   ffCompletionCredentials: boolean
+  ffCompetencyBadges: boolean
+  badgesDefaultPublic: boolean
   ffOnboardingFlow: boolean
   ffWhatifGrades: boolean
   ffGradeCurving: boolean

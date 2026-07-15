@@ -290,6 +290,7 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	d.registerStudyReminderRoutes(r)
 	d.registerCCRRoutes(r)
 	d.registerCredentialsRoutes(r)
+	d.registerBadgesRoutes(r)
 	d.registerIntegrationsRoutes(r)
 	d.registerCalendarFeedMeRoutes(r)
 	d.registerMeProfileDepthRoutes(r)

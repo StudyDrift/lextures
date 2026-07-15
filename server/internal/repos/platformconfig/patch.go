@@ -192,6 +192,8 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_completion_credentials", w.FFCompletionCredentials)
 	addBool("ff_course_reviews", w.FFCourseReviews)
 	addBool("ff_gamification", w.FFGamification)
+	addBool("ff_competency_badges", w.FFCompetencyBadges)
+	addBool("badges_default_public", w.BadgesDefaultPublic)
 	addBool("ff_onboarding_flow", w.FFOnboardingFlow)
 	addBool("ff_study_reminders", w.FFStudyReminders)
 	addBool("ff_ai_study_buddy", w.FFAIStudyBuddy)

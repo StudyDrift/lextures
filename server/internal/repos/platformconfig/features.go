@@ -119,6 +119,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFCompletionCredentials = mergeBool(db.FFCompletionCredentials, false)
 	out.FFCourseReviews = mergeBool(db.FFCourseReviews, false)
 	out.FFGamification = mergeBool(db.FFGamification, false)
+	out.FFCompetencyBadges = mergeBool(db.FFCompetencyBadges, false)
+	out.BadgesDefaultPublic = mergeBool(db.BadgesDefaultPublic, false)
 	out.FFOnboardingFlow = mergeBool(db.FFOnboardingFlow, false)
 	out.FFStudyReminders = mergeBool(db.FFStudyReminders, false)
 	out.FFAIStudyBuddy = mergeBool(db.FFAIStudyBuddy, false)

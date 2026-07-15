@@ -15,6 +15,7 @@ import { OidcConnectedAccountsPanel } from '../oidc-connected-accounts-panel'
 import { BotConnectedAccountsPanel } from '../bot-connected-accounts-panel'
 import { MfaFactorsPanel } from './mfa-factors-panel'
 import { StudyRemindersSettingsPanel } from './study-reminders-settings-panel'
+import { BadgeProfileSettingsPanel } from './badge-profile-settings-panel'
 import { AiProcessingSettingsPanel } from './ai-processing-settings-panel'
 import { LocaleFormatSettingsPanel } from './locale-format-settings-panel'
 import { LocaleSwitcher } from './locale-switcher'
@@ -1010,6 +1011,7 @@ export function AccountSettingsView() {
       </SettingsSection>
 
       <StudyRemindersSettingsPanel embedded />
+      <BadgeProfileSettingsPanel />
 
       {avatarModalOpen ? (
         <div
