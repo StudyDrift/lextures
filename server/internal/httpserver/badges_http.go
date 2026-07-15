@@ -41,9 +41,9 @@ func (d Deps) registerBadgesRoutes(r chi.Router) {
 	r.Get("/api/v1/badges/{awardedId}/badge-export", d.handleCompetencyBadgeExportURL())
 	r.Get("/api/v1/badges/{awardedId}/badge-export/download", d.handleCompetencyBadgeExportDownload())
 
-	// Learner me
-	r.Get("/api/v1/me/badges", d.handleListMyBadges())
-	r.Patch("/api/v1/me/badges/{awardedId}", d.handlePatchMyBadge())
+	// Learner me — use /me/competency-badges so we do not collide with gamification's /me/badges (15.9).
+	r.Get("/api/v1/me/competency-badges", d.handleListMyBadges())
+	r.Patch("/api/v1/me/competency-badges/{awardedId}", d.handlePatchMyBadge())
 	r.Get("/api/v1/me/badge-profile", d.handleGetBadgeProfile())
 	r.Patch("/api/v1/me/badge-profile", d.handlePatchBadgeProfile())
 	r.Get("/api/v1/badge-handle-available", d.handleBadgeHandleAvailable())

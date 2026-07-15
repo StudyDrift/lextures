@@ -86,12 +86,12 @@ async function parseJson<T>(res: Response): Promise<T> {
 }
 
 export async function fetchMyBadges(): Promise<{ badges: AwardedBadge[] }> {
-  const res = await authorizedFetch('/api/v1/me/badges')
+  const res = await authorizedFetch('/api/v1/me/competency-badges')
   return parseJson(res)
 }
 
 export async function patchMyBadge(awardedId: string, isPublic: boolean): Promise<AwardedBadge> {
-  const res = await authorizedFetch(`/api/v1/me/badges/${awardedId}`, {
+  const res = await authorizedFetch(`/api/v1/me/competency-badges/${awardedId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ isPublic }),

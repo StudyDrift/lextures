@@ -16,7 +16,7 @@ func TestBadgesRoutes_FeatureOff_Returns404(t *testing.T) {
 		method string
 		path   string
 	}{
-		{http.MethodGet, "/api/v1/me/badges"},
+		{http.MethodGet, "/api/v1/me/competency-badges"},
 		{http.MethodGet, "/api/v1/me/badge-profile"},
 		{http.MethodGet, "/api/v1/public/badges/willden"},
 		{http.MethodGet, "/api/v1/badges/verify/abc"},
@@ -52,13 +52,13 @@ func TestBadgesRoutes_MeRequiresAuth(t *testing.T) {
 	cfg := config.Config{FFCompetencyBadges: true}
 	h := NewHandler(Deps{Pool: nil, Config: cfg, JWTSigner: nil})
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/me/badges", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/me/competency-badges", nil)
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusUnauthorized && rr.Code != http.StatusForbidden {
 		// Depending on auth middleware, expect 401/403 without token.
 		if rr.Code == http.StatusOK {
-			t.Fatalf("me/badges must require auth")
+			t.Fatalf("me/competency-badges must require auth")
 		}
 	}
 }
