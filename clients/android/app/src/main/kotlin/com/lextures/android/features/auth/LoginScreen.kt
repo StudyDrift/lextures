@@ -1,6 +1,7 @@
 package com.lextures.android.features.auth
 
 import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,6 +56,7 @@ fun LoginScreen(
     session: AuthSession,
     onCreateAccount: () -> Unit,
     onMfaRequired: () -> Unit,
+    onChangeEnvironment: () -> Unit = {},
     bannerMessage: String? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -225,6 +227,18 @@ fun LoginScreen(
                         onAction = onCreateAccount,
                     )
                 }
+
+                Text(
+                    text = L.text(R.string.auth_getStarted_changeEnvironment),
+                    color = textSecondary(),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onChangeEnvironment)
+                        .padding(top = 4.dp),
+                )
             }
         }
     }

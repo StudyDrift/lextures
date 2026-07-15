@@ -1,10 +1,19 @@
 import Foundation
 
-/// Runtime API configuration. Debug builds read `API_BASE_URL` from `Config/Development.xcconfig` (see `clients/scripts/setup-mobile-dev.sh`).
+/// Runtime API configuration.
+///
+/// Priority:
+/// 1. Environment chosen on the get-started screen (`EnvironmentStore`)
+/// 2. `API_BASE_URL` process env (debug / automation)
+/// 3. `API_BASE_URL` Info.plist value from `Config/Development.xcconfig`
+/// 4. Local loopback default
 enum AppConfiguration {
     private static let defaultAPIBase = "http://127.0.0.1:8080"
 
     static var apiBaseURL: URL {
+        if let selected = EnvironmentStore.shared.apiBaseURL {
+            return selected
+        }
         if let env = ProcessInfo.processInfo.environment["API_BASE_URL"],
            let url = URL(string: env), !env.isEmpty {
             return url

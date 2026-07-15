@@ -298,6 +298,40 @@ const spec = `{
         }
       }
     },
+    "/api/v1/public/institution-inquiries": {
+      "post": {
+        "tags": ["public"],
+        "summary": "Submit institution request-information lead",
+        "description": "Stores a marketing lead from lextures.com/request-information. Unauthenticated; IP rate-limited. Email notification may be added later.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["organization_type", "organization_name", "contact_name", "email", "enrollment_size", "hosting_preference", "message"],
+                "properties": {
+                  "organization_type": { "type": "string" },
+                  "organization_name": { "type": "string" },
+                  "contact_name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "role": { "type": "string" },
+                  "enrollment_size": { "type": "string" },
+                  "hosting_preference": { "type": "string" },
+                  "message": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "{ id: UUID }" },
+          "400": { "description": "Invalid input" },
+          "429": { "description": "Rate limited" },
+          "503": { "description": "Database unavailable" }
+        }
+      }
+    },
     "/api/v1/public/marketplace/courses": {
       "get": {
         "tags": ["public-marketplace"],

@@ -16,6 +16,7 @@ import { ParentsPage } from './pages/parents-page'
 import { GetStartedPage } from './pages/get-started-page'
 import { HigherEdPage } from './pages/higher-ed-page'
 import { K12Page } from './pages/k12-page'
+import { PricingCalculatorPage } from './pages/pricing-calculator-page'
 import { PricingPage } from './pages/pricing-page'
 import { RequestInformationPage } from './pages/request-information-page'
 import { SelfLearnerPage } from './pages/self-learner-page'
@@ -106,6 +107,7 @@ export default function App() {
   if (route === '/k-12') return <K12Page />
   if (route === '/self-learner') return <SelfLearnerPage />
   if (route === '/pricing') return <PricingPage />
+  if (route === '/pricing/calculator') return <PricingCalculatorPage />
   if (route === '/courses') return <CoursesPage />
   const courseSlug = courseDetailSlug(route)
   if (courseSlug !== null) {

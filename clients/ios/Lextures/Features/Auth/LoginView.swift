@@ -6,6 +6,7 @@ struct LoginView: View {
 
     var onCreateAccount: () -> Void
     var onMfaRequired: () -> Void
+    var onChangeEnvironment: () -> Void = {}
     var bannerMessage: String?
 
     @State private var email = ""
@@ -62,6 +63,8 @@ struct LoginView: View {
                             magicLinkSection
                             footerLink
                         }
+
+                        changeEnvironmentLink
                     }
                 }
             }
@@ -166,6 +169,14 @@ struct LoginView: View {
         .font(.subheadline)
         .frame(maxWidth: .infinity)
         .padding(.top, 4)
+    }
+
+    private var changeEnvironmentLink: some View {
+        Button(L.text("auth.getStarted.changeEnvironment"), action: onChangeEnvironment)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            .frame(maxWidth: .infinity)
+            .padding(.top, 4)
     }
 
     private var ssoProviders: [SSOProvider]? {

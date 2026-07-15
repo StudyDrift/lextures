@@ -13,6 +13,8 @@ import com.lextures.android.core.auth.AuthCallbackParser
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.auth.AuthSession.AuthSessionError
 import com.lextures.android.core.auth.BiometricGate
+import com.lextures.android.core.config.AppConfiguration
+import com.lextures.android.core.config.EnvironmentStore
 import com.lextures.android.core.design.LexturesTheme
 import com.lextures.android.core.push.PushManager
 import kotlinx.coroutines.launch
@@ -25,6 +27,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        AppConfiguration.bindEnvironment(EnvironmentStore.get(this))
         PushManager.getInstance(this).configure { session.accessToken.value }
         handleDeepLinkIntent(intent)
 

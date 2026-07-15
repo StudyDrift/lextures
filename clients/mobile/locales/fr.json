@@ -2,6 +2,26 @@
   "strings": {
     "app.name": "Lextures",
     "app.tagline": "par StudyDrift",
+    "auth.getStarted.back": "Retour",
+    "auth.getStarted.changeEnvironment": "Changer d’école ou de parcours",
+    "auth.getStarted.continue": "Continuer",
+    "auth.getStarted.schoolCodeErrorEmpty": "Saisissez le code de votre établissement.",
+    "auth.getStarted.schoolCodeErrorFormat": "Utilisez uniquement des lettres minuscules, des chiffres et des tirets.",
+    "auth.getStarted.schoolCodeErrorLengthMax": "Les codes d’établissement comportent au plus 32 caractères.",
+    "auth.getStarted.schoolCodeErrorLengthMin": "Les codes d’établissement comportent au moins 2 caractères.",
+    "auth.getStarted.schoolCodeErrorReserved": "Ce code est réservé.",
+    "auth.getStarted.schoolCodeHelp": "Exemple : example ouvre example.lextures.com. Utilisez local pour un serveur de développement.",
+    "auth.getStarted.schoolCodeLabel": "Code d’établissement",
+    "auth.getStarted.schoolCodePlaceholder": "p. ex. example",
+    "auth.getStarted.schoolCodePreview": "Vous vous connecterez à %@",
+    "auth.getStarted.schoolCodeSubtitle": "Votre établissement fournit un code court pour la connexion. Saisissez-le pour rejoindre son environnement Lextures.",
+    "auth.getStarted.schoolCodeTitle": "Saisissez le code de votre établissement",
+    "auth.getStarted.schoolDescription": "Je suis élève ou enseignant dans un établissement qui utilise Lextures.",
+    "auth.getStarted.schoolTitle": "Établissement",
+    "auth.getStarted.selfLearnerDescription": "J’apprends de façon autonome, pour une certification ou à mon rythme.",
+    "auth.getStarted.selfLearnerTitle": "Apprenant autonome",
+    "auth.getStarted.subtitle": "Choisissez l’option qui correspond à votre connexion.",
+    "auth.getStarted.title": "Comment utilisez-vous Lextures ?",
     "auth.login.createAccount": "Créer un compte",
     "auth.login.email": "E-mail",
     "auth.login.emailPlaceholder": "vous@ecole.edu",
@@ -3014,6 +3034,30 @@
       "one": "%d-day study streak",
       "other": "%d-day study streak"
     },
+    "mobile.instructorInsights.progress.missingCount": {
+      "one": "%d missing item",
+      "other": "%d missing items"
+    },
+    "mobile.instructorInsights.snapshot.atRiskCount": {
+      "one": "%d student",
+      "other": "%d students"
+    },
+    "mobile.instructorInsights.snapshot.engagementCount": {
+      "one": "%d insight",
+      "other": "%d insights"
+    },
+    "mobile.instructorInsights.snapshot.ungradedCount": {
+      "one": "%d item",
+      "other": "%d items"
+    },
+    "mobile.learnerProfile.evidence.courseCount": {
+      "one": "%d course",
+      "other": "%d courses"
+    },
+    "mobile.learnerProfile.evidence.observationCount": {
+      "one": "%d observation",
+      "other": "%d observations"
+    },
     "mobile.pendingSync.waiting": {
       "one": "%d modification en attente de téléversement",
       "other": "%d modifications en attente de téléversement"
@@ -3021,6 +3065,10 @@
     "mobile.planner.calendar.eventCount": {
       "one": "%d événement",
       "other": "%d événements"
+    },
+    "mobile.reading.streakDays": {
+      "one": "%d day",
+      "other": "%d days"
     },
     "mobile.review.dueCount": {
       "one": "%d révision à faire aujourd'hui",
@@ -3033,34 +3081,6 @@
     "mobile.review.summaryReviewed": {
       "one": "Vous avez révisé %d élément",
       "other": "Vous avez révisé %d éléments"
-    },
-    "mobile.reading.streakDays": {
-      "one": "%d day",
-      "other": "%d days"
-    },
-    "mobile.instructorInsights.snapshot.atRiskCount": {
-      "one": "%d student",
-      "other": "%d students"
-    },
-    "mobile.instructorInsights.snapshot.ungradedCount": {
-      "one": "%d item",
-      "other": "%d items"
-    },
-    "mobile.instructorInsights.snapshot.engagementCount": {
-      "one": "%d insight",
-      "other": "%d insights"
-    },
-    "mobile.instructorInsights.progress.missingCount": {
-      "one": "%d missing item",
-      "other": "%d missing items"
-    },
-    "mobile.learnerProfile.evidence.observationCount": {
-      "one": "%d observation",
-      "other": "%d observations"
-    },
-    "mobile.learnerProfile.evidence.courseCount": {
-      "one": "%d course",
-      "other": "%d courses"
     }
   }
 }
