@@ -1,8 +1,9 @@
 -- Plan B1 — Competency micro-badges (signed, shareable, verifiable Open Badges 3.0).
+-- Idempotent CREATE so parallel package migrates / rollback re-apply races stay safe.
 
 CREATE SCHEMA IF NOT EXISTS badges;
 
-CREATE TABLE badges.badge_definitions (
+CREATE TABLE IF NOT EXISTS badges.badge_definitions (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     course_id           UUID NOT NULL REFERENCES course.courses (id) ON DELETE CASCADE,
     outcome_id          UUID REFERENCES course.course_learning_outcomes (id) ON DELETE SET NULL,
@@ -24,14 +25,14 @@ CREATE TABLE badges.badge_definitions (
 COMMENT ON TABLE badges.badge_definitions IS
     'Instructor-defined competency micro-badge Achievement (Open Badges 3.0 BadgeClass; plan B1).';
 
-CREATE INDEX idx_badge_definitions_course
+CREATE INDEX IF NOT EXISTS idx_badge_definitions_course
     ON badges.badge_definitions (course_id, created_at DESC);
 
-CREATE INDEX idx_badge_definitions_outcome
+CREATE INDEX IF NOT EXISTS idx_badge_definitions_outcome
     ON badges.badge_definitions (outcome_id)
     WHERE outcome_id IS NOT NULL;
 
-CREATE TABLE badges.awarded_badges (
+CREATE TABLE IF NOT EXISTS badges.awarded_badges (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     definition_id   UUID NOT NULL REFERENCES badges.badge_definitions (id) ON DELETE CASCADE,
     recipient_id    UUID NOT NULL REFERENCES "user".users (id) ON DELETE CASCADE,
@@ -52,17 +53,17 @@ CREATE TABLE badges.awarded_badges (
 COMMENT ON TABLE badges.awarded_badges IS
     'Issued competency micro-badge assertions with signed OB 3.0 VC proof (plan B1).';
 
-CREATE INDEX idx_awarded_badges_recipient
+CREATE INDEX IF NOT EXISTS idx_awarded_badges_recipient
     ON badges.awarded_badges (recipient_id, issued_at DESC);
 
-CREATE INDEX idx_awarded_badges_definition
+CREATE INDEX IF NOT EXISTS idx_awarded_badges_definition
     ON badges.awarded_badges (definition_id);
 
-CREATE INDEX idx_awarded_badges_public
+CREATE INDEX IF NOT EXISTS idx_awarded_badges_public
     ON badges.awarded_badges (recipient_id, issued_at DESC)
     WHERE is_public AND NOT revoked;
 
-CREATE TABLE badges.badge_page_views (
+CREATE TABLE IF NOT EXISTS badges.badge_page_views (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     handle_owner_id  UUID NOT NULL REFERENCES "user".users (id) ON DELETE CASCADE,
     awarded_badge_id UUID REFERENCES badges.awarded_badges (id) ON DELETE CASCADE,
@@ -74,7 +75,7 @@ CREATE TABLE badges.badge_page_views (
 COMMENT ON TABLE badges.badge_page_views IS
     'PII-free daily counters for public badge page views (plan B1; mirrors portfolio.portfolio_views).';
 
-CREATE TABLE badges.reserved_handles (
+CREATE TABLE IF NOT EXISTS badges.reserved_handles (
     handle_lower TEXT PRIMARY KEY
 );
 
@@ -104,7 +105,7 @@ INSERT INTO badges.reserved_handles (handle_lower) VALUES
     ('achievements')
 ON CONFLICT DO NOTHING;
 
-CREATE TABLE "user".user_badge_profiles (
+CREATE TABLE IF NOT EXISTS "user".user_badge_profiles (
     user_id                  UUID PRIMARY KEY REFERENCES "user".users (id) ON DELETE CASCADE,
     handle                   TEXT UNIQUE,
     handle_lower             TEXT UNIQUE GENERATED ALWAYS AS (lower(handle)) STORED,
@@ -125,7 +126,7 @@ CREATE TABLE "user".user_badge_profiles (
 COMMENT ON TABLE "user".user_badge_profiles IS
     'Learner public badge backpack handle and visibility (plan B1).';
 
-CREATE TABLE "user".user_badge_handle_history (
+CREATE TABLE IF NOT EXISTS "user".user_badge_handle_history (
     old_handle_lower TEXT PRIMARY KEY,
     user_id          UUID NOT NULL REFERENCES "user".users (id) ON DELETE CASCADE,
     released_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -134,7 +135,7 @@ CREATE TABLE "user".user_badge_handle_history (
 COMMENT ON TABLE "user".user_badge_handle_history IS
     'Previous badge handles for 301 redirects during grace window (plan B1 FR-13).';
 
-CREATE INDEX idx_user_badge_handle_history_user
+CREATE INDEX IF NOT EXISTS idx_user_badge_handle_history_user
     ON "user".user_badge_handle_history (user_id, released_at DESC);
 
 -- Feature flags (default off).
