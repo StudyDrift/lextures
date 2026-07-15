@@ -36,13 +36,13 @@ struct AiSettingsResponse: Codable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        imageModelId = try c.decodeIfPresent(String.self, forKey: .imageModelId) ?? ""
-        courseSetupModelId = try c.decodeIfPresent(String.self, forKey: .courseSetupModelId) ?? ""
-        notebookFlashcardsModelId = try c.decodeIfPresent(String.self, forKey: .notebookFlashcardsModelId) ?? ""
-        vibeActivityModelId = try c.decodeIfPresent(String.self, forKey: .vibeActivityModelId) ?? ""
-        graderAgentModelId = try c.decodeIfPresent(String.self, forKey: .graderAgentModelId) ?? ""
-        openRouterApiKey = try c.decodeIfPresent(String.self, forKey: .openRouterApiKey)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        imageModelId = try container.decodeIfPresent(String.self, forKey: .imageModelId) ?? ""
+        courseSetupModelId = try container.decodeIfPresent(String.self, forKey: .courseSetupModelId) ?? ""
+        notebookFlashcardsModelId = try container.decodeIfPresent(String.self, forKey: .notebookFlashcardsModelId) ?? ""
+        vibeActivityModelId = try container.decodeIfPresent(String.self, forKey: .vibeActivityModelId) ?? ""
+        graderAgentModelId = try container.decodeIfPresent(String.self, forKey: .graderAgentModelId) ?? ""
+        openRouterApiKey = try container.decodeIfPresent(String.self, forKey: .openRouterApiKey)
     }
 }
 
@@ -56,17 +56,17 @@ struct PutAiSettingsRequest: Encodable {
     var clearOpenRouterApiKey: Bool?
 
     func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(imageModelId, forKey: .imageModelId)
-        try c.encode(courseSetupModelId, forKey: .courseSetupModelId)
-        try c.encode(notebookFlashcardsModelId, forKey: .notebookFlashcardsModelId)
-        try c.encode(vibeActivityModelId, forKey: .vibeActivityModelId)
-        try c.encode(graderAgentModelId, forKey: .graderAgentModelId)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(imageModelId, forKey: .imageModelId)
+        try container.encode(courseSetupModelId, forKey: .courseSetupModelId)
+        try container.encode(notebookFlashcardsModelId, forKey: .notebookFlashcardsModelId)
+        try container.encode(vibeActivityModelId, forKey: .vibeActivityModelId)
+        try container.encode(graderAgentModelId, forKey: .graderAgentModelId)
         if let openRouterApiKey {
-            try c.encode(openRouterApiKey, forKey: .openRouterApiKey)
+            try container.encode(openRouterApiKey, forKey: .openRouterApiKey)
         }
         if let clearOpenRouterApiKey, clearOpenRouterApiKey {
-            try c.encode(true, forKey: .clearOpenRouterApiKey)
+            try container.encode(true, forKey: .clearOpenRouterApiKey)
         }
     }
 
@@ -116,9 +116,9 @@ struct AiModelsListResponse: Decodable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        configured = try c.decodeIfPresent(Bool.self, forKey: .configured) ?? false
-        models = try c.decodeIfPresent([AiModelOption].self, forKey: .models) ?? []
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        configured = try container.decodeIfPresent(Bool.self, forKey: .configured) ?? false
+        models = try container.decodeIfPresent([AiModelOption].self, forKey: .models) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -142,11 +142,11 @@ struct SystemPromptItem: Codable, Equatable, Identifiable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        key = try c.decodeIfPresent(String.self, forKey: .key) ?? ""
-        label = try c.decodeIfPresent(String.self, forKey: .label) ?? key
-        content = try c.decodeIfPresent(String.self, forKey: .content) ?? ""
-        updatedAt = try c.decodeIfPresent(String.self, forKey: .updatedAt)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        key = try container.decodeIfPresent(String.self, forKey: .key) ?? ""
+        label = try container.decodeIfPresent(String.self, forKey: .label) ?? key
+        content = try container.decodeIfPresent(String.self, forKey: .content) ?? ""
+        updatedAt = try container.decodeIfPresent(String.self, forKey: .updatedAt)
     }
 }
 
@@ -154,8 +154,8 @@ struct SystemPromptsListResponse: Decodable {
     var prompts: [SystemPromptItem]
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        prompts = try c.decodeIfPresent([SystemPromptItem].self, forKey: .prompts) ?? []
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        prompts = try container.decodeIfPresent([SystemPromptItem].self, forKey: .prompts) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -186,11 +186,11 @@ struct AiReportsPayload: Decodable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        range = try c.decodeIfPresent(AiReportsDateRange.self, forKey: .range) ?? AiReportsDateRange()
-        cost = try c.decodeIfPresent(AiCostReport.self, forKey: .cost) ?? AiCostReport()
-        byUser = try c.decodeIfPresent([AiUserUsageRow].self, forKey: .byUser) ?? []
-        byCourse = try c.decodeIfPresent([AiCourseUsageRow].self, forKey: .byCourse) ?? []
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        range = try container.decodeIfPresent(AiReportsDateRange.self, forKey: .range) ?? AiReportsDateRange()
+        cost = try container.decodeIfPresent(AiCostReport.self, forKey: .cost) ?? AiCostReport()
+        byUser = try container.decodeIfPresent([AiUserUsageRow].self, forKey: .byUser) ?? []
+        byCourse = try container.decodeIfPresent([AiCourseUsageRow].self, forKey: .byCourse) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -208,9 +208,9 @@ struct AiReportsDateRange: Decodable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        self.from = try c.decodeIfPresent(String.self, forKey: .from) ?? ""
-        self.to = try c.decodeIfPresent(String.self, forKey: .to) ?? ""
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.from = try container.decodeIfPresent(String.self, forKey: .from) ?? ""
+        self.to = try container.decodeIfPresent(String.self, forKey: .to) ?? ""
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -234,10 +234,10 @@ struct AiCostReport: Decodable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        summary = try c.decodeIfPresent(AiCostSummary.self, forKey: .summary) ?? AiCostSummary()
-        byDay = try c.decodeIfPresent([AiDayCostBucket].self, forKey: .byDay) ?? []
-        byFeature = try c.decodeIfPresent([AiFeatureCostRow].self, forKey: .byFeature) ?? []
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        summary = try container.decodeIfPresent(AiCostSummary.self, forKey: .summary) ?? AiCostSummary()
+        byDay = try container.decodeIfPresent([AiDayCostBucket].self, forKey: .byDay) ?? []
+        byFeature = try container.decodeIfPresent([AiFeatureCostRow].self, forKey: .byFeature) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -257,10 +257,10 @@ struct AiCostSummary: Decodable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        totalCostUsd = try c.decodeIfPresent(Double.self, forKey: .totalCostUsd) ?? 0
-        totalCalls = try c.decodeIfPresent(Int64.self, forKey: .totalCalls) ?? 0
-        totalTokens = try c.decodeIfPresent(Int64.self, forKey: .totalTokens) ?? 0
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        totalCostUsd = try container.decodeIfPresent(Double.self, forKey: .totalCostUsd) ?? 0
+        totalCalls = try container.decodeIfPresent(Int64.self, forKey: .totalCalls) ?? 0
+        totalTokens = try container.decodeIfPresent(Int64.self, forKey: .totalTokens) ?? 0
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -277,11 +277,11 @@ struct AiDayCostBucket: Decodable, Equatable, Identifiable {
     var id: String { day }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        day = try c.decodeIfPresent(String.self, forKey: .day) ?? ""
-        costUsd = try c.decodeIfPresent(Double.self, forKey: .costUsd) ?? 0
-        calls = try c.decodeIfPresent(Int64.self, forKey: .calls) ?? 0
-        tokens = try c.decodeIfPresent(Int64.self, forKey: .tokens) ?? 0
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        day = try container.decodeIfPresent(String.self, forKey: .day) ?? ""
+        costUsd = try container.decodeIfPresent(Double.self, forKey: .costUsd) ?? 0
+        calls = try container.decodeIfPresent(Int64.self, forKey: .calls) ?? 0
+        tokens = try container.decodeIfPresent(Int64.self, forKey: .tokens) ?? 0
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -298,11 +298,11 @@ struct AiFeatureCostRow: Decodable, Equatable, Identifiable {
     var id: String { feature }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        feature = try c.decodeIfPresent(String.self, forKey: .feature) ?? ""
-        costUsd = try c.decodeIfPresent(Double.self, forKey: .costUsd) ?? 0
-        calls = try c.decodeIfPresent(Int64.self, forKey: .calls) ?? 0
-        tokens = try c.decodeIfPresent(Int64.self, forKey: .tokens) ?? 0
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        feature = try container.decodeIfPresent(String.self, forKey: .feature) ?? ""
+        costUsd = try container.decodeIfPresent(Double.self, forKey: .costUsd) ?? 0
+        calls = try container.decodeIfPresent(Int64.self, forKey: .calls) ?? 0
+        tokens = try container.decodeIfPresent(Int64.self, forKey: .tokens) ?? 0
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -323,15 +323,15 @@ struct AiUserUsageRow: Decodable, Equatable, Identifiable {
     var id: String { userId }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        userId = try c.decodeIfPresent(String.self, forKey: .userId) ?? ""
-        email = try c.decodeIfPresent(String.self, forKey: .email) ?? ""
-        displayName = try c.decodeIfPresent(String.self, forKey: .displayName) ?? ""
-        calls = try c.decodeIfPresent(Int64.self, forKey: .calls) ?? 0
-        promptTokens = try c.decodeIfPresent(Int64.self, forKey: .promptTokens) ?? 0
-        completionTokens = try c.decodeIfPresent(Int64.self, forKey: .completionTokens) ?? 0
-        totalTokens = try c.decodeIfPresent(Int64.self, forKey: .totalTokens) ?? 0
-        costUsd = try c.decodeIfPresent(Double.self, forKey: .costUsd) ?? 0
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        userId = try container.decodeIfPresent(String.self, forKey: .userId) ?? ""
+        email = try container.decodeIfPresent(String.self, forKey: .email) ?? ""
+        displayName = try container.decodeIfPresent(String.self, forKey: .displayName) ?? ""
+        calls = try container.decodeIfPresent(Int64.self, forKey: .calls) ?? 0
+        promptTokens = try container.decodeIfPresent(Int64.self, forKey: .promptTokens) ?? 0
+        completionTokens = try container.decodeIfPresent(Int64.self, forKey: .completionTokens) ?? 0
+        totalTokens = try container.decodeIfPresent(Int64.self, forKey: .totalTokens) ?? 0
+        costUsd = try container.decodeIfPresent(Double.self, forKey: .costUsd) ?? 0
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -350,13 +350,13 @@ struct AiCourseUsageRow: Decodable, Equatable, Identifiable {
     var id: String { courseId }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        courseId = try c.decodeIfPresent(String.self, forKey: .courseId) ?? ""
-        courseCode = try c.decodeIfPresent(String.self, forKey: .courseCode) ?? ""
-        title = try c.decodeIfPresent(String.self, forKey: .title) ?? ""
-        calls = try c.decodeIfPresent(Int64.self, forKey: .calls) ?? 0
-        totalTokens = try c.decodeIfPresent(Int64.self, forKey: .totalTokens) ?? 0
-        costUsd = try c.decodeIfPresent(Double.self, forKey: .costUsd) ?? 0
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        courseId = try container.decodeIfPresent(String.self, forKey: .courseId) ?? ""
+        courseCode = try container.decodeIfPresent(String.self, forKey: .courseCode) ?? ""
+        title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
+        calls = try container.decodeIfPresent(Int64.self, forKey: .calls) ?? 0
+        totalTokens = try container.decodeIfPresent(Int64.self, forKey: .totalTokens) ?? 0
+        costUsd = try container.decodeIfPresent(Double.self, forKey: .costUsd) ?? 0
     }
 
     private enum CodingKeys: String, CodingKey {

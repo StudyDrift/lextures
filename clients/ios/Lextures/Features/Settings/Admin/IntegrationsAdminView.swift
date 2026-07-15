@@ -183,15 +183,19 @@ struct LtiIntegrationsAdminView: View {
 
     var body: some View {
         detailScaffold(
-            title: L.text("mobile.admin.integrations.lti.title"),
-            description: L.text("mobile.admin.integrations.lti.description"),
-            webPath: IntegrationsAdminLogic.Section.lti.webPath,
-            loading: loading && platforms.isEmpty && tools.isEmpty,
-            empty: platforms.isEmpty && tools.isEmpty && !loading,
-            emptyTitle: L.text("mobile.admin.integrations.lti.emptyTitle"),
-            emptyMessage: L.text("mobile.admin.integrations.lti.emptyMessage"),
-            errorMessage: errorMessage,
-            statusMessage: statusMessage,
+            state: DetailScaffoldState(
+                title: L.text("mobile.admin.integrations.lti.title"),
+                description: L.text("mobile.admin.integrations.lti.description"),
+                webPath: IntegrationsAdminLogic.Section.lti.webPath,
+                loading: loading && platforms.isEmpty && tools.isEmpty,
+                empty: DetailScaffoldEmpty(
+                    isEmpty: platforms.isEmpty && tools.isEmpty && !loading,
+                    title: L.text("mobile.admin.integrations.lti.emptyTitle"),
+                    message: L.text("mobile.admin.integrations.lti.emptyMessage")
+                ),
+                errorMessage: errorMessage,
+                statusMessage: statusMessage
+            ),
             onRefresh: { await load() }
         ) {
             if !platforms.isEmpty {
@@ -318,15 +322,19 @@ struct ScimIntegrationsAdminView: View {
 
     var body: some View {
         detailScaffold(
-            title: L.text("mobile.admin.integrations.scim.title"),
-            description: L.text("mobile.admin.integrations.scim.description"),
-            webPath: IntegrationsAdminLogic.Section.scim.webPath,
-            loading: loading && tokens.isEmpty && events.isEmpty,
-            empty: !loading && selectedInstitutionId != nil && tokens.isEmpty && events.isEmpty,
-            emptyTitle: L.text("mobile.admin.integrations.scim.emptyTitle"),
-            emptyMessage: L.text("mobile.admin.integrations.scim.emptyMessage"),
-            errorMessage: errorMessage,
-            statusMessage: statusMessage,
+            state: DetailScaffoldState(
+                title: L.text("mobile.admin.integrations.scim.title"),
+                description: L.text("mobile.admin.integrations.scim.description"),
+                webPath: IntegrationsAdminLogic.Section.scim.webPath,
+                loading: loading && tokens.isEmpty && events.isEmpty,
+                empty: DetailScaffoldEmpty(
+                    isEmpty: !loading && selectedInstitutionId != nil && tokens.isEmpty && events.isEmpty,
+                    title: L.text("mobile.admin.integrations.scim.emptyTitle"),
+                    message: L.text("mobile.admin.integrations.scim.emptyMessage")
+                ),
+                errorMessage: errorMessage,
+                statusMessage: statusMessage
+            ),
             onRefresh: { await loadStatus() }
         ) {
             if institutions.count > 1 {
@@ -451,15 +459,19 @@ struct CloudProvidersAdminView: View {
 
     var body: some View {
         detailScaffold(
-            title: L.text("mobile.admin.integrations.cloud.title"),
-            description: L.text("mobile.admin.integrations.cloud.description"),
-            webPath: IntegrationsAdminLogic.Section.cloud.webPath,
-            loading: loading && providers.isEmpty,
-            empty: providers.isEmpty && !loading,
-            emptyTitle: L.text("mobile.admin.integrations.cloud.emptyTitle"),
-            emptyMessage: L.text("mobile.admin.integrations.cloud.emptyMessage"),
-            errorMessage: errorMessage,
-            statusMessage: statusMessage,
+            state: DetailScaffoldState(
+                title: L.text("mobile.admin.integrations.cloud.title"),
+                description: L.text("mobile.admin.integrations.cloud.description"),
+                webPath: IntegrationsAdminLogic.Section.cloud.webPath,
+                loading: loading && providers.isEmpty,
+                empty: DetailScaffoldEmpty(
+                    isEmpty: providers.isEmpty && !loading,
+                    title: L.text("mobile.admin.integrations.cloud.emptyTitle"),
+                    message: L.text("mobile.admin.integrations.cloud.emptyMessage")
+                ),
+                errorMessage: errorMessage,
+                statusMessage: statusMessage
+            ),
             onRefresh: { await load() }
         ) {
             Text(L.text("mobile.admin.integrations.secretsOmitted"))
@@ -557,15 +569,19 @@ struct LrsIntegrationsAdminView: View {
 
     var body: some View {
         detailScaffold(
-            title: L.text("mobile.admin.integrations.lrs.title"),
-            description: L.text("mobile.admin.integrations.lrs.description"),
-            webPath: IntegrationsAdminLogic.Section.lrs.webPath,
-            loading: loading && endpoints.isEmpty,
-            empty: endpoints.isEmpty && !loading,
-            emptyTitle: L.text("mobile.admin.integrations.lrs.emptyTitle"),
-            emptyMessage: L.text("mobile.admin.integrations.lrs.emptyMessage"),
-            errorMessage: errorMessage,
-            statusMessage: statusMessage,
+            state: DetailScaffoldState(
+                title: L.text("mobile.admin.integrations.lrs.title"),
+                description: L.text("mobile.admin.integrations.lrs.description"),
+                webPath: IntegrationsAdminLogic.Section.lrs.webPath,
+                loading: loading && endpoints.isEmpty,
+                empty: DetailScaffoldEmpty(
+                    isEmpty: endpoints.isEmpty && !loading,
+                    title: L.text("mobile.admin.integrations.lrs.emptyTitle"),
+                    message: L.text("mobile.admin.integrations.lrs.emptyMessage")
+                ),
+                errorMessage: errorMessage,
+                statusMessage: statusMessage
+            ),
             onRefresh: { await load() }
         ) {
             Text(L.text("mobile.admin.integrations.secretsOmitted"))
@@ -655,15 +671,19 @@ struct OerProvidersAdminView: View {
 
     var body: some View {
         detailScaffold(
-            title: L.text("mobile.admin.integrations.oer.title"),
-            description: L.text("mobile.admin.integrations.oer.description"),
-            webPath: IntegrationsAdminLogic.Section.oer.webPath,
-            loading: loading && providers.isEmpty,
-            empty: providers.isEmpty && !loading,
-            emptyTitle: L.text("mobile.admin.integrations.oer.emptyTitle"),
-            emptyMessage: L.text("mobile.admin.integrations.oer.emptyMessage"),
-            errorMessage: errorMessage,
-            statusMessage: statusMessage,
+            state: DetailScaffoldState(
+                title: L.text("mobile.admin.integrations.oer.title"),
+                description: L.text("mobile.admin.integrations.oer.description"),
+                webPath: IntegrationsAdminLogic.Section.oer.webPath,
+                loading: loading && providers.isEmpty,
+                empty: DetailScaffoldEmpty(
+                    isEmpty: providers.isEmpty && !loading,
+                    title: L.text("mobile.admin.integrations.oer.emptyTitle"),
+                    message: L.text("mobile.admin.integrations.oer.emptyMessage")
+                ),
+                errorMessage: errorMessage,
+                statusMessage: statusMessage
+            ),
             onRefresh: { await load() }
         ) {
             ForEach(providers) { row in
@@ -796,19 +816,27 @@ private func statusToggleCard(
     }
 }
 
-private struct DetailScaffold<Content: View>: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.openURL) private var openURL
+private struct DetailScaffoldEmpty {
+    let isEmpty: Bool
+    let title: String
+    let message: String
+}
 
+private struct DetailScaffoldState {
     let title: String
     let description: String
     let webPath: String
     let loading: Bool
-    let empty: Bool
-    let emptyTitle: String
-    let emptyMessage: String
+    let empty: DetailScaffoldEmpty
     let errorMessage: String?
     let statusMessage: String?
+}
+
+private struct DetailScaffold<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openURL) private var openURL
+
+    let state: DetailScaffoldState
     let onRefresh: () async -> Void
     @ViewBuilder let content: () -> Content
 
@@ -817,30 +845,30 @@ private struct DetailScaffold<Content: View>: View {
             LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(description)
+                    Text(state.description)
                         .font(.subheadline)
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                    if let errorMessage {
+                    if let errorMessage = state.errorMessage {
                         LMSErrorBanner(message: errorMessage)
                     }
-                    if let statusMessage {
+                    if let statusMessage = state.statusMessage {
                         Text(statusMessage)
                             .font(.caption)
                             .foregroundStyle(LexturesTheme.brandTeal)
                     }
-                    if loading {
+                    if state.loading {
                         LMSSkeletonList(count: 3)
-                    } else if empty {
+                    } else if state.empty.isEmpty {
                         LMSEmptyState(
                             systemImage: "tray",
-                            title: emptyTitle,
-                            message: emptyMessage
+                            title: state.empty.title,
+                            message: state.empty.message
                         )
                     } else {
                         content()
                     }
                     Button {
-                        openURL(AppConfiguration.webURL(path: webPath))
+                        openURL(AppConfiguration.webURL(path: state.webPath))
                     } label: {
                         Label(L.text("mobile.admin.integrations.configureOnWeb"), systemImage: "arrow.up.right.square")
                             .frame(maxWidth: .infinity)
@@ -851,7 +879,7 @@ private struct DetailScaffold<Content: View>: View {
                 .padding(16)
             }
         }
-        .navigationTitle(title)
+        .navigationTitle(state.title)
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await onRefresh() }
     }
@@ -859,29 +887,9 @@ private struct DetailScaffold<Content: View>: View {
 
 @ViewBuilder
 private func detailScaffold<Content: View>(
-    title: String,
-    description: String,
-    webPath: String,
-    loading: Bool,
-    empty: Bool,
-    emptyTitle: String,
-    emptyMessage: String,
-    errorMessage: String?,
-    statusMessage: String?,
+    state: DetailScaffoldState,
     onRefresh: @escaping () async -> Void,
     @ViewBuilder content: @escaping () -> Content
 ) -> some View {
-    DetailScaffold(
-        title: title,
-        description: description,
-        webPath: webPath,
-        loading: loading,
-        empty: empty,
-        emptyTitle: emptyTitle,
-        emptyMessage: emptyMessage,
-        errorMessage: errorMessage,
-        statusMessage: statusMessage,
-        onRefresh: onRefresh,
-        content: content
-    )
+    DetailScaffold(state: state, onRefresh: onRefresh, content: content)
 }

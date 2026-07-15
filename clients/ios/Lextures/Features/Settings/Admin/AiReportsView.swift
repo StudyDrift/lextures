@@ -285,11 +285,14 @@ struct AiReportsView: View {
     }
 
     private func metricLine(_ cost: Double, _ calls: Int64, _ tokens: Int64) -> some View {
-        Text(
-            "\(AiModelsAdminLogic.formatUsd(cost)) · \(AiModelsAdminLogic.formatCount(calls)) \(L.text("mobile.admin.ai.reports.calls")) · \(AiModelsAdminLogic.formatCount(tokens)) \(L.text("mobile.admin.ai.reports.tokens"))"
-        )
-        .font(.caption.monospacedDigit())
-        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+        let callsLabel = L.text("mobile.admin.ai.reports.calls")
+        let tokensLabel = L.text("mobile.admin.ai.reports.tokens")
+        let costText = AiModelsAdminLogic.formatUsd(cost)
+        let callsText = AiModelsAdminLogic.formatCount(calls)
+        let tokensText = AiModelsAdminLogic.formatCount(tokens)
+        return Text("\(costText) · \(callsText) \(callsLabel) · \(tokensText) \(tokensLabel)")
+            .font(.caption.monospacedDigit())
+            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
     }
 
     private func load() async {

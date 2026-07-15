@@ -21,11 +21,11 @@ struct AdminTranscriptsConfig: Codable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        webhookUrl = try c.decodeIfPresent(String.self, forKey: .webhookUrl) ?? ""
-        webhookSecret = try c.decodeIfPresent(String.self, forKey: .webhookSecret)
-        hasWebhookSecret = try c.decodeIfPresent(Bool.self, forKey: .hasWebhookSecret) ?? false
-        pickupInstructions = try c.decodeIfPresent(String.self, forKey: .pickupInstructions)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        webhookUrl = try container.decodeIfPresent(String.self, forKey: .webhookUrl) ?? ""
+        webhookSecret = try container.decodeIfPresent(String.self, forKey: .webhookSecret)
+        hasWebhookSecret = try container.decodeIfPresent(Bool.self, forKey: .hasWebhookSecret) ?? false
+        pickupInstructions = try container.decodeIfPresent(String.self, forKey: .pickupInstructions)
     }
 }
 
@@ -35,12 +35,12 @@ struct PutAdminTranscriptsConfigRequest: Encodable {
     var pickupInstructions: String?
 
     func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(webhookUrl, forKey: .webhookUrl)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(webhookUrl, forKey: .webhookUrl)
         if let webhookSecret {
-            try c.encode(webhookSecret, forKey: .webhookSecret)
+            try container.encode(webhookSecret, forKey: .webhookSecret)
         }
-        try c.encode(pickupInstructions ?? "", forKey: .pickupInstructions)
+        try container.encode(pickupInstructions ?? "", forKey: .pickupInstructions)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -86,12 +86,12 @@ struct AdminAdvisingConfig: Codable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        appointmentUrl = try c.decodeIfPresent(String.self, forKey: .appointmentUrl) ?? ""
-        degreeAuditProvider = try c.decodeIfPresent(String.self, forKey: .degreeAuditProvider) ?? "none"
-        degreeAuditBaseUrl = try c.decodeIfPresent(String.self, forKey: .degreeAuditBaseUrl) ?? ""
-        apiCredentialsRef = try c.decodeIfPresent(String.self, forKey: .apiCredentialsRef) ?? ""
-        atRiskBannerEnabled = try c.decodeIfPresent(Bool.self, forKey: .atRiskBannerEnabled) ?? false
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        appointmentUrl = try container.decodeIfPresent(String.self, forKey: .appointmentUrl) ?? ""
+        degreeAuditProvider = try container.decodeIfPresent(String.self, forKey: .degreeAuditProvider) ?? "none"
+        degreeAuditBaseUrl = try container.decodeIfPresent(String.self, forKey: .degreeAuditBaseUrl) ?? ""
+        apiCredentialsRef = try container.decodeIfPresent(String.self, forKey: .apiCredentialsRef) ?? ""
+        atRiskBannerEnabled = try container.decodeIfPresent(Bool.self, forKey: .atRiskBannerEnabled) ?? false
     }
 }
 
