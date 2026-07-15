@@ -1,8 +1,38 @@
 @import "tailwindcss";
 
+/* Lextures — our humanist sans for learning surfaces and brand moments. */
+@font-face {
+  font-family: "Lextures";
+  src: url("/fonts/lextures-400.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Lextures";
+  src: url("/fonts/lextures-500.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Lextures";
+  src: url("/fonts/lextures-600.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Lextures";
+  src: url("/fonts/lextures-700.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 @theme {
   --font-serif: "Spectral", ui-serif, Georgia, serif;
-  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Lextures", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   /* Legacy aliases for inner pages during rollout */
@@ -12,6 +42,10 @@
   --color-accent-muted: #eaf4f0;
   --color-accent-border: #6ec0b1;
   --color-accent-light: #eaf4f0;
+}
+
+@utility font-lextures {
+  font-family: "Lextures", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
