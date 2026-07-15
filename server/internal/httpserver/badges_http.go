@@ -503,10 +503,7 @@ func (d Deps) handlePatchMyBadge() http.HandlerFunc {
 			return
 		}
 		if *req.IsPublic {
-			// Per-badge public also requires page can be public (minor consent).
-			if _, err := badgesvc.SetPagePublic(r.Context(), d.Pool, d.effectiveConfig(), userID, true); err != nil && !errors.Is(err, badgesvc.ErrMinorNeedsConsent) {
-				// Only gate on minor consent; other errors if already public are fine.
-			}
+			// Per-badge public requires guardian consent for minors (same gate as page public).
 			if minor, _ := badgerepo.UserIsMinor(r.Context(), d.Pool, userID); minor {
 				okConsent, _ := badgerepo.HasActiveGuardianConsent(r.Context(), d.Pool, userID)
 				if !okConsent {
