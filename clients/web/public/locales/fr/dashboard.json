@@ -19,7 +19,7 @@
   "dashboard.whatsNext.recommendedAria": "Recommandé : {{title}} ({{surface}})",
   "dashboard.whatsNext.degraded": "Les suggestions peuvent être brièvement obsolètes pendant leur actualisation.",
   "dashboard.whatsNext.go": "Aller",
-  "dashboard.whatsNext.caughtUp": "Vous êtes à jour dans {{courseTitle}}. Revenez après votre prochaine activité.",
+  "dashboard.whatsNext.caughtUp": "Vous êtes à jour dans {courseTitle}. Revenez après votre prochaine activité.",
   "dashboard.continuingEducation.ariaLabel": "Formation continue",
   "dashboard.continuingEducation.title": "Formation continue",
   "dashboard.continuingEducation.description": "Suivez vos heures de contact et téléchargez votre relevé de formation continue.",

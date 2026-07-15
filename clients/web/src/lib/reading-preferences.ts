@@ -33,7 +33,7 @@ export const defaultReadingPreferences: ReadingPreferences = {
 }
 
 const fontFamilyMap: Record<FontFace, string> = {
-  'default':       "'Plus Jakarta Sans', system-ui, sans-serif",
+  'default':       "'Lextures', system-ui, sans-serif",
   'open-dyslexic': "'OpenDyslexic', sans-serif",
   'atkinson':      "'Atkinson Hyperlegible', system-ui, sans-serif",
   'system':        "system-ui, -apple-system, sans-serif",

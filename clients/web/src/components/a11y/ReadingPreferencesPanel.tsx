@@ -16,7 +16,7 @@ interface Props {
 }
 
 const fontOptions: { value: FontFace; label: string; description: string }[] = [
-  { value: 'default',       label: 'Default',               description: 'Plus Jakarta Sans' },
+  { value: 'default',       label: 'Default',               description: 'Lextures' },
   { value: 'open-dyslexic', label: 'OpenDyslexic',          description: 'Optimised for dyslexic readers' },
   { value: 'atkinson',      label: 'Atkinson Hyperlegible',  description: 'High legibility sans-serif' },
   { value: 'system',        label: 'System font',            description: "Your device's default font" },

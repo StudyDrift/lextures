@@ -19,7 +19,7 @@
   "dashboard.whatsNext.recommendedAria": "Recomendado: {{title}} ({{surface}})",
   "dashboard.whatsNext.degraded": "Las sugerencias pueden estar brevemente desactualizadas mientras las actualizamos.",
   "dashboard.whatsNext.go": "Ir",
-  "dashboard.whatsNext.caughtUp": "Estás al día en {{courseTitle}}. Vuelve después de tu próxima actividad.",
+  "dashboard.whatsNext.caughtUp": "Estás al día en {courseTitle}. Vuelve después de tu próxima actividad.",
   "dashboard.continuingEducation.ariaLabel": "Educación continua",
   "dashboard.continuingEducation.title": "Educación continua",
   "dashboard.continuingEducation.description": "Registra horas de contacto y descarga tu transcripción de EC.",
