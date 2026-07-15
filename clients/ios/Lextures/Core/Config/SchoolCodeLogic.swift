@@ -7,7 +7,14 @@ enum SchoolCodeLogic {
     static let localAPIBase = "http://127.0.0.1:8080"
     static let tenantHostSuffix = "lextures.com"
 
-    private static let pattern = try! NSRegularExpression(pattern: #"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"#)
+    private static let pattern = makeRegex(#"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"#)
+
+    private static func makeRegex(_ pattern: String) -> NSRegularExpression {
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            preconditionFailure("Invalid school-code regex: \(pattern)")
+        }
+        return regex
+    }
 
     private static let reserved: Set<String> = [
         "admin",
