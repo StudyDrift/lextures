@@ -45,6 +45,7 @@ function resolveApiAssetUrl(url, apiBase = API_BASE) {
 const STATIC_ROUTES = [
   { loc: '/', priority: '1.0' },
   { loc: '/pricing', priority: '0.8' },
+  { loc: '/pricing/calculator', priority: '0.7' },
   { loc: '/docs', priority: '0.7' },
   { loc: '/blog', priority: '0.7' },
   { loc: '/courses', priority: '0.9' },

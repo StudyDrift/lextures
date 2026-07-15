@@ -33,7 +33,7 @@ const INSTITUTION_FEATURES = [
 const INSTITUTION_NOTES = [
   {
     title: 'How pricing works',
-    body: 'Quotes depend on enrollment, hosting model, and support level. There is no fixed per-seat price on this page because district and university deployments vary widely.',
+    body: 'Hosted university and district accounts are priced per student with automatic bulk discounts. Use the pricing calculator to estimate cost by enrollment size; final quotes may adjust for hosting model and support.',
   },
   {
     title: 'What you get',
@@ -56,11 +56,11 @@ const FAQS = [
   },
   {
     q: 'How do university and district accounts work?',
-    a: 'Institutions receive a dedicated environment — hosted by us or on infrastructure you control — with SSO, provisioning, and support scoped to your rollout. Use the request information form on the pricing page to describe your enrollment and integration needs.',
+    a: 'Institutions receive a dedicated environment — hosted by us or on infrastructure you control — with SSO, provisioning, and support scoped to your rollout. Hosted pricing is per student with bulk discounts; open the pricing calculator from this page to estimate cost, then request information when you are ready to talk.',
   },
   {
     q: 'How do self-learner accounts work?',
-    a: 'Sign up at self.lextures.com for a hosted individual account with adaptive practice and spaced-repetition review. You can also self-host the stack for free or use an institution account if your school provides access.',
+    a: 'Sign up at self.lextures.com for a free hosted individual account with adaptive practice and spaced-repetition review. You can also self-host the stack for free or use an institution account if your school provides access.',
   },
   {
     q: 'Does AI cost extra?',
@@ -186,9 +186,14 @@ export function PricingPage() {
             <PricingCard
               label="Self-learner"
               price={
-                <p className="font-display text-2xl font-semibold" style={{ color: 'var(--ink)' }}>
-                  Individual accounts
-                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-display text-5xl font-semibold" style={{ color: 'var(--ink)' }}>
+                    $0
+                  </span>
+                  <span className="text-[15px]" style={{ color: 'var(--text-soft)' }}>
+                    per account
+                  </span>
+                </div>
               }
               description="For certification prep, language study, and independent learners who want adaptive practice without running their own server."
               features={SELF_LEARNER_FEATURES}
@@ -203,14 +208,14 @@ export function PricingPage() {
               label="University or district"
               price={
                 <p className="font-display text-2xl font-semibold" style={{ color: 'var(--ink)' }}>
-                  Custom quote
+                  Bulk discounts
                 </p>
               }
               description="Production accounts for colleges, universities, and K–12 districts — hosted by Lextures or deployed on infrastructure you designate."
               features={INSTITUTION_FEATURES}
               cta={
-                <a href="/request-information" className="btn-secondary w-full justify-center">
-                  Request information
+                <a href="/pricing/calculator" className="btn-secondary w-full justify-center">
+                  Pricing calculator
                 </a>
               }
             />

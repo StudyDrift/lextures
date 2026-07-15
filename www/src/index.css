@@ -244,6 +244,62 @@
   color: var(--muted);
 }
 
+/* Pricing calculator range input — Auth0-style filled track via --slider-fill */
+.pricing-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--teal-deep) 0%,
+    var(--teal-deep) var(--slider-fill, 0%),
+    var(--line) var(--slider-fill, 0%),
+    var(--line) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+.pricing-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 3px solid var(--teal-deep);
+  box-shadow: 0 2px 8px rgba(34, 51, 59, 0.18);
+  cursor: grab;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.pricing-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(31, 122, 99, 0.28);
+}
+
+.pricing-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 3px solid var(--teal-deep);
+  box-shadow: 0 2px 8px rgba(34, 51, 59, 0.18);
+  cursor: grab;
+}
+
+.pricing-slider::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.pricing-slider:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: 4px;
+}
+
 @utility prose-content {
   color: var(--text);
   @apply leading-relaxed;

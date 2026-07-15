@@ -2,9 +2,10 @@ import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { MarketingPageShell } from '../components/marketing-page-shell'
 import {
-  buildInstitutionInquiryMailto,
-  type InstitutionInquiryForm,
-} from '../lib/institution-inquiry-mailto'
+  InstitutionInquiryApiError,
+  submitInstitutionInquiry,
+} from '../lib/institution-inquiry-api'
+import type { InstitutionInquiryForm } from '../lib/institution-inquiry-mailto'
 import { SITE_LINKS } from '../lib/site-links'
 
 const INITIAL_FORM: InstitutionInquiryForm = {
@@ -42,6 +43,8 @@ function FieldLabel({ htmlFor, children }: { htmlFor: string; children: string }
 export function RequestInformationPage() {
   const [form, setForm] = useState<InstitutionInquiryForm>(INITIAL_FORM)
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     document.title = 'Request information — Lextures'
@@ -49,12 +52,26 @@ export function RequestInformationPage() {
 
   function updateField<K extends keyof InstitutionInquiryForm>(key: K, value: InstitutionInquiryForm[K]) {
     setForm(current => ({ ...current, [key]: value }))
+    setError(null)
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    window.location.href = buildInstitutionInquiryMailto(form)
-    setSubmitted(true)
+    if (submitting) return
+    setError(null)
+    setSubmitting(true)
+    try {
+      await submitInstitutionInquiry(form)
+      setSubmitted(true)
+    } catch (err) {
+      if (err instanceof InstitutionInquiryApiError) {
+        setError(err.message)
+      } else {
+        setError("We couldn't submit your request right now. Check your connection and try again.")
+      }
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -78,8 +95,8 @@ export function RequestInformationPage() {
             Request information
           </h1>
           <p className="mt-4 text-[16px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
-            Tell us about your institution and what you are evaluating. Submitting opens your email
-            app with the details filled in — send the message to reach{' '}
+            Tell us about your institution and what you are evaluating. We&apos;ll follow up at the
+            work email you provide. Prefer email? Reach us at{' '}
             <a href={`mailto:${SITE_LINKS.institutionInquiryEmail}`} className="underline underline-offset-2">
               {SITE_LINKS.institutionInquiryEmail}
             </a>
@@ -97,19 +114,19 @@ export function RequestInformationPage() {
               role="status"
             >
               <p className="text-[15px] font-semibold" style={{ color: 'var(--ink-nav)' }}>
-                Your email app should be open
+                Thanks — we received your request
               </p>
               <p className="mt-2 text-[14px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
-                Review the pre-filled message and press send. If nothing opened, email us directly
-                at{' '}
+                Our team will review the details and get back to you. If you need to add anything,
+                email{' '}
                 <a href={`mailto:${SITE_LINKS.institutionInquiryEmail}`} className="underline underline-offset-2">
                   {SITE_LINKS.institutionInquiryEmail}
-                </a>{' '}
-                with the same details.
+                </a>
+                .
               </p>
             </div>
           ) : (
-            <form className="mt-10 space-y-5" onSubmit={handleSubmit}>
+            <form className="mt-10 space-y-5" onSubmit={e => void handleSubmit(e)}>
               <div>
                 <FieldLabel htmlFor="organizationType">Organization type</FieldLabel>
                 <select
@@ -117,6 +134,7 @@ export function RequestInformationPage() {
                   required
                   value={form.organizationType}
                   onChange={event => updateField('organizationType', event.target.value)}
+                  disabled={submitting}
                   className={fieldClass}
                   style={fieldStyle}
                 >
@@ -137,6 +155,7 @@ export function RequestInformationPage() {
                   value={form.organizationName}
                   onChange={event => updateField('organizationName', event.target.value)}
                   placeholder="e.g. State University or Lincoln Unified School District"
+                  disabled={submitting}
                   className={fieldClass}
                   style={fieldStyle}
                 />
@@ -152,6 +171,7 @@ export function RequestInformationPage() {
                     autoComplete="name"
                     value={form.contactName}
                     onChange={event => updateField('contactName', event.target.value)}
+                    disabled={submitting}
                     className={fieldClass}
                     style={fieldStyle}
                   />
@@ -165,6 +185,7 @@ export function RequestInformationPage() {
                     autoComplete="email"
                     value={form.email}
                     onChange={event => updateField('email', event.target.value)}
+                    disabled={submitting}
                     className={fieldClass}
                     style={fieldStyle}
                   />
@@ -180,6 +201,7 @@ export function RequestInformationPage() {
                   value={form.role}
                   onChange={event => updateField('role', event.target.value)}
                   placeholder="e.g. Director of IT, Registrar, Superintendent"
+                  disabled={submitting}
                   className={fieldClass}
                   style={fieldStyle}
                 />
@@ -193,6 +215,7 @@ export function RequestInformationPage() {
                     required
                     value={form.enrollmentSize}
                     onChange={event => updateField('enrollmentSize', event.target.value)}
+                    disabled={submitting}
                     className={fieldClass}
                     style={fieldStyle}
                   >
@@ -213,6 +236,7 @@ export function RequestInformationPage() {
                     required
                     value={form.hostingPreference}
                     onChange={event => updateField('hostingPreference', event.target.value)}
+                    disabled={submitting}
                     className={fieldClass}
                     style={fieldStyle}
                   >
@@ -233,13 +257,25 @@ export function RequestInformationPage() {
                   value={form.message}
                   onChange={event => updateField('message', event.target.value)}
                   placeholder="Timeline, SSO requirements, LMS integration, pilot scope, support needs…"
+                  disabled={submitting}
                   className={`${fieldClass} resize-y`}
                   style={fieldStyle}
                 />
               </div>
 
-              <button type="submit" className="btn-primary w-full justify-center sm:w-auto">
-                Open email with details
+              {error && (
+                <p className="text-sm text-red-600" role="alert">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                aria-busy={submitting || undefined}
+                className="btn-primary w-full justify-center sm:w-auto disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {submitting ? 'Submitting…' : 'Submit request'}
               </button>
             </form>
           )}

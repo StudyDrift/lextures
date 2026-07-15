@@ -2,6 +2,26 @@
   "strings": {
     "app.name": "[Łëxţûŕëš]",
     "app.tagline": "[ƀÿ ŠţûđÿÐŕîƒţ]",
+    "auth.getStarted.back": "[Back]",
+    "auth.getStarted.changeEnvironment": "[Change school or learning path]",
+    "auth.getStarted.continue": "[Continue]",
+    "auth.getStarted.schoolCodeErrorEmpty": "[Enter your school code.]",
+    "auth.getStarted.schoolCodeErrorFormat": "[Use lowercase letters, numbers, and hyphens only.]",
+    "auth.getStarted.schoolCodeErrorLengthMax": "[School codes are at most 32 characters.]",
+    "auth.getStarted.schoolCodeErrorLengthMin": "[School codes are at least 2 characters.]",
+    "auth.getStarted.schoolCodeErrorReserved": "[That code is reserved.]",
+    "auth.getStarted.schoolCodeHelp": "[Example: example opens example.lextures.com. Use local for a development server.]",
+    "auth.getStarted.schoolCodeLabel": "[School code]",
+    "auth.getStarted.schoolCodePlaceholder": "[e.g. example]",
+    "auth.getStarted.schoolCodePreview": "[You'll connect to %@]",
+    "auth.getStarted.schoolCodeSubtitle": "[Your school or district provides a short code for sign-in. Enter it below to connect to your school's Lextures environment.]",
+    "auth.getStarted.schoolCodeTitle": "[Enter your school code]",
+    "auth.getStarted.schoolDescription": "[I'm a student or educator at a school that uses Lextures.]",
+    "auth.getStarted.schoolTitle": "[School]",
+    "auth.getStarted.selfLearnerDescription": "[I'm studying independently, for a certification, or on my own schedule.]",
+    "auth.getStarted.selfLearnerTitle": "[Self-learner]",
+    "auth.getStarted.subtitle": "[Choose the option that matches how you sign in.]",
+    "auth.getStarted.title": "[How are you using Lextures?]",
     "auth.login.createAccount": "[Çŕëäţë äñ äççöüñţ]",
     "auth.login.email": "[Ëɱäîľ]",
     "auth.login.emailPlaceholder": "[ÿöü@šĉĥööľ.ëđû]",
@@ -3014,6 +3034,30 @@
       "one": "%d-day study streak",
       "other": "%d-day study streak"
     },
+    "mobile.instructorInsights.progress.missingCount": {
+      "one": "%d missing item",
+      "other": "%d missing items"
+    },
+    "mobile.instructorInsights.snapshot.atRiskCount": {
+      "one": "%d student",
+      "other": "%d students"
+    },
+    "mobile.instructorInsights.snapshot.engagementCount": {
+      "one": "%d insight",
+      "other": "%d insights"
+    },
+    "mobile.instructorInsights.snapshot.ungradedCount": {
+      "one": "%d item",
+      "other": "%d items"
+    },
+    "mobile.learnerProfile.evidence.courseCount": {
+      "one": "%d course",
+      "other": "%d courses"
+    },
+    "mobile.learnerProfile.evidence.observationCount": {
+      "one": "%d observation",
+      "other": "%d observations"
+    },
     "mobile.pendingSync.waiting": {
       "one": "[%d çĥäñġë ŵäîţîñġ ţö ûþľöäđ]",
       "other": "[%d çĥäñġëš ŵäîţîñġ ţö ûþľöäđ]"
@@ -3021,6 +3065,10 @@
     "mobile.planner.calendar.eventCount": {
       "one": "[%d ëṽëñţ]",
       "other": "[%d ëṽëñţš]"
+    },
+    "mobile.reading.streakDays": {
+      "one": "%d day",
+      "other": "%d days"
     },
     "mobile.review.dueCount": {
       "one": "[%d ŕëṽîëŵ đûë ţöđäÿ]",
@@ -3033,34 +3081,6 @@
     "mobile.review.summaryReviewed": {
       "one": "[Ýöû ŕëṽîëŵëđ %d îţëɱ]",
       "other": "[Ýöû ŕëṽîëŵëđ %d îţëɱš]"
-    },
-    "mobile.reading.streakDays": {
-      "one": "%d day",
-      "other": "%d days"
-    },
-    "mobile.instructorInsights.snapshot.atRiskCount": {
-      "one": "%d student",
-      "other": "%d students"
-    },
-    "mobile.instructorInsights.snapshot.ungradedCount": {
-      "one": "%d item",
-      "other": "%d items"
-    },
-    "mobile.instructorInsights.snapshot.engagementCount": {
-      "one": "%d insight",
-      "other": "%d insights"
-    },
-    "mobile.instructorInsights.progress.missingCount": {
-      "one": "%d missing item",
-      "other": "%d missing items"
-    },
-    "mobile.learnerProfile.evidence.observationCount": {
-      "one": "%d observation",
-      "other": "%d observations"
-    },
-    "mobile.learnerProfile.evidence.courseCount": {
-      "one": "%d course",
-      "other": "%d courses"
     }
   }
 }

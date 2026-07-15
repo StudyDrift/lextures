@@ -1,8 +1,15 @@
 import { ArrowLeft, BrainCircuit, GraduationCap, KeyRound } from 'lucide-react'
 import { useState } from 'react'
-import { Header } from '../components/header'
-import { SiteFooter } from '../components/site-footer'
-import { isValidSchoolCode, normalizeSchoolCode, schoolCodeError } from '../lib/school-code'
+import { WindLines } from '../components/home/wind-lines'
+import { MarketingPageShell } from '../components/marketing-page-shell'
+import {
+  isValidSchoolCode,
+  lookupSchoolCode,
+  normalizeSchoolCode,
+  schoolCodeError,
+  SCHOOL_LOOKUP_UNREACHABLE_MESSAGE,
+  SCHOOL_NOT_FOUND_MESSAGE,
+} from '../lib/school-code'
 import { SITE_LINKS, TENANT_HOST_SUFFIX, tenantOrigin } from '../lib/site-links'
 
 // Fire-and-forget — never awaited, never surfaces errors to the user.
@@ -99,15 +106,39 @@ function ChooseStep({ onSelect }: { onSelect: (path: Path) => void }) {
 
 function SchoolCodeStep({ onBack }: { onBack: () => void }) {
   const [code, setCode] = useState('')
+  const [lookupError, setLookupError] = useState<string | null>(null)
+  const [checking, setChecking] = useState(false)
   const normalizedCode = normalizeSchoolCode(code)
-  const error = code ? schoolCodeError(code) : null
+  const formatError = code ? schoolCodeError(code) : null
+  const error = formatError ?? lookupError
   const previewHost = normalizedCode ? `${normalizedCode}.${TENANT_HOST_SUFFIX}` : `your-school.${TENANT_HOST_SUFFIX}`
+  const canContinue = isValidSchoolCode(code) && !checking
 
-  function handleContinue() {
-    if (!isValidSchoolCode(code)) return
+  async function handleContinue() {
+    if (!isValidSchoolCode(code) || checking) return
     const schoolCode = normalizeSchoolCode(code)
-    trackOnboarding('school', schoolCode)
-    window.location.href = tenantOrigin(schoolCode)
+    setLookupError(null)
+    setChecking(true)
+    try {
+      const result = await lookupSchoolCode(schoolCode)
+      if (!result.ok) {
+        setLookupError(
+          result.reason === 'not_found'
+            ? SCHOOL_NOT_FOUND_MESSAGE
+            : result.reason === 'invalid'
+              ? (schoolCodeError(schoolCode) ?? SCHOOL_NOT_FOUND_MESSAGE)
+              : SCHOOL_LOOKUP_UNREACHABLE_MESSAGE,
+        )
+        setChecking(false)
+        return
+      }
+      trackOnboarding('school', result.slug)
+      // Keep checking=true so the control stays disabled while the browser navigates.
+      window.location.href = tenantOrigin(result.slug)
+    } catch {
+      setLookupError(SCHOOL_LOOKUP_UNREACHABLE_MESSAGE)
+      setChecking(false)
+    }
   }
 
   return (
@@ -138,10 +169,19 @@ function SchoolCodeStep({ onBack }: { onBack: () => void }) {
               autoComplete="organization"
               spellCheck={false}
               value={code}
-              onChange={e => setCode(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleContinue()}
+              onChange={e => {
+                setCode(e.target.value)
+                setLookupError(null)
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  void handleContinue()
+                }
+              }}
+              disabled={checking}
               placeholder="e.g. example"
-              className={`${fieldClass} pl-10 pr-4 placeholder-stone-400`}
+              className={`${fieldClass} pl-10 pr-4 placeholder-stone-400 disabled:opacity-60`}
               aria-invalid={error ? true : undefined}
               aria-describedby="school-code-help school-code-preview"
             />
@@ -151,9 +191,21 @@ function SchoolCodeStep({ onBack }: { onBack: () => void }) {
             <span className="font-medium text-slate-700">example.lextures.com</span>.
           </p>
           {error && (
-            <p className="mt-2 text-sm text-red-600" role="alert">
-              {error}
-            </p>
+            <div className="mt-2 space-y-1.5" role="alert">
+              <p className="text-sm text-red-600">{error}</p>
+              {lookupError === SCHOOL_NOT_FOUND_MESSAGE && !formatError && (
+                <p className="text-sm text-slate-600">
+                  If your school isn&apos;t using Lextures yet,{' '}
+                  <a
+                    href="/request-information"
+                    className="font-medium text-indigo-600 underline-offset-2 hover:underline"
+                  >
+                    request that they adopt it
+                  </a>
+                  .
+                </p>
+              )}
+            </div>
           )}
         </div>
 
@@ -167,11 +219,12 @@ function SchoolCodeStep({ onBack }: { onBack: () => void }) {
 
         <button
           type="button"
-          onClick={handleContinue}
-          disabled={!isValidSchoolCode(code)}
+          onClick={() => void handleContinue()}
+          disabled={!canContinue}
+          aria-busy={checking || undefined}
           className="btn-primary w-full justify-center py-3 text-base disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Continue
+          {checking ? 'Checking…' : 'Continue'}
         </button>
       </div>
     </div>
@@ -191,15 +244,17 @@ export function GetStartedPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
-      <Header />
-
-      <main className="flex min-h-[calc(100vh-4rem)] items-start justify-center">
-        {step === 'choose' && <ChooseStep onSelect={handleChoose} />}
-        {step === 'school-code' && <SchoolCodeStep onBack={() => setStep('choose')} />}
-      </main>
-
-      <SiteFooter />
-    </div>
+    <MarketingPageShell>
+      <section className="relative overflow-hidden">
+        {/* Half the default hero wave opacity for a subtler ambient field on this page. */}
+        <div className="pointer-events-none absolute inset-0" style={{ opacity: 0.5 }} aria-hidden>
+          <WindLines variant="hero" />
+        </div>
+        <div className="relative z-[2] flex min-h-[calc(100vh-4rem)] items-start justify-center">
+          {step === 'choose' && <ChooseStep onSelect={handleChoose} />}
+          {step === 'school-code' && <SchoolCodeStep onBack={() => setStep('choose')} />}
+        </div>
+      </section>
+    </MarketingPageShell>
   )
 }

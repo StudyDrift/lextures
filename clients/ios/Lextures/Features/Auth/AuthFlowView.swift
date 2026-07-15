@@ -1,6 +1,7 @@
 import SwiftUI
 
 enum AuthScreen {
+    case getStarted
     case login
     case signup
     case mfa
@@ -8,7 +9,7 @@ enum AuthScreen {
 
 struct AuthFlowView: View {
     @Environment(AuthSession.self) private var session
-    @State private var screen: AuthScreen = .login
+    @State private var screen: AuthScreen = EnvironmentStore.shared.hasSelection ? .login : .getStarted
     @State private var signOutBanner: String?
 
     var body: some View {
@@ -17,6 +18,13 @@ struct AuthFlowView: View {
 
             Group {
                 switch screen {
+                case .getStarted:
+                    GetStartedView {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            screen = .login
+                        }
+                    }
+                    .transition(.move(edge: .leading).combined(with: .opacity))
                 case .login:
                     LoginView(
                         onCreateAccount: {
@@ -27,6 +35,12 @@ struct AuthFlowView: View {
                         onMfaRequired: {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 screen = .mfa
+                            }
+                        },
+                        onChangeEnvironment: {
+                            EnvironmentStore.shared.clearSelection()
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                screen = .getStarted
                             }
                         },
                         bannerMessage: signOutBanner
@@ -58,6 +72,8 @@ struct AuthFlowView: View {
             signOutBanner = session.consumeSignOutMessage()
             if session.mfaRequired != nil {
                 screen = .mfa
+            } else if !EnvironmentStore.shared.hasSelection {
+                screen = .getStarted
             }
         }
     }

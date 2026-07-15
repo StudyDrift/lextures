@@ -2,6 +2,26 @@
 <resources>
     <string name="app_name">Lextures</string>
     <string name="app_tagline">من StudyDrift</string>
+    <string name="auth_getStarted_back">رجوع</string>
+    <string name="auth_getStarted_changeEnvironment">تغيير المدرسة أو مسار التعلم</string>
+    <string name="auth_getStarted_continue">متابعة</string>
+    <string name="auth_getStarted_schoolCodeErrorEmpty">أدخل رمز مدرستك.</string>
+    <string name="auth_getStarted_schoolCodeErrorFormat">استخدم أحرفًا صغيرة وأرقامًا وشرطات فقط.</string>
+    <string name="auth_getStarted_schoolCodeErrorLengthMax">رموز المدارس 32 حرفًا كحد أقصى.</string>
+    <string name="auth_getStarted_schoolCodeErrorLengthMin">رموز المدارس حرفان على الأقل.</string>
+    <string name="auth_getStarted_schoolCodeErrorReserved">هذا الرمز محجوز.</string>
+    <string name="auth_getStarted_schoolCodeHelp">مثال: example يفتح example.lextures.com. استخدم local لخادم التطوير.</string>
+    <string name="auth_getStarted_schoolCodeLabel">رمز المدرسة</string>
+    <string name="auth_getStarted_schoolCodePlaceholder">مثل example</string>
+    <string name="auth_getStarted_schoolCodePreview">ستتصل بـ %1$s</string>
+    <string name="auth_getStarted_schoolCodeSubtitle">توفر مدرستك أو منطقتك رمزًا قصيرًا لتسجيل الدخول. أدخله للاتصال ببيئة Lextures الخاصة بمدرستك.</string>
+    <string name="auth_getStarted_schoolCodeTitle">أدخل رمز مدرستك</string>
+    <string name="auth_getStarted_schoolDescription">أنا طالب أو معلم في مدرسة تستخدم Lextures.</string>
+    <string name="auth_getStarted_schoolTitle">مدرسة</string>
+    <string name="auth_getStarted_selfLearnerDescription">أتعلم بشكل مستقل، للحصول على شهادة، أو وفق جدولي الخاص.</string>
+    <string name="auth_getStarted_selfLearnerTitle">متعلم ذاتي</string>
+    <string name="auth_getStarted_subtitle">اختر الخيار الذي يناسب طريقة تسجيل دخولك.</string>
+    <string name="auth_getStarted_title">كيف تستخدم Lextures؟</string>
     <string name="auth_login_createAccount">إنشاء حساب</string>
     <string name="auth_login_email">البريد الإلكتروني</string>
     <string name="auth_login_emailPlaceholder">you@school.edu</string>

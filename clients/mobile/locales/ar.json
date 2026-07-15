@@ -2,6 +2,26 @@
   "strings": {
     "app.name": "Lextures",
     "app.tagline": "من StudyDrift",
+    "auth.getStarted.back": "رجوع",
+    "auth.getStarted.changeEnvironment": "تغيير المدرسة أو مسار التعلم",
+    "auth.getStarted.continue": "متابعة",
+    "auth.getStarted.schoolCodeErrorEmpty": "أدخل رمز مدرستك.",
+    "auth.getStarted.schoolCodeErrorFormat": "استخدم أحرفًا صغيرة وأرقامًا وشرطات فقط.",
+    "auth.getStarted.schoolCodeErrorLengthMax": "رموز المدارس 32 حرفًا كحد أقصى.",
+    "auth.getStarted.schoolCodeErrorLengthMin": "رموز المدارس حرفان على الأقل.",
+    "auth.getStarted.schoolCodeErrorReserved": "هذا الرمز محجوز.",
+    "auth.getStarted.schoolCodeHelp": "مثال: example يفتح example.lextures.com. استخدم local لخادم التطوير.",
+    "auth.getStarted.schoolCodeLabel": "رمز المدرسة",
+    "auth.getStarted.schoolCodePlaceholder": "مثل example",
+    "auth.getStarted.schoolCodePreview": "ستتصل بـ %@",
+    "auth.getStarted.schoolCodeSubtitle": "توفر مدرستك أو منطقتك رمزًا قصيرًا لتسجيل الدخول. أدخله للاتصال ببيئة Lextures الخاصة بمدرستك.",
+    "auth.getStarted.schoolCodeTitle": "أدخل رمز مدرستك",
+    "auth.getStarted.schoolDescription": "أنا طالب أو معلم في مدرسة تستخدم Lextures.",
+    "auth.getStarted.schoolTitle": "مدرسة",
+    "auth.getStarted.selfLearnerDescription": "أتعلم بشكل مستقل، للحصول على شهادة، أو وفق جدولي الخاص.",
+    "auth.getStarted.selfLearnerTitle": "متعلم ذاتي",
+    "auth.getStarted.subtitle": "اختر الخيار الذي يناسب طريقة تسجيل دخولك.",
+    "auth.getStarted.title": "كيف تستخدم Lextures؟",
     "auth.login.createAccount": "إنشاء حساب",
     "auth.login.email": "البريد الإلكتروني",
     "auth.login.emailPlaceholder": "you@school.edu",
@@ -3014,6 +3034,30 @@
       "one": "%d-day study streak",
       "other": "%d-day study streak"
     },
+    "mobile.instructorInsights.progress.missingCount": {
+      "one": "%d missing item",
+      "other": "%d missing items"
+    },
+    "mobile.instructorInsights.snapshot.atRiskCount": {
+      "one": "%d student",
+      "other": "%d students"
+    },
+    "mobile.instructorInsights.snapshot.engagementCount": {
+      "one": "%d insight",
+      "other": "%d insights"
+    },
+    "mobile.instructorInsights.snapshot.ungradedCount": {
+      "one": "%d item",
+      "other": "%d items"
+    },
+    "mobile.learnerProfile.evidence.courseCount": {
+      "one": "%d course",
+      "other": "%d courses"
+    },
+    "mobile.learnerProfile.evidence.observationCount": {
+      "one": "%d observation",
+      "other": "%d observations"
+    },
     "mobile.pendingSync.waiting": {
       "one": "تغيير واحد في انتظار الرفع",
       "other": "%d تغييرات في انتظار الرفع"
@@ -3025,6 +3069,10 @@
       "few": "%d أحداث",
       "many": "%d حدثًا",
       "other": "%d حدث"
+    },
+    "mobile.reading.streakDays": {
+      "one": "%d day",
+      "other": "%d days"
     },
     "mobile.review.dueCount": {
       "zero": "%d مراجعات مستحقة اليوم",
@@ -3049,34 +3097,6 @@
       "few": "راجعت %d عناصر",
       "many": "راجعت %d عنصرًا",
       "other": "راجعت %d عنصر"
-    },
-    "mobile.reading.streakDays": {
-      "one": "%d day",
-      "other": "%d days"
-    },
-    "mobile.instructorInsights.snapshot.atRiskCount": {
-      "one": "%d student",
-      "other": "%d students"
-    },
-    "mobile.instructorInsights.snapshot.ungradedCount": {
-      "one": "%d item",
-      "other": "%d items"
-    },
-    "mobile.instructorInsights.snapshot.engagementCount": {
-      "one": "%d insight",
-      "other": "%d insights"
-    },
-    "mobile.instructorInsights.progress.missingCount": {
-      "one": "%d missing item",
-      "other": "%d missing items"
-    },
-    "mobile.learnerProfile.evidence.observationCount": {
-      "one": "%d observation",
-      "other": "%d observations"
-    },
-    "mobile.learnerProfile.evidence.courseCount": {
-      "one": "%d course",
-      "other": "%d courses"
     }
   }
 }

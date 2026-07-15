@@ -12,8 +12,16 @@ lint:
 	done
 
 # Swallow app names when passed as goals alongside `lint` (e.g. `make lint server`).
-server web www:
+server web:
 	@:
+
+# Start the marketing site Vite dev server.
+www:
+ifneq ($(filter lint,$(MAKECMDGOALS)),)
+	@:
+else
+	cd www && npm run dev
+endif
 
 # Lint and test native mobile apps, or pass a platform: `make mobile ios`, `make mobile android`.
 MOBILE_APPS := android ios

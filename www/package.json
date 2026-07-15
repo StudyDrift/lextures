@@ -10,7 +10,7 @@
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "preview": "vite preview",
-    "test": "node --test scripts/prerender-courses.test.mjs src/lib/document-head.test.mjs src/lib/marketplace-api.test.mjs"
+    "test": "node --test scripts/prerender-courses.test.mjs src/lib/document-head.test.mjs src/lib/marketplace-api.test.mjs src/lib/school-code.test.mjs src/lib/institution-inquiry-api.test.mjs src/lib/institution-pricing.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.548.0",

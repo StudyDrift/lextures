@@ -2,6 +2,26 @@
 <resources>
     <string name="app_name">Lextures</string>
     <string name="app_tagline">by StudyDrift</string>
+    <string name="auth_getStarted_back">Back</string>
+    <string name="auth_getStarted_changeEnvironment">Change school or learning path</string>
+    <string name="auth_getStarted_continue">Continue</string>
+    <string name="auth_getStarted_schoolCodeErrorEmpty">Enter your school code.</string>
+    <string name="auth_getStarted_schoolCodeErrorFormat">Use lowercase letters, numbers, and hyphens only.</string>
+    <string name="auth_getStarted_schoolCodeErrorLengthMax">School codes are at most 32 characters.</string>
+    <string name="auth_getStarted_schoolCodeErrorLengthMin">School codes are at least 2 characters.</string>
+    <string name="auth_getStarted_schoolCodeErrorReserved">That code is reserved.</string>
+    <string name="auth_getStarted_schoolCodeHelp">Example: example opens example.lextures.com. Use local for a development server.</string>
+    <string name="auth_getStarted_schoolCodeLabel">School code</string>
+    <string name="auth_getStarted_schoolCodePlaceholder">e.g. example</string>
+    <string name="auth_getStarted_schoolCodePreview">You\'ll connect to %1$s</string>
+    <string name="auth_getStarted_schoolCodeSubtitle">Your school or district provides a short code for sign-in. Enter it below to connect to your school\'s Lextures environment.</string>
+    <string name="auth_getStarted_schoolCodeTitle">Enter your school code</string>
+    <string name="auth_getStarted_schoolDescription">I\'m a student or educator at a school that uses Lextures.</string>
+    <string name="auth_getStarted_schoolTitle">School</string>
+    <string name="auth_getStarted_selfLearnerDescription">I\'m studying independently, for a certification, or on my own schedule.</string>
+    <string name="auth_getStarted_selfLearnerTitle">Self-learner</string>
+    <string name="auth_getStarted_subtitle">Choose the option that matches how you sign in.</string>
+    <string name="auth_getStarted_title">How are you using Lextures?</string>
     <string name="auth_login_createAccount">Create an account</string>
     <string name="auth_login_email">Email</string>
     <string name="auth_login_emailPlaceholder">you@school.edu</string>
