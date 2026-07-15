@@ -430,4 +430,336 @@ extension LMSAPI {
         }
         return try decode(AiProviderTestResponse.self, from: data)
     }
+
+    // MARK: - Integrations & provisioning admin (M14.8)
+
+    static func fetchPlatformScimEnabled(accessToken: String) async throws -> Bool {
+        let (data, response) = try await client.request(
+            path: "/api/v1/settings/platform",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(PlatformScimFlag.self, from: data).scimEnabled == true
+    }
+
+    static func fetchLtiRegistrations(accessToken: String) async throws -> LtiRegistrationsResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/lti/registrations",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(LtiRegistrationsResponse.self, from: data)
+    }
+
+    static func setLtiParentPlatformActive(id: String, active: Bool, accessToken: String) async throws {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/lti/registrations/\(encodePath(id))",
+            method: "PUT",
+            body: LtiActiveBody(active: active),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+    }
+
+    static func setLtiExternalToolActive(id: String, active: Bool, accessToken: String) async throws {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/lti/external-tools/\(encodePath(id))",
+            method: "PUT",
+            body: LtiActiveBody(active: active),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+    }
+
+    static func fetchScimTokens(institutionId: String, accessToken: String) async throws -> [ScimTokenRow] {
+        let encoded = institutionId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? institutionId
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/provisioning/scim/tokens?institutionId=\(encoded)",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(ScimTokensResponse.self, from: data).tokens ?? []
+    }
+
+    static func fetchScimEvents(institutionId: String, accessToken: String) async throws -> [ScimEventRow] {
+        let encoded = institutionId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? institutionId
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/provisioning/scim/events?institutionId=\(encoded)",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(ScimEventsResponse.self, from: data).events ?? []
+    }
+
+    static func fetchAdminCloudProviders(accessToken: String) async throws -> [CloudProviderStatus] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/cloud-providers",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode([CloudProviderStatus].self, from: data)
+    }
+
+    static func setCloudProviderEnabled(provider: String, enabled: Bool, accessToken: String) async throws {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/cloud-providers/\(encodePath(provider))",
+            method: "PUT",
+            body: CloudProviderEnabledBody(enabled: enabled),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+    }
+
+    static func fetchAdminLrsEndpoints(accessToken: String) async throws -> [LrsEndpointStatus] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/lrs-config",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode([LrsEndpointStatus].self, from: data)
+    }
+
+    static func setLrsEndpointEnabled(id: String, enabled: Bool, accessToken: String) async throws {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/lrs-config/\(encodePath(id))",
+            method: "PUT",
+            body: LrsEnabledBody(enabled: enabled),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+    }
+
+    static func fetchAdminOerProviders(accessToken: String) async throws -> [OerProviderStatus] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/oer-providers",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode([OerProviderStatus].self, from: data)
+    }
+
+    static func setOerProviderEnabled(provider: String, enabled: Bool, accessToken: String) async throws {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/oer-providers/\(encodePath(provider))",
+            method: "PUT",
+            body: OerProviderEnabledBody(enabled: enabled),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+    }
+
+    // MARK: - AI models, system prompts & reports (M14.7)
+
+    static func fetchAiSettings(accessToken: String) async throws -> AiSettingsResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/settings/ai",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AiSettingsResponse.self, from: data)
+    }
+
+    static func putAiSettings(body: PutAiSettingsRequest, accessToken: String) async throws -> AiSettingsResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/settings/ai",
+            method: "PUT",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AiSettingsResponse.self, from: data)
+    }
+
+    static func fetchAiModels(kind: String, accessToken: String) async throws -> AiModelsListResponse {
+        let encoded = encodePath(kind)
+        let (data, response) = try await client.request(
+            path: "/api/v1/settings/ai/models?kind=\(encoded)",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AiModelsListResponse.self, from: data)
+    }
+
+    static func fetchSystemPrompts(accessToken: String) async throws -> [SystemPromptItem] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/settings/system-prompts",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(SystemPromptsListResponse.self, from: data).prompts
+    }
+
+    static func putSystemPrompt(
+        key: String,
+        content: String,
+        accessToken: String
+    ) async throws -> SystemPromptItem {
+        let body = PutSystemPromptRequest(content: content)
+        let (data, response) = try await client.request(
+            path: "/api/v1/settings/system-prompts/\(encodePath(key))",
+            method: "PUT",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(SystemPromptItem.self, from: data)
+    }
+
+    static func fetchAiReports(
+        from: String,
+        to: String,
+        feature: String? = nil,
+        userQuery: String? = nil,
+        courseCode: String? = nil,
+        accessToken: String
+    ) async throws -> AiReportsPayload {
+        var items: [URLQueryItem] = [
+            URLQueryItem(name: "from", value: from),
+            URLQueryItem(name: "to", value: to),
+        ]
+        if let feature, !feature.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            items.append(URLQueryItem(name: "feature", value: feature))
+        }
+        if let userQuery, !userQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            items.append(URLQueryItem(name: "userQuery", value: userQuery))
+        }
+        if let courseCode, !courseCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            items.append(URLQueryItem(name: "courseCode", value: courseCode))
+        }
+        var components = URLComponents()
+        components.queryItems = items
+        let qs = components.percentEncodedQuery.map { "?\($0)" } ?? ""
+        let (data, response) = try await client.request(
+            path: "/api/v1/settings/ai/reports\(qs)",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AiReportsPayload.self, from: data)
+    }
+
+    // MARK: - Transcripts & advising configuration (M14.9)
+
+    static func fetchAdminTranscriptsConfig(accessToken: String) async throws -> AdminTranscriptsConfig {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/transcripts/config",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AdminTranscriptsConfig.self, from: data)
+    }
+
+    static func putAdminTranscriptsConfig(
+        body: PutAdminTranscriptsConfigRequest,
+        accessToken: String
+    ) async throws -> AdminTranscriptsConfig {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/transcripts/config",
+            method: "PUT",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AdminTranscriptsConfig.self, from: data)
+    }
+
+    static func fetchAdminTranscriptRequests(accessToken: String) async throws -> [AdminTranscriptRequestRow] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/transcripts/requests",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AdminTranscriptRequestsResponse.self, from: data).requests ?? []
+    }
+
+    static func fetchAdminAdvisingConfig(accessToken: String) async throws -> AdminAdvisingConfig {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/advising/config",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AdminAdvisingConfig.self, from: data)
+    }
+
+    static func postAdminAdvisingConfig(
+        body: PutAdminAdvisingConfigRequest,
+        accessToken: String
+    ) async throws -> AdminAdvisingConfig {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/advising/config",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AdminAdvisingConfig.self, from: data)
+    }
 }

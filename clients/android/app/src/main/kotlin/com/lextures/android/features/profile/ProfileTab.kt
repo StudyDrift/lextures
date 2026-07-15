@@ -43,9 +43,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Apartment
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -128,6 +130,9 @@ fun ProfileTab(
     var showPeopleAdmin by remember { mutableStateOf(false) }
     var showOrgStructureAdmin by remember { mutableStateOf(false) }
     var showOrgBrandingAdmin by remember { mutableStateOf(false) }
+    var showAiAdmin by remember { mutableStateOf(false) }
+    var showIntegrationsAdmin by remember { mutableStateOf(false) }
+    var showTranscriptsAdvisingAdmin by remember { mutableStateOf(false) }
     var showPlatformSettingsAdmin by remember { mutableStateOf(false) }
     var personalDetailsVisible by remember { mutableStateOf(false) }
     var researchVisible by remember { mutableStateOf(false) }
@@ -361,6 +366,39 @@ fun ProfileTab(
             shell = shell,
             localePrefs = localePreferences,
             onBack = { showOrgBrandingAdmin = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showAiAdmin) {
+        com.lextures.android.features.settings.admin.AiAdminHubScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = { showAiAdmin = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showIntegrationsAdmin) {
+        com.lextures.android.features.settings.admin.IntegrationsAdminScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = { showIntegrationsAdmin = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showTranscriptsAdvisingAdmin) {
+        com.lextures.android.features.settings.admin.TranscriptsAdvisingAdminScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = { showTranscriptsAdvisingAdmin = false },
             modifier = modifier,
         )
         return
@@ -908,6 +946,51 @@ fun ProfileTab(
                     title = L.text(R.string.mobile_admin_orgBranding_title),
                     subtitle = L.text(R.string.mobile_admin_orgBranding_entry_subtitle),
                     onClick = { showOrgBrandingAdmin = true },
+                )
+            }
+        }
+
+        if (com.lextures.android.core.lms.AiModelsAdminLogic.shouldShowEntry(
+                shell.platformFeatures,
+                shell.permissions,
+            )
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.AutoAwesome,
+                    title = L.text(R.string.mobile_admin_ai_hub_title),
+                    subtitle = L.text(R.string.mobile_admin_ai_hub_entry_subtitle),
+                    onClick = { showAiAdmin = true },
+                )
+            }
+        }
+
+        if (com.lextures.android.core.lms.IntegrationsAdminLogic.shouldShowEntry(
+                shell.platformFeatures,
+                shell.permissions,
+            )
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Link,
+                    title = L.text(R.string.mobile_admin_integrations_hub_title),
+                    subtitle = L.text(R.string.mobile_admin_integrations_hub_entry_subtitle),
+                    onClick = { showIntegrationsAdmin = true },
+                )
+            }
+        }
+
+        if (com.lextures.android.core.lms.TranscriptsAdvisingAdminLogic.shouldShowEntry(
+                shell.platformFeatures,
+                shell.permissions,
+            )
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Description,
+                    title = L.text(R.string.mobile_admin_transcriptsAdvising_hub_title),
+                    subtitle = L.text(R.string.mobile_admin_transcriptsAdvising_hub_entry_subtitle),
+                    onClick = { showTranscriptsAdvisingAdmin = true },
                 )
             }
         }

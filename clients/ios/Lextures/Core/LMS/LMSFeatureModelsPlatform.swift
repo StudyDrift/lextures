@@ -23,6 +23,7 @@ struct PlatformFeatures: Decodable {
     var translationMemoryEnabled: Bool?
     var ffReadingPreferences: Bool?
     var oerLibraryEnabled: Bool?
+    var xapiEmissionEnabled: Bool?
     var customFieldsEnabled: Bool?
     var ffDemographics: Bool?
     var ffResearchConsent: Bool?
