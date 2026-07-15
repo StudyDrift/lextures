@@ -454,6 +454,7 @@ data class PlatformFeatures(
     val translationMemoryEnabled: Boolean? = null,
     val ffReadingPreferences: Boolean? = null,
     val oerLibraryEnabled: Boolean? = null,
+    val xapiEmissionEnabled: Boolean? = null,
     val customFieldsEnabled: Boolean? = null,
     val ffDemographics: Boolean? = null,
     val ffResearchConsent: Boolean? = null,

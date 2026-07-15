@@ -4485,6 +4485,283 @@ object LmsApi {
             decode(body)
         }
 
+    // AI models, system prompts & reports (M14.7)
+
+    suspend fun fetchAiSettings(accessToken: String): AiSettingsResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(path = "/api/v1/settings/ai", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun putAiSettings(body: PutAiSettingsRequest, accessToken: String): AiSettingsResponse =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(body, PutAiSettingsRequest.serializer())
+            val (responseBody, code) = client.request(
+                path = "/api/v1/settings/ai",
+                method = "PUT",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+            decode(responseBody)
+        }
+
+    suspend fun fetchAiModels(kind: String, accessToken: String): AiModelsListResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/settings/ai/models?kind=${encodePath(kind)}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchSystemPrompts(accessToken: String): List<SystemPromptItem> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/settings/system-prompts",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<SystemPromptsListResponse>(body).prompts
+        }
+
+    suspend fun putSystemPrompt(
+        key: String,
+        content: String,
+        accessToken: String,
+    ): SystemPromptItem = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(PutSystemPromptRequest(content), PutSystemPromptRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/settings/system-prompts/${encodePath(key)}",
+            method = "PUT",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun fetchAiReports(
+        from: String,
+        to: String,
+        feature: String? = null,
+        userQuery: String? = null,
+        courseCode: String? = null,
+        accessToken: String,
+    ): AiReportsPayload = withContext(Dispatchers.IO) {
+        val params = mutableListOf(
+            "from=${encodeQuery(from)}",
+            "to=${encodeQuery(to)}",
+        )
+        feature?.trim()?.takeIf { it.isNotEmpty() }?.let { params += "feature=${encodeQuery(it)}" }
+        userQuery?.trim()?.takeIf { it.isNotEmpty() }?.let { params += "userQuery=${encodeQuery(it)}" }
+        courseCode?.trim()?.takeIf { it.isNotEmpty() }?.let { params += "courseCode=${encodeQuery(it)}" }
+        val qs = params.joinToString("&")
+        val (body, code) = client.request(
+            path = "/api/v1/settings/ai/reports?$qs",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    // Integrations & provisioning admin (M14.8)
+
+    suspend fun fetchPlatformScimEnabled(accessToken: String): Boolean = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(path = "/api/v1/settings/platform", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<PlatformScimFlag>(body).scimEnabled == true
+    }
+
+    suspend fun fetchLtiRegistrations(accessToken: String): LtiRegistrationsResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/lti/registrations",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun setLtiParentPlatformActive(id: String, active: Boolean, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(LtiActiveBody(active), LtiActiveBody.serializer())
+            val (body, code) = client.request(
+                path = "/api/v1/admin/lti/registrations/${encodePath(id)}",
+                method = "PUT",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+
+    suspend fun setLtiExternalToolActive(id: String, active: Boolean, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(LtiActiveBody(active), LtiActiveBody.serializer())
+            val (body, code) = client.request(
+                path = "/api/v1/admin/lti/external-tools/${encodePath(id)}",
+                method = "PUT",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+
+    suspend fun fetchScimTokens(institutionId: String, accessToken: String): List<ScimTokenRow> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/provisioning/scim/tokens?institutionId=${encodeQuery(institutionId)}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<ScimTokensResponse>(body).tokens.orEmpty()
+        }
+
+    suspend fun fetchScimEvents(institutionId: String, accessToken: String): List<ScimEventRow> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/provisioning/scim/events?institutionId=${encodeQuery(institutionId)}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<ScimEventsResponse>(body).events.orEmpty()
+        }
+
+    suspend fun fetchAdminCloudProviders(accessToken: String): List<CloudProviderStatus> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/cloud-providers",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun setCloudProviderEnabled(provider: String, enabled: Boolean, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(
+                CloudProviderEnabledBody(enabled),
+                CloudProviderEnabledBody.serializer(),
+            )
+            val (body, code) = client.request(
+                path = "/api/v1/admin/cloud-providers/${encodePath(provider)}",
+                method = "PUT",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+
+    suspend fun fetchAdminLrsEndpoints(accessToken: String): List<LrsEndpointStatus> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/lrs-config",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun setLrsEndpointEnabled(id: String, enabled: Boolean, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(LrsEnabledBody(enabled), LrsEnabledBody.serializer())
+            val (body, code) = client.request(
+                path = "/api/v1/admin/lrs-config/${encodePath(id)}",
+                method = "PUT",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+
+    suspend fun fetchAdminOerProviders(accessToken: String): List<OerProviderStatus> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/oer-providers",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun setOerProviderEnabled(provider: String, enabled: Boolean, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(
+                OerProviderEnabledBody(enabled),
+                OerProviderEnabledBody.serializer(),
+            )
+            val (body, code) = client.request(
+                path = "/api/v1/admin/oer-providers/${encodePath(provider)}",
+                method = "PUT",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+
+    // Transcripts & advising configuration (M14.9)
+
+    suspend fun fetchAdminTranscriptsConfig(accessToken: String): AdminTranscriptsConfig =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/transcripts/config",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun putAdminTranscriptsConfig(
+        body: PutAdminTranscriptsConfigRequest,
+        accessToken: String,
+    ): AdminTranscriptsConfig = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, PutAdminTranscriptsConfigRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/admin/transcripts/config",
+            method = "PUT",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun fetchAdminTranscriptRequests(accessToken: String): List<AdminTranscriptRequestRow> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/transcripts/requests",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<AdminTranscriptRequestsResponse>(body).requests.orEmpty()
+        }
+
+    suspend fun fetchAdminAdvisingConfig(accessToken: String): AdminAdvisingConfig =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/advising/config",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun postAdminAdvisingConfig(
+        body: PutAdminAdvisingConfigRequest,
+        accessToken: String,
+    ): AdminAdvisingConfig = withContext(Dispatchers.IO) {
+        val payload = client.encodeBody(body, PutAdminAdvisingConfigRequest.serializer())
+        val (responseBody, code) = client.request(
+            path = "/api/v1/admin/advising/config",
+            method = "POST",
+            body = payload,
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
     // Product feedback (FB3)
 
     suspend fun submitFeedback(body: SubmitFeedbackRequest, accessToken: String): SubmitFeedbackResponse =

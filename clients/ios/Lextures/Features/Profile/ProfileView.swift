@@ -41,6 +41,9 @@ struct ProfileView: View {
                         PeopleAdminEntryCard()
                         OrgStructureAdminEntryCard()
                         OrgBrandingAdminEntryCard()
+                        AiAdminEntryCard()
+                        IntegrationsAdminEntryCard()
+                        TranscriptsAdvisingAdminEntryCard()
                         PlatformSettingsAdminEntryCard()
                         ProfileDepthCards()
                         LearnerProfileEntryCard()
@@ -116,6 +119,15 @@ struct ProfileView: View {
             }
             .navigationDestination(for: OrgBrandingAdminRoute.self) { _ in
                 OrgBrandingAdminView()
+            }
+            .navigationDestination(for: AiAdminHubRoute.self) { _ in
+                AiAdminHubView()
+            }
+            .navigationDestination(for: IntegrationsAdminRoute.self) { _ in
+                IntegrationsAdminView()
+            }
+            .navigationDestination(for: TranscriptsAdvisingAdminRoute.self) { _ in
+                TranscriptsAdvisingAdminView()
             }
             .navigationDestination(for: PlatformSettingsAdminRoute.self) { _ in
                 PlatformSettingsView()

@@ -544,6 +544,29 @@
 		8B783C2D3E4F5061728394 /* PlatformSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B783D3E4F5061728394A5 /* PlatformSettingsView.swift */; };
 		8B784C2D3E4F5061728394 /* PlatformSettingsAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B784D3E4F5061728394A5 /* PlatformSettingsAdminEntryCard.swift */; };
 		8B785C2D3E4F5061728394 /* PlatformSettingsAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B785D3E4F5061728394A5 /* PlatformSettingsAdminLogicTests.swift */; };
+
+		8B791C2D3E4F5061728394 /* LMSFeatureModelsAiAdmin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B791D3E4F5061728394A5 /* LMSFeatureModelsAiAdmin.swift */; };
+		8B792C2D3E4F5061728394 /* AiModelsAdminLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B792D3E4F5061728394A5 /* AiModelsAdminLogic.swift */; };
+		8B793C2D3E4F5061728394 /* AiAdminHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B793D3E4F5061728394A5 /* AiAdminHubView.swift */; };
+		8B794C2D3E4F5061728394 /* AiModelsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B794D3E4F5061728394A5 /* AiModelsSettingsView.swift */; };
+		8B795C2D3E4F5061728394 /* SystemPromptsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B795D3E4F5061728394A5 /* SystemPromptsView.swift */; };
+		8B796C2D3E4F5061728394 /* AiReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B796D3E4F5061728394A5 /* AiReportsView.swift */; };
+		8B797C2D3E4F5061728394 /* AiAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B797D3E4F5061728394A5 /* AiAdminEntryCard.swift */; };
+		8B798C2D3E4F5061728394 /* AiModelsAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B798D3E4F5061728394A5 /* AiModelsAdminLogicTests.swift */; };
+
+		8B8A1C2D3E4F5061728394 /* LMSFeatureModelsIntegrationsAdmin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A1D3E4F5061728394A5 /* LMSFeatureModelsIntegrationsAdmin.swift */; };
+		8B8A2C2D3E4F5061728394 /* IntegrationsAdminLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A2D3E4F5061728394A5 /* IntegrationsAdminLogic.swift */; };
+		8B8A3C2D3E4F5061728394 /* IntegrationsAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A3D3E4F5061728394A5 /* IntegrationsAdminView.swift */; };
+		8B8A4C2D3E4F5061728394 /* IntegrationsAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A4D3E4F5061728394A5 /* IntegrationsAdminEntryCard.swift */; };
+		8B8A5C2D3E4F5061728394 /* IntegrationsAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A5D3E4F5061728394A5 /* IntegrationsAdminLogicTests.swift */; };
+
+		8B9A1C2D3E4F5061728394 /* LMSFeatureModelsTranscriptsAdvisingAdmin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A1D3E4F5061728394A5 /* LMSFeatureModelsTranscriptsAdvisingAdmin.swift */; };
+		8B9A2C2D3E4F5061728394 /* TranscriptsAdvisingAdminLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A2D3E4F5061728394A5 /* TranscriptsAdvisingAdminLogic.swift */; };
+		8B9A3C2D3E4F5061728394 /* TranscriptsAdvisingAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A3D3E4F5061728394A5 /* TranscriptsAdvisingAdminView.swift */; };
+		8B9A4C2D3E4F5061728394 /* TranscriptsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A4D3E4F5061728394A5 /* TranscriptsSettingsView.swift */; };
+		8B9A5C2D3E4F5061728394 /* AdvisingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A5D3E4F5061728394A5 /* AdvisingSettingsView.swift */; };
+		8B9A6C2D3E4F5061728394 /* TranscriptsAdvisingAdminEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A6D3E4F5061728394A5 /* TranscriptsAdvisingAdminEntryCard.swift */; };
+		8B9A7C2D3E4F5061728394 /* TranscriptsAdvisingAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A7D3E4F5061728394A5 /* TranscriptsAdvisingAdminLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1098,6 +1121,29 @@
 		8B783D3E4F5061728394A5 /* PlatformSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformSettingsView.swift; sourceTree = "<group>"; };
 		8B784D3E4F5061728394A5 /* PlatformSettingsAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformSettingsAdminEntryCard.swift; sourceTree = "<group>"; };
 		8B785D3E4F5061728394A5 /* PlatformSettingsAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformSettingsAdminLogicTests.swift; sourceTree = "<group>"; };
+
+		8B791D3E4F5061728394A5 /* LMSFeatureModelsAiAdmin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsAiAdmin.swift; sourceTree = "<group>"; };
+		8B792D3E4F5061728394A5 /* AiModelsAdminLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiModelsAdminLogic.swift; sourceTree = "<group>"; };
+		8B793D3E4F5061728394A5 /* AiAdminHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiAdminHubView.swift; sourceTree = "<group>"; };
+		8B794D3E4F5061728394A5 /* AiModelsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiModelsSettingsView.swift; sourceTree = "<group>"; };
+		8B795D3E4F5061728394A5 /* SystemPromptsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPromptsView.swift; sourceTree = "<group>"; };
+		8B796D3E4F5061728394A5 /* AiReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiReportsView.swift; sourceTree = "<group>"; };
+		8B797D3E4F5061728394A5 /* AiAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiAdminEntryCard.swift; sourceTree = "<group>"; };
+		8B798D3E4F5061728394A5 /* AiModelsAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiModelsAdminLogicTests.swift; sourceTree = "<group>"; };
+
+		8B8A1D3E4F5061728394A5 /* LMSFeatureModelsIntegrationsAdmin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsIntegrationsAdmin.swift; sourceTree = "<group>"; };
+		8B8A2D3E4F5061728394A5 /* IntegrationsAdminLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationsAdminLogic.swift; sourceTree = "<group>"; };
+		8B8A3D3E4F5061728394A5 /* IntegrationsAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationsAdminView.swift; sourceTree = "<group>"; };
+		8B8A4D3E4F5061728394A5 /* IntegrationsAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationsAdminEntryCard.swift; sourceTree = "<group>"; };
+		8B8A5D3E4F5061728394A5 /* IntegrationsAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationsAdminLogicTests.swift; sourceTree = "<group>"; };
+
+		8B9A1D3E4F5061728394A5 /* LMSFeatureModelsTranscriptsAdvisingAdmin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsTranscriptsAdvisingAdmin.swift; sourceTree = "<group>"; };
+		8B9A2D3E4F5061728394A5 /* TranscriptsAdvisingAdminLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptsAdvisingAdminLogic.swift; sourceTree = "<group>"; };
+		8B9A3D3E4F5061728394A5 /* TranscriptsAdvisingAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptsAdvisingAdminView.swift; sourceTree = "<group>"; };
+		8B9A4D3E4F5061728394A5 /* TranscriptsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptsSettingsView.swift; sourceTree = "<group>"; };
+		8B9A5D3E4F5061728394A5 /* AdvisingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvisingSettingsView.swift; sourceTree = "<group>"; };
+		8B9A6D3E4F5061728394A5 /* TranscriptsAdvisingAdminEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptsAdvisingAdminEntryCard.swift; sourceTree = "<group>"; };
+		8B9A7D3E4F5061728394A5 /* TranscriptsAdvisingAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptsAdvisingAdminLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1121,6 +1167,9 @@
 		029927E4F879434FA36100DE /* Profile */ = {
 			isa = PBXGroup;
 			children = (
+				8B9A6D3E4F5061728394A5 /* TranscriptsAdvisingAdminEntryCard.swift */,
+				8B8A4D3E4F5061728394A5 /* IntegrationsAdminEntryCard.swift */,
+				8B797D3E4F5061728394A5 /* AiAdminEntryCard.swift */,
 				8B784D3E4F5061728394A5 /* PlatformSettingsAdminEntryCard.swift */,
 				8B777D3E4F5061728394A5 /* OrgBrandingAdminEntryCard.swift */,
 				8B766D3E4F5061728394A5 /* OrgStructureAdminEntryCard.swift */,
@@ -1669,6 +1718,14 @@
 		8B72ADM015C6D7E8F901234567 /* Admin */ = {
 			isa = PBXGroup;
 			children = (
+				8B9A5D3E4F5061728394A5 /* AdvisingSettingsView.swift */,
+				8B9A4D3E4F5061728394A5 /* TranscriptsSettingsView.swift */,
+				8B9A3D3E4F5061728394A5 /* TranscriptsAdvisingAdminView.swift */,
+				8B8A3D3E4F5061728394A5 /* IntegrationsAdminView.swift */,
+				8B796D3E4F5061728394A5 /* AiReportsView.swift */,
+				8B795D3E4F5061728394A5 /* SystemPromptsView.swift */,
+				8B794D3E4F5061728394A5 /* AiModelsSettingsView.swift */,
+				8B793D3E4F5061728394A5 /* AiAdminHubView.swift */,
 				8B783D3E4F5061728394A5 /* PlatformSettingsView.swift */,
 				8B776D3E4F5061728394A5 /* AiProviderSettingsView.swift */,
 				8B775D3E4F5061728394A5 /* AiGovernanceView.swift */,
@@ -1707,6 +1764,9 @@
 		8D3F9FB222A34107B54468F2 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B9A7D3E4F5061728394A5 /* TranscriptsAdvisingAdminLogicTests.swift */,
+				8B8A5D3E4F5061728394A5 /* IntegrationsAdminLogicTests.swift */,
+				8B798D3E4F5061728394A5 /* AiModelsAdminLogicTests.swift */,
 				8B785D3E4F5061728394A5 /* PlatformSettingsAdminLogicTests.swift */,
 				8B778D3E4F5061728394A5 /* OrgBrandingAdminLogicTests.swift */,
 				8B767D3E4F5061728394A5 /* OrgStructureAdminLogicTests.swift */,
@@ -1993,6 +2053,12 @@
 		D7AC7435149B4B17A073AD6F /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B9A2D3E4F5061728394A5 /* TranscriptsAdvisingAdminLogic.swift */,
+				8B9A1D3E4F5061728394A5 /* LMSFeatureModelsTranscriptsAdvisingAdmin.swift */,
+				8B8A2D3E4F5061728394A5 /* IntegrationsAdminLogic.swift */,
+				8B8A1D3E4F5061728394A5 /* LMSFeatureModelsIntegrationsAdmin.swift */,
+				8B792D3E4F5061728394A5 /* AiModelsAdminLogic.swift */,
+				8B791D3E4F5061728394A5 /* LMSFeatureModelsAiAdmin.swift */,
 				8B782D3E4F5061728394A5 /* PlatformSettingsAdminLogic.swift */,
 				8B781D3E4F5061728394A5 /* LMSFeatureModelsPlatformSettingsAdmin.swift */,
 				8B772D3E4F5061728394A5 /* OrgBrandingAdminLogic.swift */,
@@ -2325,6 +2391,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B9A7C2D3E4F5061728394 /* TranscriptsAdvisingAdminLogicTests.swift in Sources */,
+				8B8A5C2D3E4F5061728394 /* IntegrationsAdminLogicTests.swift in Sources */,
+				8B798C2D3E4F5061728394 /* AiModelsAdminLogicTests.swift in Sources */,
 				8B785C2D3E4F5061728394 /* PlatformSettingsAdminLogicTests.swift in Sources */,
 				8B778C2D3E4F5061728394 /* OrgBrandingAdminLogicTests.swift in Sources */,
 				8B767C2D3E4F5061728394 /* OrgStructureAdminLogicTests.swift in Sources */,
@@ -2406,6 +2475,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B9A6C2D3E4F5061728394 /* TranscriptsAdvisingAdminEntryCard.swift in Sources */,
+				8B9A5C2D3E4F5061728394 /* AdvisingSettingsView.swift in Sources */,
+				8B9A4C2D3E4F5061728394 /* TranscriptsSettingsView.swift in Sources */,
+				8B9A3C2D3E4F5061728394 /* TranscriptsAdvisingAdminView.swift in Sources */,
+				8B9A2C2D3E4F5061728394 /* TranscriptsAdvisingAdminLogic.swift in Sources */,
+				8B9A1C2D3E4F5061728394 /* LMSFeatureModelsTranscriptsAdvisingAdmin.swift in Sources */,
+				8B8A4C2D3E4F5061728394 /* IntegrationsAdminEntryCard.swift in Sources */,
+				8B8A3C2D3E4F5061728394 /* IntegrationsAdminView.swift in Sources */,
+				8B8A2C2D3E4F5061728394 /* IntegrationsAdminLogic.swift in Sources */,
+				8B8A1C2D3E4F5061728394 /* LMSFeatureModelsIntegrationsAdmin.swift in Sources */,
+				8B797C2D3E4F5061728394 /* AiAdminEntryCard.swift in Sources */,
+				8B796C2D3E4F5061728394 /* AiReportsView.swift in Sources */,
+				8B795C2D3E4F5061728394 /* SystemPromptsView.swift in Sources */,
+				8B794C2D3E4F5061728394 /* AiModelsSettingsView.swift in Sources */,
+				8B793C2D3E4F5061728394 /* AiAdminHubView.swift in Sources */,
+				8B792C2D3E4F5061728394 /* AiModelsAdminLogic.swift in Sources */,
+				8B791C2D3E4F5061728394 /* LMSFeatureModelsAiAdmin.swift in Sources */,
 				8B784C2D3E4F5061728394 /* PlatformSettingsAdminEntryCard.swift in Sources */,
 				8B783C2D3E4F5061728394 /* PlatformSettingsView.swift in Sources */,
 				8B782C2D3E4F5061728394 /* PlatformSettingsAdminLogic.swift in Sources */,

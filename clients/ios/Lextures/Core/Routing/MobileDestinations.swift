@@ -367,6 +367,7 @@ struct MobilePlatformFeatures: Equatable {
     var translationMemoryEnabled = false
     var ffReadingPreferences = false
     var oerLibraryEnabled = false
+    var xapiEmissionEnabled = false
     var customFieldsEnabled = false
     var ffDemographics = false
     var ffResearchConsent = false
@@ -436,6 +437,7 @@ struct MobilePlatformFeatures: Equatable {
             translationMemoryEnabled: features?.translationMemoryEnabled == true,
             ffReadingPreferences: features?.ffReadingPreferences == true,
             oerLibraryEnabled: features?.oerLibraryEnabled == true,
+            xapiEmissionEnabled: features?.xapiEmissionEnabled == true,
             customFieldsEnabled: features?.customFieldsEnabled == true,
             ffDemographics: features?.ffDemographics == true,
             ffResearchConsent: features?.ffResearchConsent == true,

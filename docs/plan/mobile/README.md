@@ -227,9 +227,9 @@ link-out to web for credential entry and deep authoring**, consistent with the d
 | [M14.4 Organizations, units & terms](../completed/mobile/M14.4-organizations-units-terms.md) | `organizations`/`org-units`/`terms` | `rbac:manage` / `tenant:org-units:admin` | **Done** |
 | [M14.5 Branding, AI governance & provider](../completed/mobile/M14.5-org-branding-ai-governance.md) | `org-branding` | `rbac:manage` / `tenant:org-units:admin` | **Done** |
 | [M14.6 Global platform config](./M14.6-global-platform-config.md) | `platform` | `rbac:manage` | **P2** (read + guarded flag toggle) |
-| [M14.7 AI models, prompts & reports](./M14.7-ai-models-prompts-reports.md) | `ai-models`/`ai-prompts`/`ai-reports` | `rbac:manage` | **P2** |
-| [M14.8 Integrations & provisioning admin](./M14.8-integrations-provisioning-admin.md) | `lti-tools`/`scim-provisioning`/`cloud-providers`/`lrs-integrations`/`oer-providers` (flags) | `rbac:manage` | **P2** (status + link-out) |
-| [M14.9 Transcripts & advising config](./M14.9-transcripts-advising-config.md) | `transcripts`/`advising` (flags) | `rbac:manage` | **P2** |
+| [M14.7 AI models, prompts & reports](../../completed/mobile/M14.7-ai-models-prompts-reports.md) | `ai-models`/`ai-prompts`/`ai-reports` | `rbac:manage` | **DONE** |
+| [M14.8 Integrations & provisioning admin](../completed/mobile/M14.8-integrations-provisioning-admin.md) | `lti-tools`/`scim-provisioning`/`cloud-providers`/`lrs-integrations`/`oer-providers` (flags) | `rbac:manage` | **Done** |
+| [M14.9 Transcripts & advising config](../completed/mobile/M14.9-transcripts-advising-config.md) | `transcripts`/`advising` (flags) | `rbac:manage` | **Done** |
 | [M14.10 Global archived courses](../completed/mobile/M14.10-global-archived-courses.md) | `archive` | `rbac:manage` | **P2** ✅ |
 
 > **Sequencing note.** [M13.1](../completed/mobile/M13.1-course-settings-general.md) is the keystone for M13 — it
