@@ -83,6 +83,7 @@ export const ParentDashboard = lazy(() => import('./pages/lms/parent/parent-dash
 export const ConferenceBooking = lazy(() => import('./pages/lms/parent/conference-booking'))
 export const ConferenceAvailabilitySetup = lazy(() => import('./pages/lms/conference-availability-setup'))
 export const TrustCenterPage = lazy(() => import('./pages/trust-center-page'))
+export const TypefacePage = lazy(() => import('./pages/typeface-page'))
 export const IsoComplianceAdminPage = lazy(() => import('./pages/iso-compliance-admin-page'))
 export const SecurityDisclosureAdminPage = lazy(() => import('./pages/security-disclosure-admin-page'))
 export const BackupOpsAdminPage = lazy(() => import('./pages/backup-ops-admin-page'))

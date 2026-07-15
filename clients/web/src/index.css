@@ -4,6 +4,44 @@
 @import "./styles/ui-modes/k2.css";
 @import "./styles/ui-modes/elementary.css";
 
+/* Lextures — our humanist sans for learning surfaces and brand moments. */
+@font-face {
+  font-family: 'Lextures';
+  src: url('/fonts/lextures-400.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Lextures';
+  src: url('/fonts/lextures-500.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Lextures';
+  src: url('/fonts/lextures-600.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Lextures';
+  src: url('/fonts/lextures-700.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'Lextures', ui-sans-serif, system-ui, sans-serif;
+}
+
+@utility font-lextures {
+  font-family: 'Lextures', ui-sans-serif, system-ui, sans-serif;
+}
+
 /* Video caption styling (plan 12.4) — uses CSS variables from VideoPlayer */
 .video-with-captions::cue {
   font-size: var(--caption-font-size, 1.05rem);
@@ -150,7 +188,7 @@
 html {
   color-scheme: light;
   /* Plan 12.6: reading preferences — overridden at runtime by useReadingPreferences. */
-  --reading-font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --reading-font-family: 'Lextures', system-ui, sans-serif;
   --reading-letter-spacing: normal;
   --reading-word-spacing: normal;
   --reading-line-height: 1.5;
@@ -358,7 +396,7 @@ html[data-lms-density="compact"] .lms-scope aside nav a.rounded-xl {
 
 body {
   @apply min-h-screen antialiased text-slate-900 bg-slate-50;
-  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Lextures', ui-sans-serif, system-ui, sans-serif;
 }
 
 .dark body {

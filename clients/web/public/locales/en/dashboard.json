@@ -19,7 +19,7 @@
   "dashboard.whatsNext.recommendedAria": "Recommended: {{title}} ({{surface}})",
   "dashboard.whatsNext.degraded": "Suggestions may be briefly out of date while we refresh them.",
   "dashboard.whatsNext.go": "Go",
-  "dashboard.whatsNext.caughtUp": "You're all caught up in {{courseTitle}}. Check back after your next activity.",
+  "dashboard.whatsNext.caughtUp": "You're all caught up in {courseTitle}. Check back after your next activity.",
   "dashboard.continuingEducation.ariaLabel": "Continuing education",
   "dashboard.continuingEducation.title": "Continuing education",
   "dashboard.continuingEducation.description": "Track contact hours and download your CE transcript.",

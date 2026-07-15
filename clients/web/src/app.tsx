@@ -44,6 +44,7 @@ export default function App() {
         <Route path="/reset-password" element={<Pages.ResetPassword />} />
         <Route path="/ai-disclosure" element={<Pages.AiDisclosurePage />} />
         <Route path="/trust" element={<Pages.TrustCenterPage />} />
+        <Route path="/type" element={<Pages.TypefacePage />} />
         <Route path="/p/:slug/content/:aid" element={<Pages.PublicPortfolioContentPage />} />
         <Route path="/p/:slug" element={<Pages.PublicPortfolioPage />} />
         <Route path="/paths" element={<Pages.PathsCatalogPage />} />

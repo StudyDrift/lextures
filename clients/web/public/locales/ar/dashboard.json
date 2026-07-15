@@ -19,7 +19,7 @@
   "dashboard.whatsNext.recommendedAria": "موصى به: {{title}} ({{surface}})",
   "dashboard.whatsNext.degraded": "قد تكون الاقتراحات قديمة مؤقتًا أثناء تحديثها.",
   "dashboard.whatsNext.go": "انتقال",
-  "dashboard.whatsNext.caughtUp": "أنت على اطلاع في {{courseTitle}}. عد بعد نشاطك التالي.",
+  "dashboard.whatsNext.caughtUp": "أنت على اطلاع في {courseTitle}. عد بعد نشاطك التالي.",
   "dashboard.continuingEducation.ariaLabel": "التعليم المستمر",
   "dashboard.continuingEducation.title": "التعليم المستمر",
   "dashboard.continuingEducation.description": "تتبّع ساعات التواصل وحمّل سجل التعليم المستمر.",

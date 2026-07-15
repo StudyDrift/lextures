@@ -25,4 +25,12 @@ describe('first-wave namespace bundles (plan W01)', () => {
     await i18n.changeLanguage('en')
     expect(i18n.t('dashboard.title', { ns: 'dashboard', lng: 'en' })).toBe('Dashboard')
   })
+
+  it('interpolates the course title in the caught-up message', async () => {
+    await i18n.changeLanguage('en')
+    expect(i18n.t('dashboard.whatsNext.caughtUp', {
+      ns: 'dashboard',
+      courseTitle: 'Biology 101',
+    })).toBe("You're all caught up in Biology 101. Check back after your next activity.")
+  })
 })
