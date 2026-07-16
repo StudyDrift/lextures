@@ -155,6 +155,9 @@ export type CoursePublic = {
   whiteboardEnabled?: boolean
   /** District-formatted report cards with comment banks and PDF release (default off). */
   reportCardsEnabled?: boolean
+  /** VC.1 — visual collaboration boards (default off). */
+  visualBoardsEnabled?: boolean
+  interactiveQuizzesEnabled?: boolean
   /** When true, saved grades are pushed back to the linked Canvas course (default off). */
   canvasGradeSyncEnabled?: boolean
   /** Plan 12.4 — block publishing video content without ready captions. */
@@ -816,6 +819,8 @@ export async function patchCourseFeatures(
     attendanceEnabled?: boolean
     whiteboardEnabled?: boolean
     reportCardsEnabled?: boolean
+    visualBoardsEnabled?: boolean
+    interactiveQuizzesEnabled?: boolean
   },
 ): Promise<CoursePublic> {
   const res = await authorizedFetch(
@@ -845,6 +850,10 @@ export async function patchCourseFeatures(
         ...(body.attendanceEnabled !== undefined ? { attendanceEnabled: body.attendanceEnabled } : {}),
         ...(body.whiteboardEnabled !== undefined ? { whiteboardEnabled: body.whiteboardEnabled } : {}),
         ...(body.reportCardsEnabled !== undefined ? { reportCardsEnabled: body.reportCardsEnabled } : {}),
+        ...(body.visualBoardsEnabled !== undefined ? { visualBoardsEnabled: body.visualBoardsEnabled } : {}),
+        ...(body.interactiveQuizzesEnabled !== undefined
+          ? { interactiveQuizzesEnabled: body.interactiveQuizzesEnabled }
+          : {}),
         ...(body.sectionsEnabled !== undefined ? { sectionsEnabled: body.sectionsEnabled } : {}),
       }),
     },

@@ -18,6 +18,8 @@ import {
   MessageSquare,
   MessagesSquare,
   NotebookPen,
+  Gamepad2,
+  LayoutGrid,
   PenLine,
   Pencil,
   Send,
@@ -77,6 +79,8 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     attendanceEnabled,
     whiteboardEnabled,
     reportCardsEnabled,
+    visualBoardsEnabled,
+    interactiveQuizzesEnabled,
   } = useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
   const {
@@ -85,6 +89,8 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     ffCourseEvaluations,
     ffGradeSubmission,
     ffClassroomSignals,
+    ffVisualBoards,
+    ffInteractiveQuizzes,
   } = usePlatformFeatures()
   const courseViewPreview = useCourseViewAs(courseCode)
   const viewerEnrollmentRoles = useViewerEnrollmentRoles(courseCode)
@@ -101,6 +107,8 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
   const canManageCourse = !permLoading && allows(courseItemCreatePermission(courseCode))
   const canManageQuestionBank = !permLoading && allows(courseItemsCreatePermission(courseCode))
 
+  const boardsNavVisible = ffVisualBoards && visualBoardsEnabled
+  const liveQuizzesNavVisible = ffInteractiveQuizzes && interactiveQuizzesEnabled
   const showCollaboration =
     feedEnabled ||
     discussionsEnabled ||
@@ -108,7 +116,8 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     groupSpacesEnabled ||
     liveSessionsEnabled ||
     officeHoursEnabled ||
-    (whiteboardEnabled && canManageCourse)
+    (whiteboardEnabled && canManageCourse) ||
+    boardsNavVisible
 
   const showYourLearning =
     notebookEnabled || calendarEnabled || attendanceEnabled || canViewMyGrades
@@ -116,7 +125,8 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
   const showGradingInsights =
     canViewGradebook || (standardsAlignmentEnabled && canManageCourse)
 
-  const showAssessmentTools = canManageQuestionBank && questionBankEnabled
+  const showAssessmentTools =
+    (canManageQuestionBank && questionBankEnabled) || liveQuizzesNavVisible
 
   return (
     <>
@@ -143,6 +153,11 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
       {showCollaboration ? (
         <>
           <SideNavSectionLabel>Collaboration</SideNavSectionLabel>
+          {boardsNavVisible ? (
+            <SideNavLink to={`${base}/boards`} icon={<LayoutGrid className="h-5 w-5" />}>
+              Boards
+            </SideNavLink>
+          ) : null}
           {collabDocsEnabled ? (
             <SideNavLink to={`${base}/collab-docs`} icon={<PenLine className="h-5 w-5" />}>
               Collab docs
@@ -210,12 +225,21 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
       {showAssessmentTools ? (
         <>
           <SideNavSectionLabel>Assessment</SideNavSectionLabel>
-          <SideNavLink to={`${base}/misconception-report`} icon={<Lightbulb className="h-5 w-5" />}>
-            Misconceptions
-          </SideNavLink>
-          <SideNavLink to={`${base}/questions`} icon={<ListChecks className="h-5 w-5" />}>
-            Question bank
-          </SideNavLink>
+          {liveQuizzesNavVisible ? (
+            <SideNavLink to={`${base}/live-quizzes`} icon={<Gamepad2 className="h-5 w-5" />}>
+              Live Quizzes
+            </SideNavLink>
+          ) : null}
+          {canManageQuestionBank && questionBankEnabled ? (
+            <>
+              <SideNavLink to={`${base}/misconception-report`} icon={<Lightbulb className="h-5 w-5" />}>
+                Misconceptions
+              </SideNavLink>
+              <SideNavLink to={`${base}/questions`} icon={<ListChecks className="h-5 w-5" />}>
+                Question bank
+              </SideNavLink>
+            </>
+          ) : null}
         </>
       ) : null}
 

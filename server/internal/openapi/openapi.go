@@ -25,9 +25,391 @@ const spec = `{
     { "name": "communication", "description": "Inbox / messaging (server/src/routes/communication.rs)" },
     { "name": "courses", "description": "Course APIs (server/src/routes/courses.rs; partial in Go)" },
     { "name": "admin", "description": "Global Admin maintenance (server/src/routes/admin.rs; requires global:app:rbac:manage)" },
-    { "name": "settings", "description": "Roles and permissions (server/src/routes/rbac.rs; requires global:app:rbac:manage)" }
+    { "name": "settings", "description": "Roles and permissions (server/src/routes/rbac.rs; requires global:app:rbac:manage)" },
+    { "name": "transcripts", "description": "Academic transcript preview, issuance, recipient directory, and multi-destination orders (T01–T02)" }
   ],
   "paths": {
+    "/api/v1/transcripts/recipients": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Search transcript recipient directory (typeahead)",
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["institution", "application_service", "employer", "self", "other"] } }
+        ],
+        "responses": {
+          "200": { "description": "recipients array with delivery capabilities" },
+          "401": { "description": "Authentication required" },
+          "404": { "description": "Transcripts feature disabled" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "List transcript orders for the current user",
+        "responses": {
+          "200": { "description": "orders array" },
+          "401": { "description": "Authentication required" }
+        }
+      },
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Create a draft multi-recipient transcript order",
+        "responses": {
+          "201": { "description": "order with items" },
+          "400": { "description": "Validation error (e.g. delivery method not in recipient capabilities)" },
+          "401": { "description": "Authentication required" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Get a transcript order owned by the current user",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "order detail" },
+          "404": { "description": "Not found or not owned by caller" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/items": {
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Add an item to a draft transcript order",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "updated order" },
+          "400": { "description": "Not draft or invalid item" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/items/{itemId}": {
+      "delete": {
+        "tags": ["transcripts"],
+        "summary": "Remove an item from a draft transcript order",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "updated order" },
+          "400": { "description": "Not draft or would leave order empty" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/submit": {
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Submit a draft transcript order into the T03 lifecycle (holds/consent/payment gates)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "order in in_review, on_hold, processing, or pending_* state" },
+          "400": { "description": "Validation failed" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/consent/preview": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Preview FERPA release authorization text and recipient/scope summary (T04)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "locale", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "preview object with authorizationText, recipients, requiresConsent" },
+          "404": { "description": "Order not found" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/consent": {
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Sign FERPA release authorization for a transcript order (T04)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["method", "signatureData", "agree"],
+                "properties": {
+                  "method": { "type": "string", "enum": ["typed", "drawn"] },
+                  "signatureData": { "type": "string" },
+                  "agree": { "type": "boolean" },
+                  "locale": { "type": "string" },
+                  "purpose": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "consent + advanced order" },
+          "400": { "description": "Invalid signature or agreement" },
+          "403": { "description": "Guardian required for minors" },
+          "409": { "description": "Already signed or wrong state" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/consent/revoke": {
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Revoke FERPA authorization before delivery (T04)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "revoked consent + order returned to pending_consent" },
+          "409": { "description": "Already delivered or not revocable" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/consent/export": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Export FERPA consent audit record as JSON or PDF (T04)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["json", "pdf"] } }
+        ],
+        "responses": {
+          "200": { "description": "export object or PDF bytes" },
+          "404": { "description": "Consent not found" }
+        }
+      }
+    },
+    "/api/v1/parent/transcripts/orders/{id}/consent": {
+      "post": {
+        "tags": ["transcripts", "parent"],
+        "summary": "Guardian e-signature for a minor student's transcript order (T04)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["method", "signatureData", "agree"],
+                "properties": {
+                  "method": { "type": "string", "enum": ["typed", "drawn"] },
+                  "signatureData": { "type": "string" },
+                  "agree": { "type": "boolean" },
+                  "locale": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "guardian consent + advanced order" },
+          "403": { "description": "Not a linked parent/guardian" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/orders": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Registrar fulfillment queue (filter by status, hold, q)",
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "hold", "in": "query", "schema": { "type": "string", "enum": ["true", "false"] } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "orders array with hold summary and events" },
+          "403": { "description": "Missing RBAC" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/orders/{id}": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Get order detail for registrar fulfillment",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "order with holds and audit events" } }
+      }
+    },
+    "/api/v1/admin/transcripts/orders/{id}/transition": {
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Transition order (approve|reject|cancel|complete|hold|release)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["action"],
+                "properties": {
+                  "action": { "type": "string", "enum": ["approve", "reject", "cancel", "complete", "hold", "release"] },
+                  "reason": { "type": "string", "description": "Required for reject" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "updated order" },
+          "400": { "description": "Illegal transition or missing reason" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/holds": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "List transcript holds",
+        "parameters": [
+          { "name": "userId", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "active", "in": "query", "schema": { "type": "boolean", "default": true } }
+        ],
+        "responses": { "200": { "description": "holds array" } }
+      },
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Place a hold on a student (blocks issuance)",
+        "responses": { "201": { "description": "hold created; open orders re-evaluated" } }
+      }
+    },
+    "/api/v1/admin/transcripts/holds/{id}/release": {
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Release a hold and resume on-hold orders",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "released hold" } }
+      }
+    },
+    "/api/v1/integrations/transcripts/holds": {
+      "post": {
+        "tags": ["transcripts", "integrations"],
+        "summary": "SIS/bursar hold upsert (HMAC X-Lextures-Signature, idempotent by externalId)",
+        "responses": {
+          "200": { "description": "hold upserted or released" },
+          "401": { "description": "Invalid signature" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/recipients": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "List global + org recipient directory entries",
+        "responses": { "200": { "description": "recipients array" } }
+      },
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Create an org-scoped directory recipient",
+        "responses": { "201": { "description": "recipient" } }
+      }
+    },
+    "/api/v1/admin/transcripts/recipients/{id}": {
+      "put": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Update/verify/deactivate a directory recipient",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "recipient" } }
+      }
+    },
+    "/api/v1/transcripts/preview": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Unofficial watermarked academic-record preview (not persisted)",
+        "parameters": [
+          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["json", "pdf", "xml"] } }
+        ],
+        "responses": {
+          "200": { "description": "Canonical record JSON, PDF, or PESC XML" },
+          "401": { "description": "Authentication required" },
+          "404": { "description": "Transcripts feature disabled" }
+        }
+      }
+    },
+    "/api/v1/transcripts/documents": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "List issued transcript documents for the current user",
+        "responses": {
+          "200": { "description": "documents array" },
+          "401": { "description": "Authentication required" }
+        }
+      },
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Generate and persist an official/partial/in_progress transcript",
+        "responses": {
+          "201": { "description": "document + record" },
+          "403": { "description": "Official generation not enabled" },
+          "401": { "description": "Authentication required" }
+        }
+      }
+    },
+    "/api/v1/transcripts/documents/{id}": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Get issued transcript metadata and canonical record (hash-verified)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "document + record" },
+          "409": { "description": "Integrity check failed" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/transcripts/documents/{id}/download": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Download issued transcript PDF or PESC XML",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["pdf", "xml"] } }
+        ],
+        "responses": {
+          "200": { "description": "Binary PDF or XML" },
+          "409": { "description": "Integrity check failed" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/students/{uid}/documents": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Registrar list of a student's issued transcripts",
+        "parameters": [
+          { "name": "uid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "documents array" } }
+      },
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Registrar generate/reissue transcript for a student",
+        "parameters": [
+          { "name": "uid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "201": { "description": "document + record" } }
+      }
+    },
     "/health": {
       "get": {
         "tags": ["meta"],
@@ -1005,6 +1387,1178 @@ const spec = `{
         }
       }
     },
+    "/api/v1/courses/{course_code}/boards": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List collaboration boards (plan VC.1)",
+        "description": "Requires platform ffVisualBoards and per-course visualBoardsEnabled. Returns 404 when either flag is off.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "includeArchived", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": {
+          "200": { "description": "{ boards: Board[] }" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "No course access" },
+          "404": { "description": "Feature disabled" }
+        }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Create a collaboration board (plan VC.1 / VC.8)",
+        "description": "Requires course:{code}:item:create. Optional from=template:{id} or from=board:{id}&mode=structure|full. Full copy may return 202 with a job when large.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "from", "in": "query", "schema": { "type": "string" }, "description": "template:{templateId} or board:{boardId}" },
+          { "name": "mode", "in": "query", "schema": { "type": "string", "enum": ["structure", "full"] }, "description": "Copy mode when from=board:{id}" },
+          { "name": "locale", "in": "query", "schema": { "type": "string" }, "description": "Locale for built-in template copy" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "maxLength": 200 },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Board", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Board" } } } },
+          "202": { "description": "{ job: BoardCopyJob } for large full copies" },
+          "400": { "description": "Validation error" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Feature disabled" }
+        }
+      }
+    },
+    "/api/v1/board-templates": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List board templates (plan VC.8)",
+        "description": "Gallery of built-in, course, and org templates. Requires ffVisualBoards.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "scope", "in": "query", "schema": { "type": "string", "enum": ["builtin", "course", "org"] } },
+          { "name": "courseCode", "in": "query", "schema": { "type": "string" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "locale", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ templates: BoardTemplate[] }" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/save-as-template": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Save a board as a template (plan VC.8)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["scope"],
+                "properties": {
+                  "scope": { "type": "string", "enum": ["course", "org"] },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "tags": { "type": "array", "items": { "type": "string" } },
+                  "includePosts": { "type": "boolean", "default": false }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "BoardTemplate" },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/board-copy-jobs/{job_id}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get board copy job progress (plan VC.8)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "job_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "BoardCopyJob" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List live quiz kits (plan IQ.1)",
+        "description": "Requires platform ffInteractiveQuizzes and per-course interactiveQuizzesEnabled. Returns 404 when either flag is off.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Title search" },
+          { "name": "tag", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 50 } },
+          { "name": "includeArchived", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": {
+          "200": { "description": "{ kits: QuizKit[], total, page, pageSize, totalPages }" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "No course access" },
+          "404": { "description": "Feature disabled" }
+        }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Create a live quiz kit (plan IQ.1)",
+        "description": "Requires course:{code}:item:create. Requires platform ffInteractiveQuizzes and per-course interactiveQuizzesEnabled.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title"],
+                "properties": {
+                  "title": { "type": "string", "maxLength": 200 },
+                  "description": { "type": "string" },
+                  "tags": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "QuizKit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QuizKit" } } } },
+          "400": { "description": "Validation error" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get a live quiz kit (plan IQ.1)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "QuizKit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QuizKit" } } } },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Update a live quiz kit (plan IQ.1)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "maxLength": 200 },
+                  "description": { "type": "string" },
+                  "coverImageRef": { "type": "string", "nullable": true },
+                  "status": { "type": "string", "enum": ["draft", "ready", "archived"] },
+                  "visibility": { "type": "string", "enum": ["private", "course", "org", "public"] },
+                  "tags": { "type": "array", "items": { "type": "string" } },
+                  "archived": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "QuizKit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QuizKit" } } } },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/duplicate": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Duplicate a live quiz kit (metadata-only stub, plan IQ.1)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "201": { "description": "QuizKit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QuizKit" } } } },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/archive": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Soft-archive a live quiz kit (plan IQ.1)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "QuizKit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QuizKit" } } } },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/restore": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Restore an archived live quiz kit (plan IQ.1)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "QuizKit", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QuizKit" } } } },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/validate": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Validate a live quiz kit for hosting readiness (plan IQ.2)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ isReady, issues[] }" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/games": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Start a live quiz game from a ready kit (plan IQ.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "201": { "description": "{ gameId, joinCode, game }" },
+          "400": { "description": "Kit not ready" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or hosting disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get a live quiz game session (plan IQ.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Live game session" },
+          "404": { "description": "Not found or hosting disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/end": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "End a live quiz game (plan IQ.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Ended session" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or hosting disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/players": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Join a live quiz game as an enrolled player (plan IQ.4); rejoin rotates playerToken",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "201": { "description": "{ playerId, nickname, playerToken, totalScore, rejoined:false }" },
+          "200": { "description": "Rejoin: { playerId, nickname, playerToken, totalScore, rejoined:true }" },
+          "409": { "description": "Nickname taken" },
+          "404": { "description": "Not found or hosting disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/ws": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "WebSocket hub for live quiz host/projector/player (plan IQ.3). First text frame: {authToken, role, playerToken?}",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "101": { "description": "Switching Protocols" },
+          "404": { "description": "Not found or hosting disabled" }
+        }
+      }
+    },
+    "/api/v1/live-quizzes/join/{code}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Public rate-limited join-code lookup (plan IQ.4)",
+        "parameters": [
+          { "name": "code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ gameId, courseCode, kitTitle, requiresAuth, allowsGuests, phase, status }" },
+          "404": { "description": "Unknown or expired code" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/questions": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List questions in a live quiz kit (plan IQ.2)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ questions: LiveQuizQuestion[] }" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Add a question to a live quiz kit (plan IQ.2)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "201": { "description": "LiveQuizQuestion", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LiveQuizQuestion" } } } },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/questions/reorder": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Bulk-reorder kit questions (plan IQ.2)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ questions: LiveQuizQuestion[] }" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/questions/import-bank": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Import question-bank items into a kit (plan IQ.2)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "201": { "description": "{ questions: LiveQuizQuestion[] }" },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/questions/{qid}": {
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Update a kit question with If-Match version (plan IQ.2)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "qid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "If-Match", "in": "header", "required": true, "schema": { "type": "string" }, "description": "Current question version" }
+        ],
+        "responses": {
+          "200": { "description": "LiveQuizQuestion", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LiveQuizQuestion" } } } },
+          "409": { "description": "Version conflict" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Delete a kit question (plan IQ.2)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "qid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Deleted" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get a collaboration board (plan VC.1)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Board", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Board" } } } },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Update a collaboration board (plans VC.1 / VC.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "maxLength": 200 },
+                  "description": { "type": "string" },
+                  "archived": { "type": "boolean" },
+                  "layout": { "type": "string", "enum": ["wall", "stream", "grid", "columns", "canvas", "timeline", "map"] },
+                  "layoutLocked": { "type": "boolean" },
+                  "settings": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Board", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Board" } } } },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Archive or hard-delete a collaboration board (plan VC.1)",
+        "description": "Soft-archives by default. Pass hard=true to permanently delete (requires enrollments:update).",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "hard", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": {
+          "204": { "description": "Archived or deleted" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/sections": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List board sections (plan VC.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ sections: BoardSection[] }" },
+          "404": { "description": "Board not found or feature disabled" }
+        }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Create a board section (plan VC.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title"],
+                "properties": {
+                  "title": { "type": "string", "maxLength": 200 },
+                  "sortIndex": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "BoardSection" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Board not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/sections/{section_id}": {
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Rename or reorder a board section (plan VC.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "section_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "maxLength": 200 },
+                  "sortIndex": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "BoardSection" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Section not found" }
+        }
+      },
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Delete a board section; cards move to Unsorted (plan VC.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "section_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Deleted" },
+          "400": { "description": "Cannot delete Unsorted" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Section not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/ws": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Board realtime WebSocket (plan VC.4)",
+        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"…\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffVisualBoards, ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "101": { "description": "Switching Protocols (WebSocket)" },
+          "404": { "description": "Feature disabled, board archived, or not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/posts/{post_id}/arrange": {
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Arrange a board post (section, sort, position, date, geo) (plan VC.3)",
+        "description": "Author or item:create. Blocked with 403 when layoutLocked for non-managers.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sectionId": { "type": "string", "format": "uuid" },
+                  "sortIndex": { "type": "number" },
+                  "position": {
+                    "type": "object",
+                    "properties": {
+                      "x": { "type": "number" },
+                      "y": { "type": "number" },
+                      "w": { "type": "number" },
+                      "h": { "type": "number" }
+                    }
+                  },
+                  "eventDate": { "type": "string", "format": "date-time" },
+                  "lat": { "type": "number" },
+                  "lng": { "type": "number" },
+                  "clearGeo": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "BoardPost" },
+          "400": { "description": "Invalid arrangement fields" },
+          "403": { "description": "Forbidden (ownership or layout lock)" },
+          "404": { "description": "Post not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/posts": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List board posts (plan VC.2)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ posts: BoardPost[] }" },
+          "404": { "description": "Board not found or feature disabled" }
+        }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Create a board post (plan VC.2)",
+        "description": "Any course member may create. contentType requires matching payload (e.g. link needs linkUrl).",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["contentType"],
+                "properties": {
+                  "contentType": { "type": "string", "enum": ["text", "image", "file", "link", "video", "audio", "drawing"] },
+                  "title": { "type": "string" },
+                  "body": { "type": "object" },
+                  "linkUrl": { "type": "string", "format": "uri" },
+                  "drawingData": {},
+                  "attachmentId": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "BoardPost" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Board not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/posts/{post_id}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get a board post (plan VC.2)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "BoardPost" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Update a board post (plan VC.2)",
+        "description": "Author or course:{code}:item:create may edit.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "BoardPost" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Delete a board post (plan VC.2)",
+        "description": "Author or course:{code}:item:create may delete.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Deleted" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/posts/{post_id}/reaction": {
+      "put": {
+        "tags": ["courses"],
+        "summary": "Set or toggle a board post reaction (plan VC.5)",
+        "description": "Idempotent toggle for like/vote; set/update for star/grade. Grade requires item:create.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "kind": { "type": "string", "enum": ["like", "vote", "star", "grade"] },
+                  "value": { "type": "number", "description": "Required for star (1-5) and grade" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated aggregates" },
+          "400": { "description": "Invalid kind/value or reactions disabled" },
+          "403": { "description": "Forbidden (grade without permission)" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Clear the viewer's reaction on a board post (plan VC.5)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Cleared" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/posts/{post_id}/comments": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List comments on a board post (plan VC.5)",
+        "description": "Managers see hidden comments; students do not.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ comments: BoardComment[] }" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Create a comment on a board post (plan VC.5)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["body"],
+                "properties": {
+                  "body": { "type": "object" },
+                  "parentId": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "BoardComment" },
+          "400": { "description": "Validation error" },
+          "429": { "description": "Rate limited" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/posts/{post_id}/comments/{comment_id}": {
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Update or hide a board comment (plan VC.5)",
+        "description": "Author may edit body; item:create may hide any comment.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "comment_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "BoardComment" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      },
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Soft-hide a board comment (plan VC.5)",
+        "description": "Author or item:create. Soft-hide preserves the row for audit/FERPA.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "comment_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Hidden" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/posts/{post_id}/grade-sync": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Sync a card grade to the gradebook (plan VC.5)",
+        "description": "Requires grade reaction mode, linked assignmentId, and item:create.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "post_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Synced grade summary" },
+          "400": { "description": "Missing grade, mode, or assignment link" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/attachments": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Upload or initiate a board post attachment (plan VC.2)",
+        "description": "multipart/form-data with file, or JSON for presigned PUT init.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "201": { "description": "BoardAttachment" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Board not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/attachments/{attachment_id}/content": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Download board attachment content (plan VC.2)",
+        "description": "Returns 403 when scan_status is pending/blocked and AV scanning is enabled.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "attachment_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "File bytes" },
+          "302": { "description": "Presigned redirect" },
+          "403": { "description": "Scanning or blocked" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/link-preview": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Unfurl a URL for a board link/video post (plan VC.2)",
+        "description": "SSRF-safe server-side fetch. Private/loopback URLs return 400.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["url"],
+                "properties": { "url": { "type": "string", "format": "uri" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Link preview payload" },
+          "400": { "description": "Invalid or blocked URL" },
+          "404": { "description": "Board not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/members": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List board members (plan VC.6)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ members: BoardMember[] }" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Board not found" }
+        }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Add or update a board member (plan VC.6)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["userId"],
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "role": { "type": "string", "enum": ["owner", "editor", "contributor", "viewer"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "BoardMember" },
+          "400": { "description": "Invalid input" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/members/{user_id}": {
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Remove a board member (plan VC.6)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "user_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Removed" },
+          "404": { "description": "Member not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/shares": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List board share links (plan VC.6)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ shares: BoardShare[] }" },
+          "403": { "description": "Forbidden" }
+        }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Create a board share link (plan VC.6)",
+        "description": "Requires ffBoardsExternalSharing. Returns the raw token once.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "capability": { "type": "string", "enum": ["view", "contribute"] },
+                  "password": { "type": "string" },
+                  "expiresAt": { "type": "string", "format": "date-time", "nullable": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "BoardShare including token and url" },
+          "403": { "description": "External sharing disabled or minors policy" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/shares/{share_id}": {
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Revoke a board share link (plan VC.6)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "share_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Revoked" },
+          "404": { "description": "Share not found" }
+        }
+      }
+    },
+    "/api/v1/board-links/{token}": {
+      "get": {
+        "tags": ["public"],
+        "summary": "Resolve a board share link (plan VC.6)",
+        "description": "Unauthenticated. Optional X-Board-Share-Password header for password-protected links.",
+        "parameters": [
+          { "name": "token", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ board, capability, posts, requiresPassword }" },
+          "401": { "description": "Incorrect password" },
+          "403": { "description": "External sharing disabled" },
+          "404": { "description": "Invalid, expired, or revoked" }
+        }
+      }
+    },
+    "/api/v1/board-links/{token}/posts": {
+      "post": {
+        "tags": ["public"],
+        "summary": "Create a post via contribute share link (plan VC.6)",
+        "parameters": [
+          { "name": "token", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["displayName", "contentType"],
+                "properties": {
+                  "displayName": { "type": "string" },
+                  "contentType": { "type": "string" },
+                  "title": { "type": "string" },
+                  "body": { "type": "object" },
+                  "linkUrl": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created BoardPost" },
+          "403": { "description": "Link is view-only" }
+        }
+      }
+    },
     "/api/v1/feedback": {
       "post": {
         "tags": ["me"],
@@ -1269,6 +2823,187 @@ const spec = `{
           "priceCurrency": { "type": "string" },
           "slug": { "type": "string" },
           "marketplaceListed": { "type": "boolean" }
+        }
+      },
+      "QuizKit": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "courseId": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "slug": { "type": "string" },
+          "coverImageRef": { "type": "string", "nullable": true },
+          "status": { "type": "string", "enum": ["draft", "ready", "archived"] },
+          "visibility": { "type": "string", "enum": ["private", "course", "org", "public"] },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "questionCount": { "type": "integer" },
+          "archived": { "type": "boolean" },
+          "createdBy": { "type": "string", "format": "uuid", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LiveQuizQuestion": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "kitId": { "type": "string", "format": "uuid" },
+          "position": { "type": "integer" },
+          "questionType": {
+            "type": "string",
+            "enum": ["mc_single", "mc_multiple", "true_false", "type_answer", "numeric", "poll", "ordering", "word_cloud"]
+          },
+          "prompt": { "type": "string" },
+          "promptMediaRef": { "type": "string", "nullable": true },
+          "promptMediaAlt": { "type": "string", "nullable": true },
+          "options": { "type": "array", "items": { "type": "object" } },
+          "correctAnswer": { "type": "object", "nullable": true },
+          "timeLimitSeconds": { "type": "integer", "minimum": 5, "maximum": 240 },
+          "pointsStyle": { "type": "string", "enum": ["standard", "double", "no_points"] },
+          "answerShuffle": { "type": "boolean" },
+          "explanation": { "type": "string", "nullable": true },
+          "sourceQuestionId": { "type": "string", "format": "uuid", "nullable": true },
+          "version": { "type": "integer" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Board": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "courseId": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "slug": { "type": "string" },
+          "archived": { "type": "boolean" },
+          "layout": { "type": "string", "enum": ["wall", "stream", "grid", "columns", "canvas", "timeline", "map"] },
+          "layoutLocked": { "type": "boolean" },
+          "settings": { "type": "object" },
+          "reactionMode": { "type": "string", "enum": ["none", "like", "vote", "star", "grade"] },
+          "assignmentId": { "type": "string", "format": "uuid", "nullable": true },
+          "visibility": { "type": "string", "enum": ["course", "section", "group", "invite", "link", "public"] },
+          "visibilityTarget": { "type": "string", "format": "uuid", "nullable": true },
+          "attribution": { "type": "string", "enum": ["named", "anon_to_peers", "anonymous"] },
+          "canPost": { "type": "boolean" },
+          "canInteract": { "type": "boolean" },
+          "canArrange": { "type": "boolean" },
+          "capabilities": {
+            "type": "object",
+            "properties": {
+              "canView": { "type": "boolean" },
+              "canPost": { "type": "boolean" },
+              "canInteract": { "type": "boolean" },
+              "canArrange": { "type": "boolean" },
+              "canManage": { "type": "boolean" }
+            }
+          },
+          "createdBy": { "type": "string", "format": "uuid", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "BoardMember": {
+        "type": "object",
+        "properties": {
+          "boardId": { "type": "string", "format": "uuid" },
+          "userId": { "type": "string", "format": "uuid" },
+          "role": { "type": "string", "enum": ["owner", "editor", "contributor", "viewer"] },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "BoardShare": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "boardId": { "type": "string", "format": "uuid" },
+          "capability": { "type": "string", "enum": ["view", "contribute"] },
+          "hasPassword": { "type": "boolean" },
+          "expiresAt": { "type": "string", "format": "date-time", "nullable": true },
+          "revokedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "createdBy": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "token": { "type": "string", "description": "Raw token; only returned on create" },
+          "url": { "type": "string" }
+        }
+      },
+      "BoardSection": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "boardId": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "sortIndex": { "type": "number" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "BoardPost": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "boardId": { "type": "string", "format": "uuid" },
+          "authorId": { "type": "string", "format": "uuid", "nullable": true },
+          "guestDisplayName": { "type": "string" },
+          "contentType": { "type": "string", "enum": ["text", "image", "file", "link", "video", "audio", "drawing"] },
+          "title": { "type": "string" },
+          "body": { "type": "object" },
+          "linkUrl": { "type": "string" },
+          "linkPreview": { "type": "object" },
+          "drawingData": {},
+          "attachment": { "$ref": "#/components/schemas/BoardAttachment" },
+          "sectionId": { "type": "string", "format": "uuid" },
+          "sortIndex": { "type": "number" },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": { "type": "number" },
+              "y": { "type": "number" },
+              "w": { "type": "number" },
+              "h": { "type": "number" }
+            }
+          },
+          "eventDate": { "type": "string", "format": "date-time" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" },
+          "reactionCount": { "type": "integer" },
+          "myReaction": {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string" },
+              "value": { "type": "number", "nullable": true }
+            }
+          },
+          "avgStars": { "type": "number" },
+          "commentCount": { "type": "integer" },
+          "grade": { "type": "number", "description": "Visible only to card author and graders (plan VC.5)" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "BoardComment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "postId": { "type": "string", "format": "uuid" },
+          "parentId": { "type": "string", "format": "uuid", "nullable": true },
+          "authorId": { "type": "string", "format": "uuid", "nullable": true },
+          "body": { "type": "object" },
+          "hidden": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "BoardAttachment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "url": { "type": "string", "nullable": true },
+          "fileName": { "type": "string" },
+          "mimeType": { "type": "string" },
+          "sizeBytes": { "type": "integer" },
+          "altText": { "type": "string" },
+          "scanStatus": { "type": "string", "enum": ["pending", "clean", "blocked"] }
         }
       }
     }

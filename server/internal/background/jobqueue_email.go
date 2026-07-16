@@ -80,6 +80,7 @@ func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource) {
 	cfg := cfgSrc.Config()
 	r.Register(JobTypeEmailDelivery, emailDeliveryHandler{pool: pool, cfg: cfg})
 	RegisterUserImportJob(r, pool, cfg)
+	RegisterBoardCopyJob(r, pool, localBoardBlobCopier{root: cfg.CourseFilesRoot})
 	registerScheduledJobs(r, pool, cfgSrc)
 }
 

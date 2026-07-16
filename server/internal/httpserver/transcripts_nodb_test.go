@@ -32,8 +32,15 @@ func TestTranscripts_Unauthenticated(t *testing.T) {
 		{http.MethodGet, "/api/v1/transcripts/config"},
 		{http.MethodGet, "/api/v1/transcripts/requests"},
 		{http.MethodPost, "/api/v1/transcripts/requests"},
+		{http.MethodGet, "/api/v1/transcripts/preview"},
+		{http.MethodGet, "/api/v1/transcripts/documents"},
+		{http.MethodPost, "/api/v1/transcripts/documents"},
+		{http.MethodGet, "/api/v1/transcripts/recipients"},
+		{http.MethodGet, "/api/v1/transcripts/orders"},
+		{http.MethodPost, "/api/v1/transcripts/orders"},
 		{http.MethodGet, "/api/v1/admin/transcripts/config"},
 		{http.MethodPut, "/api/v1/admin/transcripts/config"},
+		{http.MethodGet, "/api/v1/admin/transcripts/recipients"},
 	}
 	for _, tc := range paths {
 		req := httptest.NewRequest(tc.method, tc.path, nil)

@@ -206,6 +206,7 @@ describe('buildSearchItems', () => {
           officeHoursEnabled: true,
           attendanceEnabled: true,
           whiteboardEnabled: true,
+          visualBoardsEnabled: true,
           questionBankEnabled: true,
           sbgEnabled: true,
           standardsAlignmentEnabled: true,
@@ -216,6 +217,7 @@ describe('buildSearchItems', () => {
     const paths = pages.map((p) => p.path)
     expect(paths).toContain('/courses/X/discussions')
     expect(paths).toContain('/courses/X/collab-docs')
+    expect(paths).toContain('/courses/X/boards')
     expect(paths).toContain('/courses/X/groups')
     expect(paths).toContain('/courses/X/files')
     expect(paths).toContain('/courses/X/live')
@@ -225,6 +227,36 @@ describe('buildSearchItems', () => {
     expect(paths).toContain('/courses/X/questions')
     expect(paths).toContain('/courses/X/standards-gradebook')
     expect(paths).toContain('/courses/X/standards-coverage')
+  })
+
+  it('includes boards when visualBoardsEnabled is true', () => {
+    const items = buildSearchItems(
+      [{ courseCode: 'X', title: 'Y', visualBoardsEnabled: true }],
+      [],
+      allowsNone,
+    )
+    expect(items.some((i) => i.path === '/courses/X/boards')).toBe(true)
+    const disabled = buildSearchItems(
+      [{ courseCode: 'X', title: 'Y', visualBoardsEnabled: false }],
+      [],
+      allowsNone,
+    )
+    expect(disabled.some((i) => i.path === '/courses/X/boards')).toBe(false)
+  })
+
+  it('includes live quizzes when interactiveQuizzesEnabled is true', () => {
+    const items = buildSearchItems(
+      [{ courseCode: 'X', title: 'Y', interactiveQuizzesEnabled: true }],
+      [],
+      allowsNone,
+    )
+    expect(items.some((i) => i.path === '/courses/X/live-quizzes')).toBe(true)
+    const disabled = buildSearchItems(
+      [{ courseCode: 'X', title: 'Y', interactiveQuizzesEnabled: false }],
+      [],
+      allowsNone,
+    )
+    expect(disabled.some((i) => i.path === '/courses/X/live-quizzes')).toBe(false)
   })
 
   it('includes whiteboard when enabled and staff may edit the course', () => {

@@ -163,6 +163,11 @@ type platformSettingsJSON struct {
 	FFPublicCatalog                    bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                bool `json:"ffCourseMarketplace"`
 	FFFeedback                         bool `json:"ffFeedback"`
+	FFVisualBoards                     bool `json:"ffVisualBoards"`
+	FFBoardsRealtime                   bool `json:"ffBoardsRealtime"`
+	FFBoardsExternalSharing            bool `json:"ffBoardsExternalSharing"`
+	FFInteractiveQuizzes               bool `json:"ffInteractiveQuizzes"`
+	FFIqLiveHosting                    bool `json:"ffIqLiveHosting"`
 	FFEmailSES                         bool `json:"ffEmailSes"`
 	FFPublicAPI                        bool `json:"ffPublicApi"`
 	FFStripeBilling                    bool `json:"ffStripeBilling"`
@@ -407,6 +412,11 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
 			FFFeedback:                         merged.FFFeedback,
+			FFVisualBoards:                     merged.FFVisualBoards,
+			FFBoardsRealtime:                   merged.FFBoardsRealtime,
+			FFBoardsExternalSharing:            merged.FFBoardsExternalSharing,
+			FFInteractiveQuizzes:               merged.FFInteractiveQuizzes,
+			FFIqLiveHosting:                    merged.FFIqLiveHosting,
 			FFEmailSES:                         merged.FFEmailSES,
 			FFPublicAPI:                        merged.FFPublicAPI,
 			FFStripeBilling:                    merged.FFStripeBilling,
@@ -623,6 +633,11 @@ type putPlatformBody struct {
 	FFPublicCatalog                    *bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                *bool `json:"ffCourseMarketplace"`
 	FFFeedback                         *bool `json:"ffFeedback"`
+	FFVisualBoards                     *bool `json:"ffVisualBoards"`
+	FFBoardsRealtime                   *bool `json:"ffBoardsRealtime"`
+	FFBoardsExternalSharing            *bool `json:"ffBoardsExternalSharing"`
+	FFInteractiveQuizzes               *bool `json:"ffInteractiveQuizzes"`
+	FFIqLiveHosting                    *bool `json:"ffIqLiveHosting"`
 	FFEmailSES                         *bool `json:"ffEmailSes"`
 	FFPublicAPI                        *bool `json:"ffPublicApi"`
 	FFStripeBilling                    *bool `json:"ffStripeBilling"`
@@ -1025,6 +1040,11 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffcoursemarketplace", body.FFCourseMarketplace, func(v bool) { wr.FFCourseMarketplace = &v })
 		setBool("fffeedback", body.FFFeedback, func(v bool) { wr.FFFeedback = &v })
+		setBool("ffvisualboards", body.FFVisualBoards, func(v bool) { wr.FFVisualBoards = &v })
+		setBool("ffboardsrealtime", body.FFBoardsRealtime, func(v bool) { wr.FFBoardsRealtime = &v })
+		setBool("ffboardsexternalsharing", body.FFBoardsExternalSharing, func(v bool) { wr.FFBoardsExternalSharing = &v })
+		setBool("ffinteractivequizzes", body.FFInteractiveQuizzes, func(v bool) { wr.FFInteractiveQuizzes = &v })
+		setBool("ffiqlivehosting", body.FFIqLiveHosting, func(v bool) { wr.FFIqLiveHosting = &v })
 		setBool("ffemailses", body.FFEmailSES, func(v bool) { wr.FFEmailSES = &v })
 		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
@@ -1236,6 +1256,11 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
 			FFFeedback:                         merged.FFFeedback,
+			FFVisualBoards:                     merged.FFVisualBoards,
+			FFBoardsRealtime:                   merged.FFBoardsRealtime,
+			FFBoardsExternalSharing:            merged.FFBoardsExternalSharing,
+			FFInteractiveQuizzes:               merged.FFInteractiveQuizzes,
+			FFIqLiveHosting:                    merged.FFIqLiveHosting,
 			FFEmailSES:                         merged.FFEmailSES,
 			FFPublicAPI:                        merged.FFPublicAPI,
 			FFStripeBilling:                    merged.FFStripeBilling,

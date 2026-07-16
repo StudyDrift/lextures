@@ -11,7 +11,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/repos/avscanjobs"
+	"github.com/lextures/lextures/server/internal/repos/board"
 	"github.com/lextures/lextures/server/internal/repos/emailjobs"
+	"github.com/lextures/lextures/server/internal/repos/notificationsinbox"
 	"github.com/lextures/lextures/server/internal/repos/storageobjects"
 	"github.com/lextures/lextures/server/internal/repos/useraudit"
 	"github.com/lextures/lextures/server/internal/service/clamav"
@@ -105,12 +107,52 @@ func (w *Worker) scanObject(ctx context.Context, obj *storageobjects.Object) (in
 		return false, fmt.Errorf("clamav scan: %w", err)
 	}
 	if result.Clean {
-		return false, storageobjects.MarkClean(ctx, w.Pool, obj.ID)
+		if err := storageobjects.MarkClean(ctx, w.Pool, obj.ID); err != nil {
+			return false, err
+		}
+		_, _ = board.SyncAttachmentScanByStorageKey(ctx, w.Pool, obj.ObjectKey, board.ScanClean)
+		return false, nil
 	}
 	if err := w.quarantine(ctx, obj, result.VirusName); err != nil {
 		return true, err
 	}
+	w.syncBoardAttachmentBlocked(ctx, obj.ObjectKey)
 	return true, nil
+}
+
+func (w *Worker) syncBoardAttachmentBlocked(ctx context.Context, storageKey string) {
+	refs, err := board.SyncAttachmentScanByStorageKey(ctx, w.Pool, storageKey, board.ScanBlocked)
+	if err != nil || len(refs) == 0 {
+		return
+	}
+	for _, ref := range refs {
+		pid := ref.PostID
+		_, _ = board.CreateReport(ctx, w.Pool, ref.CourseCode, ref.BoardID, nil, &pid, nil,
+			"Attachment blocked by antivirus scan", board.ReportKindAVBlocked)
+		tid, _ := uuid.Parse(ref.PostID)
+		_ = board.InsertModerationLog(ctx, w.Pool, ref.BoardID, nil, board.ModActionAVBlocked, board.TargetPost, &tid, "scan_status=blocked")
+		actionURL := "/courses/" + ref.CourseCode + "/boards/" + ref.BoardID + "?moderation=1"
+		rows, qerr := w.Pool.Query(ctx, `
+			SELECT ce.user_id
+			FROM course.course_enrollments ce
+			INNER JOIN course.courses c ON c.id = ce.course_id
+			INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_staff = true
+			WHERE c.course_code = $1 AND ce.status = 'active'
+		`, ref.CourseCode)
+		if qerr != nil {
+			continue
+		}
+		for rows.Next() {
+			var staffID uuid.UUID
+			if rows.Scan(&staffID) == nil {
+				_, _ = notificationsinbox.Insert(ctx, w.Pool, staffID, "board_moderation_av",
+					"Board attachment blocked",
+					"An attachment was blocked by scanning and needs review.",
+					actionURL)
+			}
+		}
+		rows.Close()
+	}
 }
 
 func (w *Worker) quarantine(ctx context.Context, obj *storageobjects.Object, virusName string) error {

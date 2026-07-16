@@ -147,6 +147,11 @@ type Row struct {
 	FFPublicCatalog                 *bool
 	FFCourseMarketplace             *bool
 	FFFeedback                      *bool
+	FFVisualBoards                  *bool
+	FFBoardsRealtime                *bool
+	FFBoardsExternalSharing         *bool
+	FFInteractiveQuizzes            *bool
+	FFIqLiveHosting                 *bool
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFPaymentsEnabled               *bool
@@ -339,6 +344,11 @@ type Write struct {
 	FFPublicCatalog                 *bool
 	FFCourseMarketplace             *bool
 	FFFeedback                      *bool
+	FFVisualBoards                  *bool
+	FFBoardsRealtime                *bool
+	FFBoardsExternalSharing         *bool
+	FFInteractiveQuizzes            *bool
+	FFIqLiveHosting                 *bool
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFPaymentsEnabled               *bool
@@ -527,6 +537,11 @@ SELECT
 	ff_public_catalog,
 	ff_course_marketplace,
 	ff_feedback,
+	ff_visual_boards,
+	ff_boards_realtime,
+	ff_boards_external_sharing,
+	ff_interactive_quizzes,
+	ff_iq_live_hosting,
 	ff_public_api,
 	ff_stripe_billing,
 	ff_payments_enabled,
@@ -708,6 +723,11 @@ WHERE id = 1
 		&r.FFPublicCatalog,
 		&r.FFCourseMarketplace,
 		&r.FFFeedback,
+		&r.FFVisualBoards,
+		&r.FFBoardsRealtime,
+		&r.FFBoardsExternalSharing,
+		&r.FFInteractiveQuizzes,
+		&r.FFIqLiveHosting,
 		&r.FFPublicAPI,
 		&r.FFStripeBilling,
 		&r.FFPaymentsEnabled,
@@ -983,6 +1003,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_public_catalog,
 	ff_course_marketplace,
 	ff_feedback,
+	ff_visual_boards,
 	updated_at
 ) VALUES (
 	1,
@@ -992,7 +1013,7 @@ INSERT INTO settings.platform_app_settings (
 	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114, $115, $116, $117, $118, $119, $120,
 	$121, $122, $123, $124, $125, $126, $127, $128, $129, $130, $131, $132, $133, $134, $135, $136, $137, $138, $139, $140,
 	$141, $142, $143, $144, $145, $146, $147, $148, $149, $150, $151, $152, $153, $154, $155, $156, $157, $158, $159, $160,
-	$161, $162, $163, $164, $165, $166, $167, $168, $169, $170, $171,
+	$161, $162, $163, $164, $165, $166, $167, $168, $169, $170, $171, $172,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -1160,6 +1181,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_public_catalog = COALESCE(EXCLUDED.ff_public_catalog, settings.platform_app_settings.ff_public_catalog),
 	ff_course_marketplace = COALESCE(EXCLUDED.ff_course_marketplace, settings.platform_app_settings.ff_course_marketplace),
 	ff_feedback = COALESCE(EXCLUDED.ff_feedback, settings.platform_app_settings.ff_feedback),
+	ff_visual_boards = COALESCE(EXCLUDED.ff_visual_boards, settings.platform_app_settings.ff_visual_boards),
 	ff_public_api = COALESCE(EXCLUDED.ff_public_api, settings.platform_app_settings.ff_public_api),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
@@ -1341,6 +1363,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFPublicCatalog,
 		w.FFCourseMarketplace,
 		w.FFFeedback,
+		w.FFVisualBoards,
 	)
 	if err != nil {
 		return nil, err

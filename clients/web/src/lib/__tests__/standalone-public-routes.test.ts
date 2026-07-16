@@ -16,6 +16,11 @@ describe('isStandalonePublicRoute', () => {
     expect(isStandalonePublicRoute('/verify/abc')).toBe(true)
   })
 
+  it('returns true for live quiz play routes', () => {
+    expect(isStandalonePublicRoute('/play')).toBe(true)
+    expect(isStandalonePublicRoute('/play/123456')).toBe(true)
+  })
+
   it('returns false for authenticated app routes', () => {
     expect(isStandalonePublicRoute('/')).toBe(false)
     expect(isStandalonePublicRoute('/courses')).toBe(false)

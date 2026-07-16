@@ -41,6 +41,8 @@ One plan per feature gap identified in `[docs/MISSING_FEATURES.md](../MISSING_FE
 - [LH — Lighthouse remediation](../completed/lighthouse/) (completed; audits from `docs/lighthouse/` reports)
 - [S — Standards & Legal Hardening](standards/) — bullet-proofing FERPA + every jurisdiction's privacy/AI/accessibility law (S01–S21)
 - [AP — AI Multi-Provider / BYOK](ai-providers/) — OpenRouter as one provider among many; platform + org credentials; call-site migration (AP.1–AP.9)
+- [VC — Visual Collaboration Boards](visual-collaboration/) · [completed](../completed/visual-collaboration/) — in-house real-time collaboration board behind a per-course feature flag (like the Whiteboard app); posts, layouts, presence, moderation, sharing, templates, export (VC.1–VC.10)
+- [IQ — Interactive Quizzes](interactive-quizzes/) · [completed](../completed/interactive-quizzes/) — in-house, game-based live quizzing behind a per-course feature flag; author quiz kits, host live games with join codes + leaderboards, plus team/student-paced/async-homework modes, reports/gradebook, sharing, moderation & accessibility, and AI generation (IQ.1–IQ.11)
 
 ## Standards & Legal Hardening (2026-07-06)
 

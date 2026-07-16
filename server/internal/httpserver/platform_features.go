@@ -91,6 +91,11 @@ type platformFeaturesJSON struct {
 	FFPublicCatalog             bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace         bool `json:"ffCourseMarketplace"`
 	FFFeedback                  bool `json:"ffFeedback"`
+	FFVisualBoards              bool `json:"ffVisualBoards"`
+	FFBoardsRealtime            bool `json:"ffBoardsRealtime"`
+	FFBoardsExternalSharing     bool `json:"ffBoardsExternalSharing"`
+	FFInteractiveQuizzes        bool `json:"ffInteractiveQuizzes"`
+	FFIqLiveHosting             bool `json:"ffIqLiveHosting"`
 	FFEmailSES                  bool `json:"ffEmailSes"`
 	FFPublicAPI                 bool `json:"ffPublicApi"`
 	FFStripeBilling             bool `json:"ffStripeBilling"`
@@ -225,6 +230,11 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFPublicCatalog:             cfg.FFPublicCatalog,
 		FFCourseMarketplace:         cfg.FFCourseMarketplace,
 		FFFeedback:                  cfg.FFFeedback,
+		FFVisualBoards:              cfg.FFVisualBoards,
+		FFBoardsRealtime:            cfg.FFBoardsRealtime,
+		FFBoardsExternalSharing:     cfg.FFBoardsExternalSharing,
+		FFInteractiveQuizzes:        cfg.FFInteractiveQuizzes,
+		FFIqLiveHosting:             cfg.FFIqLiveHosting,
 		FFEmailSES:                  cfg.FFEmailSES,
 		FFPublicAPI:                 cfg.FFPublicAPI,
 		FFStripeBilling:             cfg.FFStripeBilling,

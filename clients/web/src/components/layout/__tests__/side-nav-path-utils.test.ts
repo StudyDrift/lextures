@@ -39,6 +39,8 @@ describe('isSettingsShellRoute', () => {
     expect(isSettingsShellRoute('/admin/compliance/iso')).toBe(true)
     expect(isSettingsShellRoute('/admin/quarantine')).toBe(true)
     expect(isSettingsShellRoute('/library/org-1')).toBe(true)
+    expect(isSettingsShellRoute('/admin/banners')).toBe(true)
+    expect(isSettingsShellRoute('/admin/transcripts')).toBe(true)
   })
 
   it('does not match main-shell learner routes', () => {

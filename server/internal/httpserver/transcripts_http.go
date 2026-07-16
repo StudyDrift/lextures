@@ -93,14 +93,25 @@ func requestToJSON(r transcriptsrepo.Request) transcriptRequestJSON {
 }
 
 type transcriptsConfigJSON struct {
-	WebhookURL         string  `json:"webhookUrl"`
-	WebhookSecret      string  `json:"webhookSecret"`
-	HasWebhookSecret   bool    `json:"hasWebhookSecret"`
-	PickupInstructions *string `json:"pickupInstructions,omitempty"`
+	WebhookURL              string  `json:"webhookUrl"`
+	WebhookSecret           string  `json:"webhookSecret"`
+	HasWebhookSecret        bool    `json:"hasWebhookSecret"`
+	PickupInstructions      *string `json:"pickupInstructions,omitempty"`
+	OfficialEnabled         bool    `json:"officialEnabled"`
+	OrdersUIEnabled         bool    `json:"ordersUiEnabled"`
+	AutoApprovalEnabled     bool    `json:"autoApprovalEnabled"`
+	RegistrarConsoleEnabled bool    `json:"registrarConsoleEnabled"`
+	ConsentRequired         bool    `json:"consentRequired"`
 }
 
 func configToJSON(c *transcriptsrepo.Config) transcriptsConfigJSON {
-	out := transcriptsConfigJSON{}
+	out := transcriptsConfigJSON{
+		OfficialEnabled:         c.OfficialEnabled,
+		OrdersUIEnabled:         c.OrdersUIEnabled,
+		AutoApprovalEnabled:     c.AutoApprovalEnabled,
+		RegistrarConsoleEnabled: c.RegistrarConsoleEnabled,
+		ConsentRequired:         c.ConsentRequired,
+	}
 	if c.WebhookURL != nil {
 		out.WebhookURL = *c.WebhookURL
 	}
@@ -118,10 +129,17 @@ func configToJSON(c *transcriptsrepo.Config) transcriptsConfigJSON {
 type transcriptsStudentConfigJSON struct {
 	PickupInstructions *string `json:"pickupInstructions,omitempty"`
 	PickupAvailable    bool    `json:"pickupAvailable"`
+	OfficialEnabled    bool    `json:"officialEnabled"`
+	OrdersUIEnabled    bool    `json:"ordersUiEnabled"`
+	ConsentRequired    bool    `json:"consentRequired"`
 }
 
 func studentConfigToJSON(c *transcriptsrepo.Config) transcriptsStudentConfigJSON {
-	out := transcriptsStudentConfigJSON{}
+	out := transcriptsStudentConfigJSON{
+		OfficialEnabled: c.OfficialEnabled,
+		OrdersUIEnabled: c.OrdersUIEnabled,
+		ConsentRequired: c.ConsentRequired,
+	}
 	if c.PickupInstructions != nil && strings.TrimSpace(*c.PickupInstructions) != "" {
 		s := strings.TrimSpace(*c.PickupInstructions)
 		out.PickupInstructions = &s
@@ -137,6 +155,8 @@ func (d Deps) registerTranscriptsRoutes(r chi.Router) {
 	r.Get("/api/v1/transcripts/config", d.handleGetTranscriptsConfig())
 	r.Post("/api/v1/transcripts/requests", d.handlePostTranscriptRequest())
 	r.Get("/api/v1/transcripts/requests", d.handleGetTranscriptRequests())
+	d.registerTranscriptDocumentRoutes(r)
+	d.registerTranscriptOrderRoutes(r)
 }
 
 // GET /api/v1/admin/transcripts/config
@@ -163,9 +183,14 @@ func (d Deps) handleGetAdminTranscriptsConfig() http.HandlerFunc {
 }
 
 type putTranscriptsConfigBody struct {
-	WebhookURL         string  `json:"webhookUrl"`
-	WebhookSecret      *string `json:"webhookSecret"`
-	PickupInstructions *string `json:"pickupInstructions"`
+	WebhookURL              string  `json:"webhookUrl"`
+	WebhookSecret           *string `json:"webhookSecret"`
+	PickupInstructions      *string `json:"pickupInstructions"`
+	OfficialEnabled         *bool   `json:"officialEnabled"`
+	OrdersUIEnabled         *bool   `json:"ordersUiEnabled"`
+	AutoApprovalEnabled     *bool   `json:"autoApprovalEnabled"`
+	RegistrarConsoleEnabled *bool   `json:"registrarConsoleEnabled"`
+	ConsentRequired         *bool   `json:"consentRequired"`
 }
 
 // PUT /api/v1/admin/transcripts/config
@@ -204,7 +229,16 @@ func (d Deps) handlePutAdminTranscriptsConfig() http.HandlerFunc {
 				secret = &s
 			}
 		}
-		cfg, err := transcriptsrepo.UpsertConfig(r.Context(), d.Pool, url, secret, body.PickupInstructions)
+		cfg, err := transcriptsrepo.UpsertConfig(r.Context(), d.Pool, transcriptsrepo.UpsertConfigInput{
+			WebhookURL:              url,
+			WebhookSecret:           secret,
+			PickupInstructions:      body.PickupInstructions,
+			OfficialEnabled:         body.OfficialEnabled,
+			OrdersUIEnabled:         body.OrdersUIEnabled,
+			AutoApprovalEnabled:     body.AutoApprovalEnabled,
+			RegistrarConsoleEnabled: body.RegistrarConsoleEnabled,
+			ConsentRequired:         body.ConsentRequired,
+		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save transcripts config.")
 			return
@@ -345,6 +379,7 @@ func parseTranscriptRequestBody(body postTranscriptRequestBody, cfg *transcripts
 }
 
 // POST /api/v1/transcripts/requests
+// Deprecated: proxies to a one-item transcript order, then continues legacy webhook delivery.
 func (d Deps) handlePostTranscriptRequest() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if d.transcriptsFeatureOff(w) {
@@ -389,12 +424,89 @@ func (d Deps) handlePostTranscriptRequest() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not create transcript request.")
 			return
 		}
+		// Mirror into the order model (best-effort; legacy request remains source of webhook delivery).
+		_ = d.proxyLegacyRequestToOrder(r.Context(), userID, &orgID, cfg, input, req.ID)
+
 		go d.deliverTranscriptWebhook(context.Background(), *req, userID, cfg)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Deprecation", "true")
+		w.Header().Set("Sunset", "Sat, 01 Nov 2026 00:00:00 GMT")
+		w.Header().Set("Link", "</api/v1/transcripts/orders>; rel=\"successor-version\"")
 		w.WriteHeader(http.StatusAccepted)
 		_ = json.NewEncoder(w).Encode(map[string]any{"request": requestToJSON(*req)})
 	}
+}
+
+func (d Deps) proxyLegacyRequestToOrder(
+	ctx context.Context,
+	userID uuid.UUID,
+	orgID *uuid.UUID,
+	cfg *transcriptsrepo.Config,
+	input transcriptsrepo.InsertRequestInput,
+	legacyID uuid.UUID,
+) error {
+	item := transcriptsrepo.CreateOrderItemInput{
+		Urgency: transcriptsrepo.UrgencyStandard,
+	}
+	if input.DeliveryType == transcriptsrepo.DeliveryMail {
+		if input.UrgencyDaysMin != nil && *input.UrgencyDaysMin <= 2 {
+			item.Urgency = transcriptsrepo.UrgencyRush
+		}
+		item.DeliveryMethod = transcriptsrepo.DeliveryPostalMail
+		addr := map[string]string{}
+		if input.DeliveryAddress != nil {
+			addr["raw"] = *input.DeliveryAddress
+		}
+		raw, _ := json.Marshal(addr)
+		name := "Mail recipient"
+		item.AdHoc = &transcriptsrepo.AdHocRecipientInput{
+			Type:         transcriptsrepo.RecipientOther,
+			Name:         name,
+			CanonicalKey: transcriptsStrPtr("adhoc:mail:" + strings.ToLower(strings.TrimSpace(transcriptsDerefStr(input.DeliveryAddress)))),
+			Capabilities: []string{string(transcriptsrepo.DeliveryPostalMail)},
+			Address:      raw,
+		}
+	} else {
+		item.DeliveryMethod = transcriptsrepo.DeliverySecureLink
+		selfID := transcriptsrepo.GlobalSelfRecipientID
+		item.RecipientID = &selfID
+		if input.DeliveryType == transcriptsrepo.DeliveryPickup {
+			item.AdHoc = &transcriptsrepo.AdHocRecipientInput{
+				Type:         transcriptsrepo.RecipientOther,
+				Name:         "Pickup",
+				CanonicalKey: transcriptsStrPtr("adhoc:pickup:" + userID.String()),
+				Capabilities: []string{string(transcriptsrepo.DeliverySecureLink)},
+			}
+			item.RecipientID = nil
+			if input.UrgencyDays <= 1 {
+				item.Urgency = transcriptsrepo.UrgencyRush
+			}
+		}
+	}
+	order, err := transcriptsrepo.CreateOrder(ctx, d.Pool, cfg, transcriptsrepo.CreateOrderInput{
+		UserID: userID,
+		OrgID:  orgID,
+		Items:  []transcriptsrepo.CreateOrderItemInput{item},
+	})
+	if err != nil {
+		return err
+	}
+	_, err = d.Pool.Exec(ctx, `
+UPDATE transcripts.orders
+SET legacy_request_id = $2, status = 'in_review', submitted_at = NOW()
+WHERE id = $1
+`, order.ID, legacyID)
+	return err
+}
+
+func transcriptsStrPtr(s string) *string { return &s }
+
+func transcriptsDerefStr(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
 }
 
 // GET /api/v1/transcripts/requests

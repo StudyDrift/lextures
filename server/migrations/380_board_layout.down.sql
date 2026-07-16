@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 380_board_layout.sql
+-- See docs/runbooks/database-migration-rollback.md

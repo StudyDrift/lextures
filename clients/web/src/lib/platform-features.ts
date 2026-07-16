@@ -110,6 +110,11 @@ export type PlatformFeaturesSnapshot = {
   aiProviderAbstractionEnabled?: boolean
   ragNotebookEnabled?: boolean
   ffFeedback?: boolean
+  ffVisualBoards?: boolean
+  ffInteractiveQuizzes?: boolean
+  ffIqLiveHosting?: boolean
+  ffBoardsRealtime?: boolean
+  ffBoardsExternalSharing?: boolean
   ffEmailSes?: boolean
 }
 
@@ -215,6 +220,11 @@ const defaults: PlatformFeaturesSnapshot = {
   aiProviderAbstractionEnabled: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
+  ffVisualBoards: false,
+  ffInteractiveQuizzes: false,
+  ffIqLiveHosting: false,
+  ffBoardsRealtime: false,
+  ffBoardsExternalSharing: false,
   ffEmailSes: false,
 }
 

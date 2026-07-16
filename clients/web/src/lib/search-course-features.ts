@@ -39,6 +39,8 @@ type NavFeatureFlags = Pick<
   | 'attendanceEnabled'
   | 'whiteboardEnabled'
   | 'reportCardsEnabled'
+  | 'visualBoardsEnabled'
+  | 'interactiveQuizzesEnabled'
 >
 
 export function navFeaturesToSearchCourse(
@@ -64,6 +66,8 @@ export function navFeaturesToSearchCourse(
     attendanceEnabled: nav.attendanceEnabled,
     whiteboardEnabled: nav.whiteboardEnabled,
     reportCardsEnabled: nav.reportCardsEnabled,
+    visualBoardsEnabled: nav.visualBoardsEnabled,
+    interactiveQuizzesEnabled: nav.interactiveQuizzesEnabled,
   })
 }
 

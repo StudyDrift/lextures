@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 385_interactive_quizzes_foundation.sql
+-- See docs/runbooks/database-migration-rollback.md

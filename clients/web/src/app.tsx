@@ -50,6 +50,9 @@ export default function App() {
         <Route path="/paths" element={<Pages.PathsCatalogPage />} />
         <Route path="/paths/:slug" element={<Pages.PathLandingPage />} />
         <Route path="/verify/:token" element={<Pages.CcrVerifyPage />} />
+        <Route path="/board-links/:token" element={<Pages.BoardSharePage />} />
+        <Route path="/play" element={<Pages.LiveQuizPlayPage />} />
+        <Route path="/play/:code" element={<Pages.LiveQuizPlayPage />} />
         <Route path="/badges/:handle/:badgeSlug" element={<Pages.PublicBadgeDetailPage />} />
         <Route path="/badges/:handle" element={<Pages.PublicBadgeListPage />} />
         <Route path="/explore" element={<Pages.ExploreCatalogPage />} />
@@ -100,6 +103,12 @@ export default function App() {
               <Route path="feed" element={<Pages.CourseFeedPage />} />
               <Route path="discussions" element={<Pages.CourseDiscussionsPage />} />
               <Route path="collab-docs/:docId?" element={<Pages.CourseCollabDocsPage />} />
+              <Route path="boards" element={<Pages.CourseBoardsPage />} />
+              <Route path="boards/:boardId" element={<Pages.CourseBoardDetailPage />} />
+              <Route path="live-quizzes" element={<Pages.LiveQuizKitsPage />} />
+              <Route path="live-quizzes/games/:gameId/present" element={<Pages.LiveQuizPresentPage />} />
+              <Route path="live-quizzes/games/:gameId" element={<Pages.LiveQuizHostPage />} />
+              <Route path="live-quizzes/:kitId" element={<Pages.LiveQuizKitEditorPage />} />
               <Route path="files" element={<Pages.CourseFilesPage />} />
               <Route path="groups" element={<Pages.CourseGroupsPage />} />
               <Route path="lesson-generator" element={<Pages.LessonGeneratorPage />} />
@@ -164,7 +173,12 @@ export default function App() {
               <Route path="import" element={<Pages.AdminImport />} />
               <Route path="courses" element={<Pages.AdminCourses />} />
               <Route path="integrations" element={<Pages.AdminIntegrations />} />
-              <Route path="banners" element={<Pages.AdminBanners />} />
+              {/* Notices live at /admin/banners so they work when Admin Console is disabled.
+                  AdminLayout also redirects this path early; this is a fallback. */}
+              <Route
+                path="banners"
+                element={<Navigate to="/admin/banners" replace />}
+              />
               <Route path="settings" element={<Pages.AdminSettingsPage />} />
               <Route path="audit-log" element={<Pages.AdminAuditLog />} />
               <Route path="search" element={<Pages.AdminSearchResults />} />
@@ -204,6 +218,8 @@ export default function App() {
             <Route path="/admin/integrations" element={<Pages.IntegrationsAdminPage />} />
             <Route path="/admin/webhooks" element={<Pages.WebhooksAdminPage />} />
             <Route path="/admin/scheduled-jobs" element={<Pages.ScheduledJobsAdminPage />} />
+            <Route path="/admin/banners" element={<Pages.AdminBanners />} />
+            <Route path="/admin/transcripts" element={<Pages.AdminTranscripts />} />
             <Route path="/admin/bookstore" element={<Pages.BookstoreIntegrationPage />} />
             <Route path="/admin/final-grades/status" element={<Pages.GradeSubmissionStatus />} />
             <Route path="/admin/incompletes" element={<Pages.IncompletesAdminPage />} />

@@ -115,6 +115,11 @@ export type PlatformSettingsPayload = {
   ffPublicCatalog: boolean
   ffCourseMarketplace: boolean
   ffFeedback: boolean
+  ffVisualBoards: boolean
+  ffInteractiveQuizzes: boolean
+  ffIqLiveHosting: boolean
+  ffBoardsRealtime: boolean
+  ffBoardsExternalSharing: boolean
   ffEmailSes: boolean
   ffSelfPacedMode: boolean
   ffPublicApi: boolean
