@@ -36,10 +36,18 @@ func (d Deps) adminConsoleEnabled(w http.ResponseWriter) bool {
 
 // adminConsoleAccess authenticates the caller and ensures org_admin or global admin for targetOrg.
 // Global admins may pass ?orgId= to scope to another organization.
+// Requires the Admin Console platform feature to be enabled.
 func (d Deps) adminConsoleAccess(w http.ResponseWriter, r *http.Request, wantManage bool) (actor uuid.UUID, targetOrg uuid.UUID, globalAdmin bool, ok bool) {
 	if !d.adminConsoleEnabled(w) {
 		return uuid.UUID{}, uuid.UUID{}, false, false
 	}
+	return d.orgAdminAccess(w, r, wantManage)
+}
+
+// orgAdminAccess is the same permission model as adminConsoleAccess (org admin / global admin)
+// but does not require the Admin Console feature flag. Used by features that share console
+// permissions but ship independently (e.g. maintenance banners, plan 18.6).
+func (d Deps) orgAdminAccess(w http.ResponseWriter, r *http.Request, wantManage bool) (actor uuid.UUID, targetOrg uuid.UUID, globalAdmin bool, ok bool) {
 	actor, ok = d.meUserID(w, r)
 	if !ok {
 		return uuid.UUID{}, uuid.UUID{}, false, false

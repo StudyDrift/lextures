@@ -11,6 +11,8 @@ const STANDALONE_PUBLIC_ROUTE_PREFIXES = [
   '/p',
   '/paths',
   '/verify',
+  '/board-links',
+  '/play',
   '/badges',
   '/explore',
 ] as const

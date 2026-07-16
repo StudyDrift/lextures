@@ -69,10 +69,15 @@ type InsertRequestInput struct {
 
 // Config holds the institution webhook settings.
 type Config struct {
-	WebhookURL          *string
-	WebhookSecret       *string
-	PickupInstructions  *string
-	UpdatedAt           time.Time
+	WebhookURL              *string
+	WebhookSecret           *string
+	PickupInstructions      *string
+	OfficialEnabled         bool
+	OrdersUIEnabled         bool
+	AutoApprovalEnabled     bool
+	RegistrarConsoleEnabled bool
+	ConsentRequired         bool
+	UpdatedAt               time.Time
 }
 
 // GetConfig returns the singleton transcripts config row.
@@ -80,12 +85,17 @@ func GetConfig(ctx context.Context, pool *pgxpool.Pool) (*Config, error) {
 	var c Config
 	var url, secret, pickup *string
 	err := pool.QueryRow(ctx, `
-SELECT webhook_url, webhook_secret, pickup_instructions, updated_at
+SELECT webhook_url, webhook_secret, pickup_instructions,
+       COALESCE(official_enabled, FALSE), COALESCE(orders_ui_enabled, FALSE),
+       COALESCE(auto_approval_enabled, FALSE), COALESCE(registrar_console_enabled, FALSE),
+       COALESCE(consent_required, TRUE),
+       updated_at
 FROM settings.transcripts_config
 WHERE id = 1
-`).Scan(&url, &secret, &pickup, &c.UpdatedAt)
+`).Scan(&url, &secret, &pickup, &c.OfficialEnabled, &c.OrdersUIEnabled,
+		&c.AutoApprovalEnabled, &c.RegistrarConsoleEnabled, &c.ConsentRequired, &c.UpdatedAt)
 	if err == pgx.ErrNoRows {
-		return &Config{}, nil
+		return &Config{ConsentRequired: true}, nil
 	}
 	if err != nil {
 		return nil, err
@@ -96,14 +106,21 @@ WHERE id = 1
 	return &c, nil
 }
 
-// UpsertConfig saves webhook URL, optional secret (empty secret leaves unchanged), and pickup instructions.
-func UpsertConfig(
-	ctx context.Context,
-	pool *pgxpool.Pool,
-	webhookURL string,
-	webhookSecret *string,
-	pickupInstructions *string,
-) (*Config, error) {
+// UpsertConfigInput is the admin config patch.
+type UpsertConfigInput struct {
+	WebhookURL              string
+	WebhookSecret           *string
+	PickupInstructions      *string
+	OfficialEnabled         *bool
+	OrdersUIEnabled         *bool
+	AutoApprovalEnabled     *bool
+	RegistrarConsoleEnabled *bool
+	ConsentRequired         *bool
+}
+
+// UpsertConfig saves webhook URL, optional secret (empty secret leaves unchanged), pickup instructions,
+// and optional feature toggles (nil leaves unchanged).
+func UpsertConfig(ctx context.Context, pool *pgxpool.Pool, in UpsertConfigInput) (*Config, error) {
 	var c Config
 	var url, secret, pickup *string
 	err := pool.QueryRow(ctx, `
@@ -118,10 +135,37 @@ SET
         WHEN $3::text IS NOT NULL THEN NULLIF(TRIM($3), '')
         ELSE pickup_instructions
     END,
+    official_enabled = CASE
+        WHEN $4::boolean IS NOT NULL THEN $4
+        ELSE official_enabled
+    END,
+    orders_ui_enabled = CASE
+        WHEN $5::boolean IS NOT NULL THEN $5
+        ELSE orders_ui_enabled
+    END,
+    auto_approval_enabled = CASE
+        WHEN $6::boolean IS NOT NULL THEN $6
+        ELSE auto_approval_enabled
+    END,
+    registrar_console_enabled = CASE
+        WHEN $7::boolean IS NOT NULL THEN $7
+        ELSE registrar_console_enabled
+    END,
+    consent_required = CASE
+        WHEN $8::boolean IS NOT NULL THEN $8
+        ELSE consent_required
+    END,
     updated_at = NOW()
 WHERE id = 1
-RETURNING webhook_url, webhook_secret, pickup_instructions, updated_at
-`, webhookURL, webhookSecret, pickupInstructions).Scan(&url, &secret, &pickup, &c.UpdatedAt)
+RETURNING webhook_url, webhook_secret, pickup_instructions,
+          COALESCE(official_enabled, FALSE), COALESCE(orders_ui_enabled, FALSE),
+          COALESCE(auto_approval_enabled, FALSE), COALESCE(registrar_console_enabled, FALSE),
+          COALESCE(consent_required, TRUE),
+          updated_at
+`, in.WebhookURL, in.WebhookSecret, in.PickupInstructions, in.OfficialEnabled, in.OrdersUIEnabled,
+		in.AutoApprovalEnabled, in.RegistrarConsoleEnabled, in.ConsentRequired).Scan(
+		&url, &secret, &pickup, &c.OfficialEnabled, &c.OrdersUIEnabled,
+		&c.AutoApprovalEnabled, &c.RegistrarConsoleEnabled, &c.ConsentRequired, &c.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}

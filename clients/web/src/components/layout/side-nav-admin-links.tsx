@@ -68,6 +68,8 @@ export function SideNavAdminLinks() {
     ffLearningPaths,
     adminConsoleEnabled,
     emailTemplateEditorEnabled,
+    maintenanceBannerEnabled,
+    ffTranscripts,
   } = usePlatformFeatures()
 
   const captionsEnabled = videoCaptionsEnabled || autoCaptioningEnabled
@@ -162,6 +164,24 @@ export function SideNavAdminLinks() {
           </SideNavLink>
 
           <SideNavSectionLabel>Platform</SideNavSectionLabel>
+          {maintenanceBannerEnabled ? (
+            <SideNavLink
+              to={orgPath('/admin/banners', orgId)}
+              className={() => (active('/admin/banners') ? sideNavActiveClass : '')}
+              icon={<Megaphone className="h-5 w-5" />}
+            >
+              Notices
+            </SideNavLink>
+          ) : null}
+          {ffTranscripts ? (
+            <SideNavLink
+              to={orgPath('/admin/transcripts', orgId)}
+              className={() => (active('/admin/transcripts') ? sideNavActiveClass : '')}
+              icon={<FileSpreadsheet className="h-5 w-5" />}
+            >
+              Transcripts
+            </SideNavLink>
+          ) : null}
           <SideNavLink
             to="/admin/scheduled-jobs"
             className={() => (active('/admin/scheduled-jobs') ? sideNavActiveClass : '')}

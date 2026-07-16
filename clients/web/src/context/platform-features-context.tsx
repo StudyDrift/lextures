@@ -123,6 +123,11 @@ export type PlatformFeatures = {
   aiProviderAbstractionEnabled: boolean
   ragNotebookEnabled: boolean
   ffFeedback: boolean
+  ffVisualBoards: boolean
+  ffBoardsRealtime: boolean
+  ffBoardsExternalSharing: boolean
+  ffInteractiveQuizzes: boolean
+  ffIqLiveHosting: boolean
   ffEmailSes: boolean
   loading: boolean
   refresh: () => Promise<void>
@@ -236,6 +241,11 @@ const defaultFeatures: PlatformFeatures = {
   aiProviderAbstractionEnabled: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
+  ffVisualBoards: false,
+  ffBoardsRealtime: false,
+  ffBoardsExternalSharing: false,
+  ffInteractiveQuizzes: false,
+  ffIqLiveHosting: false,
   ffEmailSes: false,
   loading: true,
   refresh: async () => {},
@@ -348,6 +358,11 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   aiProviderAbstractionEnabled: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
+  ffVisualBoards: false,
+  ffBoardsRealtime: false,
+  ffBoardsExternalSharing: false,
+  ffInteractiveQuizzes: false,
+  ffIqLiveHosting: false,
   ffEmailSes: false,
   })
   const [loading, setLoading] = useState(true)
@@ -469,6 +484,11 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           aiProviderAbstractionEnabled: data.aiProviderAbstractionEnabled === true,
           ragNotebookEnabled: data.ragNotebookEnabled === true,
           ffFeedback: data.ffFeedback !== false,
+          ffVisualBoards: data.ffVisualBoards === true,
+          ffBoardsRealtime: data.ffBoardsRealtime === true,
+          ffBoardsExternalSharing: data.ffBoardsExternalSharing === true,
+          ffInteractiveQuizzes: data.ffInteractiveQuizzes === true,
+          ffIqLiveHosting: data.ffIqLiveHosting === true,
           ffEmailSes: data.ffEmailSes === true,
         }
         setFeatures({
@@ -543,6 +563,11 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           aiProviderAbstractionEnabled: next.aiProviderAbstractionEnabled === true,
           ragNotebookEnabled: next.ragNotebookEnabled === true,
           ffFeedback: next.ffFeedback !== false,
+          ffVisualBoards: next.ffVisualBoards === true,
+          ffBoardsRealtime: next.ffBoardsRealtime === true,
+          ffBoardsExternalSharing: next.ffBoardsExternalSharing === true,
+          ffInteractiveQuizzes: next.ffInteractiveQuizzes === true,
+          ffIqLiveHosting: next.ffIqLiveHosting === true,
           ffEmailSes: next.ffEmailSes === true,
         })
         setPlatformFeaturesSnapshot(next)

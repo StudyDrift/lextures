@@ -120,7 +120,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffTranscripts',
     label: 'Transcripts',
     description:
-      'Let students request official transcripts from their institution via a configurable webhook.',
+      'Academic transcript preview and issuance (PDF + PESC XML), plus optional institution webhook delivery requests.',
   },
   {
     key: 'ffAdvisingIntegration',
@@ -619,6 +619,36 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     label: 'In-app product feedback',
     description:
       'Let signed-in users submit product feedback from web and mobile clients. Admins triage submissions from the feedback queue.',
+  },
+  {
+    key: 'ffVisualBoards',
+    label: 'Collaboration boards',
+    description:
+      'Platform master switch for course collaboration boards (shared walls). Courses still need the per-course Boards toggle enabled.',
+  },
+  {
+    key: 'ffInteractiveQuizzes',
+    label: 'Live Quizzes',
+    description:
+      'Platform master switch for live game-based quizzes. Courses still need the per-course Live Quizzes toggle enabled.',
+  },
+  {
+    key: 'ffIqLiveHosting',
+    label: 'Live quiz hosting',
+    description:
+      'Authoritative live game hosting engine (join codes, host console, projector, WebSocket hub). Requires Live Quizzes to be enabled.',
+  },
+  {
+    key: 'ffBoardsRealtime',
+    label: 'Board realtime sync',
+    description:
+      'Y.js WebSocket sync and presence for collaboration boards. Requires Collaboration boards to be enabled.',
+  },
+  {
+    key: 'ffBoardsExternalSharing',
+    label: 'Board external sharing',
+    description:
+      'Allow unlisted share links and public read-only boards. Off by default; requires VC.7 moderation (approval, filter, lock/freeze). Contribute links honour approval mode and content filtering.',
   },
   {
     key: 'ffEmailSes',

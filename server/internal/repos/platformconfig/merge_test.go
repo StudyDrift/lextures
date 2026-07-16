@@ -151,4 +151,69 @@ func TestMerge_FeedbackDefaultOnWhenDBUnset(t *testing.T) {
 	}
 }
 
+// Plan VC.1: FFVisualBoards defaults OFF when platform settings row is unset.
+func TestMerge_VisualBoardsDefaultOffWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFVisualBoards {
+		t.Fatal("expected FFVisualBoards false (default OFF) when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFVisualBoards: &on})
+	if !got.FFVisualBoards {
+		t.Fatal("expected DB true to enable visual boards")
+	}
+}
+
+// Plan VC.6: FFBoardsExternalSharing defaults OFF when platform settings row is unset.
+func TestMerge_FFBoardsExternalSharingDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, &Row{})
+	if got.FFBoardsExternalSharing {
+		t.Fatal("expected FFBoardsExternalSharing false (default OFF) when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFBoardsExternalSharing: &on})
+	if !got.FFBoardsExternalSharing {
+		t.Fatal("expected FFBoardsExternalSharing true when DB set")
+	}
+}
+
+// Plan VC.4: FFBoardsRealtime defaults OFF when platform settings row is unset.
+func TestMerge_BoardsRealtimeDefaultOffWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFBoardsRealtime {
+		t.Fatal("expected FFBoardsRealtime false (default OFF) when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFBoardsRealtime: &on})
+	if !got.FFBoardsRealtime {
+		t.Fatal("expected DB true to enable boards realtime")
+	}
+}
+
+// Plan IQ.1: FFInteractiveQuizzes defaults OFF when platform settings row is unset.
+func TestMerge_InteractiveQuizzesDefaultOffWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFInteractiveQuizzes {
+		t.Fatal("expected FFInteractiveQuizzes false (default OFF) when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFInteractiveQuizzes: &on})
+	if !got.FFInteractiveQuizzes {
+		t.Fatal("expected DB true to enable interactive quizzes")
+	}
+}
+
+// Plan IQ.3: FFIqLiveHosting defaults OFF when platform settings row is unset.
+func TestMerge_IqLiveHostingDefaultOffWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFIqLiveHosting {
+		t.Fatal("expected FFIqLiveHosting false (default OFF) when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFIqLiveHosting: &on})
+	if !got.FFIqLiveHosting {
+		t.Fatal("expected DB true to enable iq live hosting")
+	}
+}
+
 func ptr(s string) *string { return &s }

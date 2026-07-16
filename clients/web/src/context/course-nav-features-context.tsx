@@ -40,6 +40,10 @@ export type CourseNavFeatures = {
   whiteboardEnabled: boolean
   /** District-formatted report cards (default off). */
   reportCardsEnabled: boolean
+  /** VC.1 — visual collaboration boards (default off). */
+  visualBoardsEnabled: boolean
+  /** IQ.1 — live game-based quizzes (default off). */
+  interactiveQuizzesEnabled: boolean
   /** True while loading or re-fetching flags for the active course. */
   loading: boolean
   /** Re-load feature flags from the server (e.g. after saving settings). */
@@ -64,6 +68,8 @@ const defaultFeatures: CourseNavFeatures = {
   attendanceEnabled: false,
   whiteboardEnabled: false,
   reportCardsEnabled: false,
+  visualBoardsEnabled: false,
+  interactiveQuizzesEnabled: false,
   loading: false,
   refresh: async () => {},
 }
@@ -93,6 +99,8 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
   const [attendanceEnabled, setAttendanceEnabled] = useState(false)
   const [whiteboardEnabled, setWhiteboardEnabled] = useState(false)
   const [reportCardsEnabled, setReportCardsEnabled] = useState(false)
+  const [visualBoardsEnabled, setVisualBoardsEnabled] = useState(false)
+  const [interactiveQuizzesEnabled, setInteractiveQuizzesEnabled] = useState(false)
   const [loading, setLoading] = useState(!!courseCode)
 
   useEffect(() => {
@@ -118,6 +126,8 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setAttendanceEnabled(false)
       setWhiteboardEnabled(false)
       setReportCardsEnabled(false)
+      setVisualBoardsEnabled(false)
+      setInteractiveQuizzesEnabled(false)
       setLoading(false)
       return
     }
@@ -141,6 +151,8 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setAttendanceEnabled(c.attendanceEnabled === true)
       setWhiteboardEnabled(c.whiteboardEnabled === true)
       setReportCardsEnabled(c.reportCardsEnabled === true)
+      setVisualBoardsEnabled(c.visualBoardsEnabled === true)
+      setInteractiveQuizzesEnabled(c.interactiveQuizzesEnabled === true)
     } catch {
       setNotebookEnabled(true)
       setFeedEnabled(true)
@@ -159,6 +171,8 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setAttendanceEnabled(false)
       setWhiteboardEnabled(false)
       setReportCardsEnabled(false)
+      setVisualBoardsEnabled(false)
+      setInteractiveQuizzesEnabled(false)
     } finally {
       setLoading(false)
     }
@@ -187,6 +201,8 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       attendanceEnabled,
       whiteboardEnabled,
       reportCardsEnabled,
+      visualBoardsEnabled,
+      interactiveQuizzesEnabled,
       loading,
       refresh,
     }),
@@ -208,6 +224,8 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       attendanceEnabled,
       whiteboardEnabled,
       reportCardsEnabled,
+      visualBoardsEnabled,
+      interactiveQuizzesEnabled,
       loading,
       refresh,
     ],

@@ -42,6 +42,8 @@ const EXACT_SUBPATH_TITLES: Record<string, string> = {
   'report-cards': 'Report Cards',
   'reading-dashboard': 'Reading Dashboard',
   whiteboard: 'Whiteboard',
+  boards: 'Boards',
+  'live-quizzes': 'Live Quizzes',
   'final-grades': 'Submit Final Grades',
   evaluation: 'Course Evaluation',
   'evaluation-results': 'Evaluation Results',
@@ -75,6 +77,8 @@ export function coursePageTitleFromPath(pathname: string): string | null {
   if (/^modules\/textbook-resource\//.test(sub)) return 'Textbook'
 
   if (sub === 'collab-docs' || sub.startsWith('collab-docs/')) return 'Collaborative Documents'
+  if (sub === 'boards' || sub.startsWith('boards/')) return 'Boards'
+  if (sub === 'live-quizzes' || sub.startsWith('live-quizzes/')) return 'Live Quizzes'
   if (/^students\/[^/]+\/progress$/.test(sub)) return 'Student progress'
   if (/^whiteboard\//.test(sub)) return 'Whiteboard'
 

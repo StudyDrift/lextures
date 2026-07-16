@@ -108,6 +108,11 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	// Course marketplace defaults ON (exception to the usual default-off convention; plan MKT1).
 	out.FFCourseMarketplace = mergeBool(db.FFCourseMarketplace, true)
 	out.FFFeedback = mergeBool(db.FFFeedback, true)
+	out.FFVisualBoards = mergeBool(db.FFVisualBoards, false)
+	out.FFBoardsRealtime = mergeBool(db.FFBoardsRealtime, false)
+	out.FFBoardsExternalSharing = mergeBool(db.FFBoardsExternalSharing, false)
+	out.FFInteractiveQuizzes = mergeBool(db.FFInteractiveQuizzes, false)
+	out.FFIqLiveHosting = mergeBool(db.FFIqLiveHosting, false)
 	out.FFPublicAPI = mergeBool(db.FFPublicAPI, false)
 	out.FFStripeBilling = mergeBool(db.FFStripeBilling, false)
 	out.FFPaymentsEnabled = mergeBool(db.FFPaymentsEnabled, false)

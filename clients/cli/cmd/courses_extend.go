@@ -39,6 +39,8 @@ type courseFeatures struct {
 	AttendanceEnabled             *bool `json:"attendanceEnabled,omitempty"`
 	WhiteboardEnabled             *bool `json:"whiteboardEnabled,omitempty"`
 	ReportCardsEnabled            *bool `json:"reportCardsEnabled,omitempty"`
+	VisualBoardsEnabled           *bool `json:"visualBoardsEnabled,omitempty"`
+	InteractiveQuizzesEnabled     *bool `json:"interactiveQuizzesEnabled,omitempty"`
 }
 
 // courseDetail is the GET /courses/{code} payload used for merge updates.

@@ -38,11 +38,7 @@ export default function SideNavAdminConsoleLink({ orgId }: { orgId: string | nul
 
   const active =
     location.pathname === '/org-admin' ||
-    location.pathname.startsWith('/org-admin/users') ||
-    location.pathname.startsWith('/org-admin/courses') ||
-    location.pathname.startsWith('/org-admin/settings') ||
-    location.pathname.startsWith('/org-admin/audit-log') ||
-    location.pathname === '/org-admin/integrations'
+    location.pathname.startsWith('/org-admin/')
 
   return (
     <>

@@ -156,16 +156,24 @@ export default function AdminBannersPage() {
 
   if (!maintenanceBannerEnabled) {
     return (
-      <p className="text-sm text-slate-500">
-        Maintenance banners are disabled. Enable them in Settings → Global platform.
-      </p>
+      <div className="mx-auto max-w-3xl p-6">
+        <p className="text-sm text-slate-500">
+          Maintenance banners are disabled. Enable them in Settings → Global platform.
+        </p>
+      </div>
     )
   }
 
-  if (loading) return <p className="text-sm text-slate-500">Loading banners…</p>
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-3xl p-6">
+        <p className="text-sm text-slate-500">Loading banners…</p>
+      </div>
+    )
+  }
 
   return (
-    <div>
+    <div className="mx-auto max-w-3xl p-6">
       <div className="flex items-center gap-2">
         <Megaphone className="h-5 w-5 text-indigo-600" aria-hidden />
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Maintenance notices</h1>

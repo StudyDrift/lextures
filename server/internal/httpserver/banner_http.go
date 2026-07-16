@@ -135,15 +135,20 @@ func (d Deps) handleListBanners() http.HandlerFunc {
 		if !d.maintenanceBannerEnabled(w) {
 			return
 		}
-		actor, targetOrg, globalAdmin, ok := d.adminConsoleAccess(w, r, false)
+		actor, targetOrg, globalAdmin, ok := d.orgAdminAccess(w, r, false)
 		if !ok {
 			return
 		}
 		var list []bannersrepo.Banner
 		var err error
-		if globalAdmin && r.URL.Query().Get("scope") == "global" {
+		scopeFilter := r.URL.Query().Get("scope")
+		switch {
+		case globalAdmin && scopeFilter == "global":
 			list, err = bannersrepo.List(r.Context(), d.Pool, nil, true)
-		} else {
+		case globalAdmin && scopeFilter == "":
+			// Global admins managing Notices should see global + org banners.
+			list, err = bannersrepo.List(r.Context(), d.Pool, nil, false)
+		default:
 			list, err = bannersrepo.List(r.Context(), d.Pool, &targetOrg, false)
 		}
 		if err != nil {
@@ -176,7 +181,7 @@ func (d Deps) handleCreateBanner() http.HandlerFunc {
 		if !d.maintenanceBannerEnabled(w) {
 			return
 		}
-		actor, targetOrg, globalAdmin, ok := d.adminConsoleAccess(w, r, true)
+		actor, targetOrg, globalAdmin, ok := d.orgAdminAccess(w, r, true)
 		if !ok {
 			return
 		}
@@ -241,7 +246,7 @@ func (d Deps) handleUpdateBanner() http.HandlerFunc {
 		if !d.maintenanceBannerEnabled(w) {
 			return
 		}
-		_, targetOrg, globalAdmin, ok := d.adminConsoleAccess(w, r, true)
+		_, targetOrg, globalAdmin, ok := d.orgAdminAccess(w, r, true)
 		if !ok {
 			return
 		}
@@ -307,7 +312,7 @@ func (d Deps) handleDeleteBanner() http.HandlerFunc {
 		if !d.maintenanceBannerEnabled(w) {
 			return
 		}
-		_, targetOrg, globalAdmin, ok := d.adminConsoleAccess(w, r, true)
+		_, targetOrg, globalAdmin, ok := d.orgAdminAccess(w, r, true)
 		if !ok {
 			return
 		}
@@ -506,3 +511,4 @@ func bannerToDTO(b bannersrepo.Banner) bannerDTO {
 	}
 	return dto
 }
+

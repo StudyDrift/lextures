@@ -215,6 +215,8 @@ func NewHandler(d Deps) http.Handler {
 	d.registerSISRoutes(r)
 	d.registerWebhookRoutes(r)
 	d.registerCalendarFeedRoutes(r)
+	d.registerBoardLinkRoutes(r)
+	r.Get("/api/v1/live-quizzes/join/{code}", d.handleJoinQuizLookup())
 	d.registerFinalGradeRoutes(r)
 	d.registerCatalogRoutes(r)
 	d.registerLibraryRoutes(r)

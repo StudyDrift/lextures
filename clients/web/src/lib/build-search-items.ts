@@ -455,6 +455,18 @@ const coursePageDefs: CoursePageDef[] = [
     whenCourse: (c) => c.collabDocsEnabled === true,
   },
   {
+    suffix: '/boards',
+    title: 'Boards',
+    hint: 'boards collaboration wall cards padlet mural brainstorm',
+    whenCourse: (c) => c.visualBoardsEnabled === true,
+  },
+  {
+    suffix: '/live-quizzes',
+    title: 'Live Quizzes',
+    hint: 'live quizzes kits kahoot quizizz game-based polling leaderboard',
+    whenCourse: (c) => c.interactiveQuizzesEnabled === true,
+  },
+  {
     suffix: '/groups',
     title: 'Groups',
     hint: 'groups group spaces enrollment teams',

@@ -1,4 +1,4 @@
-import { NavLink, Navigate, Outlet, useSearchParams } from 'react-router-dom'
+import { NavLink, Navigate, Outlet, useLocation, useSearchParams } from 'react-router-dom'
 import {
   Activity,
   BookOpen,
@@ -16,7 +16,7 @@ import { AdminSearchBar } from '../../components/admin/AdminSearchBar'
 import { fetchAdminConsoleCapabilities } from '../../lib/admin-console-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
-const bannersNavItem = { to: '/org-admin/banners', label: 'Notices', icon: Megaphone, end: false as const }
+const bannersNavItem = { to: '/admin/banners', label: 'Notices', icon: Megaphone, end: false as const }
 
 const customFieldsNavItem = { to: '/org-admin/custom-fields', label: 'Custom fields', icon: ListTree, end: false as const }
 
@@ -33,6 +33,7 @@ const importNavItem = { to: '/org-admin/import', label: 'Import', icon: FileUp, 
 
 export default function AdminLayout() {
   const { adminConsoleEnabled, bulkCsvImportEnabled, maintenanceBannerEnabled } = usePlatformFeatures()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
   const [canAccess, setCanAccess] = useState<boolean | null>(null)
@@ -54,6 +55,12 @@ export default function AdminLayout() {
       cancelled = true
     }
   }, [])
+
+  // Notices are managed at /admin/banners (independent of the Admin Console feature flag).
+  // Always forward legacy /org-admin/banners links before the console gate runs.
+  if (location.pathname === '/org-admin/banners' || location.pathname.startsWith('/org-admin/banners/')) {
+    return <Navigate to={{ pathname: '/admin/banners', search: location.search }} replace />
+  }
 
   if (!adminConsoleEnabled) {
     return <Navigate to="/" replace />

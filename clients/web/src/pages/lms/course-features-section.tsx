@@ -56,6 +56,8 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const attendanceEnabled = course.attendanceEnabled === true
   const whiteboardEnabled = course.whiteboardEnabled === true
   const reportCardsEnabled = course.reportCardsEnabled === true
+  const visualBoardsEnabled = course.visualBoardsEnabled === true
+  const interactiveQuizzesEnabled = course.interactiveQuizzesEnabled === true
   const canvasGradeSyncEnabled = course.canvasGradeSyncEnabled === true
 
   const persistCanvasGradeSync = useCallback(
@@ -106,6 +108,8 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       attendanceEnabled?: boolean
       whiteboardEnabled?: boolean
       reportCardsEnabled?: boolean
+      visualBoardsEnabled?: boolean
+      interactiveQuizzesEnabled?: boolean
     }) => {
       setSaving(true)
       setMessage(null)
@@ -136,6 +140,8 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           attendanceEnabled: patch.attendanceEnabled ?? attendanceEnabled,
           whiteboardEnabled: patch.whiteboardEnabled ?? whiteboardEnabled,
           reportCardsEnabled: patch.reportCardsEnabled ?? reportCardsEnabled,
+          visualBoardsEnabled: patch.visualBoardsEnabled ?? visualBoardsEnabled,
+          interactiveQuizzesEnabled: patch.interactiveQuizzesEnabled ?? interactiveQuizzesEnabled,
         }
         const updated = await patchCourseFeatures(courseCode, body)
         onCourseUpdated(updated)
@@ -167,6 +173,8 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       attendanceEnabled,
       whiteboardEnabled,
       reportCardsEnabled,
+      visualBoardsEnabled,
+      interactiveQuizzesEnabled,
       calendarEnabled,
       courseCode,
       feedEnabled,
@@ -221,6 +229,20 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
               },
             ]
           : []),
+        {
+          label: 'Collaboration boards',
+          description:
+            'A shared wall where students post cards — text, images, links, and more — and react in real time.',
+          enabled: visualBoardsEnabled,
+          onToggle: () => void persist({ visualBoardsEnabled: !visualBoardsEnabled }),
+        },
+        {
+          label: 'Live Quizzes',
+          description:
+            'Host live, game-based quizzes with join codes and leaderboards. Build reusable quiz kits for whole-class play.',
+          enabled: interactiveQuizzesEnabled,
+          onToggle: () => void persist({ interactiveQuizzesEnabled: !interactiveQuizzesEnabled }),
+        },
         {
           label: 'Collaborative documents',
           description:
@@ -376,6 +398,8 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       standardsAlignmentEnabled,
       whiteboardEnabled,
       reportCardsEnabled,
+      visualBoardsEnabled,
+      interactiveQuizzesEnabled,
       persist,
       persistCanvasGradeSync,
     ],

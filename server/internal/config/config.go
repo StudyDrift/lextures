@@ -478,6 +478,20 @@ type Config struct {
 	// FFFeedback enables in-app product feedback submission (plan FB0). Default ON.
 	// Managed in Settings → Global platform (not process env).
 	FFFeedback bool
+	// FFVisualBoards enables collaboration boards (shared wall) across courses (plan VC.1). Default OFF.
+	// Managed in Settings → Global platform (not process env). Per-course visual_boards_enabled still required.
+	FFVisualBoards bool
+	// FFBoardsRealtime enables the board Y.js WebSocket relay (plan VC.4). Default OFF.
+	// Requires FFVisualBoards and per-course visual_boards_enabled.
+	FFBoardsRealtime bool
+	// FFBoardsExternalSharing allows link/public board visibility and share links (plan VC.6). Default OFF.
+	FFBoardsExternalSharing bool
+	// FFInteractiveQuizzes enables live game-based quizzes across courses (plan IQ.1). Default OFF.
+	// Managed in Settings → Global platform (not process env). Per-course interactive_quizzes_enabled still required.
+	FFInteractiveQuizzes bool
+	// FFIqLiveHosting enables the live game hosting engine / WebSocket hub (plan IQ.3). Default OFF.
+	// Requires FFInteractiveQuizzes and per-course interactive_quizzes_enabled.
+	FFIqLiveHosting bool
 	// FFPublicAPI enables the versioned public REST API for third-party integrations (plan 16.1).
 	// Managed in Settings → Global platform (not process env).
 	FFPublicAPI bool

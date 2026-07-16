@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 378_board_foundation.sql
+-- See docs/runbooks/database-migration-rollback.md
