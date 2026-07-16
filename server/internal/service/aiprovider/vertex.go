@@ -55,7 +55,7 @@ func newVertexProviderFromAuth(mode string, auth AuthMaterial, extra map[string]
 		return NewVertexProvider(auth.Secret(secretKeyAPIKey), base), nil
 	case AuthModeServiceAccount:
 		jsonKey := []byte(auth.Secret(secretKeyServiceAccountJSON))
-		creds, err := google.CredentialsFromJSON(context.Background(), jsonKey, vertexOAuthScope)
+		creds, err := google.CredentialsFromJSONWithType(context.Background(), jsonKey, google.ServiceAccount, vertexOAuthScope)
 		if err != nil {
 			return nil, newConfigError(ProviderVertex, "invalid service_account_json: "+err.Error())
 		}

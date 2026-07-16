@@ -286,7 +286,7 @@ export function buildGlobalSearchItems(
         title: 'AI models',
         subtitle: 'System settings',
         path: '/settings/ai/models',
-        hint: 'ai intelligence providers byok api key models openrouter anthropic openai azure',
+        hint: 'ai intelligence providers byok',
       },
       {
         title: 'System prompts',
@@ -298,7 +298,7 @@ export function buildGlobalSearchItems(
         title: 'AI reports',
         subtitle: 'System settings',
         path: '/settings/ai/reports',
-        hint: 'ai intelligence usage cost reports providers byok',
+        hint: 'ai intelligence usage reports',
       },
     ]
     for (const g of systemPages) {

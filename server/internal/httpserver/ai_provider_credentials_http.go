@@ -269,10 +269,6 @@ func (d Deps) handleDeletePlatformAIProvider() http.HandlerFunc {
 	}
 }
 
-func platformCredentialJSON(c aiprovidercreds.Credential, configured bool) map[string]any {
-	return credentialPublicJSON(c, configured)
-}
-
 func ternarySecret(configured bool) string {
 	if configured {
 		return "x"

@@ -210,10 +210,8 @@ func putAIProviderSettings(c *client.Client, payload map[string]any) ([]byte, er
 	if key, ok := payload["byokApiKey"].(string); ok && key == secretPlaceholder {
 		delete(payload, "byokApiKey")
 	}
-	// Deprecated legacy field — strip empty; warn callers via docs/CLI Long text.
-	if _, ok := payload["openRouterApiKey"]; ok {
-		delete(payload, "openRouterApiKey")
-	}
+	// Deprecated legacy field — strip; warn callers via docs/CLI Long text.
+	delete(payload, "openRouterApiKey")
 	raw, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err

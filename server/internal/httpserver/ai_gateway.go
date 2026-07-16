@@ -3,15 +3,11 @@ package httpserver
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
-	"github.com/lextures/lextures/server/internal/repos/aiusage"
-	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 func (d Deps) aiGatewayConfig() aigateway.Config {
@@ -93,34 +89,4 @@ type AIUsageMeta struct {
 	CourseCode string
 	Feature    string
 	Model      string
-}
-
-// recordAIUsage appends token/cost usage for Intelligence reports (best-effort).
-// Prefer recordAIProviderResult when CallMeta is available so provider is accurate (AP.6).
-func (d Deps) recordAIUsage(ctx context.Context, meta AIUsageMeta, usage openrouter.UsageInfo, succeeded bool) {
-	if d.Pool == nil || !usage.HasData() {
-		return
-	}
-	var userID *uuid.UUID
-	if meta.UserID != uuid.Nil {
-		uid := meta.UserID
-		userID = &uid
-	}
-	var courseID *uuid.UUID
-	if meta.CourseID != nil {
-		courseID = meta.CourseID
-	} else if code := strings.TrimSpace(meta.CourseCode); code != "" {
-		if row, err := course.GetPublicByCourseCode(ctx, d.Pool, code); err == nil && row != nil {
-			if cid, perr := uuid.Parse(row.ID); perr == nil {
-				courseID = &cid
-			}
-		}
-	}
-	_ = aiusage.Insert(ctx, d.Pool, aiusage.EntryFromUsage(userID, courseID, meta.Feature, meta.Model, usage, succeeded))
-}
-
-// logAIInferenceAllowed records a successful (non-blocked) inference after the external call completes.
-// Prefer logAIInferenceAllowedWithProvider when the backend provider is known (AP.6 FR-7).
-func (d Deps) logAIInferenceAllowed(r *http.Request, userID uuid.UUID, feature, modelID, contentForHash string, dec aigateway.Decision) {
-	d.logAIInferenceAllowedWithProvider(r, userID, feature, modelID, "", contentForHash, dec)
 }
