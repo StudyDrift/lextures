@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
@@ -16,7 +18,7 @@ func TestAssembleDisclosure_UsesOpenRouterNames(t *testing.T) {
 	doc := assembleDisclosure(map[string]string{
 		user.DefaultCourseSetupModelID: "Trinity Mini",
 		"openai/gpt-4o-mini":           "GPT-4o mini",
-	})
+	}, []string{"openrouter"})
 	if len(doc.Models) == 0 {
 		t.Fatal("expected models")
 	}
@@ -26,6 +28,9 @@ func TestAssembleDisclosure_UsesOpenRouterNames(t *testing.T) {
 	if doc.Provider != "openrouter" {
 		t.Fatalf("provider=%q", doc.Provider)
 	}
+	if len(doc.Providers) != 1 || doc.Providers[0] != "openrouter" {
+		t.Fatalf("providers=%v", doc.Providers)
+	}
 	if len(doc.Features) != len(disclosureFeatures) {
 		t.Fatalf("features=%d", len(doc.Features))
 	}
@@ -33,7 +38,7 @@ func TestAssembleDisclosure_UsesOpenRouterNames(t *testing.T) {
 
 func TestAssembleDisclosure_FallsBackToModelID(t *testing.T) {
 	t.Parallel()
-	doc := assembleDisclosure(nil)
+	doc := assembleDisclosure(nil, []string{"openrouter"})
 	found := false
 	for _, m := range doc.Models {
 		if m.ID == "openai/gpt-4o-mini" {
@@ -51,6 +56,31 @@ func TestAssembleDisclosure_FallsBackToModelID(t *testing.T) {
 	}
 }
 
+func TestAssembleDisclosure_AzureOnlyDoesNotClaimOpenRouter(t *testing.T) {
+	t.Parallel()
+	doc := assembleDisclosure(nil, []string{"azure_openai"})
+	if containsProvider(doc.Providers, "openrouter") {
+		t.Fatalf("providers should not include openrouter: %v", doc.Providers)
+	}
+	if doc.Provider != "azure_openai" {
+		t.Fatalf("provider=%q", doc.Provider)
+	}
+	raw, _ := json.Marshal(doc)
+	if strings.Contains(string(raw), "via OpenRouter") {
+		t.Fatalf("disclosure claimed OpenRouter: %s", raw)
+	}
+	foundAzure := false
+	for _, m := range doc.Models {
+		if m.Provider == "Azure OpenAI" {
+			foundAzure = true
+			break
+		}
+	}
+	if !foundAzure {
+		t.Fatalf("expected Azure OpenAI model labels, models=%+v", doc.Models)
+	}
+}
+
 func TestBuildPublicDisclosure_OpenRouterMock(t *testing.T) {
 	body := `{"data":[{"id":"` + user.DefaultCourseSetupModelID + `","name":"Trinity Mini"}]}`
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +94,7 @@ func TestBuildPublicDisclosure_OpenRouterMock(t *testing.T) {
 	}
 	defer func() { fetchModelNames = orig }()
 
-	doc, err := BuildPublicDisclosure(context.Background())
+	doc, err := BuildPublicDisclosure(context.Background(), DisclosureOptions{ConfiguredProviders: []string{"openrouter"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,11 +123,12 @@ func TestPublicDisclosureJSON_Caches(t *testing.T) {
 	defer func() { fetchModelNames = orig }()
 
 	ctx := context.Background()
-	first, err := PublicDisclosureJSON(ctx)
+	opts := DisclosureOptions{ConfiguredProviders: []string{string(aiprovider.ProviderOpenRouter)}}
+	first, err := PublicDisclosureJSON(ctx, opts)
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := PublicDisclosureJSON(ctx)
+	second, err := PublicDisclosureJSON(ctx, opts)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 const systemPrompt = `You are a supportive study-skills coach for a college student.
@@ -17,8 +17,8 @@ Use only the aggregate metrics provided — never invent grades, names, or assig
 Be encouraging, not judgmental. Mention optimal study days when provided.
 Do not use markdown or bullet points.`
 
-// GenerateTip produces a coaching tip via OpenRouter or fallback pool.
-func GenerateTip(ctx context.Context, pool *pgxpool.Pool, client *openrouter.Client, model string, userID uuid.UUID, now time.Time) (tipText string, contextLine string, usedLLM bool, err error) {
+// GenerateTip produces a coaching tip via AI completion or fallback pool.
+func GenerateTip(ctx context.Context, pool *pgxpool.Pool, ai aiprovider.ScopedCompleter, model string, userID uuid.UUID, now time.Time) (tipText string, contextLine string, usedLLM bool, err error) {
 	agg, err := LoadAggregateContext(ctx, pool, userID, now)
 	if err != nil {
 		return "", "", false, err
@@ -26,7 +26,7 @@ func GenerateTip(ctx context.Context, pool *pgxpool.Pool, client *openrouter.Cli
 	contextLine = agg.String()
 	weekSeed := fmt.Sprintf("%s:%s", userID.String(), now.Format("2006-01-02"))
 
-	if client == nil || strings.TrimSpace(model) == "" {
+	if ai == nil || strings.TrimSpace(model) == "" {
 		return PickFallback(weekSeed), contextLine, false, nil
 	}
 
@@ -34,7 +34,7 @@ func GenerateTip(ctx context.Context, pool *pgxpool.Pool, client *openrouter.Cli
 		"Metrics: %s\nWrite a personalized weekly study tip.",
 		contextLine,
 	)
-	text, genErr := client.ChatCompletion(model, []openrouter.Message{
+	text, _, genErr := ai.Complete(ctx, model, []aiprovider.Message{
 		{Role: "system", Content: systemPrompt},
 		{Role: "user", Content: userMsg},
 	})

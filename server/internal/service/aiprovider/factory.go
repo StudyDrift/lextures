@@ -14,6 +14,12 @@ type Factory struct {
 
 // Build constructs a provider for the given name, API key, and optional settings JSON.
 func (f *Factory) Build(name ProviderName, apiKey string, extra map[string]any) (Provider, error) {
+	return f.BuildWithAuth(name, AuthMaterial{APIKey: apiKey}, extra)
+}
+
+// BuildWithAuth constructs a provider using multi-secret auth material (AP.8).
+func (f *Factory) BuildWithAuth(name ProviderName, auth AuthMaterial, extra map[string]any) (Provider, error) {
+	apiKey := auth.Secret(secretKeyAPIKey)
 	switch name {
 	case ProviderOpenRouter:
 		if f != nil && f.PlatformOpenRouter != nil {
@@ -22,39 +28,36 @@ func (f *Factory) Build(name ProviderName, apiKey string, extra map[string]any) 
 		if strings.TrimSpace(apiKey) != "" {
 			return NewOpenRouterProvider(openrouter.NewClient(apiKey)), nil
 		}
-		return nil, fmt.Errorf("aiprovider: openrouter not configured")
+		return nil, newConfigError(ProviderOpenRouter, "openrouter not configured")
 	case ProviderAnthropic:
 		return NewAnthropicProvider(apiKey), nil
 	case ProviderOpenAI:
 		return NewOpenAIProvider(apiKey), nil
 	case ProviderAzureOpenAI:
+		if err := validateAzureSettings(extra); err != nil {
+			return nil, err
+		}
+		if strings.TrimSpace(apiKey) == "" {
+			return nil, newConfigError(ProviderAzureOpenAI, "azure_openai requires an API key")
+		}
 		base := stringSetting(extra, "azure_base_url")
-		if base == "" {
-			return nil, fmt.Errorf("aiprovider: azure_openai requires azure_base_url in settings")
-		}
-		return NewAzureOpenAIProvider(apiKey, base), nil
+		return NewAzureOpenAIProvider(apiKey, base, AzureOptions{
+			APIVersion:        azureAPIVersion(extra),
+			Deployments:       copyStringMap(extra["deployments"]),
+			DefaultDeployment: stringSetting(extra, "default_deployment"),
+		}), nil
 	case ProviderBedrock:
-		base := stringSetting(extra, "bedrock_base_url")
-		if base == "" {
-			region := stringSetting(extra, "aws_region")
-			if region == "" {
-				region = "us-east-1"
-			}
-			base = "https://bedrock-runtime." + region + ".amazonaws.com"
+		mode := AuthModeFromSettings(ProviderBedrock, extra)
+		if err := validateBedrockSettings(mode, auth); err != nil {
+			return nil, err
 		}
-		return NewBedrockProvider(apiKey, base), nil
+		return newBedrockProviderFromAuth(mode, auth, extra)
 	case ProviderVertex:
-		base := stringSetting(extra, "vertex_base_url")
-		if base == "" {
-			project := stringSetting(extra, "gcp_project")
-			location := stringSetting(extra, "gcp_location")
-			if project == "" || location == "" {
-				return nil, fmt.Errorf("aiprovider: vertex requires vertex_base_url or gcp_project+gcp_location")
-			}
-			base = fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1/projects/%s/locations/%s/publishers/google/models",
-				location, project, location)
+		mode := AuthModeFromSettings(ProviderVertex, extra)
+		if err := validateVertexSettings(mode, auth, extra); err != nil {
+			return nil, err
 		}
-		return NewVertexProvider(apiKey, base), nil
+		return newVertexProviderFromAuth(mode, auth, extra)
 	case ProviderDryRun:
 		return &DryRunProvider{}, nil
 	default:
@@ -76,4 +79,27 @@ func stringSetting(extra map[string]any, key string) string {
 	default:
 		return strings.TrimSpace(fmt.Sprint(t))
 	}
+}
+
+func copyStringMap(raw any) map[string]string {
+	out := map[string]string{}
+	if raw == nil {
+		return out
+	}
+	switch m := raw.(type) {
+	case map[string]string:
+		for k, v := range m {
+			if strings.TrimSpace(k) != "" && strings.TrimSpace(v) != "" {
+				out[strings.TrimSpace(k)] = strings.TrimSpace(v)
+			}
+		}
+	case map[string]any:
+		for k, v := range m {
+			s := strings.TrimSpace(fmt.Sprint(v))
+			if strings.TrimSpace(k) != "" && s != "" {
+				out[strings.TrimSpace(k)] = s
+			}
+		}
+	}
+	return out
 }

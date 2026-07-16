@@ -1731,7 +1731,7 @@ export default function CourseModuleQuizPage() {
                         onChange={(e) => setQeAdaptiveDeliveryMode(e.target.value === 'cat' ? 'cat' : 'ai')}
                         className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                       >
-                        <option value="ai">AI-generated (OpenRouter)</option>
+                        <option value="ai">AI-generated</option>
                         <option value="cat" disabled={!courseQuestionBankEnabled}>
                           IRT pool — computerized adaptive (CAT)
                         </option>

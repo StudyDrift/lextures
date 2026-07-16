@@ -86,7 +86,7 @@ func (d Deps) evaluateAIGatewayBlock(ctx context.Context, userID uuid.UUID, feat
 	return "", false
 }
 
-// AIUsageMeta identifies who triggered an OpenRouter call for analytics.ai_usage_log.
+// AIUsageMeta identifies who triggered an AI call for analytics.ai_usage_log.
 type AIUsageMeta struct {
 	UserID     uuid.UUID
 	CourseID   *uuid.UUID
@@ -96,6 +96,7 @@ type AIUsageMeta struct {
 }
 
 // recordAIUsage appends token/cost usage for Intelligence reports (best-effort).
+// Prefer recordAIProviderResult when CallMeta is available so provider is accurate (AP.6).
 func (d Deps) recordAIUsage(ctx context.Context, meta AIUsageMeta, usage openrouter.UsageInfo, succeeded bool) {
 	if d.Pool == nil || !usage.HasData() {
 		return
@@ -119,18 +120,7 @@ func (d Deps) recordAIUsage(ctx context.Context, meta AIUsageMeta, usage openrou
 }
 
 // logAIInferenceAllowed records a successful (non-blocked) inference after the external call completes.
+// Prefer logAIInferenceAllowedWithProvider when the backend provider is known (AP.6 FR-7).
 func (d Deps) logAIInferenceAllowed(r *http.Request, userID uuid.UUID, feature, modelID, contentForHash string, dec aigateway.Decision) {
-	if d.Pool == nil || !d.effectiveConfig().AiDisclosureEnabled {
-		return
-	}
-	ctx := r.Context()
-	var orgID *uuid.UUID
-	if oid, err := organization.OrgIDForUser(ctx, d.Pool, userID); err == nil {
-		orgID = &oid
-	}
-	if dec.UserIDHash == "" {
-		dec.UserIDHash = aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, userID)
-		dec.OptInConfirmed = true
-	}
-	_ = aigateway.LogInference(ctx, d.Pool, orgID, dec, feature, modelID, aigateway.ProviderOpenRouter, aigateway.ContentHash(contentForHash), false)
+	d.logAIInferenceAllowedWithProvider(r, userID, feature, modelID, "", contentForHash, dec)
 }

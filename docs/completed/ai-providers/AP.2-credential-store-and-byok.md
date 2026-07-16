@@ -1,6 +1,6 @@
 # AP.2 — Multi-Provider Credential Store & BYOK
 
-> Implementation plan. Source: multi-provider BYOK epic ([README](README.md)).
+> Implementation plan. Source: multi-provider BYOK epic ([README](../../plan/ai-providers/README.md)).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI Providers |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL — platform stores only OpenRouter key; tenant has one BYOK key + one provider |
+| **Status (today)** | DONE — platform + org multi-provider credentials (`settings.ai_provider_credentials` / `ai_provider_secrets`), dual-read legacy OpenRouter + BYOK, masked APIs, audit without secrets |
 | **Estimated effort** | M (2–3w) |
 | **Owner (proposed)** | Platform / Security |
 | **Depends on** | AP.1 (provider names/settings shape); 17.17 secrets primitives (`appsecrets`) |
@@ -218,4 +218,4 @@ type ProviderCredentialUpsert = {
 - `server/migrations/118_platform_app_settings.sql`
 - `server/internal/repos/tenantaisettings/repo.go`
 - `server/internal/httpserver/settings_ai.go`
-- Related: [AP.5](AP.5-admin-intelligence-ui.md), [AP.8](AP.8-provider-auth-hardening.md)
+- Related: [AP.5](AP.5-admin-intelligence-ui.md), [AP.8](../../plan/ai-providers/AP.8-provider-auth-hardening.md)

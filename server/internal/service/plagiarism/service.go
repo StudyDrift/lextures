@@ -13,7 +13,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/repos/originalityconfig"
 	"github.com/lextures/lextures/server/internal/repos/originalityreports"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 // Service orchestrates originality scan enqueue and processing.
@@ -21,7 +21,7 @@ type Service struct {
 	Pool         *pgxpool.Pool
 	Config       config.Config
 	FilesRoot    string
-	OpenRouter   *openrouter.Client
+	AI           aiprovider.ScopedCompleter
 	StubExternal bool
 }
 
@@ -122,7 +122,7 @@ func (s *Service) ProcessNext(ctx context.Context) (bool, error) {
 func (s *Service) providerFor(name string) (Provider, error) {
 	switch strings.ToLower(strings.TrimSpace(name)) {
 	case ProviderInternal:
-		return InternalAIProvider{Client: s.OpenRouter, Model: ""}, nil
+		return InternalAIProvider{AI: s.AI, Model: ""}, nil
 	case ProviderTurnitin, ProviderCopyleaks, ProviderGPTZero:
 		if s.StubExternal || s.Config.OriginalityStubExternal {
 			return StubExternalProvider{Name_: name}, nil

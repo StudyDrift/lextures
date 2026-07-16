@@ -66,7 +66,7 @@ export type SearchListItem = {
 export type GlobalSearchBuildOptions = {
   /** Effective platform SCIM flag (Settings → Global platform). */
   scimEnabled?: boolean
-  /** Notebook RAG / Ask AI when platform AI and OpenRouter are configured. */
+  /** Notebook RAG / Ask AI when platform AI is configured. */
   ragNotebookEnabled?: boolean
 }
 
@@ -286,7 +286,7 @@ export function buildGlobalSearchItems(
         title: 'AI models',
         subtitle: 'System settings',
         path: '/settings/ai/models',
-        hint: 'ai intelligence openrouter api key models',
+        hint: 'ai intelligence providers byok api key models openrouter anthropic openai azure',
       },
       {
         title: 'System prompts',
@@ -298,7 +298,7 @@ export function buildGlobalSearchItems(
         title: 'AI reports',
         subtitle: 'System settings',
         path: '/settings/ai/reports',
-        hint: 'ai intelligence usage cost reports openrouter',
+        hint: 'ai intelligence usage cost reports providers byok',
       },
     ]
     for (const g of systemPages) {

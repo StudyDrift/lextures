@@ -74,7 +74,7 @@ export function GraderAgentWorkflowModal({
     maxWidth: INSPECTOR_MAX_WIDTH,
   })
   const isTemplateMode = templateMode != null
-  const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled, graderAgentCostEstimateEnabled, openRouterConfigured } =
+  const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled, graderAgentCostEstimateEnabled, aiConfigured } =
     usePlatformFeatures()
   const titleId = useId()
   const statusId = useId()
@@ -455,7 +455,7 @@ export function GraderAgentWorkflowModal({
                 <CanvasView workflow={workflow} />
               </Suspense>
             </div>
-            {openRouterConfigured ? (
+            {aiConfigured ? (
               <AiBuildPanel building={aiBuilding} onBuild={handleAIBuild} />
             ) : null}
           </main>

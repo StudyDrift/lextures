@@ -20,6 +20,7 @@ type gradingAgentPreviewResult struct {
 	Flagged          *gradingagentsvc.DryRunFlagPreview
 	Held             *gradingagentsvc.DryRunHeldPreview
 	ModelID          *string
+	Provider         string
 	PromptTokens     *int
 	CompletionTokens *int
 	CostUSD          *float64
@@ -88,7 +89,7 @@ func (d Deps) executeGradingAgentWorkflowPreview(
 		if !dec.Allowed {
 			return gradingAgentPreviewResult{}, errGradingAgentAIGatewayBlocked
 		}
-		if svc.Client == nil {
+		if svc.AI == nil || !d.aiConfigured(ctx, d.orgIDPtrForUser(ctx, in.ModelUser)) {
 			return gradingAgentPreviewResult{}, errGradingAgentProviderNotConfigured
 		}
 	}
@@ -135,7 +136,7 @@ func (d Deps) executeGradingAgentLegacyScore(
 	if !dec.Allowed {
 		return gradingAgentPreviewResult{}, errGradingAgentAIGatewayBlocked
 	}
-	if svc.Client == nil {
+	if svc.AI == nil || !d.aiConfigured(ctx, d.orgIDPtrForUser(ctx, in.ModelUser)) {
 		return gradingAgentPreviewResult{}, errGradingAgentProviderNotConfigured
 	}
 
@@ -228,6 +229,7 @@ func gradingAgentPreviewFromScore(result gradingagentsvc.ScoreResult) gradingAge
 		Confidence:       result.Output.Confidence,
 		RubricScores:     result.Output.RubricScores,
 		ModelID:          &model,
+		Provider:         string(result.CallMeta.Provider),
 		PromptTokens:     &pt,
 		CompletionTokens: &ct,
 		CostUSD:          &cost,

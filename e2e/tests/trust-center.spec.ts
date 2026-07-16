@@ -36,13 +36,19 @@ test.describe('Trust Center — public access', () => {
     expect(body.soa?.total).toBe(93)
   })
 
-  test('sub-processor table lists Anthropic, OpenAI, and OpenRouter', async ({ page }) => {
+  test('sub-processor table lists AI vendors as when-configured and explains BYOK', async ({ page }) => {
     await page.goto('/trust')
     const table = page.getByRole('table', { name: /sub-processor list/i })
     await expect(table).toBeVisible()
     await expect(table.getByRole('cell', { name: /Anthropic/i })).toBeVisible()
     await expect(table.getByRole('cell', { name: /OpenAI/i })).toBeVisible()
     await expect(table.getByRole('cell', { name: /OpenRouter/i })).toBeVisible()
+    await expect(table.getByRole('cell', { name: /when configured as an AI provider/i }).first()).toBeVisible()
+    await expect(table.getByRole('cell', { name: /not used on BYOK-only deployments that omit OpenRouter/i })).toBeVisible()
+    const byokNote = page.getByTestId('ai-byok-subprocessor-note')
+    await expect(byokNote).toBeVisible()
+    await expect(byokNote).toContainText(/bring-your-own-key/i)
+    await expect(byokNote).toContainText(/not automatically a Lextures sub-processor/i)
   })
 
   test('incident history table is visible', async ({ page }) => {

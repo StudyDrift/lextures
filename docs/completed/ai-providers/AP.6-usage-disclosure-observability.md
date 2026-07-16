@@ -1,6 +1,6 @@
 # AP.6 — Usage, Cost, Disclosure & Observability
 
-> Implementation plan. Source: multi-provider BYOK epic ([README](README.md)).
+> Implementation plan. Source: multi-provider BYOK epic ([README](../../plan/ai-providers/README.md)).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI Providers |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL — `ai_usage_log.provider` exists but defaults/paths assume OpenRouter; disclosure names “via OpenRouter”; cost often from OpenRouter `usage.cost` only |
+| **Status (today)** | DONE — usage logs record real provider + optional cost estimates; disclosure lists configured providers without forcing OpenRouter; reports filter by provider; Prometheus/Grafana multi-provider labels |
 | **Estimated effort** | S–M (1–2w) |
 | **Owner (proposed)** | AI / Compliance / Observability |
 | **Depends on** | AP.4 (call sites emit CallMeta) |

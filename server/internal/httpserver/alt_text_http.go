@@ -15,6 +15,7 @@ import (
 	imagealtrepo "github.com/lextures/lextures/server/internal/repos/imagealtrepo"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/alttextai"
 	"github.com/lextures/lextures/server/internal/service/imagealt"
 )
@@ -129,21 +130,23 @@ func (d Deps) handlePostAltTextSuggest() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "imageUrl is required.")
 			return
 		}
-		or := d.openRouterClient()
-		if or == nil || d.effectiveConfig().OpenRouterAPIKey == "" {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI provider not configured.")
+		orgID := d.orgIDPtrForUser(r.Context(), userID)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 		if !d.enforceAIGateway(w, r, userID, altTextFeature, altTextSuggestModel, imageURL) {
 			return
 		}
-		suggestion, confidence, err := alttextai.Suggest(or, altTextSuggestModel, imageURL, req.Language)
+		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
+		suggestion, confidence, callMeta, err := alttextai.Suggest(r.Context(), bound, altTextSuggestModel, imageURL, req.Language)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "Alt-text suggestion failed.")
 			return
 		}
 		dec := aigateway.Decision{OptInConfirmed: true}
-		d.logAIInferenceAllowed(r, userID, altTextFeature, altTextSuggestModel, imageURL, dec)
+		d.logAIInferenceAllowedWithProvider(r, userID, altTextFeature, altTextSuggestModel, string(callMeta.Provider), imageURL, dec)
+		d.recordAIProviderUsage(r.Context(), AIUsageMeta{UserID: userID, Feature: altTextFeature, Model: altTextSuggestModel}, callMeta, true)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(altTextSuggestResponse{
 			Suggestion: suggestion,

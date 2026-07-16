@@ -15,8 +15,8 @@ import (
 func TestRedactSettingsSecrets(t *testing.T) {
 	m := map[string]any{
 		"smtpPassword": "secret-value",
-		"nested": map[string]any{"apiKey": "abc"},
-		"count": 3,
+		"nested":       map[string]any{"apiKey": "abc"},
+		"count":        3,
 	}
 	redactSettingsSecrets(m)
 	if m["smtpPassword"] != secretPlaceholder {
@@ -25,6 +25,23 @@ func TestRedactSettingsSecrets(t *testing.T) {
 	nested := m["nested"].(map[string]any)
 	if nested["apiKey"] != secretPlaceholder {
 		t.Fatalf("apiKey = %v", nested["apiKey"])
+	}
+}
+
+func TestRedactAIProviderMap_DeprecatesOpenRouterApiKey(t *testing.T) {
+	m := map[string]any{
+		"provider":         "anthropic",
+		"byokApiKey":       "secret-should-go",
+		"openRouterApiKey": "legacy-secret",
+		"byokConfigured":   true,
+	}
+	redactAIProviderMap(m)
+	if _, ok := m["byokApiKey"]; ok {
+		t.Fatalf("byokApiKey should be removed, got %v", m["byokApiKey"])
+	}
+	got, _ := m["openRouterApiKey"].(string)
+	if !strings.Contains(got, "deprecated") {
+		t.Fatalf("openRouterApiKey = %q, want deprecation marker", got)
 	}
 }
 

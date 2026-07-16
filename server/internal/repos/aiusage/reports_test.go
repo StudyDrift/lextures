@@ -6,6 +6,18 @@ import (
 	"time"
 )
 
+func TestFilters_whereSQL_provider(t *testing.T) {
+	from := time.Date(2026, 6, 16, 0, 0, 0, 0, time.UTC)
+	to := from.Add(24 * time.Hour)
+	where, args := (Filters{From: from, To: to, Provider: "anthropic"}).whereSQL("")
+	if !strings.Contains(where, "provider = $3") {
+		t.Fatalf("expected provider clause: %q", where)
+	}
+	if len(args) != 3 || args[2] != "anthropic" {
+		t.Fatalf("args: %#v", args)
+	}
+}
+
 func TestFilters_whereSQL_qualifiedForJoin(t *testing.T) {
 	from := time.Date(2026, 6, 16, 0, 0, 0, 0, time.UTC)
 	to := from.Add(24 * time.Hour)

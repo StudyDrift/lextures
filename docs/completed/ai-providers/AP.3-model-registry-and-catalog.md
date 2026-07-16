@@ -1,6 +1,6 @@
 # AP.3 — Model Registry & Per-Provider Catalogs
 
-> Implementation plan. Source: multi-provider BYOK epic ([README](README.md)).
+> Implementation plan. Source: multi-provider BYOK epic ([README](../../plan/ai-providers/README.md)).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI Providers |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | THIN — 3 hard-coded aliases; feature models are raw OpenRouter IDs; catalog only from OpenRouter |
+| **Status (today)** | DONE — versioned alias registry (role + feature aliases), dual-read OpenRouter ids, per-provider curated/live catalogs, `GET /settings/ai/models?provider=&kind=`, gateway allow-list alias matching |
 | **Estimated effort** | M (2w) |
 | **Owner (proposed)** | AI / Platform |
 | **Depends on** | AP.1, AP.2 |

@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/config"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 	"github.com/lextures/lextures/server/internal/service/plagiarism"
 )
 
@@ -18,7 +17,7 @@ func sweepOriginalityScans(ctx context.Context, pool *pgxpool.Pool, cfg config.C
 		Pool:         pool,
 		Config:       cfg,
 		FilesRoot:    cfg.CourseFilesRoot,
-		OpenRouter:   openrouter.NewClient(cfg.OpenRouterAPIKey),
+		AI:           platformScopedCompleter(pool, cfg),
 		StubExternal: cfg.OriginalityStubExternal,
 	}
 	if n, err := svc.SweepEnqueue(ctx); err != nil {

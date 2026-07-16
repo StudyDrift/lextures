@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const defaultHTTPTimeout = 60 * time.Second
+const defaultHTTPTimeout = defaultHardTimeout
 
 type httpClient struct {
 	http    *http.Client
@@ -29,33 +29,23 @@ func newHTTPClient(apiKey, baseURL string, headers map[string]string) *httpClien
 	}
 }
 
-func (c *httpClient) postJSON(ctx context.Context, provider ProviderName, path string, body any) ([]byte, int, error) {
+func (c *httpClient) withTimeout(d time.Duration) *httpClient {
 	if c == nil {
-		return nil, 0, fmt.Errorf("aiprovider: nil http client")
+		return nil
 	}
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, 0, err
+	if d <= 0 {
+		return c
 	}
-	u := c.baseURL + path
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(buf))
-	if err != nil {
-		return nil, 0, err
+	return &httpClient{
+		http:    &http.Client{Timeout: d},
+		apiKey:  c.apiKey,
+		baseURL: c.baseURL,
+		headers: c.headers,
 	}
-	req.Header.Set("Content-Type", "application/json")
-	if c.apiKey != "" {
-		req.Header.Set("Authorization", "Bearer "+c.apiKey)
-	}
-	for k, v := range c.headers {
-		if strings.TrimSpace(v) != "" {
-			req.Header.Set(k, v)
-		}
-	}
-	client := c.http
-	if client == nil {
-		client = http.DefaultClient
-	}
-	res, err := client.Do(req)
+}
+
+func (c *httpClient) postJSON(ctx context.Context, provider ProviderName, path string, body any) ([]byte, int, error) {
+	res, err := c.postJSONRaw(ctx, provider, path, body)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -72,4 +62,39 @@ func (c *httpClient) postJSON(ctx context.Context, provider ProviderName, path s
 		return nil, res.StatusCode, newProviderError(provider, res.StatusCode, msg)
 	}
 	return b, res.StatusCode, nil
+}
+
+// postJSONRaw performs the POST and returns the raw response (caller must Close Body).
+func (c *httpClient) postJSONRaw(ctx context.Context, provider ProviderName, path string, body any) (*http.Response, error) {
+	if c == nil {
+		return nil, fmt.Errorf("aiprovider: nil http client")
+	}
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	u := c.baseURL + path
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(buf))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.apiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	}
+	for k, v := range c.headers {
+		if strings.TrimSpace(v) != "" {
+			req.Header.Set(k, v)
+		}
+	}
+	client := c.http
+	if client == nil {
+		client = http.DefaultClient
+	}
+	_ = provider
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }

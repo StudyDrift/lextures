@@ -12,7 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/originalityreports"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/plagiarism"
 )
 
@@ -29,13 +29,13 @@ func (d Deps) requirePlagiarismWorkflow(w http.ResponseWriter) bool {
 	return true
 }
 
-func (d Deps) plagiarismService() *plagiarism.Service {
+func (d Deps) plagiarismService(orgID *uuid.UUID) *plagiarism.Service {
 	cfg := d.effectiveConfig()
 	return &plagiarism.Service{
 		Pool:         d.Pool,
 		Config:       cfg,
 		FilesRoot:    d.Config.CourseFilesRoot,
-		OpenRouter:   openrouter.NewClient(cfg.OpenRouterAPIKey),
+		AI:           aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID},
 		StubExternal: cfg.OriginalityStubExternal,
 	}
 }
@@ -374,7 +374,8 @@ func (d Deps) handlePostSubmissionOriginalityRetry() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Forbidden.")
 			return
 		}
-		n, err := d.plagiarismService().RetryFailed(r.Context(), submissionID)
+		orgID := d.orgIDPtrForUser(r.Context(), viewer)
+		n, err := d.plagiarismService(orgID).RetryFailed(r.Context(), submissionID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to retry originality scan.")
 			return

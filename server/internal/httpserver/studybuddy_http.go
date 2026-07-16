@@ -122,9 +122,10 @@ func (d Deps) handlePostStudyBuddyMessage() http.HandlerFunc {
 		if !d.aiStudyBuddyEnabled(w) {
 			return
 		}
-		or := d.openRouterClient()
-		if or == nil || d.effectiveConfig().OpenRouterAPIKey == "" {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "Study buddy is temporarily unavailable.")
+		// AI provider is checked before auth to preserve historical 503 (vs 401)
+		// behavior for misconfigured deployments; org-scoped resolution happens below.
+		if !d.aiConfigured(r.Context(), nil) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 		courseCode := chi.URLParam(r, "course_code")
@@ -133,6 +134,7 @@ func (d Deps) handlePostStudyBuddyMessage() http.HandlerFunc {
 			return
 		}
 		ctx := r.Context()
+		orgID := d.orgIDPtrForUser(ctx, userID)
 		c, courseID, ok := d.studyBuddyCourseAccess(w, r, courseCode, userID)
 		if !ok {
 			return
@@ -203,7 +205,7 @@ func (d Deps) handlePostStudyBuddyMessage() http.HandlerFunc {
 			return
 		}
 
-		fullText, streamErr := or.ChatCompletionStream(model, msgs, func(chunk string) error {
+		fullText, callMeta, streamErr := d.completeStreamOrBuffered(ctx, orgID, model, msgs, func(chunk string) error {
 			b, _ := json.Marshal(chunk)
 			_, werr := fmt.Fprintf(w, "data: {\"type\":\"content\",\"text\":%s}\n\n", string(b))
 			if canFlush {
@@ -216,10 +218,10 @@ func (d Deps) handlePostStudyBuddyMessage() http.HandlerFunc {
 			return
 		}
 
-		d.logAIInferenceAllowed(r, userID, aigateway.FeatureAIStudyBuddy, model, cleaned, gwDec)
-		d.recordAIUsage(ctx, AIUsageMeta{
+		d.logAIInferenceAllowedWithProvider(r, userID, aigateway.FeatureAIStudyBuddy, model, string(callMeta.Provider), cleaned, gwDec)
+		d.recordAIProviderResult(ctx, AIUsageMeta{
 			UserID: userID, Feature: aigateway.FeatureAIStudyBuddy, Model: model,
-		}, fullText.Usage, true)
+		}, callMeta, fullText, true)
 
 		_ = studybuddyrepo.AppendSessionMessage(ctx, d.Pool, session.ID, studybuddyrepo.Message{Role: "assistant", Content: fullText.Text})
 

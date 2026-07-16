@@ -300,9 +300,7 @@ func normalizeMarkdownOutput(raw string) string {
 }
 
 // Completer performs provider-agnostic chat completions (plan 16.7).
-type Completer interface {
-	Complete(ctx context.Context, orgID *uuid.UUID, modelOverride string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error)
-}
+type Completer = aiprovider.Completer
 
 // Answer runs validation, retrieval, and the AI provider call (used by HTTP handler).
 func Answer(ctx context.Context, pool *pgxpool.Pool, ai Completer, orgID *uuid.UUID, userID uuid.UUID, question string, notebooks []DocInput) (Response, aiprovider.CallMeta, error) {

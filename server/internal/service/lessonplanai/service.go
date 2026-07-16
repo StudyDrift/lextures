@@ -12,8 +12,8 @@ import (
 
 	"github.com/lextures/lextures/server/internal/models/assignmentrubric"
 	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/aitutor"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 const (
@@ -96,11 +96,6 @@ type PackageResult struct {
 	Status              string          `json:"status"`
 	Components          []ComponentSlot `json:"components"`
 	StandardsDisclaimer *string         `json:"standards_disclaimer,omitempty"`
-}
-
-// ChatClient abstracts OpenRouter for tests.
-type ChatClient interface {
-	ChatCompletion(model string, messages []openrouter.Message, opts ...openrouter.ChatOptions) (openrouter.ChatResult, error)
 }
 
 // Prompts holds system prompts for generation sub-tasks.
@@ -205,7 +200,7 @@ func standardsDisclaimer(code *string) *string {
 }
 
 // Generate runs parallel component generation and returns the updated package.
-func Generate(ctx context.Context, client ChatClient, input InputParams, pkg PackageResult, opts GenerateOptions) PackageResult {
+func Generate(ctx context.Context, client aiprovider.ScopedCompleter, input InputParams, pkg PackageResult, opts GenerateOptions) PackageResult {
 	if err := ValidateInput(input); err != nil {
 		pkg.Status = "failed"
 		return pkg
@@ -328,30 +323,27 @@ func setComponentStatus(pkg *PackageResult, key string, status ComponentStatus, 
 	})
 }
 
-func generateLessonPlan(ctx context.Context, client ChatClient, model, sysPrompt string, input InputParams) (string, error) {
-	_ = ctx
+func generateLessonPlan(ctx context.Context, client aiprovider.ScopedCompleter, model, sysPrompt string, input InputParams) (string, error) {
 	user := buildContextPrompt(input) + "\n\nWrite a complete lesson plan for this objective."
-	text, err := chatMarkdown(client, model, sysPrompt, user)
+	text, err := chatMarkdown(ctx, client, model, sysPrompt, user)
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(text), nil
 }
 
-func generateActivity(ctx context.Context, client ChatClient, model, sysPrompt string, input InputParams, level string) (string, error) {
-	_ = ctx
+func generateActivity(ctx context.Context, client aiprovider.ScopedCompleter, model, sysPrompt string, input InputParams, level string) (string, error) {
 	user := buildContextPrompt(input) + fmt.Sprintf("\n\nDifferentiation level: %s\nWrite one differentiated activity.", level)
-	text, err := chatMarkdown(client, model, sysPrompt, user)
+	text, err := chatMarkdown(ctx, client, model, sysPrompt, user)
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(text), nil
 }
 
-func generateQuiz(ctx context.Context, client ChatClient, model, sysPrompt string, input InputParams) ([]coursemodulequiz.QuizQuestion, error) {
-	_ = ctx
+func generateQuiz(ctx context.Context, client aiprovider.ScopedCompleter, model, sysPrompt string, input InputParams) ([]coursemodulequiz.QuizQuestion, error) {
 	user := buildContextPrompt(input) + "\n\nGenerate exactly 5 formative assessment questions as an exit ticket aligned to the objective."
-	text, err := chatJSON(client, model, sysPrompt, user)
+	text, err := chatJSON(ctx, client, model, sysPrompt, user)
 	if err != nil {
 		return nil, err
 	}
@@ -382,10 +374,9 @@ func generateQuiz(ctx context.Context, client ChatClient, model, sysPrompt strin
 	return payload.Questions, nil
 }
 
-func generateRubric(ctx context.Context, client ChatClient, model, sysPrompt string, input InputParams) (*assignmentrubric.RubricDefinition, error) {
-	_ = ctx
+func generateRubric(ctx context.Context, client aiprovider.ScopedCompleter, model, sysPrompt string, input InputParams) (*assignmentrubric.RubricDefinition, error) {
 	user := buildContextPrompt(input) + "\n\nCreate a rubric for the open-ended portion of this lesson."
-	text, err := chatJSON(client, model, sysPrompt, user)
+	text, err := chatJSON(ctx, client, model, sysPrompt, user)
 	if err != nil {
 		return nil, err
 	}
@@ -418,8 +409,8 @@ func buildContextPrompt(input InputParams) string {
 	return b.String()
 }
 
-func chatMarkdown(client ChatClient, model, sysPrompt, user string) (string, error) {
-	res, err := client.ChatCompletion(model, []openrouter.Message{
+func chatMarkdown(ctx context.Context, client aiprovider.ScopedCompleter, model, sysPrompt, user string) (string, error) {
+	res, _, err := client.Complete(ctx, model, []aiprovider.Message{
 		{Role: "system", Content: sysPrompt},
 		{Role: "user", Content: user},
 	})
@@ -429,11 +420,11 @@ func chatMarkdown(client ChatClient, model, sysPrompt, user string) (string, err
 	return res.Text, nil
 }
 
-func chatJSON(client ChatClient, model, sysPrompt, user string) (string, error) {
-	res, err := client.ChatCompletion(model, []openrouter.Message{
+func chatJSON(ctx context.Context, client aiprovider.ScopedCompleter, model, sysPrompt, user string) (string, error) {
+	res, _, err := client.Complete(ctx, model, []aiprovider.Message{
 		{Role: "system", Content: sysPrompt},
 		{Role: "user", Content: user},
-	}, openrouter.ChatOptions{JSONMode: true})
+	}, aiprovider.ChatOptions{JSONMode: true})
 	if err != nil {
 		return "", err
 	}
@@ -445,7 +436,7 @@ func chatJSON(client ChatClient, model, sysPrompt, user string) (string, error) 
 }
 
 // RegenerateComponent re-runs a single component and merges it into the package.
-func RegenerateComponent(ctx context.Context, client ChatClient, input InputParams, pkg PackageResult, componentKey string, opts GenerateOptions) (PackageResult, error) {
+func RegenerateComponent(ctx context.Context, client aiprovider.ScopedCompleter, input InputParams, pkg PackageResult, componentKey string, opts GenerateOptions) (PackageResult, error) {
 	opts.OnlyKeys = []string{componentKey}
 	return Generate(ctx, client, input, pkg, opts), nil
 }

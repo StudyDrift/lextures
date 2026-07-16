@@ -14,6 +14,7 @@ import (
 	pkgai "github.com/lextures/lextures/server/internal/aidisclosure"
 	repo "github.com/lextures/lextures/server/internal/repos/aidisclosure"
 	gdprrepo "github.com/lextures/lextures/server/internal/repos/gdpr"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	coppaservice "github.com/lextures/lextures/server/internal/service/coppa"
 )
 
@@ -38,6 +39,7 @@ const (
 	FeatureGraderAgent                = "grader_agent"
 	FeatureLessonGeneration           = "lesson_generation"
 	FeatureAIStudyBuddy               = "ai_study_buddy"
+	FeatureReportCardComment          = "report_card_comment"
 )
 
 // BlockReason explains why a call was blocked.
@@ -176,10 +178,47 @@ func Evaluate(ctx context.Context, pool *pgxpool.Pool, cfg Config, userID uuid.U
 }
 
 func modelAllowed(allowed []string, modelID string) bool {
+	modelID = strings.TrimSpace(modelID)
+	if modelID == "" {
+		return false
+	}
 	for _, m := range allowed {
-		if strings.EqualFold(strings.TrimSpace(m), strings.TrimSpace(modelID)) {
+		m = strings.TrimSpace(m)
+		if m == "" {
+			continue
+		}
+		if strings.EqualFold(m, modelID) {
 			return true
 		}
+		// Match aliases against resolved provider ids and dual-read OpenRouter ids (AP.3 FR-8).
+		if modelAllowedViaAlias(m, modelID) {
+			return true
+		}
+	}
+	return false
+}
+
+func modelAllowedViaAlias(allowedEntry, modelID string) bool {
+	// allowedEntry is an alias that resolves to modelID for any provider.
+	for _, p := range aiprovider.ListProviders() {
+		if id, err := aiprovider.ResolveModelID(allowedEntry, p); err == nil && strings.EqualFold(id, modelID) {
+			return true
+		}
+		if id, err := aiprovider.ResolveModelID(modelID, p); err == nil && strings.EqualFold(id, allowedEntry) {
+			return true
+		}
+	}
+	// Both sides dual-read to the same alias.
+	if a, ok := aiprovider.AliasForOpenRouterID(allowedEntry); ok {
+		if b, ok2 := aiprovider.AliasForOpenRouterID(modelID); ok2 && a == b {
+			return true
+		}
+		if strings.EqualFold(string(a), modelID) {
+			return true
+		}
+	}
+	if a, ok := aiprovider.AliasForOpenRouterID(modelID); ok && strings.EqualFold(string(a), allowedEntry) {
+		return true
 	}
 	return false
 }
@@ -214,7 +253,7 @@ func LogInference(ctx context.Context, pool *pgxpool.Pool, orgID *uuid.UUID, dec
 		modelID = "unknown"
 	}
 	if provider == "" {
-		provider = ProviderOpenRouter
+		provider = "unknown"
 	}
 	if contentHash == "" {
 		contentHash = pkgai.ContentHash("")

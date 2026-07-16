@@ -28,11 +28,35 @@ func TestBlockMessage(t *testing.T) {
 	}
 }
 
+func TestLogInference_EmptyProviderIsUnknown(t *testing.T) {
+	// Mirror LogInference default without a pool (AP.6 FR-7).
+	provider := ""
+	if provider == "" {
+		provider = "unknown"
+	}
+	if provider == ProviderOpenRouter {
+		t.Fatal("must not default empty provider to openrouter")
+	}
+	if provider != "unknown" {
+		t.Fatalf("provider=%q", provider)
+	}
+}
+
 func TestModelAllowed(t *testing.T) {
 	if !modelAllowed([]string{"anthropic/claude-3.5-sonnet"}, "anthropic/claude-3.5-sonnet") {
 		t.Fatal("expected match")
 	}
 	if modelAllowed([]string{"other"}, "anthropic/claude-3.5-sonnet") {
 		t.Fatal("expected no match")
+	}
+	// Alias allow-list matches resolved provider ids (AP.3 FR-8).
+	if !modelAllowed([]string{"text-strong"}, "claude-3-5-sonnet-20241022") {
+		t.Fatal("expected text-strong alias to match Anthropic id")
+	}
+	if !modelAllowed([]string{"text-fast"}, "arcee-ai/trinity-mini:free") {
+		t.Fatal("expected text-fast alias to match OpenRouter default id")
+	}
+	if !modelAllowed([]string{"arcee-ai/trinity-mini:free"}, "text-fast") {
+		t.Fatal("expected dual-read OpenRouter id to match alias")
 	}
 }

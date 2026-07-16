@@ -43,6 +43,7 @@ func (d Deps) handleGetSettingsAIReports() http.HandlerFunc {
 			From:       from,
 			To:         to,
 			Feature:    strings.TrimSpace(q.Get("feature")),
+			Provider:   strings.TrimSpace(q.Get("provider")),
 			UserQuery:  strings.TrimSpace(q.Get("userQuery")),
 			CourseCode: strings.TrimSpace(q.Get("courseCode")),
 		}
@@ -79,6 +80,16 @@ func (d Deps) handleGetSettingsAIReports() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI cost report.")
 			return
 		}
+		byProvider, err := aiusage.CostByProvider(ctx, d.Pool, filters)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI cost report.")
+			return
+		}
+		providers, err := aiusage.DistinctProviders(ctx, d.Pool, filters)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI cost report.")
+			return
+		}
 		byUser, err := aiusage.UsageByUser(ctx, d.Pool, filters, 50)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI usage by user.")
@@ -91,11 +102,13 @@ func (d Deps) handleGetSettingsAIReports() http.HandlerFunc {
 		}
 
 		out := models.ReportsPayload{
-			Range: models.DateRange{From: from, To: to},
+			Range:     models.DateRange{From: from, To: to},
+			Providers: providers,
 			Cost: models.CostReport{
-				Summary:   summary,
-				ByDay:     byDay,
-				ByFeature: byFeature,
+				Summary:    summary,
+				ByDay:      byDay,
+				ByFeature:  byFeature,
+				ByProvider: byProvider,
 			},
 			ByUser:   byUser,
 			ByCourse: byCourse,

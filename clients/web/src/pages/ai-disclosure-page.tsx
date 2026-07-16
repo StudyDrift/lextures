@@ -6,6 +6,7 @@ import { MARKETING_LEGAL_URLS } from '../lib/marketing-site'
 type DisclosureDoc = {
   version: string
   provider: string
+  providers?: string[]
   models: Array<{
     id: string
     name: string
@@ -61,6 +62,11 @@ export default function AiDisclosurePage() {
       {doc && (
         <div className="mt-8 space-y-8">
           <p className="text-xs text-slate-500">Version {doc.version}</p>
+          {(doc.providers?.length ?? 0) > 0 && (
+            <p className="text-sm text-slate-600 dark:text-neutral-300">
+              Configured providers: {doc.providers!.join(', ')}
+            </p>
+          )}
           {doc.models.map((m) => (
             <article
               key={m.id}

@@ -4,9 +4,9 @@
 
 ## Model
 
-- **Default provider:** OpenRouter
+- **Default provider:** Configurable AI provider (BYOK); OpenRouter is one option, not required
 - **Default model:** Configurable per org via AI governance (plan 19.10); typically Claude 3.5 Sonnet class models
-- **Routing:** Same infrastructure as other Lextures AI features (`server/internal/service/openrouter/`)
+- **Routing:** Provider-agnostic resolver (`server/internal/service/aiprovider/`); OpenRouter is one backend adapter
 
 ## Purpose
 

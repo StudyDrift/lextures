@@ -5,10 +5,11 @@ import "time"
 
 // ReportsPayload is GET /api/v1/settings/ai/reports.
 type ReportsPayload struct {
-	Range     DateRange         `json:"range"`
-	Cost      CostReport        `json:"cost"`
-	ByUser    []UserUsageRow    `json:"byUser"`
-	ByCourse  []CourseUsageRow  `json:"byCourse"`
+	Range      DateRange        `json:"range"`
+	Providers  []string         `json:"providers"`
+	Cost       CostReport       `json:"cost"`
+	ByUser     []UserUsageRow   `json:"byUser"`
+	ByCourse   []CourseUsageRow `json:"byCourse"`
 }
 
 // DateRange is the resolved query window (RFC 3339, UTC).
@@ -19,9 +20,10 @@ type DateRange struct {
 
 // CostReport aggregates platform AI spend.
 type CostReport struct {
-	Summary   CostSummary      `json:"summary"`
-	ByDay     []DayCostBucket  `json:"byDay"`
-	ByFeature []FeatureCostRow `json:"byFeature"`
+	Summary    CostSummary       `json:"summary"`
+	ByDay      []DayCostBucket   `json:"byDay"`
+	ByFeature  []FeatureCostRow  `json:"byFeature"`
+	ByProvider []ProviderCostRow `json:"byProvider"`
 }
 
 // CostSummary is headline totals.
@@ -45,6 +47,14 @@ type FeatureCostRow struct {
 	CostUSD float64 `json:"costUsd"`
 	Calls   int64   `json:"calls"`
 	Tokens  int64   `json:"tokens"`
+}
+
+// ProviderCostRow is spend for one AI provider backend (AP.6).
+type ProviderCostRow struct {
+	Provider string  `json:"provider"`
+	CostUSD  float64 `json:"costUsd"`
+	Calls    int64   `json:"calls"`
+	Tokens   int64   `json:"tokens"`
 }
 
 // UserUsageRow is per-user rollup.

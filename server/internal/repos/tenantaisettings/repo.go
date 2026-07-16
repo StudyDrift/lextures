@@ -164,5 +164,24 @@ SELECT 1 FROM settings.tenant_ai_secrets WHERE org_id = $1 AND secret_key = $2
 	return true, nil
 }
 
+// ClearBYOK removes the legacy encrypted BYOK key and clears byok_secret_ref.
+func ClearBYOK(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) error {
+	if pool == nil {
+		return errors.New("tenantaisettings: nil pool")
+	}
+	_, err := pool.Exec(ctx, `
+DELETE FROM settings.tenant_ai_secrets WHERE org_id = $1 AND secret_key = $2
+`, orgID, byokSecretKey)
+	if err != nil {
+		return err
+	}
+	_, err = pool.Exec(ctx, `
+UPDATE settings.tenant_ai_settings
+   SET byok_secret_ref = NULL, updated_at = now()
+ WHERE org_id = $1
+`, orgID)
+	return err
+}
+
 // DefaultBYOKRef returns the secret ref written when BYOK is configured.
 func DefaultBYOKRef() string { return byokSecretKey }

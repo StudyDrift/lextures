@@ -4,20 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 const (
-	disclosureProvider = "openrouter"
-	retentionDays      = 30
-	dpaStatus          = "sub_processor_under_institutional_DPA"
-	optOutPath         = "/settings/account"
-	cacheTTL           = time.Hour
+	retentionDays = 30
+	dpaStatus     = "sub_processor_under_institutional_DPA"
+	optOutPath    = "/settings/account"
+	cacheTTL      = time.Hour
 )
 
 // FeatureCard describes an AI-powered product feature for the public disclosure page.
@@ -39,16 +40,24 @@ type ModelCard struct {
 	OptOutPath    string   `json:"optOutPath"`
 }
 
-// PublicDisclosure is the machine-readable AI disclosure payload (plan 10.17).
+// PublicDisclosure is the machine-readable AI disclosure payload (plan 10.17 / AP.6).
 type PublicDisclosure struct {
-	Version  string        `json:"version"`
-	Provider string        `json:"provider"`
-	Models   []ModelCard   `json:"models"`
-	Features []FeatureCard `json:"features"`
+	Version    string        `json:"version"`
+	Provider   string        `json:"provider"`             // primary / first configured (compat)
+	Providers  []string      `json:"providers"`            // configured backends (AP.6 FR-4)
+	Models     []ModelCard   `json:"models"`
+	Features   []FeatureCard `json:"features"`
+}
+
+// DisclosureOptions customizes public disclosure assembly (AP.6).
+type DisclosureOptions struct {
+	// ConfiguredProviders are backends with usable credentials (platform and/or org).
+	ConfiguredProviders []string
 }
 
 type modelBinding struct {
 	modelID  string
+	alias    aiprovider.ModelAlias
 	purposes []string
 	dataSent string
 }
@@ -68,11 +77,12 @@ var disclosureFeatures = []FeatureCard{
 	{Key: "alt_text_suggestion", Label: "Alt-text suggestions", Description: "Suggests accessible image descriptions for course media."},
 }
 
-// platformModelBindings lists default OpenRouter models and the features that use them.
+// platformModelBindings lists default models and the features that use them.
 // User- and org-specific overrides may select other models from the platform catalog.
 var platformModelBindings = []modelBinding{
 	{
 		modelID: user.DefaultCourseSetupModelID,
+		alias:   aiprovider.AliasCourseSetup,
 		purposes: []string{
 			"ai_tutor", "rag_notebook", "syllabus_generation", "quiz_generation", "lesson_generation", "ai_study_buddy",
 		},
@@ -80,21 +90,25 @@ var platformModelBindings = []modelBinding{
 	},
 	{
 		modelID:  user.DefaultVibeActivityModelID,
+		alias:    aiprovider.AliasVibeActivity,
 		purposes: []string{"vibe_generation"},
 		dataSent: "Activity prompts and course context needed to draft the interactive activity.",
 	},
 	{
 		modelID:  user.DefaultGraderAgentModelID,
+		alias:    aiprovider.AliasGraderDefault,
 		purposes: []string{"grader_agent"},
 		dataSent: "Assignment prompts, rubrics, and student submission text for grading suggestions.",
 	},
 	{
 		modelID:  "openai/gpt-4o-mini",
+		alias:    aiprovider.AliasTranslation,
 		purposes: []string{"translation", "content_translation", "reading_level_simplification"},
 		dataSent: "Text submitted for translation or reading-level adjustment only.",
 	},
 	{
 		modelID:  "openai/gpt-4o",
+		alias:    aiprovider.AliasAltText,
 		purposes: []string{"alt_text_suggestion"},
 		dataSent: "Image references and surrounding context for alt-text generation.",
 	},
@@ -103,6 +117,7 @@ var platformModelBindings = []modelBinding{
 type disclosureCache struct {
 	mu      sync.RWMutex
 	expires time.Time
+	key     string
 	payload []byte
 }
 
@@ -110,26 +125,29 @@ var publicDisclosureCache disclosureCache
 
 var fetchModelNames = fetchOpenRouterModelNames
 
-// BuildPublicDisclosure assembles the disclosure document using live OpenRouter model metadata.
-func BuildPublicDisclosure(ctx context.Context) (PublicDisclosure, error) {
+// BuildPublicDisclosure assembles the disclosure document using configured providers + model metadata.
+func BuildPublicDisclosure(ctx context.Context, opts DisclosureOptions) (PublicDisclosure, error) {
 	names, err := fetchModelNames(ctx)
 	if err != nil {
 		names = map[string]string{}
 	}
-	return assembleDisclosure(names), nil
+	return assembleDisclosure(names, opts.ConfiguredProviders), nil
 }
 
 // PublicDisclosureJSON returns cached JSON for GET /api/v1/public/ai-disclosure.
-func PublicDisclosureJSON(ctx context.Context) ([]byte, error) {
+func PublicDisclosureJSON(ctx context.Context, opts DisclosureOptions) ([]byte, error) {
+	cacheKey := strings.Join(normalizeProviders(opts.ConfiguredProviders), ",")
 	publicDisclosureCache.mu.RLock()
-	if len(publicDisclosureCache.payload) > 0 && time.Now().Before(publicDisclosureCache.expires) {
+	if len(publicDisclosureCache.payload) > 0 &&
+		publicDisclosureCache.key == cacheKey &&
+		time.Now().Before(publicDisclosureCache.expires) {
 		out := publicDisclosureCache.payload
 		publicDisclosureCache.mu.RUnlock()
 		return out, nil
 	}
 	publicDisclosureCache.mu.RUnlock()
 
-	doc, err := BuildPublicDisclosure(ctx)
+	doc, err := BuildPublicDisclosure(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -140,6 +158,7 @@ func PublicDisclosureJSON(ctx context.Context) ([]byte, error) {
 
 	publicDisclosureCache.mu.Lock()
 	publicDisclosureCache.payload = raw
+	publicDisclosureCache.key = cacheKey
 	publicDisclosureCache.expires = time.Now().Add(cacheTTL)
 	publicDisclosureCache.mu.Unlock()
 	return raw, nil
@@ -149,16 +168,21 @@ func PublicDisclosureJSON(ctx context.Context) ([]byte, error) {
 func InvalidatePublicDisclosureCache() {
 	publicDisclosureCache.mu.Lock()
 	publicDisclosureCache.payload = nil
+	publicDisclosureCache.key = ""
 	publicDisclosureCache.expires = time.Time{}
 	publicDisclosureCache.mu.Unlock()
 }
 
-func assembleDisclosure(names map[string]string) PublicDisclosure {
+func assembleDisclosure(names map[string]string, configured []string) PublicDisclosure {
+	providers := normalizeProviders(configured)
+	viaOpenRouter := containsProvider(providers, string(aiprovider.ProviderOpenRouter))
+	routing := primaryRoutingProvider(providers)
+
 	byID := map[string]*ModelCard{}
 	order := make([]string, 0, len(platformModelBindings))
 
 	for _, bind := range platformModelBindings {
-		id := strings.TrimSpace(bind.modelID)
+		id, providerLabel := resolveDisclosureModel(bind, routing, viaOpenRouter)
 		if id == "" {
 			continue
 		}
@@ -167,7 +191,7 @@ func assembleDisclosure(names map[string]string) PublicDisclosure {
 			card = &ModelCard{
 				ID:            id,
 				Name:          modelDisplayName(id, names),
-				Provider:      modelProviderLabel(id),
+				Provider:      providerLabel,
 				Purposes:      []string{},
 				DataSent:      bind.dataSent,
 				RetentionDays: retentionDays,
@@ -188,12 +212,74 @@ func assembleDisclosure(names map[string]string) PublicDisclosure {
 		models = append(models, *byID[id])
 	}
 
-	return PublicDisclosure{
-		Version:  time.Now().UTC().Format("2006-01-02"),
-		Provider: disclosureProvider,
-		Models:   models,
-		Features: append([]FeatureCard(nil), disclosureFeatures...),
+	primary := ""
+	if len(providers) > 0 {
+		primary = providers[0]
 	}
+
+	return PublicDisclosure{
+		Version:   time.Now().UTC().Format("2006-01-02"),
+		Provider:  primary,
+		Providers: providers,
+		Models:    models,
+		Features:  append([]FeatureCard(nil), disclosureFeatures...),
+	}
+}
+
+func resolveDisclosureModel(bind modelBinding, routing aiprovider.ProviderName, viaOpenRouter bool) (modelID, providerLabel string) {
+	fallbackID := strings.TrimSpace(bind.modelID)
+	if routing != "" && routing != aiprovider.ProviderOpenRouter && bind.alias != "" {
+		if id, err := aiprovider.ResolveModelID(string(bind.alias), routing); err == nil && strings.TrimSpace(id) != "" {
+			return id, providerDisplayName(string(routing))
+		}
+	}
+	if fallbackID == "" {
+		return "", ""
+	}
+	return fallbackID, modelProviderLabel(fallbackID, viaOpenRouter)
+}
+
+func primaryRoutingProvider(configured []string) aiprovider.ProviderName {
+	for _, p := range configured {
+		switch aiprovider.ProviderName(p) {
+		case aiprovider.ProviderOpenRouter,
+			aiprovider.ProviderAnthropic,
+			aiprovider.ProviderOpenAI,
+			aiprovider.ProviderAzureOpenAI,
+			aiprovider.ProviderBedrock,
+			aiprovider.ProviderVertex:
+			return aiprovider.ProviderName(p)
+		}
+	}
+	return ""
+}
+
+func normalizeProviders(in []string) []string {
+	seen := map[string]struct{}{}
+	out := make([]string, 0, len(in))
+	for _, p := range in {
+		p = strings.ToLower(strings.TrimSpace(p))
+		if p == "" {
+			continue
+		}
+		if _, ok := seen[p]; ok {
+			continue
+		}
+		seen[p] = struct{}{}
+		out = append(out, p)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func containsProvider(list []string, want string) bool {
+	want = strings.ToLower(strings.TrimSpace(want))
+	for _, p := range list {
+		if p == want {
+			return true
+		}
+	}
+	return false
 }
 
 func fetchOpenRouterModelNames(ctx context.Context) (map[string]string, error) {
@@ -222,13 +308,57 @@ func modelDisplayName(id string, names map[string]string) string {
 	return id
 }
 
-func modelProviderLabel(id string) string {
+func modelProviderLabel(id string, viaOpenRouter bool) string {
+	id = strings.TrimSpace(id)
+	// Aliases and native ids: describe the backend family without assuming OpenRouter (AP.3/AP.6).
+	if !strings.Contains(id, "/") {
+		switch {
+		case strings.HasPrefix(id, "claude-"):
+			return "Anthropic"
+		case strings.HasPrefix(id, "gpt-") || strings.HasPrefix(id, "o1") || strings.HasPrefix(id, "o3") || strings.HasPrefix(id, "dall-e"):
+			return "OpenAI"
+		case strings.HasPrefix(id, "gemini-") || strings.HasPrefix(id, "imagen-"):
+			return "Google"
+		case strings.Contains(id, "."):
+			return "AWS Bedrock"
+		default:
+			return "AI provider"
+		}
+	}
 	before, _, ok := strings.Cut(id, "/")
 	if !ok || strings.TrimSpace(before) == "" {
-		return "OpenRouter"
+		if viaOpenRouter {
+			return "OpenRouter"
+		}
+		return "AI provider"
 	}
-	label := strings.ReplaceAll(before, "-", " ")
-	return titleWords(label) + " (via OpenRouter)"
+	label := titleWords(strings.ReplaceAll(before, "-", " "))
+	if viaOpenRouter {
+		return label + " (via OpenRouter)"
+	}
+	return label
+}
+
+func providerDisplayName(id string) string {
+	switch strings.ToLower(strings.TrimSpace(id)) {
+	case string(aiprovider.ProviderOpenRouter):
+		return "OpenRouter"
+	case string(aiprovider.ProviderAnthropic):
+		return "Anthropic"
+	case string(aiprovider.ProviderOpenAI):
+		return "OpenAI"
+	case string(aiprovider.ProviderAzureOpenAI):
+		return "Azure OpenAI"
+	case string(aiprovider.ProviderBedrock):
+		return "AWS Bedrock"
+	case string(aiprovider.ProviderVertex):
+		return "Google Vertex AI"
+	default:
+		if id == "" {
+			return "AI provider"
+		}
+		return titleWords(strings.ReplaceAll(id, "_", " "))
+	}
 }
 
 func titleWords(s string) string {

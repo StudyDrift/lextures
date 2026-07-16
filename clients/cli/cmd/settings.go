@@ -60,12 +60,24 @@ var settingsPasswordPolicySetCmd = &cobra.Command{
 
 var settingsAIProviderCmd = &cobra.Command{
 	Use:   "ai-provider",
-	Short: "Manage AI provider settings",
+	Short: "Manage AI provider settings (BYOK)",
+	Long: `Manage organization AI provider settings (bring-your-own-key).
+
+Supported providers (set "provider" in the JSON payload):
+  openrouter, anthropic, openai, azure_openai, bedrock, vertex
+
+Configure platform-wide credentials in the web UI under
+Settings → Intelligence → Models, or see docs/ai-providers-byok.md.
+
+Deprecated: platform openRouterApiKey on Settings → AI is legacy; prefer
+per-provider credentials. Org payloads may still use byokApiKey for the
+selected provider.`,
 }
 
 var settingsAIProviderGetCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get AI provider settings (secrets redacted)",
+	Long:  "Fetch org AI provider settings. Secrets are redacted. Provider may be openrouter, anthropic, openai, azure_openai, bedrock, or vertex.",
 	RunE:  runSettingsAIProviderGet,
 }
 
@@ -76,12 +88,20 @@ var settingsAIProviderSetFlags struct {
 var settingsAIProviderSetCmd = &cobra.Command{
 	Use:   "set",
 	Short: "Set AI provider settings from a JSON file",
-	RunE:  runSettingsAIProviderSet,
+	Long: `Update org AI provider settings from JSON.
+
+Example:
+  {"provider":"azure_openai","byokApiKey":"...","providerSettings":{"azure_base_url":"https://....openai.azure.com"}}
+
+Providers: openrouter, anthropic, openai, azure_openai, bedrock, vertex.
+Do not commit real API keys. openRouterApiKey is deprecated; use provider + byokApiKey.`,
+	RunE: runSettingsAIProviderSet,
 }
 
 var settingsAIProviderTestCmd = &cobra.Command{
 	Use:   "test",
 	Short: "Test AI provider connectivity",
+	Long:  "POST a connectivity check for the configured org AI provider (any supported backend).",
 	RunE:  runSettingsAIProviderTest,
 }
 

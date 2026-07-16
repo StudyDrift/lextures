@@ -50,6 +50,10 @@ jobs:
       - name: Migration lint (plan 17.10)
         run: go run ./cmd/migrate-lint
 
+      - name: OpenRouter coupling allowlist (AP.9)
+        working-directory: .
+        run: bash scripts/check-openrouter-coupling.sh
+
       - name: Marketplace courses content validate (MC0)
         run: go run ./cmd/marketplace-courses-validate
 
@@ -68,6 +72,9 @@ jobs:
           FORMAT='{{if .TestGoFiles}}{{.ImportPath}}{{"\n"}}{{end}}'
           pkgs=$(go list -f "$FORMAT" ./internal/...)
           go test $pkgs -count=1 -timeout=5m -coverprofile=coverage.out -covermode=atomic
+
+      - name: go test (AI provider HTTP e2e; AP.9)
+        run: go test ./test/ -count=1 -timeout=5m -run 'TestAIProvider_'
 
       - name: Verify committed OpenAPI spec (plan 16.1)
         run: go test ./internal/publicapi -run TestOpenAPISpec -count=1

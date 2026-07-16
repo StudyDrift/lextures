@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -164,6 +165,143 @@ func TestAIProvider_AdminSettings_CRUD(t *testing.T) {
 	if testRes.StatusCode != http.StatusOK {
 		t.Fatalf("test status: %d %s", testRes.StatusCode, readBody(t, testRes))
 	}
+}
+
+func TestAIProvider_MultiCredential_MaskAndClear(t *testing.T) {
+	env := setupAIProvider(t)
+	token := env.token(t)
+	rawKey := "azure-secret-key-must-not-leak"
+
+	putBody := map[string]any{
+		"provider":   "azure_openai",
+		"modelAlias": "gpt-4o",
+		"credentials": []map[string]any{
+			{
+				"provider": "azure_openai",
+				"enabled":  true,
+				"apiKey":   rawKey,
+				"settings": map[string]any{
+					"azure_base_url": "https://example.openai.azure.com",
+				},
+			},
+		},
+	}
+	putRes := aiProviderDo(t, env.srv, http.MethodPut, "/api/v1/admin/ai-settings", putBody, token)
+	if putRes.StatusCode != http.StatusOK {
+		t.Fatalf("put status: %d %s", putRes.StatusCode, readBody(t, putRes))
+	}
+	var putGot map[string]any
+	decodeJSON(t, putRes, &putGot)
+	body := readBodyFromMap(t, putGot)
+	if strings.Contains(body, rawKey) {
+		t.Fatal("response leaked plaintext api key")
+	}
+	if putGot["byokConfigured"] != true {
+		t.Fatalf("byokConfigured: %v", putGot["byokConfigured"])
+	}
+
+	getRes := aiProviderDo(t, env.srv, http.MethodGet, "/api/v1/admin/ai-settings", nil, token)
+	if getRes.StatusCode != http.StatusOK {
+		t.Fatalf("get status: %d %s", getRes.StatusCode, readBody(t, getRes))
+	}
+	getBody := readBody(t, getRes)
+	if strings.Contains(getBody, rawKey) {
+		t.Fatal("GET leaked plaintext api key")
+	}
+	var getGot map[string]any
+	if err := json.Unmarshal([]byte(getBody), &getGot); err != nil {
+		t.Fatal(err)
+	}
+	if getGot["byokConfigured"] != true {
+		t.Fatalf("byokConfigured: %v", getGot["byokConfigured"])
+	}
+
+	clearBody := map[string]any{
+		"provider":   "azure_openai",
+		"modelAlias": "gpt-4o",
+		"credentials": []map[string]any{
+			{"provider": "azure_openai", "clearApiKey": true},
+		},
+	}
+	clearRes := aiProviderDo(t, env.srv, http.MethodPut, "/api/v1/admin/ai-settings", clearBody, token)
+	if clearRes.StatusCode != http.StatusOK {
+		t.Fatalf("clear status: %d %s", clearRes.StatusCode, readBody(t, clearRes))
+	}
+	var clearGot map[string]any
+	decodeJSON(t, clearRes, &clearGot)
+	if clearGot["byokConfigured"] == true {
+		t.Fatal("expected byokConfigured false after clear")
+	}
+}
+
+func TestAIProvider_BYOKRequiresSecretsKey(t *testing.T) {
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		t.Skip("DATABASE_URL not set")
+	}
+	ctx := context.Background()
+	pool, err := db.NewPool(ctx, dsn)
+	if err != nil {
+		t.Fatalf("pool: %v", err)
+	}
+	t.Cleanup(pool.Close)
+
+	secret := "ai-provider-e2e-jwt-secret-min32chars"
+	signer := auth.NewJWTSigner(secret)
+	email := fmt.Sprintf("ai-provider-nosecrets-%d@test.example", time.Now().UnixNano())
+	ph, err := auth.HashPassword("Passw0rd!ai-provider")
+	if err != nil {
+		t.Fatalf("hash: %v", err)
+	}
+	dn := "AI Provider No Secrets"
+	u, err := user.InsertUser(ctx, pool, email, ph, &dn)
+	if err != nil {
+		t.Fatalf("insert user: %v", err)
+	}
+	userID := uuid.MustParse(u.ID)
+	slug := fmt.Sprintf("ai-nosec-%d", time.Now().UnixNano())
+	orgRow, err := organization.Create(ctx, pool, "AI No Secrets Org", slug, nil, nil, "", nil)
+	if err != nil {
+		t.Fatalf("org: %v", err)
+	}
+	orgID := orgRow.ID
+	_, _ = pool.Exec(ctx, `UPDATE "user".users SET org_id = $1 WHERE id = $2`, orgID, userID)
+	_, _ = pool.Exec(ctx, `
+INSERT INTO "user".org_role_grants (org_id, user_id, role)
+VALUES ($1, $2, 'org_admin') ON CONFLICT DO NOTHING
+`, orgID, userID)
+
+	srv := httptest.NewServer(httpserver.NewHandler(httpserver.Deps{
+		Pool:      pool,
+		JWTSigner: signer,
+		Config: config.Config{
+			AiProviderAbstractionEnabled: true,
+			JWTSecret:                    secret,
+			// PlatformSecretsKey intentionally unset
+		},
+	}))
+	t.Cleanup(srv.Close)
+	tok, err := signer.Sign(ctx, userID.String(), email, orgID.String(), slug, nil)
+	if err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+	res := aiProviderDo(t, srv, http.MethodPut, "/api/v1/admin/ai-settings", map[string]any{
+		"provider":   "openai",
+		"modelAlias": "gpt-4o",
+		"byokApiKey": "should-fail-without-secrets-key",
+	}, tok)
+	if res.StatusCode != http.StatusServiceUnavailable {
+		t.Fatalf("status: %d body=%s", res.StatusCode, readBody(t, res))
+	}
+}
+
+func readBodyFromMap(t *testing.T, m map[string]any) string {
+	t.Helper()
+	b, err := json.Marshal(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(b)
 }
 
 func TestAIProvider_FeatureFlagDisabled(t *testing.T) {

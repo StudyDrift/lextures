@@ -1,5 +1,5 @@
 # Common tasks for the Go API (`server/`). Run with DATABASE_URL for full tests (see CI).
-.PHONY: test testshort lint build docker-build stubs intro-course-validate marketplace-courses-validate
+.PHONY: test testshort lint build docker-build stubs intro-course-validate marketplace-courses-validate check-openrouter-coupling
 stubs:
 	python3 scripts/gen_stubs.py
 test:
@@ -8,6 +8,9 @@ test:
 
 testshort:
 	go test ./... -count=1 -short -timeout=1m
+
+check-openrouter-coupling:
+	bash ../scripts/check-openrouter-coupling.sh
 
 lint:
 	golangci-lint run ./...

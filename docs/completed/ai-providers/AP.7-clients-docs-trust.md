@@ -1,6 +1,6 @@
 # AP.7 — Clients, Documentation & Trust Surfaces
 
-> Implementation plan. Source: multi-provider BYOK epic ([README](README.md)).
+> Implementation plan. Source: multi-provider BYOK epic ([README](../../plan/ai-providers/README.md)).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI Providers |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | OpenRouter-only copy across web marketing, mobile locales, CLI help, trust center, README |
+| **Status (today)** | DONE — provider-agnostic web/mobile/CLI/www/README copy; BYOK-aware trust center; admin guide `docs/ai-providers-byok.md` |
 | **Estimated effort** | S (≤1w) |
 | **Owner (proposed)** | Frontend / Docs / Mobile |
 | **Depends on** | AP.5, AP.6 |
@@ -144,6 +144,6 @@ User-facing and public materials still instruct operators to “add an OpenRoute
 
 ## 19. References
 
-- [README](README.md) inventory
+- [README](../../plan/ai-providers/README.md) inventory
 - `e2e/tests/trust-center.spec.ts`
-- Related: [AP.5](AP.5-admin-intelligence-ui.md), [AP.6](AP.6-usage-disclosure-observability.md), [S07](../standards/S07-cross-border-transfer-subprocessor-governance.md)
+- Related: [AP.5](AP.5-admin-intelligence-ui.md), [AP.6](AP.6-usage-disclosure-observability.md), [S07](../../plan/standards/S07-cross-border-transfer-subprocessor-governance.md)

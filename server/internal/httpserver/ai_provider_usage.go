@@ -9,7 +9,6 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 func (d Deps) logAIInferenceAllowedWithProvider(
@@ -30,9 +29,7 @@ func (d Deps) logAIInferenceAllowedWithProvider(
 		dec.UserIDHash = aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, userID)
 		dec.OptInConfirmed = true
 	}
-	if provider == "" {
-		provider = aigateway.ProviderOpenRouter
-	}
+	// Empty provider → LogInference stores "unknown" (AP.6 FR-7); do not invent openrouter.
 	_ = aigateway.LogInference(ctx, d.Pool, orgID, dec, feature, modelID, provider, aigateway.ContentHash(contentForHash), false)
 }
 
@@ -57,13 +54,7 @@ func (d Deps) recordAIProviderResult(ctx context.Context, meta AIUsageMeta, call
 		uid := meta.UserID
 		userID = &uid
 	}
-	usage := openrouter.UsageInfo{
-		PromptTokens:     result.Usage.PromptTokens,
-		CompletionTokens: result.Usage.CompletionTokens,
-		TotalTokens:      result.Usage.TotalTokens,
-		CostUSD:          result.Usage.CostUSD,
-	}
-	_ = aiusage.Insert(ctx, d.Pool, aiusage.EntryFromProviderUsage(
-		userID, meta.CourseID, meta.Feature, meta.Model, string(callMeta.Provider), usage, succeeded,
+	_ = aiusage.Insert(ctx, d.Pool, aiusage.EntryFromCallMeta(
+		userID, meta.CourseID, meta.Feature, callMeta, result.Usage, succeeded,
 	))
 }

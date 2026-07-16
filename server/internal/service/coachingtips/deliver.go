@@ -12,8 +12,8 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/notificationsinbox"
 	repo "github.com/lextures/lextures/server/internal/repos/studyreflection"
 	"github.com/lextures/lextures/server/internal/repos/userai"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/notifications"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 // Deliver stores a weekly tip and notifies the student (in-app + optional email).
@@ -37,7 +37,7 @@ func Deliver(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, userID 
 }
 
 // RunWeeklyBatch generates tips for opted-in users missing a tip this week.
-func RunWeeklyBatch(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, or *openrouter.Client, now time.Time) (int, error) {
+func RunWeeklyBatch(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, ai aiprovider.ScopedCompleter, now time.Time) (int, error) {
 	if !cfg.SelfReflectionEnabled || pool == nil {
 		return 0, nil
 	}
@@ -56,7 +56,7 @@ func RunWeeklyBatch(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, 
 		if m, err := userai.GetCourseSetupModelID(ctx, pool, uid); err == nil && strings.TrimSpace(m) != "" {
 			model = strings.TrimSpace(m)
 		}
-		tip, _, _, err := GenerateTip(ctx, pool, or, model, uid, now)
+		tip, _, _, err := GenerateTip(ctx, pool, ai, model, uid, now)
 		if err != nil || strings.TrimSpace(tip) == "" {
 			continue
 		}

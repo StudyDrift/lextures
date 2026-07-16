@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/systemprompts"
 	"github.com/lextures/lextures/server/internal/repos/userai"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/lessonplanai"
 )
 
@@ -117,11 +118,12 @@ func (d Deps) runLessonGenerationJob(jobID, viewer, courseID uuid.UUID, courseCo
 
 	_ = lessongenerationjobs.MarkProcessing(ctx, d.Pool, jobID)
 
-	or := d.openRouterClient()
-	if or == nil {
-		_ = lessongenerationjobs.MarkFailed(ctx, d.Pool, jobID, "AI generation is not configured.")
+	orgID := d.orgIDPtrForUser(ctx, viewer)
+	if !d.aiConfigured(ctx, orgID) {
+		_ = lessongenerationjobs.MarkFailed(ctx, d.Pool, jobID, aiNotConfiguredMsg)
 		return
 	}
+	bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 	model, err := userai.GetCourseSetupModelID(ctx, d.Pool, viewer)
 	if err != nil {
 		model = userai.DefaultCourseSetupModelID
@@ -134,12 +136,12 @@ func (d Deps) runLessonGenerationJob(jobID, viewer, courseID uuid.UUID, courseCo
 
 	keys := lessonplanai.BuildComponentKeys(input.DifferentiationLevels)
 	pkg := lessonplanai.NewPackage(jobID.String(), keys)
-	pkg = lessonplanai.Generate(ctx, or, input, pkg, lessonplanai.GenerateOptions{
+	pkg = lessonplanai.Generate(ctx, bound, input, pkg, lessonplanai.GenerateOptions{
 		ModelID: model,
 		Prompts: d.loadLessonPrompts(ctx),
 	})
 
-	d.logAIInferenceAllowedBackground(ctx, viewer, aigateway.FeatureLessonGeneration, model, promptMaterial)
+	d.logAIInferenceAllowedBackground(ctx, viewer, aigateway.FeatureLessonGeneration, model, promptMaterial, d.aiProvidersConfigured(ctx, orgID))
 
 	raw, err := lessonplanai.MarshalPackage(pkg)
 	if err != nil {
@@ -149,7 +151,7 @@ func (d Deps) runLessonGenerationJob(jobID, viewer, courseID uuid.UUID, courseCo
 	_ = lessongenerationjobs.SaveResult(ctx, d.Pool, jobID, raw)
 }
 
-func (d Deps) logAIInferenceAllowedBackground(ctx context.Context, userID uuid.UUID, feature, modelID, contentForHash string) {
+func (d Deps) logAIInferenceAllowedBackground(ctx context.Context, userID uuid.UUID, feature, modelID, contentForHash string, providers []string) {
 	if d.Pool == nil || !d.effectiveConfig().AiDisclosureEnabled {
 		return
 	}
@@ -157,11 +159,15 @@ func (d Deps) logAIInferenceAllowedBackground(ctx context.Context, userID uuid.U
 	if oid, err := organization.OrgIDForUser(ctx, d.Pool, userID); err == nil {
 		orgID = &oid
 	}
+	provider := ""
+	if len(providers) > 0 {
+		provider = providers[0]
+	}
 	dec := aigateway.Decision{
 		UserIDHash:     aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, userID),
 		OptInConfirmed: true,
 	}
-	_ = aigateway.LogInference(ctx, d.Pool, orgID, dec, feature, modelID, aigateway.ProviderOpenRouter, aigateway.ContentHash(contentForHash), false)
+	_ = aigateway.LogInference(ctx, d.Pool, orgID, dec, feature, modelID, provider, aigateway.ContentHash(contentForHash), false)
 }
 
 // handleGetLessonGeneratorJob is GET /api/v1/courses/{course_code}/lesson-generator/{job_id}
@@ -271,11 +277,12 @@ func (d Deps) handlePostLessonGeneratorRegenerate() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to parse job result.")
 			return
 		}
-		or := d.openRouterClient()
-		if or == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI generation is not configured.")
+		orgID := d.orgIDPtrForUser(r.Context(), viewer)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
+		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 		model, mErr := userai.GetCourseSetupModelID(r.Context(), d.Pool, viewer)
 		if mErr != nil {
 			model = userai.DefaultCourseSetupModelID
@@ -284,7 +291,7 @@ func (d Deps) handlePostLessonGeneratorRegenerate() http.HandlerFunc {
 		if !d.enforceAIGateway(w, r, viewer, aigateway.FeatureLessonGeneration, model, promptMaterial) {
 			return
 		}
-		pkg = lessonplanai.Generate(r.Context(), or, input, pkg, lessonplanai.GenerateOptions{
+		pkg = lessonplanai.Generate(r.Context(), bound, input, pkg, lessonplanai.GenerateOptions{
 			ModelID:  model,
 			Prompts:  d.loadLessonPrompts(r.Context()),
 			OnlyKeys: []string{component},

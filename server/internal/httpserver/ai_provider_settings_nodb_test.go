@@ -49,3 +49,23 @@ func TestAdminAISettings_MethodNotAllowed(t *testing.T) {
 		t.Fatalf("status: %d", rec.Code)
 	}
 }
+
+func TestPlatformAIProviders_FeatureDisabled404(t *testing.T) {
+	h := NewHandler(Deps{Config: config.Config{AiProviderAbstractionEnabled: false}})
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/settings/ai/providers", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("status: %d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestPlatformAIProviders_Unauthorized401(t *testing.T) {
+	h := NewHandler(Deps{Config: config.Config{AiProviderAbstractionEnabled: true}})
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/settings/ai/providers", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("status: %d", rec.Code)
+	}
+}

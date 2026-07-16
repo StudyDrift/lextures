@@ -16,9 +16,9 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	userai "github.com/lextures/lextures/server/internal/repos/user"
-	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	ltidb "github.com/lextures/lextures/server/internal/repos/lti"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 func parseRFC3339Timestamp(s string) (time.Time, error) {
@@ -910,9 +910,9 @@ func (d Deps) handleGenerateVibeActivityHTML() http.HandlerFunc {
 			return
 		}
 
-		or := d.openRouterClient()
-		if or == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI generation is not configured. Set an OpenRouter API key under Settings → Intelligence → Models.")
+		orgID := d.orgIDPtrForUser(r.Context(), viewer)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 
@@ -929,25 +929,26 @@ func (d Deps) handleGenerateVibeActivityHTML() http.HandlerFunc {
 			OptInConfirmed: true,
 		}
 
-		msgs := []openrouter.Message{{Role: "system", Content: vibeActivitySystemPrompt}}
+		msgs := []aiprovider.Message{{Role: "system", Content: vibeActivitySystemPrompt}}
 		for _, h := range body.History {
 			role := h.Role
 			if role != "user" && role != "assistant" {
 				continue
 			}
-			msgs = append(msgs, openrouter.Message{Role: role, Content: h.Content})
+			msgs = append(msgs, aiprovider.Message{Role: role, Content: h.Content})
 		}
-		msgs = append(msgs, openrouter.Message{Role: "user", Content: prompt})
+		msgs = append(msgs, aiprovider.Message{Role: "user", Content: prompt})
 
-		generated, err := or.ChatCompletion(model, msgs)
+		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
+		generated, callMeta, err := bound.Complete(r.Context(), model, msgs)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI generation failed: "+err.Error())
 			return
 		}
-		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureVibeGeneration, model, prompt, gwDec)
-		d.recordAIUsage(r.Context(), AIUsageMeta{
+		d.logAIInferenceAllowedWithProvider(r, viewer, aigateway.FeatureVibeGeneration, model, string(callMeta.Provider), prompt, gwDec)
+		d.recordAIProviderUsage(r.Context(), AIUsageMeta{
 			UserID: viewer, CourseCode: courseCode, Feature: aigateway.FeatureVibeGeneration, Model: model,
-		}, generated.Usage, true)
+		}, callMeta, true)
 
 		html := strings.TrimSpace(generated.Text)
 		// Strip accidental markdown code fences if the model wraps output

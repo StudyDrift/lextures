@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	tmsvc "github.com/lextures/lextures/server/internal/service/translationmemory"
 )
 
@@ -337,22 +338,23 @@ func (d Deps) handlePostCourseTranslationAIDraft() http.HandlerFunc {
 		if text == "" {
 			text = strings.TrimSpace(title)
 		}
-		or := d.openRouterClient()
-		if or == nil || d.effectiveConfig().OpenRouterAPIKey == "" {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI provider not configured.")
+		orgID := d.orgIDPtrForUser(r.Context(), userID)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 		if !d.enforceAIGateway(w, r, userID, aigateway.FeatureContentTranslation, courseTranslationAIModel, text) {
 			return
 		}
-		translated, _, _, err := callLLMTranslation(or, text, req.TargetLocale)
+		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
+		translated, _, callMeta, err := callLLMTranslation(r.Context(), bound, text, req.TargetLocale)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI draft translation failed.")
 			return
 		}
 		var tTitle *string
 		if strings.TrimSpace(title) != "" {
-			tTitleStr, _, _, tErr := callLLMTranslation(or, strings.TrimSpace(title), req.TargetLocale)
+			tTitleStr, _, _, tErr := callLLMTranslation(r.Context(), bound, strings.TrimSpace(title), req.TargetLocale)
 			if tErr == nil {
 				tTitle = &tTitleStr
 			}
@@ -374,7 +376,7 @@ func (d Deps) handlePostCourseTranslationAIDraft() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save AI draft.")
 			return
 		}
-		d.logAIInferenceAllowed(r, userID, aigateway.FeatureContentTranslation, courseTranslationAIModel, text, aigateway.Decision{OptInConfirmed: true})
+		d.logAIInferenceAllowedWithProvider(r, userID, aigateway.FeatureContentTranslation, courseTranslationAIModel, string(callMeta.Provider), text, aigateway.Decision{OptInConfirmed: true})
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(translationRowJSON(tr))
 	}

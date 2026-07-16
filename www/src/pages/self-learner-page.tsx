@@ -21,7 +21,7 @@ const FEATURES = [
   },
   {
     title: 'Build from your own material',
-    body: 'Create a course, add modules and question banks, or import QTI packages. Optional AI-assisted question generation when your instance has an OpenRouter key configured.',
+    body: 'Create a course, add modules and question banks, or import QTI packages. Optional AI-assisted question generation when your instance has an AI provider configured (customer-provided keys / BYOK).',
   },
 ]
 

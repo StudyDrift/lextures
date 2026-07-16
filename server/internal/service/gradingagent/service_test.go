@@ -3,17 +3,29 @@ package gradingagent
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
+
+// stubCompleter is a minimal aiprovider.ScopedCompleter test double.
+type stubCompleter struct {
+	completeFunc func(ctx context.Context, modelOverride string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error)
+	calls        int
+}
+
+func (s *stubCompleter) Complete(ctx context.Context, modelOverride string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
+	s.calls++
+	if s.completeFunc != nil {
+		return s.completeFunc(ctx, modelOverride, messages, opts...)
+	}
+	return aiprovider.ChatResult{}, aiprovider.CallMeta{}, nil
+}
 
 func TestReadSubmissionBlob_StorageDriverKey(t *testing.T) {
 	dir := t.TempDir()
@@ -59,18 +71,25 @@ func TestReadSubmissionBlob_BlobDiskPathFallback(t *testing.T) {
 	}
 }
 
-func TestScore_OpenRouterIntegration(t *testing.T) {
+func TestScore_UsesScopedCompleter(t *testing.T) {
 	modelJSON := `{"total":8,"comment":"Solid work.","confidence":0.75,"rubric":{}}`
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/v1/chat/completions" {
-			t.Fatalf("path: %s", r.URL.Path)
-		}
-		quoted, _ := json.Marshal(modelJSON)
-		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":` + string(quoted) + `}}],"usage":{"prompt_tokens":10,"completion_tokens":5,"cost":0.01}}`))
-	}))
-	defer srv.Close()
+	stub := &stubCompleter{
+		completeFunc: func(ctx context.Context, modelOverride string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
+			if modelOverride != "test/model" {
+				t.Fatalf("modelOverride=%q", modelOverride)
+			}
+			return aiprovider.ChatResult{
+				Text: modelJSON,
+				Usage: aiprovider.UsageInfo{
+					PromptTokens:     10,
+					CompletionTokens: 5,
+					CostUSD:          0.01,
+				},
+			}, aiprovider.CallMeta{Provider: aiprovider.ProviderAnthropic, ModelID: "test/model"}, nil
+		},
+	}
 
-	svc := &Service{Client: openrouter.NewClientWithBaseURL("test-key", srv.URL+"/v1")}
+	svc := &Service{AI: stub}
 	result, err := svc.Score(context.Background(), ScoreRequest{
 		InstructorPrompt: "Grade fairly.",
 		SubmissionText:   "My essay argues for renewable energy.",
@@ -85,5 +104,54 @@ func TestScore_OpenRouterIntegration(t *testing.T) {
 	}
 	if result.Output.Comment != "Solid work." {
 		t.Fatalf("comment=%q", result.Output.Comment)
+	}
+	if result.CallMeta.Provider != aiprovider.ProviderAnthropic {
+		t.Fatalf("callMeta.Provider=%q", result.CallMeta.Provider)
+	}
+	if stub.calls != 1 {
+		t.Fatalf("calls=%d want 1", stub.calls)
+	}
+}
+
+func TestScore_RetriesWithoutJSONModeOn400(t *testing.T) {
+	modelJSON := `{"total":5,"comment":"OK.","confidence":0.5,"rubric":{}}`
+	attempts := 0
+	stub := &stubCompleter{
+		completeFunc: func(ctx context.Context, modelOverride string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
+			attempts++
+			if len(opts) > 0 && opts[0].JSONMode {
+				return aiprovider.ChatResult{}, aiprovider.CallMeta{}, fmt.Errorf("aiprovider: status 400: response_format not supported")
+			}
+			return aiprovider.ChatResult{Text: modelJSON}, aiprovider.CallMeta{}, nil
+		},
+	}
+
+	svc := &Service{AI: stub}
+	result, err := svc.Score(context.Background(), ScoreRequest{
+		InstructorPrompt: "Grade fairly.",
+		SubmissionText:   "Essay text.",
+		ModelID:          "test/model",
+		MaxPoints:        10,
+	})
+	if err != nil {
+		t.Fatalf("Score: %v", err)
+	}
+	if attempts != 2 {
+		t.Fatalf("attempts=%d want 2", attempts)
+	}
+	if result.Output.TotalPoints != 5 {
+		t.Fatalf("total=%v want 5", result.Output.TotalPoints)
+	}
+}
+
+func TestScore_NoAIConfigured(t *testing.T) {
+	svc := &Service{}
+	_, err := svc.Score(context.Background(), ScoreRequest{
+		InstructorPrompt: "Grade fairly.",
+		SubmissionText:   "Essay text.",
+		ModelID:          "test/model",
+	})
+	if err == nil {
+		t.Fatal("expected error when AI is not configured")
 	}
 }

@@ -14,9 +14,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	studybuddyrepo "github.com/lextures/lextures/server/internal/repos/studybuddy"
 	tutorrepo "github.com/lextures/lextures/server/internal/repos/tutorsession"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/aitutor"
 	"github.com/lextures/lextures/server/internal/service/notebookrag"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 const (
@@ -137,19 +137,19 @@ func FilterValidCitations(citations []tutorrepo.Citation, retrieved []tutorrepo.
 	return out
 }
 
-// BuildMessages assembles OpenRouter messages for a tutor turn.
+// BuildMessages assembles provider-agnostic messages for a tutor turn.
 func BuildMessages(
 	courseTitle string,
 	history []tutorrepo.Message,
 	userMessage, ragContext string,
 	hasRAG bool,
 	profileScaffolding string,
-) []openrouter.Message {
+) []aiprovider.Message {
 	sys := BuildSystemPrompt(courseTitle, hasRAG)
 	if strings.TrimSpace(profileScaffolding) != "" {
 		sys += profileScaffolding
 	}
-	msgs := []openrouter.Message{{Role: "system", Content: sys}}
+	msgs := []aiprovider.Message{{Role: "system", Content: sys}}
 	start := 0
 	if len(history) > HistoryMessageLimit {
 		start = len(history) - HistoryMessageLimit
@@ -158,13 +158,13 @@ func BuildMessages(
 		if m.Role == "system" {
 			continue
 		}
-		msgs = append(msgs, openrouter.Message{Role: m.Role, Content: m.Content})
+		msgs = append(msgs, aiprovider.Message{Role: m.Role, Content: m.Content})
 	}
 	body := userMessage
 	if strings.TrimSpace(ragContext) != "" {
 		body = fmt.Sprintf("Student question:\n---\n%s\n---\n\nRelevant course material excerpts (only use these as evidence):\n%s", userMessage, ragContext)
 	}
-	msgs = append(msgs, openrouter.Message{Role: "user", Content: body})
+	msgs = append(msgs, aiprovider.Message{Role: "user", Content: body})
 	return msgs
 }
 

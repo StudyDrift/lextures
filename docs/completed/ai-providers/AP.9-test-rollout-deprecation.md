@@ -1,6 +1,6 @@
 # AP.9 — Test Matrix, GA Rollout & OpenRouter Peer Deprecation
 
-> Implementation plan. Source: multi-provider BYOK epic ([README](README.md)).
+> Implementation plan (completed). Source: multi-provider BYOK epic ([README](../../plan/ai-providers/README.md)).
 
 ## Metadata
 
@@ -10,11 +10,11 @@
 | **Section** | AI Providers |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | Flag `AI_PROVIDER_ABSTRACTION_ENABLED` default false; OpenRouter remains de-facto sole path |
+| **Status (today)** | DONE — abstraction default on; CI OpenRouter coupling gate; test matrix + e2e; API changelog dual-read; rollback/GA runbooks; column drop deferred until soak |
 | **Estimated effort** | S–M (1–2w) |
 | **Owner (proposed)** | AI / QA / Platform |
 | **Depends on** | AP.4, AP.5, AP.6, AP.7 (AP.8 optional for cloud-native GA) |
-| **Unblocks** | Epic complete; remove dual paths |
+| **Unblocks** | Epic complete; remove dual paths after soak |
 
 ---
 
@@ -160,7 +160,20 @@ Rollback: set flag false or redeploy previous version; credentials remain in DB.
 
 ## 19. References
 
-- [README](README.md)
+- [README](../../plan/ai-providers/README.md)
 - `server/internal/config/config.go` (`AiProviderAbstractionEnabled`)
+- `scripts/check-openrouter-coupling.sh`
 - `server/test/ai_provider_e2e_test.go`
+- [api-changelog-ai-providers.md](../../api-changelog-ai-providers.md)
+- [ai-provider-rollback.md](../../runbooks/ai-provider-rollback.md)
+- [ai-provider-ga-checklist.md](../../runbooks/ai-provider-ga-checklist.md)
 - Related: [AP.4](AP.4-migrate-call-sites.md)–[AP.8](AP.8-provider-auth-hardening.md)
+
+## 20. Implementation notes (shipped)
+
+- `AI_PROVIDER_ABSTRACTION_ENABLED` defaults **true** (`boolEnvDefault`); rollback via `=0`.
+- CI runs OpenRouter allowlist check + `go test ./test/ -run TestAIProvider_`.
+- Unit coverage: org→platform resolution order, Anthropic+OpenAI vision mocks, BYOK mask.
+- E2E: platform provider save + org Test connection (mocked).
+- Deprecated JSON fields kept with dual-read; `openrouter_api_key` column drop scheduled after ≥1 minor + 14d zero legacy reads.
+- Alert `AIProviderElevatedErrors` on `lextures_ai_provider_calls_total{outcome="error"}`.
