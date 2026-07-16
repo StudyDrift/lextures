@@ -212,7 +212,8 @@ func LoadPostEngagements(
 		return out, nil
 	}
 
-	if kind == ReactionKindStar {
+	switch kind {
+	case ReactionKindStar:
 		rows, err = pool.Query(ctx, `
 			SELECT p.id::text,
 				COUNT(r.id)::int,
@@ -248,7 +249,7 @@ func LoadPostEngagements(
 		if err := rows.Err(); err != nil {
 			return nil, err
 		}
-	} else if kind == ReactionKindLike || kind == ReactionKindVote {
+	case ReactionKindLike, ReactionKindVote:
 		rows, err = pool.Query(ctx, `
 			SELECT p.id::text, COUNT(r.id)::int
 			FROM board.posts p
@@ -276,7 +277,7 @@ func LoadPostEngagements(
 		if err := rows.Err(); err != nil {
 			return nil, err
 		}
-	} else if kind == ReactionKindGrade {
+	case ReactionKindGrade:
 		// One effective grade per post (most recently updated); visibility filtered below.
 		rows, err = pool.Query(ctx, `
 			SELECT p.id::text, p.author_id, g.value

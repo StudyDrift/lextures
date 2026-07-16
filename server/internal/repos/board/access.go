@@ -206,10 +206,7 @@ func resolveShareLinkCaps(b *Board, opts ResolveOpts) Capabilities {
 	if !opts.ExternalSharingAllowed || opts.ForbidExternalForMinors {
 		return Capabilities{}
 	}
-	vis := b.Visibility
-	if vis != VisibilityLink && vis != VisibilityPublic && vis != VisibilityCourse {
-		// Share links may exist on course boards for guest access; still honor capability.
-	}
+	// Share links may exist on course boards for guest access; still honor capability.
 	cap := strings.ToLower(strings.TrimSpace(opts.ShareCapability))
 	switch cap {
 	case ShareCapabilityContribute:

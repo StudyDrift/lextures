@@ -821,9 +821,9 @@ func buildMinimalPDF(text string) []byte {
 	content.WriteString("BT /F1 10 Tf 40 750 Td 12 TL\n")
 	for i, line := range lines {
 		if i == 0 {
-			content.WriteString(fmt.Sprintf("(%s) Tj\n", line))
+			fmt.Fprintf(&content, "(%s) Tj\n", line)
 		} else {
-			content.WriteString(fmt.Sprintf("T* (%s) Tj\n", line))
+			fmt.Fprintf(&content, "T* (%s) Tj\n", line)
 		}
 		if i > 55 {
 			break
@@ -846,12 +846,12 @@ func buildMinimalPDF(text string) []byte {
 		buf.WriteString(obj)
 	}
 	xrefStart := buf.Len()
-	buf.WriteString(fmt.Sprintf("xref\n0 %d\n", len(objects)+1))
+	fmt.Fprintf(&buf, "xref\n0 %d\n", len(objects)+1)
 	buf.WriteString("0000000000 65535 f \n")
 	for i := 1; i <= len(objects); i++ {
-		buf.WriteString(fmt.Sprintf("%010d 00000 n \n", offsets[i]))
+		fmt.Fprintf(&buf, "%010d 00000 n \n", offsets[i])
 	}
-	buf.WriteString(fmt.Sprintf("trailer<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n", len(objects)+1, xrefStart))
+	fmt.Fprintf(&buf, "trailer<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n", len(objects)+1, xrefStart)
 	return []byte(buf.String())
 }
 

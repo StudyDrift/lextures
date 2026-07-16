@@ -130,7 +130,6 @@ func ListTemplates(ctx context.Context, pool *pgxpool.Pool, f ListTemplatesFilte
 			)
 		)`, n, n, n)
 		args = append(args, "%"+qstr+"%")
-		n++
 	}
 
 	q += ` ORDER BY

@@ -735,9 +735,6 @@ func parseBankOptions(opts, corr []byte, mappedType string) ([]Option, int) {
 				}
 			}
 		}
-		if mappedType == QTypeTrueFalse && correctIdx < 0 {
-			// leave defaults
-		}
 		out = append(out, Option{ID: id, Text: text, IsCorrect: isCorrect})
 	}
 	if mappedType == QTypeTrueFalse && len(out) == 2 && correctIdx < 0 {

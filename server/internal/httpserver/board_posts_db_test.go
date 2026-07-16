@@ -272,12 +272,12 @@ func TestBoardPosts_LinkPreviewSSRF_Pg(t *testing.T) {
 func TestBoardPosts_BlockedAttachmentNoURL_Pg(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
-	pool, h, tok, cc, _ := setupBoardTest(t, ctx, "teacher", true, true)
+	pool, _, tok, cc, _ := setupBoardTest(t, ctx, "teacher", true, true)
 	defer pool.Close()
 
 	// Rebuild handler with AV scanning on.
 	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
-	h = NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: config.Config{FFVisualBoards: true, AvScanningEnabled: true}})
+	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: config.Config{FFVisualBoards: true, AvScanningEnabled: true}})
 
 	boardID := createBoardViaAPI(t, h, tok, cc)
 	var attID uuid.UUID
