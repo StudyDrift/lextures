@@ -1,6 +1,6 @@
 # AP.4 — Migrate AI Call Sites to Provider Resolver
 
-> Implementation plan. Source: multi-provider BYOK epic ([README](README.md)).
+> Implementation plan. Source: multi-provider BYOK epic ([README](../../plan/ai-providers/README.md)).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI Providers |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | THIN — most features call `openRouterClient()` / `*openrouter.Client` directly |
+| **Status (today)** | DONE — all product AI call sites route through `aiprovider.Resolver` / `BoundCompleter`; `aiConfigured` + `aiProvidersConfigured[]` gates; OpenRouter client retained only for adapter wiring + settings dual-read |
 | **Estimated effort** | L (3–5w) |
 | **Owner (proposed)** | AI / Product eng |
 | **Depends on** | AP.1, AP.2, AP.3 |
@@ -187,15 +187,15 @@ server/internal/platformstate/platformstate.go
 - Changelog: “AI features respect org/platform provider settings.”
 - Update internal architecture notes that OpenRouter is optional.
 
-## 18. Open Questions
+## 18. Open Questions (resolved)
 
-1. Buffered stream fallback vs hard fail for non-streaming providers?
-2. Background jobs without user/org — always platform credentials?
-3. Should plagiarism internal AI be multi-provider or remain optional/disabled without platform text provider?
+1. **Buffered stream fallback vs hard fail for non-streaming providers?** → **Buffered fallback.** `Deps.completeStreamOrBuffered` tries `CompleteStream`; on `ErrNotSupported` it runs `Complete` and flushes the full text as one SSE chunk (tutor / study buddy / persistent sessions).
+2. **Background jobs without user/org — always platform credentials?** → **Yes.** `background.platformScopedCompleter` builds a resolver with `OrgID: nil` (platform credential chain) for coaching tips and originality sweeps.
+3. **Should plagiarism internal AI be multi-provider?** → **Yes.** `plagiarism.InternalAIProvider` / `Service.AI` use `aiprovider.ScopedCompleter` (platform-scoped from HTTP / sweeps). Disabled when no AI is configured, same as other features.
 
 ## 19. References
 
-- [README inventory](README.md)
-- `server/internal/httpserver/ai_provider_settings_http.go` (resolver construction)
-- `server/internal/httpserver/me_notebook.go` (partial migration pattern)
+- [README inventory](../../plan/ai-providers/README.md)
+- `server/internal/httpserver/ai_configured.go` (resolver, `aiConfigured`, stream fallback)
+- `server/internal/service/aiprovider/completer.go` (`Completer` / `BoundCompleter`)
 - Related: [AP.1](AP.1-provider-capability-interface.md), [AP.6](AP.6-usage-disclosure-observability.md)

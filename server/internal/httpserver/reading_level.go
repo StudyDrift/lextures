@@ -17,6 +17,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/contentsimplificationai"
 	readingsvc "github.com/lextures/lextures/server/internal/service/readinglevel"
 )
@@ -242,16 +243,17 @@ func (d Deps) handlePostItemSimplify() http.HandlerFunc {
 			})
 			return
 		}
-		or := d.openRouterClient()
-		if or == nil || d.effectiveConfig().OpenRouterAPIKey == "" {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI provider not configured.")
+		orgID := d.orgIDPtrForUser(r.Context(), userID)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 		plain := readingsvc.PlainTextFromMarkdown(source)
 		if !d.enforceAIGateway(w, r, userID, readingLevelFeature, readingLevelSimplifyModel, plain) {
 			return
 		}
-		simplified, err := contentsimplificationai.Simplify(or, readingLevelSimplifyModel, plain, req.TargetFKGL)
+		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
+		simplified, callMeta, err := contentsimplificationai.Simplify(r.Context(), bound, readingLevelSimplifyModel, plain, req.TargetFKGL)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "Simplification failed.")
 			return
@@ -264,7 +266,8 @@ func (d Deps) handlePostItemSimplify() http.HandlerFunc {
 		}
 		_ = rlrepo.UpsertSimplified(r.Context(), d.Pool, itemID, itemType, req.TargetFKGL, simplified, computed)
 		dec := aigateway.Decision{OptInConfirmed: true}
-		d.logAIInferenceAllowed(r, userID, readingLevelFeature, readingLevelSimplifyModel, plain, dec)
+		d.logAIInferenceAllowedWithProvider(r, userID, readingLevelFeature, readingLevelSimplifyModel, string(callMeta.Provider), plain, dec)
+		d.recordAIProviderUsage(r.Context(), AIUsageMeta{UserID: userID, Feature: readingLevelFeature, Model: readingLevelSimplifyModel}, callMeta, true)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(simplifyResponse{
 			Original:     source,

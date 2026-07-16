@@ -17,7 +17,7 @@ From the repository root:
    BOOTSTRAP_ADMIN_EMAIL=you@yourdomain.com
    ```
 
-   Optional: configure an OpenRouter API key under **Settings → Intelligence → Models** for AI features.
+   Optional: configure AI provider credentials (BYOK) under **Settings → Intelligence → Models** — see [ai-providers-byok.md](ai-providers-byok.md).
 
 2. **Start the stack:**
 

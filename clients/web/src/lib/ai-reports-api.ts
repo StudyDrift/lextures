@@ -3,6 +3,7 @@ import { readApiErrorMessage } from './errors'
 
 export type AIReportsPayload = {
   range: { from: string; to: string }
+  providers: string[]
   cost: {
     summary: {
       totalCostUsd: number
@@ -11,6 +12,7 @@ export type AIReportsPayload = {
     }
     byDay: { day: string; costUsd: number; calls: number; tokens: number }[]
     byFeature: { feature: string; costUsd: number; calls: number; tokens: number }[]
+    byProvider: { provider: string; costUsd: number; calls: number; tokens: number }[]
   }
   byUser: {
     userId: string
@@ -36,6 +38,7 @@ export type AIReportsQuery = {
   from?: string
   to?: string
   feature?: string
+  provider?: string
   userQuery?: string
   courseCode?: string
 }
@@ -46,6 +49,7 @@ export async function fetchAIReports(params: AIReportsQuery): Promise<AIReportsP
   if (params.from) search.set('from', params.from)
   if (params.to) search.set('to', params.to)
   if (params.feature) search.set('feature', params.feature)
+  if (params.provider) search.set('provider', params.provider)
   if (params.userQuery) search.set('userQuery', params.userQuery)
   if (params.courseCode) search.set('courseCode', params.courseCode)
   const qs = search.toString()
@@ -76,6 +80,9 @@ export const AI_FEATURE_LABELS: Record<string, string> = {
   content_translation: 'Content translation',
   alt_text_suggestion: 'Alt text',
   vibe_generation: 'Vibe activities',
+  grader_agent: 'Grading agent',
+  lesson_generation: 'Lesson generator',
+  ai_study_buddy: 'AI study buddy',
   unknown: 'Unknown',
 }
 

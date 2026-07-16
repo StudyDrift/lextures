@@ -35,6 +35,7 @@ import { NotificationPreferencesPanel } from '../../components/settings/notifica
 import { LearningGoalsPanel } from '../../components/onboarding/learning-goals-panel'
 
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
+import { AiProvidersPanel } from '../../components/settings/ai-providers-panel'
 import { AiProviderSettingsPanel } from '../../components/settings/ai-provider-settings-panel'
 import { ArchivedCoursesPanel } from '../../components/settings/archived-courses-panel'
 import { PeoplePanel } from '../../components/settings/people-panel'
@@ -49,6 +50,7 @@ import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { PLATFORM_SECRET_PLACEHOLDER } from '../../lib/platform-settings'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { providerLabel } from '../../lib/ai-providers'
 
 function isSystemSettingsPath(pathname: string): boolean {
   if (pathname.startsWith('/settings/ai/')) return true
@@ -115,29 +117,37 @@ function fallbackTextModels(): AiModelOption[] {
 
 type ModelKind = 'image' | 'text'
 
-async function fetchModelsForKind(kind: ModelKind): Promise<{
+async function fetchModelsForKind(
+  kind: ModelKind,
+  provider?: string,
+): Promise<{
   models: AiModelOption[]
   fromApi: boolean
   configured: boolean
+  provider?: string
 }> {
-  const modelsRes = await authorizedFetch(`/api/v1/settings/ai/models?kind=${kind}`)
+  const qs = new URLSearchParams({ kind })
+  if (provider) qs.set('provider', provider)
+  const modelsRes = await authorizedFetch(`/api/v1/settings/ai/models?${qs.toString()}`)
   const modelsRaw: unknown = await modelsRes.json().catch(() => ({}))
   if (!modelsRes.ok) {
     throw new Error(readApiErrorMessage(modelsRaw))
   }
   const list = modelsRaw as {
     configured?: boolean
+    provider?: string
     models?: AiModelOption[]
   }
   const apiModels = list.models ?? []
   const configured = list.configured === true
   if (apiModels.length > 0) {
-    return { models: apiModels, fromApi: true, configured }
+    return { models: apiModels, fromApi: true, configured, provider: list.provider }
   }
   return {
     models: kind === 'image' ? fallbackImageModels() : fallbackTextModels(),
     fromApi: false,
     configured,
+    provider: list.provider,
   }
 }
 
@@ -154,6 +164,7 @@ export default function Settings() {
     ffAdvisingIntegration,
     learnerProfileEnabled,
     emailTemplateEditorEnabled,
+    aiProviderAbstractionEnabled,
     loading: featuresLoading,
   } = usePlatformFeatures()
   const [systemPrompts, setSystemPrompts] = useState<SystemPromptItem[]>([])
@@ -183,19 +194,23 @@ export default function Settings() {
   const [modelsRefreshing, setModelsRefreshing] = useState(false)
   const [openRouterApiKey, setOpenRouterApiKey] = useState('')
   const [openRouterApiKeyBaseline, setOpenRouterApiKeyBaseline] = useState('')
+  const [activeProvider, setActiveProvider] = useState('')
 
-  const loadModels = useCallback(async () => {
+  const loadModels = useCallback(async (provider?: string) => {
     setModelsError(null)
     try {
       const [img, txt] = await Promise.all([
-        fetchModelsForKind('image'),
-        fetchModelsForKind('text'),
+        fetchModelsForKind('image', provider),
+        fetchModelsForKind('text', provider),
       ])
       setModelsConfigured(img.configured)
       setImageModels(img.models)
       setImageModelsFromApi(img.fromApi)
       setTextModels(txt.models)
       setTextModelsFromApi(txt.fromApi)
+      if (img.provider || txt.provider) {
+        setActiveProvider(img.provider || txt.provider || '')
+      }
     } catch (e) {
       setModelsError(e instanceof Error ? e.message : 'Could not load models.')
       setImageModels(fallbackImageModels())
@@ -208,9 +223,25 @@ export default function Settings() {
 
   const refreshModels = useCallback(async () => {
     setModelsRefreshing(true)
-    await loadModels()
+    await loadModels(activeProvider || undefined)
     setModelsRefreshing(false)
-  }, [loadModels])
+  }, [activeProvider, loadModels])
+
+  const onProvidersChanged = useCallback(async () => {
+    // Reload settings for activeProvider, then refresh catalogs.
+    try {
+      const settingsRes = await authorizedFetch('/api/v1/settings/ai')
+      if (settingsRes.ok) {
+        const data = (await settingsRes.json()) as { activeProvider?: string }
+        if (data.activeProvider) setActiveProvider(data.activeProvider)
+        await loadModels(data.activeProvider)
+        return
+      }
+    } catch {
+      /* fall through */
+    }
+    await loadModels(activeProvider || undefined)
+  }, [activeProvider, loadModels])
 
   const loadSystemPrompts = useCallback(async () => {
     setSystemPromptsLoading(true)
@@ -266,6 +297,7 @@ export default function Settings() {
             vibeActivityModelId?: string
             graderAgentModelId?: string
             openRouterApiKey?: string
+            activeProvider?: string
           }
           if (!cancelled && data.imageModelId) setImageModelId(data.imageModelId)
           if (!cancelled && data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
@@ -276,7 +308,10 @@ export default function Settings() {
             const key = data.openRouterApiKey ?? ''
             setOpenRouterApiKey(key)
             setOpenRouterApiKeyBaseline(key)
+            if (data.activeProvider) setActiveProvider(data.activeProvider)
           }
+          if (!cancelled) await loadModels(data.activeProvider)
+          return
         }
         if (!cancelled) await loadModels()
       } catch {
@@ -343,6 +378,7 @@ export default function Settings() {
         vibeActivityModelId?: string
         graderAgentModelId?: string
         openRouterApiKey?: string
+        activeProvider?: string
       }
       if (data.imageModelId) setImageModelId(data.imageModelId)
       if (data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
@@ -353,9 +389,10 @@ export default function Settings() {
         setOpenRouterApiKey(data.openRouterApiKey)
         setOpenRouterApiKeyBaseline(data.openRouterApiKey)
       }
+      if (data.activeProvider) setActiveProvider(data.activeProvider)
       setAiMessage('Saved.')
       toastSaveOk('AI settings saved')
-      await loadModels()
+      await loadModels(data.activeProvider)
     } catch {
       setAiError('Could not save settings.')
       toastMutationError('Could not save AI settings.')
@@ -482,7 +519,7 @@ export default function Settings() {
                 ? 'max-w-3xl'
                 : activeView === 'ai-prompts'
                   ? 'max-w-3xl'
-                  : activeView === 'ai-reports'
+                  : activeView === 'ai-models' || activeView === 'ai-reports'
                     ? 'max-w-4xl'
                     : activeView === 'account'
                       ? 'max-w-3xl'
@@ -495,71 +532,87 @@ export default function Settings() {
           <div>
             <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Models</h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-              Choose models for course setup (text) and for generating course hero images. Lists are
-              loaded from{' '}
-              <a
-                href="https://openrouter.ai/docs/api/api-reference/models/get-models"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-                target="_blank"
-                rel="noreferrer"
-              >
-                OpenRouter&apos;s models API
-              </a>{' '}
-              (text-capable and image-capable models). Generation requires an OpenRouter API key
-              configured below.
+              Configure AI providers and choose models for course setup, flashcards, vibe activities,
+              grading, and course hero images. Catalogs follow the active provider
+              {activeProvider ? ` (${providerLabel(activeProvider)})` : ''}.
             </p>
 
             {aiLoading && <p className="mt-4 text-sm text-slate-500">Loading…</p>}
             {aiError && (
-              <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
                 {aiError}
               </p>
             )}
 
-            {!modelsConfigured && !aiLoading && (
-              <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-                Add your OpenRouter API key below and save, so AI features can call OpenRouter.
+            {!aiLoading && !featuresLoading && aiProviderAbstractionEnabled && (
+              <AiProvidersPanel
+                activeProvider={activeProvider}
+                onCredentialsChanged={() => void onProvidersChanged()}
+              />
+            )}
+
+            {!aiLoading && !featuresLoading && !aiProviderAbstractionEnabled && (
+              <p
+                className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100"
+                role="status"
+              >
+                Multi-provider AI is disabled on this platform. Configure the OpenRouter API key below
+                (legacy mode), or ask a platform operator to enable AI provider abstraction.
+              </p>
+            )}
+
+            {!modelsConfigured && !aiLoading && !featuresLoading && (
+              <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100" role="status">
+                {aiProviderAbstractionEnabled
+                  ? 'Add at least one provider API key above so AI features can run. Secrets are never shown again after save.'
+                  : 'Add your OpenRouter API key below and save, so AI features can call OpenRouter.'}
               </p>
             )}
 
             {modelsError && !aiLoading && (
-              <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
                 {modelsError} Showing a static fallback list.
               </p>
             )}
 
             {!imageModelsFromApi && modelsConfigured && !aiLoading && !modelsError && (
-              <p className="mt-4 text-sm text-slate-500">No image models returned from OpenRouter; using fallback IDs.</p>
+              <p className="mt-4 text-sm text-slate-500">
+                No image models returned from the provider catalog; using fallback IDs.
+              </p>
             )}
 
             {!textModelsFromApi && modelsConfigured && !aiLoading && !modelsError && (
-              <p className="mt-4 text-sm text-slate-500">No text models returned from OpenRouter; using fallback IDs.</p>
+              <p className="mt-4 text-sm text-slate-500">
+                No text models returned from the provider catalog; using fallback IDs.
+              </p>
             )}
 
-            {!aiLoading && (
+            {!aiLoading && !featuresLoading && (
               <form className="mt-6 space-y-5" onSubmit={onSaveAi}>
-                <div>
-                  <label
-                    htmlFor="openrouter-api-key"
-                    className="block text-sm font-medium text-slate-700 dark:text-neutral-200"
-                  >
-                    OpenRouter API key
-                  </label>
-                  <input
-                    id="openrouter-api-key"
-                    type="password"
-                    autoComplete="off"
-                    value={openRouterApiKey}
-                    onChange={(e) => setOpenRouterApiKey(e.target.value)}
-                    placeholder={PLATFORM_SECRET_PLACEHOLDER}
-                    disabled={aiSaving}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
-                  />
-                  <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
-                    Platform-wide key for AI generation. Leave unchanged to keep the current key; clear
-                    the field and save to remove it.
-                  </p>
-                </div>
+                {!aiProviderAbstractionEnabled && (
+                  <div>
+                    <label
+                      htmlFor="openrouter-api-key"
+                      className="block text-sm font-medium text-slate-700 dark:text-neutral-200"
+                    >
+                      OpenRouter API key
+                    </label>
+                    <input
+                      id="openrouter-api-key"
+                      type="password"
+                      autoComplete="off"
+                      value={openRouterApiKey}
+                      onChange={(e) => setOpenRouterApiKey(e.target.value)}
+                      placeholder={PLATFORM_SECRET_PLACEHOLDER}
+                      disabled={aiSaving}
+                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    />
+                    <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+                      Platform-wide key for AI generation. Leave unchanged to keep the current key; clear
+                      the field and save to remove it.
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <ImageModelPicker
@@ -576,7 +629,7 @@ export default function Settings() {
                     Text-to-text model used when setting up course structure and content. Each option
                     shows the display name, model id, then modalities, context window, and
                     input/output price per 1M tokens (USD). Use{' '}
-                    <span className="font-medium">Refresh list</span> to reload from OpenRouter.
+                    <span className="font-medium">Refresh list</span> to reload the catalog.
                   </p>
                 </div>
 
@@ -642,7 +695,7 @@ export default function Settings() {
                   <p className="mt-1.5 text-xs text-slate-500">
                     Used when you generate course images. Each option shows the display name, model id,
                     then modalities, context window, and input/output price per 1M tokens (USD). Use{' '}
-                    <span className="font-medium">Refresh list</span> to reload from OpenRouter.
+                    <span className="font-medium">Refresh list</span> to reload the catalog.
                   </p>
                 </div>
 

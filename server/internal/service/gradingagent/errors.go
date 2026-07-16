@@ -3,6 +3,9 @@ package gradingagent
 import "strings"
 
 // UserFacingScoreError maps internal scoring failures to instructor-safe messages.
+// Copy is provider-agnostic (AP.4 FR-8): it must not assume OpenRouter is the
+// backend, since AI.Complete/CompleteVision may be served by any configured
+// aiprovider backend.
 func UserFacingScoreError(err error) string {
 	if err == nil {
 		return "Grading agent failed."
@@ -11,16 +14,16 @@ func UserFacingScoreError(err error) string {
 	switch {
 	case strings.Contains(msg, "grader agent model not configured"):
 		return "Grading agent model is not configured. Choose a model under Settings → Intelligence → Models."
-	case strings.Contains(msg, "AI provider not configured"), strings.Contains(msg, "missing API key"):
-		return "AI provider is not configured. Set an OpenRouter API key under Settings → Intelligence → Models."
-	case strings.Contains(msg, "openrouter: status 401"), strings.Contains(msg, "openrouter: status 403"):
-		return "OpenRouter rejected the API key. Check Settings → Intelligence → Models."
-	case strings.Contains(msg, "openrouter: status 402"):
-		return "OpenRouter account has insufficient credits."
-	case strings.Contains(msg, "openrouter: status 404"):
-		return "The selected AI model was not found on OpenRouter."
-	case strings.HasPrefix(msg, "openrouter:"):
-		return "OpenRouter request failed: " + truncateErr(msg, 240)
+	case strings.Contains(msg, "AI provider not configured"),
+		strings.Contains(msg, "missing API key"),
+		strings.Contains(msg, "AI not configured"):
+		return "AI provider is not configured. Configure AI under Settings → Intelligence."
+	case strings.Contains(msg, "status 401"), strings.Contains(msg, "status 403"):
+		return "AI provider rejected the API key. Check Settings → Intelligence."
+	case strings.Contains(msg, "status 402"):
+		return "AI provider account has insufficient credits."
+	case strings.Contains(msg, "status 404"):
+		return "The selected AI model was not found."
 	case strings.Contains(msg, "invalid model JSON"), strings.Contains(msg, "empty model response"):
 		return "The AI returned an unreadable grade. Try dry run again or choose a different model."
 	case strings.Contains(msg, "invalid rubric scores"):
@@ -28,7 +31,7 @@ func UserFacingScoreError(err error) string {
 	case strings.Contains(msg, "submission text is empty"):
 		return "Submission text is empty."
 	default:
-		return "Grading agent failed: " + truncateErr(msg, 240)
+		return "AI request failed: " + truncateErr(msg, 240)
 	}
 }
 

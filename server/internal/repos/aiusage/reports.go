@@ -19,6 +19,7 @@ type Filters struct {
 	From       time.Time
 	To         time.Time
 	Feature    string
+	Provider   string
 	UserID     *uuid.UUID
 	CourseID   *uuid.UUID
 	UserQuery  string
@@ -46,6 +47,11 @@ func (f Filters) whereSQL(alias string) (string, []any) {
 	n := 3
 	if s := strings.TrimSpace(f.Feature); s != "" {
 		clauses = append(clauses, fmt.Sprintf("%s = $%d", col("feature"), n))
+		args = append(args, s)
+		n++
+	}
+	if s := strings.TrimSpace(f.Provider); s != "" {
+		clauses = append(clauses, fmt.Sprintf("%s = $%d", col("provider"), n))
 		args = append(args, s)
 		n++
 	}
@@ -163,6 +169,62 @@ ORDER BY SUM(cost_usd) DESC, COUNT(*) DESC
 			return nil, err
 		}
 		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
+// CostByProvider returns spend grouped by provider (AP.6 FR-3/FR-8).
+func CostByProvider(ctx context.Context, pool *pgxpool.Pool, f Filters) ([]models.ProviderCostRow, error) {
+	where, args := f.whereSQL("")
+	rows, err := pool.Query(ctx, `
+SELECT
+  provider,
+  COALESCE(SUM(cost_usd), 0)::float8,
+  COUNT(*)::bigint,
+  COALESCE(SUM(total_tokens), 0)::bigint
+FROM analytics.ai_usage_log
+WHERE `+where+`
+GROUP BY provider
+ORDER BY SUM(cost_usd) DESC, COUNT(*) DESC
+`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]models.ProviderCostRow, 0)
+	for rows.Next() {
+		var r models.ProviderCostRow
+		if err := rows.Scan(&r.Provider, &r.CostUSD, &r.Calls, &r.Tokens); err != nil {
+			return nil, err
+		}
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
+// DistinctProviders returns provider labels seen in the window (for UI filters).
+func DistinctProviders(ctx context.Context, pool *pgxpool.Pool, f Filters) ([]string, error) {
+	// Ignore provider filter so the dropdown still lists peers in the window.
+	f2 := f
+	f2.Provider = ""
+	where, args := f2.whereSQL("")
+	rows, err := pool.Query(ctx, `
+SELECT DISTINCT provider
+FROM analytics.ai_usage_log
+WHERE `+where+`
+ORDER BY provider ASC
+`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]string, 0)
+	for rows.Next() {
+		var p string
+		if err := rows.Scan(&p); err != nil {
+			return nil, err
+		}
+		out = append(out, p)
 	}
 	return out, rows.Err()
 }

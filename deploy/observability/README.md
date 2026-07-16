@@ -62,7 +62,11 @@ All application metrics are prefixed `lextures_`. Key series:
 - `lextures_redis_pool_*` — Redis pool.
 - `lextures_job_queue_depth`, `lextures_job_queue_jobs{status}`,
   `lextures_job_queue_depth_by_type{job_type}`, `lextures_job_queue_dead_letters`.
-- `lextures_ai_provider_*`, `lextures_ai_estimated_cost_dollars_total{provider,model}`.
+- `lextures_ai_provider_*`, `lextures_ai_estimated_cost_dollars_total{provider,model}` —
+  multi-provider labels (`openrouter`, `anthropic`, `openai`, `azure_openai`, `bedrock`,
+  `vertex`). The **AI Provider** Grafana dashboard includes a `provider` variable.
+  Alert **AIProviderElevatedErrors** fires when `outcome="error"` rate exceeds 5% for 10m
+  (AP.9 post-flip soak); see `docs/runbooks/observability-oncall.md`.
 - `lextures_business_events_total{event}`.
 
 **No PII** appears in any label or trace attribute (NFR Privacy / FERPA). Adding

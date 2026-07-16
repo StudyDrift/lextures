@@ -80,6 +80,24 @@ groups:
           description: "GET /health/ready has been failing for at least 30 seconds; load balancer may be draining this instance."
           runbook: "docs/runbooks/observability-oncall.md#readinessprobeunhealthy"
 
+  - name: lextures-ai
+    rules:
+      - alert: AIProviderElevatedErrors
+        # AP.9 post-flip soak: elevated AI provider error rate for 10m.
+        expr: |
+          sum(rate(lextures_ai_provider_calls_total{outcome="error"}[5m]))
+            /
+          clamp_min(sum(rate(lextures_ai_provider_calls_total[5m])), 1)
+            > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          statuspage_component: api
+        annotations:
+          summary: "AI provider error rate above 5%"
+          description: "AI provider error rate is {{ $value | humanizePercentage }} over the last 5m (threshold 5% for 10m)."
+          runbook: "docs/runbooks/observability-oncall.md#aiproviderelevatederrors"
+
   - name: lextures-meta
     rules:
       - alert: APITargetDown

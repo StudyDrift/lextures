@@ -103,7 +103,11 @@ export type PlatformFeaturesSnapshot = {
   aiStudyBuddyEnabled?: boolean
   gdprModuleEnabled?: boolean
   aiDisclosureEnabled?: boolean
+  /** @deprecated AP.9 — use aiConfigured */
   openRouterConfigured?: boolean
+  aiConfigured?: boolean
+  aiProvidersConfigured?: string[]
+  aiProviderAbstractionEnabled?: boolean
   ragNotebookEnabled?: boolean
   ffFeedback?: boolean
   ffEmailSes?: boolean
@@ -206,6 +210,9 @@ const defaults: PlatformFeaturesSnapshot = {
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
+  aiConfigured: false,
+  aiProvidersConfigured: [],
+  aiProviderAbstractionEnabled: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
   ffEmailSes: false,

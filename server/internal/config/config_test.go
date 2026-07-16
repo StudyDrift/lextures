@@ -128,6 +128,19 @@ func TestLoadDefaults(t *testing.T) {
 	if !c.SchedulerEnabled {
 		t.Fatalf("SchedulerEnabled: want true by default in local APP_ENV")
 	}
+	// AP.9 GA: multi-provider abstraction defaults on.
+	if !c.AiProviderAbstractionEnabled {
+		t.Fatalf("AiProviderAbstractionEnabled: want true when unset (AP.9)")
+	}
+}
+
+func TestAiProviderAbstractionEnabled_RollbackOff(t *testing.T) {
+	baseEnv(t)
+	t.Setenv("AI_PROVIDER_ABSTRACTION_ENABLED", "0")
+	c := Load()
+	if c.AiProviderAbstractionEnabled {
+		t.Fatalf("AiProviderAbstractionEnabled: want false when AI_PROVIDER_ABSTRACTION_ENABLED=0")
+	}
 }
 
 func TestBackgroundJobsDisabledInProductionEnv(t *testing.T) {

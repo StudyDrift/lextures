@@ -1,6 +1,6 @@
 # AP.5 — Unify Intelligence Admin UX (Platform + Org Providers)
 
-> Implementation plan. Source: multi-provider BYOK epic ([README](README.md)).
+> Implementation plan. Source: multi-provider BYOK epic ([README](../../plan/ai-providers/README.md)).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI Providers |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL — Intelligence Models UI is OpenRouter-only; separate org BYOK panel exists behind flag |
+| **Status (today)** | DONE — Unified platform providers panel + org BYOK with provider field matrix; Models catalogs are provider-aware |
 | **Estimated effort** | M (2–3w) |
 | **Owner (proposed)** | Frontend + Platform |
 | **Depends on** | AP.2, AP.3 |
@@ -166,6 +166,9 @@ Global admins configure AI under **Settings → Intelligence → Models** with a
 ## 19. References
 
 - `clients/web/src/pages/lms/settings.tsx`
+- `clients/web/src/components/settings/ai-providers-panel.tsx`
 - `clients/web/src/components/settings/ai-provider-settings-panel.tsx`
+- `clients/web/src/components/settings/provider-credential-form.tsx`
+- `clients/web/src/lib/ai-providers.ts`
 - `clients/web/src/components/image-model-picker.tsx`
 - Related: [AP.2](AP.2-credential-store-and-byok.md), [AP.3](AP.3-model-registry-and-catalog.md)

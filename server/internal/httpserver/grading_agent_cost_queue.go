@@ -7,8 +7,9 @@ import (
 
 	"github.com/lextures/lextures/server/internal/gradingagentqueue"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
+	"github.com/lextures/lextures/server/internal/repos/aiusage"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 func (d Deps) gradingAgentRunOverBudget(ctx context.Context, run *gradingagentrepo.RunRow) (bool, error) {
@@ -51,13 +52,20 @@ func (d Deps) recordGradingAgentQueueUsage(
 	if preview.CostUSD != nil {
 		cost = *preview.CostUSD
 	}
-	d.recordAIUsage(ctx, AIUsageMeta{
-		UserID: modelUser, CourseID: &courseID, CourseCode: courseCode,
-		Feature: aigateway.FeatureGraderAgent, Model: *preview.ModelID,
-	}, openrouter.UsageInfo{
-		PromptTokens:     *preview.PromptTokens,
-		CompletionTokens: completion,
-		TotalTokens:      *preview.PromptTokens + completion,
-		CostUSD:          cost,
-	}, succeeded)
+	provider := preview.Provider
+	meta := aiprovider.CallMeta{
+		Provider: aiprovider.ProviderName(provider),
+		ModelID:  *preview.ModelID,
+		Usage: aiprovider.UsageInfo{
+			PromptTokens:     *preview.PromptTokens,
+			CompletionTokens: completion,
+			TotalTokens:      *preview.PromptTokens + completion,
+			CostUSD:          cost,
+		},
+	}
+	uid := modelUser
+	_ = courseCode
+	_ = aiusage.Insert(ctx, d.Pool, aiusage.EntryFromCallMeta(
+		&uid, &courseID, aigateway.FeatureGraderAgent, meta, meta.Usage, succeeded,
+	))
 }

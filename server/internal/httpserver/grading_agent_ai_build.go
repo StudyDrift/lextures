@@ -22,7 +22,7 @@ import (
 // reuses the grader-agent enablement and requires an AI provider to be wired,
 // avoiding a dedicated platform flag/migration.
 func (d Deps) graderAgentAiBuilderEnabled() bool {
-	return d.graderAgentEnabled() && d.openRouterClient() != nil
+	return d.graderAgentEnabled() && d.aiConfigured(context.Background(), nil)
 }
 
 type graderAgentAIBuildBody struct {
@@ -98,9 +98,14 @@ func (d Deps) handlePostGraderAgentAIBuild() http.HandlerFunc {
 			return
 		}
 
-		svc := d.gradingAgentService()
-		if svc.Client == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI provider is not configured.")
+		orgID := d.orgIDPtrForUser(r.Context(), viewer)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
+			return
+		}
+		svc := d.gradingAgentService(orgID)
+		if svc.AI == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 
@@ -185,9 +190,10 @@ func (d Deps) generateGraderAgentGraph(
 	modelID, systemPrompt, instruction string,
 	currentGraph *gradingagentsvc.WorkflowGraph,
 ) (gradingagentsvc.BuilderResult, error) {
-	// Use a dedicated client with a longer timeout for this single-shot generation.
-	buildSvc := *svc
-	buildSvc.Client = svc.Client.WithTimeout(graderAgentBuildTimeout)
+	// Use a dedicated timeout for this single-shot generation, longer than the
+	// shared client timeout because a structured-graph generation can be slower.
+	buildCtx, cancel := context.WithTimeout(ctx, graderAgentBuildTimeout)
+	defer cancel()
 
 	input := ""
 	if currentGraph != nil && len(currentGraph.Nodes) > 0 {
@@ -198,7 +204,7 @@ func (d Deps) generateGraderAgentGraph(
 
 	var lastErr error
 	for attempt := 0; attempt < 2; attempt++ {
-		text, _, _, _, runErr := buildSvc.RunBuilderPrompt(ctx, modelID, systemPrompt, instruction, input, graderAgentBuildMaxTokens)
+		text, _, _, _, runErr := svc.RunBuilderPrompt(buildCtx, modelID, systemPrompt, instruction, input, graderAgentBuildMaxTokens)
 		if runErr != nil {
 			// A timeout or transport error won't be helped by retrying with the
 			// same slow model; surface it immediately.

@@ -1,6 +1,6 @@
 # AP.8 — Provider Auth Hardening (Azure, Bedrock IAM, Vertex ADC)
 
-> Implementation plan. Source: multi-provider BYOK epic ([README](README.md)).
+> Implementation plan (completed). Source: multi-provider BYOK epic ([README](../../plan/ai-providers/README.md)).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI Providers |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE (enterprise) |
-| **Status (today)** | THIN — Azure/Bedrock/Vertex use API-key-style HTTP wrappers; limited enterprise auth |
+| **Status (today)** | DONE — Azure deployment routing; Bedrock `api_key`/`access_key`/`iam_role`; Vertex `api_key`/`service_account`/`adc`; multi-secret store; admin auth-mode UI; runbooks |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Platform / Cloud |
 | **Depends on** | AP.2, AP.4 |

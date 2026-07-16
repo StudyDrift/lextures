@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | **Feature** | AI Lesson Generator (19.2) |
-| **Default model** | OpenRouter course-setup model (org/instructor configurable) |
+| **Default model** | Course-setup model from the configured AI provider (org/instructor configurable; OpenRouter is one option) |
 | **Purpose** | Generate lesson plans, differentiated activities, formative quizzes, and rubrics from instructor-supplied learning objectives |
 | **Input data** | Learning objective, grade level, subject, optional duration, standards code, differentiation levels |
 | **Output** | Markdown lesson plans and activities; JSON quiz questions; JSON rubric definitions |

@@ -24,6 +24,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/notificationsinbox"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	gradingagentsvc "github.com/lextures/lextures/server/internal/service/gradingagent"
 )
 
@@ -106,10 +107,12 @@ func (d Deps) loadOriginalityReportsForGraderAgent(ctx context.Context, submissi
 	return out, nil
 }
 
-func (d Deps) gradingAgentService() *gradingagentsvc.Service {
+func (d Deps) gradingAgentService(orgID *uuid.UUID) *gradingagentsvc.Service {
 	cfg := d.effectiveConfig()
+	bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 	return &gradingagentsvc.Service{
-		Client:    d.openRouterClient(),
+		AI:        bound,
+		Vision:    bound,
 		Storage:   d.Storage,
 		FilesRoot: cfg.CourseFilesRoot,
 		Pool:      d.Pool,

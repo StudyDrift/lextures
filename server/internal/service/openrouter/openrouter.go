@@ -39,6 +39,18 @@ func NewClientWithBaseURL(apiKey, baseURL string) *Client {
 	}
 }
 
+// HTTPConfig exposes transport settings for adapters (e.g. images API).
+func (c *Client) HTTPConfig() (apiKey, baseURL string, httpClient *http.Client) {
+	if c == nil {
+		return "", "", nil
+	}
+	base := c.baseURL
+	if base == "" {
+		base = DefaultBaseURL
+	}
+	return c.apiKey, base, c.HTTP
+}
+
 // Message is one chat message (OpenAI format).
 type Message struct {
 	Role    string `json:"role"`

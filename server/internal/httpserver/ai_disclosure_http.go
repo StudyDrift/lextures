@@ -39,7 +39,10 @@ func (d Deps) registerAIDisclosureRoutes(r chi.Router) {
 
 func (d Deps) handlePublicAIDisclosure() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		raw, err := pkgai.PublicDisclosureJSON(r.Context())
+		opts := pkgai.DisclosureOptions{
+			ConfiguredProviders: d.aiProvidersConfigured(r.Context(), nil),
+		}
+		raw, err := pkgai.PublicDisclosureJSON(r.Context(), opts)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "Could not load AI disclosure document.")
 			return

@@ -61,7 +61,12 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 			return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
 		}
 	}
-	svc := d.gradingAgentService()
+	modelUser := cfg.CreatedBy
+	if run.InitiatedBy != nil {
+		modelUser = *run.InitiatedBy
+	}
+	orgID := d.orgIDPtrForUser(ctx, modelUser)
+	svc := d.gradingAgentService(orgID)
 	content, err := svc.ResolveSubmissionContent(ctx, msg.CourseCode, subRow, gradingagentsvc.ResolveSubmissionContentOptions{
 		TextEntryEnabled: d.graderAgentTextEntryGradingEnabled(),
 		VisionEnabled:    d.graderAgentVisionGradingEnabled(),
@@ -74,10 +79,6 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 		return d.failGradingAgentItem(ctx, msg, content.FailureReason, &modality)
 	}
 	useVision := content.Modality == gradingagentsvc.ModalityVision
-	modelUser := cfg.CreatedBy
-	if run.InitiatedBy != nil {
-		modelUser = *run.InitiatedBy
-	}
 
 	var contentItemID string
 	var rubricItemID string

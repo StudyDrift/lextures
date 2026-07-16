@@ -45,7 +45,7 @@ Open-source learning platform for running courses end to end: structured modules
 - **Communication**: Course discussions, activity feed channels, and direct messaging between users.
 - **Notebooks**: Personal and per-course notebooks with markdown, drawings, tasks, and slash commands.
 - **Integrations**: LTI 1.3 provider/consumer (Canvas, Moodle, Blackboard); SAML 2.0, OIDC, and SCIM; Clever and ClassLink for K–12; Canvas course import and QTI; [MCP](#mcp-integrations) for Cursor, Claude Desktop, and other AI agents.
-- **AI (optional)**: OpenRouter-backed course-grounded tutor, quiz generation, misconception detection, and automated hint scaffolding.
+- **AI (optional)**: Multi-provider BYOK course-grounded tutor, quiz generation, misconception detection, and automated hint scaffolding (OpenRouter, Anthropic, OpenAI, Azure OpenAI, Bedrock, Vertex).
 - **14 question types**: From multiple choice and essays to live code execution and audio/video responses.
 - **Cross-platform clients**: Web SPA, native iOS (SwiftUI) and Android (Jetpack Compose) apps, Tauri desktop, and a `lextures` CLI—all talking to the same REST API.
 - **Accessibility**: Immersive reader (read-aloud, captions, translation), accommodations engine, and WCAG-oriented UI work across web and mobile.
@@ -81,7 +81,7 @@ lextures/
 | **Marketing site** | React 19 + Vite in [`www/`](www/) |
 | **Data** | PostgreSQL 16 |
 | **Queue** | RabbitMQ (async jobs, e.g. Canvas import) |
-| **AI (optional)** | OpenRouter API key in **Settings → Intelligence → Models** (platform DB) |
+| **AI (optional)** | Provider credentials (BYOK) in **Settings → Intelligence → Models** — see [docs/ai-providers-byok.md](docs/ai-providers-byok.md) |
 
 For architecture notes (Compose port layout, dev vs prod web, testing conventions), see [docs/ARCH.md](docs/ARCH.md).
 

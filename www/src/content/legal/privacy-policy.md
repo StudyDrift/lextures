@@ -63,13 +63,16 @@ Submit California requests to **privacy@lextures.com**. We will not discriminate
 
 ## AI Features and Sub-Processors
 
-Lextures offers optional AI-assisted features (tutoring, feedback suggestions, content generation, and similar tools). When enabled by your institution:
+Lextures offers optional AI-assisted features (tutoring, feedback suggestions, content generation, and similar tools). When enabled by your institution, prompts may be sent to **customer-chosen AI providers** (bring-your-own-key), which may include:
 
 | Provider | Purpose | Data sent |
 | --- | --- | --- |
-| **Anthropic** | Large language model inference | Prompt text and context needed to fulfill the request; identifiers are minimized. |
-| **OpenAI** | Large language model inference | Same as above. |
-| **OpenRouter** | Model routing gateway | Same as above; may route to underlying model providers. |
+| **Anthropic** | Large language model inference (when configured) | Prompt text and context needed to fulfill the request; identifiers are minimized. |
+| **OpenAI** | Large language model inference (when configured) | Same as above. |
+| **OpenRouter** | Model routing gateway (when configured) | Same as above; may route to underlying model providers. |
+| **Azure OpenAI / Bedrock / Vertex** | Direct cloud AI (when configured via BYOK) | Same as above; processed under your institution’s agreement with that cloud vendor. |
+
+Providers process data **only when configured** for the deployment. A customer’s direct BYOK connection to their own cloud AI account is not automatically a Lextures sub-processor; see the [Trust Center](https://self.lextures.com/trust) for platform vs BYOK wording.
 
 Before content is sent to AI providers, Lextures applies **PII redaction** and institutional policy controls where configured. Prompts should not include unnecessary sensitive data. Your institution may disable AI features or specific providers.
 

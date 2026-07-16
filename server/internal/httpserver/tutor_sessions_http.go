@@ -220,9 +220,10 @@ func (d Deps) handlePostTutorSessionMessage() http.HandlerFunc {
 		if !d.persistentTutorEnabled(w) {
 			return
 		}
-		or := d.openRouterClient()
-		if or == nil || d.effectiveConfig().OpenRouterAPIKey == "" {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI provider not configured.")
+		// AI provider is checked before auth to preserve historical 503 (vs 401)
+		// behavior for misconfigured deployments; org-scoped resolution happens below.
+		if !d.aiConfigured(r.Context(), nil) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 
@@ -270,6 +271,11 @@ func (d Deps) handlePostTutorSessionMessage() http.HandlerFunc {
 		orgID, err := organization.OrgIDForUser(ctx, d.Pool, userID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load user org.")
+			return
+		}
+		orgIDPtr := &orgID
+		if !d.aiConfigured(ctx, orgIDPtr) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 		budget, err := tutorrepo.GetTokenBudget(ctx, d.Pool, userID, orgID)
@@ -336,7 +342,7 @@ func (d Deps) handlePostTutorSessionMessage() http.HandlerFunc {
 			return
 		}
 
-		fullText, streamErr := or.ChatCompletionStream(model, msgs, func(chunk string) error {
+		fullText, callMeta, streamErr := d.completeStreamOrBuffered(ctx, orgIDPtr, model, msgs, func(chunk string) error {
 			b, _ := json.Marshal(chunk)
 			_, werr := fmt.Fprintf(w, "data: {\"type\":\"content\",\"text\":%s}\n\n", string(b))
 			if canFlush {
@@ -349,10 +355,10 @@ func (d Deps) handlePostTutorSessionMessage() http.HandlerFunc {
 			return
 		}
 
-		d.logAIInferenceAllowed(r, userID, aigateway.FeatureAITutor, model, cleaned, gwDec)
-		d.recordAIUsage(ctx, AIUsageMeta{
+		d.logAIInferenceAllowedWithProvider(r, userID, aigateway.FeatureAITutor, model, string(callMeta.Provider), cleaned, gwDec)
+		d.recordAIProviderResult(ctx, AIUsageMeta{
 			UserID: userID, Feature: aigateway.FeatureAITutor, Model: model,
-		}, fullText.Usage, true)
+		}, callMeta, fullText, true)
 
 		validCitations := tutorsession.FilterValidCitations(nil, citations)
 		if len(validCitations) == 0 && hasRAG && len(citations) > 0 {

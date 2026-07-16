@@ -210,6 +210,8 @@ func putAIProviderSettings(c *client.Client, payload map[string]any) ([]byte, er
 	if key, ok := payload["byokApiKey"].(string); ok && key == secretPlaceholder {
 		delete(payload, "byokApiKey")
 	}
+	// Deprecated legacy field — strip; warn callers via docs/CLI Long text.
+	delete(payload, "openRouterApiKey")
 	raw, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
@@ -279,10 +281,18 @@ func redactAIProviderMap(m map[string]any) {
 		return
 	}
 	delete(m, "byokApiKey")
+	hadDeprecatedOpenRouterKey := false
+	if _, ok := m["openRouterApiKey"]; ok {
+		hadDeprecatedOpenRouterKey = true
+		delete(m, "openRouterApiKey")
+	}
 	if byok, ok := m["byokConfigured"].(bool); ok && byok {
 		m["byokConfigured"] = true
 	}
 	redactSettingsSecrets(m)
+	if hadDeprecatedOpenRouterKey {
+		m["openRouterApiKey"] = "[deprecated — use provider credentials / byokApiKey]"
+	}
 }
 
 func redactSettingsSecrets(v any) {

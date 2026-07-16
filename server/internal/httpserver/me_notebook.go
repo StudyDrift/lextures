@@ -6,16 +6,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/uuid"
-
 	"github.com/lextures/lextures/server/internal/apierr"
-	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/systemprompts"
 	userrepo "github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/repos/userai"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/notebookrag"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 type notebookRagJSON struct {
@@ -35,8 +32,8 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 			return
 		}
 		// No DB pool: match legacy behavior for misconfigured dev/test handlers (503 before auth).
-		if d.Pool == nil && d.openRouterClient() == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI features are not configured on this server.")
+		if d.Pool == nil && !d.aiConfigured(r.Context(), nil) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 		var body notebookRagJSON
@@ -68,13 +65,10 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 		if !d.enforceAIGateway(w, r, userID, aigateway.FeatureRAGNotebook, model, contentKey) {
 			return
 		}
-		if d.openRouterClient() == nil && d.aiProviderResolver() == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI features are not configured on this server.")
+		orgID := d.orgIDPtrForUser(r.Context(), userID)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
-		}
-		var orgID *uuid.UUID
-		if oid, err := organization.OrgIDForUser(r.Context(), d.Pool, userID); err == nil {
-			orgID = &oid
 		}
 		gwDec := aigateway.Decision{
 			UserIDHash:     aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, userID),
@@ -112,8 +106,8 @@ func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if d.Pool == nil && d.openRouterClient() == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI features are not configured on this server.")
+		if d.Pool == nil && !d.aiConfigured(r.Context(), nil) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 		var body struct {
@@ -143,8 +137,9 @@ func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 			return
 		}
 
-		if d.openRouterClient() == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI features are not configured on this server.")
+		orgID := d.orgIDPtrForUser(r.Context(), userID)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 
@@ -155,7 +150,7 @@ func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 			sysPrompt = systemprompts.DefaultNotebookFlashcardsPrompt
 		}
 
-		messages := []openrouter.Message{
+		messages := []aiprovider.Message{
 			{Role: "system", Content: sysPrompt},
 			{Role: "user", Content: notes},
 		}
@@ -165,16 +160,17 @@ func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 			OptInConfirmed: true,
 		}
 
-		completion, err := d.openRouterClient().ChatCompletion(model, messages)
+		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
+		completion, callMeta, err := bound.Complete(r.Context(), model, messages)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeAiGenerationFailed, fmt.Sprintf("AI model failed to respond: %v", err))
 			return
 		}
 
-		d.logAIInferenceAllowed(r, userID, aigateway.FeatureRAGNotebook, model, notes, gwDec)
-		d.recordAIUsage(r.Context(), AIUsageMeta{
+		d.logAIInferenceAllowedWithProvider(r, userID, aigateway.FeatureRAGNotebook, model, string(callMeta.Provider), notes, gwDec)
+		d.recordAIProviderUsage(r.Context(), AIUsageMeta{
 			UserID: userID, Feature: aigateway.FeatureRAGNotebook, Model: model,
-		}, completion.Usage, true)
+		}, callMeta, true)
 
 		// Parse output to ensure it is valid JSON matching our expected flashcards structure
 		var parsed struct {

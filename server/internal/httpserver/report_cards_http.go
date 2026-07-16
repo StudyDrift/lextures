@@ -17,7 +17,8 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/reportcards"
 	"github.com/lextures/lextures/server/internal/repos/userai"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/reportpdf"
 )
 
@@ -496,9 +497,9 @@ func (d Deps) handleAIReportCardComment() http.HandlerFunc {
 			return
 		}
 
-		or := d.openRouterClient()
-		if or == nil || d.effectiveConfig().OpenRouterAPIKey == "" {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI comment generation is not available.")
+		orgID := d.orgIDPtrForUser(r.Context(), actorID)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 
@@ -524,15 +525,26 @@ func (d Deps) handleAIReportCardComment() http.HandlerFunc {
 			)
 		}
 
-		msgs := []openrouter.Message{
+		if !d.enforceAIGateway(w, r, actorID, aigateway.FeatureReportCardComment, model, prompt) {
+			return
+		}
+		gwDec := aigateway.Decision{
+			UserIDHash:     aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, actorID),
+			OptInConfirmed: true,
+		}
+
+		msgs := []aiprovider.Message{
 			{Role: "system", Content: "You are a helpful teacher assistant writing concise, professional report card comments."},
 			{Role: "user", Content: prompt},
 		}
-		suggestion, err := or.ChatCompletion(model, msgs)
+		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
+		suggestion, callMeta, err := bound.Complete(r.Context(), model, msgs)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "AI comment generation failed.")
 			return
 		}
+		d.logAIInferenceAllowedWithProvider(r, actorID, aigateway.FeatureReportCardComment, model, string(callMeta.Provider), prompt, gwDec)
+		d.recordAIProviderUsage(r.Context(), AIUsageMeta{UserID: actorID, Feature: aigateway.FeatureReportCardComment, Model: model}, callMeta, true)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"suggestion": strings.TrimSpace(suggestion.Text)})

@@ -125,7 +125,11 @@ type platformFeaturesJSON struct {
 	MaintenanceBannerEnabled     bool `json:"maintenanceBannerEnabled"`
 	CustomFieldsEnabled          bool `json:"customFieldsEnabled"`
 	SeatManagementEnabled        bool `json:"seatManagementEnabled"`
-	OpenRouterConfigured         bool `json:"openRouterConfigured"`
+	// OpenRouterConfigured is deprecated (AP.9); alias of AIConfigured for one minor release. Prefer aiConfigured.
+	OpenRouterConfigured         bool `json:"openRouterConfigured"` // Deprecated: use aiConfigured
+	AIConfigured                 bool `json:"aiConfigured"`
+	AiProvidersConfigured        []string `json:"aiProvidersConfigured"`
+	AiProviderAbstractionEnabled bool     `json:"aiProviderAbstractionEnabled"`
 	RagNotebookEnabled   bool `json:"ragNotebookEnabled"`
 	AiStudyBuddyEnabled  bool `json:"aiStudyBuddyEnabled"`
 
@@ -269,15 +273,18 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 
 func (d Deps) effectiveRagNotebookEnabled(ctx context.Context, userID uuid.UUID) bool {
 	cfg := d.effectiveConfig()
-	if !cfg.AiDisclosureEnabled || d.openRouterClient() == nil {
+	if !cfg.AiDisclosureEnabled {
 		return false
 	}
 	if d.Pool == nil {
-		return true
+		return d.aiConfigured(ctx, nil)
 	}
 	orgID, err := organization.OrgIDForUser(ctx, d.Pool, userID)
 	if err != nil {
-		return true
+		return d.aiConfigured(ctx, nil)
+	}
+	if !d.aiConfigured(ctx, &orgID) {
+		return false
 	}
 	tc, err := aidisclosurerepo.GetTenantConfig(ctx, d.Pool, orgID)
 	if err != nil || tc == nil {
@@ -291,15 +298,18 @@ func (d Deps) effectiveRagNotebookEnabled(ctx context.Context, userID uuid.UUID)
 
 func (d Deps) effectiveAIStudyBuddyEnabled(ctx context.Context, userID uuid.UUID) bool {
 	cfg := d.effectiveConfig()
-	if !cfg.FFAIStudyBuddy || !cfg.AiDisclosureEnabled || d.openRouterClient() == nil {
+	if !cfg.FFAIStudyBuddy || !cfg.AiDisclosureEnabled {
 		return false
 	}
 	if d.Pool == nil {
-		return true
+		return d.aiConfigured(ctx, nil)
 	}
 	orgID, err := organization.OrgIDForUser(ctx, d.Pool, userID)
 	if err != nil {
-		return true
+		return d.aiConfigured(ctx, nil)
+	}
+	if !d.aiConfigured(ctx, &orgID) {
+		return false
 	}
 	tc, err := aidisclosurerepo.GetTenantConfig(ctx, d.Pool, orgID)
 	if err != nil || tc == nil {
@@ -326,7 +336,13 @@ func (d Deps) handleGetPlatformFeatures() http.HandlerFunc {
 		cfg := d.effectiveConfig()
 		out := platformFeaturesFromConfig(cfg)
 		out.AiDisclosureEnabled = cfg.AiDisclosureEnabled
-		out.OpenRouterConfigured = d.openRouterClient() != nil
+		orgID := d.orgIDPtrForUser(r.Context(), userID)
+		out.AIConfigured = d.aiConfigured(r.Context(), orgID)
+		out.AiProvidersConfigured = d.aiProvidersConfigured(r.Context(), orgID)
+		// OpenRouterConfigured is a deprecated alias of AIConfigured (AP.4 FR-8 / AP.9 FR-6).
+		// Dual-read window: ≥1 minor release after GA; remove after clients use aiConfigured only.
+		out.OpenRouterConfigured = out.AIConfigured
+		out.AiProviderAbstractionEnabled = cfg.AiProviderAbstractionEnabled
 		out.RagNotebookEnabled = d.effectiveRagNotebookEnabled(r.Context(), userID)
 		out.AiStudyBuddyEnabled = d.effectiveAIStudyBuddyEnabled(r.Context(), userID)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

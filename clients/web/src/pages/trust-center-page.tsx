@@ -22,7 +22,12 @@ function isoStatusLabel(status: string): string {
 import { Link } from 'react-router-dom'
 import { BrandLogo } from '../components/brand-logo'
 import { MARKETING_LEGAL_URLS } from '../lib/marketing-site'
-import { SUB_PROCESSORS, SUB_PROCESSORS_EFFECTIVE_DATE, type DpaStatus } from '../content/trust/sub-processors'
+import {
+  AI_SUBPROCESSOR_BYOK_NOTE,
+  SUB_PROCESSORS,
+  SUB_PROCESSORS_EFFECTIVE_DATE,
+  type DpaStatus,
+} from '../content/trust/sub-processors'
 import { INCIDENTS, type IncidentSeverity, type IncidentStatus } from '../content/trust/incidents'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -360,6 +365,9 @@ export default function TrustCenterPage() {
                 In accordance with GDPR Art. 28 and FERPA, we disclose all third-party vendors who process customer data.
               </p>
             </div>
+            <p className="mb-4 text-sm text-slate-600 dark:text-neutral-400" data-testid="ai-byok-subprocessor-note">
+              {AI_SUBPROCESSOR_BYOK_NOTE}
+            </p>
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm border-collapse" aria-label="Sub-processor list">
                 <caption className="sr-only">Complete list of Lextures sub-processors as of {SUB_PROCESSORS_EFFECTIVE_DATE}</caption>

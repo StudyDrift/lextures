@@ -13,7 +13,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	userai "github.com/lextures/lextures/server/internal/repos/user"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 type syllabusResponse struct {
@@ -205,9 +205,9 @@ func (d Deps) handleGenerateSyllabusSection() http.HandlerFunc {
 		heading := strings.TrimSpace(body.SectionHeading)
 		existing := strings.TrimSpace(body.ExistingMarkdown)
 
-		or := d.openRouterClient()
-		if or == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI generation is not configured. Set an OpenRouter API key under Settings → Intelligence → Models.")
+		orgID := d.orgIDPtrForUser(r.Context(), viewer)
+		if !d.aiConfigured(r.Context(), orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 
@@ -236,7 +236,8 @@ func (d Deps) handleGenerateSyllabusSection() http.HandlerFunc {
 			fmt.Fprintf(&userMsg, "\n\nExisting content to revise or extend:\n%s", existing)
 		}
 
-		generated, err := or.ChatCompletion(model, []openrouter.Message{
+		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
+		generated, callMeta, err := bound.Complete(r.Context(), model, []aiprovider.Message{
 			{Role: "system", Content: sysPrompt},
 			{Role: "user", Content: userMsg.String()},
 		})
@@ -244,10 +245,10 @@ func (d Deps) handleGenerateSyllabusSection() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI generation failed: "+err.Error())
 			return
 		}
-		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureSyllabusGeneration, model, promptMaterial, gwDec)
-		d.recordAIUsage(r.Context(), AIUsageMeta{
+		d.logAIInferenceAllowedWithProvider(r, viewer, aigateway.FeatureSyllabusGeneration, model, string(callMeta.Provider), promptMaterial, gwDec)
+		d.recordAIProviderUsage(r.Context(), AIUsageMeta{
 			UserID: viewer, CourseCode: courseCode, Feature: aigateway.FeatureSyllabusGeneration, Model: model,
-		}, generated.Usage, true)
+		}, callMeta, true)
 
 		markdown := strings.TrimSpace(generated.Text)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

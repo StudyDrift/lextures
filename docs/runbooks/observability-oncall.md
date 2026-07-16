@@ -63,6 +63,14 @@ dedicated health-check pool cannot connect while the main pool is exhausted.
 Mitigate by restoring the dependency or restarting the instance after the DB
 recovers.
 
+### AIProviderElevatedErrors
+*AI provider error rate > 5% for 10m (AP.9).* Open Grafana → **AI Provider**
+dashboard; filter by `provider`. Correlate with a recent credential change or
+upstream outage. If the spike followed a multi-provider deploy, consider
+flag rollback (`AI_PROVIDER_ABSTRACTION_ENABLED=0`) per
+[ai-provider-rollback.md](ai-provider-rollback.md). Disable the failing
+provider credential if another peer provider can serve traffic.
+
 ## Sentry triage
 
 1. Triage by Sentry environment (production vs staging) and severity.

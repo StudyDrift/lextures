@@ -13,9 +13,9 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/learnergoals"
 	studybuddyrepo "github.com/lextures/lextures/server/internal/repos/studybuddy"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/aitutor"
 	"github.com/lextures/lextures/server/internal/service/notebookrag"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 const (
@@ -173,7 +173,7 @@ func appendReviewDuePrompt(prompts []Prompt, now time.Time) []Prompt {
 	return prompts
 }
 
-// BuildMessages assembles the OpenRouter message list for a study buddy turn.
+// BuildMessages assembles the provider-agnostic message list for a study buddy turn.
 func (s *Service) BuildMessages(
 	courseTitle string,
 	memory *studybuddyrepo.MemoryRow,
@@ -183,21 +183,21 @@ func (s *Service) BuildMessages(
 	userMessage string,
 	ragContext string,
 	hasRAG bool,
-) []openrouter.Message {
+) []aiprovider.Message {
 	sys := BuildSystemPrompt(courseTitle, memory, priorLevel, displayName, hasRAG)
-	msgs := []openrouter.Message{{Role: "system", Content: sys}}
+	msgs := []aiprovider.Message{{Role: "system", Content: sys}}
 	start := 0
 	if len(history) > maxHistoryTurns*2 {
 		start = len(history) - maxHistoryTurns*2
 	}
 	for _, m := range history[start:] {
-		msgs = append(msgs, openrouter.Message{Role: m.Role, Content: m.Content})
+		msgs = append(msgs, aiprovider.Message{Role: m.Role, Content: m.Content})
 	}
 	body := userMessage
 	if strings.TrimSpace(ragContext) != "" {
 		body = fmt.Sprintf("Student question:\n---\n%s\n---\n\nRelevant course material excerpts (only use these as evidence):\n%s", userMessage, ragContext)
 	}
-	msgs = append(msgs, openrouter.Message{Role: "user", Content: body})
+	msgs = append(msgs, aiprovider.Message{Role: "user", Content: body})
 	return msgs
 }
 

@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,10 +12,8 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/translation"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
-
-const translationProvider = "openrouter"
 
 var allowedContentTypes = map[string]bool{
 	"feed_post":        true,
@@ -97,9 +96,9 @@ func (d Deps) handleTranslate() http.HandlerFunc {
 			return
 		}
 
-		or := d.openRouterClient()
-		if or == nil || d.effectiveConfig().OpenRouterAPIKey == "" {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "Translation provider not configured.")
+		orgID := d.orgIDPtrForUser(ctx, userID)
+		if !d.aiConfigured(ctx, orgID) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 
@@ -112,17 +111,18 @@ func (d Deps) handleTranslate() http.HandlerFunc {
 			OptInConfirmed: true,
 		}
 
-		translated, sourceLang, usage, err := callLLMTranslation(or, req.Text, req.TargetLang)
+		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
+		translated, sourceLang, callMeta, err := callLLMTranslation(ctx, bound, req.Text, req.TargetLang)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Translation temporarily unavailable.")
 			return
 		}
 
-		_ = translation.Store(ctx, d.Pool, req.ContentType, contentID, sourceLang, req.TargetLang, translated, translationProvider)
-		d.logAIInferenceAllowed(r, userID, aigateway.FeatureTranslation, translationModel, req.Text, gwDec)
-		d.recordAIUsage(r.Context(), AIUsageMeta{
+		_ = translation.Store(ctx, d.Pool, req.ContentType, contentID, sourceLang, req.TargetLang, translated, string(callMeta.Provider))
+		d.logAIInferenceAllowedWithProvider(r, userID, aigateway.FeatureTranslation, translationModel, string(callMeta.Provider), req.Text, gwDec)
+		d.recordAIProviderUsage(r.Context(), AIUsageMeta{
 			UserID: userID, Feature: aigateway.FeatureTranslation, Model: translationModel,
-		}, usage, true)
+		}, callMeta, true)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(translateResponse{
@@ -133,8 +133,8 @@ func (d Deps) handleTranslate() http.HandlerFunc {
 	}
 }
 
-// callLLMTranslation sends a translation request to the LLM and returns (translated, sourceLang, usage, error).
-func callLLMTranslation(or *openrouter.Client, text, targetLang string) (string, string, openrouter.UsageInfo, error) {
+// callLLMTranslation sends a translation request to the LLM and returns (translated, sourceLang, callMeta, error).
+func callLLMTranslation(ctx context.Context, ai aiprovider.ScopedCompleter, text, targetLang string) (string, string, aiprovider.CallMeta, error) {
 	langName := langCodeToName(targetLang)
 	prompt := fmt.Sprintf(
 		"Detect the source language of the following text and translate it to %s. "+
@@ -142,14 +142,14 @@ func callLLMTranslation(or *openrouter.Client, text, targetLang string) (string,
 			`{"source_lang":"<BCP47 code>","translated":"<translation>"}`,
 		langName,
 	)
-	messages := []openrouter.Message{
+	messages := []aiprovider.Message{
 		{Role: "system", Content: prompt},
 		{Role: "user", Content: text},
 	}
 
-	completion, err := or.ChatCompletion("openai/gpt-4o-mini", messages)
+	completion, callMeta, err := ai.Complete(ctx, "openai/gpt-4o-mini", messages)
 	if err != nil {
-		return "", "", openrouter.UsageInfo{}, fmt.Errorf("llm call failed: %w", err)
+		return "", "", callMeta, fmt.Errorf("llm call failed: %w", err)
 	}
 
 	var result struct {
@@ -158,12 +158,12 @@ func callLLMTranslation(or *openrouter.Client, text, targetLang string) (string,
 	}
 	if err := json.Unmarshal([]byte(completion.Text), &result); err != nil {
 		// If LLM didn't produce valid JSON, treat entire response as the translation.
-		return strings.TrimSpace(completion.Text), "und", completion.Usage, nil
+		return strings.TrimSpace(completion.Text), "und", callMeta, nil
 	}
 	if result.SourceLang == "" {
 		result.SourceLang = "und"
 	}
-	return result.Translated, result.SourceLang, completion.Usage, nil
+	return result.Translated, result.SourceLang, callMeta, nil
 }
 
 // langCodeToName converts a BCP 47 language code to a human-readable name for the prompt.

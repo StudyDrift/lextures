@@ -16,7 +16,7 @@ Production builds run `npm run bundle:check` after `vite build`. Budgets:
 
 | Check | Limit |
 | --- | --- |
-| Initial entry chunk (`index-*.js` gzip) | ≤ 256 KB (raised from 200 KB when Vite 8.0.16+ changed default chunking) |
+| Initial entry chunk (`index-*.js` gzip) | ≤ 257 KiB + 2 KiB CI slack |
 | Dashboard lazy chunk regression | ≤ +10 KB vs `scripts/bundle-baseline.json` |
 
 To refresh the dashboard baseline after an intentional size increase:

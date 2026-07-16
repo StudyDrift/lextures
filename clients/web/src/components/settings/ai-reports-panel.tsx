@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatDateTime, formatNumber } from '../../lib/format'
+import { providerLabel } from '../../lib/ai-providers'
 import {
   aiFeatureLabel,
   aiReportsUtcRange,
@@ -38,6 +39,7 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
 export function AiReportsPanel() {
   const [preset, setPreset] = useState<AIReportsPreset>('24h')
   const [feature, setFeature] = useState('')
+  const [provider, setProvider] = useState('')
   const [userQuery, setUserQuery] = useState('')
   const [courseCode, setCourseCode] = useState('')
   const [report, setReport] = useState<AIReportsPayload | null>(null)
@@ -52,6 +54,7 @@ export function AiReportsPanel() {
       const data = await fetchAIReports({
         ...range,
         feature: feature.trim() || undefined,
+        provider: provider.trim() || undefined,
         userQuery: userQuery.trim() || undefined,
         courseCode: courseCode.trim() || undefined,
       })
@@ -62,7 +65,7 @@ export function AiReportsPanel() {
     } finally {
       setLoading(false)
     }
-  }, [preset, feature, userQuery, courseCode])
+  }, [preset, feature, provider, userQuery, courseCode])
 
   useEffect(() => {
     void load()
@@ -74,12 +77,18 @@ export function AiReportsPanel() {
     return Array.from(keys).sort()
   }, [report])
 
+  const providerOptions = useMemo(() => {
+    const keys = new Set<string>(report?.providers ?? [])
+    for (const row of report?.cost.byProvider ?? []) keys.add(row.provider)
+    return Array.from(keys).sort()
+  }, [report])
+
   return (
     <div>
       <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Reports</h2>
       <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-        Platform-wide OpenRouter spend and usage. Data is recorded from successful AI calls after this
-        feature ships.
+        Platform-wide AI spend and usage across configured providers. Costs may include estimates when
+        a provider omits billing metadata.
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
@@ -119,21 +128,38 @@ export function AiReportsPanel() {
               <h3 id="ai-cost-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
                 AI cost
               </h3>
-              <label className="text-sm text-slate-600 dark:text-neutral-300">
-                <span className="sr-only">Filter by feature</span>
-                <select
-                  value={feature}
-                  onChange={(e) => setFeature(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
-                >
-                  <option value="">All features</option>
-                  {featureOptions.map((f) => (
-                    <option key={f} value={f}>
-                      {aiFeatureLabel(f)}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="flex flex-wrap gap-2">
+                <label className="text-sm text-slate-600 dark:text-neutral-300">
+                  <span className="sr-only">Filter by provider</span>
+                  <select
+                    value={provider}
+                    onChange={(e) => setProvider(e.target.value)}
+                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                  >
+                    <option value="">All providers</option>
+                    {providerOptions.map((p) => (
+                      <option key={p} value={p}>
+                        {providerLabel(p)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-sm text-slate-600 dark:text-neutral-300">
+                  <span className="sr-only">Filter by feature</span>
+                  <select
+                    value={feature}
+                    onChange={(e) => setFeature(e.target.value)}
+                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                  >
+                    <option value="">All features</option>
+                    {featureOptions.map((f) => (
+                      <option key={f} value={f}>
+                        {aiFeatureLabel(f)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -142,9 +168,36 @@ export function AiReportsPanel() {
               <SummaryCard label="Tokens" value={formatNumber(report.cost.summary.totalTokens)} />
             </div>
 
+            {(report.cost.byProvider?.length ?? 0) > 0 && (
+              <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+                <table className="min-w-full text-start text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
+                    <tr>
+                      <th className="px-4 py-2.5 font-semibold">Provider</th>
+                      <th className="px-4 py-2.5 font-semibold">Cost</th>
+                      <th className="px-4 py-2.5 font-semibold">Calls</th>
+                      <th className="px-4 py-2.5 font-semibold">Tokens</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
+                    {report.cost.byProvider.map((row) => (
+                      <tr key={row.provider}>
+                        <td className="px-4 py-2.5 text-slate-800 dark:text-neutral-200">
+                          {providerLabel(row.provider)}
+                        </td>
+                        <td className="px-4 py-2.5 tabular-nums">{formatUsd(row.costUsd)}</td>
+                        <td className="px-4 py-2.5 tabular-nums">{formatNumber(row.calls)}</td>
+                        <td className="px-4 py-2.5 tabular-nums">{formatNumber(row.tokens)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
             {report.cost.byDay.length > 0 && (
               <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
-                <table className="min-w-full text-left text-sm">
+                <table className="min-w-full text-start text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
                     <tr>
                       <th className="px-4 py-2.5 font-semibold">Day (UTC)</th>
@@ -169,7 +222,7 @@ export function AiReportsPanel() {
 
             {report.cost.byFeature.length > 0 && (
               <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
-                <table className="min-w-full text-left text-sm">
+                <table className="min-w-full text-start text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
                     <tr>
                       <th className="px-4 py-2.5 font-semibold">Feature</th>
@@ -220,7 +273,7 @@ export function AiReportsPanel() {
 
             {report.byUser.length > 0 ? (
               <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
-                <table className="min-w-full text-left text-sm">
+                <table className="min-w-full text-start text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
                     <tr>
                       <th className="px-4 py-2.5 font-semibold">User</th>
@@ -268,7 +321,7 @@ export function AiReportsPanel() {
 
             {report.byCourse.length > 0 ? (
               <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
-                <table className="min-w-full text-left text-sm">
+                <table className="min-w-full text-start text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
                     <tr>
                       <th className="px-4 py-2.5 font-semibold">Course</th>

@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 const (
@@ -34,18 +34,17 @@ type Provider interface {
 	Scan(ctx context.Context, text string) (ScanResult, error)
 }
 
-// InternalAIProvider scores AI-authorship probability via OpenRouter.
+// InternalAIProvider scores AI-authorship probability via an AI completer.
 type InternalAIProvider struct {
-	Client *openrouter.Client
-	Model  string
+	AI    aiprovider.ScopedCompleter
+	Model string
 }
 
 func (p InternalAIProvider) Name() string { return ProviderInternal }
 
 func (p InternalAIProvider) Scan(ctx context.Context, text string) (ScanResult, error) {
-	_ = ctx
-	if p.Client == nil {
-		return ScanResult{}, fmt.Errorf("internal ai: missing openrouter client")
+	if p.AI == nil {
+		return ScanResult{}, fmt.Errorf("internal ai: missing completer")
 	}
 	trimmed := strings.TrimSpace(text)
 	if trimmed == "" {
@@ -58,7 +57,7 @@ func (p InternalAIProvider) Scan(ctx context.Context, text string) (ScanResult, 
 	if model == "" {
 		model = "openai/gpt-4o-mini"
 	}
-	out, err := p.Client.ChatCompletion(model, []openrouter.Message{
+	out, _, err := p.AI.Complete(ctx, model, []aiprovider.Message{
 		{
 			Role: "system",
 			Content: "You classify whether student writing was likely AI-generated. " +

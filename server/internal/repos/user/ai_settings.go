@@ -1,4 +1,7 @@
-// user.user_ai_settings — per-user OpenRouter model defaults (mirrors server/src/repos/user_ai_settings.rs).
+// user.user_ai_settings — per-user AI model defaults (alias or provider model id; AP.3).
+// Columns remain TEXT; values may be stable aliases (text-fast) or provider-native /
+// legacy OpenRouter ids. Defaults stay OpenRouter ids until AP.4 flips them to aliases;
+// aiprovider.ResolveModelID dual-reads both shapes.
 package user
 
 import (
@@ -12,11 +15,11 @@ import (
 
 // Defaults when no row exists (parity with Rust repos/user_ai_settings.rs).
 const (
-	DefaultImageModelID                = "black-forest-labs/flux.2-flex"
-	DefaultCourseSetupModelID          = "arcee-ai/trinity-mini:free"
-	DefaultNotebookFlashcardsModelID   = "arcee-ai/trinity-mini:free"
-	DefaultVibeActivityModelID         = "arcee-ai/trinity-mini:free"
-	DefaultGraderAgentModelID          = "arcee-ai/trinity-mini:free"
+	DefaultImageModelID              = "black-forest-labs/flux.2-flex"
+	DefaultCourseSetupModelID        = "arcee-ai/trinity-mini:free"
+	DefaultNotebookFlashcardsModelID = "arcee-ai/trinity-mini:free"
+	DefaultVibeActivityModelID       = "arcee-ai/trinity-mini:free"
+	DefaultGraderAgentModelID        = "arcee-ai/trinity-mini:free"
 )
 
 // GetImageModelID returns the user's image model, or the global default.

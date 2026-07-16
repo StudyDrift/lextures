@@ -378,7 +378,8 @@ type Config struct {
 	DataResidencyEnabled bool
 	// AiDisclosureEnabled gates AI opt-out, gateway enforcement, inference logging, and disclosure APIs (plan 10.17). Defaults to true.
 	AiDisclosureEnabled bool
-	// AiProviderAbstractionEnabled gates per-tenant AI provider selection and BYOK (plan 16.7). Defaults to false.
+	// AiProviderAbstractionEnabled gates per-tenant AI provider selection and BYOK (plan 16.7 / AP.9).
+	// Defaults to true (GA). Set AI_PROVIDER_ABSTRACTION_ENABLED=0 to roll back to legacy OpenRouter-only admin paths.
 	AiProviderAbstractionEnabled bool
 	// SecurityDisclosureModuleEnabled gates responsible-disclosure report triage APIs (plan 10.16).
 	SecurityDisclosureModuleEnabled bool
@@ -931,7 +932,7 @@ func Load() Config {
 
 		EnableAPIDocs: boolEnv("ENABLE_API_DOCS"),
 
-		AiProviderAbstractionEnabled: boolEnv("AI_PROVIDER_ABSTRACTION_ENABLED"),
+		AiProviderAbstractionEnabled: boolEnvDefault("AI_PROVIDER_ABSTRACTION_ENABLED", true),
 
 		StatusPageEnabled:          boolEnv("STATUS_PAGE_ENABLED"),
 		StatusPageURL:              stringDefault(firstNonEmptyTrimmed("STATUS_PAGE_URL"), "https://status.lextures.io"),

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/lextures/lextures/server/internal/models/assignmentrubric"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 const systemPrompt = `You are an academic grading assistant. The instructor's grading instructions are authoritative.
@@ -30,7 +30,7 @@ func BuildMessages(
 	rubric *assignmentrubric.RubricDefinition,
 	submissionText string,
 	maxPoints float64,
-) []openrouter.Message {
+) []aiprovider.Message {
 	var user strings.Builder
 	user.WriteString("=== INSTRUCTOR GRADING INSTRUCTIONS (authoritative) ===\n")
 	user.WriteString(strings.TrimSpace(instructorPrompt))
@@ -63,7 +63,7 @@ func BuildMessages(
 	user.WriteString("<<<UNTRUSTED_SUBMISSION_START>>>\n")
 	user.WriteString(strings.TrimSpace(submissionText))
 	user.WriteString("\n<<<UNTRUSTED_SUBMISSION_END>>>")
-	return []openrouter.Message{
+	return []aiprovider.Message{
 		{Role: "system", Content: systemPrompt},
 		{Role: "user", Content: user.String()},
 	}

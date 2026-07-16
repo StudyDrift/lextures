@@ -3,19 +3,17 @@ package lessonplanai
 import (
 	"context"
 	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 type stubChat struct {
 	replies map[string]string
 }
 
-func (s stubChat) ChatCompletion(model string, messages []openrouter.Message, opts ...openrouter.ChatOptions) (openrouter.ChatResult, error) {
+func (s stubChat) Complete(ctx context.Context, model string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
 	user := ""
 	for _, m := range messages {
 		if m.Role == "user" {
@@ -33,7 +31,7 @@ func (s stubChat) ChatCompletion(model string, messages []openrouter.Message, op
 		key = "json"
 	}
 	text := s.replies[key]
-	return openrouter.ChatResult{Text: text}, nil
+	return aiprovider.ChatResult{Text: text}, aiprovider.CallMeta{}, nil
 }
 
 func TestValidateInput(t *testing.T) {
@@ -110,13 +108,9 @@ func TestGenerateParallelPartialFailure(t *testing.T) {
 }
 
 func TestGenerateQuizAndProvenance(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"{\"questions\":[{\"prompt\":\"Q1\",\"questionType\":\"true_false\",\"choices\":[\"True\",\"False\"],\"correctChoiceIndex\":0,\"points\":1,\"estimatedMinutes\":1,\"required\":true}]}"}}]}`))
-	}))
-	defer server.Close()
-
-	client := openrouter.NewClientWithBaseURL("test-key", server.URL)
+	client := stubChat{replies: map[string]string{
+		"json": `{"questions":[{"prompt":"Q1","questionType":"true_false","choices":["True","False"],"correctChoiceIndex":0,"points":1,"estimatedMinutes":1,"required":true}]}`,
+	}}
 	input := InputParams{
 		LearningObjective: "Multiply fractions",
 		GradeLevel:        "5",
@@ -125,8 +119,8 @@ func TestGenerateQuizAndProvenance(t *testing.T) {
 	keys := []string{ComponentQuiz}
 	pkg := NewPackage("job-2", keys)
 	pkg = Generate(context.Background(), client, input, pkg, GenerateOptions{
-		ModelID: "test-model",
-		Prompts: Prompts{Quiz: DefaultQuizPrompt},
+		ModelID:  "test-model",
+		Prompts:  Prompts{Quiz: DefaultQuizPrompt},
 		OnlyKeys: []string{ComponentQuiz},
 	})
 	if len(pkg.Components) != 1 || pkg.Components[0].Status != StatusCompleted {

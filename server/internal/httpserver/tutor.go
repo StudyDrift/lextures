@@ -15,7 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/userai"
 	"github.com/lextures/lextures/server/internal/service/aitutor"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 const (
@@ -79,12 +79,12 @@ func (d Deps) handleGetTutorConversation() http.HandlerFunc {
 // Streams the tutor response via Server-Sent Events.
 func (d Deps) handlePostTutorMessage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		or := d.openRouterClient()
-		if or == nil || d.effectiveConfig().OpenRouterAPIKey == "" {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI provider not configured.")
+		// AI provider is checked before auth to preserve historical 503 (vs 401)
+		// behavior for misconfigured deployments; org-scoped resolution happens below.
+		if !d.aiConfigured(r.Context(), nil) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
-
 		courseCode := chi.URLParam(r, "course_code")
 		// Accept token in query param so EventSource can connect.
 		userID, ok := d.meUserIDOrQueryToken(w, r)
@@ -126,6 +126,11 @@ func (d Deps) handlePostTutorMessage() http.HandlerFunc {
 		orgID, err := organization.OrgIDForUser(ctx, d.Pool, userID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load user org.")
+			return
+		}
+		orgIDPtr := &orgID
+		if !d.aiConfigured(ctx, orgIDPtr) {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return
 		}
 		budget, err := tutorrepo.GetTokenBudget(ctx, d.Pool, userID, orgID)
@@ -176,7 +181,7 @@ func (d Deps) handlePostTutorMessage() http.HandlerFunc {
 			return
 		}
 
-		fullText, streamErr := or.ChatCompletionStream(model, msgs, func(chunk string) error {
+		fullText, callMeta, streamErr := d.completeStreamOrBuffered(ctx, orgIDPtr, model, msgs, func(chunk string) error {
 			b, _ := json.Marshal(chunk)
 			_, werr := fmt.Fprintf(w, "data: {\"type\":\"content\",\"text\":%s}\n\n", string(b))
 			if canFlush {
@@ -185,10 +190,10 @@ func (d Deps) handlePostTutorMessage() http.HandlerFunc {
 			return werr
 		})
 		if streamErr == nil {
-			d.logAIInferenceAllowed(r, userID, aigateway.FeatureAITutor, model, cleaned, gwDec)
-			d.recordAIUsage(ctx, AIUsageMeta{
+			d.logAIInferenceAllowedWithProvider(r, userID, aigateway.FeatureAITutor, model, string(callMeta.Provider), cleaned, gwDec)
+			d.recordAIProviderResult(ctx, AIUsageMeta{
 				UserID: userID, Feature: aigateway.FeatureAITutor, Model: model,
-			}, fullText.Usage, true)
+			}, callMeta, fullText, true)
 		}
 		if streamErr != nil {
 			tutorSSEError(w, flusher, "The tutor is temporarily unavailable. Your conversation history is saved.")
@@ -312,18 +317,18 @@ func buildConversationResponse(conv tutorrepo.Conversation, budget tutorrepo.Tok
 	}
 }
 
-func buildTutorMessages(courseTitle string, conv tutorrepo.Conversation, userMessage string) []openrouter.Message {
+func buildTutorMessages(courseTitle string, conv tutorrepo.Conversation, userMessage string) []aiprovider.Message {
 	sys := aitutor.BuildSystemPrompt(courseTitle)
-	msgs := []openrouter.Message{{Role: "system", Content: sys}}
+	msgs := []aiprovider.Message{{Role: "system", Content: sys}}
 
 	history := conv.Messages
 	if len(history) > maxHistoryTurns*2 {
 		history = history[len(history)-maxHistoryTurns*2:]
 	}
 	for _, m := range history {
-		msgs = append(msgs, openrouter.Message{Role: m.Role, Content: m.Content})
+		msgs = append(msgs, aiprovider.Message{Role: m.Role, Content: m.Content})
 	}
-	msgs = append(msgs, openrouter.Message{Role: "user", Content: userMessage})
+	msgs = append(msgs, aiprovider.Message{Role: "user", Content: userMessage})
 	return msgs
 }
 

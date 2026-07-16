@@ -64,7 +64,7 @@ const FAQS = [
   },
   {
     q: 'Does AI cost extra?',
-    a: 'AI-assisted question generation, tutoring, and grading require an OpenRouter API key configured in your instance. The LMS works without AI; adaptive IRT and spaced repetition do not require it.',
+    a: 'AI-assisted question generation, tutoring, and grading require a customer-provided AI provider key (bring-your-own-key) configured in your instance — for example OpenRouter, Anthropic, OpenAI, Azure OpenAI, Bedrock, or Vertex. The LMS works without AI; adaptive IRT and spaced repetition do not require it.',
   },
   {
     q: 'Can we use Lextures inside Canvas or Moodle?',

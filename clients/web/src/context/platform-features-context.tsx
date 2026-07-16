@@ -116,7 +116,11 @@ export type PlatformFeatures = {
   aiStudyBuddyEnabled: boolean
   gdprModuleEnabled: boolean
   aiDisclosureEnabled: boolean
+  /** @deprecated AP.9 — use aiConfigured */
   openRouterConfigured: boolean
+  aiConfigured: boolean
+  aiProvidersConfigured: string[]
+  aiProviderAbstractionEnabled: boolean
   ragNotebookEnabled: boolean
   ffFeedback: boolean
   ffEmailSes: boolean
@@ -227,6 +231,9 @@ const defaultFeatures: PlatformFeatures = {
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
+  aiConfigured: false,
+  aiProvidersConfigured: [],
+  aiProviderAbstractionEnabled: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
   ffEmailSes: false,
@@ -336,6 +343,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
+  aiConfigured: false,
+  aiProvidersConfigured: [],
+  aiProviderAbstractionEnabled: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
   ffEmailSes: false,
@@ -452,6 +462,11 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           gdprModuleEnabled: data.gdprModuleEnabled === true,
           aiDisclosureEnabled: data.aiDisclosureEnabled === true,
           openRouterConfigured: data.openRouterConfigured === true,
+          aiConfigured: data.aiConfigured === true,
+          aiProvidersConfigured: Array.isArray(data.aiProvidersConfigured)
+            ? data.aiProvidersConfigured.filter((p) => typeof p === 'string')
+            : [],
+          aiProviderAbstractionEnabled: data.aiProviderAbstractionEnabled === true,
           ragNotebookEnabled: data.ragNotebookEnabled === true,
           ffFeedback: data.ffFeedback !== false,
           ffEmailSes: data.ffEmailSes === true,
@@ -523,6 +538,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           gdprModuleEnabled: next.gdprModuleEnabled === true,
           aiDisclosureEnabled: next.aiDisclosureEnabled === true,
           openRouterConfigured: next.openRouterConfigured === true,
+          aiConfigured: next.aiConfigured === true,
+          aiProvidersConfigured: next.aiProvidersConfigured ?? [],
+          aiProviderAbstractionEnabled: next.aiProviderAbstractionEnabled === true,
           ragNotebookEnabled: next.ragNotebookEnabled === true,
           ffFeedback: next.ffFeedback !== false,
           ffEmailSes: next.ffEmailSes === true,

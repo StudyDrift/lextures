@@ -1,6 +1,6 @@
 # AP.1 — Complete Provider Capability Interface
 
-> Implementation plan. Source: multi-provider BYOK epic ([README](README.md)). Extends [16.7](../../completed/16-integrations-extensibility/16.7-ai-provider-abstraction.md).
+> Implementation plan. Source: multi-provider BYOK epic ([README](../../plan/ai-providers/README.md)). Extends [16.7](../16-integrations-extensibility/16.7-ai-provider-abstraction.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI Providers |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL — `aiprovider.Provider` has `Complete` + stub `Embed`; no stream/vision/image/MaxTokens |
+| **Status (today)** | DONE — `Provider` supports Complete, CompleteStream, CompleteVision, Embed; optional `ImageProvider`; ChatOptions include JSONMode/MaxTokens/Temperature/Timeout |
 | **Estimated effort** | M (2–3w) |
 | **Owner (proposed)** | AI / Platform |
 | **Depends on** | — |
@@ -146,4 +146,4 @@ The abstraction in `server/internal/service/aiprovider/` only models a text chat
 
 - `server/internal/service/aiprovider/provider.go`, `types.go`, `resolver.go`
 - `server/internal/service/openrouter/openrouter.go`, `stream.go`
-- Related: [AP.4](AP.4-migrate-call-sites.md), [16.7](../../completed/16-integrations-extensibility/16.7-ai-provider-abstraction.md)
+- Related: [AP.4](AP.4-migrate-call-sites.md), [16.7](../16-integrations-extensibility/16.7-ai-provider-abstraction.md)

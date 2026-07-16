@@ -6,7 +6,7 @@ Use this as a reference to start a new project with a similar shape to [Lextures
 
 ## 1. What Lextures Is
 
-**Lextures** is an open-source LMS (Learning Management System): courses, modules, grading, enrollments, integrations (LTI, SAML, OIDC, SCIM), optional AI via OpenRouter. License: **AGPL-3.0**.
+**Lextures** is an open-source LMS (Learning Management System): courses, modules, grading, enrollments, integrations (LTI, SAML, OIDC, SCIM), optional AI via customer-chosen providers (BYOK; OpenRouter is one option). License: **AGPL-3.0**.
 
 For a **greenfield** project you typically keep the **platform shape** (repo layout, layers, tooling) and drop domain-specific pieces (quizzes, LTI, 220+ migrations, compliance modules).
 
@@ -269,7 +269,7 @@ Worth knowing before copying — many are **optional** for a smaller greenfield 
 | **SCIM** | User provisioning |
 | **File uploads** | TUS resumable uploads, local or MinIO/S3 |
 | **Real-time** | WebSockets (`coder/websocket`), comm/notification hubs (partial) |
-| **AI** | OpenRouter behind platform settings |
+| **AI** | Multi-provider BYOK behind platform/org settings (`aiprovider` resolver; OpenRouter is one provider) |
 | **Compliance** | FERPA, GDPR, COPPA, CCPA routes and audit logs |
 | **Mobile** | Android/iOS clients + shared API |
 | **Marketing site** | `www/` separate Vite app |

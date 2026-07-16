@@ -12,8 +12,8 @@ const spec = `{
   "openapi": "3.0.3",
   "info": {
     "title": "StudyDrift API",
-    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running).",
-    "version": "0.1.0"
+    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features — use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for ≥1 minor release; see docs/api-changelog-ai-providers.md.",
+    "version": "0.2.0"
   },
   "tags": [
     { "name": "meta", "description": "Health and API metadata" },
@@ -1106,6 +1106,120 @@ const spec = `{
           "401": { "description": "Not signed in" },
           "403": { "description": "Forbidden" },
           "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/public/ai-disclosure": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Public AI usage disclosure document (configured providers + models)",
+        "responses": {
+          "200": {
+            "description": "PublicDisclosure JSON: version, provider, providers[], models[], features[]"
+          }
+        }
+      }
+    },
+    "/api/v1/settings/ai": {
+      "get": {
+        "tags": ["settings"],
+        "summary": "Get Intelligence AI model settings",
+        "description": "Returns feature model ids and activeProvider. Response field openRouterApiKey is deprecated (AP.9); use GET /api/v1/settings/ai/providers.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "AI settings JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imageModelId": { "type": "string" },
+                    "courseSetupModelId": { "type": "string" },
+                    "notebookFlashcardsModelId": { "type": "string" },
+                    "vibeActivityModelId": { "type": "string" },
+                    "graderAgentModelId": { "type": "string" },
+                    "activeProvider": { "type": "string" },
+                    "openRouterApiKey": { "type": "string", "deprecated": true, "description": "Masked legacy OpenRouter key; prefer /settings/ai/providers" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" }
+        }
+      },
+      "put": {
+        "tags": ["settings"],
+        "summary": "Update Intelligence AI model settings",
+        "description": "Request fields openRouterApiKey and clearOpenRouterApiKey are deprecated (AP.9); prefer PUT/DELETE /api/v1/settings/ai/providers/{provider}.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Updated AI settings JSON" },
+          "400": { "description": "Invalid input" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/settings/ai/providers": {
+      "get": {
+        "tags": ["settings"],
+        "summary": "List platform AI provider credentials (masked)",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "credentials[], providers[], tenant BYOK policy" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Abstraction disabled (rollback)" }
+        }
+      }
+    },
+    "/api/v1/platform/features": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Runtime platform feature flags for the signed-in user",
+        "description": "aiConfigured and aiProvidersConfigured[] are authoritative for AI availability. openRouterConfigured is a deprecated alias of aiConfigured (AP.9).",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "Feature flags JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aiConfigured": { "type": "boolean" },
+                    "aiProvidersConfigured": { "type": "array", "items": { "type": "string" } },
+                    "aiProviderAbstractionEnabled": { "type": "boolean" },
+                    "openRouterConfigured": { "type": "boolean", "deprecated": true, "description": "Deprecated alias of aiConfigured" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Not signed in" }
+        }
+      }
+    },
+    "/api/v1/settings/ai/reports": {
+      "get": {
+        "tags": ["settings"],
+        "summary": "Intelligence AI usage and cost reports (multi-provider)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "feature", "in": "query", "schema": { "type": "string" } },
+          { "name": "provider", "in": "query", "schema": { "type": "string" }, "description": "Filter by AI provider (openrouter, anthropic, openai, azure_openai, bedrock, vertex)" },
+          { "name": "userQuery", "in": "query", "schema": { "type": "string" } },
+          { "name": "courseCode", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "ReportsPayload with cost.byProvider and providers[]" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Forbidden" }
         }
       }
     },
