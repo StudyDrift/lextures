@@ -248,9 +248,14 @@ jobs:
       e2e: ${{ steps.filter.outputs.e2e }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # git-based path filter needs enough history to find the merge-base
+          fetch-depth: 0
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          # Avoid GitHub REST listFiles (unicorn/rate-limit failures on large PRs).
+          token: ''
           filters: |
             e2e:
               - 'server/**'
@@ -610,9 +615,13 @@ jobs:
       deploy: ${{ steps.filter.outputs.deploy }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          # Avoid GitHub REST listFiles (unicorn/rate-limit failures on large PRs).
+          token: ''
           filters: |
             iac:
               - 'iac/**'
