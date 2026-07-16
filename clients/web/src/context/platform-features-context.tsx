@@ -464,7 +464,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           openRouterConfigured: data.openRouterConfigured === true,
           aiConfigured: data.aiConfigured === true,
           aiProvidersConfigured: Array.isArray(data.aiProvidersConfigured)
-            ? data.aiProvidersConfigured.filter((p): p is string => typeof p === 'string')
+            ? data.aiProvidersConfigured.filter((p) => typeof p === 'string')
             : [],
           aiProviderAbstractionEnabled: data.aiProviderAbstractionEnabled === true,
           ragNotebookEnabled: data.ragNotebookEnabled === true,

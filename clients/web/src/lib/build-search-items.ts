@@ -286,7 +286,7 @@ export function buildGlobalSearchItems(
         title: 'AI models',
         subtitle: 'System settings',
         path: '/settings/ai/models',
-        hint: 'ai intelligence providers byok',
+        hint: 'ai providers byok',
       },
       {
         title: 'System prompts',
@@ -298,7 +298,7 @@ export function buildGlobalSearchItems(
         title: 'AI reports',
         subtitle: 'System settings',
         path: '/settings/ai/reports',
-        hint: 'ai intelligence usage reports',
+        hint: 'ai usage reports',
       },
     ]
     for (const g of systemPages) {
