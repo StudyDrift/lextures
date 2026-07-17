@@ -163,7 +163,12 @@ func SubmitOrder(ctx context.Context, pool *pgxpool.Pool, cfg *Config, orderID, 
 	if OrderIsSelfDisclosureOnly(o) {
 		_ = LogSelfDisclosureIfNeeded(ctx, pool, o, userID)
 	}
-	return GetOrderForUser(ctx, pool, orderID, userID)
+	out, err := GetOrderForUser(ctx, pool, orderID, userID)
+	if err != nil {
+		return nil, err
+	}
+	NotifyOrderStatusChange(ctx, pool, out)
+	return out, nil
 }
 
 // TransitionOrder applies a registrar action (approve/reject/cancel/complete/hold/release).
@@ -271,7 +276,12 @@ func TransitionOrder(ctx context.Context, pool *pgxpool.Pool, cfg *Config, in Tr
 	}); err != nil {
 		return nil, err
 	}
-	return GetOrderByID(ctx, pool, in.OrderID)
+	out, err := GetOrderByID(ctx, pool, in.OrderID)
+	if err != nil {
+		return nil, err
+	}
+	NotifyOrderStatusChange(ctx, pool, out)
+	return out, nil
 }
 
 type transitionParams struct {
@@ -353,6 +363,9 @@ VALUES ($1, $2, $3, $4, $5)
 
 	if err := tx.Commit(ctx); err != nil {
 		return nil, err
+	}
+	if p.MarkItemsReady {
+		NotifyItemsReady(ctx, pool, p.OrderID)
 	}
 	return GetOrderByID(ctx, pool, p.OrderID)
 }

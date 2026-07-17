@@ -47,7 +47,7 @@ export function AnswerGrid({
                 type="button"
                 disabled={locked && !multi}
                 onClick={() => onSelect(opt.id)}
-                className={`flex min-h-14 w-full items-center gap-3 rounded-xl px-4 py-4 text-start text-lg font-medium text-white shadow-sm transition motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-70 ${colorForIndex(i)} ${
+                className={`flex min-h-14 w-full items-center gap-3 rounded-xl px-4 py-4 text-start text-lg font-medium text-white shadow-sm transition-transform motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-70 ${colorForIndex(i)} ${
                   selected ? 'ring-4 ring-white/80' : ''
                 } ${locked ? 'cursor-default' : 'active:scale-[0.98] motion-reduce:active:scale-100'}`}
                 aria-pressed={selected}

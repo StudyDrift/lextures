@@ -194,9 +194,6 @@ func (d Deps) handleSaveQuizKitAsTemplate() http.HandlerFunc {
 // handleListQuizTemplates is GET /api/v1/live-quizzes/templates.
 func (d Deps) handleListQuizTemplates() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.interactiveQuizzesMasterOff(w) {
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -244,9 +241,6 @@ func (d Deps) handleCreateKitFromTemplate() http.HandlerFunc {
 		TargetCourseCode string `json:"targetCourseCode"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.interactiveQuizzesMasterOff(w) {
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -413,9 +407,6 @@ func (d Deps) handleDeleteQuizKitShare() http.HandlerFunc {
 // handleQuizLibrarySearch is GET /api/v1/live-quizzes/library.
 func (d Deps) handleQuizLibrarySearch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.interactiveQuizzesMasterOff(w) {
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -467,9 +458,6 @@ func firstNonEmpty(vals ...string) string {
 // handleQuizLibraryPreview is GET /api/v1/live-quizzes/library/{kit_id}/preview.
 func (d Deps) handleQuizLibraryPreview() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.interactiveQuizzesMasterOff(w) {
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -506,9 +494,6 @@ func (d Deps) handleQuizLibraryImport() http.HandlerFunc {
 		TargetCourseCode string `json:"targetCourseCode"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.interactiveQuizzesMasterOff(w) {
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return

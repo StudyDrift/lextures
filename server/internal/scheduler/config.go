@@ -2,7 +2,7 @@ package scheduler
 
 // Job type identifiers for the built-in scheduled jobs. The scheduler enqueues a
 // jobs.queue row with one of these as job_type; a handler registered in the
-// background worker performs the actual work (plan 17.4 FR-3, FR-4).
+// background worker performs the actual work.
 const (
 	JobTypeLateSubmissionSweep        = "scheduled.late_submission_sweep"
 	JobTypeExpiredTokenCleanup        = "scheduled.expired_token_cleanup"
@@ -19,11 +19,12 @@ const (
 	JobTypeBoardContentRetention      = "scheduled.board_content_retention"
 	JobTypeQuizgameUsageRollup        = "scheduled.quizgame_usage_rollup"
 	JobTypeQuizgameRetention          = "scheduled.quizgame_retention"
+	JobTypeTranscriptAnalyticsRollup  = "scheduled.transcript_analytics_rollup"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
 // scheduled jobs are added here and given a handler in the worker — no change to
-// the scheduling engine is required (plan 17.4 NFR maintainability, FR-1).
+// the scheduling engine is required.
 type ScheduledJob struct {
 	// Name is the stable identifier used in history, locks, the admin API and
 	// the jobs.queue unique_key. It must be unique.
@@ -35,7 +36,7 @@ type ScheduledJob struct {
 	// Description is a human-readable summary for the admin UI.
 	Description string
 	// DefaultEnabled is the built-in enabled state; an admin override in
-	// jobs.schedule_overrides takes precedence (plan 17.4 FR-6).
+	// jobs.schedule_overrides takes precedence.
 	DefaultEnabled bool
 
 	schedule Schedule
@@ -89,7 +90,7 @@ func BuiltinJobs() []ScheduledJob {
 			Name:           "tutor_session_retention",
 			Spec:           "30 4 * * *", // daily 04:30 UTC
 			JobType:        JobTypeTutorSessionRetention,
-			Description:    "Purge tutor sessions older than each org's retention policy (plan 19.1).",
+			Description:    "Purge tutor sessions older than each org's retention policy.",
 			DefaultEnabled: true,
 		},
 		{
@@ -153,6 +154,13 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "55 3 * * *", // daily 03:55 UTC
 			JobType:        JobTypeQuizgameRetention,
 			Description:    "Anonymise/delete aged Live Quiz responses and purge guest data (IQ.11).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "transcript_analytics_rollup",
+			Spec:           "30 1 * * *", // daily 01:30 UTC
+			JobType:        JobTypeTranscriptAnalyticsRollup,
+			Description:    "Refresh transcript order/delivery/revenue daily analytics rollups (T12).",
 			DefaultEnabled: true,
 		},
 	}

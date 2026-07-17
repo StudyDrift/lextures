@@ -51,7 +51,7 @@ This report covers the degree of conformance for the following accessibility sta
 |---|---|---|---|
 | 1.1.1 | Non-text Content | Supports | All UI images include alt text; the TipTap editor enforces alt text on uploaded images. |
 | 1.2.1 | Audio-only and Video-only (Prerecorded) | Not Applicable | Lextures does not host standalone audio-only or video-only content at this time. |
-| 1.2.2 | Captions (Prerecorded) | Partially Supports | Auto-captions for uploaded videos are in progress (plan 8.4). |
+| 1.2.2 | Captions (Prerecorded) | Partially Supports | Auto-captions for uploaded videos are in progress. |
 | 1.2.3 | Audio Description or Media Alternative (Prerecorded) | Not Applicable | No prerecorded video content delivered by the platform itself. |
 | 1.3.1 | Info and Relationships | Supports | Semantic HTML headings, landmark regions, and table markup used throughout. |
 | 1.3.2 | Meaningful Sequence | Supports | DOM order matches visual reading order. |
@@ -115,7 +115,7 @@ This report covers the degree of conformance for the following accessibility sta
 | 302.1 Without Vision | Supports | All content is accessible via keyboard and compatible with screen readers (NVDA, JAWS, VoiceOver). |
 | 302.2 With Limited Vision | Supports | Browser zoom to 400% does not break layout; high-contrast mode supported; all text meets WCAG 1.4.3. |
 | 302.3 Without Perception of Color | Supports | Color is never the sole indicator of meaning; icons and text labels always accompany color-coded information. |
-| 302.4 Without Hearing | Partially Supports | Uploaded video captions are supported where provided; auto-caption generation is in progress (plan 8.4). |
+| 302.4 Without Hearing | Partially Supports | Uploaded video captions are supported where provided; auto-caption generation is in progress. |
 | 302.5 With Limited Hearing | Not Applicable | The application does not require the ability to hear audio to access any feature. |
 | 302.6 Without Speech | Not Applicable | No features require spoken input; all functionality is available via keyboard and pointer. |
 | 302.7 Without Fine Motor Control | Supports | Full keyboard navigation available for all features. No time-limited interactions. Drag-and-drop reorder has keyboard alternative. |

@@ -22,6 +22,9 @@ struct PlatformFeatures: Decodable {
     var autoCaptioningEnabled: Bool?
     var translationMemoryEnabled: Bool?
     var ffReadingPreferences: Bool?
+    var ffMotionNavigation: Bool?
+    var ffMotionReveal: Bool?
+    var ffMotionLists: Bool?
     var oerLibraryEnabled: Bool?
     var xapiEmissionEnabled: Bool?
     var customFieldsEnabled: Bool?

@@ -24,6 +24,7 @@ func (d Deps) registerTranscriptOrderRoutes(r chi.Router) {
 	r.Post("/api/v1/transcripts/orders/{id}/items", d.handlePostTranscriptOrderItem())
 	r.Delete("/api/v1/transcripts/orders/{id}/items/{itemId}", d.handleDeleteTranscriptOrderItem())
 	r.Post("/api/v1/transcripts/orders/{id}/submit", d.handleSubmitTranscriptOrder())
+	d.registerTranscriptTrackingRoutes(r)
 	d.registerTranscriptConsentRoutes(r)
 
 	r.Get("/api/v1/admin/transcripts/recipients", d.handleAdminListTranscriptRecipients())
@@ -243,7 +244,7 @@ type postOrderBody struct {
 func parseOrderItemBody(body orderItemBody) (transcriptsrepo.CreateOrderItemInput, string) {
 	method, ok := transcriptsrepo.ParseDeliveryMethod(body.DeliveryMethod)
 	if !ok {
-		return transcriptsrepo.CreateOrderItemInput{}, "deliveryMethod must be electronic_pesc, electronic_pdf, secure_link_email, postal_mail, or api_peer."
+		return transcriptsrepo.CreateOrderItemInput{}, "deliveryMethod must be electronic_pesc, edi_speede, electronic_pdf, secure_link_email, postal_mail, or api_peer."
 	}
 	urgency, ok := transcriptsrepo.ParseOrderUrgency(body.Urgency)
 	if !ok {

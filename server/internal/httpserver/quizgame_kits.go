@@ -16,18 +16,9 @@ import (
 	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
-func (d Deps) interactiveQuizzesMasterOff(w http.ResponseWriter) bool {
-	if !d.effectiveConfig().FFInteractiveQuizzes {
-		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Live Quizzes are not enabled.")
-		return true
-	}
-	return false
-}
-
+// interactiveQuizzesFeatureOff returns true when Live Quizzes are disabled for the course.
+// Access is controlled only by the per-course interactiveQuizzesEnabled flag (no platform master switch).
 func (d Deps) interactiveQuizzesFeatureOff(w http.ResponseWriter, r *http.Request, courseCode string) bool {
-	if d.interactiveQuizzesMasterOff(w) {
-		return true
-	}
 	crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
 	if err != nil || crow == nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")

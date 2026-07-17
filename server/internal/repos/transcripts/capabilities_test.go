@@ -10,6 +10,10 @@ func TestParseDeliveryMethod(t *testing.T) {
 	if _, ok := ParseDeliveryMethod("carrier_pigeon"); ok {
 		t.Fatal("expected reject")
 	}
+	edi, ok := ParseDeliveryMethod("edi_speede")
+	if !ok || edi != DeliveryEDISPEEDE {
+		t.Fatalf("edi_speede: got %q ok=%v", edi, ok)
+	}
 }
 
 func TestMethodAllowedByCapabilities(t *testing.T) {
@@ -42,12 +46,17 @@ func TestOrgEnabledDeliveryMethods(t *testing.T) {
 		t.Fatal("expected baseline methods")
 	}
 	if enabled[DeliveryElectronicPESC] {
-		t.Fatal("pesc should require webhook")
+		t.Fatal("pesc should require webhook or delivery_v2")
 	}
 	url := "https://example.com/hook"
 	cfg.WebhookURL = &url
 	enabled = OrgEnabledDeliveryMethods(cfg)
-	if !enabled[DeliveryElectronicPESC] {
-		t.Fatal("expected pesc with webhook")
+	if !enabled[DeliveryElectronicPESC] || !enabled[DeliveryAPIPeer] {
+		t.Fatal("expected pesc + api_peer with webhook")
+	}
+	cfg2 := &Config{DeliveryV2: true}
+	enabled = OrgEnabledDeliveryMethods(cfg2)
+	if !enabled[DeliveryElectronicPESC] || !enabled[DeliveryEDISPEEDE] || !enabled[DeliveryAPIPeer] {
+		t.Fatal("expected v2 adapters without webhook")
 	}
 }

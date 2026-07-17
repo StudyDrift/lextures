@@ -237,7 +237,9 @@ fun LexturesTheme(content: @Composable () -> Unit) {
                 LocalLocalePreferences provides localePreferences,
                 LocalLayoutDirection provides layoutDirection,
             ) {
-                content()
+                ProvideReduceMotion {
+                    content()
+                }
             }
         },
     )

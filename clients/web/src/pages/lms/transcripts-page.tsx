@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TranscriptConsentForm } from '../../components/lms/transcript-consent-form'
+import { TranscriptOrderTimeline } from '../../components/lms/transcript-order-timeline'
 import { TranscriptOrderBuilder } from '../../components/lms/transcript-order-builder'
 import { deliveryTypeLabel, TranscriptRequestModal, urgencyLabel } from '../../components/lms/transcript-request-modal'
 import { useConfirm } from '../../components/use-confirm'
@@ -9,6 +10,7 @@ import { authorizedFetch } from '../../lib/api'
 import { formatDate } from '../../lib/format'
 import {
   exportTranscriptConsent,
+  fetchMyTranscriptInbound,
   fetchTranscriptDocuments,
   fetchTranscriptOrders,
   fetchTranscriptPreview,
@@ -22,6 +24,7 @@ import {
   type AcademicRecord,
   type SubmitTranscriptRequestPayload,
   type TranscriptDocument,
+  type TranscriptInboundDocument,
   type TranscriptOrder,
   type TranscriptRequest,
   type TranscriptsStudentConfig,
@@ -78,9 +81,10 @@ function variantLabel(variant: TranscriptDocument['variant']): string {
 export default function TranscriptsPage() {
   const { t } = useTranslation('common')
   const { confirm, ConfirmDialogHost } = useConfirm()
-  const { ffTranscripts, loading: featuresLoading } = usePlatformFeatures()
+  const { ffTranscripts, ffTranscriptInbound, loading: featuresLoading } = usePlatformFeatures()
   const [requests, setRequests] = useState<TranscriptRequest[]>([])
   const [orders, setOrders] = useState<TranscriptOrder[]>([])
+  const [inboundDocs, setInboundDocs] = useState<TranscriptInboundDocument[]>([])
   const [documents, setDocuments] = useState<TranscriptDocument[]>([])
   const [preview, setPreview] = useState<AcademicRecord | null>(null)
   const [transcriptConfig, setTranscriptConfig] = useState<TranscriptsStudentConfig | null>(null)
@@ -99,17 +103,19 @@ export default function TranscriptsPage() {
     setLoading(true)
     setError(null)
     try {
-      const [list, docs, cfg, meRes, orderList] = await Promise.all([
+      const [list, docs, cfg, meRes, orderList, inboundList] = await Promise.all([
         fetchTranscriptRequests(),
         fetchTranscriptDocuments(),
         fetchTranscriptsConfig(),
         authorizedFetch('/api/v1/me'),
         fetchTranscriptOrders().catch(() => [] as TranscriptOrder[]),
+        fetchMyTranscriptInbound().catch(() => [] as TranscriptInboundDocument[]),
       ])
       setRequests(list)
       setDocuments(docs)
       setTranscriptConfig(cfg)
       setOrders(orderList)
+      setInboundDocs(inboundList)
       if (meRes.ok) {
         const me = (await meRes.json()) as { email?: string }
         if (me.email) setDefaultEmail(me.email)
@@ -202,6 +208,32 @@ export default function TranscriptsPage() {
             {message}
           </div>
         )}
+
+        {ffTranscriptInbound ? (
+          <section aria-labelledby="inbound-heading">
+            <h2 id="inbound-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100">
+              {t('transcripts.inbound.studentSection')}
+            </h2>
+            {inboundDocs.length === 0 ? (
+              <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.inbound.studentEmpty')}</p>
+            ) : (
+              <ul className="mt-3 divide-y divide-slate-200 rounded-md border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+                {inboundDocs.map((doc) => (
+                  <li key={doc.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                    <span>
+                      {t('transcripts.inbound.studentFrom', {
+                        school: doc.sourceName || t('transcripts.inbound.unknownSource'),
+                      })}
+                    </span>
+                    <span className="rounded px-1.5 py-0.5 text-xs bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200">
+                      {t(`transcripts.inbound.status.${doc.status}`, { defaultValue: doc.status })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ) : null}
 
         <section aria-labelledby="preview-heading">
           <h2 id="preview-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100">
@@ -322,6 +354,16 @@ export default function TranscriptsPage() {
                     </p>
                   </div>
                   <div className="flex gap-2">
+                    {doc.verificationUrl || doc.verifyToken ? (
+                      <a
+                        href={doc.verificationUrl ?? `/verify/${encodeURIComponent(doc.verifyToken!)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                      >
+                        Verify
+                      </a>
+                    ) : null}
                     {doc.hasPdf ? (
                       <button
                         type="button"
@@ -409,10 +451,20 @@ export default function TranscriptsPage() {
                           <ul className="mt-2 space-y-1">
                             {o.items.map((it) => (
                               <li key={it.id} className="text-xs text-slate-600 dark:text-neutral-400">
-                                {it.recipient?.name ?? t('transcripts.order.unnamed')} · {it.deliveryMethod} · {it.urgency}
+                                {it.recipient?.name ?? t('transcripts.order.unnamed')} · {it.deliveryMethod} ·{' '}
+                                {it.urgency} · {it.status}
                               </li>
                             ))}
                           </ul>
+                          {o.status !== 'draft' ? (
+                            <TranscriptOrderTimeline
+                              order={o}
+                              onChanged={() => {
+                                setMessage(t('transcripts.tracking.updated'))
+                                void load()
+                              }}
+                            />
+                          ) : null}
                           {onHold && o.studentMessage && (
                             <div
                               className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100"

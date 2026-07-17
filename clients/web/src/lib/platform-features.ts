@@ -42,6 +42,9 @@ export type PlatformFeaturesSnapshot = {
   autoCaptioningEnabled?: boolean
   ffReadingPreferences?: boolean
   ffHighContrastReducedMotion?: boolean
+  ffMotionNavigation?: boolean
+  ffMotionReveal?: boolean
+  ffMotionLists?: boolean
   ffLibrary?: boolean
   ffBroadcasts?: boolean
   ffClassroomSignals?: boolean
@@ -77,6 +80,8 @@ export type PlatformFeaturesSnapshot = {
   ffEportfolio?: boolean
   ffBookstoreIntegration?: boolean
   ffTranscripts?: boolean
+  ffTranscriptInbound?: boolean
+  ffDiplomas?: boolean
   ffAdvisingIntegration?: boolean
   ffResearchConsent?: boolean
   ffAccessibilityIntake?: boolean
@@ -160,6 +165,9 @@ const defaults: PlatformFeaturesSnapshot = {
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
   ffHighContrastReducedMotion: false,
+  ffMotionNavigation: true,
+  ffMotionReveal: true,
+  ffMotionLists: true,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
@@ -195,6 +203,8 @@ const defaults: PlatformFeaturesSnapshot = {
   ffEportfolio: false,
   ffBookstoreIntegration: false,
   ffTranscripts: false,
+  ffTranscriptInbound: false,
+  ffDiplomas: false,
   ffAdvisingIntegration: false,
   ffResearchConsent: false,
   ffAccessibilityIntake: false,
@@ -228,8 +238,8 @@ const defaults: PlatformFeaturesSnapshot = {
   ragNotebookEnabled: false,
   ffFeedback: true,
   ffVisualBoards: true,
-  ffInteractiveQuizzes: false,
-  ffIqLiveHosting: false,
+  ffInteractiveQuizzes: true,
+  ffIqLiveHosting: true,
   ffIqTeamMode: false,
   ffIqStudentPaced: false,
   ffIqHomework: false,
@@ -351,6 +361,27 @@ export function transcriptsFeatureEnabled(): boolean {
   return loaded && snapshot.ffTranscripts === true
 }
 
+export function transcriptInboundFeatureEnabled(): boolean {
+  return loaded && snapshot.ffTranscripts === true && snapshot.ffTranscriptInbound === true
+}
+
+/** T09 wallet is available when any credential source flag is on. */
+export function credentialWalletFeatureEnabled(): boolean {
+  return (
+    loaded &&
+    (snapshot.ffTranscripts === true ||
+      snapshot.ffCoCurricularTranscript === true ||
+      snapshot.ffCompetencyBadges === true ||
+      snapshot.ffCompletionCredentials === true ||
+      snapshot.ffCeuTracking === true ||
+      snapshot.ffDiplomas === true)
+  )
+}
+
+export function diplomasFeatureEnabled(): boolean {
+  return loaded && snapshot.ffDiplomas === true
+}
+
 export function eportfolioFeatureEnabled(): boolean {
   return loaded && snapshot.ffEportfolio === true
 }
@@ -376,4 +407,31 @@ export function readingPreferencesApiEnabled(s?: PlatformFeaturesSnapshot): bool
     snap.ffReadingPreferences === true ||
     snap.ffHighContrastReducedMotion === true
   )
+}
+
+/** AN.2: splash/route/section transitions (default on; kill-switch via Settings). */
+export function motionNavigationEnabled(s?: PlatformFeaturesSnapshot): boolean {
+  const snap = s ?? snapshot
+  if (!s && !loaded) {
+    return true
+  }
+  return snap.ffMotionNavigation !== false
+}
+
+/** AN.3: skeleton→content load choreography (default on; kill-switch via Settings). */
+export function motionRevealEnabled(s?: PlatformFeaturesSnapshot): boolean {
+  const snap = s ?? snapshot
+  if (!s && !loaded) {
+    return true
+  }
+  return snap.ffMotionReveal !== false
+}
+
+/** AN.4: list insert/remove/reorder motion (default on; kill-switch via Settings). */
+export function motionListsEnabled(s?: PlatformFeaturesSnapshot): boolean {
+  const snap = s ?? snapshot
+  if (!s && !loaded) {
+    return true
+  }
+  return snap.ffMotionLists !== false
 }

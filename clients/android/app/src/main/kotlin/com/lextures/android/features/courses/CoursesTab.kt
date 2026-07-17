@@ -1,5 +1,12 @@
 package com.lextures.android.features.courses
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +49,9 @@ import androidx.compose.ui.unit.sp
 import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.realtime.RealtimeManager
+import com.lextures.android.core.design.LocalReduceMotion
 import com.lextures.android.core.design.LexturesColors
+import com.lextures.android.core.design.LexturesMotion
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.OfflineBanner
 import com.lextures.android.core.design.StalenessChip
@@ -143,19 +152,6 @@ fun CoursesTab(
         return
     }
 
-    openCourse?.let { course ->
-        CourseDetailScreen(
-            session = session,
-            course = course,
-            onBack = { openCourse = null; deepLinkSection = null; deepLinkThreadId = null; shell?.activeCourse = null },
-            shell = shell,
-            initialSection = deepLinkSection,
-            initialThreadId = deepLinkThreadId,
-            modifier = modifier,
-        )
-        return
-    }
-
     val filtered = remember(courses, searchText) {
         val q = searchText.trim().lowercase()
         if (q.isEmpty()) {
@@ -169,7 +165,45 @@ fun CoursesTab(
         }
     }
 
-    Column(modifier = modifier) {
+    val reduceMotion = LocalReduceMotion.current
+    val motionNavEnabled = shell?.platformFeatures?.ffMotionNavigation != false
+    val navMs = LexturesMotion.navigationDurationMs(reduceMotion, motionNavEnabled)
+
+    AnimatedContent(
+        targetState = openCourse,
+        modifier = modifier,
+        transitionSpec = {
+            val forward = targetState != null && initialState == null
+            if (!motionNavEnabled || reduceMotion || navMs == 0) {
+                fadeIn(tween(navMs.coerceAtLeast(LexturesMotion.InstantMs))) togetherWith
+                    fadeOut(tween(navMs.coerceAtLeast(LexturesMotion.InstantMs)))
+            } else if (forward) {
+                (slideInHorizontally(tween(navMs)) { it / 3 } + fadeIn(tween(navMs))) togetherWith
+                    (slideOutHorizontally(tween(navMs)) { -it / 5 } + fadeOut(tween(navMs)))
+            } else {
+                (slideInHorizontally(tween(navMs)) { -it / 5 } + fadeIn(tween(navMs))) togetherWith
+                    (slideOutHorizontally(tween(navMs)) { it / 3 } + fadeOut(tween(navMs)))
+            }
+        },
+        label = "courseDrillIn",
+    ) { course ->
+        if (course != null) {
+            CourseDetailScreen(
+                session = session,
+                course = course,
+                onBack = {
+                    openCourse = null
+                    deepLinkSection = null
+                    deepLinkThreadId = null
+                    shell?.activeCourse = null
+                },
+                shell = shell,
+                initialSection = deepLinkSection,
+                initialThreadId = deepLinkThreadId,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+    Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -266,6 +300,8 @@ fun CoursesTab(
                     )
                 }
             }
+        }
+    }
         }
     }
 }

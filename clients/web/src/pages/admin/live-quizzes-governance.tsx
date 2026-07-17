@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   fetchAdminIQAnalytics,
   fetchAdminIQLiveGames,
@@ -27,8 +26,6 @@ export default function LiveQuizzesGovernancePage() {
   const titleId = useId()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId') ?? undefined
-  const { ffInteractiveQuizzes, loading: featuresLoading } = usePlatformFeatures()
-
   const [settings, setSettings] = useState<InteractiveQuizPlatformSettings | null>(null)
   const [analytics, setAnalytics] = useState<InteractiveQuizAnalytics | null>(null)
   const [queue, setQueue] = useState<InteractiveQuizReviewItem[]>([])
@@ -67,9 +64,8 @@ export default function LiveQuizzesGovernancePage() {
   }, [orgId, t])
 
   useEffect(() => {
-    if (featuresLoading || !ffInteractiveQuizzes) return
     void load()
-  }, [featuresLoading, ffInteractiveQuizzes, load])
+  }, [load])
 
   async function persist(patch: Parameters<typeof patchAdminIQSettings>[0]) {
     setSaving(true)
@@ -113,20 +109,12 @@ export default function LiveQuizzesGovernancePage() {
     await persist(patch)
   }
 
-  if (featuresLoading) {
+  if (loading && !settings) {
     return (
       <main className="mx-auto max-w-4xl p-6">
         <p className="text-sm" role="status">
           {t('common.loading')}
         </p>
-      </main>
-    )
-  }
-
-  if (!ffInteractiveQuizzes) {
-    return (
-      <main className="mx-auto max-w-4xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">{t('admin.liveQuiz.flagOff')}</p>
       </main>
     )
   }

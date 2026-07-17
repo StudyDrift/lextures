@@ -1,8 +1,8 @@
 package com.lextures.android.features.home
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import com.lextures.android.core.design.LocalReduceMotion
+import com.lextures.android.core.design.LexturesMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
@@ -565,10 +566,15 @@ private fun RootContent(
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
     val transition = shell.rootNavigationTransition
+    val reduceMotion = LocalReduceMotion.current
+    val motionNavEnabled = shell.platformFeatures.ffMotionNavigation
     val paneTransitionTarget = if (transition != null && !transition.drivenByDrawer) 1f else 0f
     val paneTransitionProgress by animateFloatAsState(
         targetValue = paneTransitionTarget,
-        animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+        animationSpec = LexturesMotion.navigationSpec(
+            reduceMotion = reduceMotion,
+            enabled = motionNavEnabled,
+        ),
         label = "paneTransition",
     )
     val navigationCompletion = when {
@@ -591,12 +597,17 @@ private fun RootContent(
     if (transition != null) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val widthPx = constraints.maxWidth.toFloat()
-            val incomingOffset = (widthPx * (1f - navigationCompletion)).roundToInt()
-            val outgoingOffset = (-widthPx * navigationCompletion).roundToInt()
+            // Reduced motion / kill-switch: crossfade via opacity only (no slide).
+            val slide = motionNavEnabled && !reduceMotion
+            val incomingOffset = if (slide) (widthPx * (1f - navigationCompletion)).roundToInt() else 0
+            val outgoingOffset = if (slide) (-widthPx * navigationCompletion).roundToInt() else 0
+            val outgoingAlpha = if (slide) 1f else (1f - navigationCompletion)
+            val incomingAlpha = if (slide) 1f else navigationCompletion
             Box(
                 Modifier
                     .fillMaxSize()
-                    .offset { IntOffset(outgoingOffset, 0) },
+                    .offset { IntOffset(outgoingOffset, 0) }
+                    .graphicsLayer { alpha = outgoingAlpha },
             ) {
                 RootPane(
                     destination = transition.outgoing,
@@ -610,7 +621,8 @@ private fun RootContent(
             Box(
                 Modifier
                     .fillMaxSize()
-                    .offset { IntOffset(incomingOffset, 0) },
+                    .offset { IntOffset(incomingOffset, 0) }
+                    .graphicsLayer { alpha = incomingAlpha },
             ) {
                 RootPane(
                     destination = destination,

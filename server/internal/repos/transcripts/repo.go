@@ -78,6 +78,7 @@ type Config struct {
 	RegistrarConsoleEnabled bool
 	ConsentRequired         bool
 	FeesEnabled             bool
+	DeliveryV2              bool
 	UpdatedAt               time.Time
 }
 
@@ -90,11 +91,13 @@ SELECT webhook_url, webhook_secret, pickup_instructions,
        COALESCE(official_enabled, FALSE), COALESCE(orders_ui_enabled, FALSE),
        COALESCE(auto_approval_enabled, FALSE), COALESCE(registrar_console_enabled, FALSE),
        COALESCE(consent_required, TRUE), COALESCE(fees_enabled, FALSE),
+       COALESCE(delivery_v2, FALSE),
        updated_at
 FROM settings.transcripts_config
 WHERE id = 1
 `).Scan(&url, &secret, &pickup, &c.OfficialEnabled, &c.OrdersUIEnabled,
-		&c.AutoApprovalEnabled, &c.RegistrarConsoleEnabled, &c.ConsentRequired, &c.FeesEnabled, &c.UpdatedAt)
+		&c.AutoApprovalEnabled, &c.RegistrarConsoleEnabled, &c.ConsentRequired, &c.FeesEnabled,
+		&c.DeliveryV2, &c.UpdatedAt)
 	if err == pgx.ErrNoRows {
 		return &Config{ConsentRequired: true}, nil
 	}
@@ -118,6 +121,7 @@ type UpsertConfigInput struct {
 	RegistrarConsoleEnabled *bool
 	ConsentRequired         *bool
 	FeesEnabled             *bool
+	DeliveryV2              *bool
 }
 
 // UpsertConfig saves webhook URL, optional secret (empty secret leaves unchanged), pickup instructions,
@@ -161,17 +165,23 @@ SET
         WHEN $9::boolean IS NOT NULL THEN $9
         ELSE fees_enabled
     END,
+    delivery_v2 = CASE
+        WHEN $10::boolean IS NOT NULL THEN $10
+        ELSE delivery_v2
+    END,
     updated_at = NOW()
 WHERE id = 1
 RETURNING webhook_url, webhook_secret, pickup_instructions,
           COALESCE(official_enabled, FALSE), COALESCE(orders_ui_enabled, FALSE),
           COALESCE(auto_approval_enabled, FALSE), COALESCE(registrar_console_enabled, FALSE),
           COALESCE(consent_required, TRUE), COALESCE(fees_enabled, FALSE),
+          COALESCE(delivery_v2, FALSE),
           updated_at
 `, in.WebhookURL, in.WebhookSecret, in.PickupInstructions, in.OfficialEnabled, in.OrdersUIEnabled,
-		in.AutoApprovalEnabled, in.RegistrarConsoleEnabled, in.ConsentRequired, in.FeesEnabled).Scan(
+		in.AutoApprovalEnabled, in.RegistrarConsoleEnabled, in.ConsentRequired, in.FeesEnabled, in.DeliveryV2).Scan(
 		&url, &secret, &pickup, &c.OfficialEnabled, &c.OrdersUIEnabled,
-		&c.AutoApprovalEnabled, &c.RegistrarConsoleEnabled, &c.ConsentRequired, &c.FeesEnabled, &c.UpdatedAt)
+		&c.AutoApprovalEnabled, &c.RegistrarConsoleEnabled, &c.ConsentRequired, &c.FeesEnabled,
+		&c.DeliveryV2, &c.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}

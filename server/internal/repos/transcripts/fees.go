@@ -850,5 +850,10 @@ func AdvanceAfterPayment(
 		}
 		return nil, err
 	}
-	return GetOrderByID(ctx, pool, orderID)
+	out, err := GetOrderByID(ctx, pool, orderID)
+	if err != nil {
+		return nil, err
+	}
+	NotifyOrderStatusChange(ctx, pool, out)
+	return out, nil
 }

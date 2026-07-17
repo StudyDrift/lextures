@@ -312,7 +312,7 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                               setSelectedTemplateId(tmpl.id)
                               if (!title.trim()) setTitle(tmpl.title)
                             }}
-                            className={`w-full rounded-md border p-3 text-start transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                            className={`w-full rounded-md border p-3 text-start transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                               selected
                                 ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40'
                                 : 'border-slate-200 hover:border-indigo-300 dark:border-neutral-700'

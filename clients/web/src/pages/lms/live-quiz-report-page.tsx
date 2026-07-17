@@ -19,7 +19,7 @@ import {
 export default function LiveQuizReportPage() {
   const { t } = useTranslation()
   const { courseCode = '', gameId = '' } = useParams()
-  const { ffInteractiveQuizzes, ffIqGradebookPush } = usePlatformFeatures()
+  const { ffIqGradebookPush } = usePlatformFeatures()
   const [data, setData] = useState<GameReportResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [q, setQ] = useState('')
@@ -32,10 +32,6 @@ export default function LiveQuizReportPage() {
 
   const load = useCallback(async () => {
     if (!courseCode || !gameId) return
-    if (!ffInteractiveQuizzes) {
-      setError(t('liveQuiz.error.disabled'))
-      return
-    }
     setError(null)
     try {
       setData(await fetchGameReport(courseCode, gameId))
@@ -48,7 +44,7 @@ export default function LiveQuizReportPage() {
     } catch (e) {
       setError(e instanceof Error ? e.message : t('liveQuiz.report.errorLoad'))
     }
-  }, [courseCode, gameId, ffInteractiveQuizzes, t])
+  }, [courseCode, gameId, t])
 
   useEffect(() => {
     void load()

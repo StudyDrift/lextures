@@ -7,6 +7,10 @@ import {
 
 export type { ScoringStartOptions }
 
+const fieldClass =
+  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100'
+const labelMuted = 'mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400'
+
 export function ScoringProfilePicker({
   value,
   onChange,
@@ -18,8 +22,10 @@ export function ScoringProfilePicker({
   const profile = value.scoringProfile
 
   return (
-    <fieldset className="space-y-4 rounded-lg border p-4">
-      <legend className="px-1 text-sm font-semibold">{t('liveQuiz.score.profileHeading')}</legend>
+    <fieldset className="space-y-4">
+      <legend className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        {t('liveQuiz.score.profileHeading')}
+      </legend>
       <div className="grid gap-2 sm:grid-cols-3">
         {(
           [
@@ -27,46 +33,51 @@ export function ScoringProfilePicker({
             ['formative', 'liveQuiz.score.profile.formative'],
             ['custom', 'liveQuiz.score.profile.custom'],
           ] as const
-        ).map(([id, labelKey]) => (
-          <label
-            key={id}
-            className={
-              profile === id
-                ? 'cursor-pointer rounded-md border border-primary bg-primary/5 p-3 text-sm'
-                : 'cursor-pointer rounded-md border p-3 text-sm'
-            }
-          >
-            <input
-              type="radio"
-              className="sr-only"
-              name="scoringProfile"
-              checked={profile === id}
-              onChange={() =>
-                onChange({
-                  ...value,
-                  scoringProfile: id,
-                  scoringConfig:
-                    id === 'custom'
-                      ? { ...defaultCustomScoringConfig, ...value.scoringConfig }
-                      : value.scoringConfig,
-                })
+        ).map(([id, labelKey]) => {
+          const selected = profile === id
+          return (
+            <label
+              key={id}
+              className={
+                selected
+                  ? 'cursor-pointer rounded-xl border border-indigo-400 bg-indigo-50/60 p-3 text-sm dark:border-indigo-500 dark:bg-indigo-950/40'
+                  : 'cursor-pointer rounded-xl border border-slate-200 bg-white p-3 text-sm hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600'
               }
-            />
-            <span className="font-medium">{t(labelKey)}</span>
-            <p className="mt-1 text-xs text-muted-foreground">{t(`${labelKey}Hint`)}</p>
-          </label>
-        ))}
+            >
+              <input
+                type="radio"
+                className="sr-only"
+                name="scoringProfile"
+                checked={selected}
+                onChange={() =>
+                  onChange({
+                    ...value,
+                    scoringProfile: id,
+                    scoringConfig:
+                      id === 'custom'
+                        ? { ...defaultCustomScoringConfig, ...value.scoringConfig }
+                        : value.scoringConfig,
+                  })
+                }
+              />
+              <span className="font-medium text-slate-900 dark:text-neutral-100">{t(labelKey)}</span>
+              <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                {t(`${labelKey}Hint`)}
+              </p>
+            </label>
+          )
+        })}
       </div>
 
       {profile === 'custom' ? (
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-sm">
-            <span className="mb-1 block">{t('liveQuiz.score.base')}</span>
+            <span className={labelMuted}>{t('liveQuiz.score.base')}</span>
             <input
               type="number"
               min={100}
               step={100}
-              className="w-full rounded-md border px-2 py-1.5"
+              className={fieldClass}
               value={value.scoringConfig.base ?? 1000}
               onChange={(e) =>
                 onChange({
@@ -77,50 +88,59 @@ export function ScoringProfilePicker({
             />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block">{t('liveQuiz.score.speedWeight')}</span>
+            <span className={labelMuted}>{t('liveQuiz.score.speedWeight')}</span>
             <input
               type="number"
               min={0}
               max={2}
               step={0.1}
-              className="w-full rounded-md border px-2 py-1.5"
+              className={fieldClass}
               value={value.scoringConfig.speedWeight ?? 1}
               onChange={(e) =>
                 onChange({
                   ...value,
-                  scoringConfig: { ...value.scoringConfig, speedWeight: Number(e.target.value) || 0 },
+                  scoringConfig: {
+                    ...value.scoringConfig,
+                    speedWeight: Number(e.target.value) || 0,
+                  },
                 })
               }
             />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block">{t('liveQuiz.score.streakStep')}</span>
+            <span className={labelMuted}>{t('liveQuiz.score.streakStep')}</span>
             <input
               type="number"
               min={0}
               step={50}
-              className="w-full rounded-md border px-2 py-1.5"
+              className={fieldClass}
               value={value.scoringConfig.streakStep ?? 100}
               onChange={(e) =>
                 onChange({
                   ...value,
-                  scoringConfig: { ...value.scoringConfig, streakStep: Number(e.target.value) || 0 },
+                  scoringConfig: {
+                    ...value.scoringConfig,
+                    streakStep: Number(e.target.value) || 0,
+                  },
                 })
               }
             />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block">{t('liveQuiz.score.streakCap')}</span>
+            <span className={labelMuted}>{t('liveQuiz.score.streakCap')}</span>
             <input
               type="number"
               min={0}
               max={20}
-              className="w-full rounded-md border px-2 py-1.5"
+              className={fieldClass}
               value={value.scoringConfig.streakCap ?? 5}
               onChange={(e) =>
                 onChange({
                   ...value,
-                  scoringConfig: { ...value.scoringConfig, streakCap: Number(e.target.value) || 0 },
+                  scoringConfig: {
+                    ...value.scoringConfig,
+                    streakCap: Number(e.target.value) || 0,
+                  },
                 })
               }
             />
@@ -128,19 +148,20 @@ export function ScoringProfilePicker({
         </div>
       ) : null}
 
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
         <input
           type="checkbox"
           checked={value.powerUpsEnabled}
           onChange={(e) => onChange({ ...value, powerUpsEnabled: e.target.checked })}
+          className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
         />
         {t('liveQuiz.powerup.enable')}
       </label>
 
       <label className="block text-sm">
-        <span className="mb-1 block">{t('liveQuiz.leaderboard.privacyLabel')}</span>
+        <span className={labelMuted}>{t('liveQuiz.leaderboard.privacyLabel')}</span>
         <select
-          className="w-full rounded-md border px-2 py-1.5"
+          className={fieldClass}
           value={value.leaderboardPrivacy}
           onChange={(e) =>
             onChange({ ...value, leaderboardPrivacy: e.target.value as LeaderboardPrivacy })

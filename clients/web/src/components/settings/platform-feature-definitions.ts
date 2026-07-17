@@ -81,7 +81,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'bulkCsvImportEnabled',
     label: 'Bulk user CSV import',
     description:
-      'Enables org admins to upload CSV files to create, update, or deactivate users in bulk (plan 18.2).',
+      'Enables org admins to upload CSV files to create, update, or deactivate users in bulk.',
   },
   {
     key: 'adminSearchEnabled',
@@ -103,13 +103,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'emailTemplateEditorEnabled',
     label: 'Email template editor',
     description:
-      'Enables org admins to customize transactional email templates with merge fields, preview, and version history (plan 18.5).',
+      'Enables org admins to customize transactional email templates with merge fields, preview, and version history.',
   },
   {
     key: 'maintenanceBannerEnabled',
     label: 'Maintenance banners',
     description:
-      'Enables site-wide and org-scoped maintenance/outage banners with admin publishing and Statuspage webhook integration (plan 18.6).',
+      'Enables site-wide and org-scoped maintenance/outage banners with admin publishing and Statuspage webhook integration.',
   },
   {
     key: 'ffZapierConnector',
@@ -121,6 +121,18 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     label: 'Transcripts',
     description:
       'Academic transcript preview and issuance (PDF + PESC XML), plus optional institution webhook delivery requests.',
+  },
+  {
+    key: 'ffTranscriptInbound',
+    label: 'Transcript inbound intake',
+    description:
+      'Receive transcripts from other institutions (PESC/PDF), parse and match to applicants, and review them in the registrar intake queue.',
+  },
+  {
+    key: 'ffDiplomas',
+    label: 'Diplomas & certificates',
+    description:
+      'Diploma and certificate templates, issuance, learner wallet display, and public credential verification (T11).',
   },
   {
     key: 'ffAdvisingIntegration',
@@ -192,13 +204,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffPaymentsEnabled',
     label: 'Payment provider abstraction',
     description:
-      'Multi-provider checkout (Stripe + PayPal), transaction history, async webhooks, and admin refunds (plan 16.8).',
+      'Multi-provider checkout (Stripe + PayPal), transaction history, async webhooks, and admin refunds.',
   },
   {
     key: 'ffRedisCache',
     label: 'Redis object cache',
     description:
-      'Cache hot read paths (course structure, enrollments, public catalog, calendar feeds) in shared Redis (plan 17.5).',
+      'Cache hot read paths (course structure, enrollments, public catalog, calendar feeds) in shared Redis.',
   },
   {
     key: 'ffRevenueShare',
@@ -435,70 +447,70 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffWhatifGrades',
     label: 'What-if grades',
     description:
-      'Let students model hypothetical scores and projected course grades on My Grades (plan 3.16).',
+      'Let students model hypothetical scores and projected course grades on My Grades.',
   },
   {
     key: 'ffGradeCurving',
     label: 'Grade curving',
     description:
-      'Let instructors curve or scale assignment grades with preview, undo, and audit trail (plan 3.17).',
+      'Let instructors curve or scale assignment grades with preview, undo, and audit trail.',
   },
   {
     key: 'ffOnboardingFlow',
     label: 'Self-learner onboarding',
     description:
-      'Multi-step onboarding wizard with goal capture, optional diagnostic placement, and Start Here recommendations (plan 15.11).',
+      'Multi-step onboarding wizard with goal capture, optional diagnostic placement, and Start Here recommendations.',
   },
   {
     key: 'ffAiStudyBuddy',
     label: 'AI study buddy',
     description:
-      'Persistent self-learner AI companion with course-grounded answers, memory, and proactive study prompts (plan 15.12).',
+      'Persistent self-learner AI companion with course-grounded answers, memory, and proactive study prompts.',
   },
   {
     key: 'ffLessonGenerator',
     label: 'AI lesson generator',
     description:
-      'Instructor wizard to generate lesson plans, differentiated activities, formative quizzes, and rubrics from learning objectives (plan 19.2).',
+      'Instructor wizard to generate lesson plans, differentiated activities, formative quizzes, and rubrics from learning objectives.',
   },
   {
     key: 'ffPersistentTutor',
     label: 'Persistent AI tutor',
     description:
-      'Named tutor sessions with conversation history, RAG citations, and instructor concept-confusion digests (plan 19.1).',
+      'Named tutor sessions with conversation history, RAG citations, and instructor concept-confusion digests.',
   },
   {
     key: 'ffAcademicCalendar',
     label: 'Academic calendar',
     description:
-      'Institution academic calendar with terms, holidays, and iCal feeds on the dashboard and admin tools (plan 14.6).',
+      'Institution academic calendar with terms, holidays, and iCal feeds on the dashboard and admin tools.',
   },
   {
     key: 'ffAltTextEnforcement',
     label: 'Alt-text hard block',
     description:
-      'Block publishing course images that lack alt text when alt-text enforcement is enabled (accessibility plan 12.5).',
+      'Block publishing course images that lack alt text when alt-text enforcement is enabled.',
   },
   {
     key: 'ffApiTokens',
     label: 'API access keys',
     description:
-      'Personal and institutional API tokens with scoped access for integrations, automation, and MCP agents (plan 16.2).',
+      'Personal and institutional API tokens with scoped access for integrations, automation, and MCP agents.',
   },
   {
     key: 'ffBotDiscord',
     label: 'Discord classroom bot',
-    description: 'Connect Discord servers for assignment reminders and classroom announcements (plan 16.6).',
+    description: 'Connect Discord servers for assignment reminders and classroom announcements.',
   },
   {
     key: 'ffBotSlack',
     label: 'Slack classroom bot',
-    description: 'Connect Slack workspaces for assignment reminders and classroom announcements (plan 16.6).',
+    description: 'Connect Slack workspaces for assignment reminders and classroom announcements.',
   },
   {
     key: 'ffBotTeams',
     label: 'Microsoft Teams classroom bot',
-    description: 'Connect Microsoft Teams for assignment reminders and classroom announcements (plan 16.6).',
+    description: 'Connect Microsoft Teams for assignment reminders and classroom announcements.',
   },
   {
     key: 'ffBroadcasts',
@@ -509,31 +521,31 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffCalendarFeeds',
     label: 'Calendar feeds',
     description:
-      'iCal and CalDAV calendar feed subscriptions for assignment and quiz deadlines (plan 16.5).',
+      'iCal and CalDAV calendar feed subscriptions for assignment and quiz deadlines.',
   },
   {
     key: 'ffCatalogIntegration',
     label: 'Course catalog & registration',
     description:
-      'Browse and register for catalog courses from the main navigation and learner dashboard (plan 14.2).',
+      'Browse and register for catalog courses from the main navigation and learner dashboard.',
   },
   {
     key: 'ffClassroomSignals',
     label: 'Classroom signals',
     description:
-      'K-12 classroom engagement widgets on course and admin dashboards (plan 13.9).',
+      'K-12 classroom engagement widgets on course and admin dashboards.',
   },
   {
     key: 'ffConferenceScheduling',
     label: 'Parent-teacher conferences',
     description:
-      'Schedule parent-teacher conferences from the parent portal and instructor dashboard (plan 13.12).',
+      'Schedule parent-teacher conferences from the parent portal and instructor dashboard.',
   },
   {
     key: 'ffCourseEvaluations',
     label: 'Course evaluations',
     description:
-      'Evaluation templates, learner surveys, and institutional evaluation reports (plan 14.7).',
+      'Evaluation templates, learner surveys, and institutional evaluation reports.',
   },
   {
     key: 'ffCourseReviews',
@@ -543,7 +555,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
   {
     key: 'ffDemographics',
     label: 'Student demographics reporting',
-    description: 'Title I and student demographics admin reports for K-12 compliance (plan 13.x).',
+    description: 'Title I and student demographics admin reports for K-12 compliance.',
   },
   {
     key: 'ffEnrollmentStateMachine',
@@ -561,42 +573,42 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffGradeSubmission',
     label: 'Final grade submission',
     description:
-      'Instructor final grade submission workflow and admin grade-submission status reporting (plan 14.x).',
+      'Instructor final grade submission workflow and admin grade-submission status reporting.',
   },
   {
     key: 'ffIncompleteGradeWorkflow',
     label: 'Incomplete grade workflow',
     description:
-      'Track and resolve incomplete (I) grades from the admin incompletes view and gradebook (plan 14.4).',
+      'Track and resolve incomplete (I) grades from the admin incompletes view and gradebook.',
   },
   {
     key: 'ffLibrary',
     label: 'Learner library & reading log',
     description:
-      'Reading log, reading dashboard, and library catalog pages for independent reading programs (plan 14.10).',
+      'Reading log, reading dashboard, and library catalog pages for independent reading programs.',
   },
   {
     key: 'ffLibraryIntegration',
     label: 'Library system integration',
-    description: 'Admin configuration for external library catalog integrations (plan 14.10).',
+    description: 'Admin configuration for external library catalog integrations.',
   },
   {
     key: 'ffParentPortal',
     label: 'Parent portal',
     description:
-      'K-12 parent/guardian portal with child linking, read-only grade access, and notification preferences (plan 13.1).',
+      'K-12 parent/guardian portal with child linking, read-only grade access, and notification preferences.',
   },
   {
     key: 'ffParentPortalV2',
     label: 'Parent portal v2 sections',
     description:
-      'Expanded parent dashboard: attendance, behavior, report cards, and message-teacher actions (plan W02).',
+      'Expanded parent dashboard: attendance, behavior, report cards, and message-teacher actions.',
   },
   {
     key: 'ffProctoringIntegration',
     label: 'Proctoring integration',
     description:
-      'Third-party proctoring launch and session hooks on high-stakes quizzes (plan 14.9).',
+      'Third-party proctoring launch and session hooks on high-stakes quizzes.',
   },
   {
     key: 'ffPublicApi',
@@ -627,16 +639,10 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Platform master switch for course collaboration boards (shared walls). Courses still need the per-course Boards toggle enabled.',
   },
   {
-    key: 'ffInteractiveQuizzes',
-    label: 'Live Quizzes',
-    description:
-      'Platform master switch for live game-based quizzes. Courses still need the per-course Live Quizzes toggle enabled.',
-  },
-  {
     key: 'ffIqLiveHosting',
     label: 'Live quiz hosting',
     description:
-      'Authoritative live game hosting engine (join codes, host console, projector, WebSocket hub). Requires Live Quizzes to be enabled.',
+      'Authoritative live game hosting engine (join codes, host console, projector, WebSocket hub). On by default; enable Live Quizzes per course to host games.',
   },
   {
     key: 'ffIqTeamMode',
@@ -657,7 +663,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffIqGradebookPush',
     label: 'Live quiz gradebook push',
     description:
-      'Allow instructors to push live-quiz or homework game scores into the course gradebook. Requires Live Quizzes.',
+      'Allow instructors to push live-quiz or homework game scores into the course gradebook. Requires Live Quizzes enabled on the course.',
   },
   {
     key: 'ffIqPublicKitCatalog',
@@ -675,7 +681,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffIqAiGeneration',
     label: 'Live quiz AI generation',
     description:
-      'Let instructors draft quiz-kit questions with AI from a topic, passage, or course content. Requires Live Quizzes, configured AI providers, and teacher review before hosting.',
+      'Let instructors draft quiz-kit questions with AI from a topic, passage, or course content. Requires Live Quizzes on the course, configured AI providers, and teacher review before hosting.',
   },
   {
     key: 'ffBoardsRealtime',
@@ -699,13 +705,31 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffReadAloud',
     label: 'Read-aloud (text-to-speech)',
     description:
-      'Learner read-aloud controls in the top bar when read-aloud is enabled platform-wide (plan 12.8).',
+      'Learner read-aloud controls in the top bar when read-aloud is enabled platform-wide.',
   },
   {
     key: 'ffReadingPreferences',
     label: 'Reading preferences',
     description:
-      'Learner reading preference controls (font, spacing, contrast) in the top bar (plan 12.x).',
+      'Learner reading preference controls (font, spacing, contrast) in the top bar.',
+  },
+  {
+    key: 'ffMotionNavigation',
+    label: 'Navigation transitions',
+    description:
+      'Animate splash handoff, route changes, and section switches. Turn off to disable motion instantly (AN.2 kill-switch).',
+  },
+  {
+    key: 'ffMotionReveal',
+    label: 'Load choreography',
+    description:
+      'Crossfade skeletons into content and stagger card/list entrances. Turn off to disable instantly (AN.3 kill-switch).',
+  },
+  {
+    key: 'ffMotionLists',
+    label: 'List & collection motion',
+    description:
+      'Animate list insert/remove/reorder and drag-lift. Turn off to disable instantly (AN.4 kill-switch).',
   },
   {
     key: 'ffReportCards',
@@ -720,7 +744,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
   {
     key: 'ffSisIntegration',
     label: 'SIS integration',
-    description: 'Student information system integration settings and sync tools in admin (plan 14.1).',
+    description: 'Student information system integration settings and sync tools in admin.',
   },
   {
     key: 'ffUiMode',

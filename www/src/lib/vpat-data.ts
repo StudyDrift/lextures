@@ -17,7 +17,7 @@ export const WCAG_CRITERIA: WcagCriterion[] = [
   // Level A
   { sc: '1.1.1', title: 'Non-text Content', level: 'A', conformance: 'Supports', notes: 'All UI images include alt text; the TipTap editor enforces alt text on uploaded images.' },
   { sc: '1.2.1', title: 'Audio-only and Video-only (Prerecorded)', level: 'A', conformance: 'Not Applicable', notes: 'Lextures does not host standalone audio-only or video-only content at this time.' },
-  { sc: '1.2.2', title: 'Captions (Prerecorded)', level: 'A', conformance: 'Partially Supports', notes: 'Auto-captions for uploaded videos are in progress (plan 8.4).' },
+  { sc: '1.2.2', title: 'Captions (Prerecorded)', level: 'A', conformance: 'Partially Supports', notes: 'Auto-captions for uploaded videos are in progress.' },
   { sc: '1.2.3', title: 'Audio Description or Media Alternative (Prerecorded)', level: 'A', conformance: 'Not Applicable', notes: 'No prerecorded video content delivered by the platform itself.' },
   { sc: '1.3.1', title: 'Info and Relationships', level: 'A', conformance: 'Supports', notes: 'Semantic HTML headings, landmark regions, and table markup used throughout.' },
   { sc: '1.3.2', title: 'Meaningful Sequence', level: 'A', conformance: 'Supports', notes: 'DOM order matches visual reading order.' },
@@ -78,7 +78,7 @@ export const FPC_CRITERIA: FpcCriterion[] = [
   { id: '302.1', title: 'Without Vision', conformance: 'Supports', notes: 'All content is accessible via keyboard and compatible with screen readers (NVDA, JAWS, VoiceOver). Verified with VoiceOver on macOS and NVDA on Windows.' },
   { id: '302.2', title: 'With Limited Vision', conformance: 'Supports', notes: 'Browser zoom to 400% does not break layout; high-contrast mode supported; all text meets WCAG 1.4.3 contrast requirements.' },
   { id: '302.3', title: 'Without Perception of Color', conformance: 'Supports', notes: 'Color is never the sole indicator of meaning; icons and text labels always accompany color-coded information.' },
-  { id: '302.4', title: 'Without Hearing', conformance: 'Partially Supports', notes: 'Uploaded video captions are supported where provided; auto-caption generation is in progress (plan 8.4). No real-time audio/video.' },
+  { id: '302.4', title: 'Without Hearing', conformance: 'Partially Supports', notes: 'Uploaded video captions are supported where provided; auto-caption generation is in progress. No real-time audio/video.' },
   { id: '302.5', title: 'With Limited Hearing', conformance: 'Not Applicable', notes: 'The application does not require the ability to hear audio to access any feature.' },
   { id: '302.6', title: 'Without Speech', conformance: 'Not Applicable', notes: 'No features require spoken input; all functionality is available via keyboard and pointer.' },
   { id: '302.7', title: 'Without Fine Motor Control', conformance: 'Supports', notes: 'Full keyboard navigation is available for all features. No time-limited interactions. Drag-and-drop reorder has a keyboard alternative.' },

@@ -58,6 +58,7 @@ import {
   type GradebookColumnForFinal,
 } from './gradebook/compute-course-final-percent'
 import { DashboardCourseSectionSkeleton, DashboardLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
+import { LoadReveal, StaggerReveal } from '../../components/ui/load-reveal'
 import {
   GradingBacklogList,
   type GradingBacklogItem,
@@ -312,6 +313,7 @@ export default function Dashboard() {
     ffStudyReminders,
     aiStudyBuddyEnabled,
     ffResearchConsent,
+    ffMotionReveal,
   } = usePlatformFeatures()
 
   const [catalog, setCatalog] = useState<CoursePublic[] | null>(null)
@@ -668,9 +670,13 @@ export default function Dashboard() {
         </p>
       )}
 
-      {showInitialLoading && !catalogError && <DashboardLoadingSkeleton />}
-
-      {catalog && catalog.length === 0 && !catalogError && (
+      {!catalogError && (
+        <LoadReveal
+          ready={!showInitialLoading}
+          enabled={ffMotionReveal}
+          skeleton={<DashboardLoadingSkeleton />}
+        >
+      {catalog && catalog.length === 0 && (
         <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50/80 px-6 py-8 text-center dark:border-neutral-700 dark:bg-neutral-900/50">
           <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">{t('dashboard.empty.noCourses')}</p>
           <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
@@ -692,7 +698,8 @@ export default function Dashboard() {
 
       {hasCourses && (
         <div data-onboarding="dashboard-main" className="mt-8 space-y-10">
-          <section aria-label={t('dashboard.quickLinks.ariaLabel')}>
+          <StaggerReveal index={0} enabled={ffMotionReveal} as="section">
+            <div aria-label={t('dashboard.quickLinks.ariaLabel')}>
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/inbox"
@@ -743,16 +750,20 @@ export default function Dashboard() {
                 </span>
               )}
             </div>
-          </section>
+            </div>
+          </StaggerReveal>
 
-          <IntroWelcomeBanner />
-          <IntroCourseCard />
-          <StartHereCard />
+          <StaggerReveal index={1} enabled={ffMotionReveal}>
+            <IntroWelcomeBanner />
+            <IntroCourseCard />
+            <StartHereCard />
+          </StaggerReveal>
 
           {detailsLoading && <DashboardCourseSectionSkeleton />}
 
           {whatsNext && anyStudentExperience && (
-            <section aria-label={t('dashboard.whatsNext.ariaLabel')}>
+            <StaggerReveal index={2} enabled={ffMotionReveal} as="section">
+              <div aria-label={t('dashboard.whatsNext.ariaLabel')}>
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
                 {t('dashboard.whatsNext.title')}
               </h2>
@@ -834,10 +845,13 @@ export default function Dashboard() {
                   {t('dashboard.whatsNext.caughtUp', { courseTitle: whatsNext.course.title })}
                 </p>
               )}
-            </section>
+              </div>
+            </StaggerReveal>
           )}
 
-          <StudyStatsCard />
+          <StaggerReveal index={3} enabled={ffMotionReveal}>
+            <StudyStatsCard />
+          </StaggerReveal>
 
           {ffStudyReminders && anyStudentExperience ? <DailyGoalProgressCard /> : null}
 
@@ -1070,7 +1084,8 @@ export default function Dashboard() {
           )}
 
           {anyStudentExperience && (
-            <section aria-label={t('dashboard.learning.ariaLabel')}>
+            <StaggerReveal index={4} enabled={ffMotionReveal} as="section">
+            <div aria-label={t('dashboard.learning.ariaLabel')}>
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
                   {t('dashboard.learning.title')}
@@ -1320,11 +1335,13 @@ export default function Dashboard() {
                   )}
                 </>
               )}
-            </section>
+            </div>
+            </StaggerReveal>
           )}
 
           {anyStaffExperience && (
-            <section aria-label={t('dashboard.teaching.ariaLabel')}>
+            <StaggerReveal index={5} enabled={ffMotionReveal} as="section">
+            <div aria-label={t('dashboard.teaching.ariaLabel')}>
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
                   {t('dashboard.teaching.title')}
@@ -1433,7 +1450,8 @@ export default function Dashboard() {
                 </div>
                 </>
               )}
-            </section>
+            </div>
+            </StaggerReveal>
           )}
 
           {!anyStudentExperience && !anyStaffExperience && hasCourses && (
@@ -1457,6 +1475,8 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+      )}
+        </LoadReveal>
       )}
       {aiStudyBuddyEnabled && studyBuddyCourseCode ? (
         <StudyBuddyWidget courseCode={studyBuddyCourseCode} />

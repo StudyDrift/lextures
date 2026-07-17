@@ -10,7 +10,6 @@ import {
   type QuizKit,
 } from '../../lib/live-quiz-api'
 import { toastMutationError } from '../../lib/lms-toast'
-import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
 
 export default function LiveQuizLibraryPage() {
@@ -18,7 +17,6 @@ export default function LiveQuizLibraryPage() {
   const navigate = useNavigate()
   const { courseCode: rawCode } = useParams<{ courseCode: string }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
-  const { ffInteractiveQuizzes } = usePlatformFeatures()
 
   const [q, setQ] = useState('')
   const [subject, setSubject] = useState('')
@@ -37,10 +35,6 @@ export default function LiveQuizLibraryPage() {
     setLoading(true)
     setError(null)
     try {
-      if (!ffInteractiveQuizzes) {
-        setError(t('liveQuiz.error.disabled'))
-        return
-      }
       const result = await searchQuizLibrary({
         q: q.trim() || undefined,
         subject: subject.trim() || undefined,
@@ -54,7 +48,7 @@ export default function LiveQuizLibraryPage() {
     } finally {
       setLoading(false)
     }
-  }, [ffInteractiveQuizzes, q, subject, grade, lang, tag, t])
+  }, [q, subject, grade, lang, tag, t])
 
   useEffect(() => {
     void load()
@@ -174,7 +168,7 @@ export default function LiveQuizLibraryPage() {
                 <button
                   type="button"
                   onClick={() => void openPreview(kit.id)}
-                  className="block w-full rounded-lg border border-slate-200 p-4 text-start transition hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:hover:border-indigo-700"
+                  className="block w-full rounded-lg border border-slate-200 p-4 text-start transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:hover:border-indigo-700"
                 >
                   <h3 className="font-medium text-slate-900 dark:text-neutral-100">{kit.title}</h3>
                   {kit.description ? (

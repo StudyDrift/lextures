@@ -61,6 +61,8 @@ import com.lextures.android.core.design.cardBackground
 import com.lextures.android.core.design.coverBrush
 import com.lextures.android.core.design.fieldBorder
 import com.lextures.android.core.design.isDarkTheme
+import com.lextures.android.core.design.lxListMotion
+import com.lextures.android.core.design.lxReveal
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.Broadcast
@@ -136,6 +138,14 @@ fun DashboardTab(
     var announcements by remember { mutableStateOf<List<Broadcast>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
+    /** AN.3: once content has revealed, pull-to-refresh must not re-show skeleton / re-stagger. */
+    var contentRevealed by remember { mutableStateOf(false) }
+    val revealEnabled = shell.platformFeatures.ffMotionReveal
+    val listsEnabled = shell.platformFeatures.ffMotionLists
+    val dataReady = !(loading && courses.isEmpty())
+    LaunchedEffect(dataReady) {
+        if (dataReady) contentRevealed = true
+    }
 
     var openCourse by remember { mutableStateOf<CourseSummary?>(null) }
     var openDueItem by remember { mutableStateOf<DueItem?>(null) }
@@ -465,69 +475,85 @@ fun DashboardTab(
             item { LmsErrorBanner(message) }
         }
 
-        if (loading && courses.isEmpty()) {
+        if (!contentRevealed) {
             item { LmsSkeletonList(count = 4) }
             return@LazyColumn
         }
 
+        var revealIndex = 0
+
         if (shell.platformFeatures.ffMobileLiveMeetings && liveAndUpcoming.isNotEmpty()) {
+            val idx = revealIndex++
             item {
-                LiveMeetingsRail(
-                    items = liveAndUpcoming,
-                    courses = courses,
-                    session = session,
-                    onOpenCourse = { course ->
-                        shell.activeCourse = course
-                        shell.activeCourseRoot = shell.rootDestination
-                        shell.activeCourseSection = com.lextures.android.core.navigation.CourseWorkspaceSection.Live
-                        shell.rootDestination = com.lextures.android.core.navigation.RootDestination.Courses
-                    },
-                )
+                Box(modifier = Modifier.lxReveal(index = idx, appeared = contentRevealed, enabled = revealEnabled)) {
+                    LiveMeetingsRail(
+                        items = liveAndUpcoming,
+                        courses = courses,
+                        session = session,
+                        onOpenCourse = { course ->
+                            shell.activeCourse = course
+                            shell.activeCourseRoot = shell.rootDestination
+                            shell.activeCourseSection = com.lextures.android.core.navigation.CourseWorkspaceSection.Live
+                            shell.rootDestination = com.lextures.android.core.navigation.RootDestination.Courses
+                        },
+                    )
+                }
             }
         }
 
         announcements.firstOrNull()?.let { broadcast ->
+            val idx = revealIndex++
             item {
-                AnnouncementCard(
-                    broadcast = broadcast,
-                    showSeeAll = announcements.size > 1,
-                    onAcknowledge = {
-                        val token = accessToken ?: return@AnnouncementCard
-                        scope.launch {
-                            // Best-effort: dismiss locally even if the POST fails.
-                            runCatching { LmsApi.acknowledgeBroadcast(broadcast.id, token) }
-                            announcements = announcements.filterNot { it.id == broadcast.id }
-                        }
-                    },
-                    onSeeAll = { showAnnouncements = true },
-                )
+                Box(modifier = Modifier.lxReveal(index = idx, appeared = contentRevealed, enabled = revealEnabled)) {
+                    AnnouncementCard(
+                        broadcast = broadcast,
+                        showSeeAll = announcements.size > 1,
+                        onAcknowledge = {
+                            val token = accessToken ?: return@AnnouncementCard
+                            scope.launch {
+                                // Best-effort: dismiss locally even if the POST fails.
+                                runCatching { LmsApi.acknowledgeBroadcast(broadcast.id, token) }
+                                announcements = announcements.filterNot { it.id == broadcast.id }
+                            }
+                        },
+                        onSeeAll = { showAnnouncements = true },
+                    )
+                }
             }
         }
 
         if (shell.platformFeatures.selfReflectionEnabled) {
+            val idx = revealIndex++
             item {
-                com.lextures.android.features.insights.DashboardInsightsSection(
-                    session = session,
-                    onOpenInsights = { showInsights = true },
-                )
+                Box(modifier = Modifier.lxReveal(index = idx, appeared = contentRevealed, enabled = revealEnabled)) {
+                    com.lextures.android.features.insights.DashboardInsightsSection(
+                        session = session,
+                        onOpenInsights = { showInsights = true },
+                    )
+                }
             }
         }
 
         if (shell.platformFeatures.ffLearningPaths || courses.any { it.viewerIsStudent }) {
+            val idx = revealIndex++
             item {
-                com.lextures.android.features.paths.DashboardStudySection(
-                    session = session,
-                    studentCourses = courses.filter { it.viewerIsStudent },
-                    learningPathsEnabled = shell.platformFeatures.ffLearningPaths,
-                    onOpenReview = { showReview = true },
-                    onOpenRecommendation = { course, item -> openRecommendedItem = course to item },
-                    onOpenPaths = { showPaths = true },
-                )
+                Box(modifier = Modifier.lxReveal(index = idx, appeared = contentRevealed, enabled = revealEnabled)) {
+                    com.lextures.android.features.paths.DashboardStudySection(
+                        session = session,
+                        studentCourses = courses.filter { it.viewerIsStudent },
+                        learningPathsEnabled = shell.platformFeatures.ffLearningPaths,
+                        onOpenReview = { showReview = true },
+                        onOpenRecommendation = { course, item -> openRecommendedItem = course to item },
+                        onOpenPaths = { showPaths = true },
+                    )
+                }
             }
         }
 
         reviewStats?.let { stats ->
+            val idx = revealIndex++
             item {
+                Box(modifier = Modifier.lxReveal(index = idx, appeared = contentRevealed, enabled = revealEnabled)) {
                 LmsCard(onClick = { showReview = true }) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -576,21 +602,32 @@ fun DashboardTab(
                         )
                     }
                 }
+                }
             }
         }
 
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                StatCard("${courses.size}", "Courses", Icons.AutoMirrored.Filled.MenuBook, accentColor())
-                StatCard("${dueThisWeek.size}", "Due this week", Icons.Default.AssignmentTurnedIn, LexturesColors.Coral)
-                StatCard("${shell.unreadInbox}", "Unread", Icons.Default.Inbox, LexturesColors.Amber)
+        run {
+            val idx = revealIndex++
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.lxReveal(index = idx, appeared = contentRevealed, enabled = revealEnabled),
+                ) {
+                    StatCard("${courses.size}", "Courses", Icons.AutoMirrored.Filled.MenuBook, accentColor())
+                    StatCard("${dueThisWeek.size}", "Due this week", Icons.Default.AssignmentTurnedIn, LexturesColors.Coral)
+                    StatCard("${shell.unreadInbox}", "Unread", Icons.Default.Inbox, LexturesColors.Amber)
+                }
             }
         }
 
         if (staffBacklogs.isNotEmpty()) {
             item { LmsSectionHeader("Needs grading", Icons.Default.FactCheck) }
             items(staffBacklogs, key = { "backlog-${it.course.id}" }) { backlog ->
-                LmsCard(accent = LexturesColors.Amber, onClick = { openBacklog = backlog }) {
+                LmsCard(
+                    accent = LexturesColors.Amber,
+                    onClick = { openBacklog = backlog },
+                    modifier = Modifier.lxListMotion(enabled = listsEnabled),
+                ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -652,7 +689,11 @@ fun DashboardTab(
             }
         } else {
             items(dueThisWeek, key = { "${it.course.courseCode}/${it.item.id}" }) { due ->
-                LmsCard(accent = LexturesColors.Coral, onClick = { openDueItem = due }) {
+                LmsCard(
+                    accent = LexturesColors.Coral,
+                    onClick = { openDueItem = due },
+                    modifier = Modifier.lxListMotion(enabled = listsEnabled),
+                ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically,

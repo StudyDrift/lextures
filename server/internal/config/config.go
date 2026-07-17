@@ -320,6 +320,12 @@ type Config struct {
 	FFAltTextEnforcement bool
 	// FFHighContrastReducedMotion enables the high-contrast/reduced-motion preference panel and API (plan 12.7).
 	FFHighContrastReducedMotion bool
+	// FFMotionNavigation enables splash handoff and route/screen/tab transitions (AN.2). Default ON; kill-switch.
+	FFMotionNavigation bool
+	// FFMotionReveal enables skeleton→content crossfade and staggered entrances (AN.3). Default ON; kill-switch.
+	FFMotionReveal bool
+	// FFMotionLists enables list insert/remove/reorder and drag-lift motion (AN.4). Default ON; kill-switch.
+	FFMotionLists bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).
@@ -443,6 +449,12 @@ type Config struct {
 	// FFTranscripts enables student transcript requests and institution webhook configuration.
 	// Managed in Settings → Global platform (not process env).
 	FFTranscripts bool
+	// FFTranscriptInbound enables inbound transcript receiving and the intake queue (T07).
+	// Managed in Settings → Global platform (not process env).
+	FFTranscriptInbound bool
+	// FFDiplomas enables diploma/certificate templates, issuance, wallet, and verification (T11).
+	// Managed in Settings → Global platform (not process env).
+	FFDiplomas bool
 	// FFWebhooks enables outbound webhook subscriptions and delivery (plan 16.3).
 	// Managed in Settings → Global platform (not process env).
 	FFWebhooks bool
@@ -486,11 +498,11 @@ type Config struct {
 	FFBoardsRealtime bool
 	// FFBoardsExternalSharing allows link/public board visibility and share links (plan VC.6). Default OFF.
 	FFBoardsExternalSharing bool
-	// FFInteractiveQuizzes enables live game-based quizzes across courses (plan IQ.1). Default OFF.
-	// Managed in Settings → Global platform (not process env). Per-course interactive_quizzes_enabled still required.
+	// FFInteractiveQuizzes is always treated as on; Live Quizzes are gated only by per-course
+	// interactive_quizzes_enabled (platform master switch removed). Kept for API compatibility.
 	FFInteractiveQuizzes bool
-	// FFIqLiveHosting enables the live game hosting engine / WebSocket hub (plan IQ.3). Default OFF.
-	// Requires FFInteractiveQuizzes and per-course interactive_quizzes_enabled.
+	// FFIqLiveHosting enables the live game hosting engine / WebSocket hub (plan IQ.3). Default ON.
+	// Requires per-course interactive_quizzes_enabled. Can still be turned off in platform settings.
 	FFIqLiveHosting bool
 	// FFIqTeamMode enables team game mode (plan IQ.6). Default OFF.
 	FFIqTeamMode bool
@@ -507,7 +519,7 @@ type Config struct {
 	// Default OFF. Blocked for under-13/COPPA courses even when on.
 	FFIqGuestJoin bool
 	// FFIqAiGeneration enables AI-assisted quiz kit generation in the kit editor (plan IQ.10). Default OFF.
-	// Requires FFInteractiveQuizzes, per-course interactive_quizzes_enabled, and configured AI providers.
+	// Requires per-course interactive_quizzes_enabled and configured AI providers.
 	FFIqAiGeneration bool
 	// FFPublicAPI enables the versioned public REST API for third-party integrations (plan 16.1).
 	// Managed in Settings → Global platform (not process env).

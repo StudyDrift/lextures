@@ -213,6 +213,9 @@ var allowedItemTransitions = map[ItemStatus]map[ItemStatus]struct{}{
 		ItemFailed:    {},
 		ItemCanceled:  {},
 	},
+	ItemFailed: {
+		ItemReady: {}, // T06 resend
+	},
 }
 
 // CanTransitionItem reports whether from→to is a legal item edge.

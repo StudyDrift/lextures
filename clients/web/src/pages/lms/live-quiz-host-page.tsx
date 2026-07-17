@@ -52,7 +52,7 @@ export default function LiveQuizHostPage() {
   }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
   const gameId = rawGameId ? decodeURIComponent(rawGameId) : ''
-  const { ffInteractiveQuizzes, ffIqLiveHosting } = usePlatformFeatures()
+  const { ffIqLiveHosting } = usePlatformFeatures()
   const [bootstrap, setBootstrap] = useState<LiveGame | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -61,7 +61,7 @@ export default function LiveQuizHostPage() {
   const load = useCallback(async () => {
     if (!courseCode || !gameId) return
     try {
-      if (!ffInteractiveQuizzes || !ffIqLiveHosting) {
+      if (!ffIqLiveHosting) {
         setError(t('liveQuiz.error.disabled'))
         return
       }
@@ -69,7 +69,7 @@ export default function LiveQuizHostPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : t('liveQuiz.host.errorLoad'))
     }
-  }, [courseCode, gameId, ffInteractiveQuizzes, ffIqLiveHosting, t])
+  }, [courseCode, gameId, ffIqLiveHosting, t])
 
   useEffect(() => {
     void load()

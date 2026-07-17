@@ -28,6 +28,18 @@ const (
 	StudyReminderWeeklySummary = "study_reminder_weekly_summary"
 	SeatUtilizationAlert       = "seat_utilization_alert"
 	IntroCourseCompleted       = "intro_course_completed"
+	TranscriptOrderSubmitted   = "transcript_order_submitted"
+	TranscriptOrderOnHold      = "transcript_order_on_hold"
+	TranscriptOrderConsent     = "transcript_order_consent_needed"
+	TranscriptOrderPayment     = "transcript_order_payment_needed"
+	TranscriptOrderApproved    = "transcript_order_approved"
+	TranscriptOrderRejected    = "transcript_order_rejected"
+	TranscriptOrderSent        = "transcript_order_sent"
+	TranscriptOrderDelivered    = "transcript_order_delivered"
+	TranscriptOrderOpened      = "transcript_order_opened"
+	TranscriptOrderFailed      = "transcript_order_failed"
+	TranscriptOrderCanceled    = "transcript_order_canceled"
+	TranscriptOrderException   = "transcript_order_exception"
 )
 
 // All is the canonical list for defaults and UI.
@@ -58,4 +70,16 @@ var All = []string{
 	StudyReminderWeeklySummary,
 	SeatUtilizationAlert,
 	IntroCourseCompleted,
+	TranscriptOrderSubmitted,
+	TranscriptOrderOnHold,
+	TranscriptOrderConsent,
+	TranscriptOrderPayment,
+	TranscriptOrderApproved,
+	TranscriptOrderRejected,
+	TranscriptOrderSent,
+	TranscriptOrderDelivered,
+	TranscriptOrderOpened,
+	TranscriptOrderFailed,
+	TranscriptOrderCanceled,
+	TranscriptOrderException,
 }

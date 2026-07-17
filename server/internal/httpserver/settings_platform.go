@@ -152,6 +152,8 @@ type platformSettingsJSON struct {
 	FFEportfolio                       bool `json:"ffEportfolio"`
 	FFBookstoreIntegration             bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                      bool `json:"ffTranscripts"`
+	FFTranscriptInbound                bool `json:"ffTranscriptInbound"`
+	FFDiplomas                         bool `json:"ffDiplomas"`
 	FFWebhooks                         bool `json:"ffWebhooks"`
 	FFZapierConnector                  bool `json:"ffZapierConnector"`
 	FFAdvisingIntegration              bool `json:"ffAdvisingIntegration"`
@@ -206,6 +208,9 @@ type platformSettingsJSON struct {
 	DPAPortalEnabled             bool    `json:"dpaPortalEnabled"`
 	SOC2ModuleEnabled            bool    `json:"soc2ModuleEnabled"`
 	FFReadingPreferences         bool    `json:"ffReadingPreferences"`
+	FFMotionNavigation           bool    `json:"ffMotionNavigation"`
+	FFMotionReveal               bool    `json:"ffMotionReveal"`
+	FFMotionLists                bool    `json:"ffMotionLists"`
 	FFClassroomSignals           bool    `json:"ffClassroomSignals"`
 	FFLibraryIntegration         bool    `json:"ffLibraryIntegration"`
 	DiagnosticAssessmentsEnabled bool    `json:"diagnosticAssessmentsEnabled"`
@@ -408,6 +413,8 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFEportfolio:                       merged.FFEportfolio,
 			FFBookstoreIntegration:             merged.FFBookstoreIntegration,
 			FFTranscripts:                      merged.FFTranscripts,
+			FFTranscriptInbound:                merged.FFTranscriptInbound,
+			FFDiplomas:                         merged.FFDiplomas,
 			FFWebhooks:                         merged.FFWebhooks,
 			FFZapierConnector:                  merged.FFZapierConnector,
 			FFAdvisingIntegration:              merged.FFAdvisingIntegration,
@@ -461,6 +468,9 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			DPAPortalEnabled:                   merged.DPAPortalEnabled,
 			SOC2ModuleEnabled:                  merged.SOC2ModuleEnabled,
 			FFReadingPreferences:               merged.FFReadingPreferences,
+			FFMotionNavigation:                 merged.FFMotionNavigation,
+			FFMotionReveal:                     merged.FFMotionReveal,
+			FFMotionLists:                      merged.FFMotionLists,
 			FFClassroomSignals:                 merged.FFClassroomSignals,
 			FFLibraryIntegration:               merged.FFLibraryIntegration,
 			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,
@@ -636,6 +646,8 @@ type putPlatformBody struct {
 	FFEportfolio                       *bool `json:"ffEportfolio"`
 	FFBookstoreIntegration             *bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                      *bool `json:"ffTranscripts"`
+	FFTranscriptInbound                *bool `json:"ffTranscriptInbound"`
+	FFDiplomas                         *bool `json:"ffDiplomas"`
 	FFWebhooks                         *bool `json:"ffWebhooks"`
 	FFZapierConnector                  *bool `json:"ffZapierConnector"`
 	FFAdvisingIntegration              *bool `json:"ffAdvisingIntegration"`
@@ -690,6 +702,9 @@ type putPlatformBody struct {
 	DPAPortalEnabled             *bool    `json:"dpaPortalEnabled"`
 	SOC2ModuleEnabled            *bool    `json:"soc2ModuleEnabled"`
 	FFReadingPreferences         *bool    `json:"ffReadingPreferences"`
+	FFMotionNavigation           *bool    `json:"ffMotionNavigation"`
+	FFMotionReveal               *bool    `json:"ffMotionReveal"`
+	FFMotionLists                *bool    `json:"ffMotionLists"`
 	FFClassroomSignals           *bool    `json:"ffClassroomSignals"`
 	FFLibraryIntegration         *bool    `json:"ffLibraryIntegration"`
 	DiagnosticAssessmentsEnabled *bool    `json:"diagnosticAssessmentsEnabled"`
@@ -1050,6 +1065,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffeportfolio", body.FFEportfolio, func(v bool) { wr.FFEportfolio = &v })
 		setBool("ffbookstoreintegration", body.FFBookstoreIntegration, func(v bool) { wr.FFBookstoreIntegration = &v })
 		setBool("fftranscripts", body.FFTranscripts, func(v bool) { wr.FFTranscripts = &v })
+		setBool("fftranscriptinbound", body.FFTranscriptInbound, func(v bool) { wr.FFTranscriptInbound = &v })
+		setBool("ffdiplomas", body.FFDiplomas, func(v bool) { wr.FFDiplomas = &v })
 		setBool("ffwebhooks", body.FFWebhooks, func(v bool) { wr.FFWebhooks = &v })
 		setBool("ffzapierconnector", body.FFZapierConnector, func(v bool) { wr.FFZapierConnector = &v })
 		setBool("ffadvisingintegration", body.FFAdvisingIntegration, func(v bool) { wr.FFAdvisingIntegration = &v })
@@ -1103,6 +1120,9 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
 		setBool("soc2moduleenabled", body.SOC2ModuleEnabled, func(v bool) { wr.SOC2ModuleEnabled = &v })
 		setBool("ffreadingpreferences", body.FFReadingPreferences, func(v bool) { wr.FFReadingPreferences = &v })
+		setBool("ffmotionnavigation", body.FFMotionNavigation, func(v bool) { wr.FFMotionNavigation = &v })
+		setBool("ffmotionreveal", body.FFMotionReveal, func(v bool) { wr.FFMotionReveal = &v })
+		setBool("ffmotionlists", body.FFMotionLists, func(v bool) { wr.FFMotionLists = &v })
 		setBool("ffclassroomsignals", body.FFClassroomSignals, func(v bool) { wr.FFClassroomSignals = &v })
 		setBool("fflibraryintegration", body.FFLibraryIntegration, func(v bool) { wr.FFLibraryIntegration = &v })
 		setBool("diagnosticassessmentsenabled", body.DiagnosticAssessmentsEnabled, func(v bool) { wr.DiagnosticAssessmentsEnabled = &v })
@@ -1273,6 +1293,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFEportfolio:                       merged.FFEportfolio,
 			FFBookstoreIntegration:             merged.FFBookstoreIntegration,
 			FFTranscripts:                      merged.FFTranscripts,
+			FFTranscriptInbound:                merged.FFTranscriptInbound,
+			FFDiplomas:                         merged.FFDiplomas,
 			FFWebhooks:                         merged.FFWebhooks,
 			FFZapierConnector:                  merged.FFZapierConnector,
 			FFAdvisingIntegration:              merged.FFAdvisingIntegration,
@@ -1326,6 +1348,9 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			DPAPortalEnabled:                   merged.DPAPortalEnabled,
 			SOC2ModuleEnabled:                  merged.SOC2ModuleEnabled,
 			FFReadingPreferences:               merged.FFReadingPreferences,
+			FFMotionNavigation:                 merged.FFMotionNavigation,
+			FFMotionReveal:                     merged.FFMotionReveal,
+			FFMotionLists:                      merged.FFMotionLists,
 			FFClassroomSignals:                 merged.FFClassroomSignals,
 			FFLibraryIntegration:               merged.FFLibraryIntegration,
 			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,

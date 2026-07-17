@@ -31,6 +31,7 @@ export type TranscriptsConfig = {
   registrarConsoleEnabled: boolean
   consentRequired: boolean
   feesEnabled: boolean
+  deliveryV2?: boolean
 }
 
 export type TranscriptOrderStatus =
@@ -194,10 +195,38 @@ export type TranscriptRecipientType =
 
 export type TranscriptDeliveryMethod =
   | 'electronic_pesc'
+  | 'edi_speede'
   | 'electronic_pdf'
   | 'secure_link_email'
   | 'postal_mail'
   | 'api_peer'
+
+export type TranscriptDeliveryReceipt = {
+  id: string
+  orderItemId: string
+  adapter: string
+  attemptNo: number
+  status: 'queued' | 'sent' | 'delivered' | 'opened' | 'failed'
+  responseCode?: number
+  detail?: string
+  idempotencyKey: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type TranscriptShareLinkMeta = {
+  token: string
+  expiresAt: string
+  maxDownloads: number
+  downloadsRemaining: number
+  openedAt?: string
+  documentId: string
+  orderItemId: string
+  expired: boolean
+  exhausted: boolean
+  verifyToken?: string
+  verificationUrl?: string
+}
 
 export type TranscriptOrderUrgency = 'standard' | 'rush'
 
@@ -282,6 +311,12 @@ export type TranscriptDocument = {
   generatedAt: string
   hasPdf: boolean
   hasXml: boolean
+  verifyToken?: string
+  verificationUrl?: string
+  revokedAt?: string
+  revokeReason?: string
+  disclosePublicly?: boolean
+  signed?: boolean
 }
 
 export type AcademicRecordCourse = {
@@ -570,6 +605,108 @@ export async function updateAdminTranscriptRecipient(
   return data.recipient
 }
 
+export async function fetchTranscriptItemReceipts(
+  orderId: string,
+  itemId: string,
+): Promise<TranscriptDeliveryReceipt[]> {
+  const res = await authorizedFetch(
+    `/api/v1/transcripts/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}/receipts`,
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load delivery receipts.')
+  }
+  const data = (await res.json()) as { receipts: TranscriptDeliveryReceipt[] }
+  return data.receipts ?? []
+}
+
+export async function resendTranscriptOrderItem(orderId: string, itemId: string): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/transcripts/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}/resend`,
+    { method: 'POST' },
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not resend transcript item.')
+  }
+}
+
+export type TranscriptTimelineKind = 'order' | 'delivery'
+
+export type TranscriptTimelineEntry = {
+  id: string
+  kind: TranscriptTimelineKind
+  at: string
+  status: string
+  label: string
+  itemId?: string
+  adapter?: string
+  attemptNo?: number
+  detail?: string
+  reason?: string
+}
+
+export type TranscriptOrderTimeline = {
+  orderId: string
+  status: TranscriptOrderStatus
+  canCancel: boolean
+  canResendItems: string[]
+  entries: TranscriptTimelineEntry[]
+  items: TranscriptOrderItem[]
+}
+
+export async function fetchTranscriptOrderTimeline(orderId: string): Promise<TranscriptOrderTimeline> {
+  const res = await authorizedFetch(
+    `/api/v1/transcripts/orders/${encodeURIComponent(orderId)}/timeline`,
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load order timeline.')
+  }
+  const data = (await res.json()) as { timeline?: TranscriptOrderTimeline }
+  if (!data.timeline) throw new Error('Unexpected response from server.')
+  return data.timeline
+}
+
+export async function cancelTranscriptOrder(orderId: string): Promise<TranscriptOrder> {
+  const res = await authorizedFetch(`/api/v1/transcripts/orders/${encodeURIComponent(orderId)}/cancel`, {
+    method: 'POST',
+  })
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not cancel transcript order.')
+  }
+  const data = (await res.json()) as { order?: TranscriptOrder }
+  if (!data.order) throw new Error('Unexpected response from server.')
+  return data.order
+}
+
+const apiBase = import.meta.env.VITE_API_URL ?? ''
+
+export async function fetchTranscriptShareLink(token: string): Promise<TranscriptShareLinkMeta> {
+  const res = await fetch(`${apiBase}/api/v1/r/t/${encodeURIComponent(token)}`)
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'This download link is invalid or unavailable.')
+  }
+  return (await res.json()) as TranscriptShareLinkMeta
+}
+
+export async function downloadTranscriptShareLink(token: string): Promise<void> {
+  const res = await fetch(`${apiBase}/api/v1/r/t/${encodeURIComponent(token)}/download`)
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not download transcript.')
+  }
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'transcript.pdf'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export async function saveAdminTranscriptsConfig(payload: {
   webhookUrl: string
   webhookSecret?: string
@@ -580,6 +717,7 @@ export async function saveAdminTranscriptsConfig(payload: {
   registrarConsoleEnabled?: boolean
   consentRequired?: boolean
   feesEnabled?: boolean
+  deliveryV2?: boolean
 }): Promise<TranscriptsConfig> {
   const res = await authorizedFetch('/api/v1/admin/transcripts/config', {
     method: 'PUT',
@@ -760,6 +898,52 @@ export async function saveTranscriptDocumentDownload(id: string, format: 'pdf' |
   triggerBlobDownload(blob, format === 'pdf' ? 'transcript.pdf' : 'transcript.xml')
 }
 
+export async function setTranscriptDocumentDisclosure(
+  id: string,
+  disclosePublicly: boolean,
+): Promise<TranscriptDocument> {
+  const res = await authorizedFetch(`/api/v1/transcripts/documents/${encodeURIComponent(id)}/disclosure`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ disclosePublicly }),
+  })
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not update disclosure.')
+  }
+  const data = (await res.json()) as { document?: TranscriptDocument }
+  if (!data.document) throw new Error('Unexpected response from server.')
+  return data.document
+}
+
+export async function revokeAdminTranscriptDocument(id: string, reason?: string): Promise<TranscriptDocument> {
+  const res = await authorizedFetch(`/api/v1/admin/transcripts/documents/${encodeURIComponent(id)}/revoke`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason: reason ?? '' }),
+  })
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not revoke document.')
+  }
+  const data = (await res.json()) as { document?: TranscriptDocument }
+  if (!data.document) throw new Error('Unexpected response from server.')
+  return data.document
+}
+
+export async function unrevokeAdminTranscriptDocument(id: string): Promise<TranscriptDocument> {
+  const res = await authorizedFetch(`/api/v1/admin/transcripts/documents/${encodeURIComponent(id)}/unrevoke`, {
+    method: 'POST',
+  })
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not restore document.')
+  }
+  const data = (await res.json()) as { document?: TranscriptDocument }
+  if (!data.document) throw new Error('Unexpected response from server.')
+  return data.document
+}
+
 export async function saveTranscriptPreviewPDF(): Promise<void> {
   const blob = await downloadTranscriptPreviewPDF()
   triggerBlobDownload(blob, 'transcript-unofficial.pdf')
@@ -930,4 +1114,367 @@ export async function refundAdminTranscriptOrder(
   }
   if (!data.order || !data.refund) throw new Error('Unexpected response from server.')
   return { order: data.order, refund: data.refund }
+}
+
+export type TranscriptInboundStatus =
+  | 'received'
+  | 'quarantined'
+  | 'parsed'
+  | 'matched'
+  | 'accepted'
+  | 'rejected'
+  | 'unmatched'
+
+export type TranscriptInboundDocument = {
+  id: string
+  orgId: string
+  channel: 'api_peer' | 'sftp' | 'email' | string
+  sourceName?: string
+  externalRef?: string
+  format: 'pesc_xml' | 'pdf' | 'edi' | 'other' | string
+  contentHash: string
+  contentType?: string
+  byteSize: number
+  parsed?: unknown
+  studentName?: string
+  studentDob?: string
+  studentRef?: string
+  matchedUserId?: string
+  matchConfidence?: number
+  matchDetail?: unknown
+  status: TranscriptInboundStatus
+  needsManualReview: boolean
+  reviewerId?: string
+  rejectReason?: string
+  quarantineReason?: string
+  receivedAt: string
+  processedAt?: string
+}
+
+export type TranscriptInboundEvent = {
+  id: string
+  eventType: string
+  actorId?: string
+  detail?: unknown
+  createdAt: string
+}
+
+export type TranscriptInboundCourse = {
+  code: string
+  title: string
+  creditsAttempted: number
+  creditsEarned: number
+  grade: string
+  qualityPoints?: number
+  inProgress?: boolean
+  transfer?: boolean
+}
+
+export async function fetchAdminTranscriptInbound(params?: {
+  status?: string
+  q?: string
+  orgId?: string
+  limit?: number
+}): Promise<TranscriptInboundDocument[]> {
+  const qs = new URLSearchParams()
+  if (params?.status) qs.set('status', params.status)
+  if (params?.q) qs.set('q', params.q)
+  if (params?.orgId) qs.set('orgId', params.orgId)
+  if (params?.limit != null) qs.set('limit', String(params.limit))
+  const suffix = qs.toString() ? `?${qs.toString()}` : ''
+  const res = await authorizedFetch(`/api/v1/admin/transcripts/inbound${suffix}`)
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load inbound queue.')
+  }
+  const data = (await res.json()) as { documents?: TranscriptInboundDocument[] }
+  return data.documents ?? []
+}
+
+export async function fetchAdminTranscriptInboundDetail(
+  id: string,
+): Promise<{ document: TranscriptInboundDocument; events: TranscriptInboundEvent[] }> {
+  const res = await authorizedFetch(`/api/v1/admin/transcripts/inbound/${encodeURIComponent(id)}`)
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load inbound document.')
+  }
+  const data = (await res.json()) as {
+    document?: TranscriptInboundDocument
+    events?: TranscriptInboundEvent[]
+  }
+  if (!data.document) throw new Error('Unexpected response from server.')
+  return { document: data.document, events: data.events ?? [] }
+}
+
+export async function fetchAdminTranscriptInboundCourses(
+  id: string,
+): Promise<{ courses: TranscriptInboundCourse[]; parsed?: unknown }> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/transcripts/inbound/${encodeURIComponent(id)}/courses`,
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load courses.')
+  }
+  const data = (await res.json()) as { courses?: TranscriptInboundCourse[]; parsed?: unknown }
+  return { courses: data.courses ?? [], parsed: data.parsed }
+}
+
+export async function matchAdminTranscriptInbound(
+  id: string,
+  userId: string,
+): Promise<TranscriptInboundDocument> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/transcripts/inbound/${encodeURIComponent(id)}/match`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
+    },
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not match document.')
+  }
+  const data = (await res.json()) as { document?: TranscriptInboundDocument }
+  if (!data.document) throw new Error('Unexpected response from server.')
+  return data.document
+}
+
+export async function acceptAdminTranscriptInbound(id: string): Promise<TranscriptInboundDocument> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/transcripts/inbound/${encodeURIComponent(id)}/accept`,
+    { method: 'POST' },
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not accept document.')
+  }
+  const data = (await res.json()) as { document?: TranscriptInboundDocument }
+  if (!data.document) throw new Error('Unexpected response from server.')
+  return data.document
+}
+
+export async function rejectAdminTranscriptInbound(
+  id: string,
+  reason: string,
+): Promise<TranscriptInboundDocument> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/transcripts/inbound/${encodeURIComponent(id)}/reject`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    },
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not reject document.')
+  }
+  const data = (await res.json()) as { document?: TranscriptInboundDocument }
+  if (!data.document) throw new Error('Unexpected response from server.')
+  return data.document
+}
+
+export async function fetchMyTranscriptInbound(): Promise<TranscriptInboundDocument[]> {
+  const res = await authorizedFetch('/api/v1/me/transcripts/inbound')
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load received transcripts.')
+  }
+  const data = (await res.json()) as { documents?: TranscriptInboundDocument[] }
+  return data.documents ?? []
+}
+
+/** T12: panel visibility returned by analytics/health endpoints. */
+export type TranscriptConsolePanels = {
+  queue: boolean
+  holds: boolean
+  fees: boolean
+  delivery: boolean
+  recipients: boolean
+  settings: boolean
+  analytics: boolean
+  finance: boolean
+  export: boolean
+}
+
+export type TranscriptDashboardDaily = {
+  day: string
+  orders: number
+  items: number
+  delivered: number
+  onHold: number
+  rejected: number
+  refunded: number
+  netRevenueMinor: number
+}
+
+export type TranscriptDashboardSummary = {
+  orgId: string
+  from: string
+  to: string
+  orders: number
+  items: number
+  delivered: number
+  onHold: number
+  rejected: number
+  refunded: number
+  netRevenueMinor: number
+  holdRate: number
+  rejectionRate: number
+  refundRate: number
+  turnaround: {
+    sampleSize: number
+    avgHours: number
+    p50Hours: number
+    p90Hours: number
+    p95Hours: number
+  }
+  methodMix: Array<{ method: string; count: number }>
+  topDestinations: Array<{ recipientId?: string; recipientName: string; count: number }>
+  daily: TranscriptDashboardDaily[]
+  lastRefreshedAt?: string
+  stale: boolean
+  panels: TranscriptConsolePanels
+  currency: string
+}
+
+export type TranscriptHealthSummary = {
+  orgId: string
+  backlogCount: number
+  oldestPendingAgeHours: number
+  oldestPendingOrderId?: string
+  deliveryFailureRate: number
+  deadLetterCount: number
+  backlogAlert: boolean
+  ageAlert: boolean
+  failureAlert: boolean
+  anyAlert: boolean
+  thresholds: {
+    backlogCount: number
+    oldestPendingHours: number
+    failureRateBps: number
+  }
+  panels: TranscriptConsolePanels
+}
+
+export type TranscriptDrillDownOrder = {
+  id: string
+  status: string
+  userEmail?: string
+  submittedAt?: string
+  createdAt: string
+  totalAmount?: number
+  currency?: string
+}
+
+export type TranscriptDeliveryConfig = {
+  deliveryV2: boolean
+  webhookUrl?: string
+  hasWebhookSecret?: boolean
+  webhookSecret?: string
+  adapters: string[]
+}
+
+function dashboardQuery(params?: { from?: string; to?: string; orgId?: string }): string {
+  const qs = new URLSearchParams()
+  if (params?.from) qs.set('from', params.from)
+  if (params?.to) qs.set('to', params.to)
+  if (params?.orgId) qs.set('orgId', params.orgId)
+  const s = qs.toString()
+  return s ? `?${s}` : ''
+}
+
+export async function fetchAdminTranscriptDashboard(params?: {
+  from?: string
+  to?: string
+  orgId?: string
+}): Promise<TranscriptDashboardSummary> {
+  const res = await authorizedFetch(`/api/v1/admin/transcripts/dashboard${dashboardQuery(params)}`)
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load transcript analytics.')
+  }
+  return (await res.json()) as TranscriptDashboardSummary
+}
+
+export async function fetchAdminTranscriptHealth(params?: {
+  orgId?: string
+}): Promise<TranscriptHealthSummary> {
+  const qs = params?.orgId ? `?orgId=${encodeURIComponent(params.orgId)}` : ''
+  const res = await authorizedFetch(`/api/v1/admin/transcripts/health${qs}`)
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load transcript health.')
+  }
+  return (await res.json()) as TranscriptHealthSummary
+}
+
+export async function fetchAdminTranscriptDashboardDrilldown(params: {
+  metric: string
+  from?: string
+  to?: string
+}): Promise<TranscriptDrillDownOrder[]> {
+  const qs = new URLSearchParams()
+  qs.set('metric', params.metric)
+  if (params.from) qs.set('from', params.from)
+  if (params.to) qs.set('to', params.to)
+  const res = await authorizedFetch(`/api/v1/admin/transcripts/dashboard/drilldown?${qs.toString()}`)
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load drill-down.')
+  }
+  const data = (await res.json()) as { orders?: TranscriptDrillDownOrder[] }
+  return data.orders ?? []
+}
+
+export async function downloadAdminTranscriptAnalyticsExport(params?: {
+  type?: 'dashboard' | 'summary'
+  from?: string
+  to?: string
+}): Promise<void> {
+  const qs = new URLSearchParams()
+  qs.set('type', params?.type ?? 'dashboard')
+  if (params?.from) qs.set('from', params.from)
+  if (params?.to) qs.set('to', params.to)
+  const res = await authorizedFetch(`/api/v1/admin/transcripts/reports/export?${qs.toString()}`)
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not export report.')
+  }
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `transcript-analytics-${params?.from ?? 'from'}_${params?.to ?? 'to'}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+export async function fetchAdminTranscriptDeliveryConfig(): Promise<TranscriptDeliveryConfig> {
+  const res = await authorizedFetch('/api/v1/admin/transcripts/delivery-config')
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load delivery config.')
+  }
+  return (await res.json()) as TranscriptDeliveryConfig
+}
+
+export async function saveAdminTranscriptDeliveryConfig(payload: {
+  deliveryV2?: boolean
+  webhookUrl: string
+  webhookSecret?: string
+}): Promise<TranscriptDeliveryConfig> {
+  const res = await authorizedFetch('/api/v1/admin/transcripts/delivery-config', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not save delivery config.')
+  }
+  return (await res.json()) as TranscriptDeliveryConfig
 }

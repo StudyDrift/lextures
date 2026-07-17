@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, MoreHorizontal } from 'lucide-react'
+import { ArrowLeft, Maximize2, Minimize2, MoreHorizontal } from 'lucide-react'
 import {
   arrangeBoardPost,
   createBoardSection,
@@ -82,6 +82,7 @@ export default function CourseBoardDetailPage() {
   const [quickJoinOpen, setQuickJoinOpen] = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [minorsFloor, setMinorsFloor] = useState(false)
+  const [boardFullscreen, setBoardFullscreen] = useState(false)
 
   const realtimeEnabled =
     ffBoardsRealtime && !!board && !board.archived && !loading && !error
@@ -170,6 +171,20 @@ export default function CourseBoardDetailPage() {
   }, [settingsOpen, canManageBoard, courseCode, boardId])
 
   useCoursePageTitle(board?.title ?? null)
+
+  useEffect(() => {
+    if (!boardFullscreen) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setBoardFullscreen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [boardFullscreen])
 
   async function saveRename() {
     if (!board || !titleDraft.trim()) return
@@ -356,16 +371,26 @@ export default function CourseBoardDetailPage() {
             {error}
           </div>
         ) : board ? (
-          <div className="flex min-h-48 flex-1 flex-col gap-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0 space-y-2">
-                <Link
-                  to={listBase}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-                >
-                  <ArrowLeft className="size-4" aria-hidden />
-                  {t('boards.detail.back')}
-                </Link>
+          <div
+            className={
+              boardFullscreen
+                ? 'fixed inset-0 z-[100] flex min-h-0 flex-col gap-3 overflow-hidden bg-white p-3 dark:bg-neutral-900 sm:p-4'
+                : // Top bar is h-14 (3.5rem). LmsPage omitHeader adds ~1.25–1.75rem vertical padding.
+                  // Explicit height is required because RouteTransition does not stretch flex-1.
+                  'flex h-[calc(100dvh-5.25rem)] min-h-0 flex-1 flex-col gap-3 overflow-hidden'
+            }
+          >
+            <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 space-y-1.5">
+                {!boardFullscreen ? (
+                  <Link
+                    to={listBase}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                  >
+                    <ArrowLeft className="size-4" aria-hidden />
+                    {t('boards.detail.back')}
+                  </Link>
+                ) : null}
                 {renaming ? (
                   <div className="flex flex-wrap items-center gap-2">
                     <input
@@ -398,7 +423,7 @@ export default function CourseBoardDetailPage() {
                     {board.title}
                   </h1>
                 )}
-                {board.description ? (
+                {board.description && !boardFullscreen ? (
                   <p className="text-sm text-slate-600 dark:text-neutral-300">{board.description}</p>
                 ) : null}
               </div>
@@ -423,6 +448,27 @@ export default function CourseBoardDetailPage() {
                     }}
                   />
                 ) : null}
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  onClick={() => setBoardFullscreen((v) => !v)}
+                  aria-pressed={boardFullscreen}
+                  aria-label={
+                    boardFullscreen ? t('boards.detail.exitFullscreen') : t('boards.detail.fullscreen')
+                  }
+                  title={
+                    boardFullscreen ? t('boards.detail.exitFullscreen') : t('boards.detail.fullscreen')
+                  }
+                >
+                  {boardFullscreen ? (
+                    <Minimize2 className="size-4" aria-hidden />
+                  ) : (
+                    <Maximize2 className="size-4" aria-hidden />
+                  )}
+                  <span className="hidden sm:inline">
+                    {boardFullscreen ? t('boards.detail.exitFullscreen') : t('boards.detail.fullscreen')}
+                  </span>
+                </button>
                 <button
                   type="button"
                   className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
@@ -540,7 +586,7 @@ export default function CourseBoardDetailPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
               <LayoutSwitcher
                 layout={board.layout}
                 layoutLocked={board.layoutLocked}
@@ -556,7 +602,7 @@ export default function CourseBoardDetailPage() {
             </div>
 
             {canManageBoard && settingsOpen ? (
-              <div className="space-y-4 rounded-md border border-slate-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
+              <div className="max-h-48 shrink-0 space-y-4 overflow-y-auto rounded-md border border-slate-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
                 <label className="flex flex-col gap-1 text-sm">
                   <span className="font-medium text-slate-800 dark:text-neutral-100">
                     {t('boards.settings.reactionMode')}
@@ -643,10 +689,11 @@ export default function CourseBoardDetailPage() {
             ) : null}
 
             <div
-              className="flex min-h-64 flex-1 flex-col gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3 dark:border-neutral-700 dark:bg-neutral-900/40 sm:p-4"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3 dark:border-neutral-700 dark:bg-neutral-900/40 sm:p-4"
               role="region"
               aria-label={t('boards.detail.canvasAria')}
             >
+              <div className="flex min-h-0 flex-1 flex-col overflow-auto">
               <BoardSurface
                 courseCode={courseCode}
                 board={board}
@@ -676,6 +723,7 @@ export default function CourseBoardDetailPage() {
                 awareness={realtimeEnabled ? realtime.awareness : null}
                 onCursorMove={realtimeEnabled ? realtime.setCursor : undefined}
               />
+              </div>
             </div>
           </div>
         ) : null}

@@ -188,6 +188,12 @@ data class MobilePlatformFeatures(
     val autoCaptioningEnabled: Boolean = false,
     val translationMemoryEnabled: Boolean = false,
     val ffReadingPreferences: Boolean = false,
+    /** AN.2 kill-switch; default on when unset. */
+    val ffMotionNavigation: Boolean = true,
+    /** AN.3 kill-switch; default on when unset. */
+    val ffMotionReveal: Boolean = true,
+    /** AN.4 kill-switch; default on when unset. */
+    val ffMotionLists: Boolean = true,
     val oerLibraryEnabled: Boolean = false,
     val xapiEmissionEnabled: Boolean = false,
     val customFieldsEnabled: Boolean = false,
@@ -275,6 +281,9 @@ data class MobilePlatformFeatures(
             autoCaptioningEnabled = features?.autoCaptioningEnabled == true,
             translationMemoryEnabled = features?.translationMemoryEnabled == true,
             ffReadingPreferences = features?.ffReadingPreferences == true,
+            ffMotionNavigation = features?.ffMotionNavigation != false,
+            ffMotionReveal = features?.ffMotionReveal != false,
+            ffMotionLists = features?.ffMotionLists != false,
             oerLibraryEnabled = features?.oerLibraryEnabled == true,
             xapiEmissionEnabled = features?.xapiEmissionEnabled == true,
             customFieldsEnabled = features?.customFieldsEnabled == true,

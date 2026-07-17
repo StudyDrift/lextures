@@ -54,6 +54,9 @@ type platformFeaturesJSON struct {
 	AutoCaptioningEnabled       bool `json:"autoCaptioningEnabled"`
 	FFReadingPreferences        bool `json:"ffReadingPreferences"`
 	FFHighContrastReducedMotion bool `json:"ffHighContrastReducedMotion"`
+	FFMotionNavigation          bool `json:"ffMotionNavigation"`
+	FFMotionReveal              bool `json:"ffMotionReveal"`
+	FFMotionLists               bool `json:"ffMotionLists"`
 	FFParentPortal              bool `json:"ffParentPortal"`
 	FFParentPortalV2            bool `json:"ffParentPortalV2"`
 	FFReportCards               bool `json:"ffReportCards"`
@@ -80,6 +83,8 @@ type platformFeaturesJSON struct {
 	FFBookstoreIntegration      bool `json:"ffBookstoreIntegration"`
 	FFEportfolio                bool `json:"ffEportfolio"`
 	FFTranscripts               bool `json:"ffTranscripts"`
+	FFTranscriptInbound         bool `json:"ffTranscriptInbound"`
+	FFDiplomas                  bool `json:"ffDiplomas"`
 	FFWebhooks                  bool `json:"ffWebhooks"`
 	FFZapierConnector           bool `json:"ffZapierConnector"`
 	FFAdvisingIntegration       bool `json:"ffAdvisingIntegration"`
@@ -200,6 +205,9 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		AutoCaptioningEnabled:       cfg.AutoCaptioningEnabled,
 		FFReadingPreferences:        cfg.FFReadingPreferences,
 		FFHighContrastReducedMotion: cfg.FFHighContrastReducedMotion,
+		FFMotionNavigation:          cfg.FFMotionNavigation,
+		FFMotionReveal:              cfg.FFMotionReveal,
+		FFMotionLists:               cfg.FFMotionLists,
 		FFParentPortal:              cfg.FFParentPortal,
 		FFParentPortalV2:            cfg.FFParentPortalV2,
 		FFReportCards:               cfg.FFReportCards,
@@ -226,6 +234,8 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFBookstoreIntegration:      cfg.FFBookstoreIntegration,
 		FFEportfolio:                cfg.FFEportfolio,
 		FFTranscripts:               cfg.FFTranscripts,
+		FFTranscriptInbound:         cfg.FFTranscriptInbound,
+		FFDiplomas:                  cfg.FFDiplomas,
 		FFWebhooks:                  cfg.FFWebhooks,
 		FFZapierConnector:           cfg.FFZapierConnector,
 		FFAdvisingIntegration:       cfg.FFAdvisingIntegration,

@@ -34,8 +34,7 @@ type generateKitRequest struct {
 }
 
 func (d Deps) iqAiGenerationOff(w http.ResponseWriter) bool {
-	cfg := d.effectiveConfig()
-	if !cfg.FFInteractiveQuizzes || !cfg.FFIqAiGeneration {
+	if !d.effectiveConfig().FFIqAiGeneration {
 		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "AI quiz generation is not enabled.")
 		return true
 	}

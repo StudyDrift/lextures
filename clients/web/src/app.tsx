@@ -49,7 +49,10 @@ export default function App() {
         <Route path="/p/:slug" element={<Pages.PublicPortfolioPage />} />
         <Route path="/paths" element={<Pages.PathsCatalogPage />} />
         <Route path="/paths/:slug" element={<Pages.PathLandingPage />} />
+        <Route path="/verify" element={<Pages.CcrVerifyPage />} />
         <Route path="/verify/:token" element={<Pages.CcrVerifyPage />} />
+        <Route path="/r/t/:token" element={<Pages.TranscriptSharePage />} />
+        <Route path="/wallet/s/:token" element={<Pages.WalletSharePage />} />
         <Route path="/board-links/:token" element={<Pages.BoardSharePage />} />
         <Route path="/play" element={<Pages.LiveQuizPlayPage />} />
         <Route path="/play/:code" element={<Pages.LiveQuizPlayPage />} />
@@ -75,6 +78,7 @@ export default function App() {
             <Route path="/me/profile" element={<Pages.MyProfilePage />} />
             <Route path="/me/ccr" element={<Pages.MyCCR />} />
             <Route path="/me/credentials" element={<Pages.MyCredentials />} />
+            <Route path="/me/wallet" element={<Pages.CredentialWalletPage />} />
             <Route path="/me/badges" element={<Pages.MyBadges />} />
             <Route path="/me/ce-transcript" element={<Pages.CeTranscript />} />
             <Route path="/me/billing" element={<Pages.BillingSettingsPage />} />
@@ -225,6 +229,7 @@ export default function App() {
             <Route path="/admin/scheduled-jobs" element={<Pages.ScheduledJobsAdminPage />} />
             <Route path="/admin/banners" element={<Pages.AdminBanners />} />
             <Route path="/admin/transcripts" element={<Pages.AdminTranscripts />} />
+            <Route path="/admin/diplomas" element={<Pages.AdminDiplomas />} />
             <Route path="/admin/bookstore" element={<Pages.BookstoreIntegrationPage />} />
             <Route path="/admin/final-grades/status" element={<Pages.GradeSubmissionStatus />} />
             <Route path="/admin/incompletes" element={<Pages.IncompletesAdminPage />} />

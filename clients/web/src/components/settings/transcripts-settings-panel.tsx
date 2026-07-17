@@ -35,6 +35,7 @@ export function TranscriptsSettingsPanel() {
   const [registrarConsoleEnabled, setRegistrarConsoleEnabled] = useState(false)
   const [consentRequired, setConsentRequired] = useState(true)
   const [feesEnabled, setFeesEnabled] = useState(false)
+  const [deliveryV2, setDeliveryV2] = useState(false)
   const [feeSchedule, setFeeSchedule] = useState<TranscriptFeeSchedule | null>(null)
   const [baseFeeMajor, setBaseFeeMajor] = useState('0')
   const [rushFeeMajor, setRushFeeMajor] = useState('0')
@@ -54,6 +55,7 @@ export function TranscriptsSettingsPanel() {
   const registrarConsoleId = useId()
   const consentRequiredId = useId()
   const feesEnabledId = useId()
+  const deliveryV2Id = useId()
 
   const load = useCallback(async () => {
     if (!ffTranscripts) {
@@ -81,6 +83,7 @@ export function TranscriptsSettingsPanel() {
       setRegistrarConsoleEnabled(cfg.registrarConsoleEnabled === true)
       setConsentRequired(cfg.consentRequired !== false)
       setFeesEnabled(cfg.feesEnabled === true)
+      setDeliveryV2(cfg.deliveryV2 === true)
       setFailures(failed)
       setRecipients(directory)
       setWaiverCodes(waivers)
@@ -118,6 +121,7 @@ export function TranscriptsSettingsPanel() {
         registrarConsoleEnabled?: boolean
         consentRequired?: boolean
         feesEnabled?: boolean
+        deliveryV2?: boolean
       } = {
         webhookUrl: webhookUrl.trim(),
         pickupInstructions: pickupInstructions.trim(),
@@ -127,6 +131,7 @@ export function TranscriptsSettingsPanel() {
         registrarConsoleEnabled,
         consentRequired,
         feesEnabled,
+        deliveryV2,
       }
       if (webhookSecret.trim() && webhookSecret !== SECRET_PLACEHOLDER) {
         payload.webhookSecret = webhookSecret.trim()
@@ -151,6 +156,7 @@ export function TranscriptsSettingsPanel() {
       setRegistrarConsoleEnabled(cfg.registrarConsoleEnabled === true)
       setConsentRequired(cfg.consentRequired !== false)
       setFeesEnabled(cfg.feesEnabled === true)
+      setDeliveryV2(cfg.deliveryV2 === true)
       setSaved(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save settings.')
@@ -342,6 +348,24 @@ export function TranscriptsSettingsPanel() {
               <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
                 When on, orders compute an itemized total and require payment (or a waiver) before fulfillment.
                 When off, transcripts remain free.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 rounded-md border border-slate-200 px-3 py-3 dark:border-neutral-700">
+            <input
+              id={deliveryV2Id}
+              type="checkbox"
+              checked={deliveryV2}
+              onChange={(e) => setDeliveryV2(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            <div>
+              <label htmlFor={deliveryV2Id} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+                Electronic delivery adapters (v2)
+              </label>
+              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                Enable PESC, EDI/SPEEDE, secure-link, and postal adapters. The api_peer webhook (with document
+                reference) works either way.
               </p>
             </div>
           </div>

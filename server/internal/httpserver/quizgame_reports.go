@@ -21,8 +21,7 @@ import (
 )
 
 func (d Deps) iqGradebookPushOff(w http.ResponseWriter) bool {
-	cfg := d.effectiveConfig()
-	if !cfg.FFInteractiveQuizzes || !cfg.FFIqGradebookPush {
+	if !d.effectiveConfig().FFIqGradebookPush {
 		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 		return true
 	}

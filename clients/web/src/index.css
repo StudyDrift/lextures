@@ -36,6 +36,31 @@
 
 @theme {
   --font-sans: 'Lextures', ui-sans-serif, system-ui, sans-serif;
+
+  /* AN.1 — motion tokens (durations, easings, stagger). */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  /* Bubble spring (response ≈ 0.5s, damping ≈ 0.72). Fallback when linear() unsupported. */
+  --ease-bubble: var(--ease-standard);
+  --dur-instant: 100ms;
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 320ms;
+  --dur-deliberate: 480ms;
+  --stagger-step: 40ms;
+  --motion-enter-translate: 12px;
+  --motion-enter-scale: 0.97;
+  --motion-press-scale: 0.97;
+
+  --ease-lx-standard: var(--ease-standard);
+  --ease-lx-exit: var(--ease-exit);
+  --ease-lx-bubble: var(--ease-bubble);
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 320ms;
+  --duration-deliberate: 480ms;
 }
 
 @utility font-lextures {
@@ -97,12 +122,12 @@
   .lms-scope button:not(:disabled):not(.lex-btn-static),
   .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static) {
     transition-property: transform;
-    transition-duration: 150ms;
-    transition-timing-function: ease-out;
+    transition-duration: var(--dur-fast);
+    transition-timing-function: var(--ease-standard);
   }
   .lms-scope button:not(:disabled):not(.lex-btn-static):active,
   .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static):active {
-    scale: 0.96;
+    scale: var(--motion-press-scale);
   }
 }
 
@@ -231,10 +256,72 @@ html.dark {
   unicode-bidi: plaintext;
 }
 
+/*
+ * AN.1 — motion foundation. Feature-detect linear() for --ease-bubble;
+ * fall back to --ease-standard when unsupported (see @supports below).
+ */
+@supports (animation-timing-function: linear(0, 1)) {
+  :root {
+    --ease-bubble: linear(
+      0,
+      0.044,
+      0.15,
+      0.2862,
+      0.4304,
+      0.5678,
+      0.6897,
+      0.7919,
+      0.8733,
+      0.9349,
+      0.979,
+      1.0086,
+      1.0265,
+      1.0356,
+      1.0384,
+      1.037,
+      1.0331,
+      1.028,
+      1.0225,
+      1.0171,
+      1.0124,
+      1.0084,
+      1.0052,
+      1.0027,
+      1
+    );
+  }
+}
+
+/* K-2 / elementary: slightly longer durations (FR-10). */
+html.ui-mode-k2 {
+  --dur-instant: 120ms;
+  --dur-fast: 180ms;
+  --dur-base: 260ms;
+  --dur-slow: 380ms;
+  --dur-deliberate: 560ms;
+  --duration-instant: 120ms;
+  --duration-fast: 180ms;
+  --duration-base: 260ms;
+  --duration-slow: 380ms;
+  --duration-deliberate: 560ms;
+}
+html.ui-mode-elementary {
+  --dur-instant: 110ms;
+  --dur-fast: 165ms;
+  --dur-base: 240ms;
+  --dur-slow: 350ms;
+  --dur-deliberate: 520ms;
+  --duration-instant: 110ms;
+  --duration-fast: 165ms;
+  --duration-base: 240ms;
+  --duration-slow: 350ms;
+  --duration-deliberate: 520ms;
+}
+
 @keyframes sidenav-item-in {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(calc(var(--motion-enter-translate) * -1));
   }
   to {
     opacity: 1;
@@ -245,7 +332,7 @@ html.dark {
 @keyframes tooltip-in {
   from {
     opacity: 0;
-    transform: translateY(-50%) translateX(-8px);
+    transform: translateY(-50%) translateX(calc(var(--motion-enter-translate) * -0.67));
   }
   to {
     opacity: 1;
@@ -254,8 +341,365 @@ html.dark {
 }
 
 .tooltip-in {
-  animation: tooltip-in 0.15s ease-out forwards;
+  animation: tooltip-in var(--dur-fast) var(--ease-standard) forwards;
 }
+
+/* Helper classes for motion.enter / motion.bubbleIn (declarative). */
+@keyframes lx-motion-enter {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--motion-enter-translate) * -1)) scale(var(--motion-enter-scale));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes lx-motion-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--motion-enter-translate) * -1)) scale(var(--motion-enter-scale));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes lx-motion-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lx-motion-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes lx-motion-exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(var(--motion-enter-scale));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.reduced-motion) .lx-motion-enter {
+    animation: lx-motion-enter var(--dur-base) var(--ease-standard) forwards;
+  }
+  html:not(.reduced-motion) .lx-motion-bubble-in {
+    animation: lx-motion-bubble-in var(--dur-deliberate) var(--ease-bubble) forwards;
+  }
+  html:not(.reduced-motion) .lx-motion-exit {
+    animation: lx-motion-exit var(--dur-fast) var(--ease-exit) forwards;
+  }
+}
+
+.lx-motion-fade-in {
+  animation: lx-motion-fade-in var(--dur-instant) linear forwards;
+}
+.lx-motion-fade-out {
+  animation: lx-motion-fade-out var(--dur-instant) linear forwards;
+}
+
+@keyframes lx-motion-enter-rtl {
+  from {
+    opacity: 0;
+    transform: translateX(var(--motion-enter-translate)) scale(var(--motion-enter-scale));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.reduced-motion)[dir='rtl'] .lx-motion-enter {
+    animation-name: lx-motion-enter-rtl;
+  }
+  html:not(.reduced-motion)[dir='rtl'] .lx-motion-bubble-in {
+    animation-name: lx-motion-enter-rtl;
+  }
+}
+
+/* AN.2 — route / section transitions (transform + opacity only). */
+.lx-route-transition {
+  /* Grow with page content so <main overflow-y-auto> can scroll.
+     Avoid min-height:0 + flex:1 here — that shrinks to the viewport and
+     clips tall routes when a descendant uses overflow:clip. */
+  min-width: 0;
+  width: 100%;
+}
+
+@keyframes lx-route-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lx-route-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes lx-route-forward-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--motion-enter-translate));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes lx-route-back-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--motion-enter-translate) * -1));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.lx-route-fade-in {
+  animation: lx-route-fade-in var(--dur-base) var(--ease-standard) both;
+}
+
+.lx-route-fade-out {
+  animation: lx-route-fade-out var(--dur-fast) var(--ease-exit) both;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.reduced-motion) .lx-route-forward-in {
+    animation: lx-route-forward-in var(--dur-base) var(--ease-standard) both;
+  }
+  html:not(.reduced-motion) .lx-route-back-in {
+    animation: lx-route-back-in var(--dur-base) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion)[dir='rtl'] .lx-route-forward-in {
+    animation-name: lx-route-back-in;
+  }
+  html:not(.reduced-motion)[dir='rtl'] .lx-route-back-in {
+    animation-name: lx-route-forward-in;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-route-fade-in,
+  .lx-route-fade-out,
+  .lx-route-forward-in,
+  .lx-route-back-in {
+    animation: lx-route-fade-in var(--dur-instant) linear both;
+  }
+}
+
+html.reduced-motion .lx-route-fade-in,
+html.reduced-motion .lx-route-fade-out,
+html.reduced-motion .lx-route-forward-in,
+html.reduced-motion .lx-route-back-in {
+  animation: lx-route-fade-in var(--dur-instant) linear both;
+}
+
+/* AN.3 — load choreography: skeleton→content + staggered bubble reveal. */
+@keyframes lx-motion-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-enter-translate)) scale(var(--motion-enter-scale));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.lx-load-reveal {
+  /* FR-4: stack skeleton + content in one cell so height tracks the taller layer. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  transition: none;
+}
+
+.lx-load-reveal-skeleton,
+.lx-load-reveal-content {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.lx-load-reveal-content {
+  /* Do not clip — page-level reveals must contribute to scroll height. */
+  position: relative;
+}
+
+.lx-stagger-reveal-pending {
+  opacity: 0;
+  transform: translateY(var(--motion-enter-translate)) scale(var(--motion-enter-scale));
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.reduced-motion) .lx-motion-reveal {
+    animation: lx-motion-reveal var(--dur-base) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-load-reveal-in {
+    animation: lx-motion-reveal var(--dur-base) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-stagger-reveal {
+    animation: lx-motion-reveal var(--dur-base) var(--ease-bubble) both;
+    animation-delay: var(--lx-reveal-delay, 0ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-stagger-reveal-pending {
+    opacity: 0;
+    transform: none;
+  }
+  .lx-load-reveal-in,
+  .lx-stagger-reveal,
+  .lx-motion-reveal {
+    animation: lx-motion-fade-in var(--dur-instant) linear both;
+    animation-delay: 0ms;
+  }
+}
+
+html.reduced-motion .lx-stagger-reveal-pending {
+  opacity: 0;
+  transform: none;
+}
+
+html.reduced-motion .lx-load-reveal-in,
+html.reduced-motion .lx-stagger-reveal,
+html.reduced-motion .lx-motion-reveal {
+  animation: lx-motion-fade-in var(--dur-instant) linear both;
+  animation-delay: 0ms;
+}
+
+/* AN.4 — list / collection mutation motion (insert, remove, reorder). */
+.lx-animated-list {
+  /* Keep appends from shifting the viewport (FR-5). */
+  overflow-anchor: auto;
+}
+
+.lx-list-item-shell {
+  display: grid;
+  grid-template-rows: 1fr;
+  min-height: 0;
+}
+
+.lx-list-item-inner {
+  min-height: 0;
+  overflow: clip;
+}
+
+@keyframes lx-list-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-enter-translate)) scale(var(--motion-enter-scale));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes lx-list-exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(var(--motion-enter-scale));
+  }
+}
+
+@keyframes lx-list-collapse {
+  from {
+    grid-template-rows: 1fr;
+  }
+  to {
+    grid-template-rows: 0fr;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.reduced-motion) .lx-list-item-enter > .lx-list-item-inner {
+    animation: lx-list-enter var(--dur-base) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-list-item-exit {
+    animation: lx-list-collapse var(--dur-fast) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-list-item-exit > .lx-list-item-inner {
+    animation: lx-list-exit var(--dur-fast) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-list-item-move {
+    transition: transform var(--dur-base) var(--ease-bubble);
+  }
+}
+
+.lx-list-item-enter-fade {
+  animation: lx-motion-fade-in var(--dur-instant) linear both;
+}
+.lx-list-item-exit-fade {
+  animation: lx-motion-fade-out var(--dur-instant) linear both;
+}
+.lx-list-item-exit-instant {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-list-item-enter {
+    animation: lx-motion-fade-in var(--dur-instant) linear both;
+  }
+  .lx-list-item-exit {
+    animation: lx-motion-fade-out var(--dur-instant) linear both;
+  }
+  .lx-list-item-move {
+    transition: none;
+  }
+}
+
+html.reduced-motion .lx-list-item-enter {
+  animation: lx-motion-fade-in var(--dur-instant) linear both;
+}
+html.reduced-motion .lx-list-item-exit {
+  animation: lx-motion-fade-out var(--dur-instant) linear both;
+}
+html.reduced-motion .lx-list-item-move {
+  transition: none;
+}
+
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--dur-base);
+    animation-timing-function: var(--ease-standard);
+  }
+}
+
 
 @keyframes canvas-import-status-in {
   from {
@@ -269,7 +713,7 @@ html.dark {
 }
 
 .canvas-import-status-in {
-  animation: canvas-import-status-in 0.12s ease-out forwards;
+  animation: canvas-import-status-in var(--dur-instant) var(--ease-standard) forwards;
 }
 
 @keyframes canvas-import-select-in {
@@ -287,36 +731,36 @@ html.dark {
 
 @media (prefers-reduced-motion: no-preference) {
   html:not(.reduced-motion) .canvas-import-select-in {
-    animation: canvas-import-select-in 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
+    animation: canvas-import-select-in var(--dur-slow) var(--ease-standard) forwards;
   }
 }
 
 .sidenav-course-items > * {
-  animation: sidenav-item-in 0.28s cubic-bezier(0.33, 1, 0.68, 1) backwards;
+  animation: sidenav-item-in var(--dur-slow) var(--ease-standard) backwards;
 }
 .sidenav-course-items > *:nth-child(1) {
-  animation-delay: 0.02s;
+  animation-delay: calc(var(--stagger-step) * 0);
 }
 .sidenav-course-items > *:nth-child(2) {
-  animation-delay: 0.06s;
+  animation-delay: calc(var(--stagger-step) * 1);
 }
 .sidenav-course-items > *:nth-child(3) {
-  animation-delay: 0.1s;
+  animation-delay: calc(var(--stagger-step) * 2);
 }
 .sidenav-course-items > *:nth-child(4) {
-  animation-delay: 0.14s;
+  animation-delay: calc(var(--stagger-step) * 3);
 }
 .sidenav-course-items > *:nth-child(5) {
-  animation-delay: 0.18s;
+  animation-delay: calc(var(--stagger-step) * 4);
 }
 .sidenav-course-items > *:nth-child(6) {
-  animation-delay: 0.22s;
+  animation-delay: calc(var(--stagger-step) * 5);
 }
 .sidenav-course-items > *:nth-child(7) {
-  animation-delay: 0.26s;
+  animation-delay: calc(var(--stagger-step) * 6);
 }
 .sidenav-course-items > *:nth-child(8) {
-  animation-delay: 0.3s;
+  animation-delay: calc(var(--stagger-step) * 7);
 }
 
 @media (prefers-reduced-motion: reduce) {

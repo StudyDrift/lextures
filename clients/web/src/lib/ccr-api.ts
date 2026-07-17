@@ -30,10 +30,14 @@ export type CCRGenerateResponse = {
 
 export type CCRVerifyResponse = {
   valid: boolean
-  status: 'Valid' | 'Invalid'
+  status: string
   issuerName: string
   issuedAt: string
-  credential: Record<string, unknown>
+  credential?: Record<string, unknown>
+  result?: string
+  documentType?: string
+  issuerDid?: string
+  revokedAt?: string
 }
 
 export async function fetchMyCCR(): Promise<CCRSummaryResponse> {

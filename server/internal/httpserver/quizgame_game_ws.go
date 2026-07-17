@@ -75,8 +75,7 @@ func (d Deps) handleQuizGameWS() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "server misconfiguration")
 			return
 		}
-		cfg := d.effectiveConfig()
-		if !cfg.FFInteractiveQuizzes || !cfg.FFIqLiveHosting {
+		if !d.effectiveConfig().FFIqLiveHosting {
 			http.Error(w, "live quiz hosting disabled", http.StatusNotFound)
 			return
 		}
