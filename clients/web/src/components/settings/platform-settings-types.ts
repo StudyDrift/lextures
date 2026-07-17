@@ -52,6 +52,8 @@ export type PlatformSettingsPayload = {
   ffCoCurricularTranscript: boolean
   ffEportfolio: boolean
   ffTranscripts: boolean
+  ffTranscriptInbound: boolean
+  ffDiplomas: boolean
   ffWebhooks: boolean
   adminConsoleEnabled: boolean
   impersonationEnabled: boolean
@@ -104,6 +106,9 @@ export type PlatformSettingsPayload = {
   ffLibrary: boolean
   ffLibraryIntegration: boolean
   ffReadingPreferences: boolean
+  ffMotionNavigation: boolean
+  ffMotionReveal: boolean
+  ffMotionLists: boolean
   ffUiMode: boolean
   ffReadAloud: boolean
   ffAltTextEnforcement: boolean

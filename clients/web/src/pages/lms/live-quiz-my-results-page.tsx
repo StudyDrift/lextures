@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LmsPage } from './lms-page'
-import { usePlatformFeatures } from '../../context/platform-features-context'
 import { getAccessToken } from '../../lib/auth'
 import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { fetchMyGameResults, gameReportExportUrl, type MyResults } from '../../lib/live-quiz-api'
@@ -10,7 +9,6 @@ import { fetchMyGameResults, gameReportExportUrl, type MyResults } from '../../l
 export default function LiveQuizMyResultsPage() {
   const { t } = useTranslation()
   const { courseCode = '', gameId = '' } = useParams()
-  const { ffInteractiveQuizzes } = usePlatformFeatures()
   const [data, setData] = useState<MyResults | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -18,16 +16,12 @@ export default function LiveQuizMyResultsPage() {
 
   const load = useCallback(async () => {
     if (!courseCode || !gameId) return
-    if (!ffInteractiveQuizzes) {
-      setError(t('liveQuiz.error.disabled'))
-      return
-    }
     try {
       setData(await fetchMyGameResults(courseCode, gameId))
     } catch (e) {
       setError(e instanceof Error ? e.message : t('liveQuiz.myResults.errorLoad'))
     }
-  }, [courseCode, gameId, ffInteractiveQuizzes, t])
+  }, [courseCode, gameId, t])
 
   useEffect(() => {
     void load()

@@ -94,7 +94,7 @@ export default function CourseBoardsPage() {
                 <li key={board.id}>
                   <Link
                     to={`${base}/${encodeURIComponent(board.id)}`}
-                    className="block rounded-lg border border-slate-200 p-4 transition hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/20"
+                    className="block rounded-lg border border-slate-200 p-4 transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/20"
                   >
                     <h3 className="font-medium text-slate-900 dark:text-neutral-100">{board.title}</h3>
                     {board.description ? (

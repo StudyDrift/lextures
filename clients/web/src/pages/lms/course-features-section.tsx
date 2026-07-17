@@ -200,7 +200,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         {
           label: 'AI Tutor',
           description:
-            'Conversational AI tutor side-panel available on all course pages — students can ask questions grounded in course context with a per-student monthly token budget (plan 6.9).',
+            'Conversational AI tutor side-panel available on all course pages — students can ask questions grounded in course context with a per-student monthly token budget.',
           enabled: aiTutorEnabled,
           onToggle: () => void persist({ aiTutorEnabled: !aiTutorEnabled }),
         },
@@ -246,7 +246,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         {
           label: 'Collaborative documents',
           description:
-            'Real-time co-editing with Y.js CRDT — shared rich-text docs and whiteboards for group work and classroom brainstorming (plan 6.5).',
+            'Real-time co-editing with Y.js CRDT — shared rich-text docs and whiteboards for group work and classroom brainstorming.',
           enabled: collabDocsEnabled,
           onToggle: () => void persist({ collabDocsEnabled: !collabDocsEnabled }),
         },
@@ -260,7 +260,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         {
           label: 'Discussion forums',
           description:
-            'Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation (plan 6.1).',
+            'Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation.',
           enabled: discussionsEnabled,
           onToggle: () => void persist({ discussionsEnabled: !discussionsEnabled }),
         },
@@ -281,7 +281,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         {
           label: 'Live sessions',
           description:
-            'Virtual classroom meetings via Jitsi, BigBlueButton, Zoom, or other providers — shows the Live Sessions menu item and scheduling page (plan 6.4).',
+            'Virtual classroom meetings via Jitsi, BigBlueButton, Zoom, or other providers — shows the Live Sessions menu item and scheduling page.',
           enabled: liveSessionsEnabled,
           onToggle: () => void persist({ liveSessionsEnabled: !liveSessionsEnabled }),
         },
@@ -296,7 +296,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         {
           label: 'Multilingual Messaging',
           description:
-            'Show a Translate button on feed posts, discussion posts, and inbox messages so users can read content in their preferred language (plan 6.10).',
+            'Show a Translate button on feed posts, discussion posts, and inbox messages so users can read content in their preferred language.',
           enabled: multilingualMessagingEnabled,
           onToggle: () =>
             void persist({ multilingualMessagingEnabled: !multilingualMessagingEnabled }),
@@ -311,7 +311,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         {
           label: 'Office hours',
           description:
-            'Let instructors define availability windows and students book 1-on-1 appointment slots — shows the Office Hours menu item (plan 6.7).',
+            'Let instructors define availability windows and students book 1-on-1 appointment slots — shows the Office Hours menu item.',
           enabled: officeHoursEnabled,
           onToggle: () => void persist({ officeHoursEnabled: !officeHoursEnabled }),
         },

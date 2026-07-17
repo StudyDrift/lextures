@@ -208,8 +208,8 @@ struct AuthPrimaryButtonStyle: ButtonStyle {
                 radius: configuration.isPressed ? 4 : 10,
                 y: configuration.isPressed ? 2 : 5
             )
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? LexturesMotion.pressScale : 1)
+            .animation(.easeOut(duration: LexturesMotion.fast), value: configuration.isPressed)
     }
 }
 
@@ -252,7 +252,7 @@ struct AuthTextField: View {
                     )
             )
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .animation(.easeOut(duration: 0.15), value: focused)
+            .animation(.easeOut(duration: LexturesMotion.fast), value: focused)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

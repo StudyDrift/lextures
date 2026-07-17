@@ -11,6 +11,7 @@ type DeliveryMethod string
 
 const (
 	DeliveryElectronicPESC DeliveryMethod = "electronic_pesc"
+	DeliveryEDISPEEDE      DeliveryMethod = "edi_speede"
 	DeliveryElectronicPDF  DeliveryMethod = "electronic_pdf"
 	DeliverySecureLink     DeliveryMethod = "secure_link_email"
 	DeliveryPostalMail     DeliveryMethod = "postal_mail"
@@ -20,6 +21,7 @@ const (
 // AllDeliveryMethods is the closed set of delivery methods (shared with T06).
 var AllDeliveryMethods = []DeliveryMethod{
 	DeliveryElectronicPESC,
+	DeliveryEDISPEEDE,
 	DeliveryElectronicPDF,
 	DeliverySecureLink,
 	DeliveryPostalMail,
@@ -83,7 +85,7 @@ var GlobalSelfRecipientID = uuid.MustParse("a0000000-0000-4000-8000-000000000001
 func ParseDeliveryMethod(s string) (DeliveryMethod, bool) {
 	m := DeliveryMethod(strings.TrimSpace(strings.ToLower(s)))
 	switch m {
-	case DeliveryElectronicPESC, DeliveryElectronicPDF, DeliverySecureLink, DeliveryPostalMail, DeliveryAPIPeer:
+	case DeliveryElectronicPESC, DeliveryEDISPEEDE, DeliveryElectronicPDF, DeliverySecureLink, DeliveryPostalMail, DeliveryAPIPeer:
 		return m, true
 	default:
 		return "", false
@@ -162,15 +164,24 @@ func CanonicalKeyFromName(name string) string {
 
 // OrgEnabledDeliveryMethods returns delivery methods the institution currently supports.
 // Pickup maps onto secure_link_email for the order model; webhook presence enables electronic paths.
+// When delivery_v2 is on, PESC/EDI/PDF/postal adapters are available without requiring a webhook.
 func OrgEnabledDeliveryMethods(cfg *Config) map[DeliveryMethod]bool {
 	out := map[DeliveryMethod]bool{
 		DeliverySecureLink:    true,
 		DeliveryElectronicPDF: true,
 		DeliveryPostalMail:    true,
 	}
-	if cfg != nil && cfg.WebhookURL != nil && strings.TrimSpace(*cfg.WebhookURL) != "" {
-		out[DeliveryElectronicPESC] = true
+	hasWebhook := cfg != nil && cfg.WebhookURL != nil && strings.TrimSpace(*cfg.WebhookURL) != ""
+	if hasWebhook {
 		out[DeliveryAPIPeer] = true
+	}
+	if cfg != nil && cfg.DeliveryV2 {
+		out[DeliveryElectronicPESC] = true
+		out[DeliveryEDISPEEDE] = true
+		out[DeliveryAPIPeer] = true
+	} else if hasWebhook {
+		// Pre-T06: webhook presence unlocked PESC + peer for directory orders.
+		out[DeliveryElectronicPESC] = true
 	}
 	return out
 }

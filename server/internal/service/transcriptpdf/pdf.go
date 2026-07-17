@@ -4,19 +4,35 @@ package transcriptpdf
 import (
 	"bytes"
 	"fmt"
+	"image"
+	"image/png"
 	"sort"
 	"strings"
 
+	"github.com/boombuler/barcode"
+	"github.com/boombuler/barcode/qr"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/lextures/lextures/server/internal/service/academicrecord"
 )
 
+// Options controls tamper-evidence embedding on official PDFs (T08).
+type Options struct {
+	VerificationURL string
+	ContentHash     string
+	ShortCode       string
+}
+
 // BuildPDF renders an academic record to PDF bytes.
 // Unofficial and preview variants receive a diagonal UNOFFICIAL watermark.
-func BuildPDF(rec *academicrecord.AcademicRecord) ([]byte, error) {
+func BuildPDF(rec *academicrecord.AcademicRecord, opts ...Options) ([]byte, error) {
 	if rec == nil {
 		return nil, fmt.Errorf("transcriptpdf: nil record")
 	}
+	var opt Options
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
+
 	pdf := gofpdf.New("P", "mm", "Letter", "")
 	docTitle := "Official Academic Transcript"
 	if rec.Variant != academicrecord.VariantOfficial {
@@ -26,7 +42,7 @@ func BuildPDF(rec *academicrecord.AcademicRecord) ([]byte, error) {
 	pdf.SetAuthor(rec.Institution.Name, false)
 	pdf.SetCreator("Lextures", false)
 	pdf.SetSubject(docTitle, false)
-	pdf.SetAutoPageBreak(true, 20)
+	pdf.SetAutoPageBreak(true, 28)
 	pdf.AddPage()
 
 	unofficial := rec.Variant != academicrecord.VariantOfficial
@@ -130,6 +146,9 @@ func BuildPDF(rec *academicrecord.AcademicRecord) ([]byte, error) {
 		pdf.Ln(8)
 		pdf.SetFont("Helvetica", "I", 8)
 		pdf.MultiCell(0, 4, "This official transcript is sealed by the issuing institution. Alteration voids the document.", "", "L", false)
+		if err := embedVerificationFooter(pdf, opt); err != nil {
+			return nil, err
+		}
 	}
 
 	var buf bytes.Buffer
@@ -137,6 +156,61 @@ func BuildPDF(rec *academicrecord.AcademicRecord) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func embedVerificationFooter(pdf *gofpdf.Fpdf, opt Options) error {
+	url := strings.TrimSpace(opt.VerificationURL)
+	hash := strings.TrimSpace(opt.ContentHash)
+	code := strings.TrimSpace(opt.ShortCode)
+	if url == "" && hash == "" {
+		return nil
+	}
+	pdf.Ln(6)
+	if url != "" {
+		if err := embedQR(pdf, url); err != nil {
+			return err
+		}
+		pdf.SetFont("Helvetica", "", 8)
+		pdf.MultiCell(140, 4, fmt.Sprintf("Verify at %s", url), "", "L", false)
+		if code != "" {
+			pdf.SetFont("Helvetica", "B", 8)
+			pdf.CellFormat(0, 4, fmt.Sprintf("Verification code: %s", code), "", 1, "L", false, 0, "")
+		}
+	}
+	if hash != "" {
+		pdf.SetFont("Helvetica", "", 7)
+		pdf.MultiCell(0, 3.5, fmt.Sprintf("Content hash (SHA-256): %s", hash), "", "L", false)
+	}
+	return nil
+}
+
+func embedQR(pdf *gofpdf.Fpdf, link string) error {
+	code, err := qr.Encode(link, qr.M, qr.Auto)
+	if err != nil {
+		return err
+	}
+	code, err = barcode.Scale(code, 120, 120)
+	if err != nil {
+		return err
+	}
+	// gofpdf only accepts 8-bit PNG; barcode may produce a paletted/16-bit source.
+	bounds := code.Bounds()
+	rgba := image.NewRGBA(bounds)
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			rgba.Set(x, y, code.At(x, y))
+		}
+	}
+	var pngBuf bytes.Buffer
+	if err := png.Encode(&pngBuf, rgba); err != nil {
+		return err
+	}
+	name := "transcript_verify_qr"
+	opt := gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}
+	pdf.RegisterImageOptionsReader(name, opt, bytes.NewReader(pngBuf.Bytes()))
+	y := pdf.GetY()
+	pdf.ImageOptions(name, 160, y, 30, 30, false, opt, 0, "")
+	return nil
 }
 
 func stampUnofficialWatermark(pdf *gofpdf.Fpdf) {

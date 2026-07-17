@@ -23,27 +23,16 @@ import {
 } from '../../lib/unified-notifications'
 import { markAllInboxMessagesRead, patchMailbox } from '../../lib/communication-api'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
+import { durations, easings, usePrefersReducedMotion } from '../../lib/motion'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
 import { useInboxUnreadCount, useMailboxRevision, useRefreshInboxUnread } from '../../context/use-inbox-unread'
 import { useInboxNotifications } from '../../context/use-push-notifications'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { AnimatedList } from '../ui/animated-list'
 
-/** Easing: strong deceleration (not linear) for panel + backdrop. */
-const NOTIF_DRAWER_EASE = 'cubic-bezier(0.16, 1, 0.3, 1)'
-const NOTIF_DRAWER_MS = 320
-
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(() =>
-    typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false,
-  )
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const sync = () => setReduced(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
-  return reduced
-}
+/** Drawer open/close uses shared motion tokens (AN.1). */
+const NOTIF_DRAWER_EASE = easings.standard
+const NOTIF_DRAWER_MS = durations.slow
 
 const FILTER_OPTIONS = [
   { id: 'all', label: 'All notifications', icon: LayoutGrid },
@@ -107,6 +96,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
   const titleId = useId()
   const descId = useId()
   const reducedMotion = usePrefersReducedMotion()
+  const { ffMotionLists } = usePlatformFeatures()
   const [portalVisible, setPortalVisible] = useState(open)
   const [entered, setEntered] = useState(false)
   const [filter, setFilter] = useState<NotificationFilter>('all')
@@ -418,36 +408,40 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
               {alertItems.length === 0 ? (
                 <p className="px-2 py-8 text-center text-sm text-slate-500 dark:text-neutral-400">No alerts.</p>
               ) : null}
-              <ul className="flex flex-col gap-1 pb-[env(safe-area-inset-bottom)]">
-                {alertItems.map((n) => (
-                  <li key={n.id}>
-                    <Link
-                      to={notificationActionHref(n.actionUrl)}
-                      onClick={() => {
-                        if (!n.isRead) void markAlertRead(n.id)
-                        onClose()
-                      }}
-                      className={`flex gap-3 rounded-xl px-2 py-2.5 text-start transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-800 ${n.isRead ? 'opacity-60' : ''}`}
-                    >
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
-                        <BellRing className="h-5 w-5" aria-hidden />
+              <AnimatedList
+                items={alertItems}
+                getKey={(n) => n.id}
+                enabled={ffMotionLists}
+                className="flex flex-col gap-1 pb-[env(safe-area-inset-bottom)]"
+                aria-label="Alerts"
+              >
+                {(n) => (
+                  <Link
+                    to={notificationActionHref(n.actionUrl)}
+                    onClick={() => {
+                      if (!n.isRead) void markAlertRead(n.id)
+                      onClose()
+                    }}
+                    className={`flex gap-3 rounded-xl px-2 py-2.5 text-start transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-800 ${n.isRead ? 'opacity-60' : ''}`}
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+                      <BellRing className="h-5 w-5" aria-hidden />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className={`line-clamp-2 text-sm font-medium ${n.isRead ? 'text-slate-500 dark:text-neutral-400' : 'text-slate-900 dark:text-neutral-100'}`}>
+                        {n.title}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className={`line-clamp-2 text-sm font-medium ${n.isRead ? 'text-slate-500 dark:text-neutral-400' : 'text-slate-900 dark:text-neutral-100'}`}>
-                          {n.title}
-                        </span>
-                        <span className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-neutral-400">
-                          {n.body}
-                        </span>
-                        <span className="mt-1 text-[11px] text-slate-400 dark:text-neutral-500">
-                          {formatTimeAgoFromIso(n.createdAt)}
-                        </span>
+                      <span className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-neutral-400">
+                        {n.body}
                       </span>
-                      {!n.isRead ? <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-indigo-500" aria-hidden /> : null}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                      <span className="mt-1 text-[11px] text-slate-400 dark:text-neutral-500">
+                        {formatTimeAgoFromIso(n.createdAt)}
+                      </span>
+                    </span>
+                    {!n.isRead ? <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-indigo-500" aria-hidden /> : null}
+                  </Link>
+                )}
+              </AnimatedList>
             </div>
           ) : null}
 
@@ -466,54 +460,58 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
               Nothing to show for this filter.
             </p>
           ) : null}
-          <ul className="flex flex-col gap-1 pb-[env(safe-area-inset-bottom)]">
-            {filtered.map((row) => {
+          <AnimatedList
+            items={filtered}
+            getKey={(row) => row.id}
+            enabled={ffMotionLists}
+            className="flex flex-col gap-1 pb-[env(safe-area-inset-bottom)]"
+            aria-label="Notifications"
+          >
+            {(row) => {
               const Icon = kindIcon(row.kind)
               const unreadAlert = row.kind === 'alert' && !row.isRead
               return (
-                <li key={row.id}>
-                  <Link
-                    to={row.href}
-                    onClick={() => {
-                      handleNotificationOpen(row)
-                      onClose()
-                    }}
-                    className={[
-                      'flex gap-3 rounded-xl px-2 py-2.5 text-start transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-800',
-                      unreadAlert ? '' : row.kind === 'alert' ? 'opacity-60' : '',
-                    ].join(' ')}
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
-                      <Icon className="h-5 w-5" aria-hidden />
+                <Link
+                  to={row.href}
+                  onClick={() => {
+                    handleNotificationOpen(row)
+                    onClose()
+                  }}
+                  className={[
+                    'flex gap-3 rounded-xl px-2 py-2.5 text-start transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-800',
+                    unreadAlert ? '' : row.kind === 'alert' ? 'opacity-60' : '',
+                  ].join(' ')}
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span
+                      className={[
+                        'line-clamp-2 text-sm font-medium',
+                        unreadAlert
+                          ? 'text-slate-900 dark:text-neutral-100'
+                          : row.kind === 'alert'
+                            ? 'text-slate-500 dark:text-neutral-400'
+                            : 'text-slate-900 dark:text-neutral-100',
+                      ].join(' ')}
+                    >
+                      {row.title}
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span
-                        className={[
-                          'line-clamp-2 text-sm font-medium',
-                          unreadAlert
-                            ? 'text-slate-900 dark:text-neutral-100'
-                            : row.kind === 'alert'
-                              ? 'text-slate-500 dark:text-neutral-400'
-                              : 'text-slate-900 dark:text-neutral-100',
-                        ].join(' ')}
-                      >
-                        {row.title}
-                      </span>
-                      <span className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-neutral-400">
-                        {row.subtitle}
-                      </span>
-                      <span className="mt-1 text-[11px] text-slate-400 dark:text-neutral-500">
-                        {formatTimeAgoFromIso(row.sortAt)}
-                      </span>
+                    <span className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-neutral-400">
+                      {row.subtitle}
                     </span>
-                    {unreadAlert ? (
-                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-indigo-500" aria-hidden />
-                    ) : null}
-                  </Link>
-                </li>
+                    <span className="mt-1 text-[11px] text-slate-400 dark:text-neutral-500">
+                      {formatTimeAgoFromIso(row.sortAt)}
+                    </span>
+                  </span>
+                  {unreadAlert ? (
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-indigo-500" aria-hidden />
+                  ) : null}
+                </Link>
               )
-            })}
-          </ul>
+            }}
+          </AnimatedList>
             </>
           ) : null}
         </div>

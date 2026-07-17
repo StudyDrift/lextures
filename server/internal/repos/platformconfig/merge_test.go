@@ -77,6 +77,18 @@ func TestMerge_BookstoreIntegrationDefaultsOffWhenDBUnset(t *testing.T) {
 	}
 }
 
+func TestMerge_DiplomasDefaultOff(t *testing.T) {
+	got := Merge(config.Config{FFDiplomas: true}, nil)
+	if got.FFDiplomas {
+		t.Fatal("expected FFDiplomas off (default) when DB unset, ignoring config/env")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFDiplomas: &on})
+	if !got.FFDiplomas {
+		t.Fatal("expected DB true to enable FFDiplomas")
+	}
+}
+
 func TestMerge_BookstoreIntegrationDBOverridesEnv(t *testing.T) {
 	off := false
 	got := Merge(config.Config{FFBookstoreIntegration: true}, &Row{FFBookstoreIntegration: &off})
@@ -164,6 +176,60 @@ func TestMerge_VisualBoardsAlwaysOn(t *testing.T) {
 	}
 }
 
+// AN.2: FFMotionNavigation defaults ON when platform settings row is unset (kill-switch).
+func TestMerge_FFMotionNavigationDefaultOn(t *testing.T) {
+	got := Merge(config.Config{}, &Row{})
+	if !got.FFMotionNavigation {
+		t.Fatal("expected FFMotionNavigation true (default ON) when DB unset")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFMotionNavigation: &off})
+	if got.FFMotionNavigation {
+		t.Fatal("expected FFMotionNavigation false when DB set false")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMotionNavigation: &on})
+	if !got.FFMotionNavigation {
+		t.Fatal("expected FFMotionNavigation true when DB set")
+	}
+}
+
+// AN.3: FFMotionReveal defaults ON when platform settings row is unset (kill-switch).
+func TestMerge_FFMotionRevealDefaultOn(t *testing.T) {
+	got := Merge(config.Config{}, &Row{})
+	if !got.FFMotionReveal {
+		t.Fatal("expected FFMotionReveal true (default ON) when DB unset")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFMotionReveal: &off})
+	if got.FFMotionReveal {
+		t.Fatal("expected FFMotionReveal false when DB set false")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMotionReveal: &on})
+	if !got.FFMotionReveal {
+		t.Fatal("expected FFMotionReveal true when DB set")
+	}
+}
+
+// AN.4: FFMotionLists defaults ON when platform settings row is unset (kill-switch).
+func TestMerge_FFMotionListsDefaultOn(t *testing.T) {
+	got := Merge(config.Config{}, &Row{})
+	if !got.FFMotionLists {
+		t.Fatal("expected FFMotionLists true (default ON) when DB unset")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFMotionLists: &off})
+	if got.FFMotionLists {
+		t.Fatal("expected FFMotionLists false when DB set false")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMotionLists: &on})
+	if !got.FFMotionLists {
+		t.Fatal("expected FFMotionLists true when DB set")
+	}
+}
+
 // Plan VC.6: FFBoardsExternalSharing defaults OFF when platform settings row is unset.
 func TestMerge_FFBoardsExternalSharingDefaultOff(t *testing.T) {
 	got := Merge(config.Config{}, &Row{})
@@ -195,24 +261,29 @@ func TestMerge_BoardsRealtimeDefaultOnWhenDBUnset(t *testing.T) {
 	}
 }
 
-// Plan IQ.1: FFInteractiveQuizzes defaults OFF when platform settings row is unset.
-func TestMerge_InteractiveQuizzesDefaultOffWhenDBUnset(t *testing.T) {
+// Live Quizzes are course-scoped only; platform master is always on (ignored).
+func TestMerge_InteractiveQuizzesAlwaysOn(t *testing.T) {
 	got := Merge(config.Config{}, nil)
-	if got.FFInteractiveQuizzes {
-		t.Fatal("expected FFInteractiveQuizzes false (default OFF) when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFInteractiveQuizzes: &on})
 	if !got.FFInteractiveQuizzes {
-		t.Fatal("expected DB true to enable interactive quizzes")
+		t.Fatal("expected FFInteractiveQuizzes true (always on; course flag is the gate)")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFInteractiveQuizzes: &off})
+	if !got.FFInteractiveQuizzes {
+		t.Fatal("expected FFInteractiveQuizzes true even when DB stores false")
 	}
 }
 
-// Plan IQ.3: FFIqLiveHosting defaults OFF when platform settings row is unset.
-func TestMerge_IqLiveHostingDefaultOffWhenDBUnset(t *testing.T) {
+// Plan IQ.3: FFIqLiveHosting defaults ON when platform settings row is unset.
+func TestMerge_IqLiveHostingDefaultOnWhenDBUnset(t *testing.T) {
 	got := Merge(config.Config{}, nil)
+	if !got.FFIqLiveHosting {
+		t.Fatal("expected FFIqLiveHosting true (default ON) when DB unset")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFIqLiveHosting: &off})
 	if got.FFIqLiveHosting {
-		t.Fatal("expected FFIqLiveHosting false (default OFF) when DB unset")
+		t.Fatal("expected explicit DB false to disable iq live hosting")
 	}
 	on := true
 	got = Merge(config.Config{}, &Row{FFIqLiveHosting: &on})

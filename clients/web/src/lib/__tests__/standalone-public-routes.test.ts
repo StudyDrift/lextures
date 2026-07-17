@@ -14,6 +14,8 @@ describe('isStandalonePublicRoute', () => {
 
   it('returns true for verify routes', () => {
     expect(isStandalonePublicRoute('/verify/abc')).toBe(true)
+    expect(isStandalonePublicRoute('/r/t/abc')).toBe(true)
+    expect(isStandalonePublicRoute('/wallet/s/abc')).toBe(true)
   })
 
   it('returns true for live quiz play routes', () => {

@@ -85,6 +85,12 @@ func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource) {
 	RegisterBoardExportJob(r, pool, exportStorage)
 	RegisterBoardLifecycleJobs(r, pool, exportStorage)
 	RegisterQuizgameGovernanceJobs(r, pool)
+	RegisterTranscriptDeliveryJob(r, pool, cfg)
+	RegisterTranscriptInboundJob(r, pool)
+	RegisterTranscriptAnalyticsJobs(r, pool)
+	RegisterTranscriptNotifyHooks(pool, cfg, nil)
+	RegisterWalletExportJob(r, pool, cfg)
+	RegisterDiplomaBatchJob(r, pool, cfg)
 	registerScheduledJobs(r, pool, cfgSrc)
 }
 

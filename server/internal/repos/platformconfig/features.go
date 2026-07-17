@@ -71,6 +71,12 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.AltTextEnforcementEnabled = mergeBool(db.AltTextEnforcementEnabled, false)
 	out.FFAltTextEnforcement = mergeBool(db.FFAltTextEnforcement, false)
 	out.FFHighContrastReducedMotion = mergeBool(db.FFHighContrastReducedMotion, false)
+	// AN.2 navigation transitions default ON; kill-switch via Settings → Global platform.
+	out.FFMotionNavigation = mergeBool(db.FFMotionNavigation, true)
+	// AN.3 load choreography default ON; kill-switch via Settings → Global platform.
+	out.FFMotionReveal = mergeBool(db.FFMotionReveal, true)
+	// AN.4 list/collection motion default ON; kill-switch via Settings → Global platform.
+	out.FFMotionLists = mergeBool(db.FFMotionLists, true)
 	out.FFParentPortal = mergeBool(db.FFParentPortal, false)
 	out.FFParentPortalV2 = mergeBool(db.FFParentPortalV2, false)
 	out.FFReportCards = mergeBool(db.FFReportCards, false)
@@ -95,6 +101,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFEportfolio = mergeBool(db.FFEportfolio, false)
 	out.FFBookstoreIntegration = mergeBool(db.FFBookstoreIntegration, false)
 	out.FFTranscripts = mergeBool(db.FFTranscripts, false)
+	out.FFTranscriptInbound = mergeBool(db.FFTranscriptInbound, false)
+	out.FFDiplomas = mergeBool(db.FFDiplomas, false)
 	out.FFWebhooks = mergeBool(db.FFWebhooks, false)
 	out.FFZapierConnector = mergeBool(db.FFZapierConnector, false)
 	out.FFMarketplace = mergeBool(db.FFMarketplace, false)
@@ -113,8 +121,10 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	// Boards realtime defaults ON so multi-user boards sync live without a refresh.
 	out.FFBoardsRealtime = mergeBool(db.FFBoardsRealtime, true)
 	out.FFBoardsExternalSharing = mergeBool(db.FFBoardsExternalSharing, false)
-	out.FFInteractiveQuizzes = mergeBool(db.FFInteractiveQuizzes, false)
-	out.FFIqLiveHosting = mergeBool(db.FFIqLiveHosting, false)
+	// Live Quizzes are course-scoped only; platform master switch removed.
+	out.FFInteractiveQuizzes = true
+	// Live hosting is the core of Live Quizzes; default ON so course enable is enough to host.
+	out.FFIqLiveHosting = mergeBool(db.FFIqLiveHosting, true)
 	out.FFIqTeamMode = mergeBool(db.FFIqTeamMode, false)
 	out.FFIqStudentPaced = mergeBool(db.FFIqStudentPaced, false)
 	out.FFIqHomework = mergeBool(db.FFIqHomework, false)

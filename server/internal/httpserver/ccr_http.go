@@ -16,7 +16,6 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	ccrsvc "github.com/lextures/lextures/server/internal/service/ccr"
-	"github.com/lextures/lextures/server/internal/service/vc_signing"
 )
 
 func (d Deps) ccrFeatureOff(w http.ResponseWriter) bool {
@@ -31,7 +30,7 @@ func (d Deps) registerCCRRoutes(r chi.Router) {
 	r.Get("/api/v1/me/ccr", d.handleListMyCCR())
 	r.Post("/api/v1/me/ccr/generate", d.handleGenerateMyCCR())
 	r.Get("/api/v1/me/ccr/{id}/download", d.handleDownloadMyCCR())
-	r.Get("/api/v1/verify/{shareToken}", d.handleVerifyCCR())
+	// Public verify is unified under registerTranscriptVerifyRoutes (T08); CLR tokens still work.
 	r.Get("/.well-known/did.json", d.handleInstitutionDID())
 	r.Post("/api/v1/admin/students/{uid}/ccr/achievements", d.handleAdminAddCCRAchievement())
 }
@@ -175,71 +174,14 @@ func (d Deps) handleDownloadMyCCR() http.HandlerFunc {
 	}
 }
 
-func (d Deps) handleVerifyCCR() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ccrFeatureOff(w) {
-			return
-		}
-		token := strings.TrimSpace(chi.URLParam(r, "shareToken"))
-		if token == "" {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
-			return
-		}
-		doc, err := ccrrepo.GetDocumentByShareToken(r.Context(), d.Pool, token)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify credential.")
-			return
-		}
-		if doc == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
-			return
-		}
-
-		var vc map[string]any
-		if err := json.Unmarshal(doc.VCProof, &vc); err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Invalid credential.")
-			return
-		}
-
-		cfg := d.effectiveConfig()
-		key, err := ccrsvc.ResolveSigningKey(cfg, cfg.PublicWebOrigin, cfg.CCRSigningSeedB64)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Signing key unavailable.")
-			return
-		}
-		valid, err := vcsigning.VerifyCredential(vc, key.PublicKey)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Verification failed.")
-			return
-		}
-		logging.GlobalCCRMetrics.IncVerifications()
-
-		issuerName := "Lextures"
-		if strings.TrimSpace(cfg.CCRInstitutionName) != "" {
-			issuerName = cfg.CCRInstitutionName
-		}
-		status := "Invalid"
-		if valid {
-			status = "Valid"
-		}
-
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"valid":      valid,
-			"status":     status,
-			"issuerName": issuerName,
-			"issuedAt":   doc.GeneratedAt.UTC().Format(time.RFC3339),
-			"credential": vc,
-		})
-	}
-}
-
 func (d Deps) handleInstitutionDID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ccrFeatureOff(w) {
+		cfg := d.effectiveConfig()
+		// DID covers all signed credential types (CLR, badges, transcripts) — T08 FR-10.
+		if !cfg.FFCoCurricularTranscript && !cfg.FFTranscripts && !cfg.FFCompetencyBadges {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Institution DID is not enabled.")
 			return
 		}
-		cfg := d.effectiveConfig()
 		key, err := ccrsvc.ResolveSigningKey(cfg, cfg.PublicWebOrigin, cfg.CCRSigningSeedB64)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Signing key unavailable.")

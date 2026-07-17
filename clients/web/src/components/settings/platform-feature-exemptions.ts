@@ -8,4 +8,6 @@ export const PLATFORM_FEATURE_EXEMPT_KEYS = [
   'ffContentFilterIntegration',
   'ffPlagiarismChecks',
   'ffStudyReminders',
+  // Live Quizzes are course-scoped only; platform master is always on (ignored).
+  'ffInteractiveQuizzes',
 ] as const satisfies readonly PlatformBooleanFeatureKey[]

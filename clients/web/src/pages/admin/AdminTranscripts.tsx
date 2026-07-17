@@ -1,19 +1,36 @@
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { FileText, Loader2 } from 'lucide-react'
+import { TranscriptAnalyticsPanel } from '../../components/lms/transcript-analytics-panel'
+import { TranscriptInboundQueue } from '../../components/lms/transcript-inbound-queue'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
+  createAdminTranscriptRecipient,
+  fetchAdminTranscriptDeliveryConfig,
+  fetchAdminTranscriptFees,
   fetchAdminTranscriptHolds,
   fetchAdminTranscriptOrders,
+  fetchAdminTranscriptRecipients,
   fetchAdminTranscriptsConfig,
+  fetchAdminTranscriptWaiverCodes,
   placeAdminTranscriptHold,
   releaseAdminTranscriptHold,
+  revokeAdminTranscriptDocument,
+  saveAdminTranscriptDeliveryConfig,
+  saveAdminTranscriptFees,
   transitionAdminTranscriptOrder,
+  unrevokeAdminTranscriptDocument,
+  updateAdminTranscriptRecipient,
   waiveAdminTranscriptOrder,
+  type TranscriptDeliveryConfig,
+  type TranscriptFeeSchedule,
   type TranscriptHold,
   type TranscriptHoldType,
   type TranscriptOrder,
   type TranscriptOrderTransitionAction,
+  type TranscriptRecipient,
+  type TranscriptWaiverCode,
 } from '../../lib/transcripts-api'
 
 const HOLD_TYPES: TranscriptHoldType[] = [
@@ -22,6 +39,27 @@ const HOLD_TYPES: TranscriptHoldType[] = [
   'registrar',
   'library',
   'other',
+]
+
+type ConsoleTab =
+  | 'queue'
+  | 'holds'
+  | 'fees'
+  | 'delivery'
+  | 'recipients'
+  | 'settings'
+  | 'analytics'
+  | 'inbound'
+
+const TABS: ConsoleTab[] = [
+  'queue',
+  'holds',
+  'analytics',
+  'fees',
+  'delivery',
+  'recipients',
+  'settings',
+  'inbound',
 ]
 
 function statusChipClass(status: string): string {
@@ -42,9 +80,16 @@ function statusChipClass(status: string): string {
   }
 }
 
+function parseTab(raw: string | null): ConsoleTab {
+  if (raw && (TABS as string[]).includes(raw)) return raw as ConsoleTab
+  return 'queue'
+}
+
 export default function AdminTranscriptsPage() {
   const { t } = useTranslation('common')
-  const { ffTranscripts } = usePlatformFeatures()
+  const { ffTranscripts, ffTranscriptInbound } = usePlatformFeatures()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab = parseTab(searchParams.get('tab'))
   const rejectReasonId = useId()
   const holdUserId = useId()
   const [consoleEnabled, setConsoleEnabled] = useState(false)
@@ -61,7 +106,33 @@ export default function AdminTranscriptsPage() {
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
+  const [feeSchedule, setFeeSchedule] = useState<TranscriptFeeSchedule | null>(null)
+  const [baseFeeMajor, setBaseFeeMajor] = useState('0')
+  const [rushFeeMajor, setRushFeeMajor] = useState('0')
+  const [perRecipientMajor, setPerRecipientMajor] = useState('0')
+  const [waivers, setWaivers] = useState<TranscriptWaiverCode[]>([])
+  const [deliveryCfg, setDeliveryCfg] = useState<TranscriptDeliveryConfig | null>(null)
+  const [deliveryWebhook, setDeliveryWebhook] = useState('')
+  const [recipients, setRecipients] = useState<TranscriptRecipient[]>([])
+  const [settingsSummary, setSettingsSummary] = useState<string[]>([])
+
+  const setTab = useCallback(
+    (next: ConsoleTab) => {
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.set('tab', next)
+      setSearchParams(nextParams, { replace: true })
+    },
+    [searchParams, setSearchParams],
+  )
+
+  const visibleTabs = useMemo(() => {
+    return TABS.filter((id) => {
+      if (id === 'inbound') return ffTranscriptInbound === true
+      return consoleEnabled
+    })
+  }, [consoleEnabled, ffTranscriptInbound])
+
+  const loadQueue = useCallback(async () => {
     if (!ffTranscripts) {
       setLoading(false)
       return
@@ -71,6 +142,14 @@ export default function AdminTranscriptsPage() {
     try {
       const cfg = await fetchAdminTranscriptsConfig()
       setConsoleEnabled(cfg.registrarConsoleEnabled === true)
+      setSettingsSummary([
+        cfg.officialEnabled ? 'official' : '',
+        cfg.ordersUiEnabled ? 'ordersUi' : '',
+        cfg.autoApprovalEnabled ? 'autoApproval' : '',
+        cfg.consentRequired !== false ? 'consent' : '',
+        cfg.feesEnabled ? 'fees' : '',
+        cfg.deliveryV2 ? 'deliveryV2' : '',
+      ].filter(Boolean))
       if (!cfg.registrarConsoleEnabled) {
         setOrders([])
         setHolds([])
@@ -86,17 +165,52 @@ export default function AdminTranscriptsPage() {
       ])
       setOrders(queue)
       setHolds(activeHolds)
-      setSelected((prev) => (prev ? (queue.find((o) => o.id === prev.id) ?? prev) : null))
+      const focusId = searchParams.get('orderId')
+      setSelected((prev) => {
+        if (focusId) return queue.find((o) => o.id === focusId) ?? prev
+        return prev ? (queue.find((o) => o.id === prev.id) ?? prev) : null
+      })
     } catch (e) {
       setError(e instanceof Error ? e.message : t('transcripts.registrar.loadError'))
     } finally {
       setLoading(false)
     }
-  }, [ffTranscripts, statusFilter, holdFilter, query, t])
+  }, [ffTranscripts, statusFilter, holdFilter, query, searchParams, t])
+
+  const loadConfigPanels = useCallback(async () => {
+    if (!ffTranscripts || !consoleEnabled) return
+    try {
+      if (tab === 'fees') {
+        const [fees, codes] = await Promise.all([
+          fetchAdminTranscriptFees(),
+          fetchAdminTranscriptWaiverCodes(),
+        ])
+        setFeeSchedule(fees)
+        setBaseFeeMajor(String((fees.baseFee ?? 0) / 100))
+        setRushFeeMajor(String((fees.rushFee ?? 0) / 100))
+        setPerRecipientMajor(String((fees.perRecipientFee ?? 0) / 100))
+        setWaivers(codes)
+      }
+      if (tab === 'delivery') {
+        const cfg = await fetchAdminTranscriptDeliveryConfig()
+        setDeliveryCfg(cfg)
+        setDeliveryWebhook(cfg.webhookUrl ?? '')
+      }
+      if (tab === 'recipients') {
+        setRecipients(await fetchAdminTranscriptRecipients())
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('transcripts.registrar.loadError'))
+    }
+  }, [ffTranscripts, consoleEnabled, tab, t])
 
   useEffect(() => {
-    void load()
-  }, [load])
+    void loadQueue()
+  }, [loadQueue])
+
+  useEffect(() => {
+    void loadConfigPanels()
+  }, [loadConfigPanels])
 
   async function runTransition(action: TranscriptOrderTransitionAction) {
     if (!selected) return
@@ -116,7 +230,7 @@ export default function AdminTranscriptsPage() {
       setSelected(updated)
       setMessage(t('transcripts.registrar.transitionOk'))
       setRejectReason('')
-      await load()
+      await loadQueue()
     } catch (e) {
       setError(e instanceof Error ? e.message : t('transcripts.registrar.transitionError'))
     } finally {
@@ -137,7 +251,7 @@ export default function AdminTranscriptsPage() {
       })
       setHoldForm({ userId: '', type: 'financial', reason: '' })
       setMessage(t('transcripts.registrar.holdPlaced'))
-      await load()
+      await loadQueue()
     } catch (err) {
       setError(err instanceof Error ? err.message : t('transcripts.registrar.holdError'))
     } finally {
@@ -153,7 +267,7 @@ export default function AdminTranscriptsPage() {
     )
   }
 
-  if (!loading && !consoleEnabled) {
+  if (!loading && !consoleEnabled && !ffTranscriptInbound) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-10">
         <h1 className="text-2xl font-semibold text-slate-900 dark:text-neutral-50">
@@ -175,10 +289,16 @@ export default function AdminTranscriptsPage() {
             {t('transcripts.registrar.title')}
           </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
-            {t('transcripts.registrar.subtitle')}
+            {t('transcripts.console.subtitle')}
           </p>
         </div>
       </div>
+
+      {!consoleEnabled && ffTranscriptInbound ? (
+        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+          {t('transcripts.registrar.consoleDisabled')}
+        </p>
+      ) : null}
 
       {error && (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100" role="alert">
@@ -191,292 +311,588 @@ export default function AdminTranscriptsPage() {
         </p>
       )}
 
-      <div className="mt-6 flex flex-wrap items-end gap-3">
-        <label className="text-sm">
-          <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.filterStatus')}</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          >
-            <option value="">{t('transcripts.registrar.filterAll')}</option>
-            <option value="in_review">in_review</option>
-            <option value="on_hold">on_hold</option>
-            <option value="processing">processing</option>
-            <option value="rejected">rejected</option>
-            <option value="completed">completed</option>
-          </select>
-        </label>
-        <label className="text-sm">
-          <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.filterHold')}</span>
-          <select
-            value={holdFilter}
-            onChange={(e) => setHoldFilter(e.target.value as 'all' | 'yes' | 'no')}
-            className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-          >
-            <option value="all">{t('transcripts.registrar.filterAll')}</option>
-            <option value="yes">{t('transcripts.registrar.filterHoldYes')}</option>
-            <option value="no">{t('transcripts.registrar.filterHoldNo')}</option>
-          </select>
-        </label>
-        <label className="min-w-[12rem] flex-1 text-sm">
-          <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.filterSearch')}</span>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') void load()
-            }}
-            className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            placeholder={t('transcripts.registrar.searchPlaceholder')}
-          />
-        </label>
-        <button
-          type="button"
-          onClick={() => void load()}
-          className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 dark:bg-neutral-200 dark:text-neutral-900"
-        >
-          {t('transcripts.registrar.refresh')}
-        </button>
+      <div className="mt-6 border-b border-slate-200 dark:border-neutral-800" role="tablist" aria-label={t('transcripts.console.tabsLabel')}>
+        <div className="flex flex-wrap gap-1">
+          {visibleTabs.map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={tab === id}
+              onClick={() => setTab(id)}
+              className={`rounded-t-md px-3 py-2 text-sm font-medium ${
+                tab === id
+                  ? 'bg-slate-100 text-slate-900 dark:bg-neutral-800 dark:text-neutral-50'
+                  : 'text-slate-600 hover:bg-slate-50 dark:text-neutral-400 dark:hover:bg-neutral-900'
+              }`}
+            >
+              {t(`transcripts.console.tab.${id}`)}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <section aria-labelledby="queue-heading">
-          <h2 id="queue-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
-            {t('transcripts.registrar.queueTitle')}
+      {consoleEnabled && tab === 'queue' ? (
+        <>
+          <div className="mt-6 flex flex-wrap items-end gap-3">
+            <label className="text-sm">
+              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.filterStatus')}</span>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              >
+                <option value="">{t('transcripts.registrar.filterAll')}</option>
+                <option value="in_review">in_review</option>
+                <option value="on_hold">on_hold</option>
+                <option value="processing">processing</option>
+                <option value="rejected">rejected</option>
+                <option value="completed">completed</option>
+              </select>
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.filterHold')}</span>
+              <select
+                value={holdFilter}
+                onChange={(e) => setHoldFilter(e.target.value as 'all' | 'yes' | 'no')}
+                className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              >
+                <option value="all">{t('transcripts.registrar.filterAll')}</option>
+                <option value="yes">{t('transcripts.registrar.filterHoldYes')}</option>
+                <option value="no">{t('transcripts.registrar.filterHoldNo')}</option>
+              </select>
+            </label>
+            <label className="min-w-[12rem] flex-1 text-sm">
+              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.filterSearch')}</span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') void loadQueue()
+                }}
+                className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                placeholder={t('transcripts.registrar.searchPlaceholder')}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void loadQueue()}
+              className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 dark:bg-neutral-200 dark:text-neutral-900"
+            >
+              {t('transcripts.registrar.refresh')}
+            </button>
+          </div>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+            <section aria-labelledby="queue-heading">
+              <h2 id="queue-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+                {t('transcripts.registrar.queueTitle')}
+              </h2>
+              {loading ? (
+                <p className="mt-4 flex items-center gap-2 text-sm text-slate-500">
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  {t('common.loading')}
+                </p>
+              ) : orders.length === 0 ? (
+                <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">{t('transcripts.registrar.queueEmpty')}</p>
+              ) : (
+                <ul className="mt-3 divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+                  {orders.map((o) => (
+                    <li key={o.id}>
+                      <button
+                        type="button"
+                        onClick={() => setSelected(o)}
+                        className={`flex w-full items-start justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-neutral-900 ${
+                          selected?.id === o.id ? 'bg-slate-50 dark:bg-neutral-900' : 'bg-white dark:bg-neutral-950'
+                        }`}
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+                            {o.userEmail ?? o.userId ?? o.id}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {o.items.length} {t('transcripts.registrar.recipients')} ·{' '}
+                            {o.submittedAt ? new Date(o.submittedAt).toLocaleString() : new Date(o.createdAt).toLocaleString()}
+                          </p>
+                          {o.studentMessage && (
+                            <p className="mt-1 text-xs text-amber-800 dark:text-amber-200">{o.studentMessage}</p>
+                          )}
+                        </div>
+                        <span
+                          className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${statusChipClass(o.status)}`}
+                          aria-label={t('transcripts.status.aria', { status: o.status })}
+                        >
+                          {t(`transcripts.status.${o.status}`, { defaultValue: o.status })}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section aria-labelledby="detail-heading" className="rounded-lg border border-slate-200 p-4 dark:border-neutral-800">
+              <h2 id="detail-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+                {t('transcripts.registrar.detailTitle')}
+              </h2>
+              {!selected ? (
+                <p className="mt-3 text-sm text-slate-500">{t('transcripts.registrar.detailEmpty')}</p>
+              ) : (
+                <div className="mt-3 space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">{selected.userEmail}</p>
+                    <p className="text-xs text-slate-500">{selected.id}</p>
+                    <p className="mt-2">
+                      <span
+                        className={`rounded px-2 py-0.5 text-xs font-medium ${statusChipClass(selected.status)}`}
+                        aria-label={t('transcripts.status.aria', { status: selected.status })}
+                      >
+                        {t(`transcripts.status.${selected.status}`, { defaultValue: selected.status })}
+                      </span>
+                    </p>
+                  </div>
+                  {selected.paymentStatus ? (
+                    <p className="text-xs text-slate-500">
+                      {t('transcripts.registrar.payment')}: {selected.paymentStatus}
+                      {selected.totalAmount != null
+                        ? ` · ${selected.currency?.toUpperCase() ?? 'USD'} ${(selected.totalAmount / 100).toFixed(2)}`
+                        : ''}
+                    </p>
+                  ) : null}
+                  <div className="flex flex-wrap gap-2">
+                    {(['approve', 'complete', 'cancel', 'hold', 'release'] as const).map((action) => (
+                      <button
+                        key={action}
+                        type="button"
+                        disabled={acting}
+                        onClick={() => void runTransition(action)}
+                        className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+                      >
+                        {t(`transcripts.registrar.action.${action}`)}
+                      </button>
+                    ))}
+                    {selected.paymentStatus &&
+                    !['paid', 'waived', 'free', 'refunded'].includes(selected.paymentStatus) ? (
+                      <button
+                        type="button"
+                        disabled={acting}
+                        onClick={() => {
+                          void (async () => {
+                            setActing(true)
+                            setError(null)
+                            setMessage(null)
+                            try {
+                              const order = await waiveAdminTranscriptOrder(selected.id, 'Registrar fee waiver')
+                              setSelected(order)
+                              setMessage(t('transcripts.registrar.waiveOk'))
+                              await loadQueue()
+                            } catch (e) {
+                              setError(e instanceof Error ? e.message : t('transcripts.registrar.waiveError'))
+                            } finally {
+                              setActing(false)
+                            }
+                          })()
+                        }}
+                        className="rounded-md border border-emerald-600 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-50 disabled:opacity-50 dark:text-emerald-200 dark:hover:bg-emerald-950"
+                      >
+                        {t('transcripts.registrar.waiveFee')}
+                      </button>
+                    ) : null}
+                  </div>
+                  <div>
+                    <label htmlFor={rejectReasonId} className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                      {t('transcripts.registrar.rejectReason')}
+                    </label>
+                    <div className="mt-1 flex gap-2">
+                      <input
+                        id={rejectReasonId}
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        className="flex-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                      />
+                      <button
+                        type="button"
+                        disabled={acting}
+                        onClick={() => void runTransition('reject')}
+                        className="rounded-md bg-red-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-50"
+                      >
+                        {t('transcripts.registrar.action.reject')}
+                      </button>
+                    </div>
+                  </div>
+                  {selected.items?.some((it) => it.documentId) ? (
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-200">
+                        {t('transcripts.registrar.revokeTitle')}
+                      </h3>
+                      <ul className="mt-2 space-y-2">
+                        {selected.items
+                          .filter((it) => it.documentId)
+                          .map((it) => (
+                            <li key={it.id} className="flex flex-wrap items-center gap-2 text-xs">
+                              <span className="font-mono text-slate-600 dark:text-neutral-400">{it.documentId}</span>
+                              <button
+                                type="button"
+                                disabled={acting}
+                                onClick={() => {
+                                  void (async () => {
+                                    if (!it.documentId) return
+                                    setActing(true)
+                                    setError(null)
+                                    setMessage(null)
+                                    try {
+                                      await revokeAdminTranscriptDocument(it.documentId, rejectReason || 'Revoked by registrar')
+                                      setMessage(t('transcripts.registrar.revokeSuccess'))
+                                    } catch (e) {
+                                      setError(e instanceof Error ? e.message : t('transcripts.registrar.revokeError'))
+                                    } finally {
+                                      setActing(false)
+                                    }
+                                  })()
+                                }}
+                                className="rounded border border-amber-600 px-2 py-1 text-amber-900 hover:bg-amber-50 disabled:opacity-50 dark:text-amber-200 dark:hover:bg-amber-950"
+                              >
+                                {t('transcripts.registrar.action.revoke')}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={acting}
+                                onClick={() => {
+                                  void (async () => {
+                                    if (!it.documentId) return
+                                    setActing(true)
+                                    setError(null)
+                                    setMessage(null)
+                                    try {
+                                      await unrevokeAdminTranscriptDocument(it.documentId)
+                                      setMessage(t('transcripts.registrar.unrevokeSuccess'))
+                                    } catch (e) {
+                                      setError(e instanceof Error ? e.message : t('transcripts.registrar.unrevokeError'))
+                                    } finally {
+                                      setActing(false)
+                                    }
+                                  })()
+                                }}
+                                className="rounded border border-slate-300 px-2 py-1 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+                              >
+                                {t('transcripts.registrar.action.unrevoke')}
+                              </button>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {selected.events && selected.events.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-200">
+                        {t('transcripts.registrar.timeline')}
+                      </h3>
+                      <ol className="mt-2 space-y-2 border-l border-slate-200 pl-3 dark:border-neutral-700">
+                        {selected.events.map((ev) => (
+                          <li key={ev.id} className="text-xs text-slate-600 dark:text-neutral-400">
+                            <span className="font-medium text-slate-800 dark:text-neutral-200">
+                              {ev.fromState ?? '—'} → {ev.toState}
+                            </span>
+                            {ev.reason ? ` · ${ev.reason}` : ''}
+                            <div className="text-[11px] text-slate-400">{new Date(ev.createdAt).toLocaleString()}</div>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          </div>
+        </>
+      ) : null}
+
+      {consoleEnabled && tab === 'holds' ? (
+        <section className="mt-6" aria-labelledby="holds-heading">
+          <h2 id="holds-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+            {t('transcripts.registrar.holdsTitle')}
           </h2>
-          {loading ? (
-            <p className="mt-4 flex items-center gap-2 text-sm text-slate-500">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              {t('common.loading')}
-            </p>
-          ) : orders.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">{t('transcripts.registrar.queueEmpty')}</p>
+          <form onSubmit={(e) => void handlePlaceHold(e)} className="mt-3 flex flex-wrap items-end gap-2">
+            <label className="text-sm">
+              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.holdUserId')}</span>
+              <input
+                id={holdUserId}
+                value={holdForm.userId}
+                onChange={(e) => setHoldForm((f) => ({ ...f, userId: e.target.value }))}
+                className="mt-1 w-72 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                required
+              />
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.holdType')}</span>
+              <select
+                value={holdForm.type}
+                onChange={(e) => setHoldForm((f) => ({ ...f, type: e.target.value as TranscriptHoldType }))}
+                className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              >
+                {HOLD_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {t(`transcripts.holdType.${type}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="min-w-[12rem] flex-1 text-sm">
+              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.holdReason')}</span>
+              <input
+                value={holdForm.reason}
+                onChange={(e) => setHoldForm((f) => ({ ...f, reason: e.target.value }))}
+                className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={acting}
+              className="rounded-md bg-amber-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-50"
+            >
+              {t('transcripts.registrar.placeHold')}
+            </button>
+          </form>
+          {holds.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-500">{t('transcripts.registrar.holdsEmpty')}</p>
           ) : (
-            <ul className="mt-3 divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
-              {orders.map((o) => (
-                <li key={o.id}>
+            <ul className="mt-4 divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+              {holds.map((h) => (
+                <li key={h.id} className="flex items-start justify-between gap-3 bg-white px-4 py-3 dark:bg-neutral-950">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+                      {t(`transcripts.holdType.${h.type}`)} · {h.userId}
+                    </p>
+                    <p className="text-xs text-slate-600 dark:text-neutral-400">{h.studentMessage}</p>
+                    {h.reason && <p className="mt-1 text-xs text-slate-400">{t('transcripts.registrar.internalReason')}: {h.reason}</p>}
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setSelected(o)}
-                    className={`flex w-full items-start justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-neutral-900 ${
-                      selected?.id === o.id ? 'bg-slate-50 dark:bg-neutral-900' : 'bg-white dark:bg-neutral-950'
-                    }`}
+                    disabled={acting}
+                    onClick={() => {
+                      void releaseAdminTranscriptHold(h.id)
+                        .then(() => loadQueue())
+                        .catch((err: unknown) =>
+                          setError(err instanceof Error ? err.message : t('transcripts.registrar.holdError')),
+                        )
+                    }}
+                    className="shrink-0 rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700"
                   >
-                    <div>
-                      <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
-                        {o.userEmail ?? o.userId ?? o.id}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {o.items.length} {t('transcripts.registrar.recipients')} ·{' '}
-                        {o.submittedAt ? new Date(o.submittedAt).toLocaleString() : new Date(o.createdAt).toLocaleString()}
-                      </p>
-                      {o.studentMessage && (
-                        <p className="mt-1 text-xs text-amber-800 dark:text-amber-200">{o.studentMessage}</p>
-                      )}
-                    </div>
-                    <span
-                      className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${statusChipClass(o.status)}`}
-                      aria-label={t('transcripts.status.aria', { status: o.status })}
-                    >
-                      {t(`transcripts.status.${o.status}`, { defaultValue: o.status })}
-                    </span>
+                    {t('transcripts.registrar.releaseHold')}
                   </button>
                 </li>
               ))}
             </ul>
           )}
         </section>
+      ) : null}
 
-        <section aria-labelledby="detail-heading" className="rounded-lg border border-slate-200 p-4 dark:border-neutral-800">
-          <h2 id="detail-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
-            {t('transcripts.registrar.detailTitle')}
-          </h2>
-          {!selected ? (
-            <p className="mt-3 text-sm text-slate-500">{t('transcripts.registrar.detailEmpty')}</p>
+      {consoleEnabled && tab === 'analytics' ? (
+        <TranscriptAnalyticsPanel
+          enabled
+          onOpenQueue={(orderId) => {
+            const next = new URLSearchParams(searchParams)
+            next.set('tab', 'queue')
+            if (orderId) next.set('orderId', orderId)
+            setSearchParams(next, { replace: true })
+          }}
+        />
+      ) : null}
+
+      {consoleEnabled && tab === 'fees' ? (
+        <section className="mt-6 space-y-4" aria-labelledby="fees-heading">
+          <h2 id="fees-heading" className="text-lg font-semibold">{t('transcripts.console.tab.fees')}</h2>
+          <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.console.feesHelp')}</p>
+          {feeSchedule ? (
+            <form
+              className="flex flex-wrap items-end gap-3"
+              onSubmit={(e) => {
+                e.preventDefault()
+                void (async () => {
+                  setActing(true)
+                  try {
+                    const updated = await saveAdminTranscriptFees({
+                      baseFee: Math.round(parseFloat(baseFeeMajor || '0') * 100),
+                      rushFee: Math.round(parseFloat(rushFeeMajor || '0') * 100),
+                      perRecipientFee: Math.round(parseFloat(perRecipientMajor || '0') * 100),
+                      currency: feeSchedule.currency,
+                      freeAllotment: feeSchedule.freeAllotment,
+                      allotmentPeriod: feeSchedule.allotmentPeriod,
+                      methodSurcharges: feeSchedule.methodSurcharges,
+                    })
+                    setFeeSchedule(updated)
+                    setMessage(t('transcripts.console.feesSaved'))
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : t('transcripts.console.feesError'))
+                  } finally {
+                    setActing(false)
+                  }
+                })()
+              }}
+            >
+              <label className="text-sm">
+                <span className="block text-slate-600">{t('transcripts.console.baseFee')}</span>
+                <input value={baseFeeMajor} onChange={(e) => setBaseFeeMajor(e.target.value)} className="mt-1 w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900" />
+              </label>
+              <label className="text-sm">
+                <span className="block text-slate-600">{t('transcripts.console.rushFee')}</span>
+                <input value={rushFeeMajor} onChange={(e) => setRushFeeMajor(e.target.value)} className="mt-1 w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900" />
+              </label>
+              <label className="text-sm">
+                <span className="block text-slate-600">{t('transcripts.console.perRecipientFee')}</span>
+                <input value={perRecipientMajor} onChange={(e) => setPerRecipientMajor(e.target.value)} className="mt-1 w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900" />
+              </label>
+              <button type="submit" disabled={acting} className="rounded-md bg-slate-800 px-3 py-1.5 text-sm text-white disabled:opacity-50">
+                {t('transcripts.console.save')}
+              </button>
+            </form>
           ) : (
-            <div className="mt-3 space-y-4">
-              <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">{selected.userEmail}</p>
-                <p className="text-xs text-slate-500">{selected.id}</p>
-                <p className="mt-2">
-                  <span
-                    className={`rounded px-2 py-0.5 text-xs font-medium ${statusChipClass(selected.status)}`}
-                    aria-label={t('transcripts.status.aria', { status: selected.status })}
-                  >
-                    {t(`transcripts.status.${selected.status}`, { defaultValue: selected.status })}
-                  </span>
-                </p>
-              </div>
-              {selected.paymentStatus ? (
-                <p className="text-xs text-slate-500">
-                  Payment: {selected.paymentStatus}
-                  {selected.totalAmount != null
-                    ? ` · ${selected.currency?.toUpperCase() ?? 'USD'} ${(selected.totalAmount / 100).toFixed(2)}`
-                    : ''}
-                </p>
-              ) : null}
-              <div className="flex flex-wrap gap-2">
-                {(['approve', 'complete', 'cancel', 'hold', 'release'] as const).map((action) => (
-                  <button
-                    key={action}
-                    type="button"
-                    disabled={acting}
-                    onClick={() => void runTransition(action)}
-                    className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
-                  >
-                    {t(`transcripts.registrar.action.${action}`)}
-                  </button>
+            <p className="text-sm text-slate-500">{t('common.loading')}</p>
+          )}
+          <div>
+            <h3 className="text-sm font-semibold">{t('transcripts.console.waiverCodes')}</h3>
+            {waivers.length === 0 ? (
+              <p className="mt-2 text-sm text-slate-500">{t('transcripts.console.waiversEmpty')}</p>
+            ) : (
+              <ul className="mt-2 text-sm">
+                {waivers.map((w) => (
+                  <li key={w.id} className="font-mono">{w.code}</li>
                 ))}
-                {selected.paymentStatus &&
-                !['paid', 'waived', 'free', 'refunded'].includes(selected.paymentStatus) ? (
-                  <button
-                    type="button"
-                    disabled={acting}
-                    onClick={() => {
-                      void (async () => {
-                        setActing(true)
-                        setError(null)
-                        setMessage(null)
-                        try {
-                          const order = await waiveAdminTranscriptOrder(selected.id, 'Registrar fee waiver')
-                          setSelected(order)
-                          setMessage('Order fee waived.')
-                          await load()
-                        } catch (e) {
-                          setError(e instanceof Error ? e.message : 'Could not waive order.')
-                        } finally {
-                          setActing(false)
-                        }
-                      })()
-                    }}
-                    className="rounded-md border border-emerald-600 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-50 disabled:opacity-50 dark:text-emerald-200 dark:hover:bg-emerald-950"
-                  >
-                    Waive fee
-                  </button>
-                ) : null}
-              </div>
-              <div>
-                <label htmlFor={rejectReasonId} className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
-                  {t('transcripts.registrar.rejectReason')}
-                </label>
-                <div className="mt-1 flex gap-2">
-                  <input
-                    id={rejectReasonId}
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                    className="flex-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-                  />
-                  <button
-                    type="button"
-                    disabled={acting}
-                    onClick={() => void runTransition('reject')}
-                    className="rounded-md bg-red-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-50"
-                  >
-                    {t('transcripts.registrar.action.reject')}
-                  </button>
-                </div>
-              </div>
-              {selected.events && selected.events.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-200">
-                    {t('transcripts.registrar.timeline')}
-                  </h3>
-                  <ol className="mt-2 space-y-2 border-l border-slate-200 pl-3 dark:border-neutral-700">
-                    {selected.events.map((ev) => (
-                      <li key={ev.id} className="text-xs text-slate-600 dark:text-neutral-400">
-                        <span className="font-medium text-slate-800 dark:text-neutral-200">
-                          {ev.fromState ?? '—'} → {ev.toState}
-                        </span>
-                        {ev.reason ? ` · ${ev.reason}` : ''}
-                        <div className="text-[11px] text-slate-400">{new Date(ev.createdAt).toLocaleString()}</div>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-            </div>
+              </ul>
+            )}
+          </div>
+        </section>
+      ) : null}
+
+      {consoleEnabled && tab === 'delivery' ? (
+        <section className="mt-6 space-y-4" aria-labelledby="delivery-heading">
+          <h2 id="delivery-heading" className="text-lg font-semibold">{t('transcripts.console.tab.delivery')}</h2>
+          {deliveryCfg ? (
+            <form
+              className="space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault()
+                void (async () => {
+                  setActing(true)
+                  try {
+                    const updated = await saveAdminTranscriptDeliveryConfig({
+                      webhookUrl: deliveryWebhook.trim(),
+                      deliveryV2: deliveryCfg.deliveryV2,
+                    })
+                    setDeliveryCfg(updated)
+                    setMessage(t('transcripts.console.deliverySaved'))
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : t('transcripts.console.deliveryError'))
+                  } finally {
+                    setActing(false)
+                  }
+                })()
+              }}
+            >
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={deliveryCfg.deliveryV2}
+                  onChange={(e) => setDeliveryCfg((c) => (c ? { ...c, deliveryV2: e.target.checked } : c))}
+                />
+                {t('transcripts.console.deliveryV2')}
+              </label>
+              <label className="block text-sm">
+                <span className="text-slate-600">{t('transcripts.console.webhookUrl')}</span>
+                <input
+                  value={deliveryWebhook}
+                  onChange={(e) => setDeliveryWebhook(e.target.value)}
+                  className="mt-1 w-full max-w-xl rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                  required
+                />
+              </label>
+              <p className="text-xs text-slate-500">
+                {t('transcripts.console.adapters')}: {deliveryCfg.adapters.join(', ')}
+              </p>
+              <button type="submit" disabled={acting} className="rounded-md bg-slate-800 px-3 py-1.5 text-sm text-white disabled:opacity-50">
+                {t('transcripts.console.save')}
+              </button>
+            </form>
+          ) : (
+            <p className="text-sm text-slate-500">{t('common.loading')}</p>
           )}
         </section>
-      </div>
+      ) : null}
 
-      <section className="mt-10" aria-labelledby="holds-heading">
-        <h2 id="holds-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
-          {t('transcripts.registrar.holdsTitle')}
-        </h2>
-        <form onSubmit={(e) => void handlePlaceHold(e)} className="mt-3 flex flex-wrap items-end gap-2">
-          <label className="text-sm">
-            <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.holdUserId')}</span>
-            <input
-              id={holdUserId}
-              value={holdForm.userId}
-              onChange={(e) => setHoldForm((f) => ({ ...f, userId: e.target.value }))}
-              className="mt-1 w-72 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-              required
-            />
-          </label>
-          <label className="text-sm">
-            <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.holdType')}</span>
-            <select
-              value={holdForm.type}
-              onChange={(e) => setHoldForm((f) => ({ ...f, type: e.target.value as TranscriptHoldType }))}
-              className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            >
-              {HOLD_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {t(`transcripts.holdType.${type}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="min-w-[12rem] flex-1 text-sm">
-            <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.holdReason')}</span>
-            <input
-              value={holdForm.reason}
-              onChange={(e) => setHoldForm((f) => ({ ...f, reason: e.target.value }))}
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
-            />
-          </label>
+      {consoleEnabled && tab === 'recipients' ? (
+        <section className="mt-6 space-y-4" aria-labelledby="recipients-heading">
+          <h2 id="recipients-heading" className="text-lg font-semibold">{t('transcripts.console.tab.recipients')}</h2>
           <button
-            type="submit"
-            disabled={acting}
-            className="rounded-md bg-amber-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-50"
+            type="button"
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-700"
+            onClick={() => {
+              void (async () => {
+                try {
+                  const created = await createAdminTranscriptRecipient({
+                    name: 'New recipient',
+                    type: 'institution',
+                    capabilities: ['electronic_pdf'],
+                  })
+                  setRecipients((prev) => [created, ...prev])
+                  setMessage(t('transcripts.console.recipientCreated'))
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : t('transcripts.console.recipientError'))
+                }
+              })()
+            }}
           >
-            {t('transcripts.registrar.placeHold')}
+            {t('transcripts.console.addRecipient')}
           </button>
-        </form>
-        {holds.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-500">{t('transcripts.registrar.holdsEmpty')}</p>
-        ) : (
-          <ul className="mt-4 divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
-            {holds.map((h) => (
-              <li key={h.id} className="flex items-start justify-between gap-3 bg-white px-4 py-3 dark:bg-neutral-950">
-                <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
-                    {t(`transcripts.holdType.${h.type}`)} · {h.userId}
-                  </p>
-                  <p className="text-xs text-slate-600 dark:text-neutral-400">{h.studentMessage}</p>
-                  {h.reason && <p className="mt-1 text-xs text-slate-400">{t('transcripts.registrar.internalReason')}: {h.reason}</p>}
-                </div>
-                <button
-                  type="button"
-                  disabled={acting}
-                  onClick={() => {
-                    void releaseAdminTranscriptHold(h.id)
-                      .then(() => load())
-                      .catch((err: unknown) =>
-                        setError(err instanceof Error ? err.message : t('transcripts.registrar.holdError')),
-                      )
-                  }}
-                  className="shrink-0 rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700"
-                >
-                  {t('transcripts.registrar.releaseHold')}
-                </button>
-              </li>
+          {recipients.length === 0 ? (
+            <p className="text-sm text-slate-500">{t('transcripts.console.recipientsEmpty')}</p>
+          ) : (
+            <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+              {recipients.map((r) => (
+                <li key={r.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                  <div>
+                    <p className="font-medium">{r.name}</p>
+                    <p className="text-xs text-slate-500">{r.type} · {(r.capabilities ?? []).join(', ')}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="text-xs text-slate-600 hover:underline"
+                    onClick={() => {
+                      void updateAdminTranscriptRecipient(r.id, { active: !r.active })
+                        .then((updated) => {
+                          setRecipients((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))
+                        })
+                        .catch((err: unknown) =>
+                          setError(err instanceof Error ? err.message : t('transcripts.console.recipientError')),
+                        )
+                    }}
+                  >
+                    {r.active ? t('transcripts.console.deactivate') : t('transcripts.console.activate')}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
+
+      {consoleEnabled && tab === 'settings' ? (
+        <section className="mt-6 space-y-3" aria-labelledby="settings-heading">
+          <h2 id="settings-heading" className="text-lg font-semibold">{t('transcripts.console.tab.settings')}</h2>
+          <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.console.settingsHelp')}</p>
+          <ul className="list-disc pl-5 text-sm text-slate-700 dark:text-neutral-300">
+            {settingsSummary.map((key) => (
+              <li key={key}>{t(`transcripts.console.setting.${key}`, { defaultValue: key })}</li>
             ))}
           </ul>
-        )}
-      </section>
+          <p className="text-sm">
+            <a href="/settings/transcripts" className="text-sky-700 underline dark:text-sky-300">
+              {t('transcripts.console.openPlatformSettings')}
+            </a>
+          </p>
+        </section>
+      ) : null}
+
+      {tab === 'inbound' ? <TranscriptInboundQueue enabled={ffTranscriptInbound === true} /> : null}
     </div>
   )
 }

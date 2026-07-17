@@ -48,10 +48,12 @@ export function SideNavMainLinks() {
     ffAccessibilityIntake,
     ffCoCurricularTranscript,
     ffCeuTracking,
+    ffDiplomas,
     ffStripeBilling,
     ffRevenueShare,
     ffLearningPaths,
     ffCompletionCredentials,
+    ffCompetencyBadges,
     ffCatalogIntegration,
     ffCourseMarketplace,
     ffLibrary,
@@ -72,12 +74,17 @@ export function SideNavMainLinks() {
     </span>
   )
 
-  const showRecords =
+  const showWallet =
     ffTranscripts ||
-    ffAdvisingIntegration ||
     ffCoCurricularTranscript ||
+    ffCompetencyBadges ||
     ffCompletionCredentials ||
     ffCeuTracking ||
+    ffDiplomas
+
+  const showRecords =
+    showWallet ||
+    ffAdvisingIntegration ||
     ffResearchConsent ||
     ffAccessibilityIntake ||
     ffStripeBilling ||
@@ -173,6 +180,11 @@ export function SideNavMainLinks() {
           {ffAccessibilityIntake ? (
             <SideNavLink to="/me/accommodations" icon={<ShieldCheck className="h-5 w-5" />}>
               My accommodations
+            </SideNavLink>
+          ) : null}
+          {showWallet ? (
+            <SideNavLink to="/me/wallet" icon={<Award className="h-5 w-5" />}>
+              Credential wallet
             </SideNavLink>
           ) : null}
           {ffCoCurricularTranscript ? (

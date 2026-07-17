@@ -234,6 +234,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerBookstoreRoutes(r)
 	d.registerEportfolioRoutes(r)
 	d.registerTranscriptsRoutes(r)
+	d.registerDiplomasRoutes(r)
 	d.registerAdvisingRoutes(r)
 	d.registerResearchConsentRoutes(r)
 	d.registerConsortiumRoutes(r)

@@ -1,8 +1,8 @@
 package com.lextures.android.features.navigation
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import com.lextures.android.core.design.LocalReduceMotion
+import com.lextures.android.core.design.LexturesMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -73,9 +73,10 @@ fun DrawerScaffold(
         val openThreshold = panelPx * 0.33f
         val escalateThreshold = panelPx * 0.25f
 
+        val reduceMotion = LocalReduceMotion.current
         val drawerProgress by animateFloatAsState(
             targetValue = if (state != DrawerState.None) 1f else 0f,
-            animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+            animationSpec = LexturesMotion.navigationSpec(reduceMotion = reduceMotion),
             label = "drawerProgress",
         )
         SideEffect { onDrawerProgress(drawerProgress) }

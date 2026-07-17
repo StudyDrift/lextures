@@ -228,16 +228,23 @@ struct DashboardView: View {
                             LMSErrorBanner(message: error)
                         }
 
-                        if model.loading && model.courses.isEmpty {
+                        LXLoadReveal(
+                            ready: !(model.loading && model.courses.isEmpty),
+                            enabled: shell.platformFeatures.ffMotionReveal
+                        ) {
                             LMSSkeletonList(count: 4)
-                        } else {
+                        } content: {
                             announcementCard
+                                .lxStaggeredReveal(index: 0, appeared: true, enabled: shell.platformFeatures.ffMotionReveal)
                             if shell.platformFeatures.ffMobileLiveMeetings, !model.liveAndUpcoming.isEmpty {
                                 LiveMeetingsRail(items: model.liveAndUpcoming, courses: model.courses)
+                                    .lxStaggeredReveal(index: 1, appeared: true, enabled: shell.platformFeatures.ffMotionReveal)
                             }
                             reviewCard
+                                .lxStaggeredReveal(index: 2, appeared: true, enabled: shell.platformFeatures.ffMotionReveal)
                             if shell.platformFeatures.selfReflectionEnabled {
                                 DashboardInsightsSection(onOpenInsights: { openInsights = true })
+                                    .lxStaggeredReveal(index: 3, appeared: true, enabled: shell.platformFeatures.ffMotionReveal)
                             }
                             if shell.platformFeatures.ffLearningPaths || !studentCourses.isEmpty {
                                 DashboardStudySection(
@@ -248,16 +255,21 @@ struct DashboardView: View {
                                     },
                                     onOpenPaths: { openPaths = true }
                                 )
+                                .lxStaggeredReveal(index: 4, appeared: true, enabled: shell.platformFeatures.ffMotionReveal)
                             }
                             statsRow
+                                .lxStaggeredReveal(index: 5, appeared: true, enabled: shell.platformFeatures.ffMotionReveal)
                             teacherSnapshot
+                                .lxStaggeredReveal(index: 6, appeared: true, enabled: shell.platformFeatures.ffMotionReveal)
                             dueSoonSection
+                                .lxStaggeredReveal(index: 7, appeared: true, enabled: shell.platformFeatures.ffMotionReveal)
                             DashboardCoursesCarousel(
                                 courses: model.courses,
                                 loading: model.loading,
                                 courseItemCounts: model.courseItemCounts,
                                 colorScheme: colorScheme
                             )
+                            .lxStaggeredReveal(index: 8, appeared: true, enabled: shell.platformFeatures.ffMotionReveal)
                         }
                     }
                     .padding(16)
@@ -463,6 +475,7 @@ struct DashboardView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .lxListMotion(enabled: shell.platformFeatures.ffMotionLists)
             }
         }
     }
@@ -526,6 +539,7 @@ struct DashboardView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .lxListMotion(enabled: shell.platformFeatures.ffMotionLists)
             }
         }
     }

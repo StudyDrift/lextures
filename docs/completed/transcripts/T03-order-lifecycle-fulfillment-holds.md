@@ -193,5 +193,5 @@ None required. (Optional future: anomaly flag for unusual order spikes — out o
 ## 19. References
 
 - Existing: `server/internal/httpserver/transcripts_http.go` (status handling), RBAC repos, audit log ([10.11](../../completed/10-compliance-privacy-security/)).
-- Related plans: [T02](T02-recipient-directory-and-orders.md), [T04](T04-ferpa-consent-esignature.md), [T05](../../plan/transcripts/T05-fees-payments-waivers.md), [T06](../../plan/transcripts/T06-electronic-delivery-standards.md), [T12](../../plan/transcripts/T12-registrar-console-analytics.md).
+- Related plans: [T02](T02-recipient-directory-and-orders.md), [T04](T04-ferpa-consent-esignature.md), [T05](T05-fees-payments-waivers.md), [T06](T06-electronic-delivery-standards.md), [T12](T12-registrar-console-analytics.md).
 - Shipped: migration `393`, `models/transcriptorder`, `repos/transcripts/{holds,lifecycle}.go`, `transcripts_lifecycle_http.go`, registrar UI at `/admin/transcripts`.

@@ -62,7 +62,6 @@ export function SideNavAdminLinks() {
     ffWebhooks,
     ffContentFilterIntegration,
     ffVisualBoards,
-    ffInteractiveQuizzes,
     ffIncompleteGradeWorkflow,
     ffGradeSubmission,
     ffAcademicCalendar,
@@ -74,6 +73,7 @@ export function SideNavAdminLinks() {
     emailTemplateEditorEnabled,
     maintenanceBannerEnabled,
     ffTranscripts,
+    ffDiplomas,
   } = usePlatformFeatures()
 
   const captionsEnabled = videoCaptionsEnabled || autoCaptioningEnabled
@@ -186,6 +186,15 @@ export function SideNavAdminLinks() {
               Transcripts
             </SideNavLink>
           ) : null}
+          {ffDiplomas ? (
+            <SideNavLink
+              to={orgPath('/admin/diplomas', orgId)}
+              className={() => (active('/admin/diplomas') ? sideNavActiveClass : '')}
+              icon={<Award className="h-5 w-5" />}
+            >
+              Diplomas
+            </SideNavLink>
+          ) : null}
           <SideNavLink
             to="/admin/scheduled-jobs"
             className={() => (active('/admin/scheduled-jobs') ? sideNavActiveClass : '')}
@@ -202,15 +211,13 @@ export function SideNavAdminLinks() {
               Collaboration boards
             </SideNavLink>
           ) : null}
-          {ffInteractiveQuizzes ? (
-            <SideNavLink
-              to={orgPath('/admin/live-quizzes', orgId)}
-              className={() => (active('/admin/live-quizzes') ? sideNavActiveClass : '')}
-              icon={<Gamepad2 className="h-5 w-5" />}
-            >
-              Live Quizzes
-            </SideNavLink>
-          ) : null}
+          <SideNavLink
+            to={orgPath('/admin/live-quizzes', orgId)}
+            className={() => (active('/admin/live-quizzes') ? sideNavActiveClass : '')}
+            icon={<Gamepad2 className="h-5 w-5" />}
+          >
+            Live Quizzes
+          </SideNavLink>
 
           {showIntegrations ? (
             <>

@@ -88,7 +88,7 @@ export default function PublicBadgeListPage() {
             <li key={b.id}>
               <Link
                 to={`/badges/${encodeURIComponent(resolvedHandle)}/${encodeURIComponent(b.slug)}`}
-                className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-indigo-600"
+                className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-indigo-600"
               >
                 <h2 className="font-semibold">{b.name}</h2>
                 <p className="mt-1 text-xs text-slate-500">

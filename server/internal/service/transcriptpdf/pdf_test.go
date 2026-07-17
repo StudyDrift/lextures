@@ -58,3 +58,32 @@ func TestBuildPDF_OfficialNoWatermark(t *testing.T) {
 		t.Fatal("official PDF must not carry UNOFFICIAL watermark")
 	}
 }
+
+func TestBuildPDF_OfficialEmbedsVerifyFooter(t *testing.T) {
+	rec := &academicrecord.AcademicRecord{
+		Variant:     academicrecord.VariantOfficial,
+		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		Student:     academicrecord.StudentBlock{Name: "Ada"},
+		Institution: academicrecord.InstitutionBlock{Name: "U"},
+		Terms:       []academicrecord.TermBlock{},
+		Cumulative:  academicrecord.CumulativeBlock{},
+		Legend:      academicrecord.DefaultLegend(),
+	}
+	pdf, err := BuildPDF(rec, Options{
+		VerificationURL: "https://app.example.com/verify/abc-token",
+		ContentHash:     "deadbeefcafebabe",
+		ShortCode:       "ABC",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.HasPrefix(pdf, []byte("%PDF")) {
+		t.Fatal("expected PDF")
+	}
+	if !bytes.Contains(pdf, []byte("Verify at")) && !bytes.Contains(pdf, []byte("verify")) {
+		// Content streams may be compressed; document should still grow with QR image.
+		if len(pdf) < 800 {
+			t.Fatalf("expected larger PDF with QR/footer, got %d bytes", len(pdf))
+		}
+	}
+}

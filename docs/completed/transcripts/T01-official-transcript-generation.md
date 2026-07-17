@@ -211,4 +211,4 @@ None. Generation is deterministic; no model involved. (Explicitly no AI in the o
 
 - Existing: `server/internal/httpserver/transcripts_http.go`, `server/internal/repos/transcripts/repo.go`, `server/internal/service/masterytranscriptpdf/`, `server/internal/service/vc_signing/`, `clients/web/src/pages/lms/transcripts-page.tsx`.
 - Standards: PESC (Postsecondary Electronic Standards Council) AcademicRecord/College Transcript XML; PDF/UA (ISO 14289).
-- Related plans: [T02](T02-recipient-directory-and-orders.md), [T06](../../plan/transcripts/T06-electronic-delivery-standards.md), [T08](../../plan/transcripts/T08-credential-verification.md), [14.13 CLR](../../completed/14-higher-ed-specific/14.13-co-curricular-transcript.md).
+- Related plans: [T02](T02-recipient-directory-and-orders.md), [T06](T06-electronic-delivery-standards.md), [T08](T08-credential-verification.md), [14.13 CLR](../14-higher-ed-specific/14.13-co-curricular-transcript.md).

@@ -25,49 +25,58 @@ const (
 
 // Document is an immutable issued transcript artifact.
 type Document struct {
-	ID              uuid.UUID
-	UserID          uuid.UUID
-	OrgID           *uuid.UUID
-	Variant         DocumentVariant
-	Version         int
-	Canonical       json.RawMessage
-	SchemaVersion   string
-	TemplateVersion string
-	ContentHash     string
-	PDFBytes        []byte
-	PESCXMLBytes    []byte
-	PDFKey          *string
-	PESCXMLKey      *string
-	VCProof         json.RawMessage
-	GPACumulative   *float64
-	CreditsEarned   *float64
-	GeneratedBy     *uuid.UUID
-	GeneratedAt     time.Time
+	ID               uuid.UUID
+	UserID           uuid.UUID
+	OrgID            *uuid.UUID
+	Variant          DocumentVariant
+	Version          int
+	Canonical        json.RawMessage
+	SchemaVersion    string
+	TemplateVersion  string
+	ContentHash      string
+	PDFBytes         []byte
+	PESCXMLBytes     []byte
+	PDFKey           *string
+	PESCXMLKey       *string
+	VCProof          json.RawMessage
+	GPACumulative    *float64
+	CreditsEarned    *float64
+	GeneratedBy      *uuid.UUID
+	GeneratedAt      time.Time
+	VerifyToken      *string
+	PDFHash          *string
+	RevokedAt        *time.Time
+	RevokeReason     *string
+	DisclosePublicly bool
 }
 
 // InsertDocumentInput is the payload for creating a new issued document.
 type InsertDocumentInput struct {
-	UserID          uuid.UUID
-	OrgID           *uuid.UUID
-	Variant         DocumentVariant
-	Canonical       json.RawMessage
-	SchemaVersion   string
-	TemplateVersion string
-	ContentHash     string
-	PDFBytes        []byte
-	PESCXMLBytes    []byte
-	PDFKey          *string
-	PESCXMLKey      *string
-	VCProof         json.RawMessage
-	GPACumulative   *float64
-	CreditsEarned   *float64
-	GeneratedBy     *uuid.UUID
+	UserID           uuid.UUID
+	OrgID            *uuid.UUID
+	Variant          DocumentVariant
+	Canonical        json.RawMessage
+	SchemaVersion    string
+	TemplateVersion  string
+	ContentHash      string
+	PDFBytes         []byte
+	PESCXMLBytes     []byte
+	PDFKey           *string
+	PESCXMLKey       *string
+	VCProof          json.RawMessage
+	GPACumulative    *float64
+	CreditsEarned    *float64
+	GeneratedBy      *uuid.UUID
+	VerifyToken      *string
+	PDFHash          *string
+	DisclosePublicly bool
 }
 
 const documentSelectColumns = `
 id, user_id, org_id, variant, version, canonical, schema_version, template_version,
 content_hash, pdf_bytes, pesc_xml_bytes, pdf_key, pesc_xml_key, vc_proof,
-gpa_cumulative, credits_earned, generated_by, generated_at`
+gpa_cumulative, credits_earned, generated_by, generated_at,
+verify_token, pdf_hash, revoked_at, revoke_reason, disclose_publicly`
 
 func scanDocument(row pgx.Row, d *Document) error {
 	var variant string
@@ -76,6 +85,7 @@ func scanDocument(row pgx.Row, d *Document) error {
 		&d.SchemaVersion, &d.TemplateVersion, &d.ContentHash,
 		&d.PDFBytes, &d.PESCXMLBytes, &d.PDFKey, &d.PESCXMLKey, &d.VCProof,
 		&d.GPACumulative, &d.CreditsEarned, &d.GeneratedBy, &d.GeneratedAt,
+		&d.VerifyToken, &d.PDFHash, &d.RevokedAt, &d.RevokeReason, &d.DisclosePublicly,
 	)
 	if err != nil {
 		return err
@@ -116,13 +126,15 @@ func InsertDocument(ctx context.Context, pool *pgxpool.Pool, in InsertDocumentIn
 INSERT INTO transcripts.transcript_documents (
     user_id, org_id, variant, version, canonical, schema_version, template_version,
     content_hash, pdf_bytes, pesc_xml_bytes, pdf_key, pesc_xml_key, vc_proof,
-    gpa_cumulative, credits_earned, generated_by
+    gpa_cumulative, credits_earned, generated_by,
+    verify_token, pdf_hash, disclose_publicly
 )
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
 RETURNING `+documentSelectColumns+`
 `, in.UserID, in.OrgID, string(in.Variant), version, in.Canonical, in.SchemaVersion, in.TemplateVersion,
 		in.ContentHash, in.PDFBytes, in.PESCXMLBytes, in.PDFKey, in.PESCXMLKey, in.VCProof,
-		in.GPACumulative, in.CreditsEarned, in.GeneratedBy)
+		in.GPACumulative, in.CreditsEarned, in.GeneratedBy,
+		in.VerifyToken, in.PDFHash, in.DisclosePublicly)
 	if err := scanDocument(row, &d); err != nil {
 		return nil, err
 	}

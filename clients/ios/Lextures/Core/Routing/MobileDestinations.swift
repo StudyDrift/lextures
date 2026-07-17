@@ -370,6 +370,12 @@ struct MobilePlatformFeatures: Equatable {
     var autoCaptioningEnabled = false
     var translationMemoryEnabled = false
     var ffReadingPreferences = false
+    /// AN.2 kill-switch; default on when unset.
+    var ffMotionNavigation = true
+    /// AN.3 kill-switch; default on when unset.
+    var ffMotionReveal = true
+    /// AN.4 kill-switch; default on when unset.
+    var ffMotionLists = true
     var oerLibraryEnabled = false
     var xapiEmissionEnabled = false
     var customFieldsEnabled = false
@@ -440,6 +446,9 @@ struct MobilePlatformFeatures: Equatable {
             autoCaptioningEnabled: features?.autoCaptioningEnabled == true,
             translationMemoryEnabled: features?.translationMemoryEnabled == true,
             ffReadingPreferences: features?.ffReadingPreferences == true,
+            ffMotionNavigation: features?.ffMotionNavigation != false,
+            ffMotionReveal: features?.ffMotionReveal != false,
+            ffMotionLists: features?.ffMotionLists != false,
             oerLibraryEnabled: features?.oerLibraryEnabled == true,
             xapiEmissionEnabled: features?.xapiEmissionEnabled == true,
             customFieldsEnabled: features?.customFieldsEnabled == true,

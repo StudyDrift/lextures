@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { TranscriptCheckoutForm } from './transcript-checkout-form'
 import { TranscriptConsentForm } from './transcript-consent-form'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { AnimatedList } from '../ui/animated-list'
 import {
   createTranscriptOrder,
   searchTranscriptRecipients,
@@ -18,6 +20,7 @@ import {
 
 const DELIVERY_METHODS: TranscriptDeliveryMethod[] = [
   'electronic_pesc',
+  'edi_speede',
   'electronic_pdf',
   'secure_link_email',
   'postal_mail',
@@ -56,6 +59,8 @@ function methodLabelKey(m: TranscriptDeliveryMethod): string {
   switch (m) {
     case 'electronic_pesc':
       return 'transcripts.delivery.electronicPesc'
+    case 'edi_speede':
+      return 'transcripts.delivery.ediSpeede'
     case 'electronic_pdf':
       return 'transcripts.delivery.electronicPdf'
     case 'secure_link_email':
@@ -111,6 +116,7 @@ export function TranscriptOrderBuilder({
   onSubmitted,
 }: TranscriptOrderBuilderProps) {
   const { t } = useTranslation('common')
+  const { ffMotionLists } = usePlatformFeatures()
   const titleId = useId()
   const searchId = useId()
   const listboxId = useId()
@@ -352,21 +358,54 @@ export function TranscriptOrderBuilder({
 
         {step === 2 ? (
           <div className="mt-5 space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {items.map((it, i) => (
-                <button
-                  key={it.key}
-                  type="button"
-                  onClick={() => setActiveIdx(i)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    i === activeIdx
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
-                  }`}
-                >
-                  {it.recipient?.name || it.adHocName || t('transcripts.order.recipientN', { n: i + 1 })}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-2">
+              <AnimatedList
+                items={items}
+                getKey={(it) => it.key}
+                enabled={ffMotionLists}
+                as="div"
+                itemAs="div"
+                className="flex flex-wrap gap-2"
+                aria-label={t('transcripts.order.sectionTitle')}
+              >
+                {(it, meta) => {
+                  const i = items.findIndex((x) => x.key === it.key)
+                  const idx = i >= 0 ? i : meta.index
+                  const label =
+                    it.recipient?.name || it.adHocName || t('transcripts.order.recipientN', { n: idx + 1 })
+                  return (
+                    <div className="inline-flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setActiveIdx(idx)}
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          idx === activeIdx
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                      {items.length > 1 && meta.phase !== 'exit' ? (
+                        <button
+                          type="button"
+                          aria-label={`${t('transcripts.order.close')}: ${label}`}
+                          onClick={() => {
+                            setItems((prev) => {
+                              const next = prev.filter((x) => x.key !== it.key)
+                              setActiveIdx((cur) => Math.min(cur, Math.max(0, next.length - 1)))
+                              return next
+                            })
+                          }}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                        >
+                          <X className="h-3.5 w-3.5" aria-hidden />
+                        </button>
+                      ) : null}
+                    </div>
+                  )
+                }}
+              </AnimatedList>
               <button
                 type="button"
                 onClick={() => {
@@ -539,18 +578,24 @@ export function TranscriptOrderBuilder({
         {step === 3 ? (
           <div className="mt-5 space-y-3">
             <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.order.reviewHelp')}</p>
-            <ul className="divide-y divide-slate-200 rounded-md border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
-              {items.map((it) => (
-                <li key={it.key} className="px-3 py-2 text-sm">
+            <AnimatedList
+              items={items}
+              getKey={(it) => it.key}
+              enabled={ffMotionLists}
+              className="divide-y divide-slate-200 rounded-md border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800"
+              aria-label={t('transcripts.order.reviewHelp')}
+            >
+              {(it) => (
+                <div className="px-3 py-2 text-sm">
                   <p className="font-medium text-slate-900 dark:text-neutral-50">
                     {it.recipient?.name || it.adHocName || t('transcripts.order.unnamed')}
                   </p>
                   <p className="text-xs text-slate-500">
                     {t(methodLabelKey(it.deliveryMethod))} · {t(`transcripts.order.urgency${it.urgency === 'rush' ? 'Rush' : 'Standard'}`)}
                   </p>
-                </li>
-              ))}
-            </ul>
+                </div>
+              )}
+            </AnimatedList>
           </div>
         ) : null}
 

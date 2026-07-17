@@ -28,6 +28,18 @@ const (
 	EventStudyReminderWeeklySummary = notificationevents.StudyReminderWeeklySummary
 	EventSeatUtilizationAlert       = notificationevents.SeatUtilizationAlert
 	EventIntroCourseCompleted       = notificationevents.IntroCourseCompleted
+	EventTranscriptOrderSubmitted   = notificationevents.TranscriptOrderSubmitted
+	EventTranscriptOrderOnHold      = notificationevents.TranscriptOrderOnHold
+	EventTranscriptOrderConsent     = notificationevents.TranscriptOrderConsent
+	EventTranscriptOrderPayment     = notificationevents.TranscriptOrderPayment
+	EventTranscriptOrderApproved    = notificationevents.TranscriptOrderApproved
+	EventTranscriptOrderRejected    = notificationevents.TranscriptOrderRejected
+	EventTranscriptOrderSent        = notificationevents.TranscriptOrderSent
+	EventTranscriptOrderDelivered    = notificationevents.TranscriptOrderDelivered
+	EventTranscriptOrderOpened      = notificationevents.TranscriptOrderOpened
+	EventTranscriptOrderFailed      = notificationevents.TranscriptOrderFailed
+	EventTranscriptOrderCanceled    = notificationevents.TranscriptOrderCanceled
+	EventTranscriptOrderException   = notificationevents.TranscriptOrderException
 )
 
 // AllEventTypes re-exports the canonical event list for callers outside this package.

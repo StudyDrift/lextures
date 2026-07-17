@@ -287,6 +287,8 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		LearnerProfileService:     learnerProfileSvc,
 		IntroCourseService:        introCourseSvc,
 	}
+	// Re-wire T10 transcript notify hooks with the live NotifHub for SSE bell updates.
+	background.RegisterTranscriptNotifyHooks(pool, platform.Config(), deps.NotifHub)
 	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
 	background.StartCanvasSubmissionSyncConsumer(ctx, canvasSubmissionSyncQueue, deps)
 	background.StartGradingAgentConsumer(ctx, gradingAgentQueue, deps)

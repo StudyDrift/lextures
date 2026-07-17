@@ -103,6 +103,7 @@ type transcriptsConfigJSON struct {
 	RegistrarConsoleEnabled bool    `json:"registrarConsoleEnabled"`
 	ConsentRequired         bool    `json:"consentRequired"`
 	FeesEnabled             bool    `json:"feesEnabled"`
+	DeliveryV2              bool    `json:"deliveryV2"`
 }
 
 func configToJSON(c *transcriptsrepo.Config) transcriptsConfigJSON {
@@ -113,6 +114,7 @@ func configToJSON(c *transcriptsrepo.Config) transcriptsConfigJSON {
 		RegistrarConsoleEnabled: c.RegistrarConsoleEnabled,
 		ConsentRequired:         c.ConsentRequired,
 		FeesEnabled:             c.FeesEnabled,
+		DeliveryV2:              c.DeliveryV2,
 	}
 	if c.WebhookURL != nil {
 		out.WebhookURL = *c.WebhookURL
@@ -162,6 +164,10 @@ func (d Deps) registerTranscriptsRoutes(r chi.Router) {
 	d.registerTranscriptDocumentRoutes(r)
 	d.registerTranscriptOrderRoutes(r)
 	d.registerTranscriptFeeRoutes(r)
+	d.registerTranscriptDeliveryRoutes(r)
+	d.registerTranscriptInboundRoutes(r)
+	d.registerTranscriptVerifyRoutes(r)
+	d.registerTranscriptAnalyticsRoutes(r)
 }
 
 // GET /api/v1/admin/transcripts/config
@@ -197,6 +203,7 @@ type putTranscriptsConfigBody struct {
 	RegistrarConsoleEnabled *bool   `json:"registrarConsoleEnabled"`
 	ConsentRequired         *bool   `json:"consentRequired"`
 	FeesEnabled             *bool   `json:"feesEnabled"`
+	DeliveryV2              *bool   `json:"deliveryV2"`
 }
 
 // PUT /api/v1/admin/transcripts/config
@@ -245,6 +252,7 @@ func (d Deps) handlePutAdminTranscriptsConfig() http.HandlerFunc {
 			RegistrarConsoleEnabled: body.RegistrarConsoleEnabled,
 			ConsentRequired:         body.ConsentRequired,
 			FeesEnabled:             body.FeesEnabled,
+			DeliveryV2:              body.DeliveryV2,
 		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save transcripts config.")

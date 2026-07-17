@@ -116,7 +116,12 @@ UPDATE settings.transcripts_config SET official_enabled = true WHERE id = 1
 
 	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
 	tok, _ := signer.Sign(ctx, row.ID, em, "", "", nil)
-	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: config.Config{FFTranscripts: true}})
+	// Official issuance signs a VC (T08); PublicWebOrigin + JWTSecret required for did:web key material.
+	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: config.Config{
+		FFTranscripts:   true,
+		PublicWebOrigin: "http://localhost:5173",
+		JWTSecret:       "01234567890123456789012345678901",
+	}})
 	return pool, h, tok, uid
 }
 

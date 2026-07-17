@@ -26,33 +26,63 @@ func (d Deps) registerTranscriptDocumentRoutes(r chi.Router) {
 }
 
 type transcriptDocumentJSON struct {
-	ID              string   `json:"id"`
-	Variant         string   `json:"variant"`
-	Version         int      `json:"version"`
-	SchemaVersion   string   `json:"schemaVersion"`
-	TemplateVersion string   `json:"templateVersion"`
-	ContentHash     string   `json:"contentHash"`
-	GPACumulative   *float64 `json:"gpaCumulative,omitempty"`
-	CreditsEarned   *float64 `json:"creditsEarned,omitempty"`
-	GeneratedAt     string   `json:"generatedAt"`
-	HasPDF          bool     `json:"hasPdf"`
-	HasXML          bool     `json:"hasXml"`
+	ID               string   `json:"id"`
+	Variant          string   `json:"variant"`
+	Version          int      `json:"version"`
+	SchemaVersion    string   `json:"schemaVersion"`
+	TemplateVersion  string   `json:"templateVersion"`
+	ContentHash      string   `json:"contentHash"`
+	GPACumulative    *float64 `json:"gpaCumulative,omitempty"`
+	CreditsEarned    *float64 `json:"creditsEarned,omitempty"`
+	GeneratedAt      string   `json:"generatedAt"`
+	HasPDF           bool     `json:"hasPdf"`
+	HasXML           bool     `json:"hasXml"`
+	VerifyToken      *string  `json:"verifyToken,omitempty"`
+	VerificationURL  *string  `json:"verificationUrl,omitempty"`
+	RevokedAt        *string  `json:"revokedAt,omitempty"`
+	RevokeReason     *string  `json:"revokeReason,omitempty"`
+	DisclosePublicly bool     `json:"disclosePublicly"`
+	Signed           bool     `json:"signed"`
 }
 
 func documentToJSON(doc *transcriptsrepo.Document) transcriptDocumentJSON {
-	return transcriptDocumentJSON{
-		ID:              doc.ID.String(),
-		Variant:         string(doc.Variant),
-		Version:         doc.Version,
-		SchemaVersion:   doc.SchemaVersion,
-		TemplateVersion: doc.TemplateVersion,
-		ContentHash:     doc.ContentHash,
-		GPACumulative:   doc.GPACumulative,
-		CreditsEarned:   doc.CreditsEarned,
-		GeneratedAt:     doc.GeneratedAt.UTC().Format(time.RFC3339),
-		HasPDF:          len(doc.PDFBytes) > 0 || (doc.PDFKey != nil && *doc.PDFKey != ""),
-		HasXML:          len(doc.PESCXMLBytes) > 0 || (doc.PESCXMLKey != nil && *doc.PESCXMLKey != ""),
+	out := transcriptDocumentJSON{
+		ID:               doc.ID.String(),
+		Variant:          string(doc.Variant),
+		Version:          doc.Version,
+		SchemaVersion:    doc.SchemaVersion,
+		TemplateVersion:  doc.TemplateVersion,
+		ContentHash:      doc.ContentHash,
+		GPACumulative:    doc.GPACumulative,
+		CreditsEarned:    doc.CreditsEarned,
+		GeneratedAt:      doc.GeneratedAt.UTC().Format(time.RFC3339),
+		HasPDF:           len(doc.PDFBytes) > 0 || (doc.PDFKey != nil && *doc.PDFKey != ""),
+		HasXML:           len(doc.PESCXMLBytes) > 0 || (doc.PESCXMLKey != nil && *doc.PESCXMLKey != ""),
+		DisclosePublicly: doc.DisclosePublicly,
+		Signed:           len(doc.VCProof) > 0,
+		RevokeReason:     doc.RevokeReason,
 	}
+	if doc.VerifyToken != nil && *doc.VerifyToken != "" {
+		tok := *doc.VerifyToken
+		out.VerifyToken = &tok
+	}
+	if doc.RevokedAt != nil {
+		s := doc.RevokedAt.UTC().Format(time.RFC3339)
+		out.RevokedAt = &s
+	}
+	return out
+}
+
+func documentToJSONWithOrigin(doc *transcriptsrepo.Document, webOrigin string) transcriptDocumentJSON {
+	out := documentToJSON(doc)
+	if doc.VerifyToken != nil && *doc.VerifyToken != "" {
+		base := strings.TrimRight(strings.TrimSpace(webOrigin), "/")
+		if base != "" {
+			url := base + "/verify/" + *doc.VerifyToken
+			out.VerificationURL = &url
+		}
+	}
+	return out
 }
 
 type postTranscriptDocumentBody struct {
@@ -164,6 +194,7 @@ func (d Deps) handlePostTranscriptDocument() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, msg)
 			return
 		}
+		cfg := d.effectiveConfig()
 		result, err := transcriptissue.Generate(r.Context(), d.Pool, transcriptissue.GenerateParams{
 			UserID:      userID,
 			GeneratedBy: userID,
@@ -172,6 +203,7 @@ func (d Deps) handlePostTranscriptDocument() http.HandlerFunc {
 			Formats:     parseGenerateFormats(body.Format),
 			Persist:     true,
 			GeneratedAt: time.Now().UTC(),
+			Config:      &cfg,
 		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to generate transcript.")
@@ -184,7 +216,7 @@ func (d Deps) handlePostTranscriptDocument() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"document": documentToJSON(result.Document),
+			"document": documentToJSONWithOrigin(result.Document, cfg.PublicWebOrigin),
 			"record":   result.Record,
 		})
 	}
@@ -209,9 +241,10 @@ func (d Deps) handleListTranscriptDocuments() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load documents.")
 			return
 		}
+		origin := d.effectiveConfig().PublicWebOrigin
 		out := make([]transcriptDocumentJSON, 0, len(list))
 		for i := range list {
-			out = append(out, documentToJSON(&list[i]))
+			out = append(out, documentToJSONWithOrigin(&list[i], origin))
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"documents": out})
@@ -250,7 +283,7 @@ func (d Deps) handleGetTranscriptDocument() http.HandlerFunc {
 		_ = json.Unmarshal(doc.Canonical, &record)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"document": documentToJSON(doc),
+			"document": documentToJSONWithOrigin(doc, d.effectiveConfig().PublicWebOrigin),
 			"record":   record,
 		})
 	}
@@ -385,9 +418,10 @@ func (d Deps) handleAdminListStudentTranscriptDocuments() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load documents.")
 			return
 		}
+		origin := d.effectiveConfig().PublicWebOrigin
 		out := make([]transcriptDocumentJSON, 0, len(list))
 		for i := range list {
-			out = append(out, documentToJSON(&list[i]))
+			out = append(out, documentToJSONWithOrigin(&list[i], origin))
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"documents": out})
@@ -434,6 +468,7 @@ func (d Deps) handleAdminGenerateStudentTranscript() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, msg)
 			return
 		}
+		cfg := d.effectiveConfig()
 		result, err := transcriptissue.Generate(r.Context(), d.Pool, transcriptissue.GenerateParams{
 			UserID:      uid,
 			GeneratedBy: adminID,
@@ -442,6 +477,7 @@ func (d Deps) handleAdminGenerateStudentTranscript() http.HandlerFunc {
 			Formats:     parseGenerateFormats(body.Format),
 			Persist:     true,
 			GeneratedAt: time.Now().UTC(),
+			Config:      &cfg,
 		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to generate transcript.")
@@ -450,7 +486,7 @@ func (d Deps) handleAdminGenerateStudentTranscript() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"document": documentToJSON(result.Document),
+			"document": documentToJSONWithOrigin(result.Document, cfg.PublicWebOrigin),
 			"record":   result.Record,
 		})
 	}

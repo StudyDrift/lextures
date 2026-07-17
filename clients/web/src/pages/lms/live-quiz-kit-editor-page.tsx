@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -99,7 +99,6 @@ export default function LiveQuizKitEditorPage() {
   const kitId = rawKitId ? decodeURIComponent(rawKitId) : ''
   const { allows, loading: permLoading } = usePermissions()
   const {
-    ffInteractiveQuizzes,
     ffIqLiveHosting,
     ffIqTeamMode,
     ffIqStudentPaced,
@@ -110,6 +109,8 @@ export default function LiveQuizKitEditorPage() {
   const [hostDialogOpen, setHostDialogOpen] = useState(false)
   const [scoringOpts, setScoringOpts] = useState<ScoringStartOptions>(defaultScoringStartOptions)
   const [modeOpts, setModeOpts] = useState<ModeStartOptions>(defaultModeStartOptions)
+  const hostDialogTitleId = useId()
+  const hostCancelRef = useRef<HTMLButtonElement>(null)
   const canEdit = !permLoading && !!courseCode && allows(courseItemCreatePermission(courseCode))
 
   const [kit, setKit] = useState<QuizKit | null>(null)
@@ -172,10 +173,6 @@ export default function LiveQuizKitEditorPage() {
     setLoading(true)
     setError(null)
     try {
-      if (!ffInteractiveQuizzes) {
-        setError(t('liveQuiz.error.disabled'))
-        return
-      }
       const course = await fetchCourse(courseCode)
       if (!course.interactiveQuizzesEnabled) {
         setError(t('liveQuiz.error.disabled'))
@@ -198,13 +195,13 @@ export default function LiveQuizKitEditorPage() {
     } finally {
       setLoading(false)
     }
-  }, [courseCode, ffInteractiveQuizzes, kitId, loadDraftFromQuestion, selectedId, t])
+  }, [courseCode, kitId, loadDraftFromQuestion, selectedId, t])
 
   useEffect(() => {
     void load()
     // intentionally once on mount / kit change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courseCode, kitId, ffInteractiveQuizzes])
+  }, [courseCode, kitId])
 
   useEffect(() => {
     if (!selectedId) return
@@ -377,6 +374,24 @@ export default function LiveQuizKitEditorPage() {
       toastMutationError(err instanceof Error ? err.message : String(err))
     }
   }
+
+  useEffect(() => {
+    if (!hostDialogOpen) return
+    const timer = window.setTimeout(() => hostCancelRef.current?.focus(), 0)
+    return () => window.clearTimeout(timer)
+  }, [hostDialogOpen])
+
+  useEffect(() => {
+    if (!hostDialogOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' && !hosting) {
+        e.preventDefault()
+        setHostDialogOpen(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [hostDialogOpen, hosting])
 
   async function handleHost() {
     if (!ffIqLiveHosting) {
@@ -898,28 +913,46 @@ export default function LiveQuizKitEditorPage() {
 
       {hostDialogOpen ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="live-quiz-host-dialog-title"
+          className="fixed inset-0 z-[400] flex items-center justify-center p-4"
+          role="presentation"
         >
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-5 shadow-lg dark:bg-neutral-900">
-            <h2 id="live-quiz-host-dialog-title" className="mb-3 text-lg font-semibold">
-              {t('liveQuiz.host.startDialogTitle')}
-            </h2>
-            <ModePicker
-              value={modeOpts}
-              onChange={setModeOpts}
-              teamEnabled={ffIqTeamMode}
-              pacedEnabled={ffIqStudentPaced}
-            />
-            <div className="mt-4">
+          <button
+            type="button"
+            aria-label={t('dialogs.close')}
+            disabled={hosting}
+            className="lex-btn-static absolute inset-0 cursor-default border-0 bg-black/45 p-0 disabled:cursor-not-allowed"
+            onClick={() => {
+              if (!hosting) setHostDialogOpen(false)
+            }}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={hostDialogTitleId}
+            className="relative z-10 flex max-h-[min(90vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+          >
+            <div className="shrink-0 border-b border-slate-100 px-5 py-4 dark:border-neutral-800">
+              <h2
+                id={hostDialogTitleId}
+                className="text-lg font-semibold text-slate-950 dark:text-neutral-100"
+              >
+                {t('liveQuiz.host.startDialogTitle')}
+              </h2>
+            </div>
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-4">
+              <ModePicker
+                value={modeOpts}
+                onChange={setModeOpts}
+                teamEnabled={ffIqTeamMode}
+                pacedEnabled={ffIqStudentPaced}
+              />
               <ScoringProfilePicker value={scoringOpts} onChange={setScoringOpts} />
             </div>
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-slate-100 bg-slate-50/80 px-5 py-4 dark:border-neutral-800 dark:bg-neutral-900/80">
               <button
+                ref={hostCancelRef}
                 type="button"
-                className="rounded-md border px-3 py-2 text-sm"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
                 onClick={() => setHostDialogOpen(false)}
                 disabled={hosting}
               >
@@ -927,13 +960,13 @@ export default function LiveQuizKitEditorPage() {
               </button>
               <button
                 type="button"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={hosting}
                 onClick={() => {
                   void handleHost()
                 }}
               >
-                {t('liveQuiz.host.confirmStart')}
+                {hosting ? t('dialogs.working') : t('liveQuiz.host.confirmStart')}
               </button>
             </div>
           </div>

@@ -110,6 +110,9 @@ type Row struct {
 	SecurityDisclosureModuleEnabled *bool
 	BackupModuleEnabled             *bool
 	FFHighContrastReducedMotion     *bool
+	FFMotionNavigation              *bool
+	FFMotionReveal                  *bool
+	FFMotionLists                   *bool
 	FFParentPortal                  *bool
 	FFParentPortalV2                *bool
 	FFReportCards                   *bool
@@ -135,6 +138,8 @@ type Row struct {
 	FFEportfolio                    *bool
 	FFBookstoreIntegration          *bool
 	FFTranscripts                   *bool
+	FFTranscriptInbound             *bool
+	FFDiplomas                      *bool
 	FFWebhooks                      *bool
 	FFZapierConnector               *bool
 	FFMarketplace                   *bool
@@ -314,6 +319,9 @@ type Write struct {
 	SecurityDisclosureModuleEnabled *bool
 	BackupModuleEnabled             *bool
 	FFHighContrastReducedMotion     *bool
+	FFMotionNavigation              *bool
+	FFMotionReveal                  *bool
+	FFMotionLists                   *bool
 	FFParentPortal                  *bool
 	FFParentPortalV2                *bool
 	FFReportCards                   *bool
@@ -339,6 +347,8 @@ type Write struct {
 	FFEportfolio                    *bool
 	FFBookstoreIntegration          *bool
 	FFTranscripts                   *bool
+	FFTranscriptInbound             *bool
+	FFDiplomas                      *bool
 	FFWebhooks                      *bool
 	FFZapierConnector               *bool
 	FFMarketplace                   *bool
@@ -515,6 +525,9 @@ SELECT
 	security_disclosure_module_enabled,
 	backup_module_enabled,
 	ff_high_contrast_reduced_motion,
+	ff_motion_navigation,
+	ff_motion_reveal,
+	ff_motion_lists,
 	ff_parent_portal,
 	ff_parent_portal_v2,
 	ff_report_cards,
@@ -539,6 +552,8 @@ SELECT
 	ff_eportfolio,
 	ff_bookstore_integration,
 	ff_transcripts,
+	ff_transcript_inbound,
+	ff_diplomas,
 	ff_webhooks,
 	ff_zapier_connector,
 	ff_marketplace_enabled,
@@ -708,6 +723,9 @@ WHERE id = 1
 		&r.SecurityDisclosureModuleEnabled,
 		&r.BackupModuleEnabled,
 		&r.FFHighContrastReducedMotion,
+		&r.FFMotionNavigation,
+		&r.FFMotionReveal,
+		&r.FFMotionLists,
 		&r.FFParentPortal,
 		&r.FFParentPortalV2,
 		&r.FFReportCards,
@@ -732,6 +750,8 @@ WHERE id = 1
 		&r.FFEportfolio,
 		&r.FFBookstoreIntegration,
 		&r.FFTranscripts,
+		&r.FFTranscriptInbound,
+		&r.FFDiplomas,
 		&r.FFWebhooks,
 		&r.FFZapierConnector,
 		&r.FFMarketplace,
@@ -952,6 +972,9 @@ INSERT INTO settings.platform_app_settings (
 	security_disclosure_module_enabled,
 	backup_module_enabled,
 	ff_high_contrast_reduced_motion,
+	ff_motion_navigation,
+	ff_motion_reveal,
+	ff_motion_lists,
 	ff_parent_portal,
 	ff_parent_portal_v2,
 	ff_report_cards,
@@ -976,6 +999,8 @@ INSERT INTO settings.platform_app_settings (
 	ff_eportfolio,
 	ff_bookstore_integration,
 	ff_transcripts,
+	ff_transcript_inbound,
+	ff_diplomas,
 	ff_webhooks,
 	ff_zapier_connector,
 	ff_marketplace_enabled,
@@ -1041,7 +1066,8 @@ INSERT INTO settings.platform_app_settings (
 	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114, $115, $116, $117, $118, $119, $120,
 	$121, $122, $123, $124, $125, $126, $127, $128, $129, $130, $131, $132, $133, $134, $135, $136, $137, $138, $139, $140,
 	$141, $142, $143, $144, $145, $146, $147, $148, $149, $150, $151, $152, $153, $154, $155, $156, $157, $158, $159, $160,
-	$161, $162, $163, $164, $165, $166, $167, $168, $169, $170, $171, $172,
+	$161, $162, $163, $164, $165, $166, $167, $168, $169, $170, $171, $172, $173, $174, $175,
+	$176, $177,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -1137,6 +1163,9 @@ ON CONFLICT (id) DO UPDATE SET
 	security_disclosure_module_enabled = COALESCE(EXCLUDED.security_disclosure_module_enabled, settings.platform_app_settings.security_disclosure_module_enabled),
 	backup_module_enabled = COALESCE(EXCLUDED.backup_module_enabled, settings.platform_app_settings.backup_module_enabled),
 	ff_high_contrast_reduced_motion = COALESCE(EXCLUDED.ff_high_contrast_reduced_motion, settings.platform_app_settings.ff_high_contrast_reduced_motion),
+	ff_motion_navigation = COALESCE(EXCLUDED.ff_motion_navigation, settings.platform_app_settings.ff_motion_navigation),
+	ff_motion_reveal = COALESCE(EXCLUDED.ff_motion_reveal, settings.platform_app_settings.ff_motion_reveal),
+	ff_motion_lists = COALESCE(EXCLUDED.ff_motion_lists, settings.platform_app_settings.ff_motion_lists),
 	ff_parent_portal = COALESCE(EXCLUDED.ff_parent_portal, settings.platform_app_settings.ff_parent_portal),
 	ff_parent_portal_v2 = COALESCE(EXCLUDED.ff_parent_portal_v2, settings.platform_app_settings.ff_parent_portal_v2),
 	ff_report_cards = COALESCE(EXCLUDED.ff_report_cards, settings.platform_app_settings.ff_report_cards),
@@ -1161,6 +1190,8 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_eportfolio = COALESCE(EXCLUDED.ff_eportfolio, settings.platform_app_settings.ff_eportfolio),
 	ff_bookstore_integration = COALESCE(EXCLUDED.ff_bookstore_integration, settings.platform_app_settings.ff_bookstore_integration),
 	ff_transcripts = COALESCE(EXCLUDED.ff_transcripts, settings.platform_app_settings.ff_transcripts),
+	ff_transcript_inbound = COALESCE(EXCLUDED.ff_transcript_inbound, settings.platform_app_settings.ff_transcript_inbound),
+	ff_diplomas = COALESCE(EXCLUDED.ff_diplomas, settings.platform_app_settings.ff_diplomas),
 	ff_webhooks = COALESCE(EXCLUDED.ff_webhooks, settings.platform_app_settings.ff_webhooks),
 	ff_zapier_connector = COALESCE(EXCLUDED.ff_zapier_connector, settings.platform_app_settings.ff_zapier_connector),
 	ff_marketplace_enabled = COALESCE(EXCLUDED.ff_marketplace_enabled, settings.platform_app_settings.ff_marketplace_enabled),
@@ -1312,6 +1343,9 @@ ON CONFLICT (id) DO UPDATE SET
 		w.SecurityDisclosureModuleEnabled,
 		w.BackupModuleEnabled,
 		w.FFHighContrastReducedMotion,
+		w.FFMotionNavigation,
+		w.FFMotionReveal,
+		w.FFMotionLists,
 		w.FFParentPortal,
 		w.FFParentPortalV2,
 		w.FFReportCards,
@@ -1336,6 +1370,8 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFEportfolio,
 		w.FFBookstoreIntegration,
 		w.FFTranscripts,
+		w.FFTranscriptInbound,
+		w.FFDiplomas,
 		w.FFWebhooks,
 		w.FFZapierConnector,
 		w.FFMarketplace,

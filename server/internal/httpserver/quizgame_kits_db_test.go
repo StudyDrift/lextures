@@ -170,22 +170,6 @@ func TestQuizKits_FeatureGate_Pg(t *testing.T) {
 	}
 }
 
-func TestQuizKits_MasterFlagOff_Pg(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
-
-	pool, h, tok, cc, _ := setupQuizKitTest(t, ctx, "teacher", true, false)
-	defer pool.Close()
-
-	rr := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/courses/"+cc+"/live-quizzes/kits", nil)
-	req.Header.Set("Authorization", "Bearer "+tok)
-	h.ServeHTTP(rr, req)
-	if rr.Code != http.StatusNotFound {
-		t.Fatalf("master off: expected 404, got %d %s", rr.Code, rr.Body.String())
-	}
-}
-
 func TestQuizKits_FullCRUD_Pg(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()

@@ -199,5 +199,5 @@ None.
 ## 19. References
 
 - Existing: [15.3 Stripe billing](../15-self-learner-specific/15.3-billing-stripe.md), migration `371_zero_decimal_currency_fix.sql`, `372_email_provider_ses` (receipts).
-- Related plans: [T02](T02-recipient-directory-and-orders.md), [T03](T03-order-lifecycle-fulfillment-holds.md), [T06](../../plan/transcripts/T06-electronic-delivery-standards.md), [15.13 tax](../15-self-learner-specific/15.13-tax-compliance.md).
+- Related plans: [T02](T02-recipient-directory-and-orders.md), [T03](T03-order-lifecycle-fulfillment-holds.md), [T06](T06-electronic-delivery-standards.md), [15.13 tax](../15-self-learner-specific/15.13-tax-compliance.md).
 - Shipped: migration `407_transcript_fees.sql`, `models/transcriptfees`, `repos/transcripts/fees.go`, `transcripts_fees_http.go`, Stripe transcript checkout/webhook/refund in `service/billing`, checkout step in order builder, fee schedule UI in transcripts settings, `fees_enabled` config flag.

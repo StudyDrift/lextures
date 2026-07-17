@@ -5,7 +5,6 @@ import {
   DragOverlay,
   PointerSensor,
   closestCorners,
-  defaultDropAnimation,
   pointerWithin,
   useDroppable,
   useSensor,
@@ -17,9 +16,11 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
 import { useCoursePins } from '../../context/course-pinned-context'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { heroImageObjectStyle } from '../../lib/hero-image-position'
+import { listDragStyle, listDropAnimation } from '../../lib/list-motion'
+import { usePrefersReducedMotion } from '../../lib/motion'
 import type { PinnedCourseSummary } from '../../lib/course-catalog-settings-api'
 import {
   computeNextPinRows,
@@ -42,12 +43,6 @@ const gridColsMap: Record<number, string> = {
   2: 'grid-cols-2',
   3: 'grid-cols-3',
   4: 'grid-cols-4',
-}
-
-const iosDropAnimation = {
-  ...defaultDropAnimation,
-  duration: 220,
-  easing: 'cubic-bezier(0.2, 0, 0, 1)',
 }
 
 const NEW_ROW_DROP_ID = newRowDropId()
@@ -180,6 +175,8 @@ function SortablePinnedCourseTile({
     id: course.id,
     disabled: sideNavCollapsed,
   })
+  const reduceMotion = usePrefersReducedMotion()
+  const { ffMotionLists } = usePlatformFeatures()
   const suppressNavRef = useRef(false)
   const wasDraggingRef = useRef(false)
 
@@ -191,10 +188,15 @@ function SortablePinnedCourseTile({
   }, [isDragging])
 
   const style: CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition: transition ?? 'transform 200ms cubic-bezier(0.2, 0, 0, 1)',
-    opacity: isDragging ? 0 : 1,
-    zIndex: isDragging ? 0 : undefined,
+    ...listDragStyle({
+      transform,
+      transition,
+      isDragging,
+      reduceMotion,
+      enabled: ffMotionLists,
+    }),
+    // Keep the sortable placeholder transparent while the overlay shows the lift.
+    opacity: isDragging ? 0 : undefined,
   }
 
   const title = pinnedCourseTitle(course)
@@ -288,7 +290,10 @@ function NewPinnedRowDropZone({ active }: { active: boolean }) {
 export function SideNavPinnedCourses() {
   const { pinnedRows, loading, flashPinnedCourseId, reorderPinnedRows } = useCoursePins()
   const { sideNavCollapsed } = useShellNav()
+  const { ffMotionLists } = usePlatformFeatures()
+  const reduceMotion = usePrefersReducedMotion()
   const location = useLocation()
+  const dropAnimation = listDropAnimation({ reduceMotion, enabled: ffMotionLists })
   const [activeDragId, setActiveDragId] = useState<string | null>(null)
   const [hoveringNewRow, setHoveringNewRow] = useState(false)
   const [localRows, setLocalRows] = useState<PinnedCourseSummary[][]>([])
@@ -452,7 +457,7 @@ export function SideNavPinnedCourses() {
           <NewPinnedRowDropZone active={hoveringNewRow} />
         </div>
       ) : null}
-      <DragOverlay dropAnimation={iosDropAnimation}>
+      <DragOverlay dropAnimation={dropAnimation}>
         {activeCourse ? (
           <PinnedCourseTileVisual
             course={activeCourse}

@@ -113,7 +113,7 @@ export default function BackupOpsAdminPage() {
       <div>
         <h1 className="text-2xl font-semibold text-slate-900 dark:text-neutral-50">Backup &amp; restore</h1>
         <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
-          RPO/RTO ops dashboard (plan 10.15). Targets: Postgres RPO ≤ {status?.targets.postgresRpoMinutes} min, RTO ≤ {status?.targets.postgresRtoMinutes} min.
+          RPO/RTO ops dashboard. Targets: Postgres RPO ≤ {status?.targets.postgresRpoMinutes} min, RTO ≤ {status?.targets.postgresRtoMinutes} min.
         </p>
       </div>
 

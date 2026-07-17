@@ -123,7 +123,7 @@ final class AppShellModel {
         rootNavigationTransition = nil
     }
 
-    private static let drawerAnimation = Animation.easeInOut(duration: 0.35)
+    private static let drawerAnimation = LexturesMotion.navigation
 
     private func sharesRootPane(_ lhs: RootDestination, _ rhs: RootDestination) -> Bool {
         let profilePane: Set<RootDestination> = [.profile, .settings]
@@ -391,6 +391,7 @@ struct RootNavigationTransition: Equatable {
 /// Post-auth shell: Home, Courses, Notebooks, Inbox, Profile behind a floating pill tab bar.
 struct MainTabView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(\.lxReduceMotion) private var reduceMotion
     var initialDeepLink: DeepLinkDestination?
     @State private var shell = AppShellModel()
     @Bindable private var realtime = RealtimeManager.shared
@@ -398,6 +399,8 @@ struct MainTabView: View {
     @State private var drawerOpenProgress: CGFloat = 0
     /// 0 = transition start, 1 = settled — used for non-drawer root changes.
     @State private var paneTransitionProgress: CGFloat = 1
+
+    private var motionNavEnabled: Bool { shell.platformFeatures.ffMotionNavigation }
 
     var body: some View {
         DrawerScaffold(
@@ -468,11 +471,20 @@ struct MainTabView: View {
         .onChange(of: shell.rootNavigationTransition) { _, transition in
             guard let transition, !transition.drivenByDrawer else { return }
             paneTransitionProgress = 0
-            withAnimation(.easeInOut(duration: 0.35)) {
+            let duration = LexturesMotion.navigationDuration(
+                reduceMotion: reduceMotion,
+                enabled: motionNavEnabled
+            )
+            let anim = LexturesMotion.resolve(
+                LexturesMotion.navigation,
+                reduceMotion: reduceMotion || !motionNavEnabled
+            )
+            withAnimation(anim) {
                 paneTransitionProgress = 1
             }
             Task {
-                try? await Task.sleep(for: .milliseconds(360))
+                let ms = UInt64(max(duration, LexturesMotion.instant) * 1000) + 20
+                try? await Task.sleep(for: .milliseconds(ms))
                 if paneTransitionProgress >= 0.99 {
                     shell.completeRootNavigationTransition()
                 }
@@ -618,6 +630,8 @@ struct MainTabView: View {
         outgoing: Bool
     ) -> CGFloat {
         guard shell.rootNavigationTransition != nil else { return 0 }
+        // Lateral tab/section moves crossfade (no slide) under reduced motion or kill-switch.
+        if reduceMotion || !motionNavEnabled { return 0 }
         let completion = navigationCompletion
         if active { return width * (1 - completion) }
         if outgoing { return -width * completion }
@@ -630,13 +644,18 @@ struct MainTabView: View {
 /// Deep-teal floating capsule: selected tab gets a cream circular "puck".
 struct IaShellTabBar: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.lxReduceMotion) private var reduceMotion
     @Bindable var shell: AppShellModel
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(shell.shellTabs, id: \.self) { tab in
                 Button {
-                    withAnimation(.spring(duration: 0.3)) {
+                    let anim = LexturesMotion.resolve(
+                        LexturesMotion.tabSwitch,
+                        reduceMotion: reduceMotion || !shell.platformFeatures.ffMotionNavigation
+                    )
+                    withAnimation(anim) {
                         shell.selectShellTab(tab)
                     }
                 } label: {
@@ -696,13 +715,18 @@ struct IaShellTabBar: View {
 
 struct LexturesTabBar: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.lxReduceMotion) private var reduceMotion
     @Bindable var shell: AppShellModel
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(AppTab.allCases) { tab in
                 Button {
-                    withAnimation(.spring(duration: 0.3)) {
+                    let anim = LexturesMotion.resolve(
+                        LexturesMotion.tabSwitch,
+                        reduceMotion: reduceMotion || !shell.platformFeatures.ffMotionNavigation
+                    )
+                    withAnimation(anim) {
                         shell.selectLegacyTab(tab)
                     }
                 } label: {

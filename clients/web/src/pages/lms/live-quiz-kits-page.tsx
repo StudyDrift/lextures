@@ -27,7 +27,7 @@ export default function LiveQuizKitsPage() {
   const { courseCode: rawCode } = useParams<{ courseCode: string }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
   const { allows, loading: permLoading } = usePermissions()
-  const { ffInteractiveQuizzes, ffIqPublicKitCatalog } = usePlatformFeatures()
+  const { ffIqPublicKitCatalog } = usePlatformFeatures()
   const canCreate = !permLoading && !!courseCode && allows(courseItemCreatePermission(courseCode))
 
   const [kits, setKits] = useState<QuizKit[]>([])
@@ -50,10 +50,6 @@ export default function LiveQuizKitsPage() {
     setLoading(true)
     setError(null)
     try {
-      if (!ffInteractiveQuizzes) {
-        setError(t('liveQuiz.error.disabled'))
-        return
-      }
       const course = await fetchCourse(courseCode)
       if (!course.interactiveQuizzesEnabled) {
         setError(t('liveQuiz.error.disabled'))
@@ -69,7 +65,7 @@ export default function LiveQuizKitsPage() {
     } finally {
       setLoading(false)
     }
-  }, [courseCode, ffInteractiveQuizzes, search, showArchived, t])
+  }, [courseCode, search, showArchived, t])
 
   useEffect(() => {
     void load()
@@ -295,7 +291,7 @@ export default function LiveQuizKitsPage() {
                 <li key={kit.id} className="relative">
                   <Link
                     to={`${base}/${encodeURIComponent(kit.id)}`}
-                    className="block min-h-11 rounded-lg border border-slate-200 p-4 transition hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/20"
+                    className="block min-h-11 rounded-lg border border-slate-200 p-4 transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/20"
                     aria-label={kit.title}
                   >
                     <div className="flex items-start justify-between gap-2">

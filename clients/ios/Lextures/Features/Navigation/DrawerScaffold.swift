@@ -27,7 +27,7 @@ struct DrawerScaffold<Main: View, GlobalPanel: View, CoursePanel: View>: View {
 
     private let edgeHotZone: CGFloat = 24
     private let openThresholdFraction: CGFloat = 0.33
-    private let drawerAnimation = Animation.easeInOut(duration: 0.35)
+    private let drawerAnimation = LexturesMotion.navigation
 
     var body: some View {
         GeometryReader { geo in

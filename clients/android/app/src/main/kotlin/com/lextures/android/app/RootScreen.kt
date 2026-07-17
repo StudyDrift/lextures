@@ -17,6 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.lextures.android.core.auth.AuthPhase
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.auth.BiometricGate
+import com.lextures.android.core.design.LocalReduceMotion
+import com.lextures.android.core.design.LexturesMotion
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.auth.AuthFlowScreen
 import com.lextures.android.features.onboarding.AuthenticatedRootScreen
@@ -31,6 +33,8 @@ fun RootScreen(session: AuthSession, modifier: Modifier = Modifier) {
     val offline = OfflineService.get(context)
     val biometricGate = remember { BiometricGate.get(context) }
     val isLocked by biometricGate.isLocked.collectAsState()
+    val reduceMotion = LocalReduceMotion.current
+    val phaseMs = LexturesMotion.phaseDurationMs(reduceMotion = reduceMotion)
 
     LaunchedEffect(accessToken, phase) {
         if (phase == AuthPhase.Authenticated) {
@@ -50,7 +54,8 @@ fun RootScreen(session: AuthSession, modifier: Modifier = Modifier) {
         targetState = phase,
         modifier = modifier.fillMaxSize(),
         transitionSpec = {
-            fadeIn(animationSpec = tween(350)) togetherWith fadeOut(animationSpec = tween(350))
+            fadeIn(animationSpec = tween(phaseMs)) togetherWith
+                fadeOut(animationSpec = tween(phaseMs))
         },
         label = "rootPhase",
     ) { current ->

@@ -521,6 +521,7 @@ VALUES ($1, $2, $3, $4, $5)
 		target = transcriptorder.OrderInReview
 	}
 	to := OrderStatus(target)
+	markedReady := false
 	if from != to {
 		if err := transcriptorder.ValidateOrderTransition(
 			transcriptorder.OrderStatus(from),
@@ -550,16 +551,23 @@ VALUES ($1, $2, $3, $4, $5)
 			if err := markItemsStatusTx(ctx, tx, locked.ID, &in.SignerID, ItemPending, ItemReady, "ready for delivery"); err != nil {
 				return nil, nil, err
 			}
+			markedReady = true
 		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return nil, nil, err
 	}
+	if markedReady {
+		NotifyItemsReady(ctx, pool, locked.ID)
+	}
 	telemetry.RecordBusinessEvent("transcript_consent_signed")
 	outOrder, err := GetOrderByID(ctx, pool, locked.ID)
 	if err != nil {
 		return &c, nil, err
+	}
+	if from != outOrder.Status {
+		NotifyOrderStatusChange(ctx, pool, outOrder)
 	}
 	return &c, outOrder, nil
 }

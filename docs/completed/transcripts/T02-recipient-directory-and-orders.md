@@ -209,4 +209,4 @@ Optional: fuzzy recipient matching / dedupe suggestions (normalize institution n
 ## 19. References
 
 - Existing: `server/internal/repos/transcripts/repo.go`, `clients/web/src/components/lms/transcript-request-modal.tsx`, `clients/web/src/lib/transcripts-api.ts`, `clients/web/src/pages/lms/transcripts-page.tsx`.
-- Related plans: [T01](T01-official-transcript-generation.md), [T03](T03-order-lifecycle-fulfillment-holds.md), [T04](T04-ferpa-consent-esignature.md), [T05](../../plan/transcripts/T05-fees-payments-waivers.md), [T06](../../plan/transcripts/T06-electronic-delivery-standards.md).
+- Related plans: [T01](T01-official-transcript-generation.md), [T03](T03-order-lifecycle-fulfillment-holds.md), [T04](T04-ferpa-consent-esignature.md), [T05](T05-fees-payments-waivers.md), [T06](T06-electronic-delivery-standards.md).

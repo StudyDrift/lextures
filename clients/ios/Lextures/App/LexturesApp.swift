@@ -20,6 +20,7 @@ struct LexturesApp: App {
                 .environment(themePreference)
                 .environment(\.locale, localePreferences.effectiveLocale)
                 .environment(\.layoutDirection, localePreferences.layoutDirection)
+                .lxReduceMotionEnvironment()
                 .preferredColorScheme(themePreference.colorScheme)
         }
     }

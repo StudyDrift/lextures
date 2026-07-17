@@ -56,6 +56,9 @@ export type PlatformFeatures = {
   autoCaptioningEnabled: boolean
   ffReadingPreferences: boolean
   ffHighContrastReducedMotion: boolean
+  ffMotionNavigation: boolean
+  ffMotionReveal: boolean
+  ffMotionLists: boolean
   ffLibrary: boolean
   ffBroadcasts: boolean
   ffClassroomSignals: boolean
@@ -90,6 +93,8 @@ export type PlatformFeatures = {
   ffEportfolio: boolean
   ffBookstoreIntegration: boolean
   ffTranscripts: boolean
+  ffTranscriptInbound: boolean
+  ffDiplomas: boolean
   ffAdvisingIntegration: boolean
   ffResearchConsent: boolean
   ffAccessibilityIntake: boolean
@@ -182,6 +187,9 @@ const defaultFeatures: PlatformFeatures = {
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
   ffHighContrastReducedMotion: false,
+  ffMotionNavigation: true,
+  ffMotionReveal: true,
+  ffMotionLists: true,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
@@ -216,6 +224,8 @@ const defaultFeatures: PlatformFeatures = {
   ffEportfolio: false,
   ffBookstoreIntegration: false,
   ffTranscripts: false,
+  ffTranscriptInbound: false,
+  ffDiplomas: false,
   ffAdvisingIntegration: false,
   ffResearchConsent: false,
   ffAccessibilityIntake: false,
@@ -251,8 +261,8 @@ const defaultFeatures: PlatformFeatures = {
   ffVisualBoards: true,
   ffBoardsRealtime: true,
   ffBoardsExternalSharing: false,
-  ffInteractiveQuizzes: false,
-  ffIqLiveHosting: false,
+  ffInteractiveQuizzes: true,
+  ffIqLiveHosting: true,
   ffIqTeamMode: false,
   ffIqStudentPaced: false,
   ffIqHomework: false,
@@ -306,6 +316,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     autoCaptioningEnabled: false,
     ffReadingPreferences: false,
     ffHighContrastReducedMotion: false,
+    ffMotionNavigation: true,
+    ffMotionReveal: true,
+    ffMotionLists: true,
     ffLibrary: false,
     ffBroadcasts: false,
     ffClassroomSignals: false,
@@ -340,6 +353,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffEportfolio: false,
     ffBookstoreIntegration: false,
     ffTranscripts: false,
+    ffTranscriptInbound: false,
+    ffDiplomas: false,
     ffAdvisingIntegration: false,
     ffResearchConsent: false,
     ffAccessibilityIntake: false,
@@ -375,8 +390,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffVisualBoards: true,
   ffBoardsRealtime: true,
   ffBoardsExternalSharing: false,
-  ffInteractiveQuizzes: false,
-  ffIqLiveHosting: false,
+  ffInteractiveQuizzes: true,
+  ffIqLiveHosting: true,
   ffIqTeamMode: false,
   ffIqStudentPaced: false,
   ffIqHomework: false,
@@ -437,6 +452,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           autoCaptioningEnabled: data.autoCaptioningEnabled === true,
           ffReadingPreferences: data.ffReadingPreferences === true,
           ffHighContrastReducedMotion: data.ffHighContrastReducedMotion === true,
+          ffMotionNavigation: data.ffMotionNavigation !== false,
+          ffMotionReveal: data.ffMotionReveal !== false,
+          ffMotionLists: data.ffMotionLists !== false,
           ffLibrary: data.ffLibrary === true,
           ffBroadcasts: data.ffBroadcasts === true,
           ffClassroomSignals: data.ffClassroomSignals === true,
@@ -471,6 +489,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffEportfolio: data.ffEportfolio === true,
           ffBookstoreIntegration: data.ffBookstoreIntegration === true,
           ffTranscripts: data.ffTranscripts === true,
+          ffTranscriptInbound: data.ffTranscriptInbound === true,
+          ffDiplomas: data.ffDiplomas === true,
           ffAdvisingIntegration: data.ffAdvisingIntegration === true,
           ffResearchConsent: data.ffResearchConsent === true,
           ffAccessibilityIntake: data.ffAccessibilityIntake === true,
@@ -508,8 +528,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffVisualBoards: true,
           ffBoardsRealtime: data.ffBoardsRealtime === true,
           ffBoardsExternalSharing: data.ffBoardsExternalSharing === true,
-          ffInteractiveQuizzes: data.ffInteractiveQuizzes === true,
-          ffIqLiveHosting: data.ffIqLiveHosting === true,
+          ffInteractiveQuizzes: true,
+          ffIqLiveHosting: data.ffIqLiveHosting !== false,
           ffIqTeamMode: data.ffIqTeamMode === true,
           ffIqStudentPaced: data.ffIqStudentPaced === true,
           ffIqHomework: data.ffIqHomework === true,
@@ -525,6 +545,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           autoCaptioningEnabled: next.autoCaptioningEnabled === true,
           ffReadingPreferences: next.ffReadingPreferences === true,
           ffHighContrastReducedMotion: next.ffHighContrastReducedMotion === true,
+          ffMotionNavigation: next.ffMotionNavigation !== false,
+          ffMotionReveal: next.ffMotionReveal !== false,
+          ffMotionLists: next.ffMotionLists !== false,
           ffLibrary: next.ffLibrary === true,
           ffBroadcasts: next.ffBroadcasts === true,
           ffClassroomSignals: next.ffClassroomSignals === true,
@@ -559,6 +582,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffEportfolio: next.ffEportfolio === true,
           ffBookstoreIntegration: next.ffBookstoreIntegration === true,
           ffTranscripts: next.ffTranscripts === true,
+          ffTranscriptInbound: next.ffTranscriptInbound === true,
+          ffDiplomas: next.ffDiplomas === true,
           ffAdvisingIntegration: next.ffAdvisingIntegration === true,
           ffResearchConsent: next.ffResearchConsent === true,
           ffAccessibilityIntake: next.ffAccessibilityIntake === true,
@@ -594,8 +619,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffVisualBoards: true,
           ffBoardsRealtime: next.ffBoardsRealtime === true,
           ffBoardsExternalSharing: next.ffBoardsExternalSharing === true,
-          ffInteractiveQuizzes: next.ffInteractiveQuizzes === true,
-          ffIqLiveHosting: next.ffIqLiveHosting === true,
+          ffInteractiveQuizzes: true,
+          ffIqLiveHosting: next.ffIqLiveHosting !== false,
           ffIqTeamMode: next.ffIqTeamMode === true,
           ffIqStudentPaced: next.ffIqStudentPaced === true,
           ffIqHomework: next.ffIqHomework === true,

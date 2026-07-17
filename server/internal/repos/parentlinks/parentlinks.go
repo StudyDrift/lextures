@@ -67,6 +67,40 @@ WHERE l.org_id = $1 AND l.parent_user_id = $2 AND l.student_user_id = $3
 	return &l, nil
 }
 
+// ListParentsForStudent returns active/pending guardian links for a student in an org (T10).
+func ListParentsForStudent(ctx context.Context, pool *pgxpool.Pool, studentID, orgID uuid.UUID) ([]Link, error) {
+	rows, err := pool.Query(ctx, `
+SELECT l.id, l.org_id, l.parent_user_id, l.student_user_id, l.relationship, l.status, l.linked_by, l.linked_at,
+       su.email, su.display_name, pu.email, pu.display_name
+FROM "user".parent_student_links l
+INNER JOIN "user".users su ON su.id = l.student_user_id
+INNER JOIN "user".users pu ON pu.id = l.parent_user_id
+WHERE l.student_user_id = $1 AND l.org_id = $2 AND l.status IN `+activeStatuses+`
+ORDER BY pu.display_name NULLS LAST, pu.email
+`, studentID, orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []Link
+	for rows.Next() {
+		var l Link
+		var linkedBy *uuid.UUID
+		var sdn, pdn sql.NullString
+		if err := rows.Scan(
+			&l.ID, &l.OrgID, &l.ParentUserID, &l.StudentUserID, &l.Relationship, &l.Status, &linkedBy, &l.LinkedAt,
+			&l.StudentEmail, &sdn, &l.ParentEmail, &pdn,
+		); err != nil {
+			return nil, err
+		}
+		l.LinkedBy = linkedBy
+		l.StudentDisplay = strPtr(sdn)
+		l.ParentDisplay = strPtr(pdn)
+		out = append(out, l)
+	}
+	return out, rows.Err()
+}
+
 // ListChildrenForParent returns active/pending links for a parent in their home org.
 func ListChildrenForParent(ctx context.Context, pool *pgxpool.Pool, parentID, orgID uuid.UUID) ([]Link, error) {
 	rows, err := pool.Query(ctx, `

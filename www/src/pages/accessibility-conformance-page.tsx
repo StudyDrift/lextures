@@ -70,7 +70,7 @@ export function AccessibilityConformancePage() {
         </div>
 
         <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          <strong>Status note:</strong> Lextures is an active conformance program (plan 10.7). The
+          <strong>Status note:</strong> Lextures is an active conformance program. The
           items marked &quot;Partially Supports&quot; represent known gaps that are actively being remediated.
           Automated axe-core checks run on every pull request to prevent regressions.
         </div>

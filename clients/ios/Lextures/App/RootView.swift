@@ -4,6 +4,7 @@ struct RootView: View {
     @Environment(AuthSession.self) private var session
     @Environment(BiometricGate.self) private var biometricGate
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.lxReduceMotion) private var reduceMotion
     @Bindable private var networkMonitor = NetworkMonitor.shared
 
     var body: some View {
@@ -11,12 +12,18 @@ struct RootView: View {
             switch session.phase {
             case .splash:
                 SplashView()
+                    .transition(.opacity)
                     .task {
                         // Show splash first, then refresh. Avoids overlapping Swift concurrency +
                         // URLSession work at process start (problematic on iOS 26/27 betas).
+                        // Handoff runs over boot work and is capped at deliberate (AN.2 FR-2).
                         try? await Task.sleep(for: .milliseconds(900))
                         await session.refreshIfNeeded()
-                        withAnimation(.easeInOut(duration: 0.35)) {
+                        let handoff = LexturesMotion.resolve(
+                            LexturesMotion.phaseTransition,
+                            reduceMotion: reduceMotion
+                        )
+                        withAnimation(handoff) {
                             session.finishSplash()
                         }
                     }
@@ -28,7 +35,10 @@ struct RootView: View {
                     .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.35), value: session.phase)
+        .animation(
+            LexturesMotion.resolve(LexturesMotion.phaseTransition, reduceMotion: reduceMotion),
+            value: session.phase
+        )
         .onOpenURL { url in
             Task { await handleIncomingURL(url) }
         }

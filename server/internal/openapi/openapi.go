@@ -26,7 +26,7 @@ const spec = `{
     { "name": "courses", "description": "Course APIs (server/src/routes/courses.rs; partial in Go)" },
     { "name": "admin", "description": "Global Admin maintenance (server/src/routes/admin.rs; requires global:app:rbac:manage)" },
     { "name": "settings", "description": "Roles and permissions (server/src/routes/rbac.rs; requires global:app:rbac:manage)" },
-    { "name": "transcripts", "description": "Academic transcript preview, issuance, recipient directory, and multi-destination orders (T01–T02)" }
+    { "name": "transcripts", "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01–T06)" }
   ],
   "paths": {
     "/api/v1/transcripts/recipients": {
@@ -113,6 +113,460 @@ const spec = `{
         "responses": {
           "200": { "description": "order in in_review, on_hold, processing, or pending_* state" },
           "400": { "description": "Validation failed" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/timeline": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Merged order + delivery tracking timeline (T10)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "timeline with canCancel, canResendItems, entries, items" },
+          "401": { "description": "Authentication required" },
+          "404": { "description": "Order not found" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/cancel": {
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Learner cancel of a pre-delivery order; refunds when paid (T10)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "canceled order (optional refund)" },
+          "401": { "description": "Authentication required" },
+          "409": { "description": "Cancel not allowed in current state" },
+          "404": { "description": "Order not found" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/items/{itemId}/receipts": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Delivery receipt timeline for an order item (T06)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "receipts array (queued/sent/delivered/opened/failed)" },
+          "401": { "description": "Authentication required" },
+          "404": { "description": "Order or item not found" }
+        }
+      }
+    },
+    "/api/v1/transcripts/orders/{id}/items/{itemId}/resend": {
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Queue a new delivery attempt for an order item (T06)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "202": { "description": "Resend queued" },
+          "400": { "description": "Item not eligible for resend" },
+          "404": { "description": "Order or item not found" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/orders/{id}/items/{itemId}/resend": {
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Registrar resend of an order item (T06)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "202": { "description": "Resend queued" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/delivery-config": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Get delivery adapter config (T06)",
+        "responses": {
+          "200": { "description": "deliveryV2 flag, webhook/api_peer settings, adapter list" }
+        }
+      },
+      "put": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Update delivery adapter config (T06)",
+        "responses": {
+          "200": { "description": "Updated config" },
+          "400": { "description": "Validation failed" }
+        }
+      }
+    },
+    "/api/v1/r/t/{token}": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Public secure-link metadata; records opened receipt (T06)",
+        "parameters": [
+          { "name": "token", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Link metadata (expiry, downloads remaining)" },
+          "404": { "description": "Unknown token" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/r/t/{token}/download": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Download signed PDF via secure link; decrements remaining downloads (T06)",
+        "parameters": [
+          { "name": "token", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "application/pdf" },
+          "404": { "description": "Unknown token" },
+          "410": { "description": "Expired or exhausted" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/verify/{shareToken}": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Unified public credential verification for transcripts, CLRs, and diplomas (T08/T11)",
+        "parameters": [
+          { "name": "shareToken", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "via", "in": "query", "schema": { "type": "string", "enum": ["qr", "link"] } }
+        ],
+        "responses": {
+          "200": { "description": "Verification outcome (genuine/tampered/revoked) with minimal disclosure" },
+          "404": { "description": "Unknown token" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/admin/credentials/templates": {
+      "get": {
+        "tags": ["diplomas"],
+        "summary": "List diploma/certificate templates (T11)",
+        "responses": {
+          "200": { "description": "Template list" },
+          "404": { "description": "ff_diplomas off" }
+        }
+      },
+      "post": {
+        "tags": ["diplomas"],
+        "summary": "Create diploma/certificate template (T11)",
+        "responses": {
+          "201": { "description": "Created template" },
+          "404": { "description": "ff_diplomas off" }
+        }
+      }
+    },
+    "/api/v1/admin/credentials/templates/{id}": {
+      "put": {
+        "tags": ["diplomas"],
+        "summary": "Update diploma/certificate template (T11)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Updated template" },
+          "404": { "description": "Not found or ff_diplomas off" }
+        }
+      }
+    },
+    "/api/v1/admin/credentials/issue": {
+      "post": {
+        "tags": ["diplomas"],
+        "summary": "Issue a diploma/certificate to one learner (T11)",
+        "responses": {
+          "200": { "description": "Issued or skipped (idempotent)" },
+          "404": { "description": "ff_diplomas off" }
+        }
+      }
+    },
+    "/api/v1/admin/credentials/issue/batch": {
+      "post": {
+        "tags": ["diplomas"],
+        "summary": "Enqueue cohort diploma/certificate batch issuance (T11)",
+        "responses": {
+          "202": { "description": "Batch accepted" },
+          "404": { "description": "ff_diplomas off" }
+        }
+      }
+    },
+    "/api/v1/admin/credentials/batches/{id}": {
+      "get": {
+        "tags": ["diplomas"],
+        "summary": "Get diploma batch issuance progress (T11)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Batch status" },
+          "404": { "description": "Not found or ff_diplomas off" }
+        }
+      }
+    },
+    "/api/v1/admin/credentials/{id}/revoke": {
+      "post": {
+        "tags": ["diplomas"],
+        "summary": "Revoke an issued diploma/certificate (T11)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Revoked credential" },
+          "404": { "description": "Not found or ff_diplomas off" }
+        }
+      }
+    },
+    "/api/v1/admin/credentials/{id}/unrevoke": {
+      "post": {
+        "tags": ["diplomas"],
+        "summary": "Unrevoke an issued diploma/certificate (T11)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Unrevoked credential" },
+          "404": { "description": "Not found or ff_diplomas off" }
+        }
+      }
+    },
+    "/api/v1/me/diplomas": {
+      "get": {
+        "tags": ["diplomas"],
+        "summary": "List my issued diplomas/certificates (T11)",
+        "responses": {
+          "200": { "description": "Credential list" },
+          "404": { "description": "ff_diplomas off" }
+        }
+      }
+    },
+    "/api/v1/me/diplomas/{id}/download": {
+      "get": {
+        "tags": ["diplomas"],
+        "summary": "Download signed diploma/certificate PDF (T11)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "application/pdf" },
+          "404": { "description": "Not found or ff_diplomas off" }
+        }
+      }
+    },
+    "/api/v1/me/wallet": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "List unified learner credential wallet items (T09)",
+        "responses": {
+          "200": { "description": "Wallet items with issuer, date, verify status" },
+          "404": { "description": "Wallet feature off" }
+        }
+      }
+    },
+    "/api/v1/me/wallet/{itemId}": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Wallet item detail with download/verify links (T09)",
+        "parameters": [
+          { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Wallet item" },
+          "404": { "description": "Not found or feature off" }
+        }
+      }
+    },
+    "/api/v1/me/wallet/collections": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "List curated credential collections (T09)",
+        "responses": { "200": { "description": "collections array" } }
+      },
+      "post": {
+        "tags": ["wallet"],
+        "summary": "Create a curated collection and optional share link (T09)",
+        "responses": {
+          "201": { "description": "Collection created" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/v1/me/wallet/collections/{id}": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Get a credential collection (T09)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "Collection" }, "404": { "description": "Not found" } }
+      },
+      "put": {
+        "tags": ["wallet"],
+        "summary": "Update a credential collection (T09)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "Updated collection" } }
+      },
+      "delete": {
+        "tags": ["wallet"],
+        "summary": "Delete a credential collection (T09)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/api/v1/me/wallet/collections/{id}/revoke": {
+      "post": {
+        "tags": ["wallet"],
+        "summary": "Revoke a collection share link (T09)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "Revoked collection" }, "404": { "description": "Not found" } }
+      }
+    },
+    "/api/v1/me/wallet/collections/{id}/access": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Collection share access history (T09)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "access array" } }
+      }
+    },
+    "/api/v1/me/wallet/export": {
+      "post": {
+        "tags": ["wallet"],
+        "summary": "Start an async portable wallet export (ZIP) (T09)",
+        "responses": {
+          "202": { "description": "Export accepted (pending or ready)" },
+          "404": { "description": "Wallet feature off" }
+        }
+      }
+    },
+    "/api/v1/me/wallet/export/{id}": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Poll wallet export status (T09)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "Export status" }, "404": { "description": "Not found" } }
+      }
+    },
+    "/api/v1/me/wallet/export/{id}/download": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Download a ready wallet export ZIP (T09)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "application/zip" },
+          "409": { "description": "Export not ready" }
+        }
+      }
+    },
+    "/api/v1/wallet/s/{token}": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Public shared credential collection view (T09)",
+        "parameters": [
+          { "name": "token", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Disclosure-filtered collection" },
+          "404": { "description": "Unknown token" },
+          "410": { "description": "Revoked or expired" }
+        }
+      }
+    },
+    "/api/v1/verify/upload": {
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Verify an uploaded transcript PDF by content hash match (T08)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Verification outcome" },
+          "400": { "description": "Invalid upload" },
+          "404": { "description": "No matching issued document" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/documents/{id}/revoke": {
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Revoke an issued transcript document (T08)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Revoked document" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/documents/{id}/unrevoke": {
+      "post": {
+        "tags": ["transcripts"],
+        "summary": "Clear revocation on an issued transcript document (T08)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Document restored" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/.well-known/did.json": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Institution DID document for verifying signed credentials (T08)",
+        "responses": {
+          "200": { "description": "DID document with assertionMethod keys" },
+          "404": { "description": "Signing not enabled" }
         }
       }
     },
@@ -220,6 +674,63 @@ const spec = `{
         }
       }
     },
+    "/api/v1/admin/transcripts/dashboard": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Transcript analytics dashboard (volumes, destinations, turnaround, revenue) (T12)",
+        "description": "Org-scoped. Requires global:app:rbac:manage or org:transcripts:analytics:view. Finance tiles require finance/config permission.",
+        "parameters": [
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "orgId", "in": "query", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "DashboardSummary with KPIs, series, method mix, destinations, panels" },
+          "403": { "description": "Missing RBAC" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/dashboard/drilldown": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Drill-down orders for a dashboard metric (T12)",
+        "parameters": [
+          { "name": "metric", "in": "query", "schema": { "type": "string", "enum": ["orders", "on_hold", "rejected", "refunded", "delivered"] } },
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": { "200": { "description": "orders array contributing to the metric" } }
+      }
+    },
+    "/api/v1/admin/transcripts/health": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Transcript SLA / queue health panel (T12)",
+        "parameters": [
+          { "name": "orgId", "in": "query", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "backlog, oldest pending age, failure rate, dead-letter count, alert flags" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/reports/export": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Export transcript analytics as CSV (T12)",
+        "description": "Requires analytics view/export permission. CSV reconciles with dashboard for the same from/to/org.",
+        "parameters": [
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["dashboard", "summary"], "default": "dashboard" } },
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "orgId", "in": "query", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "text/csv attachment" },
+          "403": { "description": "Missing export RBAC" }
+        }
+      }
+    },
     "/api/v1/admin/transcripts/orders": {
       "get": {
         "tags": ["transcripts", "admin"],
@@ -307,6 +818,111 @@ const spec = `{
           "200": { "description": "hold upserted or released" },
           "401": { "description": "Invalid signature" }
         }
+      }
+    },
+    "/api/v1/integrations/transcripts/inbound": {
+      "post": {
+        "tags": ["transcripts", "integrations"],
+        "summary": "Peer/network inbound transcript intake (HMAC; JSON+base64 or raw PESC/PDF) (T07)",
+        "responses": {
+          "201": { "description": "Received and processed (or queued)" },
+          "200": { "description": "Duplicate of an existing inbound document" },
+          "400": { "description": "Validation/quarantine refusal" },
+          "401": { "description": "Invalid signature" },
+          "404": { "description": "ff_transcript_inbound off" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/inbound": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Registrar inbound intake queue (T07)",
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "orgId", "in": "query", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "documents array" } }
+      }
+    },
+    "/api/v1/admin/transcripts/inbound/{id}": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Inbound document detail + audit events (T07)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "document + events" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/admin/transcripts/inbound/{id}/courses": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Structured course data for transfer-credit evaluation (T07)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "courses + parsed record" } }
+      }
+    },
+    "/api/v1/admin/transcripts/inbound/{id}/original": {
+      "get": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Download immutable original inbound artifact (T07)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "Raw bytes (XML/PDF)" } }
+      }
+    },
+    "/api/v1/admin/transcripts/inbound/{id}/match": {
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Manually assign inbound document to an applicant (T07)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "Updated document" } }
+      }
+    },
+    "/api/v1/admin/transcripts/inbound/{id}/unmatch": {
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Clear inbound match (audited, reversible) (T07)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "Updated document" } }
+      }
+    },
+    "/api/v1/admin/transcripts/inbound/{id}/accept": {
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Accept inbound transcript onto applicant record (T07)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "Accepted document" } }
+      }
+    },
+    "/api/v1/admin/transcripts/inbound/{id}/reject": {
+      "post": {
+        "tags": ["transcripts", "admin"],
+        "summary": "Reject inbound transcript with reason (T07)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "Rejected document" } }
+      }
+    },
+    "/api/v1/me/transcripts/inbound": {
+      "get": {
+        "tags": ["transcripts"],
+        "summary": "Learner view of matched inbound transcripts (T07)",
+        "responses": { "200": { "description": "documents array" } }
       }
     },
     "/api/v1/admin/transcripts/recipients": {

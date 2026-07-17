@@ -29,8 +29,7 @@ func (d Deps) iqModeAllowed(mode engine.SessionMode) bool {
 }
 
 func (d Deps) iqHomeworkFeatureOff(w http.ResponseWriter, r *http.Request, courseCode string) bool {
-	cfg := d.effectiveConfig()
-	if !cfg.FFInteractiveQuizzes || !cfg.FFIqHomework {
+	if !d.effectiveConfig().FFIqHomework {
 		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Live quiz homework is not enabled.")
 		return true
 	}
