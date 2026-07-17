@@ -211,6 +211,14 @@ func (p *StripeProvider) VerifyWebhook(body []byte, headers http.Header) (*Webho
 	}, nil
 }
 
+// GetStripeCheckoutSession loads a Checkout Session by id (for PI resolution on refund).
+func GetStripeCheckoutSession(secretKey, sessionID string) (*stripe.CheckoutSession, error) {
+	stripe.Key = secretKey
+	params := &stripe.CheckoutSessionParams{}
+	params.AddExpand("payment_intent")
+	return checkoutsession.Get(sessionID, params)
+}
+
 func stripeCheckoutPaymentMethods(country string) []string {
 	switch strings.ToUpper(strings.TrimSpace(country)) {
 	case "NL":

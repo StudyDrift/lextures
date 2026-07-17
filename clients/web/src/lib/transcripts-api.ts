@@ -30,6 +30,7 @@ export type TranscriptsConfig = {
   autoApprovalEnabled: boolean
   registrarConsoleEnabled: boolean
   consentRequired: boolean
+  feesEnabled: boolean
 }
 
 export type TranscriptOrderStatus =
@@ -85,6 +86,72 @@ export type TranscriptsStudentConfig = {
   officialEnabled: boolean
   ordersUiEnabled: boolean
   consentRequired: boolean
+  feesEnabled: boolean
+}
+
+export type TranscriptPaymentStatus =
+  | 'unpaid'
+  | 'pending'
+  | 'paid'
+  | 'waived'
+  | 'refunded'
+  | 'partially_refunded'
+  | 'free'
+
+export type TranscriptQuoteLine = {
+  code: string
+  description: string
+  amount: number
+  quantity?: number
+}
+
+export type TranscriptQuote = {
+  currency: string
+  lines: TranscriptQuoteLine[]
+  subtotal: number
+  waiverAmount: number
+  freeAllotmentApplied: boolean
+  total: number
+  requiresPayment: boolean
+  paymentStatusIfZero?: TranscriptPaymentStatus
+}
+
+export type TranscriptFeeSchedule = {
+  orgId: string
+  currency: string
+  baseFee: number
+  rushFee: number
+  perRecipientFee: number
+  methodSurcharges: Record<string, number>
+  freeAllotment: number
+  allotmentPeriod: 'lifetime' | 'year' | 'term'
+  updatedAt?: string
+}
+
+export type TranscriptWaiverCode = {
+  id: string
+  orgId: string
+  code: string
+  kind: 'full' | 'percent' | 'amount'
+  value?: number
+  maxUses?: number
+  usedCount: number
+  expiresAt?: string
+  createdAt: string
+}
+
+export type TranscriptReceipt = {
+  orderId: string
+  issuedAt: string
+  studentEmail?: string
+  currency: string
+  paymentStatus: string
+  paymentRef?: string
+  amountPaid: number
+  amountPaidFormatted: string
+  amountRefunded: number
+  lines: TranscriptQuoteLine[]
+  isRefund: boolean
 }
 
 export type TranscriptConsentSummary = {
@@ -166,6 +233,11 @@ export type TranscriptOrder = {
   consentId?: string
   consent?: TranscriptConsentSummary
   requiresGuardian?: boolean
+  paymentStatus?: TranscriptPaymentStatus | string
+  paymentRef?: string
+  totalAmount?: number
+  currency?: string
+  amountRefunded?: number
   createdAt: string
   submittedAt?: string
   items: TranscriptOrderItem[]
@@ -507,6 +579,7 @@ export async function saveAdminTranscriptsConfig(payload: {
   autoApprovalEnabled?: boolean
   registrarConsoleEnabled?: boolean
   consentRequired?: boolean
+  feesEnabled?: boolean
 }): Promise<TranscriptsConfig> {
   const res = await authorizedFetch('/api/v1/admin/transcripts/config', {
     method: 'PUT',
@@ -690,4 +763,171 @@ export async function saveTranscriptDocumentDownload(id: string, format: 'pdf' |
 export async function saveTranscriptPreviewPDF(): Promise<void> {
   const blob = await downloadTranscriptPreviewPDF()
   triggerBlobDownload(blob, 'transcript-unofficial.pdf')
+}
+
+export async function fetchTranscriptOrderQuote(
+  orderId: string,
+  waiverCode?: string,
+): Promise<{ orderId: string; feesEnabled: boolean; paymentStatus: string; quote: TranscriptQuote }> {
+  const qs = waiverCode?.trim() ? `?waiverCode=${encodeURIComponent(waiverCode.trim())}` : ''
+  const res = await authorizedFetch(
+    `/api/v1/transcripts/orders/${encodeURIComponent(orderId)}/quote${qs}`,
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load quote.')
+  }
+  return (await res.json()) as {
+    orderId: string
+    feesEnabled: boolean
+    paymentStatus: string
+    quote: TranscriptQuote
+  }
+}
+
+export async function checkoutTranscriptOrder(
+  orderId: string,
+  payload?: { waiverCode?: string; successUrl?: string; cancelUrl?: string },
+): Promise<
+  | { checkoutUrl: string; sessionId: string }
+  | { waived: true; order: TranscriptOrder }
+> {
+  const res = await authorizedFetch(
+    `/api/v1/transcripts/orders/${encodeURIComponent(orderId)}/checkout`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload ?? {}),
+    },
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not start checkout.')
+  }
+  const data = (await res.json()) as {
+    checkoutUrl?: string
+    sessionId?: string
+    waived?: boolean
+    order?: TranscriptOrder
+  }
+  if (data.waived && data.order) {
+    return { waived: true, order: data.order }
+  }
+  if (!data.checkoutUrl || !data.sessionId) {
+    throw new Error('Unexpected response from server.')
+  }
+  return { checkoutUrl: data.checkoutUrl, sessionId: data.sessionId }
+}
+
+export async function fetchTranscriptOrderReceipt(
+  orderId: string,
+  format: 'json' | 'pdf' = 'json',
+): Promise<TranscriptReceipt | Blob> {
+  const res = await authorizedFetch(
+    `/api/v1/transcripts/orders/${encodeURIComponent(orderId)}/receipt?format=${format}`,
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not load receipt.')
+  }
+  if (format === 'pdf') return res.blob()
+  return (await res.json()) as TranscriptReceipt
+}
+
+export async function fetchAdminTranscriptFees(): Promise<TranscriptFeeSchedule> {
+  const res = await authorizedFetch('/api/v1/admin/transcripts/fees')
+  if (!res.ok) throw new Error('Could not load fee schedule.')
+  return (await res.json()) as TranscriptFeeSchedule
+}
+
+export async function saveAdminTranscriptFees(payload: {
+  currency: string
+  baseFee: number
+  rushFee: number
+  perRecipientFee: number
+  methodSurcharges?: Record<string, number>
+  freeAllotment: number
+  allotmentPeriod: 'lifetime' | 'year' | 'term'
+}): Promise<TranscriptFeeSchedule> {
+  const res = await authorizedFetch('/api/v1/admin/transcripts/fees', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not save fee schedule.')
+  }
+  return (await res.json()) as TranscriptFeeSchedule
+}
+
+export async function fetchAdminTranscriptWaiverCodes(): Promise<TranscriptWaiverCode[]> {
+  const res = await authorizedFetch('/api/v1/admin/transcripts/waiver-codes')
+  if (!res.ok) throw new Error('Could not load waiver codes.')
+  const data = (await res.json()) as { waiverCodes?: TranscriptWaiverCode[] }
+  return data.waiverCodes ?? []
+}
+
+export async function createAdminTranscriptWaiverCode(payload: {
+  code: string
+  kind: 'full' | 'percent' | 'amount'
+  value?: number
+  maxUses?: number
+  expiresAt?: string
+}): Promise<TranscriptWaiverCode> {
+  const res = await authorizedFetch('/api/v1/admin/transcripts/waiver-codes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not create waiver code.')
+  }
+  return (await res.json()) as TranscriptWaiverCode
+}
+
+export async function waiveAdminTranscriptOrder(
+  orderId: string,
+  reason?: string,
+): Promise<TranscriptOrder> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/transcripts/orders/${encodeURIComponent(orderId)}/waive`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    },
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not waive order.')
+  }
+  const data = (await res.json()) as { order?: TranscriptOrder }
+  if (!data.order) throw new Error('Unexpected response from server.')
+  return data.order
+}
+
+export async function refundAdminTranscriptOrder(
+  orderId: string,
+  amountCents?: number,
+): Promise<{ order: TranscriptOrder; refund: { refundId: string; amountCents: number } }> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/transcripts/orders/${encodeURIComponent(orderId)}/refund`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(amountCents != null ? { amountCents } : {}),
+    },
+  )
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not refund order.')
+  }
+  const data = (await res.json()) as {
+    order?: TranscriptOrder
+    refund?: { refundId: string; amountCents: number }
+  }
+  if (!data.order || !data.refund) throw new Error('Unexpected response from server.')
+  return { order: data.order, refund: data.refund }
 }

@@ -1,6 +1,6 @@
 # T05 — Transcript Fees, Payments & Waivers
 
-> Implementation plan. Per-order/per-recipient/rush fees, fee waivers, and refunds via existing Stripe billing. Source landscape: [transcripts/README](README.md).
+> Implementation plan. Per-order/per-recipient/rush fees, fee waivers, and refunds via existing Stripe billing. Source landscape: [transcripts/README](../../plan/transcripts/README.md).
 
 ## Metadata
 
@@ -10,10 +10,10 @@
 | **Section** | Transcripts & Credentials Platform |
 | **Severity** | MAJOR |
 | **Markets** | HE · SL |
-| **Status (today)** | MISSING — transcript requests are free; there is no fee schedule, checkout, waiver, or refund. Most registrars charge per official transcript and need to collect it at order time. |
+| **Status (today)** | DONE — org fee schedule, itemized quotes, Stripe checkout, waiver codes/admin waive, refunds, receipts, payment gate on order lifecycle. |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Commerce/Billing squad + Registrar/SIS |
-| **Depends on** | T02 (orders), T03 (payment gate), [15.3 Stripe billing](../../completed/15-self-learner-specific/15.3-billing-stripe.md) |
+| **Depends on** | T02 (orders), T03 (payment gate), [15.3 Stripe billing](../15-self-learner-specific/15.3-billing-stripe.md) |
 | **Unblocks** | T06 (deliver only after payment), T12 (revenue analytics) |
 
 ---
@@ -36,8 +36,8 @@ and refunds — with payment status wired as a hard gate in the order lifecycle.
 
 ## 3. Non-Goals
 
-- General subscription/course commerce (owned by [15.3](../../completed/15-self-learner-specific/15.3-billing-stripe.md)); this reuses its Stripe plumbing.
-- Tax handling beyond what [15.13 tax compliance](../../completed/15-self-learner-specific/15.13-tax-compliance.md) provides — integrate, don't reimplement.
+- General subscription/course commerce (owned by [15.3](../15-self-learner-specific/15.3-billing-stripe.md)); this reuses its Stripe plumbing.
+- Tax handling beyond what [15.13 tax compliance](../15-self-learner-specific/15.13-tax-compliance.md) provides — integrate, don't reimplement.
 - Payouts/revenue share to third parties.
 
 ## 4. Personas & User Stories
@@ -150,7 +150,7 @@ None.
 
 ## 12. Integration Points
 
-- **Internal:** [15.3 Stripe billing](../../completed/15-self-learner-specific/15.3-billing-stripe.md) plumbing/webhooks, [15.13 tax](../../completed/15-self-learner-specific/15.13-tax-compliance.md), T02 orders, T03 payment gate, T06 delivery guard, T12 revenue analytics.
+- **Internal:** [15.3 Stripe billing](../15-self-learner-specific/15.3-billing-stripe.md) plumbing/webhooks, [15.13 tax](../15-self-learner-specific/15.13-tax-compliance.md), T02 orders, T03 payment gate, T06 delivery guard, T12 revenue analytics.
 - **External:** Stripe (PaymentIntents, Refunds, Webhooks).
 - **Emissions:** `transcript.payment.succeeded/refunded`, `transcript.waiver.applied`.
 
@@ -198,5 +198,6 @@ None.
 
 ## 19. References
 
-- Existing: [15.3 Stripe billing](../../completed/15-self-learner-specific/15.3-billing-stripe.md), migration `371_zero_decimal_currency_fix.sql`, `372_email_provider_ses` (receipts).
-- Related plans: [T02](../../completed/transcripts/T02-recipient-directory-and-orders.md), [T03](../../completed/transcripts/T03-order-lifecycle-fulfillment-holds.md), [T06](T06-electronic-delivery-standards.md), [15.13 tax](../../completed/15-self-learner-specific/15.13-tax-compliance.md).
+- Existing: [15.3 Stripe billing](../15-self-learner-specific/15.3-billing-stripe.md), migration `371_zero_decimal_currency_fix.sql`, `372_email_provider_ses` (receipts).
+- Related plans: [T02](T02-recipient-directory-and-orders.md), [T03](T03-order-lifecycle-fulfillment-holds.md), [T06](../../plan/transcripts/T06-electronic-delivery-standards.md), [15.13 tax](../15-self-learner-specific/15.13-tax-compliance.md).
+- Shipped: migration `407_transcript_fees.sql`, `models/transcriptfees`, `repos/transcripts/fees.go`, `transcripts_fees_http.go`, Stripe transcript checkout/webhook/refund in `service/billing`, checkout step in order builder, fee schedule UI in transcripts settings, `fees_enabled` config flag.

@@ -103,6 +103,11 @@ type orderJSON struct {
 	ConsentID        *string             `json:"consentId,omitempty"`
 	Consent          *consentSummaryJSON `json:"consent,omitempty"`
 	RequiresGuardian bool                `json:"requiresGuardian,omitempty"`
+	PaymentStatus    string              `json:"paymentStatus,omitempty"`
+	PaymentRef       *string             `json:"paymentRef,omitempty"`
+	TotalAmount      *int                `json:"totalAmount,omitempty"`
+	Currency         *string             `json:"currency,omitempty"`
+	AmountRefunded   int                 `json:"amountRefunded,omitempty"`
 	CreatedAt        string              `json:"createdAt"`
 	SubmittedAt      *string             `json:"submittedAt,omitempty"`
 	Items            []orderItemJSON     `json:"items"`
@@ -124,11 +129,16 @@ func orderToJSONExt(
 	rejectionReason *string,
 ) orderJSON {
 	out := orderJSON{
-		ID:        o.ID.String(),
-		Status:    string(o.Status),
-		CreatedAt: o.CreatedAt.UTC().Format(time.RFC3339),
-		Items:     make([]orderItemJSON, 0, len(o.Items)),
-		OnHold:    o.Status == transcriptsrepo.OrderOnHold,
+		ID:             o.ID.String(),
+		Status:         string(o.Status),
+		PaymentStatus:  string(o.PaymentStatus),
+		TotalAmount:    o.TotalAmount,
+		Currency:       o.Currency,
+		AmountRefunded: o.AmountRefunded,
+		PaymentRef:     o.PaymentRef,
+		CreatedAt:      o.CreatedAt.UTC().Format(time.RFC3339),
+		Items:          make([]orderItemJSON, 0, len(o.Items)),
+		OnHold:         o.Status == transcriptsrepo.OrderOnHold,
 	}
 	if o.ConsentID != nil {
 		s := o.ConsentID.String()

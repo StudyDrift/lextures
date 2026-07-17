@@ -9,6 +9,7 @@ import {
   placeAdminTranscriptHold,
   releaseAdminTranscriptHold,
   transitionAdminTranscriptOrder,
+  waiveAdminTranscriptOrder,
   type TranscriptHold,
   type TranscriptHoldType,
   type TranscriptOrder,
@@ -307,6 +308,14 @@ export default function AdminTranscriptsPage() {
                   </span>
                 </p>
               </div>
+              {selected.paymentStatus ? (
+                <p className="text-xs text-slate-500">
+                  Payment: {selected.paymentStatus}
+                  {selected.totalAmount != null
+                    ? ` · ${selected.currency?.toUpperCase() ?? 'USD'} ${(selected.totalAmount / 100).toFixed(2)}`
+                    : ''}
+                </p>
+              ) : null}
               <div className="flex flex-wrap gap-2">
                 {(['approve', 'complete', 'cancel', 'hold', 'release'] as const).map((action) => (
                   <button
@@ -319,6 +328,33 @@ export default function AdminTranscriptsPage() {
                     {t(`transcripts.registrar.action.${action}`)}
                   </button>
                 ))}
+                {selected.paymentStatus &&
+                !['paid', 'waived', 'free', 'refunded'].includes(selected.paymentStatus) ? (
+                  <button
+                    type="button"
+                    disabled={acting}
+                    onClick={() => {
+                      void (async () => {
+                        setActing(true)
+                        setError(null)
+                        setMessage(null)
+                        try {
+                          const order = await waiveAdminTranscriptOrder(selected.id, 'Registrar fee waiver')
+                          setSelected(order)
+                          setMessage('Order fee waived.')
+                          await load()
+                        } catch (e) {
+                          setError(e instanceof Error ? e.message : 'Could not waive order.')
+                        } finally {
+                          setActing(false)
+                        }
+                      })()
+                    }}
+                    className="rounded-md border border-emerald-600 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-50 disabled:opacity-50 dark:text-emerald-200 dark:hover:bg-emerald-950"
+                  >
+                    Waive fee
+                  </button>
+                ) : null}
               </div>
               <div>
                 <label htmlFor={rejectReasonId} className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
