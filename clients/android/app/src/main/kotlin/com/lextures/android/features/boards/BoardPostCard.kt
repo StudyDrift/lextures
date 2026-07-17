@@ -547,7 +547,7 @@ private fun BoardEmbedWebView(url: String) {
     )
 }
 
-@OptIn(UnstableApi::class)
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 private fun BoardMediaPlayer(url: String, video: Boolean) {
     val context = LocalContext.current
