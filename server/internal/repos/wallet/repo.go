@@ -394,7 +394,7 @@ func CreateCollection(ctx context.Context, pool *pgxpool.Pool, in CreateCollecti
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer tx.Rollback(ctx) //nolint:errcheck
 
 	var c Collection
 	err = scanCollection(tx.QueryRow(ctx, `
@@ -484,7 +484,7 @@ func UpdateCollection(ctx context.Context, pool *pgxpool.Pool, in UpdateCollecti
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer tx.Rollback(ctx) //nolint:errcheck
 
 	var out Collection
 	err = scanCollection(tx.QueryRow(ctx, `

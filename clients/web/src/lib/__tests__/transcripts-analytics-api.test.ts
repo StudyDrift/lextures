@@ -110,7 +110,13 @@ describe('transcripts analytics api (T12)', () => {
       }
       return el
     })
-    fetchMock.mockResolvedValue(new Response(new Blob(['section,key,value\n']), { status: 200 }))
+    // Uint8Array body avoids jsdom Blob.stream gaps under MSW interceptors.
+    fetchMock.mockResolvedValue(
+      new Response(new TextEncoder().encode('section,key,value\n'), {
+        status: 200,
+        headers: { 'Content-Type': 'text/csv' },
+      }),
+    )
 
     await downloadAdminTranscriptAnalyticsExport({ from: '2026-01-01', to: '2026-01-31' })
     expect(fetchMock).toHaveBeenCalledWith(

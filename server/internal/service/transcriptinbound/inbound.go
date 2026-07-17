@@ -212,7 +212,7 @@ func processPESC(ctx context.Context, pool *pgxpool.Pool, doc *transcriptsrepo.I
 		StudentRef:  firstNonEmpty(ref, ptrStr(doc.StudentRef), ptrStr(doc.ExternalRef)),
 		SourceName:  source,
 	})
-	status := transcriptsrepo.InboundParsed
+	var status string
 	var matched *uuid.UUID
 	var conf *float64
 	var detail json.RawMessage

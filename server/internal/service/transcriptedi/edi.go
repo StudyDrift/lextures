@@ -45,7 +45,7 @@ func BuildTS130(rec *academicrecord.AcademicRecord) ([]byte, error) {
 	write(fmt.Sprintf("GS*RA*LEXTURES*RECEIVER*%s*%s*%s*X*005010", gsDate, isaTime, ctrl))
 	write(fmt.Sprintf("ST*130*%s", ctrl))
 	write(fmt.Sprintf("BGN*11*%s*%s", docID, gsDate))
-	write(fmt.Sprintf("ERP*ST"))
+	write("ERP*ST")
 	write(fmt.Sprintf("REF*TD*%s", docID))
 	write(fmt.Sprintf("N1*SY*%s*91*%s", school, schoolCode(rec)))
 	write(fmt.Sprintf("N1*SZ*%s", name))

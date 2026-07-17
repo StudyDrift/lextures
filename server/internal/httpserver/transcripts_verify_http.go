@@ -127,7 +127,7 @@ func (d Deps) handleUnifiedCredentialVerifyUpload() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "file is required.")
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		if header.Size > maxVerifyUploadBytes {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "File too large.")
 			return

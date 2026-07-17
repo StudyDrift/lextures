@@ -30,8 +30,9 @@ const dashboardFile = findChunk(/^dashboard-.*\.js$/)
 const entryGzip = gzipSize(join(distAssets, entryFile))
 const dashboardGzip = dashboardFile ? gzipSize(join(distAssets, dashboardFile)) : null
 
-// 257 KiB + 3 KiB slack — Linux CI gzip can exceed macOS/local builds for the same sources.
-const entryMaxBytes = Number(process.env.ENTRY_MAX_JS_GZIP_BYTES ?? 257 * 1024 + 3 * 1024)
+// 260 KiB + 3 KiB slack — Linux CI gzip can exceed macOS/local builds for the same sources.
+// Raised for shell route-transition / motion tokens pulled into the entry graph (AN.1–AN.2).
+const entryMaxBytes = Number(process.env.ENTRY_MAX_JS_GZIP_BYTES ?? 260 * 1024 + 3 * 1024)
 const regressionMaxBytes = Number(process.env.DASHBOARD_CHUNK_REGRESSION_BYTES ?? 10 * 1024)
 
 if (entryGzip > entryMaxBytes) {

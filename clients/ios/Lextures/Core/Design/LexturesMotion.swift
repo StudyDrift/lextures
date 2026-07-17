@@ -43,8 +43,8 @@ enum LexturesMotion {
     static let staggerMaxItems: Int = 8
 
     static func staggerDelay(for index: Int) -> TimeInterval {
-        let i = min(max(0, index), staggerMaxItems - 1)
-        return TimeInterval(i) * staggerStep
+        let clampedIndex = min(max(0, index), staggerMaxItems - 1)
+        return TimeInterval(clampedIndex) * staggerStep
     }
 
     /// Resolve an animation under reduced motion → opacity-friendly short ease (FR-7).

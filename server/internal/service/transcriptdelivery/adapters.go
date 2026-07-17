@@ -158,7 +158,7 @@ func (a apiPeerAdapter) Deliver(
 	}
 	if err := webhooks.ValidateEndpointURL(endpoint); err != nil {
 		// Local/dev often uses http://localhost — allow only when APP_ENV=local.
-		if !(env.Cfg.AppEnv == "local" && strings.HasPrefix(strings.TrimSpace(endpoint), "http://")) {
+		if env.Cfg.AppEnv != "local" || !strings.HasPrefix(strings.TrimSpace(endpoint), "http://") {
 			return AdapterResult{}, fmt.Errorf("peer endpoint: %w", err)
 		}
 	}
@@ -428,14 +428,12 @@ func (a postalAdapter) Deliver(
 	if dc.Document == nil {
 		return AdapterResult{}, transcriptsrepo.ErrDocumentRequired
 	}
-	addr := json.RawMessage(`{}`)
-	if dc.Item.Recipient != nil && len(dc.Item.Recipient.Address) > 0 {
-		addr = dc.Item.Recipient.Address
-		if err := validatePostalAddress(addr); err != nil {
-			return AdapterResult{}, err
-		}
-	} else {
+	if dc.Item.Recipient == nil || len(dc.Item.Recipient.Address) == 0 {
 		return AdapterResult{}, fmt.Errorf("postal address required")
+	}
+	addr := dc.Item.Recipient.Address
+	if err := validatePostalAddress(addr); err != nil {
+		return AdapterResult{}, err
 	}
 	job, err := transcriptsrepo.InsertPostalJob(ctx, env.Pool, dc.Item.ID, dc.Document.ID, addr)
 	if err != nil {
