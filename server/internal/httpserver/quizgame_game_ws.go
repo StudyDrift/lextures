@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/quizgame/engine"
+	"github.com/lextures/lextures/server/internal/quizgame/scoring"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/quizgame"
@@ -105,25 +106,14 @@ func (d Deps) handleQuizGameWS() http.HandlerFunc {
 			Role        string `json:"role"`
 			PlayerToken string `json:"playerToken"`
 		}
-		if err := json.Unmarshal(b, &m); err != nil || m.AuthToken == "" {
+		if err := json.Unmarshal(b, &m); err != nil {
 			return
 		}
 		role := strings.ToLower(strings.TrimSpace(m.Role))
 		if role == "" {
 			role = "host"
 		}
-		u, err := d.JWTSigner.Verify(r.Context(), m.AuthToken)
-		if err != nil {
-			return
-		}
-		userID, err := uuid.Parse(u.UserID)
-		if err != nil {
-			return
-		}
-		has, err := enrollment.UserHasAccess(r.Context(), d.Pool, courseCode, userID)
-		if err != nil || !has {
-			return
-		}
+
 		crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
 		if err != nil || crow == nil || !crow.InteractiveQuizzesEnabled {
 			return
@@ -133,36 +123,71 @@ func (d Deps) handleQuizGameWS() http.HandlerFunc {
 			return
 		}
 
+		var userID uuid.UUID
 		meta := quizGamePeerMeta{Role: role}
-		switch role {
-		case "host":
-			hasPerm, perr := courseroles.UserHasPermission(r.Context(), d.Pool, userID, "course:"+courseCode+":item:create")
-			if perr != nil || !hasPerm {
+
+		// IQ.9: guest players authenticate with playerToken only (no JWT).
+		if role == "player" && m.PlayerToken != "" && m.AuthToken == "" {
+			p, perr := quizgame.GetPlayerByToken(r.Context(), d.Pool, sess.ID, m.PlayerToken)
+			if perr != nil || p == nil || p.Banned {
 				return
 			}
-			// Host reconnect clears waiting state.
-			if sess.CurrentPhase == string(engine.PhaseWaitingForHost) || sess.Status == string(engine.StatusPaused) {
-				st := sess.EngineState()
-				next, ev, ok := engine.ReduceHostReconnect(st, sess.HostDisconnectedAt, time.Now().UTC(), engine.HostGraceDefault)
-				if ok {
-					_, _ = quizgame.ApplyHostTransition(r.Context(), d.Pool, sess.ID, next, ev, false)
-					sess, _ = quizgame.GetSession(r.Context(), d.Pool, sess.ID)
-				}
-			}
-		case "projector":
-			// Read-only; any enrolled user with course access may open projector for the host.
-		case "player":
-			if m.PlayerToken == "" {
+			if p.UserID != nil {
+				// Enrolled players must present a JWT.
 				return
 			}
-			p, err := quizgame.GetPlayerByToken(r.Context(), d.Pool, sess.ID, m.PlayerToken)
-			if err != nil || p == nil {
+			if !sess.AllowGuests || !d.effectiveConfig().FFIqGuestJoin {
 				return
 			}
 			meta.PlayerID = p.ID
 			_ = quizgame.SetPlayerConnected(r.Context(), d.Pool, p.ID, true)
-		default:
-			return
+		} else {
+			if m.AuthToken == "" {
+				return
+			}
+			u, verr := d.JWTSigner.Verify(r.Context(), m.AuthToken)
+			if verr != nil {
+				return
+			}
+			parsed, perr := uuid.Parse(u.UserID)
+			if perr != nil {
+				return
+			}
+			userID = parsed
+			has, herr := enrollment.UserHasAccess(r.Context(), d.Pool, courseCode, userID)
+			if herr != nil || !has {
+				return
+			}
+			switch role {
+			case "host":
+				hasPerm, perr := courseroles.UserHasPermission(r.Context(), d.Pool, userID, "course:"+courseCode+":item:create")
+				if perr != nil || !hasPerm {
+					return
+				}
+				// Host reconnect clears waiting state.
+				if sess.CurrentPhase == string(engine.PhaseWaitingForHost) || sess.Status == string(engine.StatusPaused) {
+					st := sess.EngineState()
+					next, ev, ok := engine.ReduceHostReconnect(st, sess.HostDisconnectedAt, time.Now().UTC(), engine.HostGraceDefault)
+					if ok {
+						_, _ = quizgame.ApplyHostTransition(r.Context(), d.Pool, sess.ID, next, ev, false)
+						sess, _ = quizgame.GetSession(r.Context(), d.Pool, sess.ID)
+					}
+				}
+			case "projector":
+				// Read-only; any enrolled user with course access may open projector for the host.
+			case "player":
+				if m.PlayerToken == "" {
+					return
+				}
+				p, perr := quizgame.GetPlayerByToken(r.Context(), d.Pool, sess.ID, m.PlayerToken)
+				if perr != nil || p == nil || p.Banned {
+					return
+				}
+				meta.PlayerID = p.ID
+				_ = quizgame.SetPlayerConnected(r.Context(), d.Pool, p.ID, true)
+			default:
+				return
+			}
 		}
 
 		meta.GameID = gameID.String()
@@ -235,9 +260,14 @@ func (d Deps) handleQuizGameWS() http.HandlerFunc {
 				QuestionIndex *int            `json:"questionIndex"`
 				Answer        json.RawMessage `json:"answer"`
 				PlayerID      string          `json:"playerId"`
+				Nickname      string          `json:"nickname"`
+				Muted         *bool           `json:"muted"`
+				Locked        *bool           `json:"locked"`
 				AfterSeq      *int            `json:"afterSeq"`
 				ResumeSeq     *int            `json:"resumeSeq"`
 				ClientSentAt  string          `json:"clientSentAt"` // telemetry only; server clock is authoritative
+				Kind          string          `json:"kind"`         // powerup kind
+				PowerUp       string          `json:"powerUp"`      // answer-time power-up claim
 			}
 			if err := json.Unmarshal(data, &frame); err != nil || frame.Type == "" {
 				continue
@@ -323,17 +353,90 @@ func (d Deps) handleQuizGameWS() http.HandlerFunc {
 					continue
 				}
 				applyQuizHostAction(runCtx, d, gameID.String(), engine.HostAction(frame.Type))
-			case "kick":
+			case "kick", "ban":
 				if meta.Role != "host" || frame.PlayerID == "" {
 					continue
 				}
-				_ = quizgame.KickPlayer(runCtx, d.Pool, gameID.String(), frame.PlayerID)
+				_ = quizgame.BanPlayer(runCtx, d.Pool, gameID.String(), frame.PlayerID)
+				pid, _ := uuid.Parse(frame.PlayerID)
+				kind := quizgame.SafetyKicked
+				if frame.Type == "ban" {
+					kind = quizgame.SafetyBanned
+				}
+				_ = quizgame.RecordSafetyEvent(runCtx, d.Pool, gameID.String(), &pid, &userID, kind, map[string]any{"via": "ws"})
 				notifyQuizPlayerKicked(runCtx, gameID, frame.PlayerID)
 				live, _ := quizgame.GetSession(runCtx, d.Pool, gameID.String())
 				if live != nil {
 					broadcastQuizGameState(runCtx, d, live)
 				}
-				telemetry.RecordBusinessEvent("quizgame.player.kick")
+				telemetry.RecordBusinessEvent("quizgame.player." + frame.Type)
+			case "rename":
+				if meta.Role != "host" || frame.PlayerID == "" {
+					continue
+				}
+				nick := strings.TrimSpace(frame.Nickname)
+				if nick == "" {
+					nick, _ = quizgame.NeutralPlayerName(runCtx, d.Pool, gameID.String(), frame.PlayerID)
+				}
+				if err := quizgame.RenamePlayer(runCtx, d.Pool, gameID.String(), frame.PlayerID, nick); err != nil {
+					continue
+				}
+				pid, _ := uuid.Parse(frame.PlayerID)
+				_ = quizgame.RecordSafetyEvent(runCtx, d.Pool, gameID.String(), &pid, &userID, quizgame.SafetyRenamed, map[string]any{"nickname": nick, "via": "ws"})
+				live, _ := quizgame.GetSession(runCtx, d.Pool, gameID.String())
+				if live != nil {
+					broadcastQuizGameState(runCtx, d, live)
+				}
+				telemetry.RecordBusinessEvent("quizgame.player.rename")
+			case "mute_names":
+				if meta.Role != "host" || frame.Muted == nil {
+					continue
+				}
+				_ = quizgame.SetNamesMuted(runCtx, d.Pool, gameID.String(), *frame.Muted)
+				_ = quizgame.RecordSafetyEvent(runCtx, d.Pool, gameID.String(), nil, &userID, quizgame.SafetyMuted, map[string]any{"muted": *frame.Muted, "via": "ws"})
+				live, _ := quizgame.GetSession(runCtx, d.Pool, gameID.String())
+				if live != nil {
+					broadcastQuizGameState(runCtx, d, live)
+				}
+				telemetry.RecordBusinessEvent("quizgame.safety.mute_names")
+			case "lock_lobby":
+				if meta.Role != "host" || frame.Locked == nil {
+					continue
+				}
+				_ = quizgame.SetLobbyLocked(runCtx, d.Pool, gameID.String(), *frame.Locked)
+				_ = quizgame.RecordSafetyEvent(runCtx, d.Pool, gameID.String(), nil, &userID, quizgame.SafetyLobbyLocked, map[string]any{"locked": *frame.Locked, "via": "ws"})
+				live, _ := quizgame.GetSession(runCtx, d.Pool, gameID.String())
+				if live != nil {
+					broadcastQuizGameState(runCtx, d, live)
+				}
+				telemetry.RecordBusinessEvent("quizgame.safety.lock_lobby")
+			case "powerup":
+				if meta.Role != "player" || meta.PlayerID == "" || frame.QuestionIndex == nil || frame.Kind == "" {
+					continue
+				}
+				ack := map[string]any{
+					"type":          "powerup_ack",
+					"questionIndex": *frame.QuestionIndex,
+					"kind":          frame.Kind,
+				}
+				if err := quizgame.ClaimPowerUp(runCtx, d.Pool, gameID.String(), meta.PlayerID, *frame.QuestionIndex, frame.Kind); err != nil {
+					ack["ok"] = false
+					switch {
+					case errors.Is(err, quizgame.ErrPowerUpsDisabled):
+						ack["error"] = "disabled"
+					case errors.Is(err, quizgame.ErrPowerUpInvalid):
+						ack["error"] = "ineligible"
+					default:
+						ack["error"] = "rejected"
+					}
+				} else {
+					ack["ok"] = true
+					telemetry.RecordBusinessEvent("quizgame.powerup.claim")
+				}
+				payload, _ := json.Marshal(ack)
+				writeCtx, cancel := context.WithTimeout(runCtx, 2*time.Second)
+				_ = client.SendText(writeCtx, payload)
+				cancel()
 			case "answer":
 				if meta.Role != "player" || meta.PlayerID == "" || frame.QuestionIndex == nil {
 					continue
@@ -345,6 +448,7 @@ func (d Deps) handleQuizGameWS() http.HandlerFunc {
 					QuestionIndex: *frame.QuestionIndex,
 					Answer:        frame.Answer,
 					ReceivedAt:    time.Now().UTC(),
+					PowerUp:       frame.PowerUp,
 				})
 				ack := map[string]any{
 					"type":          "answer_ack",
@@ -368,6 +472,9 @@ func (d Deps) handleQuizGameWS() http.HandlerFunc {
 							ack["points"] = prior.Points
 							ack["responseMs"] = prior.ResponseMs
 							ack["alreadyAnswered"] = true
+							if len(prior.PointsBreakdown) > 0 {
+								ack["pointsBreakdown"] = json.RawMessage(prior.PointsBreakdown)
+							}
 						}
 					case errors.Is(err, quizgame.ErrLateAnswer):
 						ack["error"] = "late"
@@ -380,6 +487,7 @@ func (d Deps) handleQuizGameWS() http.HandlerFunc {
 					ack["isCorrect"] = res.IsCorrect
 					ack["responseMs"] = res.ResponseMs
 					ack["points"] = res.Points
+					ack["pointsBreakdown"] = res.PointsBreakdown
 					telemetry.RecordBusinessEvent("quizgame.answer.ok")
 					live, _ := quizgame.GetSession(runCtx, d.Pool, gameID.String())
 					if live != nil {
@@ -443,6 +551,9 @@ func sendPlayerAnswerResume(ctx context.Context, d Deps, client *yrelay.Client, 
 		"points":          prior.Points,
 		"responseMs":      prior.ResponseMs,
 		"alreadyAnswered": true,
+	}
+	if len(prior.PointsBreakdown) > 0 {
+		ack["pointsBreakdown"] = json.RawMessage(prior.PointsBreakdown)
 	}
 	if p, perr := quizgame.GetPlayer(ctx, d.Pool, playerID); perr == nil && p != nil {
 		ack["streak"] = p.Streak
@@ -547,12 +658,14 @@ func autoLockQuizQuestion(ctx context.Context, d Deps, sessionID string, expecte
 	if live != nil {
 		broadcastQuizGameState(ctx, d, live)
 	}
-	// Auto pacing: auto-reveal then next after short delays.
+	// Auto pacing: auto-reveal → leaderboard → next after short delays.
 	if live != nil && live.Pacing == string(engine.PacingAuto) {
 		time.Sleep(2 * time.Second)
 		applyQuizHostAction(ctx, d, sessionID, engine.ActionReveal)
-		time.Sleep(5 * time.Second)
-		applyQuizHostAction(ctx, d, sessionID, engine.ActionNext)
+		time.Sleep(4 * time.Second)
+		applyQuizHostAction(ctx, d, sessionID, engine.ActionNext) // reveal → leaderboard
+		time.Sleep(3 * time.Second)
+		applyQuizHostAction(ctx, d, sessionID, engine.ActionNext) // leaderboard → next / podium
 	}
 }
 
@@ -580,27 +693,70 @@ func broadcastQuizGameState(ctx context.Context, d Deps, sess *quizgame.Session)
 	})
 	// Hosts need correctness on reveal; send host frame as a second pass (harmless for players after reveal).
 	if sess.CurrentPhase == string(engine.PhaseQuestionReveal) ||
+		sess.CurrentPhase == string(engine.PhaseLeaderboard) ||
 		sess.CurrentPhase == string(engine.PhasePodium) ||
 		sess.CurrentPhase == string(engine.PhaseEnded) ||
 		sess.CurrentPhase == string(engine.PhaseLobby) {
 		room.ForEach(func(c *yrelay.Client) {
-			_ = c.SendText(writeCtx, hostFrame)
+			meta, ok := getQuizGamePeer(c.ID)
+			if ok && meta.Role == "host" {
+				_ = c.SendText(writeCtx, hostFrame)
+				return
+			}
+			if ok && meta.Role == "player" && meta.PlayerID != "" {
+				_ = c.SendText(writeCtx, buildQuizStateFrameForPlayer(ctx, d, sess, meta.PlayerID))
+				return
+			}
+			_ = c.SendText(writeCtx, projFrame)
 		})
 	}
+}
+
+func buildQuizStateFrameForPlayer(ctx context.Context, d Deps, sess *quizgame.Session, playerID string) []byte {
+	b := buildQuizStateFrame(ctx, d, sess, "player")
+	var frame map[string]any
+	if json.Unmarshal(b, &frame) != nil {
+		return b
+	}
+	view, err := quizgame.BuildLeaderboardView(ctx, d.Pool, sess, 10, playerID)
+	if err == nil && view != nil && view.You != nil {
+		frame["you"] = view.You
+	}
+	out, _ := json.Marshal(frame)
+	return out
 }
 
 func buildQuizStateFrame(ctx context.Context, d Deps, sess *quizgame.Session, role string) []byte {
 	seq, _ := quizgame.LatestSeq(ctx, d.Pool, sess.ID)
 	players, _ := quizgame.ListPlayers(ctx, d.Pool, sess.ID)
+	mode := engine.NormalizeMode(sess.Mode)
+	muteForPublic := sess.NamesMuted && role != "host"
 	playerOut := make([]map[string]any, 0, len(players))
-	for _, p := range players {
-		playerOut = append(playerOut, map[string]any{
+	for i, p := range players {
+		nick := p.Nickname
+		if muteForPublic {
+			nick = quizgame.DisplayNickname(true, i, p.Nickname)
+		}
+		row := map[string]any{
 			"id":         p.ID,
-			"nickname":   p.Nickname,
+			"nickname":   nick,
 			"totalScore": p.TotalScore,
 			"streak":     p.Streak,
 			"connected":  p.Connected,
-		})
+			"teamId":     p.TeamID,
+		}
+		if role == "host" {
+			row["renamedByHost"] = p.RenamedByHost
+			row["isGuest"] = p.UserID == nil
+		}
+		if !engine.UsesSharedClock(mode) {
+			row["currentIndex"] = p.CurrentIndex
+			row["currentPhase"] = p.CurrentPhase
+			if p.FinishedAt != nil {
+				row["finished"] = true
+			}
+		}
+		playerOut = append(playerOut, row)
 	}
 	code := ""
 	if sess.JoinCode != nil {
@@ -610,6 +766,7 @@ func buildQuizStateFrame(ctx context.Context, d Deps, sess *quizgame.Session, ro
 		"type":          "state",
 		"seq":           seq,
 		"gameId":        sess.ID,
+		"mode":          string(mode),
 		"phase":         sess.CurrentPhase,
 		"status":        sess.Status,
 		"questionIndex": sess.CurrentIndex,
@@ -618,6 +775,9 @@ func buildQuizStateFrame(ctx context.Context, d Deps, sess *quizgame.Session, ro
 		"pacing":        sess.Pacing,
 		"players":       playerOut,
 		"questionCount": len(sess.KitSnapshot.Questions),
+		"namesMuted":    sess.NamesMuted,
+		"lobbyLocked":   sess.LobbyLocked,
+		"allowGuests":   sess.AllowGuests,
 	}
 	if sess.QuestionOpenedAt != nil {
 		frame["openedAt"] = sess.QuestionOpenedAt.UTC().Format(time.RFC3339Nano)
@@ -672,25 +832,57 @@ func buildQuizStateFrame(ctx context.Context, d Deps, sess *quizgame.Session, ro
 			sess.CurrentPhase == string(engine.PhaseQuestionReveal) ||
 			sess.CurrentPhase == string(engine.PhaseLeaderboard) {
 			dist, _ := quizgame.AnswerDistribution(ctx, d.Pool, sess.ID, idx)
+			if role == "projector" || role == "player" {
+				dist = quizgame.FilterDistributionForProjector(dist)
+			}
 			frame["distribution"] = dist
 		}
 	}
+
+	cfg := scoring.ResolveConfig(sess.ScoringProfile, scoring.ParseConfigJSON(sess.ScoringConfig))
+	frame["scoringProfile"] = sess.ScoringProfile
+	frame["powerUpsEnabled"] = cfg.PowerUpsEnabled
+	frame["leaderboardPrivacy"] = scoring.NormalizePrivacy(sess.LeaderboardPrivacy)
 
 	if sess.CurrentPhase == string(engine.PhaseQuestionReveal) ||
 		sess.CurrentPhase == string(engine.PhaseLeaderboard) ||
 		sess.CurrentPhase == string(engine.PhasePodium) ||
 		sess.CurrentPhase == string(engine.PhaseEnded) {
-		board, _ := quizgame.LeaderboardRows(ctx, d.Pool, sess.ID, 10)
-		lb := make([]map[string]any, 0, len(board))
-		for i, p := range board {
-			lb = append(lb, map[string]any{
-				"rank":       i + 1,
-				"playerId":   p.ID,
-				"nickname":   p.Nickname,
-				"totalScore": p.TotalScore,
-			})
+		view, _ := quizgame.BuildLeaderboardView(ctx, d.Pool, sess, 10, "")
+		if view != nil {
+			lb := make([]map[string]any, 0, len(view.Top))
+			for i, p := range view.Top {
+				nick := p.Nickname
+				if muteForPublic {
+					nick = quizgame.DisplayNickname(true, i, p.Nickname)
+				}
+				row := map[string]any{
+					"rank":       p.Rank,
+					"playerId":   p.PlayerID,
+					"nickname":   nick,
+					"totalScore": p.TotalScore,
+				}
+				if view.Privacy == "hidden" {
+					row["nickname"] = ""
+				}
+				lb = append(lb, row)
+			}
+			frame["leaderboard"] = lb
+			if sess.CurrentPhase == string(engine.PhasePodium) || sess.CurrentPhase == string(engine.PhaseEnded) {
+				frame["podium"] = lb
+			}
 		}
-		frame["leaderboard"] = lb
+		if mode == engine.ModeTeam {
+			if board, err := quizgame.RefreshTeamScores(ctx, d.Pool, sess.ID); err == nil {
+				frame["teamLeaderboard"] = board
+			}
+		}
+	}
+	if mode == engine.ModeStudentPaced && (role == "host" || role == "projector") {
+		buckets, total, finished, _ := quizgame.PacedHostProgress(ctx, d.Pool, sess.ID)
+		frame["pacedProgress"] = buckets
+		frame["playerCount"] = total
+		frame["finishedCount"] = finished
 	}
 
 	b, _ := json.Marshal(frame)

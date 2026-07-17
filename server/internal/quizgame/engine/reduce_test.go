@@ -67,7 +67,11 @@ func TestReduce_LockRevealNextPodium(t *testing.T) {
 	if err != nil || revealed.Phase != PhaseQuestionReveal {
 		t.Fatalf("reveal: %v phase=%s", err, revealed.Phase)
 	}
-	podium, ev, err := Reduce(revealed, ActionNext, now)
+	lb, ev, err := Reduce(revealed, ActionNext, now)
+	if err != nil || lb.Phase != PhaseLeaderboard {
+		t.Fatalf("next→leaderboard: %v phase=%s ev=%v", err, lb.Phase, ev)
+	}
+	podium, ev, err := Reduce(lb, ActionNext, now)
 	if err != nil || podium.Phase != PhasePodium {
 		t.Fatalf("next→podium: %v phase=%s ev=%v", err, podium.Phase, ev)
 	}
@@ -81,7 +85,14 @@ func TestReduce_NextOpensFollowingQuestion(t *testing.T) {
 	now := time.Now().UTC()
 	s := baseState(PhaseQuestionReveal, 0, 3)
 	s.Status = StatusRunning
-	next, _, err := Reduce(s, ActionNext, now)
+	lb, _, err := Reduce(s, ActionNext, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lb.Phase != PhaseLeaderboard {
+		t.Fatalf("reveal next should enter leaderboard, got %s", lb.Phase)
+	}
+	next, _, err := Reduce(lb, ActionNext, now)
 	if err != nil {
 		t.Fatal(err)
 	}

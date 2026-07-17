@@ -24,6 +24,7 @@ enum CourseFeaturesLogic {
         case lockdownMode
         case srs
         case standardsAlignment
+        case visualBoards
         case whiteboard
 
         var id: String { rawValue }
@@ -59,6 +60,7 @@ enum CourseFeaturesLogic {
         .init(tool: .lockdownMode),
         .init(tool: .srs),
         .init(tool: .standardsAlignment),
+        .init(tool: .visualBoards),
         .init(tool: .whiteboard),
     ]
 
@@ -94,6 +96,7 @@ enum CourseFeaturesLogic {
         .lockdownMode: { $0.lockdownModeEnabled == true },
         .srs: { $0.srsEnabled == true },
         .standardsAlignment: { $0.standardsAlignmentEnabled == true },
+        .visualBoards: { $0.visualBoardsEnabled == true },
         .whiteboard: { $0.whiteboardEnabled == true },
     ]
 
@@ -119,6 +122,7 @@ enum CourseFeaturesLogic {
         .lockdownMode: { $0.lockdownModeEnabled = $1 },
         .srs: { $0.srsEnabled = $1 },
         .standardsAlignment: { $0.standardsAlignmentEnabled = $1 },
+        .visualBoards: { $0.visualBoardsEnabled = $1 },
         .whiteboard: { $0.whiteboardEnabled = $1 },
     ]
 
@@ -155,7 +159,8 @@ enum CourseFeaturesLogic {
             filesEnabled: course.filesEnabled != false,
             attendanceEnabled: course.attendanceEnabled == true,
             whiteboardEnabled: course.whiteboardEnabled == true,
-            reportCardsEnabled: course.reportCardsEnabled == true
+            reportCardsEnabled: course.reportCardsEnabled == true,
+            visualBoardsEnabled: course.visualBoardsEnabled == true
         )
     }
 
@@ -222,6 +227,7 @@ struct CourseFeaturesPatch: Codable, Equatable {
     var attendanceEnabled: Bool
     var whiteboardEnabled: Bool
     var reportCardsEnabled: Bool
+    var visualBoardsEnabled: Bool
 }
 
 struct CourseCaptionPolicyPatch: Codable, Equatable {

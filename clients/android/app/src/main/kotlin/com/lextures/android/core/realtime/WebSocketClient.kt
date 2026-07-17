@@ -17,6 +17,17 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
 /**
+ * Lifecycle hooks for per-screen sockets that need connection-state UX (e.g. [BoardSocket]).
+ *
+ * [httpStatus] is set when the HTTP upgrade failed before the socket opened (e.g. 404).
+ * [willReconnect] is false when the client stopped retrying (permanent refusal or [disconnect]).
+ */
+sealed class WebSocketLifecycleEvent {
+    data object Opened : WebSocketLifecycleEvent()
+    data class Closed(val httpStatus: Int?, val willReconnect: Boolean) : WebSocketLifecycleEvent()
+}
+
+/**
  * Reconnecting JSON WebSocket client for the server's realtime hubs.
  *
  * Mirrors the web client's handshake (`clients/web/src/context/inbox-unread-provider.tsx`):
@@ -24,12 +35,17 @@ import okhttp3.WebSocketListener
  * one auth message before subscribing — see `handleCommWS` in
  * `server/internal/httpserver/communication.go`), then treats every later frame as an event
  * payload. Reconnects after a fixed 2s delay, matching the web app's `scheduleReconnect`.
+ *
+ * Binary frames are ignored (OkHttp only delivers text to [onMessage] when the String overload
+ * is used) — required for board Y.js replay frames (VC.M4).
  */
 class WebSocketClient(
     private val path: String,
     private val http: OkHttpClient = OkHttpClient(),
     private val accessTokenProvider: () -> String?,
     private val onMessage: (String) -> Unit,
+    private val onLifecycle: ((WebSocketLifecycleEvent) -> Unit)? = null,
+    private val stopOnPermanentRefusal: Boolean = false,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var socket: WebSocket? = null
@@ -69,6 +85,7 @@ class WebSocketClient(
             request,
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
+                    onLifecycle?.invoke(WebSocketLifecycleEvent.Opened)
                     webSocket.send(Json.encodeToString(AuthHandshake(token)))
                 }
 
@@ -77,20 +94,32 @@ class WebSocketClient(
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                    scheduleReconnect(webSocket)
+                    handleDisconnect(webSocket, httpStatus = null)
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    scheduleReconnect(webSocket)
+                    handleDisconnect(webSocket, httpStatus = response?.code)
                 }
             },
         )
     }
 
-    private fun scheduleReconnect(finished: WebSocket) {
-        if (isStopped || socket !== finished) return
+    private fun handleDisconnect(finished: WebSocket, httpStatus: Int?) {
+        if (isStopped || socket !== finished) {
+            onLifecycle?.invoke(WebSocketLifecycleEvent.Closed(httpStatus, willReconnect = false))
+            return
+        }
         socket = null
         connectedToken = null
+
+        val permanent = stopOnPermanentRefusal && isPermanentWsRefusal(httpStatus)
+        if (permanent) {
+            isStopped = true
+            onLifecycle?.invoke(WebSocketLifecycleEvent.Closed(httpStatus, willReconnect = false))
+            return
+        }
+
+        onLifecycle?.invoke(WebSocketLifecycleEvent.Closed(httpStatus, willReconnect = true))
         reconnectJob = scope.launch {
             delay(RECONNECT_DELAY_MS)
             connect()
@@ -103,5 +132,8 @@ class WebSocketClient(
     private companion object {
         const val NORMAL_CLOSURE = 1000
         const val RECONNECT_DELAY_MS = 2000L
+
+        fun isPermanentWsRefusal(statusCode: Int?): Boolean =
+            statusCode == 401 || statusCode == 403 || statusCode == 404
     }
 }

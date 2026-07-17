@@ -64,6 +64,8 @@ data class CourseSummary(
     val misconceptionDetectionEnabled: Boolean? = null,
     val multilingualMessagingEnabled: Boolean? = null,
     val whiteboardEnabled: Boolean? = null,
+    /** VC.M1 — visual collaboration boards (opt-in; default off). */
+    val visualBoardsEnabled: Boolean? = null,
     val requireCaptions: Boolean? = null,
     val viewerEnrollmentInvitationPending: Boolean? = null,
     val viewerPendingEnrollmentId: String? = null,
@@ -111,6 +113,8 @@ data class CourseSummary(
     val isGroupSpacesEnabled: Boolean get() = groupSpacesEnabled == true
 
     val isCollabDocsEnabled: Boolean get() = collabDocsEnabled == true
+
+    val isVisualBoardsEnabled: Boolean get() = visualBoardsEnabled == true
 }
 
 @Serializable

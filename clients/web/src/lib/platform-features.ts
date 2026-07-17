@@ -113,6 +113,13 @@ export type PlatformFeaturesSnapshot = {
   ffVisualBoards?: boolean
   ffInteractiveQuizzes?: boolean
   ffIqLiveHosting?: boolean
+  ffIqTeamMode?: boolean
+  ffIqStudentPaced?: boolean
+  ffIqHomework?: boolean
+  ffIqGradebookPush?: boolean
+  ffIqPublicKitCatalog?: boolean
+  ffIqGuestJoin?: boolean
+  ffIqAiGeneration?: boolean
   ffBoardsRealtime?: boolean
   ffBoardsExternalSharing?: boolean
   ffEmailSes?: boolean
@@ -223,6 +230,13 @@ const defaults: PlatformFeaturesSnapshot = {
   ffVisualBoards: true,
   ffInteractiveQuizzes: false,
   ffIqLiveHosting: false,
+  ffIqTeamMode: false,
+  ffIqStudentPaced: false,
+  ffIqHomework: false,
+  ffIqGradebookPush: false,
+  ffIqPublicKitCatalog: false,
+  ffIqGuestJoin: false,
+  ffIqAiGeneration: false,
   ffBoardsRealtime: true,
   ffBoardsExternalSharing: false,
   ffEmailSes: false,

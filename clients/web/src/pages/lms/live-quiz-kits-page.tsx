@@ -8,6 +8,8 @@ import {
   duplicateQuizKit,
   listQuizKits,
   restoreQuizKit,
+  saveQuizKitAsTemplate,
+  submitQuizKitToCatalog,
   type QuizKit,
 } from '../../lib/live-quiz-api'
 import { courseItemCreatePermission, fetchCourse } from '../../lib/courses-api'
@@ -15,6 +17,8 @@ import { formatDate } from '../../lib/format'
 import { toastMutationError } from '../../lib/lms-toast'
 import { usePermissions } from '../../context/use-permissions'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { ShareKitDialog } from '../../components/live-quiz/share-kit-dialog'
+import { TemplatePickerDialog } from '../../components/live-quiz/template-picker-dialog'
 import { LmsPage } from './lms-page'
 
 export default function LiveQuizKitsPage() {
@@ -23,7 +27,7 @@ export default function LiveQuizKitsPage() {
   const { courseCode: rawCode } = useParams<{ courseCode: string }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
   const { allows, loading: permLoading } = usePermissions()
-  const { ffInteractiveQuizzes } = usePlatformFeatures()
+  const { ffInteractiveQuizzes, ffIqPublicKitCatalog } = usePlatformFeatures()
   const canCreate = !permLoading && !!courseCode && allows(courseItemCreatePermission(courseCode))
 
   const [kits, setKits] = useState<QuizKit[]>([])
@@ -36,6 +40,8 @@ export default function LiveQuizKitsPage() {
   const [search, setSearch] = useState('')
   const [showArchived, setShowArchived] = useState(false)
   const [menuKitId, setMenuKitId] = useState<string | null>(null)
+  const [shareKitId, setShareKitId] = useState<string | null>(null)
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false)
 
   const base = `/courses/${encodeURIComponent(courseCode)}/live-quizzes`
 
@@ -116,6 +122,26 @@ export default function LiveQuizKitsPage() {
     }
   }
 
+  async function handleSaveAsTemplate(kitId: string) {
+    setMenuKitId(null)
+    try {
+      await saveQuizKitAsTemplate(courseCode, kitId, { scope: 'course' })
+      await load()
+    } catch (err) {
+      toastMutationError(err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  async function handleSubmitCatalog(kitId: string) {
+    setMenuKitId(null)
+    try {
+      await submitQuizKitToCatalog(courseCode, kitId)
+      await load()
+    } catch (err) {
+      toastMutationError(err instanceof Error ? err.message : String(err))
+    }
+  }
+
   return (
     <LmsPage title={t('liveQuiz.gallery.title')}>
       {loading ? (
@@ -144,17 +170,34 @@ export default function LiveQuizKitsPage() {
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-slate-600 dark:text-neutral-300">{t('liveQuiz.gallery.subtitle')}</p>
-            {canCreate && !creating ? (
-              <button
-                type="button"
-                onClick={() => setCreating(true)}
-                aria-label={t('liveQuiz.kit.createAria')}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                to={`${base}/library`}
+                className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
               >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                {t('liveQuiz.kit.create')}
-              </button>
-            ) : null}
+                {t('liveQuiz.library.open')}
+              </Link>
+              {canCreate && !creating ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setTemplatePickerOpen(true)}
+                    className="inline-flex min-h-11 items-center rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  >
+                    {t('liveQuiz.template.newFrom')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreating(true)}
+                    aria-label={t('liveQuiz.kit.createAria')}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  >
+                    <Plus className="h-4 w-4" aria-hidden="true" />
+                    {t('liveQuiz.kit.create')}
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -298,6 +341,35 @@ export default function LiveQuizKitsPage() {
                           >
                             {t('liveQuiz.kit.duplicate')}
                           </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                            onClick={() => void handleSaveAsTemplate(kit.id)}
+                          >
+                            {t('liveQuiz.template.saveAs')}
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                            onClick={() => {
+                              setMenuKitId(null)
+                              setShareKitId(kit.id)
+                            }}
+                          >
+                            {t('liveQuiz.share.action')}
+                          </button>
+                          {ffIqPublicKitCatalog ? (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                              onClick={() => void handleSubmitCatalog(kit.id)}
+                            >
+                              {t('liveQuiz.library.submitCatalog')}
+                            </button>
+                          ) : null}
                           {kit.archived ? (
                             <button
                               type="button"
@@ -327,6 +399,22 @@ export default function LiveQuizKitsPage() {
           )}
         </div>
       )}
+      {shareKitId ? (
+        <ShareKitDialog
+          courseCode={courseCode}
+          kitId={shareKitId}
+          open
+          onClose={() => setShareKitId(null)}
+        />
+      ) : null}
+      <TemplatePickerDialog
+        courseCode={courseCode}
+        open={templatePickerOpen}
+        onClose={() => setTemplatePickerOpen(false)}
+        onCreated={(kit) => {
+          void navigate(`${base}/${encodeURIComponent(kit.id)}`)
+        }}
+      />
     </LmsPage>
   )
 }

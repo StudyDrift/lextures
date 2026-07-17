@@ -25,6 +25,7 @@ struct CourseDestinationPlaceholder: View {
         case .library: return "books.vertical"
         case .groups: return "person.3"
         case .collabDocs: return "doc.text"
+        case .boards: return "rectangle.3.group"
         default: return "sparkles"
         }
     }

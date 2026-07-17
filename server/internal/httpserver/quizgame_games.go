@@ -13,6 +13,8 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/quizgame/engine"
+	"github.com/lextures/lextures/server/internal/quizgame/scoring"
+	"github.com/lextures/lextures/server/internal/repos/board"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/quizgame"
 	"github.com/lextures/lextures/server/internal/telemetry"
@@ -94,21 +96,30 @@ func sessionJSON(s *quizgame.Session, includeAnswers bool) map[string]any {
 		questions = append(questions, qm)
 	}
 	out := map[string]any{
-		"id":           s.ID,
-		"kitId":        s.KitID,
-		"courseId":     s.CourseID,
-		"hostId":       s.HostID,
-		"joinCode":     code,
-		"mode":         s.Mode,
-		"status":       s.Status,
-		"pacing":       s.Pacing,
-		"phase":        s.CurrentPhase,
-		"questionIndex": s.CurrentIndex,
-		"kitTitle":     s.KitSnapshot.Title,
-		"questionCount": len(s.KitSnapshot.Questions),
-		"questions":    questions,
-		"settings":     json.RawMessage(s.Settings),
-		"createdAt":    s.CreatedAt.UTC().Format(time.RFC3339),
+		"id":                 s.ID,
+		"kitId":              s.KitID,
+		"courseId":           s.CourseID,
+		"hostId":             s.HostID,
+		"joinCode":           code,
+		"mode":               s.Mode,
+		"status":             s.Status,
+		"pacing":             s.Pacing,
+		"phase":              s.CurrentPhase,
+		"questionIndex":      s.CurrentIndex,
+		"kitTitle":           s.KitSnapshot.Title,
+		"questionCount":      len(s.KitSnapshot.Questions),
+		"questions":          questions,
+		"settings":           json.RawMessage(s.Settings),
+		"scoringProfile":     s.ScoringProfile,
+		"scoringProfileVer":  s.ScoringProfileVer,
+		"scoringConfig":      json.RawMessage(s.ScoringConfig),
+		"leaderboardPrivacy": s.LeaderboardPrivacy,
+		"allowGuests":        s.AllowGuests,
+		"lobbyLocked":        s.LobbyLocked,
+		"namesMuted":         s.NamesMuted,
+		"oneSessionRule":     s.OneSessionRule,
+		"maxJoinsPerIp":      s.MaxJoinsPerIP,
+		"createdAt":          s.CreatedAt.UTC().Format(time.RFC3339),
 	}
 	if s.QuestionOpenedAt != nil {
 		out["openedAt"] = s.QuestionOpenedAt.UTC().Format(time.RFC3339Nano)
@@ -128,8 +139,18 @@ func sessionJSON(s *quizgame.Session, includeAnswers bool) map[string]any {
 // handleCreateQuizGame is POST /api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/games.
 func (d Deps) handleCreateQuizGame() http.HandlerFunc {
 	type reqBody struct {
-		Pacing   string          `json:"pacing"`
-		Settings json.RawMessage `json:"settings"`
+		Pacing             string              `json:"pacing"`
+		Mode               string              `json:"mode"`
+		Settings           json.RawMessage     `json:"settings"`
+		TeamConfig         *engine.TeamConfig  `json:"teamConfig"`
+		PacedConfig        *engine.PacedConfig `json:"pacedConfig"`
+		ScoringProfile     string              `json:"scoringProfile"`
+		ScoringConfig      scoring.Config      `json:"scoringConfig"`
+		LeaderboardPrivacy string              `json:"leaderboardPrivacy"`
+		PowerUpsEnabled    *bool               `json:"powerUpsEnabled"`
+		AllowGuests        bool                `json:"allowGuests"`
+		OneSessionRule     string              `json:"oneSessionRule"`
+		MaxJoinsPerIP      int                 `json:"maxJoinsPerIp"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -158,12 +179,57 @@ func (d Deps) handleCreateQuizGame() http.HandlerFunc {
 		if r.Body != nil {
 			_ = json.NewDecoder(r.Body).Decode(&body)
 		}
+		mode := engine.NormalizeMode(body.Mode)
+		if mode == engine.ModeHomework {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Use the assignments API to start homework mode.")
+			return
+		}
+		if !d.iqModeAllowed(mode) {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "This game mode is not enabled.")
+			return
+		}
+		if err := quizgame.CheckConcurrentGamesQuota(r.Context(), d.Pool, courseCode); err != nil {
+			if errors.Is(err, quizgame.ErrConcurrentGamesQuota) {
+				telemetry.RecordBusinessEvent("quizgame.quota.concurrent_games_rejected")
+				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "Concurrent live-game quota reached. End an active game or ask an admin to raise the limit.")
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not verify game quotas.")
+			return
+		}
+		allowGuests := body.AllowGuests
+		if allowGuests {
+			if !d.effectiveConfig().FFIqGuestJoin {
+				allowGuests = false
+			} else if d.effectiveConfig().CoppaWorkflowEnabled {
+				if hasMinors, merr := board.CourseHasEnrolledMinors(r.Context(), d.Pool, courseCode); merr == nil && hasMinors {
+					allowGuests = false
+				}
+			}
+			if allowGuests {
+				if eff, eerr := quizgame.ResolveEffectiveSettingsForCourse(r.Context(), d.Pool, courseCode); eerr == nil {
+					if eff.GuestJoinPolicy == quizgame.GuestJoinDisabled {
+						allowGuests = false
+					}
+				}
+			}
+		}
 		sess, err := quizgame.CreateGame(r.Context(), d.Pool, quizgame.CreateGameInput{
-			CourseCode: courseCode,
-			KitID:      kitID,
-			HostID:     viewer,
-			Pacing:     body.Pacing,
-			Settings:   body.Settings,
+			CourseCode:         courseCode,
+			KitID:              kitID,
+			HostID:             viewer,
+			Pacing:             body.Pacing,
+			Mode:               string(mode),
+			Settings:           body.Settings,
+			TeamConfig:         body.TeamConfig,
+			PacedConfig:        body.PacedConfig,
+			ScoringProfile:     body.ScoringProfile,
+			ScoringConfig:      body.ScoringConfig,
+			LeaderboardPrivacy: body.LeaderboardPrivacy,
+			PowerUpsEnabled:    body.PowerUpsEnabled,
+			AllowGuests:        allowGuests,
+			OneSessionRule:     body.OneSessionRule,
+			MaxJoinsPerIP:      body.MaxJoinsPerIP,
 		})
 		if errors.Is(err, quizgame.ErrKitNotReady) {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Kit is not ready to host. Fix validation issues first.")
@@ -176,6 +242,9 @@ func (d Deps) handleCreateQuizGame() http.HandlerFunc {
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not start game.")
 			return
+		}
+		if mode == engine.ModeTeam {
+			_, _ = quizgame.CreateTeams(r.Context(), d.Pool, sess.ID, nil, nil)
 		}
 		telemetry.RecordBusinessEvent("quizgame.game.create")
 		code := ""
@@ -223,18 +292,144 @@ func (d Deps) handleGetQuizGame() http.HandlerFunc {
 		players, _ := quizgame.ListPlayers(r.Context(), d.Pool, gameID)
 		playerOut := make([]map[string]any, 0, len(players))
 		for _, p := range players {
-			playerOut = append(playerOut, map[string]any{
+			m := map[string]any{
 				"id":         p.ID,
 				"nickname":   p.Nickname,
 				"totalScore": p.TotalScore,
 				"streak":     p.Streak,
 				"connected":  p.Connected,
-			})
+				"teamId":     p.TeamID,
+			}
+			if p.FinishedAt != nil {
+				m["finished"] = true
+			}
+			if engine.NormalizeMode(sess.Mode) == engine.ModeStudentPaced || engine.NormalizeMode(sess.Mode) == engine.ModeHomework {
+				m["currentIndex"] = p.CurrentIndex
+				m["currentPhase"] = p.CurrentPhase
+			}
+			playerOut = append(playerOut, m)
 		}
 		out := sessionJSON(sess, canHost)
 		out["players"] = playerOut
+		if engine.NormalizeMode(sess.Mode) == engine.ModeTeam {
+			if board, err := quizgame.RefreshTeamScores(r.Context(), d.Pool, gameID); err == nil {
+				out["teamLeaderboard"] = board
+			}
+			if teams, err := quizgame.ListTeams(r.Context(), d.Pool, gameID); err == nil {
+				teamOut := make([]map[string]any, 0, len(teams))
+				for _, t := range teams {
+					teamOut = append(teamOut, teamJSON(t))
+				}
+				out["teams"] = teamOut
+			}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
+	}
+}
+
+// handleGetQuizGameLeaderboard is GET .../games/{game_id}/leaderboard (IQ.5).
+func (d Deps) handleGetQuizGameLeaderboard() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, _, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		if d.iqLiveHostingFeatureOff(w, r, courseCode) {
+			return
+		}
+		gameID := chi.URLParam(r, "game_id")
+		sess, err := quizgame.GetSessionByCourse(r.Context(), d.Pool, courseCode, gameID)
+		if errors.Is(err, quizgame.ErrSessionNotFound) || sess == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Game not found.")
+			return
+		}
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load game.")
+			return
+		}
+		view, err := quizgame.BuildLeaderboardView(r.Context(), d.Pool, sess, 50, "")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load leaderboard.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(view)
+	}
+}
+
+// handleGetQuizGamePlayerResponses is GET .../games/{game_id}/responses/{player_id} (IQ.5 / IQ.7).
+func (d Deps) handleGetQuizGamePlayerResponses() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		if d.iqLiveHostingFeatureOff(w, r, courseCode) {
+			return
+		}
+		gameID := chi.URLParam(r, "game_id")
+		playerID := chi.URLParam(r, "player_id")
+		sess, err := quizgame.GetSessionByCourse(r.Context(), d.Pool, courseCode, gameID)
+		if errors.Is(err, quizgame.ErrSessionNotFound) || sess == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Game not found.")
+			return
+		}
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load game.")
+			return
+		}
+		isHost := sess.HostID != nil && *sess.HostID == viewer.String()
+		hasPerm, _ := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
+		player, perr := quizgame.GetPlayer(r.Context(), d.Pool, playerID)
+		if perr != nil || player == nil || player.SessionID != gameID {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Player not found.")
+			return
+		}
+		isSelf := player.UserID != nil && *player.UserID == viewer.String()
+		if !isHost && !hasPerm && !isSelf {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to view these responses.")
+			return
+		}
+		rows, err := quizgame.ListPlayerResponses(r.Context(), d.Pool, gameID, playerID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load responses.")
+			return
+		}
+		out := make([]map[string]any, 0, len(rows))
+		for _, resp := range rows {
+			item := map[string]any{
+				"questionIndex": resp.QuestionIndex,
+				"isCorrect":     resp.IsCorrect,
+				"responseMs":    resp.ResponseMs,
+				"points":        resp.Points,
+				"answeredAt":    resp.AnsweredAt.UTC().Format(time.RFC3339Nano),
+			}
+			if len(resp.PointsBreakdown) > 0 {
+				item["pointsBreakdown"] = json.RawMessage(resp.PointsBreakdown)
+			}
+			if isHost || hasPerm {
+				item["answer"] = json.RawMessage(resp.Answer)
+			}
+			out = append(out, item)
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"playerId":  playerID,
+			"nickname":  player.Nickname,
+			"totalScore": player.TotalScore,
+			"responses": out,
+		})
 	}
 }
 
@@ -276,6 +471,11 @@ func (d Deps) handleEndQuizGame() http.HandlerFunc {
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not end game.")
 			return
+		}
+		if _, rerr := quizgame.BuildAndStoreReport(r.Context(), d.Pool, ended.ID); rerr != nil {
+			telemetry.RecordBusinessEvent("quizgame.report.build_failed")
+		} else {
+			telemetry.RecordBusinessEvent("quizgame.report.generated")
 		}
 		broadcastQuizGameState(r.Context(), d, ended)
 		telemetry.RecordBusinessEvent("quizgame.game.end")
@@ -323,14 +523,15 @@ func (d Deps) handleJoinQuizLookup() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not look up game.")
 			return
 		}
-		// Guest join ships with IQ.9; enrolled-only until then.
+		allowsGuests := d.guestJoinAllowed(r, *courseCode, sess)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"gameId":       sess.ID,
 			"courseCode":   *courseCode,
 			"kitTitle":     sess.KitSnapshot.Title,
-			"requiresAuth": true,
-			"allowsGuests": false,
+			"requiresAuth": !allowsGuests,
+			"allowsGuests": allowsGuests,
+			"lobbyLocked":  sess.LobbyLocked,
 			"phase":        sess.CurrentPhase,
 			"status":       sess.Status,
 		})
@@ -338,7 +539,7 @@ func (d Deps) handleJoinQuizLookup() http.HandlerFunc {
 }
 
 // handleJoinQuizPlayer is POST /api/v1/courses/{course_code}/live-quizzes/games/{game_id}/players.
-// IQ.4: enrolled join + rejoin (same user rotates reconnect token). Guest join deferred to IQ.9.
+// IQ.4/IQ.9: enrolled join + rejoin with nickname moderation, one-session, and join limits.
 func (d Deps) handleJoinQuizPlayer() http.HandlerFunc {
 	type reqBody struct {
 		Nickname   string          `json:"nickname"`
@@ -380,22 +581,32 @@ func (d Deps) handleJoinQuizPlayer() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Nickname is required.")
 			return
 		}
+		// Rejoins do not consume a new player slot; check quota only for new joins.
+		existing, _ := quizgame.GetPlayerByUser(r.Context(), d.Pool, gameID, viewer)
+		if existing == nil {
+			if err := quizgame.CheckPlayersPerGameQuota(r.Context(), d.Pool, courseCode, gameID); err != nil {
+				if errors.Is(err, quizgame.ErrPlayersPerGameQuota) {
+					telemetry.RecordBusinessEvent("quizgame.quota.players_rejected")
+					apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "This game is full (player quota reached).")
+					return
+				}
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not verify player quotas.")
+				return
+			}
+		}
 		res, err := quizgame.AddPlayer(r.Context(), d.Pool, quizgame.AddPlayerInput{
 			SessionID:  gameID,
 			UserID:     &viewer,
 			Nickname:   body.Nickname,
 			ClientMeta: body.ClientMeta,
+			RemoteIP:   clientRemoteIP(r),
 		})
-		if errors.Is(err, quizgame.ErrPlayerExists) {
-			apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "Nickname is already taken in this game.")
-			return
+		if errors.Is(err, quizgame.ErrNicknameDenied) {
+			_ = quizgame.RecordSafetyEvent(r.Context(), d.Pool, sess.ID, nil, &viewer, quizgame.SafetyNicknameDenied, map[string]any{
+				"nickname": body.Nickname,
+			})
 		}
-		if errors.Is(err, quizgame.ErrNicknameInvalid) {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Nickname is invalid. Use 1–24 letters, numbers, or spaces.")
-			return
-		}
-		if errors.Is(err, quizgame.ErrSessionEnded) {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "This game has ended.")
+		if writeQuizJoinError(w, err) {
 			return
 		}
 		if err != nil {

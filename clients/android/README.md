@@ -48,6 +48,7 @@ Cleartext HTTP to localhost is allowed for development (`res/xml/network_securit
 | `app/src/main/kotlin/.../features/home/` | Post-auth tab shell + shared LMS UI |
 | `app/src/main/kotlin/.../features/dashboard/` | Greeting, stats, due-this-week, course shortcuts |
 | `app/src/main/kotlin/.../features/courses/` | Course list, search, course structure detail |
+| `app/src/main/kotlin/.../features/boards/` | Collaboration boards list, post cards, composer, layouts, share sheet, public board-link view |
 | `app/src/main/kotlin/.../features/notebooks/` | Device-local markdown notebooks (global + per course) |
 | `app/src/main/kotlin/.../features/inbox/` | Mailbox folders, message detail, compose |
 | `app/src/main/kotlin/.../core/auth/` | API + encrypted token store |
@@ -79,8 +80,23 @@ Access and refresh tokens are stored in EncryptedSharedPreferences. MFA-required
 - `GET /api/v1/courses/{code}` — viewer enrollment roles
 - `GET /api/v1/courses/{code}/structure` — modules and due dates
 - `GET/POST/PATCH /api/v1/communication/messages` + `GET /api/v1/communication/unread-count` — inbox
+- Boards (flag-gated): REST under `/api/v1/courses/{code}/boards/*`, share/members/board-links APIs, plus the shared board WebSocket
 
 Notebooks are device-local (same model as the web app's localStorage notebooks, format v2), keyed per signed-in user.
+
+## Realtime sockets
+
+Per-screen sockets use `core/realtime/WebSocketClient` (JSON `{"authToken":…}` handshake, 2s reconnect):
+
+| Socket | Path | Screen |
+|--------|------|--------|
+| `RealtimeManager` | `/communication/ws`, `/notifications/ws` | App-wide |
+| `FeedSocket` | `/courses/{code}/feed/ws` | Feed |
+| `CourseStructureSocket` | `/courses/{code}/structure/ws` | Course detail |
+| `CourseFilesSocket` | `/courses/{code}/files/ws` | Course files |
+| `BoardSocket` | `/courses/{code}/boards/{id}/ws` | Board detail |
+
+`BoardSocket` listens for JSON `board.changed` frames and refetches posts/sections; binary Y.js frames from the web CRDT relay are ignored. Presence/live cursors are deferred (need a native CRDT binding).
 
 ## CI
 

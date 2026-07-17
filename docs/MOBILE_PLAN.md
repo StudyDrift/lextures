@@ -10,6 +10,9 @@
 Both native clients (SwiftUI iOS 17+, Jetpack Compose Android) share a brand system
 (cream paper / deep teal / coral / amber, serif display type, floating cards, deterministic
 course-cover gradients) and currently ship **four tabs**: Dashboard, Courses, Notebooks, Inbox.
+Course **Boards** (visual collaboration; VC.M1–VC.M4) appear in the course drawer under Collaboration when
+`visualBoardsEnabled` is on — board list, detail with multi-format post cards, layout surfaces, a mobile composer
+(text / photo / link / file / audio; drawing display-only), and live updates via `BoardSocket` on the shared board WS.
 
 What exists:
 - Auth (login/signup/keychain-keystore session), splash.

@@ -96,6 +96,13 @@ type platformFeaturesJSON struct {
 	FFBoardsExternalSharing     bool `json:"ffBoardsExternalSharing"`
 	FFInteractiveQuizzes        bool `json:"ffInteractiveQuizzes"`
 	FFIqLiveHosting             bool `json:"ffIqLiveHosting"`
+	FFIqTeamMode                bool `json:"ffIqTeamMode"`
+	FFIqStudentPaced            bool `json:"ffIqStudentPaced"`
+	FFIqHomework                bool `json:"ffIqHomework"`
+	FFIqGradebookPush           bool `json:"ffIqGradebookPush"`
+	FFIqPublicKitCatalog        bool `json:"ffIqPublicKitCatalog"`
+	FFIqGuestJoin               bool `json:"ffIqGuestJoin"`
+	FFIqAiGeneration            bool `json:"ffIqAiGeneration"`
 	FFEmailSES                  bool `json:"ffEmailSes"`
 	FFPublicAPI                 bool `json:"ffPublicApi"`
 	FFStripeBilling             bool `json:"ffStripeBilling"`
@@ -235,6 +242,13 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFBoardsExternalSharing:     cfg.FFBoardsExternalSharing,
 		FFInteractiveQuizzes:        cfg.FFInteractiveQuizzes,
 		FFIqLiveHosting:             cfg.FFIqLiveHosting,
+		FFIqTeamMode:                cfg.FFIqTeamMode,
+		FFIqStudentPaced:            cfg.FFIqStudentPaced,
+		FFIqHomework:                cfg.FFIqHomework,
+		FFIqGradebookPush:           cfg.FFIqGradebookPush,
+		FFIqPublicKitCatalog:        cfg.FFIqPublicKitCatalog,
+		FFIqGuestJoin:               cfg.FFIqGuestJoin,
+		FFIqAiGeneration:            cfg.FFIqAiGeneration,
 		FFEmailSES:                  cfg.FFEmailSES,
 		FFPublicAPI:                 cfg.FFPublicAPI,
 		FFStripeBilling:             cfg.FFStripeBilling,

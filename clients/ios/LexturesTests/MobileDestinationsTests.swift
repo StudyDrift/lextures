@@ -50,6 +50,32 @@ final class MobileDestinationsTests: XCTestCase {
         XCTAssertTrue(sections.contains(.collabDocs))
     }
 
+    func testCourseWorkspaceShowsBoardsWhenVisualBoardsEnabled() {
+        let on = CourseSummary(
+            id: "1",
+            courseCode: "demo",
+            title: "Demo",
+            description: "",
+            viewerEnrollmentRoles: ["student"],
+            visualBoardsEnabled: true
+        )
+        let off = CourseSummary(
+            id: "1",
+            courseCode: "demo",
+            title: "Demo",
+            description: "",
+            viewerEnrollmentRoles: ["student"],
+            visualBoardsEnabled: false
+        )
+        XCTAssertTrue(
+            MobileDestinations.courseWorkspaceSections(CourseWorkspaceContext(course: on)).contains(.boards)
+        )
+        XCTAssertFalse(
+            MobileDestinations.courseWorkspaceSections(CourseWorkspaceContext(course: off)).contains(.boards)
+        )
+        XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .boards), .boards)
+    }
+
     func testCourseWorkspaceHidesDisabledFeatures() {
         let course = CourseSummary(
             id: "1",
@@ -125,6 +151,12 @@ final class MobileDestinationsTests: XCTestCase {
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .behavior), .behavior)
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .hallPass), .hallPass)
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .insights), .instructorInsights)
+        XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .boards), .boards)
+        guard case let .course(_, section, itemId) = DeepLinkRouter.resolve("/courses/cs101/boards/board-1") else {
+            return XCTFail("expected course deep link")
+        }
+        XCTAssertEqual(section, .boards)
+        XCTAssertEqual(itemId, "board-1")
     }
 
     func testCourseWorkspaceShowsInsightsForStaffWhenEnabled() {

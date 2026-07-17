@@ -238,5 +238,5 @@ Not AI-touching.
 
 - Existing files: `clients/web/src/app.tsx` (route registration, incl. non-LMS public routes),
   `clients/web/src/lib/` API client patterns, design-system components.
-- Related plans: [IQ.3](IQ.3-live-game-hosting-engine.md), [IQ.5](../../plan/interactive-quizzes/IQ.5-scoring-leaderboards-mechanics.md),
-  [IQ.6](../../plan/interactive-quizzes/IQ.6-game-modes-team-paced-async.md), [IQ.9](../../plan/interactive-quizzes/IQ.9-moderation-safety-accessibility.md).
+- Related plans: [IQ.3](IQ.3-live-game-hosting-engine.md), [IQ.5](IQ.5-scoring-leaderboards-mechanics.md),
+  [IQ.6](IQ.6-game-modes-team-paced-async.md), [IQ.9](../../plan/interactive-quizzes/IQ.9-moderation-safety-accessibility.md).

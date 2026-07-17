@@ -152,6 +152,13 @@ type Row struct {
 	FFBoardsExternalSharing         *bool
 	FFInteractiveQuizzes            *bool
 	FFIqLiveHosting                 *bool
+	FFIqTeamMode                    *bool
+	FFIqStudentPaced                *bool
+	FFIqHomework                    *bool
+	FFIqGradebookPush               *bool
+	FFIqPublicKitCatalog            *bool
+	FFIqGuestJoin                   *bool
+	FFIqAiGeneration                *bool
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFPaymentsEnabled               *bool
@@ -349,6 +356,13 @@ type Write struct {
 	FFBoardsExternalSharing         *bool
 	FFInteractiveQuizzes            *bool
 	FFIqLiveHosting                 *bool
+	FFIqTeamMode                    *bool
+	FFIqStudentPaced                *bool
+	FFIqHomework                    *bool
+	FFIqGradebookPush               *bool
+	FFIqPublicKitCatalog            *bool
+	FFIqGuestJoin                   *bool
+	FFIqAiGeneration                *bool
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFPaymentsEnabled               *bool
@@ -542,6 +556,13 @@ SELECT
 	ff_boards_external_sharing,
 	ff_interactive_quizzes,
 	ff_iq_live_hosting,
+	ff_iq_team_mode,
+	ff_iq_student_paced,
+	ff_iq_homework,
+	ff_iq_gradebook_push,
+	ff_iq_public_kit_catalog,
+	ff_iq_guest_join,
+	ff_iq_ai_generation,
 	ff_public_api,
 	ff_stripe_billing,
 	ff_payments_enabled,
@@ -728,6 +749,13 @@ WHERE id = 1
 		&r.FFBoardsExternalSharing,
 		&r.FFInteractiveQuizzes,
 		&r.FFIqLiveHosting,
+		&r.FFIqTeamMode,
+		&r.FFIqStudentPaced,
+		&r.FFIqHomework,
+		&r.FFIqGradebookPush,
+		&r.FFIqPublicKitCatalog,
+		&r.FFIqGuestJoin,
+		&r.FFIqAiGeneration,
 		&r.FFPublicAPI,
 		&r.FFStripeBilling,
 		&r.FFPaymentsEnabled,

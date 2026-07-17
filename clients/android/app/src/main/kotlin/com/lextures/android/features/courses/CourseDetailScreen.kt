@@ -84,6 +84,8 @@ import com.lextures.android.features.grades.GradeFeedbackScreen
 import com.lextures.android.features.officehours.CourseOfficeHoursSection
 import com.lextures.android.features.discussions.CourseDiscussionsSection
 import com.lextures.android.features.feed.CourseFeedSection
+import com.lextures.android.features.boards.BoardsListScreen
+import com.lextures.android.features.boards.BoardsUnavailableScreen
 import com.lextures.android.features.groups.CourseCollabDocsSection
 import com.lextures.android.features.groups.CourseGroupsSection
 import com.lextures.android.features.evaluations.CourseEvaluationsSection
@@ -117,6 +119,9 @@ fun CourseDetailScreen(
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
     val deepLinkThreadId = initialThreadId
+    var boardsDeepLinkUnavailable by remember {
+        mutableStateOf(false)
+    }
 
     // A course reached with an unaccepted invitation: gate content behind accept/decline.
     // Accepting swaps in the refreshed (active) course so the rest of the screen loads normally.
@@ -329,16 +334,21 @@ fun CourseDetailScreen(
         if (shell != null) {
             shell.activeCourse = course
             shell.activeCourseRoot = shell.rootDestination
-            val initial = initialSection?.takeIf { it in allSections }
-            if (initial != null) shell.activeCourseSection = initial
         }
         onDispose { shell?.activeCourse = null }
     }
-    LaunchedEffect(allSections) {
+    LaunchedEffect(allSections, initialSection) {
         shell?.activeCourseSections = allSections
+        if (initialSection == CourseWorkspaceSection.Boards && CourseWorkspaceSection.Boards !in allSections) {
+            boardsDeepLinkUnavailable = true
+        } else {
+            boardsDeepLinkUnavailable = false
+            val initial = initialSection?.takeIf { it in allSections }
+            if (initial != null && shell != null) shell.activeCourseSection = initial
+        }
         val current = shell?.activeCourseSection
-        if (current != null && current !in allSections) {
-            shell.activeCourseSection = allSections.firstOrNull() ?: CourseWorkspaceSection.Modules
+        if (current != null && current !in allSections && !boardsDeepLinkUnavailable) {
+            shell?.activeCourseSection = allSections.firstOrNull() ?: CourseWorkspaceSection.Modules
         }
     }
 
@@ -436,7 +446,9 @@ fun CourseDetailScreen(
                 item { StalenessChip(label = label) }
             }
 
-            if (shell?.iaRedesignEnabled == true) {
+            if (boardsDeepLinkUnavailable) {
+                item { BoardsUnavailableScreen() }
+            } else if (shell?.iaRedesignEnabled == true) {
                 when (selectedSection) {
                     CourseWorkspaceSection.Overview -> item {
                         CourseSyllabusSection(session = session, course = course)
@@ -536,6 +548,19 @@ fun CourseDetailScreen(
                     }
                     CourseWorkspaceSection.CollabDocs -> item {
                         CourseCollabDocsSection(session = session, course = course)
+                    }
+                    CourseWorkspaceSection.Boards -> item {
+                        BoardsListScreen(
+                            session = session,
+                            course = course,
+                            permissions = shell?.permissions.orEmpty(),
+                            currentUserId = shell?.profile?.id,
+                            initialBoardId = if (selectedSection == CourseWorkspaceSection.Boards) {
+                                deepLinkThreadId
+                            } else {
+                                null
+                            },
+                        )
                     }
                     CourseWorkspaceSection.People -> item {
                         CoursePeopleSection(session = session, course = course)

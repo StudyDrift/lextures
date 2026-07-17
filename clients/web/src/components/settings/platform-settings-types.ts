@@ -118,6 +118,13 @@ export type PlatformSettingsPayload = {
   ffVisualBoards: boolean
   ffInteractiveQuizzes: boolean
   ffIqLiveHosting: boolean
+  ffIqTeamMode: boolean
+  ffIqStudentPaced: boolean
+  ffIqHomework: boolean
+  ffIqGradebookPush: boolean
+  ffIqPublicKitCatalog: boolean
+  ffIqGuestJoin: boolean
+  ffIqAiGeneration: boolean
   ffBoardsRealtime: boolean
   ffBoardsExternalSharing: boolean
   ffEmailSes: boolean

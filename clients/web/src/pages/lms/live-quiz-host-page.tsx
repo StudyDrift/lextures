@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { endLiveGame, fetchLiveGame, type LiveGame } from '../../lib/live-quiz-api'
+import { HostSafetyPanel } from '../../components/live-quiz/host-safety-panel'
+import { LiveQuizLeaderboard } from '../../components/live-quiz/leaderboard'
+import {
+  assignLiveGameTeams,
+  endLiveGame,
+  fetchLiveGame,
+  startPacedLiveGame,
+  type LiveGame,
+} from '../../lib/live-quiz-api'
 import { useLiveGame } from '../../lib/live-quiz-realtime'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { toastMutationError } from '../../lib/lms-toast'
@@ -90,6 +98,27 @@ export default function LiveQuizHostPage() {
     try {
       game.end()
       await endLiveGame(courseCode, gameId)
+      navigate(
+        `/courses/${encodeURIComponent(courseCode)}/live-quizzes/games/${encodeURIComponent(gameId)}/report`,
+      )
+    } catch (err) {
+      toastMutationError(err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  async function handleAutoBalanceTeams() {
+    try {
+      await assignLiveGameTeams(courseCode, gameId, { autoBalance: true })
+      await load()
+    } catch (err) {
+      toastMutationError(err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  async function handleStartPaced() {
+    try {
+      await startPacedLiveGame(courseCode, gameId)
+      await load()
     } catch (err) {
       toastMutationError(err instanceof Error ? err.message : String(err))
     }
@@ -97,6 +126,7 @@ export default function LiveQuizHostPage() {
 
   const state = game.state
   const phase = state?.phase ?? bootstrap?.phase ?? 'lobby'
+  const mode = bootstrap?.mode ?? 'live_classic'
   const joinCode = state?.joinCode || bootstrap?.joinCode || ''
   const players = state?.players ?? bootstrap?.players ?? []
   const kitTitle = state?.kitTitle || bootstrap?.kitTitle || ''
@@ -162,40 +192,53 @@ export default function LiveQuizHostPage() {
               </p>
             ) : null}
           </div>
-          <div>
-            <h2 className="mb-2 text-lg font-medium">
-              {t('liveQuiz.host.players', { count: players.length })}
-            </h2>
-            <ul className="space-y-1">
-              {players.map((p) => (
-                <li key={p.id} className="flex items-center justify-between gap-2 text-sm">
-                  <span>
-                    {p.nickname}
-                    {!p.connected ? ` (${t('liveQuiz.host.disconnected')})` : ''}
-                  </span>
-                  <button
-                    type="button"
-                    className="text-destructive underline"
-                    onClick={() => game.kick(p.id)}
-                  >
-                    {t('liveQuiz.host.kick')}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <button
-            type="button"
-            className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
-            disabled={game.pending || players.length === 0}
-            onClick={() => game.open()}
-          >
-            {t('liveQuiz.host.start')}
-          </button>
+          <HostSafetyPanel
+            courseCode={courseCode}
+            gameId={gameId}
+            players={players}
+            namesMuted={!!state?.namesMuted || !!bootstrap?.namesMuted}
+            lobbyLocked={!!state?.lobbyLocked || !!bootstrap?.lobbyLocked}
+            onKick={(id) => game.kick(id)}
+            onRename={(id) => game.rename(id)}
+            onMuteNames={(muted) => game.muteNames(muted)}
+            onLockLobby={(locked) => game.lockLobby(locked)}
+          />
+          {mode === 'team' ? (
+            <button
+              type="button"
+              className="rounded-md border px-4 py-2 text-sm disabled:opacity-50"
+              disabled={players.length === 0}
+              onClick={() => void handleAutoBalanceTeams()}
+            >
+              {t('liveQuiz.team.autoBalance', { defaultValue: 'Auto-balance teams' })}
+            </button>
+          ) : null}
+          {mode === 'student_paced' ? (
+            <button
+              type="button"
+              className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+              disabled={players.length === 0}
+              onClick={() => void handleStartPaced()}
+            >
+              {t('liveQuiz.paced.start', { defaultValue: 'Start student-paced game' })}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+              disabled={game.pending || players.length === 0}
+              onClick={() => game.open()}
+            >
+              {t('liveQuiz.host.start')}
+            </button>
+          )}
         </section>
       )}
 
-      {phase !== 'lobby' && phase !== 'ended' && phase !== 'podium' && (
+      {phase !== 'lobby' &&
+        phase !== 'ended' &&
+        phase !== 'podium' &&
+        phase !== 'leaderboard' && (
         <section className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -233,7 +276,7 @@ export default function LiveQuizHostPage() {
                 {t('liveQuiz.host.reveal')}
               </button>
             )}
-            {(phase === 'question_reveal' || phase === 'leaderboard') && (
+            {phase === 'question_reveal' && (
               <button
                 type="button"
                 className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50"
@@ -257,19 +300,40 @@ export default function LiveQuizHostPage() {
               {t('liveQuiz.host.correct')}: {state.question.correctOptionIds.join(', ')}
             </p>
           )}
+          <HostSafetyPanel
+            courseCode={courseCode}
+            gameId={gameId}
+            players={players}
+            namesMuted={!!state?.namesMuted || !!bootstrap?.namesMuted}
+            lobbyLocked={!!state?.lobbyLocked || !!bootstrap?.lobbyLocked}
+            onKick={(id) => game.kick(id)}
+            onRename={(id) => game.rename(id)}
+            onMuteNames={(muted) => game.muteNames(muted)}
+            onLockLobby={(locked) => game.lockLobby(locked)}
+          />
         </section>
       )}
 
-      {(phase === 'podium' || phase === 'ended') && (
+      {(phase === 'leaderboard' || phase === 'podium' || phase === 'ended') && (
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold">{t('liveQuiz.host.podium')}</h2>
-          <ol className="space-y-1">
-            {(state?.leaderboard ?? []).map((row) => (
-              <li key={row.playerId}>
-                #{row.rank} {row.nickname} — {row.totalScore}
-              </li>
-            ))}
-          </ol>
+          <h2 className="text-xl font-semibold">
+            {phase === 'leaderboard' ? t('liveQuiz.leaderboard.title') : t('liveQuiz.host.podium')}
+          </h2>
+          <LiveQuizLeaderboard
+            rows={state?.leaderboard ?? state?.podium ?? []}
+            privacy={state?.leaderboardPrivacy ?? 'names'}
+            variant={phase === 'leaderboard' ? 'list' : 'podium'}
+          />
+          {phase === 'leaderboard' && (
+            <button
+              type="button"
+              className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+              disabled={game.pending}
+              onClick={() => game.next()}
+            >
+              {t('liveQuiz.host.next')}
+            </button>
+          )}
           {phase === 'podium' && (
             <button
               type="button"
@@ -280,13 +344,26 @@ export default function LiveQuizHostPage() {
             </button>
           )}
           {phase === 'ended' && (
-            <button
-              type="button"
-              className="underline"
-              onClick={() => navigate(`/courses/${encodeURIComponent(courseCode)}/live-quizzes`)}
-            >
-              {t('liveQuiz.kit.backToGallery')}
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
+                onClick={() =>
+                  navigate(
+                    `/courses/${encodeURIComponent(courseCode)}/live-quizzes/games/${encodeURIComponent(gameId)}/report`,
+                  )
+                }
+              >
+                {t('liveQuiz.report.viewReport')}
+              </button>
+              <button
+                type="button"
+                className="underline"
+                onClick={() => navigate(`/courses/${encodeURIComponent(courseCode)}/live-quizzes`)}
+              >
+                {t('liveQuiz.kit.backToGallery')}
+              </button>
+            </div>
           )}
         </section>
       )}

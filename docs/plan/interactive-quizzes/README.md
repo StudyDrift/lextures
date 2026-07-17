@@ -77,13 +77,13 @@ rich reports, sharing, moderation, accessibility, and AI generation.
 | IQ.2 | ~~Quiz-kit authoring & question types~~ → [completed](../../completed/interactive-quizzes/IQ.2-kit-authoring-and-question-types.md) | BLOCKER | IQ.1 | L |
 | IQ.3 | ~~Live game hosting engine (real-time)~~ → [completed](../../completed/interactive-quizzes/IQ.3-live-game-hosting-engine.md) | BLOCKER | IQ.1, IQ.2 | L |
 | IQ.4 | ~~Player join & gameplay experience~~ → [completed](../../completed/interactive-quizzes/IQ.4-player-join-and-gameplay.md) | BLOCKER | IQ.3 | L |
-| IQ.5 | [Scoring, leaderboards & game mechanics](IQ.5-scoring-leaderboards-mechanics.md) | MAJOR | IQ.3, IQ.4 | M |
-| IQ.6 | [Game modes: team, student-paced & async homework](IQ.6-game-modes-team-paced-async.md) | MAJOR | IQ.3, IQ.4 | L |
-| IQ.7 | [Reports, results & gradebook/analytics](IQ.7-reports-results-gradebook.md) | MAJOR | IQ.3 | M |
-| IQ.8 | [Content library, templates, sharing & discovery](IQ.8-library-templates-sharing.md) | MAJOR | IQ.1, IQ.2 | M |
-| IQ.9 | [Moderation, safety, accessibility & fair play](IQ.9-moderation-safety-accessibility.md) | BLOCKER (K12) | IQ.3, IQ.4 | M |
-| IQ.10 | [AI-assisted quiz generation](IQ.10-ai-assisted-generation.md) | MAJOR | IQ.2 | M |
-| IQ.11 | [Admin governance, quotas, analytics & lifecycle](IQ.11-admin-governance-quotas-lifecycle.md) | MAJOR | IQ.1 | M |
+| IQ.5 | ~~Scoring, leaderboards & game mechanics~~ → [completed](../../completed/interactive-quizzes/IQ.5-scoring-leaderboards-mechanics.md) | MAJOR | IQ.3, IQ.4 | M |
+| IQ.6 | ~~Game modes: team, student-paced & async homework~~ → [completed](../../completed/interactive-quizzes/IQ.6-game-modes-team-paced-async.md) | MAJOR | IQ.3, IQ.4 | L |
+| IQ.7 | ~~Reports, results & gradebook/analytics~~ → [completed](../../completed/interactive-quizzes/IQ.7-reports-results-gradebook.md) | MAJOR | IQ.3 | M |
+| IQ.8 | ~~Content library, templates, sharing & discovery~~ → [completed](../../completed/interactive-quizzes/IQ.8-library-templates-sharing.md) | MAJOR | IQ.1, IQ.2 | M |
+| IQ.9 | ~~Moderation, safety, accessibility & fair play~~ → [completed](../../completed/interactive-quizzes/IQ.9-moderation-safety-accessibility.md) | BLOCKER (K12) | IQ.3, IQ.4 | M |
+| IQ.10 | ~~AI-assisted quiz generation~~ → [completed](../../completed/interactive-quizzes/IQ.10-ai-assisted-generation.md) | MAJOR | IQ.2 | M |
+| IQ.11 | ~~Admin governance, quotas, analytics & lifecycle~~ → [completed](../../completed/interactive-quizzes/IQ.11-admin-governance-quotas-lifecycle.md) | MAJOR | IQ.1 | M |
 
 ## Recommended sequencing
 

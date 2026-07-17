@@ -56,6 +56,8 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var misconceptionDetectionEnabled: Bool?
     var multilingualMessagingEnabled: Bool?
     var whiteboardEnabled: Bool?
+    /// VC.M1 — visual collaboration boards (opt-in; default off).
+    var visualBoardsEnabled: Bool?
     var requireCaptions: Bool?
     var viewerEnrollmentInvitationPending: Bool?
     var viewerPendingEnrollmentId: String?
@@ -94,6 +96,8 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var isGroupSpacesEnabled: Bool { groupSpacesEnabled == true }
 
     var isCollabDocsEnabled: Bool { collabDocsEnabled == true }
+
+    var isVisualBoardsEnabled: Bool { visualBoardsEnabled == true }
 
     var isPinned: Bool { catalogPinned == true }
 

@@ -345,5 +345,5 @@ Not AI-touching. (An optional AI "explain this answer" on reveal could reuse IQ.
   `server/internal/httpserver/server.go` (WS setup), `enrollment.UserHasAccess`,
   `server/internal/repos/quizattempts/` (attempt/response persistence patterns), `server/internal/telemetry`.
 - Related plans: [IQ.1 (completed)](IQ.1-foundation-and-feature-flag.md), [IQ.2 (completed)](IQ.2-kit-authoring-and-question-types.md), [IQ.4 (completed)](IQ.4-player-join-and-gameplay.md),
-  [IQ.5](../../plan/interactive-quizzes/IQ.5-scoring-leaderboards-mechanics.md), [IQ.6](../../plan/interactive-quizzes/IQ.6-game-modes-team-paced-async.md),
+  [IQ.5](IQ.5-scoring-leaderboards-mechanics.md), [IQ.6](IQ.6-game-modes-team-paced-async.md),
   [IQ.9](../../plan/interactive-quizzes/IQ.9-moderation-safety-accessibility.md); Collaborative Documents (plan 6.5) / [VC.4](../../plan/visual-collaboration/VC.4-realtime-collaboration-and-presence.md) for WS transport reuse.

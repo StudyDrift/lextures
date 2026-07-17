@@ -639,6 +639,45 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Authoritative live game hosting engine (join codes, host console, projector, WebSocket hub). Requires Live Quizzes to be enabled.',
   },
   {
+    key: 'ffIqTeamMode',
+    label: 'Live quiz team mode',
+    description: 'Team play with named teams and team leaderboards. Requires live quiz hosting.',
+  },
+  {
+    key: 'ffIqStudentPaced',
+    label: 'Live quiz student-paced mode',
+    description: 'Each learner advances through questions independently. Requires live quiz hosting.',
+  },
+  {
+    key: 'ffIqHomework',
+    label: 'Live quiz homework',
+    description: 'Assign quiz kits as async homework with windows, attempts, and grade policies.',
+  },
+  {
+    key: 'ffIqGradebookPush',
+    label: 'Live quiz gradebook push',
+    description:
+      'Allow instructors to push live-quiz or homework game scores into the course gradebook. Requires Live Quizzes.',
+  },
+  {
+    key: 'ffIqPublicKitCatalog',
+    label: 'Live quiz public kit catalog',
+    description:
+      'Enable a curated public catalog of shareable quiz kits. Submissions stay pending until moderated. Org sharing works without this flag.',
+  },
+  {
+    key: 'ffIqGuestJoin',
+    label: 'Live quiz guest join',
+    description:
+      'Allow unauthenticated guest players when a host enables guests for a game. Off by default; blocked for courses with minors (COPPA). Requires nickname moderation (IQ.9).',
+  },
+  {
+    key: 'ffIqAiGeneration',
+    label: 'Live quiz AI generation',
+    description:
+      'Let instructors draft quiz-kit questions with AI from a topic, passage, or course content. Requires Live Quizzes, configured AI providers, and teacher review before hosting.',
+  },
+  {
     key: 'ffBoardsRealtime',
     label: 'Board realtime sync',
     description:

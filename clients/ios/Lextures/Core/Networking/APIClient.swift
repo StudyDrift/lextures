@@ -13,7 +13,8 @@ struct APIClient {
         body: (any Encodable)? = nil,
         authorized: Bool = false,
         accessToken: String? = nil,
-        idempotencyKey: String? = nil
+        idempotencyKey: String? = nil,
+        extraHeaders: [String: String] = [:]
     ) async throws -> (Data, HTTPURLResponse) {
         let bodyData: Data?
         if let body {
@@ -27,7 +28,8 @@ struct APIClient {
             bodyData: bodyData,
             authorized: authorized,
             accessToken: accessToken,
-            idempotencyKey: idempotencyKey
+            idempotencyKey: idempotencyKey,
+            extraHeaders: extraHeaders
         )
     }
 
@@ -39,7 +41,8 @@ struct APIClient {
         authorized: Bool = false,
         accessToken: String? = nil,
         idempotencyKey: String? = nil,
-        isRetryAfterRefresh: Bool = false
+        isRetryAfterRefresh: Bool = false,
+        extraHeaders: [String: String] = [:]
     ) async throws -> (Data, HTTPURLResponse) {
         var request = URLRequest(url: AppConfiguration.apiURL(path: path))
         request.httpMethod = method
@@ -61,6 +64,10 @@ struct APIClient {
 
         if let idempotencyKey, !idempotencyKey.isEmpty {
             request.setValue(idempotencyKey, forHTTPHeaderField: "X-Idempotency-Key")
+        }
+
+        for (key, value) in extraHeaders where !value.isEmpty {
+            request.setValue(value, forHTTPHeaderField: key)
         }
 
         let data: Data
@@ -87,7 +94,8 @@ struct APIClient {
                               method: method,
                               bodyData: bodyData,
                               accessToken: accessToken,
-                              idempotencyKey: idempotencyKey
+                              idempotencyKey: idempotencyKey,
+                              extraHeaders: extraHeaders
                           ) {
                     return retried
                 }
@@ -104,7 +112,8 @@ struct APIClient {
         method: String,
         bodyData: Data?,
         accessToken: String?,
-        idempotencyKey: String?
+        idempotencyKey: String?,
+        extraHeaders: [String: String]
     ) async throws -> (Data, HTTPURLResponse)? {
         let session = await MainActor.run { NetworkAuthContext.session }
         guard let session else { return nil }
@@ -118,7 +127,8 @@ struct APIClient {
             authorized: true,
             accessToken: newToken,
             idempotencyKey: idempotencyKey,
-            isRetryAfterRefresh: true
+            isRetryAfterRefresh: true,
+            extraHeaders: extraHeaders
         )
     }
 

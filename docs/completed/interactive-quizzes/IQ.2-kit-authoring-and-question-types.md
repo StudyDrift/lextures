@@ -266,4 +266,4 @@ pass the same validation.
   `server/internal/repos/storageobjects/`, `server/internal/repos/avscanjobs/`.
 - Related plans: [IQ.1](IQ.1-foundation-and-feature-flag.md),
   [IQ.3 (completed)](IQ.3-live-game-hosting-engine.md),
-  [IQ.10](../../plan/interactive-quizzes/IQ.10-ai-assisted-generation.md).
+  [IQ.10](IQ.10-ai-assisted-generation.md).

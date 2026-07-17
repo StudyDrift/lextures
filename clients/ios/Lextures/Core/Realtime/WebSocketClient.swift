@@ -55,6 +55,14 @@ private final class WebSocketSessionSupport: NSObject, URLSessionWebSocketDelega
     }
 }
 
+/// Lifecycle hooks for per-screen sockets that need connection-state UX (e.g. BoardSocket).
+enum WebSocketLifecycleEvent: Equatable, Sendable {
+    case opened
+    /// `httpStatus` is set when the HTTP upgrade failed before the socket opened (e.g. 404).
+    /// `willReconnect` is false when the client stopped retrying (permanent refusal or disconnect()).
+    case closed(httpStatus: Int?, willReconnect: Bool)
+}
+
 /// Reconnecting JSON WebSocket client for the server's realtime hubs.
 ///
 /// Mirrors the web client's handshake (`clients/web/src/context/inbox-unread-provider.tsx`):
@@ -67,6 +75,8 @@ final class WebSocketClient {
     private let path: String
     private let accessTokenProvider: () -> String?
     private let onMessage: (Data) -> Void
+    private let onLifecycle: ((WebSocketLifecycleEvent) -> Void)?
+    private let stopOnPermanentRefusal: Bool
 
     private var task: URLSessionWebSocketTask?
     private var connectedToken: String?
@@ -76,11 +86,15 @@ final class WebSocketClient {
     init(
         path: String,
         accessTokenProvider: @escaping () -> String?,
-        onMessage: @escaping (Data) -> Void
+        onMessage: @escaping (Data) -> Void,
+        onLifecycle: ((WebSocketLifecycleEvent) -> Void)? = nil,
+        stopOnPermanentRefusal: Bool = false
     ) {
         self.path = path
         self.accessTokenProvider = accessTokenProvider
         self.onMessage = onMessage
+        self.onLifecycle = onLifecycle
+        self.stopOnPermanentRefusal = stopOnPermanentRefusal
     }
 
     /// Connects if not already connected with the current token. Safe to call repeatedly
@@ -123,13 +137,17 @@ final class WebSocketClient {
             do {
                 let opened = await WebSocketSessionSupport.shared.waitForOpen(newTask)
                 guard opened, !self.isStopped, self.task === newTask else {
-                    await self.scheduleReconnect(after: newTask)
+                    let status = (newTask.response as? HTTPURLResponse)?.statusCode
+                    await self.handleDisconnect(after: newTask, httpStatus: status)
                     return
                 }
+                self.onLifecycle?(.opened)
                 try await newTask.send(.string(authString))
                 try await self.receiveLoop(task: newTask)
+                await self.handleDisconnect(after: newTask, httpStatus: nil)
             } catch {
-                await self.scheduleReconnect(after: newTask)
+                let status = (newTask.response as? HTTPURLResponse)?.statusCode
+                await self.handleDisconnect(after: newTask, httpStatus: status)
             }
         }
     }
@@ -150,14 +168,31 @@ final class WebSocketClient {
         }
     }
 
-    private func scheduleReconnect(after finishedTask: URLSessionWebSocketTask) async {
-        guard !isStopped, task === finishedTask else { return }
+    private func handleDisconnect(after finishedTask: URLSessionWebSocketTask, httpStatus: Int?) async {
+        guard !isStopped, task === finishedTask else {
+            onLifecycle?(.closed(httpStatus: httpStatus, willReconnect: false))
+            return
+        }
         task = nil
         connectedToken = nil
+
+        let permanent = stopOnPermanentRefusal && Self.isPermanentWsRefusal(httpStatus)
+        if permanent {
+            isStopped = true
+            onLifecycle?(.closed(httpStatus: httpStatus, willReconnect: false))
+            return
+        }
+
+        onLifecycle?(.closed(httpStatus: httpStatus, willReconnect: true))
         reconnectTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(2))
             guard let self, !Task.isCancelled else { return }
             self.connect()
         }
+    }
+
+    private static func isPermanentWsRefusal(_ statusCode: Int?) -> Bool {
+        guard let statusCode else { return false }
+        return statusCode == 401 || statusCode == 403 || statusCode == 404
     }
 }

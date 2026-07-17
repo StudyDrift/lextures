@@ -24,24 +24,32 @@ func questionJSON(q quizgame.Question) map[string]any {
 	if len(q.CorrectAnswer) > 0 {
 		_ = json.Unmarshal(q.CorrectAnswer, &corr)
 	}
+	source := q.Source
+	if source == "" {
+		source = "authored"
+	}
 	return map[string]any{
-		"id":               q.ID,
-		"kitId":            q.KitID,
-		"position":         q.Position,
-		"questionType":     q.QuestionType,
-		"prompt":           q.Prompt,
-		"promptMediaRef":   q.PromptMediaRef,
-		"promptMediaAlt":   q.PromptMediaAlt,
-		"options":          opts,
-		"correctAnswer":    corr,
-		"timeLimitSeconds": q.TimeLimitSeconds,
-		"pointsStyle":      q.PointsStyle,
-		"answerShuffle":    q.AnswerShuffle,
-		"explanation":      q.Explanation,
-		"sourceQuestionId": q.SourceQuestionID,
-		"version":          q.Version,
-		"createdAt":        q.CreatedAt.UTC().Format(time.RFC3339),
-		"updatedAt":        q.UpdatedAt.UTC().Format(time.RFC3339),
+		"id":                   q.ID,
+		"kitId":                q.KitID,
+		"position":             q.Position,
+		"questionType":         q.QuestionType,
+		"prompt":               q.Prompt,
+		"promptMediaRef":       q.PromptMediaRef,
+		"promptMediaAlt":       q.PromptMediaAlt,
+		"options":              opts,
+		"correctAnswer":        corr,
+		"timeLimitSeconds":     q.TimeLimitSeconds,
+		"pointsStyle":          q.PointsStyle,
+		"answerShuffle":        q.AnswerShuffle,
+		"explanation":          q.Explanation,
+		"sourceQuestionId":     q.SourceQuestionID,
+		"source":               source,
+		"needsReview":          q.NeedsReview,
+		"generationJobId":      q.GenerationJobID,
+		"generationConfidence": q.GenerationConfidence,
+		"version":              q.Version,
+		"createdAt":            q.CreatedAt.UTC().Format(time.RFC3339),
+		"updatedAt":            q.UpdatedAt.UTC().Format(time.RFC3339),
 	}
 }
 

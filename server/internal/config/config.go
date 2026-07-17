@@ -492,6 +492,23 @@ type Config struct {
 	// FFIqLiveHosting enables the live game hosting engine / WebSocket hub (plan IQ.3). Default OFF.
 	// Requires FFInteractiveQuizzes and per-course interactive_quizzes_enabled.
 	FFIqLiveHosting bool
+	// FFIqTeamMode enables team game mode (plan IQ.6). Default OFF.
+	FFIqTeamMode bool
+	// FFIqStudentPaced enables student-paced game mode (plan IQ.6). Default OFF.
+	FFIqStudentPaced bool
+	// FFIqHomework enables async homework assignments (plan IQ.6). Default OFF.
+	FFIqHomework bool
+	// FFIqGradebookPush enables pushing live-quiz scores into the course gradebook (plan IQ.7). Default OFF.
+	FFIqGradebookPush bool
+	// FFIqPublicKitCatalog enables the curated public live-quiz kit catalog (plan IQ.8). Default OFF.
+	// Org sharing and templates work without this flag; public listing requires moderation (pending → listed).
+	FFIqPublicKitCatalog bool
+	// FFIqGuestJoin enables guest (unauthenticated) join for live quizzes when a game allows it (plan IQ.9).
+	// Default OFF. Blocked for under-13/COPPA courses even when on.
+	FFIqGuestJoin bool
+	// FFIqAiGeneration enables AI-assisted quiz kit generation in the kit editor (plan IQ.10). Default OFF.
+	// Requires FFInteractiveQuizzes, per-course interactive_quizzes_enabled, and configured AI providers.
+	FFIqAiGeneration bool
 	// FFPublicAPI enables the versioned public REST API for third-party integrations (plan 16.1).
 	// Managed in Settings → Global platform (not process env).
 	FFPublicAPI bool

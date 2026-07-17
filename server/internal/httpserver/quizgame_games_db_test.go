@@ -130,7 +130,7 @@ func TestQuizGames_StartJoinAnswerEnd_Pg(t *testing.T) {
 		t.Fatalf("lookup courseCode: want %s got %v", cc, lookup["courseCode"])
 	}
 	if lookup["allowsGuests"] != false {
-		t.Fatalf("allowsGuests should be false until IQ.9: %v", lookup["allowsGuests"])
+		t.Fatalf("allowsGuests should default false: %v", lookup["allowsGuests"])
 	}
 
 	joinBody, _ := json.Marshal(map[string]any{"nickname": "Ada"})
@@ -302,6 +302,218 @@ func TestQuizGames_HostingSubFlagOff_Pg(t *testing.T) {
 	h.ServeHTTP(w, req)
 	if w.Code != http.StatusNotFound {
 		t.Fatalf("ws want 404 got %d", w.Code)
+	}
+}
+
+func TestQuizGames_ScoringLeaderboardBreakdown_Pg(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+
+	pool, h, tok, cc, courseID := setupQuizKitTest(t, ctx, "teacher", true, true)
+	defer pool.Close()
+
+	kitID := seedReadyKit(t, h, tok, cc)
+	body, _ := json.Marshal(map[string]any{
+		"pacing":             "manual",
+		"scoringProfile":     "competitive",
+		"leaderboardPrivacy": "nicknames",
+		"powerUpsEnabled":    false,
+	})
+	req := httptest.NewRequest(http.MethodPost,
+		"/api/v1/courses/"+cc+"/live-quizzes/kits/"+kitID+"/games", bytes.NewReader(body))
+	req.Header.Set("Authorization", "Bearer "+tok)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("start: %d %s", w.Code, w.Body.String())
+	}
+	var started map[string]any
+	_ = json.Unmarshal(w.Body.Bytes(), &started)
+	gameID, _ := started["gameId"].(string)
+	game, _ := started["game"].(map[string]any)
+	if game["scoringProfile"] != "competitive" {
+		t.Fatalf("scoringProfile: %v", game["scoringProfile"])
+	}
+	if game["leaderboardPrivacy"] != "nicknames" {
+		t.Fatalf("leaderboardPrivacy: %v", game["leaderboardPrivacy"])
+	}
+
+	join := func(authTok, nick string) string {
+		t.Helper()
+		jb, _ := json.Marshal(map[string]any{"nickname": nick})
+		r := httptest.NewRequest(http.MethodPost,
+			"/api/v1/courses/"+cc+"/live-quizzes/games/"+gameID+"/players", bytes.NewReader(jb))
+		r.Header.Set("Authorization", "Bearer "+authTok)
+		r.Header.Set("Content-Type", "application/json")
+		rw := httptest.NewRecorder()
+		h.ServeHTTP(rw, r)
+		if rw.Code != http.StatusCreated && rw.Code != http.StatusOK {
+			t.Fatalf("join %s: %d %s", nick, rw.Code, rw.Body.String())
+		}
+		var out map[string]any
+		_ = json.Unmarshal(rw.Body.Bytes(), &out)
+		id, _ := out["playerId"].(string)
+		return id
+	}
+
+	pFast := join(tok, "Fast")
+	studentTok := enrollExtraQuizPlayer(t, ctx, pool, h, cc, courseID)
+	pSlow := join(studentTok, "Slow")
+
+	sess, err := quizgame.GetSession(ctx, pool, gameID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().UTC()
+	next, ev, err := engine.Reduce(sess.EngineState(), engine.ActionOpen, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next = engine.ApplyDeadline(next, 10)
+	if _, err := quizgame.ApplyHostTransition(ctx, pool, gameID, next, ev, false); err != nil {
+		t.Fatal(err)
+	}
+
+	fast, err := quizgame.SubmitAnswer(ctx, pool, quizgame.SubmitAnswerInput{
+		SessionID: gameID, PlayerID: pFast, QuestionIndex: 0,
+		Answer: json.RawMessage(`{"optionId":"b"}`), ReceivedAt: now.Add(2 * time.Second),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	slow, err := quizgame.SubmitAnswer(ctx, pool, quizgame.SubmitAnswerInput{
+		SessionID: gameID, PlayerID: pSlow, QuestionIndex: 0,
+		Answer: json.RawMessage(`{"optionId":"b"}`), ReceivedAt: now.Add(8 * time.Second),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fast.Points <= slow.Points {
+		t.Fatalf("AC-1: fast=%d should beat slow=%d", fast.Points, slow.Points)
+	}
+	if fast.Points < 1000 || slow.Points < 1000 {
+		t.Fatalf("both ≥ base: fast=%d slow=%d", fast.Points, slow.Points)
+	}
+	if fast.PointsBreakdown.Total != fast.Points {
+		t.Fatalf("breakdown total mismatch: %+v", fast.PointsBreakdown)
+	}
+	sum := fast.PointsBreakdown.Base + fast.PointsBreakdown.SpeedBonus + fast.PointsBreakdown.StreakBonus
+	if sum != fast.Points {
+		t.Fatalf("AC-6 components %d != total %d", sum, fast.Points)
+	}
+
+	// Idempotent reconnect: re-submit is duplicate; score unchanged.
+	before, _ := quizgame.GetPlayer(ctx, pool, pFast)
+	_, err = quizgame.SubmitAnswer(ctx, pool, quizgame.SubmitAnswerInput{
+		SessionID: gameID, PlayerID: pFast, QuestionIndex: 0,
+		Answer: json.RawMessage(`{"optionId":"b"}`), ReceivedAt: now.Add(3 * time.Second),
+	})
+	if err != quizgame.ErrDuplicateAnswer {
+		t.Fatalf("want duplicate got %v", err)
+	}
+	after, _ := quizgame.GetPlayer(ctx, pool, pFast)
+	if after.TotalScore != before.TotalScore {
+		t.Fatalf("AC-5 double-award: before=%d after=%d", before.TotalScore, after.TotalScore)
+	}
+
+	req = httptest.NewRequest(http.MethodGet,
+		"/api/v1/courses/"+cc+"/live-quizzes/games/"+gameID+"/leaderboard", nil)
+	req.Header.Set("Authorization", "Bearer "+tok)
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("leaderboard: %d %s", w.Code, w.Body.String())
+	}
+	var lb map[string]any
+	_ = json.Unmarshal(w.Body.Bytes(), &lb)
+	if lb["privacy"] != "nicknames" {
+		t.Fatalf("privacy: %v", lb["privacy"])
+	}
+
+	req = httptest.NewRequest(http.MethodGet,
+		"/api/v1/courses/"+cc+"/live-quizzes/games/"+gameID+"/responses/"+pFast, nil)
+	req.Header.Set("Authorization", "Bearer "+tok)
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("responses: %d %s", w.Code, w.Body.String())
+	}
+	var respBody map[string]any
+	_ = json.Unmarshal(w.Body.Bytes(), &respBody)
+	responses, _ := respBody["responses"].([]any)
+	if len(responses) != 1 {
+		t.Fatalf("want 1 response got %v", respBody)
+	}
+}
+
+func TestQuizGames_FormativeEqualPoints_Pg(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+
+	pool, h, tok, cc, courseID := setupQuizKitTest(t, ctx, "teacher", true, true)
+	defer pool.Close()
+
+	kitID := seedReadyKit(t, h, tok, cc)
+	body, _ := json.Marshal(map[string]any{"pacing": "manual", "scoringProfile": "formative"})
+	req := httptest.NewRequest(http.MethodPost,
+		"/api/v1/courses/"+cc+"/live-quizzes/kits/"+kitID+"/games", bytes.NewReader(body))
+	req.Header.Set("Authorization", "Bearer "+tok)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("start: %d %s", w.Code, w.Body.String())
+	}
+	var started map[string]any
+	_ = json.Unmarshal(w.Body.Bytes(), &started)
+	gameID, _ := started["gameId"].(string)
+
+	joinBody, _ := json.Marshal(map[string]any{"nickname": "A"})
+	req = httptest.NewRequest(http.MethodPost,
+		"/api/v1/courses/"+cc+"/live-quizzes/games/"+gameID+"/players", bytes.NewReader(joinBody))
+	req.Header.Set("Authorization", "Bearer "+tok)
+	req.Header.Set("Content-Type", "application/json")
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	var p1 map[string]any
+	_ = json.Unmarshal(w.Body.Bytes(), &p1)
+	id1, _ := p1["playerId"].(string)
+
+	stTok := enrollExtraQuizPlayer(t, ctx, pool, h, cc, courseID)
+	joinBody2, _ := json.Marshal(map[string]any{"nickname": "B"})
+	req = httptest.NewRequest(http.MethodPost,
+		"/api/v1/courses/"+cc+"/live-quizzes/games/"+gameID+"/players", bytes.NewReader(joinBody2))
+	req.Header.Set("Authorization", "Bearer "+stTok)
+	req.Header.Set("Content-Type", "application/json")
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	var p2 map[string]any
+	_ = json.Unmarshal(w.Body.Bytes(), &p2)
+	id2, _ := p2["playerId"].(string)
+
+	sess, _ := quizgame.GetSession(ctx, pool, gameID)
+	now := time.Now().UTC()
+	next, ev, _ := engine.Reduce(sess.EngineState(), engine.ActionOpen, now)
+	next = engine.ApplyDeadline(next, 10)
+	_, _ = quizgame.ApplyHostTransition(ctx, pool, gameID, next, ev, false)
+
+	a, err := quizgame.SubmitAnswer(ctx, pool, quizgame.SubmitAnswerInput{
+		SessionID: gameID, PlayerID: id1, QuestionIndex: 0,
+		Answer: json.RawMessage(`{"optionId":"b"}`), ReceivedAt: now.Add(1 * time.Second),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := quizgame.SubmitAnswer(ctx, pool, quizgame.SubmitAnswerInput{
+		SessionID: gameID, PlayerID: id2, QuestionIndex: 0,
+		Answer: json.RawMessage(`{"optionId":"b"}`), ReceivedAt: now.Add(9 * time.Second),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a.Points != b.Points || a.Points != 1000 {
+		t.Fatalf("AC-4 formative equal: a=%d b=%d", a.Points, b.Points)
 	}
 }
 

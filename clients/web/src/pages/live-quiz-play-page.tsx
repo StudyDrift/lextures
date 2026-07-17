@@ -9,6 +9,7 @@ import { StandingCard } from '../components/live-quiz/play/standing-card'
 import { getAccessToken } from '../lib/auth'
 import {
   joinLiveGame,
+  joinLiveGameAsGuest,
   LiveQuizJoinError,
   lookupJoinCode,
   type JoinLookup,
@@ -39,6 +40,7 @@ export default function LiveQuizPlayPage() {
   const [playerToken, setPlayerToken] = useState<string | null>(null)
   const [courseCode, setCourseCode] = useState('')
   const [gameId, setGameId] = useState('')
+  const [doubleOrNothing, setDoubleOrNothing] = useState(false)
 
   const game = useLiveGame({
     courseCode,
@@ -114,15 +116,19 @@ export default function LiveQuizPlayPage() {
       )
       return
     }
-    if (lookup.requiresAuth && !getAccessToken()) {
-      const from = `/play/${codeInput.replace(/\D/g, '') || rawCode || ''}`
+    const joinCode = (codeInput || rawCode || '').replace(/\D/g, '')
+    const useGuest = lookup.allowsGuests && !getAccessToken()
+    if (lookup.requiresAuth && !useGuest && !getAccessToken()) {
+      const from = `/play/${joinCode}`
       navigate('/login', { state: { from } })
       return
     }
     setBusy(true)
     setError(null)
     try {
-      const res = await joinLiveGame(lookup.courseCode, lookup.gameId, check.nickname)
+      const res = useGuest
+        ? await joinLiveGameAsGuest(joinCode, check.nickname)
+        : await joinLiveGame(lookup.courseCode, lookup.gameId, check.nickname)
       setPlayerId(res.playerId)
       setPlayerToken(res.playerToken)
       setNickname(res.nickname)
@@ -132,7 +138,7 @@ export default function LiveQuizPlayPage() {
         playerId: res.playerId,
         playerToken: res.playerToken,
         nickname: res.nickname,
-        joinCode: codeInput || rawCode,
+        joinCode,
       })
       setStep('play')
     } catch (err) {
@@ -298,15 +304,33 @@ export default function LiveQuizPlayPage() {
                 )}
 
                 {phase === 'question_open' && !game.hasAnsweredCurrent && (
-                  <AnswerSurface
-                    key={`${game.state?.questionIndex}-${q.questionType}`}
-                    questionType={q.questionType}
-                    options={q.options}
-                    locked={locked}
-                    onAnswer={(payload) => {
-                      game.submitAnswer(game.state!.questionIndex, payload)
-                    }}
-                  />
+                  <>
+                    {game.state?.powerUpsEnabled &&
+                      q.pointsStyle !== 'no_points' &&
+                      q.questionType !== 'poll' &&
+                      q.questionType !== 'word_cloud' && (
+                        <label className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={doubleOrNothing}
+                            onChange={(e) => setDoubleOrNothing(e.target.checked)}
+                          />
+                          {t('liveQuiz.powerup.doubleOrNothing')}
+                        </label>
+                      )}
+                    <AnswerSurface
+                      key={`${game.state?.questionIndex}-${q.questionType}`}
+                      questionType={q.questionType}
+                      options={q.options}
+                      locked={locked}
+                      onAnswer={(payload) => {
+                        game.submitAnswer(game.state!.questionIndex, payload, {
+                          powerUp: doubleOrNothing ? 'double_or_nothing' : undefined,
+                        })
+                        setDoubleOrNothing(false)
+                      }}
+                    />
+                  </>
                 )}
 
                 {showResult && (
@@ -359,6 +383,14 @@ function mapJoinError(err: unknown, t: (key: string) => string): string {
         return t('liveQuiz.play.errorNicknameTaken')
       case 'nickname_invalid':
         return t('liveQuiz.play.errorNicknameCharset')
+      case 'nickname_denied':
+        return t('liveQuiz.moderation.nicknameDenied')
+      case 'lobby_locked':
+        return t('liveQuiz.safety.lobbyLocked')
+      case 'banned':
+        return t('liveQuiz.safety.banned')
+      case 'one_session':
+        return t('liveQuiz.safety.oneSession')
       case 'game_ended':
         return t('liveQuiz.play.errorGameEnded')
       case 'auth_required':

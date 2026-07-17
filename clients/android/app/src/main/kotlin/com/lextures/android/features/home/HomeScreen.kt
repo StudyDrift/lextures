@@ -130,6 +130,8 @@ class HomeShellState {
     var pendingInsights by mutableStateOf(false)
     var pendingCheckout by mutableStateOf<com.lextures.android.core.lms.PendingCheckoutContext?>(null)
     var checkoutReturnPhase by mutableStateOf<com.lextures.android.core.lms.CheckoutReturnPhase?>(null)
+    /** Public board share-link token pending presentation (VC.M6). */
+    var pendingBoardLinkToken by mutableStateOf<String?>(null)
     var pendingBilling by mutableStateOf(false)
     var pendingProfileSettingsRoute by mutableStateOf<SettingsDeepLinkSection?>(null)
     var pendingParentStudentId by mutableStateOf<String?>(null)
@@ -280,6 +282,10 @@ class HomeShellState {
                     }
                     pendingParentSubRoute = parentSubRoute(destination.studentId, destination.section)
                     RootDestination.Children
+                }
+                is DeepLinkDestination.BoardLink -> {
+                    pendingBoardLinkToken = destination.token
+                    rootDestination
                 }
             },
         )
@@ -532,6 +538,18 @@ fun HomeScreen(
                 phase = phase,
                 onDismiss = { shell.checkoutReturnPhase = null },
             )
+        }
+
+        shell.pendingBoardLinkToken?.let { token ->
+            Dialog(
+                onDismissRequest = { shell.pendingBoardLinkToken = null },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                com.lextures.android.features.boards.publicboard.BoardPublicScreen(
+                    token = token,
+                    onClose = { shell.pendingBoardLinkToken = null },
+                )
+            }
         }
     }
 }

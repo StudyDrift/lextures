@@ -40,6 +40,33 @@ class MobileDestinationsTest {
     }
 
     @Test
+    fun courseWorkspaceShowsBoardsWhenVisualBoardsEnabled() {
+        val on = CourseSummary(
+            id = "1",
+            courseCode = "demo",
+            title = "Demo",
+            viewerEnrollmentRoles = listOf("student"),
+            visualBoardsEnabled = true,
+        )
+        val off = CourseSummary(
+            id = "1",
+            courseCode = "demo",
+            title = "Demo",
+            viewerEnrollmentRoles = listOf("student"),
+            visualBoardsEnabled = false,
+        )
+        assertTrue(
+            MobileDestinations.courseWorkspaceSections(CourseWorkspaceContext(course = on))
+                .contains(CourseWorkspaceSection.Boards),
+        )
+        assertFalse(
+            MobileDestinations.courseWorkspaceSections(CourseWorkspaceContext(course = off))
+                .contains(CourseWorkspaceSection.Boards),
+        )
+        assertEquals(CourseWorkspaceSection.Boards, CourseWorkspaceSection.from(CourseDeepLinkSection.Boards))
+    }
+
+    @Test
     fun courseWorkspaceHidesDisabledFeatures() {
         val course = CourseSummary(
             id = "1",
@@ -76,6 +103,7 @@ class MobileDestinationsTest {
         assertEquals(CourseWorkspaceSection.Attendance, CourseWorkspaceSection.from(CourseDeepLinkSection.Attendance))
         assertEquals(CourseWorkspaceSection.Groups, CourseWorkspaceSection.from(CourseDeepLinkSection.Groups))
         assertEquals(CourseWorkspaceSection.CollabDocs, CourseWorkspaceSection.from(CourseDeepLinkSection.CollabDocs))
+        assertEquals(CourseWorkspaceSection.Boards, CourseWorkspaceSection.from(CourseDeepLinkSection.Boards))
         assertEquals(CourseWorkspaceSection.Behavior, CourseWorkspaceSection.from(CourseDeepLinkSection.Behavior))
         assertEquals(CourseWorkspaceSection.HallPass, CourseWorkspaceSection.from(CourseDeepLinkSection.HallPass))
         assertEquals(CourseWorkspaceSection.InstructorInsights, CourseWorkspaceSection.from(CourseDeepLinkSection.Insights))

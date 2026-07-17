@@ -20,6 +20,8 @@ enum DeepLinkDestination: Equatable {
     case settings(SettingsDeepLinkSection)
     case course(code: String, section: CourseDeepLinkSection?, itemId: String?)
     case parent(studentId: String?, section: ParentDeepLinkSection)
+    /// Public board share link (`/board-links/{token}`).
+    case boardLink(token: String)
 }
 
 enum ParentDeepLinkSection: Equatable {
@@ -45,6 +47,7 @@ enum CourseDeepLinkSection: String, Equatable {
     case library
     case groups
     case collabDocs
+    case boards
     case behavior
     case hallPass
     case insights
@@ -152,6 +155,14 @@ enum DeepLinkRouter {
             return resolveSettingsDeepLink(segments)
         case "parent":
             return resolveParentDeepLink(segments)
+        case "board-links":
+            if segments.count >= 2 {
+                let token = segments[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                if !token.isEmpty {
+                    return .boardLink(token: token)
+                }
+            }
+            return .home
         default:
             return resolveMeDeepLink(segments)
         }
@@ -215,6 +226,9 @@ enum DeepLinkRouter {
         case "collab-docs":
             let itemId = segments.count >= 4 ? segments[3] : nil
             return .course(code: courseCode, section: .collabDocs, itemId: itemId)
+        case "boards":
+            let itemId = segments.count >= 4 ? segments[3] : nil
+            return .course(code: courseCode, section: .boards, itemId: itemId)
         case "assignments", "quizzes", "modules":
             if segments.count >= 5,
                ["content", "quiz", "assignment"].contains(segments[3].lowercased()) {

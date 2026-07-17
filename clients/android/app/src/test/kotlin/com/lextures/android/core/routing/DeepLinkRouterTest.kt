@@ -94,4 +94,28 @@ class DeepLinkRouterTest {
         assertTrue(destination is DeepLinkDestination.Parent)
         assertEquals(ParentDeepLinkSection.Conferences, (destination as DeepLinkDestination.Parent).section)
     }
+
+    @Test
+    fun resolvesCourseBoardsPath() {
+        val list = DeepLinkRouter.resolve("/courses/cs101/boards")
+        assertTrue(list is DeepLinkDestination.Course)
+        list as DeepLinkDestination.Course
+        assertEquals("cs101", list.code)
+        assertEquals(CourseDeepLinkSection.Boards, list.section)
+        assertEquals(null, list.itemId)
+
+        val detail = DeepLinkRouter.resolve("/courses/cs101/boards/board-1")
+        assertTrue(detail is DeepLinkDestination.Course)
+        detail as DeepLinkDestination.Course
+        assertEquals(CourseDeepLinkSection.Boards, detail.section)
+        assertEquals("board-1", detail.itemId)
+    }
+
+    @Test
+    fun resolvesBoardLinkPath() {
+        val destination = DeepLinkRouter.resolve("https://lextures.com/board-links/tok-abc")
+        assertTrue(destination is DeepLinkDestination.BoardLink)
+        assertEquals("tok-abc", (destination as DeepLinkDestination.BoardLink).token)
+        assertTrue(DeepLinkRouter.resolve("/board-links/") is DeepLinkDestination.Home)
+    }
 }

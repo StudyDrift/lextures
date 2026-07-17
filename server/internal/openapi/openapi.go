@@ -1567,6 +1567,152 @@ const spec = `{
         }
       }
     },
+    "/api/v1/admin/settings/interactive-quizzes": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Get platform Live Quiz governance settings (plan IQ.11)",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "InteractiveQuizPlatformSettings" },
+          "403": { "description": "Forbidden" }
+        }
+      },
+      "patch": {
+        "tags": ["admin"],
+        "summary": "Update platform Live Quiz governance settings (plan IQ.11)",
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "maxConcurrentGames": { "type": "integer", "minimum": 0, "nullable": true },
+                  "clearMaxConcurrentGames": { "type": "boolean" },
+                  "maxPlayersPerGame": { "type": "integer", "minimum": 1 },
+                  "maxKitsPerCourse": { "type": "integer", "minimum": 0, "nullable": true },
+                  "clearMaxKitsPerCourse": { "type": "boolean" },
+                  "retentionDays": { "type": "integer", "minimum": 1 },
+                  "guestJoinPolicy": { "type": "string", "enum": ["disabled", "teacher_mediated", "open"] },
+                  "defaultMode": { "type": "string", "enum": ["live_classic", "team", "student_paced", "homework"] },
+                  "defaultLeaderboardPrivacy": { "type": "string", "enum": ["names", "anon_to_peers", "anonymous"] },
+                  "aiGenerationEnabled": { "type": "boolean" },
+                  "aiGenerationsPerDay": { "type": "integer", "minimum": 0, "nullable": true },
+                  "clearAiGenerationsPerDay": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "InteractiveQuizPlatformSettings" },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/admin/interactive-quizzes/analytics": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Live Quiz admin analytics (plan IQ.11)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "orgId", "in": "query", "required": false, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "from", "in": "query", "required": false, "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "required": false, "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "InteractiveQuizAnalytics" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/admin/interactive-quizzes/review-queue": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Live Quiz catalog/moderation review queue (plan IQ.11)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "status", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "InteractiveQuizReviewQueue" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/admin/interactive-quizzes/review-queue/{id}/{action}": {
+      "post": {
+        "tags": ["admin"],
+        "summary": "Approve, reject, or action a Live Quiz review item (plan IQ.11)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "action", "in": "path", "required": true, "schema": { "type": "string", "enum": ["approve", "reject", "action", "takedown"] } }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "InteractiveQuizReviewItem" },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/admin/interactive-quizzes/games/{game_id}/force-end": {
+      "post": {
+        "tags": ["admin"],
+        "summary": "Force-end a live quiz game and free its concurrency slot (plan IQ.11)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "QuizGame" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/admin/interactive-quizzes/kits/bulk-archive": {
+      "post": {
+        "tags": ["admin"],
+        "summary": "Bulk-archive old Live Quiz kits (plan IQ.11)",
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "olderThanDays": { "type": "integer", "default": 365 },
+                  "limit": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "{ archived: number }" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
     "/api/v1/courses/{course_code}/boards/{board_id}/analytics": {
       "get": {
         "tags": ["courses"],
@@ -1786,6 +1932,101 @@ const spec = `{
         }
       }
     },
+    "/api/v1/live-quizzes/templates": {
+      "get": {
+        "operationId": "listLiveQuizTemplates",
+        "summary": "List live quiz kit templates (system/org/course)",
+        "tags": ["Live Quizzes"],
+        "parameters": [
+          { "name": "courseCode", "in": "query", "schema": { "type": "string" } },
+          { "name": "scope", "in": "query", "schema": { "type": "string", "enum": ["system", "org", "course"] } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ templates: QuizKit[] }" }
+        }
+      }
+    },
+    "/api/v1/live-quizzes/templates/{id}/create-kit": {
+      "post": {
+        "operationId": "createLiveQuizKitFromTemplate",
+        "summary": "Create a course kit by deep-copying a template",
+        "tags": ["Live Quizzes"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["targetCourseCode"],
+                "properties": { "targetCourseCode": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "QuizKit" }
+        }
+      }
+    },
+    "/api/v1/live-quizzes/library": {
+      "get": {
+        "operationId": "searchLiveQuizLibrary",
+        "summary": "Search shared and (optionally) public catalog kits",
+        "tags": ["Live Quizzes"],
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "subject", "in": "query", "schema": { "type": "string" } },
+          { "name": "grade", "in": "query", "schema": { "type": "string" } },
+          { "name": "lang", "in": "query", "schema": { "type": "string" } },
+          { "name": "tag", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ kits: QuizKit[], total, page, pageSize, totalPages }" }
+        }
+      }
+    },
+    "/api/v1/live-quizzes/library/{kit_id}/preview": {
+      "get": {
+        "operationId": "previewLiveQuizLibraryKit",
+        "summary": "Read-only preview of a library kit",
+        "tags": ["Live Quizzes"],
+        "parameters": [
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ kit: QuizKit, questions: LiveQuizQuestion[] }" }
+        }
+      }
+    },
+    "/api/v1/live-quizzes/library/{kit_id}/import": {
+      "post": {
+        "operationId": "importLiveQuizLibraryKit",
+        "summary": "Import (deep-copy) a library kit into a course",
+        "tags": ["Live Quizzes"],
+        "parameters": [
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["targetCourseCode"],
+                "properties": { "targetCourseCode": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "QuizKit (+ validation)" }
+        }
+      }
+    },
     "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/duplicate": {
       "post": {
         "tags": ["courses"],
@@ -1852,18 +2093,81 @@ const spec = `{
     "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/games": {
       "post": {
         "tags": ["courses"],
-        "summary": "Start a live quiz game from a ready kit (plan IQ.3)",
+        "summary": "Start a live quiz game from a ready kit (plan IQ.3 / IQ.5 / IQ.6 modes)",
         "security": [ { "bearerAuth": [] } ],
         "parameters": [
           { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
           { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LiveQuizCreateGameRequest" }
+            }
+          }
+        },
         "responses": {
           "201": { "description": "{ gameId, joinCode, game }" },
           "400": { "description": "Kit not ready" },
           "403": { "description": "Forbidden" },
           "404": { "description": "Not found or hosting disabled" }
         }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/assignments": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Create an async homework assignment from a kit (plan IQ.6)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "201": { "description": "LiveQuizAssignment", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LiveQuizAssignment" } } } },
+          "400": { "description": "Kit not ready" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or homework disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/assignments/{assignment_id}/start": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Start or resume a homework attempt (plan IQ.6)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "assignment_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "201": { "description": "{ attemptId, sessionId, playerId, playerToken, game }" },
+          "403": { "description": "Not open / closed / out of attempts" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/teams": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List teams and team leaderboard (plan IQ.6)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "200": { "description": "{ teams, leaderboard }" } }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Create or replace teams for a team-mode game (plan IQ.6)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": { "201": { "description": "{ teams }" } }
       }
     },
     "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}": {
@@ -1877,6 +2181,38 @@ const spec = `{
         ],
         "responses": {
           "200": { "description": "Live game session" },
+          "404": { "description": "Not found or hosting disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/leaderboard": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Live quiz leaderboard with privacy mode (plan IQ.5)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "LiveQuizLeaderboardView", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LiveQuizLeaderboardView" } } } },
+          "404": { "description": "Not found or hosting disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/responses/{player_id}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Per-player response breakdowns for disputes/reports (plan IQ.5)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "player_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ playerId, nickname, totalScore, responses[] with pointsBreakdown }" },
+          "403": { "description": "Forbidden" },
           "404": { "description": "Not found or hosting disabled" }
         }
       }
@@ -1897,10 +2233,121 @@ const spec = `{
         }
       }
     },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/report": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Post-game report with per-question analysis and leaderboard (plan IQ.7)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ report, players, leaderboard, gradebookLink? }" },
+          "403": { "description": "Students cannot view the full report" },
+          "409": { "description": "Game not ended yet" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/my-results": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Self-scoped player results and review list (plan IQ.7)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ totalScore, rank, reviewThese }" },
+          "404": { "description": "Not a player in this game" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/report/export": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Export game report as CSV or printable HTML/PDF (plan IQ.7)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["csv", "pdf", "html"] } }
+        ],
+        "responses": {
+          "200": { "description": "CSV or HTML export (scoped to requester)" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/report/rebuild": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Recompute cached game report from session_responses (plan IQ.7)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Rebuilt report" },
+          "409": { "description": "Game not ended" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/gradebook-link": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Push game scores to the course gradebook (plan IQ.7)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mapping": { "type": "string", "enum": ["raw_points", "percent_correct", "participation"] },
+                  "pointsPossible": { "type": "number" },
+                  "participationPct": { "type": "number" },
+                  "previewOnly": { "type": "boolean" },
+                  "title": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "{ link, preview }" },
+          "404": { "description": "Gradebook push disabled or game not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/gradebook-link/{link_id}": {
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Unlink gradebook item without deleting the game (plan IQ.7)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "link_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Unlinked" },
+          "404": { "description": "Link not found" }
+        }
+      }
+    },
     "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/players": {
       "post": {
         "tags": ["courses"],
-        "summary": "Join a live quiz game as an enrolled player (plan IQ.4); rejoin rotates playerToken",
+        "summary": "Join a live quiz game as an enrolled player (IQ.4/IQ.9); nickname moderated; rejoin rotates playerToken",
         "security": [ { "bearerAuth": [] } ],
         "parameters": [
           { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
@@ -1909,15 +2356,109 @@ const spec = `{
         "responses": {
           "201": { "description": "{ playerId, nickname, playerToken, totalScore, rejoined:false }" },
           "200": { "description": "Rejoin: { playerId, nickname, playerToken, totalScore, rejoined:true }" },
-          "409": { "description": "Nickname taken" },
+          "400": { "description": "Nickname invalid/denied or game ended" },
+          "403": { "description": "Lobby locked or player banned" },
+          "409": { "description": "Nickname taken or one-session refuse" },
           "404": { "description": "Not found or hosting disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/players/{player_id}/kick": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Kick and ban a player for this game (plan IQ.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "player_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Kicked" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/players/{player_id}/ban": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Ban a player for this game (plan IQ.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "player_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Banned" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/players/{player_id}/rename": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Force-rename a player (plan IQ.9); empty body → Player N",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "player_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ playerId, nickname }" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/safety": {
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Update game safety settings: mute names, lock lobby, guests, one-session (plan IQ.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ allowGuests, lobbyLocked, namesMuted, oneSessionRule, maxJoinsPerIp }" },
+          "403": { "description": "Guests blocked for minors policy" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/flag": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Flag abusive content for review (plan IQ.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Flagged" },
+          "400": { "description": "Reason required" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/safety-events": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List safety audit events and advisory integrity flags (plan IQ.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ events, integrityFlags }" }
         }
       }
     },
     "/api/v1/courses/{course_code}/live-quizzes/games/{game_id}/ws": {
       "get": {
         "tags": ["courses"],
-        "summary": "WebSocket hub for live quiz host/projector/player (plan IQ.3). First text frame: {authToken, role, playerToken?}",
+        "summary": "WebSocket hub for live quiz host/projector/player (IQ.3/IQ.9). First text frame: {authToken?, role, playerToken?}. Host frames: kick|ban|rename|mute_names|lock_lobby|pause. Guests may connect with playerToken only.",
         "security": [ { "bearerAuth": [] } ],
         "parameters": [
           { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
@@ -1932,12 +2473,28 @@ const spec = `{
     "/api/v1/live-quizzes/join/{code}": {
       "get": {
         "tags": ["courses"],
-        "summary": "Public rate-limited join-code lookup (plan IQ.4)",
+        "summary": "Public rate-limited join-code lookup (plan IQ.4/IQ.9)",
         "parameters": [
           { "name": "code", "in": "path", "required": true, "schema": { "type": "string" } }
         ],
         "responses": {
-          "200": { "description": "{ gameId, courseCode, kitTitle, requiresAuth, allowsGuests, phase, status }" },
+          "200": { "description": "{ gameId, courseCode, kitTitle, requiresAuth, allowsGuests, lobbyLocked, phase, status }" },
+          "404": { "description": "Unknown or expired code" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/live-quizzes/join/{code}/players": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Public guest join when platform + game allow guests (plan IQ.9); blocked for under-13 courses",
+        "parameters": [
+          { "name": "code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "201": { "description": "{ playerId, nickname, playerToken, isGuest, courseCode, gameId }" },
+          "400": { "description": "Nickname invalid/denied" },
+          "403": { "description": "Guests not allowed / lobby locked / banned" },
           "404": { "description": "Unknown or expired code" },
           "429": { "description": "Rate limited" }
         }
@@ -2036,6 +2593,90 @@ const spec = `{
           "204": { "description": "Deleted" },
           "403": { "description": "Forbidden" },
           "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/generate": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Start AI quiz-kit generation job (plan IQ.10)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LiveQuizGenerateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "202": { "description": "{ job: LiveQuizGenerationJob }" },
+          "402": { "description": "AI budget exceeded" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found or AI generation disabled" },
+          "503": { "description": "AI not configured" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/generate/{job_id}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get AI quiz-kit generation job status (plan IQ.10)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "job_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ job: LiveQuizGenerationJob }" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/generate/{job_id}/cancel": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Cancel AI quiz-kit generation job (plan IQ.10)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "job_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ job: LiveQuizGenerationJob }" },
+          "404": { "description": "Not found or feature disabled" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/questions/{qid}/regenerate": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Regenerate a single kit question with AI (plan IQ.10)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "kit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "qid", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LiveQuizGenerateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "202": { "description": "{ job: LiveQuizGenerationJob }" },
+          "402": { "description": "AI budget exceeded" },
+          "404": { "description": "Not found or AI generation disabled" },
+          "503": { "description": "AI not configured" }
         }
       }
     },
@@ -3005,7 +3646,7 @@ const spec = `{
         "type": "object",
         "properties": {
           "id": { "type": "string", "format": "uuid" },
-          "courseId": { "type": "string", "format": "uuid" },
+          "courseId": { "type": "string", "format": "uuid", "nullable": true },
           "title": { "type": "string" },
           "description": { "type": "string" },
           "slug": { "type": "string" },
@@ -3017,7 +3658,27 @@ const spec = `{
           "archived": { "type": "boolean" },
           "createdBy": { "type": "string", "format": "uuid", "nullable": true },
           "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" }
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "isTemplate": { "type": "boolean" },
+          "templateScope": { "type": "string", "enum": ["system", "org", "course"], "nullable": true },
+          "derivedFromKitId": { "type": "string", "format": "uuid", "nullable": true },
+          "attribution": { "type": "string" },
+          "subject": { "type": "string", "nullable": true },
+          "gradeBand": { "type": "string", "nullable": true },
+          "language": { "type": "string", "nullable": true },
+          "catalogStatus": { "type": "string", "enum": ["unlisted", "pending", "listed", "rejected"] }
+        }
+      },
+      "QuizKitShare": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "kitId": { "type": "string", "format": "uuid" },
+          "granteeType": { "type": "string", "enum": ["user", "course", "org_unit", "org"] },
+          "granteeId": { "type": "string", "format": "uuid", "nullable": true },
+          "permission": { "type": "string", "enum": ["view", "copy", "edit"] },
+          "createdBy": { "type": "string", "format": "uuid", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" }
         }
       },
       "LiveQuizQuestion": {
@@ -3040,9 +3701,176 @@ const spec = `{
           "answerShuffle": { "type": "boolean" },
           "explanation": { "type": "string", "nullable": true },
           "sourceQuestionId": { "type": "string", "format": "uuid", "nullable": true },
+          "source": { "type": "string", "enum": ["authored", "ai_generated", "bank_import"], "description": "IQ.10 provenance" },
+          "needsReview": { "type": "boolean", "description": "IQ.10: AI drafts require teacher review before hosting" },
+          "generationJobId": { "type": "string", "format": "uuid", "nullable": true },
+          "generationConfidence": { "type": "number", "nullable": true, "minimum": 0, "maximum": 1 },
           "version": { "type": "integer" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LiveQuizGenerateRequest": {
+        "type": "object",
+        "required": ["sourceType"],
+        "properties": {
+          "sourceType": { "type": "string", "enum": ["topic", "passage", "course_content_ref"] },
+          "sourceRef": {
+            "type": "object",
+            "description": "topic/passage text or contentId — never student data",
+            "properties": {
+              "topic": { "type": "string" },
+              "passage": { "type": "string" },
+              "text": { "type": "string" },
+              "contentId": { "type": "string", "format": "uuid" },
+              "itemId": { "type": "string", "format": "uuid" }
+            }
+          },
+          "params": {
+            "type": "object",
+            "properties": {
+              "count": { "type": "integer", "minimum": 1, "maximum": 25, "default": 5 },
+              "types": { "type": "array", "items": { "type": "string" } },
+              "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"], "default": "medium" },
+              "gradeBand": { "type": "string" },
+              "language": { "type": "string", "default": "en" },
+              "includeExplanations": { "type": "boolean", "default": true },
+              "likeQuestionId": { "type": "string", "format": "uuid" },
+              "replaceQuestionId": { "type": "string", "format": "uuid" }
+            }
+          }
+        }
+      },
+      "LiveQuizGenerationJob": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "kitId": { "type": "string", "format": "uuid" },
+          "courseId": { "type": "string", "format": "uuid" },
+          "requestedBy": { "type": "string", "format": "uuid", "nullable": true },
+          "sourceType": { "type": "string", "enum": ["topic", "passage", "course_content_ref"] },
+          "sourceRef": { "type": "object" },
+          "params": { "type": "object" },
+          "status": { "type": "string", "enum": ["queued", "running", "succeeded", "failed", "canceled"] },
+          "provider": { "type": "string", "nullable": true },
+          "model": { "type": "string", "nullable": true },
+          "usageId": { "type": "string", "format": "uuid", "nullable": true },
+          "error": { "type": "string", "nullable": true },
+          "resultSummary": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "inserted": { "type": "integer" },
+              "repaired": { "type": "integer" },
+              "dropped": { "type": "integer" },
+              "questionIds": { "type": "array", "items": { "type": "string", "format": "uuid" } }
+            }
+          },
+          "progress": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "startedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "completedAt": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "LiveQuizScoringConfig": {
+        "type": "object",
+        "description": "IQ.5 scoring config persisted on the session at start",
+        "properties": {
+          "base": { "type": "integer", "default": 1000 },
+          "speedWeight": { "type": "number", "default": 1 },
+          "streakStep": { "type": "integer", "default": 100 },
+          "streakCap": { "type": "integer", "default": 5 },
+          "powerUpsEnabled": { "type": "boolean", "default": false },
+          "participationPoints": { "type": "integer", "default": 0 }
+        }
+      },
+      "LiveQuizCreateGameRequest": {
+        "type": "object",
+        "properties": {
+          "pacing": { "type": "string", "enum": ["manual", "auto"] },
+          "mode": { "type": "string", "enum": ["live_classic", "team", "student_paced"], "default": "live_classic", "description": "IQ.6 game mode (homework uses assignments API)" },
+          "teamConfig": {
+            "type": "object",
+            "properties": {
+              "teamCount": { "type": "integer", "minimum": 2, "maximum": 20, "default": 4 },
+              "aggregate": { "type": "string", "enum": ["average", "sum"], "default": "average" },
+              "answerRule": { "type": "string", "enum": ["each_member_answers", "one_device_per_team"], "default": "each_member_answers" },
+              "autoBalance": { "type": "boolean", "default": true }
+            }
+          },
+          "pacedConfig": {
+            "type": "object",
+            "properties": {
+              "shuffle": { "type": "boolean", "default": true },
+              "timeBudgetSeconds": { "type": "integer", "minimum": 0 },
+              "perQuestionTimers": { "type": "boolean", "default": true },
+              "liveLeaderboard": { "type": "boolean", "default": false }
+            }
+          },
+          "settings": { "type": "object" },
+          "scoringProfile": { "type": "string", "enum": ["competitive", "formative", "custom"], "default": "competitive" },
+          "scoringConfig": { "$ref": "#/components/schemas/LiveQuizScoringConfig" },
+          "leaderboardPrivacy": { "type": "string", "enum": ["names", "nicknames", "hidden"], "default": "names" },
+          "powerUpsEnabled": { "type": "boolean", "default": false }
+        }
+      },
+      "LiveQuizAssignment": {
+        "type": "object",
+        "description": "Async homework assignment binding a kit to a course (IQ.6)",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "kitId": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "opensAt": { "type": "string", "format": "date-time", "nullable": true },
+          "dueAt": { "type": "string", "format": "date-time", "nullable": true },
+          "closesAt": { "type": "string", "format": "date-time", "nullable": true },
+          "attemptsAllowed": { "type": "integer" },
+          "gradePolicy": { "type": "string", "enum": ["best", "last", "average"] },
+          "shuffle": { "type": "boolean" },
+          "state": { "type": "string", "enum": ["not_yet_open", "open", "late", "closed", "out_of_attempts", "in_progress"] },
+          "gradebookScore": { "type": "number" }
+        }
+      },
+      "LiveQuizPointsBreakdown": {
+        "type": "object",
+        "description": "Explainable per-response award (IQ.5 FR-9)",
+        "properties": {
+          "base": { "type": "integer" },
+          "speedBonus": { "type": "integer" },
+          "streakBonus": { "type": "integer" },
+          "styleMultiplier": { "type": "number" },
+          "powerUp": { "type": "string" },
+          "powerUpFactor": { "type": "number" },
+          "total": { "type": "integer" }
+        }
+      },
+      "LiveQuizLeaderboardView": {
+        "type": "object",
+        "properties": {
+          "top": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rank": { "type": "integer" },
+                "playerId": { "type": "string", "format": "uuid" },
+                "nickname": { "type": "string" },
+                "totalScore": { "type": "integer" },
+                "streak": { "type": "integer" }
+              }
+            }
+          },
+          "you": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "rank": { "type": "integer" },
+              "totalScore": { "type": "integer" },
+              "streak": { "type": "integer" }
+            }
+          },
+          "privacy": { "type": "string", "enum": ["names", "nicknames", "hidden"] },
+          "playerCount": { "type": "integer" }
         }
       },
       "Board": {

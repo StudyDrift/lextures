@@ -84,6 +84,7 @@ func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource) {
 	exportStorage := LocalBoardExportStorageFromRoot(cfg.CourseFilesRoot)
 	RegisterBoardExportJob(r, pool, exportStorage)
 	RegisterBoardLifecycleJobs(r, pool, exportStorage)
+	RegisterQuizgameGovernanceJobs(r, pool)
 	registerScheduledJobs(r, pool, cfgSrc)
 }
 

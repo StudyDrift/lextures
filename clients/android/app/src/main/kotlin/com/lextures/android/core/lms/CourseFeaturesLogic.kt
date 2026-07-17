@@ -26,6 +26,7 @@ object CourseFeaturesLogic {
         lockdownMode("lockdownMode"),
         srs("srs"),
         standardsAlignment("standardsAlignment"),
+        visualBoards("visualBoards"),
         whiteboard("whiteboard"),
     }
 
@@ -53,6 +54,7 @@ object CourseFeaturesLogic {
         ToolRow(Tool.lockdownMode),
         ToolRow(Tool.srs),
         ToolRow(Tool.standardsAlignment),
+        ToolRow(Tool.visualBoards),
         ToolRow(Tool.whiteboard),
     )
 
@@ -88,6 +90,7 @@ object CourseFeaturesLogic {
         Tool.lockdownMode -> com.lextures.android.R.string.mobile_courseSettings_features_tool_lockdownMode_label
         Tool.srs -> com.lextures.android.R.string.mobile_courseSettings_features_tool_srs_label
         Tool.standardsAlignment -> com.lextures.android.R.string.mobile_courseSettings_features_tool_standardsAlignment_label
+        Tool.visualBoards -> com.lextures.android.R.string.mobile_courseSettings_features_tool_visualBoards_label
         Tool.whiteboard -> com.lextures.android.R.string.mobile_courseSettings_features_tool_whiteboard_label
     }
 
@@ -113,6 +116,7 @@ object CourseFeaturesLogic {
         Tool.lockdownMode -> com.lextures.android.R.string.mobile_courseSettings_features_tool_lockdownMode_description
         Tool.srs -> com.lextures.android.R.string.mobile_courseSettings_features_tool_srs_description
         Tool.standardsAlignment -> com.lextures.android.R.string.mobile_courseSettings_features_tool_standardsAlignment_description
+        Tool.visualBoards -> com.lextures.android.R.string.mobile_courseSettings_features_tool_visualBoards_description
         Tool.whiteboard -> com.lextures.android.R.string.mobile_courseSettings_features_tool_whiteboard_description
     }
 
@@ -142,6 +146,7 @@ object CourseFeaturesLogic {
         Tool.lockdownMode -> course.lockdownModeEnabled == true
         Tool.srs -> course.srsEnabled == true
         Tool.standardsAlignment -> course.standardsAlignmentEnabled == true
+        Tool.visualBoards -> course.visualBoardsEnabled == true
         Tool.whiteboard -> course.whiteboardEnabled == true
     }
 
@@ -167,6 +172,7 @@ object CourseFeaturesLogic {
         Tool.lockdownMode -> course.copy(lockdownModeEnabled = enabled)
         Tool.srs -> course.copy(srsEnabled = enabled)
         Tool.standardsAlignment -> course.copy(standardsAlignmentEnabled = enabled)
+        Tool.visualBoards -> course.copy(visualBoardsEnabled = enabled)
         Tool.whiteboard -> course.copy(whiteboardEnabled = enabled)
     }
 
@@ -193,6 +199,7 @@ object CourseFeaturesLogic {
         attendanceEnabled = course.attendanceEnabled == true,
         whiteboardEnabled = course.whiteboardEnabled == true,
         reportCardsEnabled = course.reportCardsEnabled == true,
+        visualBoardsEnabled = course.visualBoardsEnabled == true,
     )
 
     fun shouldConfirmDisable(currentlyEnabled: Boolean): Boolean = currentlyEnabled
@@ -236,6 +243,7 @@ data class CourseFeaturesPatch(
     val attendanceEnabled: Boolean,
     val whiteboardEnabled: Boolean,
     val reportCardsEnabled: Boolean,
+    val visualBoardsEnabled: Boolean,
 )
 
 @kotlinx.serialization.Serializable

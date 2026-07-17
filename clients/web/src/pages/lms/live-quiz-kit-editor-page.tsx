@@ -8,10 +8,12 @@ import {
   CheckCircle2,
   Copy,
   Plus,
+  Sparkles,
   Trash2,
   Upload,
 } from 'lucide-react'
 import { BankImportDrawer } from '../../components/live-quiz/bank-import-drawer'
+import { GenerateWithAiPanel } from '../../components/live-quiz/generate-with-ai-panel'
 import { MediaAttach } from '../../components/live-quiz/media-attach'
 import { McOptionList } from '../../components/live-quiz/mc-option-list'
 import { NumericEditor, type NumericDraft } from '../../components/live-quiz/numeric-editor'
@@ -23,6 +25,16 @@ import {
   type AcceptedAnswerDraft,
 } from '../../components/live-quiz/type-answer-editor'
 import { WordCloudEditor } from '../../components/live-quiz/word-cloud-editor'
+import { ModePicker } from '../../components/live-quiz/mode-picker'
+import {
+  defaultModeStartOptions,
+  type ModeStartOptions,
+} from '../../components/live-quiz/mode-start-options'
+import { ScoringProfilePicker } from '../../components/live-quiz/scoring-profile-picker'
+import {
+  defaultScoringStartOptions,
+  type ScoringStartOptions,
+} from '../../components/live-quiz/scoring-start-options'
 import {
   createQuizQuestion,
   deleteQuizQuestion,
@@ -32,6 +44,7 @@ import {
   listQuizQuestions,
   patchQuizKit,
   patchQuizQuestion,
+  regenerateQuizQuestion,
   reorderQuizQuestions,
   startLiveGame,
   validateQuizKit,
@@ -85,8 +98,18 @@ export default function LiveQuizKitEditorPage() {
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
   const kitId = rawKitId ? decodeURIComponent(rawKitId) : ''
   const { allows, loading: permLoading } = usePermissions()
-  const { ffInteractiveQuizzes, ffIqLiveHosting } = usePlatformFeatures()
+  const {
+    ffInteractiveQuizzes,
+    ffIqLiveHosting,
+    ffIqTeamMode,
+    ffIqStudentPaced,
+    ffIqAiGeneration,
+    aiConfigured,
+  } = usePlatformFeatures()
   const [hosting, setHosting] = useState(false)
+  const [hostDialogOpen, setHostDialogOpen] = useState(false)
+  const [scoringOpts, setScoringOpts] = useState<ScoringStartOptions>(defaultScoringStartOptions)
+  const [modeOpts, setModeOpts] = useState<ModeStartOptions>(defaultModeStartOptions)
   const canEdit = !permLoading && !!courseCode && allows(courseItemCreatePermission(courseCode))
 
   const [kit, setKit] = useState<QuizKit | null>(null)
@@ -96,6 +119,9 @@ export default function LiveQuizKitEditorPage() {
   const [error, setError] = useState<string | null>(null)
   const [bankEnabled, setBankEnabled] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
+  const [aiOpen, setAiOpen] = useState(false)
+  const [aiLikeQuestionId, setAiLikeQuestionId] = useState<string | null>(null)
+  const [regenBusy, setRegenBusy] = useState(false)
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [issues, setIssues] = useState<KitValidationIssue[]>([])
   const [renaming, setRenaming] = useState(false)
@@ -334,12 +360,11 @@ export default function LiveQuizKitEditorPage() {
     }
   }
 
-  async function handleHost() {
+  async function openHostDialog() {
     if (!ffIqLiveHosting) {
       toastMutationError(t('liveQuiz.error.hostingDisabled'))
       return
     }
-    setHosting(true)
     try {
       const result = await validateQuizKit(courseCode, kitId)
       setIssues(result.issues)
@@ -347,7 +372,33 @@ export default function LiveQuizKitEditorPage() {
         toastMutationError(t('liveQuiz.validate.issuesHeading'))
         return
       }
-      const started = await startLiveGame(courseCode, kitId, { pacing: 'manual' })
+      setHostDialogOpen(true)
+    } catch (err) {
+      toastMutationError(err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  async function handleHost() {
+    if (!ffIqLiveHosting) {
+      toastMutationError(t('liveQuiz.error.hostingDisabled'))
+      return
+    }
+    setHosting(true)
+    try {
+      const started = await startLiveGame(courseCode, kitId, {
+        pacing: 'manual',
+        mode: modeOpts.mode,
+        teamConfig: modeOpts.mode === 'team' ? modeOpts.teamConfig : undefined,
+        pacedConfig: modeOpts.mode === 'student_paced' ? modeOpts.pacedConfig : undefined,
+        scoringProfile: scoringOpts.scoringProfile,
+        scoringConfig: {
+          ...scoringOpts.scoringConfig,
+          powerUpsEnabled: scoringOpts.powerUpsEnabled,
+        },
+        leaderboardPrivacy: scoringOpts.leaderboardPrivacy,
+        powerUpsEnabled: scoringOpts.powerUpsEnabled,
+      })
+      setHostDialogOpen(false)
       navigate(
         `/courses/${encodeURIComponent(courseCode)}/live-quizzes/games/${encodeURIComponent(started.gameId)}`,
       )
@@ -499,6 +550,22 @@ export default function LiveQuizKitEditorPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    setAiLikeQuestionId(null)
+                    setAiOpen(true)
+                  }}
+                  title={
+                    !ffIqAiGeneration || !aiConfigured
+                      ? t('liveQuiz.ai.unavailable.short')
+                      : undefined
+                  }
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                >
+                  <Sparkles className="h-4 w-4" aria-hidden />
+                  {t('liveQuiz.ai.open')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
                     void handleValidate()
                   }}
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
@@ -511,7 +578,7 @@ export default function LiveQuizKitEditorPage() {
                     type="button"
                     disabled={hosting}
                     onClick={() => {
-                      void handleHost()
+                      void openHostDialog()
                     }}
                     className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
                   >
@@ -604,6 +671,8 @@ export default function LiveQuizKitEditorPage() {
                           </span>
                           <span className="text-xs text-slate-500">
                             {t(`liveQuiz.qtype.${q.questionType}`)} · {q.timeLimitSeconds}s
+                            {q.source === 'ai_generated' ? ` · ${t('liveQuiz.ai.badge')}` : ''}
+                            {q.needsReview ? ` · ${t('liveQuiz.ai.needsReview')}` : ''}
                           </span>
                         </button>
                         {canEdit ? (
@@ -685,6 +754,45 @@ export default function LiveQuizKitEditorPage() {
                         <Copy className="h-4 w-4" aria-hidden />
                         {t('liveQuiz.editor.duplicate')}
                       </button>
+                      {ffIqAiGeneration && aiConfigured ? (
+                        <>
+                          <button
+                            type="button"
+                            disabled={regenBusy}
+                            onClick={() => {
+                              void (async () => {
+                                setRegenBusy(true)
+                                try {
+                                  await regenerateQuizQuestion(courseCode, kitId, selected.id)
+                                  // Poll briefly then reload
+                                  await new Promise((r) => setTimeout(r, 2500))
+                                  await load()
+                                } catch (err) {
+                                  toastMutationError(
+                                    err instanceof Error ? err.message : String(err),
+                                  )
+                                } finally {
+                                  setRegenBusy(false)
+                                }
+                              })()
+                            }}
+                            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                          >
+                            <Sparkles className="h-4 w-4" aria-hidden />
+                            {t('liveQuiz.ai.regenerate')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAiLikeQuestionId(selected.id)
+                              setAiOpen(true)
+                            }}
+                            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                          >
+                            {t('liveQuiz.ai.moreLikeThis')}
+                          </button>
+                        </>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() => {
@@ -773,6 +881,64 @@ export default function LiveQuizKitEditorPage() {
           setKit((k) => (k ? { ...k, questionCount: k.questionCount + created.length } : k))
         }}
       />
+
+      <GenerateWithAiPanel
+        open={aiOpen}
+        courseCode={courseCode}
+        kitId={kitId}
+        likeQuestionId={aiLikeQuestionId}
+        onClose={() => {
+          setAiOpen(false)
+          setAiLikeQuestionId(null)
+        }}
+        onComplete={() => {
+          void load()
+        }}
+      />
+
+      {hostDialogOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="live-quiz-host-dialog-title"
+        >
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-5 shadow-lg dark:bg-neutral-900">
+            <h2 id="live-quiz-host-dialog-title" className="mb-3 text-lg font-semibold">
+              {t('liveQuiz.host.startDialogTitle')}
+            </h2>
+            <ModePicker
+              value={modeOpts}
+              onChange={setModeOpts}
+              teamEnabled={ffIqTeamMode}
+              pacedEnabled={ffIqStudentPaced}
+            />
+            <div className="mt-4">
+              <ScoringProfilePicker value={scoringOpts} onChange={setScoringOpts} />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-md border px-3 py-2 text-sm"
+                onClick={() => setHostDialogOpen(false)}
+                disabled={hosting}
+              >
+                {t('liveQuiz.host.cancelStart')}
+              </button>
+              <button
+                type="button"
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                disabled={hosting}
+                onClick={() => {
+                  void handleHost()
+                }}
+              >
+                {t('liveQuiz.host.confirmStart')}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </LmsPage>
   )
 }

@@ -106,7 +106,10 @@ export default function App() {
               <Route path="boards" element={<Pages.CourseBoardsPage />} />
               <Route path="boards/:boardId" element={<Pages.CourseBoardDetailPage />} />
               <Route path="live-quizzes" element={<Pages.LiveQuizKitsPage />} />
+              <Route path="live-quizzes/library" element={<Pages.LiveQuizLibraryPage />} />
               <Route path="live-quizzes/games/:gameId/present" element={<Pages.LiveQuizPresentPage />} />
+              <Route path="live-quizzes/games/:gameId/report" element={<Pages.LiveQuizReportPage />} />
+              <Route path="live-quizzes/games/:gameId/my-results" element={<Pages.LiveQuizMyResultsPage />} />
               <Route path="live-quizzes/games/:gameId" element={<Pages.LiveQuizHostPage />} />
               <Route path="live-quizzes/:kitId" element={<Pages.LiveQuizKitEditorPage />} />
               <Route path="files" element={<Pages.CourseFilesPage />} />
@@ -215,6 +218,7 @@ export default function App() {
             <Route path="/admin/demographics/title1" element={<Pages.Title1ReportPage />} />
             <Route path="/admin/content-filter" element={<Pages.ContentFilterSettingsPage />} />
             <Route path="/admin/boards" element={<Pages.BoardsGovernancePage />} />
+            <Route path="/admin/live-quizzes" element={<Pages.LiveQuizzesGovernancePage />} />
             <Route path="/admin/sis" element={<Pages.SisIntegrationPage />} />
             <Route path="/admin/integrations" element={<Pages.IntegrationsAdminPage />} />
             <Route path="/admin/webhooks" element={<Pages.WebhooksAdminPage />} />
