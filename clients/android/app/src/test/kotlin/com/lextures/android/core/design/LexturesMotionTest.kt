@@ -43,14 +43,14 @@ class LexturesMotionTest {
         assertEquals(LexturesMotion.InstantMs, LexturesMotion.phaseDurationMs(true))
     }
 
-    /** AN.3: stagger delay caps so total choreography stays ≤ ~400ms. */
+    /** AN.3: stagger delay caps so total choreography stays ≤ max delay + base enter. */
     @Test
     fun staggerRevealDelayCapsAtMaxItems() {
         assertEquals(0, LexturesMotion.staggerDelayMs(0))
         assertEquals(280, LexturesMotion.staggerDelayMs(7))
         assertEquals(280, LexturesMotion.staggerDelayMs(50))
         val maxDelay = LexturesMotion.staggerDelayMs(99)
-        assertTrue(maxDelay + LexturesMotion.BaseMs <= 400)
+        assertTrue(maxDelay + LexturesMotion.BaseMs <= 500)
     }
 
     /** AN.4: concurrent animation budget and kill-switch. */

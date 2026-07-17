@@ -65,8 +65,8 @@ object LexturesMotion {
     const val StaggerMaxItems = 8
 
     fun staggerDelayMs(index: Int): Int {
-        val i = index.coerceIn(0, StaggerMaxItems - 1)
-        return i * StaggerStepMs
+        val clampedIndex = index.coerceIn(0, StaggerMaxItems - 1)
+        return clampedIndex * StaggerStepMs
     }
 
     fun floatSpec(spec: AnimationSpec<Float>, reduceMotion: Boolean): AnimationSpec<Float> =
@@ -309,5 +309,85 @@ fun StaggeredReveal(
 ) {
     Column(modifier = modifier.lxReveal(index = index, appeared = appeared, enabled = enabled)) {
         content()
+    }
+}
+
+// MARK: AN.4 — List / collection motion
+
+/** Max simultaneous list mutation animations (FR-9). */
+const val LIST_MOTION_MAX_CONCURRENT = 12
+
+/** Slight lift on drag grab (FR-4). */
+const val LIST_DRAG_LIFT_SCALE = 1.03f
+
+/**
+ * Whether a mutation at [index] should animate given the concurrent budget.
+ * Reduced motion still returns true so opacity-only paths can run.
+ */
+fun shouldAnimateListItem(index: Int, reduceMotion: Boolean, enabled: Boolean): Boolean {
+    if (!enabled) return false
+    if (reduceMotion) return true
+    return index < LIST_MOTION_MAX_CONCURRENT
+}
+
+/**
+ * AN.4 — insert/remove enter for list rows (LazyColumn identity keys required).
+ * Reduced motion → opacity only; kill-switch → no animation.
+ */
+@Composable
+fun Modifier.lxListMotion(enabled: Boolean = true): Modifier {
+    val reduceMotion = LocalReduceMotion.current
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(enabled) {
+        visible = true
+    }
+    val progress by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = when {
+            !enabled -> tween(durationMillis = 0)
+            reduceMotion -> tween(durationMillis = LexturesMotion.InstantMs)
+            else -> LexturesMotion.bubble
+        },
+        label = "lxListMotion",
+    )
+    if (!enabled) return this
+    return if (reduceMotion) {
+        this.alpha(progress)
+    } else {
+        val density = LocalDensity.current
+        val translatePx = with(density) { LexturesMotion.enterTranslateDp.toPx() }
+        val translate = translatePx * (1f - progress)
+        val scale = LexturesMotion.EnterScaleFrom + (1f - LexturesMotion.EnterScaleFrom) * progress
+        this.graphicsLayer {
+            alpha = progress
+            translationY = translate
+            scaleX = scale
+            scaleY = scale
+        }
+    }
+}
+
+/**
+ * AN.4 — drag lift (scale); reduced motion / kill-switch → no scale change.
+ */
+@Composable
+fun Modifier.lxListDragLift(isDragging: Boolean, enabled: Boolean = true): Modifier {
+    val reduceMotion = LocalReduceMotion.current
+    val target = when {
+        !enabled || !isDragging || reduceMotion -> 1f
+        else -> LIST_DRAG_LIFT_SCALE
+    }
+    val scale by animateFloatAsState(
+        targetValue = target,
+        animationSpec = when {
+            !enabled -> tween(durationMillis = 0)
+            reduceMotion -> tween(durationMillis = LexturesMotion.InstantMs)
+            else -> LexturesMotion.bubble
+        },
+        label = "lxListDragLift",
+    )
+    return this.graphicsLayer {
+        scaleX = scale
+        scaleY = scale
     }
 }

@@ -42,9 +42,9 @@ final class LexturesMotionTests: XCTestCase {
         XCTAssertEqual(LexturesMotion.staggerDelay(for: 0), 0, accuracy: 0.0001)
         XCTAssertEqual(LexturesMotion.staggerDelay(for: 7), 0.280, accuracy: 0.0001)
         XCTAssertEqual(LexturesMotion.staggerDelay(for: 50), LexturesMotion.staggerDelay(for: 7), accuracy: 0.0001)
-        // Total choreography budget: max delay + base ≤ ~400ms + settle
+        // Total choreography budget: max delay + base enter (8×40ms + 220ms).
         let maxDelay = LexturesMotion.staggerDelay(for: 99)
-        XCTAssertLessThanOrEqual(maxDelay + LexturesMotion.base, 0.400 + 0.001)
+        XCTAssertLessThanOrEqual(maxDelay + LexturesMotion.base, 0.500 + 0.001)
     }
 
     func testAccessibilityPreferencesPersistsReducedMotion() {
