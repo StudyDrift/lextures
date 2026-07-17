@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
+import { TranscriptCheckoutForm } from './transcript-checkout-form'
 import { TranscriptConsentForm } from './transcript-consent-form'
 import {
   createTranscriptOrder,
@@ -9,6 +10,7 @@ import {
   type CreateOrderItemPayload,
   type TranscriptDeliveryMethod,
   type TranscriptDocument,
+  type TranscriptOrder,
   type TranscriptOrderUrgency,
   type TranscriptRecipient,
   type TranscriptRecipientType,
@@ -112,7 +114,7 @@ export function TranscriptOrderBuilder({
   const titleId = useId()
   const searchId = useId()
   const listboxId = useId()
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1)
   const [items, setItems] = useState<DraftItem[]>([newDraftItem()])
   const [activeIdx, setActiveIdx] = useState(0)
   const [query, setQuery] = useState('')
@@ -124,7 +126,22 @@ export function TranscriptOrderBuilder({
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [pendingConsentOrderId, setPendingConsentOrderId] = useState<string | null>(null)
+  const [pendingPaymentOrderId, setPendingPaymentOrderId] = useState<string | null>(null)
   const searchTimer = useRef<number | null>(null)
+
+  function continueAfterGate(order: TranscriptOrder) {
+    if (order.status === 'pending_consent') {
+      setPendingConsentOrderId(order.id)
+      setStep(4)
+      return
+    }
+    if (order.status === 'pending_payment') {
+      setPendingPaymentOrderId(order.id)
+      setStep(5)
+      return
+    }
+    onSubmitted(order.id)
+  }
 
   useEffect(() => {
     if (!open) return
@@ -138,6 +155,7 @@ export function TranscriptOrderBuilder({
     setFormError(null)
     setBusy(false)
     setPendingConsentOrderId(null)
+    setPendingPaymentOrderId(null)
   }, [open, documents])
 
   useEffect(() => {
@@ -262,12 +280,7 @@ export function TranscriptOrderBuilder({
     try {
       const draft = await createTranscriptOrder(payload)
       const submitted = await submitTranscriptOrder(draft.id)
-      if (submitted.status === 'pending_consent') {
-        setPendingConsentOrderId(submitted.id)
-        setStep(4)
-        return
-      }
-      onSubmitted(submitted.id)
+      continueAfterGate(submitted)
     } catch (e) {
       setFormError(e instanceof Error ? e.message : t('transcripts.order.errorSubmit'))
     } finally {
@@ -289,9 +302,14 @@ export function TranscriptOrderBuilder({
               {t('transcripts.order.title')}
             </h2>
             <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
-              {t(step === 4 ? 'transcripts.order.stepLabelConsent' : 'transcripts.order.stepLabel', {
-                step: step === 4 ? 4 : step,
-              })}
+              {t(
+                step === 5
+                  ? 'transcripts.order.stepLabelPayment'
+                  : step === 4
+                    ? 'transcripts.order.stepLabelConsent'
+                    : 'transcripts.order.stepLabel',
+                { step: step <= 3 ? step : step },
+              )}
             </p>
           </div>
           <button
@@ -539,7 +557,15 @@ export function TranscriptOrderBuilder({
         {step === 4 && pendingConsentOrderId ? (
           <TranscriptConsentForm
             orderId={pendingConsentOrderId}
-            onSigned={(order) => onSubmitted(order.id)}
+            onSigned={(order) => continueAfterGate(order)}
+            onCancel={onClose}
+          />
+        ) : null}
+
+        {step === 5 && pendingPaymentOrderId ? (
+          <TranscriptCheckoutForm
+            orderId={pendingPaymentOrderId}
+            onPaidOrWaived={(order) => onSubmitted(order.id)}
             onCancel={onClose}
           />
         ) : null}

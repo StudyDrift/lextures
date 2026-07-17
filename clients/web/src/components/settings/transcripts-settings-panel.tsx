@@ -2,14 +2,20 @@ import { useCallback, useEffect, useId, useState } from 'react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   createAdminTranscriptRecipient,
+  createAdminTranscriptWaiverCode,
+  fetchAdminTranscriptFees,
   fetchAdminTranscriptRecipients,
   fetchAdminTranscriptRequests,
   fetchAdminTranscriptsConfig,
+  fetchAdminTranscriptWaiverCodes,
+  saveAdminTranscriptFees,
   saveAdminTranscriptsConfig,
   updateAdminTranscriptRecipient,
+  type TranscriptFeeSchedule,
   type TranscriptRecipient,
   type TranscriptRequest,
   type TranscriptsConfig,
+  type TranscriptWaiverCode,
 } from '../../lib/transcripts-api'
 
 const SECRET_PLACEHOLDER = '••••••••••••'
@@ -28,6 +34,13 @@ export function TranscriptsSettingsPanel() {
   const [autoApprovalEnabled, setAutoApprovalEnabled] = useState(false)
   const [registrarConsoleEnabled, setRegistrarConsoleEnabled] = useState(false)
   const [consentRequired, setConsentRequired] = useState(true)
+  const [feesEnabled, setFeesEnabled] = useState(false)
+  const [feeSchedule, setFeeSchedule] = useState<TranscriptFeeSchedule | null>(null)
+  const [baseFeeMajor, setBaseFeeMajor] = useState('0')
+  const [rushFeeMajor, setRushFeeMajor] = useState('0')
+  const [perRecipientMajor, setPerRecipientMajor] = useState('0')
+  const [waiverCodes, setWaiverCodes] = useState<TranscriptWaiverCode[]>([])
+  const [newWaiverCode, setNewWaiverCode] = useState('')
   const [recipients, setRecipients] = useState<TranscriptRecipient[]>([])
   const [newRecipientName, setNewRecipientName] = useState('')
   const [loading, setLoading] = useState(true)
@@ -40,6 +53,7 @@ export function TranscriptsSettingsPanel() {
   const autoApprovalId = useId()
   const registrarConsoleId = useId()
   const consentRequiredId = useId()
+  const feesEnabledId = useId()
 
   const load = useCallback(async () => {
     if (!ffTranscripts) {
@@ -50,10 +64,12 @@ export function TranscriptsSettingsPanel() {
     setLoading(true)
     setError(null)
     try {
-      const [cfg, failed, directory] = await Promise.all([
+      const [cfg, failed, directory, fees, waivers] = await Promise.all([
         fetchAdminTranscriptsConfig(),
         fetchAdminTranscriptRequests(),
         fetchAdminTranscriptRecipients().catch(() => [] as TranscriptRecipient[]),
+        fetchAdminTranscriptFees().catch(() => null),
+        fetchAdminTranscriptWaiverCodes().catch(() => [] as TranscriptWaiverCode[]),
       ])
       setConfig(cfg)
       setWebhookUrl(cfg.webhookUrl)
@@ -64,8 +80,16 @@ export function TranscriptsSettingsPanel() {
       setAutoApprovalEnabled(cfg.autoApprovalEnabled === true)
       setRegistrarConsoleEnabled(cfg.registrarConsoleEnabled === true)
       setConsentRequired(cfg.consentRequired !== false)
+      setFeesEnabled(cfg.feesEnabled === true)
       setFailures(failed)
       setRecipients(directory)
+      setWaiverCodes(waivers)
+      if (fees) {
+        setFeeSchedule(fees)
+        setBaseFeeMajor(String((fees.baseFee ?? 0) / 100))
+        setRushFeeMajor(String((fees.rushFee ?? 0) / 100))
+        setPerRecipientMajor(String((fees.perRecipientFee ?? 0) / 100))
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load transcripts settings.')
     } finally {
@@ -93,6 +117,7 @@ export function TranscriptsSettingsPanel() {
         autoApprovalEnabled?: boolean
         registrarConsoleEnabled?: boolean
         consentRequired?: boolean
+        feesEnabled?: boolean
       } = {
         webhookUrl: webhookUrl.trim(),
         pickupInstructions: pickupInstructions.trim(),
@@ -101,12 +126,23 @@ export function TranscriptsSettingsPanel() {
         autoApprovalEnabled,
         registrarConsoleEnabled,
         consentRequired,
+        feesEnabled,
       }
       if (webhookSecret.trim() && webhookSecret !== SECRET_PLACEHOLDER) {
         payload.webhookSecret = webhookSecret.trim()
       }
       const cfg = await saveAdminTranscriptsConfig(payload)
+      const fees = await saveAdminTranscriptFees({
+        currency: feeSchedule?.currency || 'usd',
+        baseFee: Math.round(Number(baseFeeMajor || '0') * 100),
+        rushFee: Math.round(Number(rushFeeMajor || '0') * 100),
+        perRecipientFee: Math.round(Number(perRecipientMajor || '0') * 100),
+        methodSurcharges: feeSchedule?.methodSurcharges ?? {},
+        freeAllotment: feeSchedule?.freeAllotment ?? 0,
+        allotmentPeriod: feeSchedule?.allotmentPeriod ?? 'lifetime',
+      })
       setConfig(cfg)
+      setFeeSchedule(fees)
       setWebhookSecret(cfg.hasWebhookSecret ? SECRET_PLACEHOLDER : '')
       setPickupInstructions(cfg.pickupInstructions ?? '')
       setOfficialEnabled(cfg.officialEnabled === true)
@@ -114,6 +150,7 @@ export function TranscriptsSettingsPanel() {
       setAutoApprovalEnabled(cfg.autoApprovalEnabled === true)
       setRegistrarConsoleEnabled(cfg.registrarConsoleEnabled === true)
       setConsentRequired(cfg.consentRequired !== false)
+      setFeesEnabled(cfg.feesEnabled === true)
       setSaved(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save settings.')
@@ -290,6 +327,104 @@ export function TranscriptsSettingsPanel() {
               </p>
             </div>
           </div>
+          <div className="flex items-start gap-3 rounded-md border border-slate-200 px-3 py-3 dark:border-neutral-700">
+            <input
+              id={feesEnabledId}
+              type="checkbox"
+              checked={feesEnabled}
+              onChange={(e) => setFeesEnabled(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            <div>
+              <label htmlFor={feesEnabledId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+                Charge transcript fees (Stripe checkout)
+              </label>
+              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                When on, orders compute an itemized total and require payment (or a waiver) before fulfillment.
+                When off, transcripts remain free.
+              </p>
+            </div>
+          </div>
+          {feesEnabled ? (
+            <div className="space-y-3 rounded-md border border-slate-200 p-3 dark:border-neutral-700">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Fee schedule (USD)</h3>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <label className="text-sm">
+                  Base fee
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={baseFeeMajor}
+                    onChange={(e) => setBaseFeeMajor(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-950"
+                  />
+                </label>
+                <label className="text-sm">
+                  Rush surcharge
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={rushFeeMajor}
+                    onChange={(e) => setRushFeeMajor(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-950"
+                  />
+                </label>
+                <label className="text-sm">
+                  Per recipient
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={perRecipientMajor}
+                    onChange={(e) => setPerRecipientMajor(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-950"
+                  />
+                </label>
+              </div>
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Waiver codes</h4>
+                <form
+                  className="mt-2 flex flex-wrap gap-2"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    const code = newWaiverCode.trim()
+                    if (!code) return
+                    void createAdminTranscriptWaiverCode({ code, kind: 'full', maxUses: 100 })
+                      .then((wc) => {
+                        setWaiverCodes((prev) => [wc, ...prev])
+                        setNewWaiverCode('')
+                      })
+                      .catch((err: unknown) => {
+                        setError(err instanceof Error ? err.message : 'Could not create waiver code.')
+                      })
+                  }}
+                >
+                  <input
+                    value={newWaiverCode}
+                    onChange={(e) => setNewWaiverCode(e.target.value)}
+                    placeholder="FULLWAIVE"
+                    className="rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-700"
+                  >
+                    Add full waiver code
+                  </button>
+                </form>
+                <ul className="mt-2 space-y-1 text-xs text-slate-600 dark:text-neutral-400">
+                  {waiverCodes.map((wc) => (
+                    <li key={wc.id}>
+                      <span className="font-mono font-medium">{wc.code}</span> · {wc.kind}
+                      {wc.maxUses != null ? ` · ${wc.usedCount}/${wc.maxUses} uses` : ''}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ) : null}
           <div>
             <label htmlFor={secretId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
               Webhook secret (optional)

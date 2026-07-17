@@ -504,9 +504,13 @@ VALUES ($1, $2, $3, $4, $5)
 	if err != nil {
 		return nil, nil, err
 	}
+	paymentOK, err := PaymentSatisfiedForOrder(ctx, pool, cfg, &locked)
+	if err != nil {
+		return nil, nil, err
+	}
 	gates := transcriptorder.GateContext{
 		ConsentSatisfied: true,
-		PaymentSatisfied: true, // T05
+		PaymentSatisfied: paymentOK,
 		HasBlockingHold:  blocked,
 		AutoApproval:     auto,
 	}

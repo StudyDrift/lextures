@@ -20,6 +20,7 @@ import (
 	"github.com/lextures/lextures/server/internal/courseroles"
 	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 	repoCourse "github.com/lextures/lextures/server/internal/repos/course"
+	transcriptsrepo "github.com/lextures/lextures/server/internal/repos/transcripts"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/paymentprovider"
 	"github.com/lextures/lextures/server/internal/telemetry"
@@ -177,6 +178,10 @@ func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stri
 	if err := json.Unmarshal(event.Data.Raw, &sess); err != nil {
 		return nil, err
 	}
+	// T05: transcript order checkout — mark paid and advance lifecycle (no course entitlement).
+	if orderID, ok := ResolveTranscriptOrderFromSessionMetadata(sess.Metadata); ok {
+		return handleTranscriptCheckoutCompleted(ctx, pool, event, &sess, orderID)
+	}
 	userID, err := uuid.Parse(strings.TrimSpace(sess.Metadata["user_id"]))
 	if err != nil {
 		return nil, fmt.Errorf("missing user_id metadata")
@@ -251,6 +256,34 @@ func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stri
 		}
 	}
 	return &WebhookResult{EventType: string(event.Type), Created: created}, nil
+}
+
+func handleTranscriptCheckoutCompleted(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	event stripe.Event,
+	sess *stripe.CheckoutSession,
+	orderID uuid.UUID,
+) (*WebhookResult, error) {
+	paymentRef := sess.ID
+	if sess.PaymentIntent != nil && sess.PaymentIntent.ID != "" {
+		paymentRef = sess.PaymentIntent.ID
+	}
+	amount := int(sess.AmountTotal)
+	currency := string(sess.Currency)
+	tcfg, err := transcriptsrepo.GetConfig(ctx, pool)
+	if err != nil {
+		return nil, err
+	}
+	raw, _ := json.Marshal(sess)
+	_, err = transcriptsrepo.MarkOrderPaidFromStripe(
+		ctx, pool, tcfg, orderID, paymentRef, amount, currency, event.ID, raw,
+	)
+	if err != nil {
+		return nil, err
+	}
+	telemetry.RecordBusinessEvent("transcript_payment_succeeded")
+	return &WebhookResult{EventType: string(event.Type), Created: true}, nil
 }
 
 func enrollCoursePurchase(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID) error {
@@ -343,6 +376,31 @@ func handleChargeRefunded(ctx context.Context, pool *pgxpool.Pool, event stripe.
 	var ch stripe.Charge
 	if err := json.Unmarshal(event.Data.Raw, &ch); err != nil {
 		return nil, err
+	}
+	// T05: transcript refunds via PaymentIntent / session ref on the order.
+	if orderID, ok := ResolveTranscriptOrderFromSessionMetadata(ch.Metadata); ok {
+		refundAmount := int(ch.AmountRefunded)
+		if refundAmount <= 0 {
+			refundAmount = int(ch.Amount)
+		}
+		raw, _ := json.Marshal(ch)
+		if _, err := transcriptsrepo.MarkOrderRefundedFromStripe(ctx, pool, orderID, refundAmount, event.ID, raw); err != nil {
+			return nil, err
+		}
+		return &WebhookResult{EventType: string(event.Type), Created: true}, nil
+	}
+	if ch.PaymentIntent != nil && ch.PaymentIntent.ID != "" {
+		if orderID, err := transcriptsrepo.FindOrderIDByPaymentRef(ctx, pool, ch.PaymentIntent.ID); err == nil && orderID != uuid.Nil {
+			refundAmount := int(ch.AmountRefunded)
+			if refundAmount <= 0 {
+				refundAmount = int(ch.Amount)
+			}
+			raw, _ := json.Marshal(ch)
+			if _, err := transcriptsrepo.MarkOrderRefundedFromStripe(ctx, pool, orderID, refundAmount, event.ID, raw); err != nil {
+				return nil, err
+			}
+			return &WebhookResult{EventType: string(event.Type), Created: true}, nil
+		}
 	}
 	rawCourse := strings.TrimSpace(ch.Metadata["course_id"])
 	rawUser := strings.TrimSpace(ch.Metadata["user_id"])

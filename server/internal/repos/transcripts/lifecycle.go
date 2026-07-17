@@ -61,7 +61,6 @@ type AdminOrderRow struct {
 }
 
 // GateContextForOrder builds consent/payment/hold gates for forward transitions.
-// Payment defaults satisfied until T05 wires real checks.
 func GateContextForOrder(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -80,9 +79,13 @@ func GateContextForOrder(
 	if err != nil {
 		return transcriptorder.GateContext{}, err
 	}
+	paymentOK, err := PaymentSatisfiedForOrder(ctx, pool, cfg, o)
+	if err != nil {
+		return transcriptorder.GateContext{}, err
+	}
 	return transcriptorder.GateContext{
 		ConsentSatisfied: consentOK,
-		PaymentSatisfied: true, // T05
+		PaymentSatisfied: paymentOK,
 		HasBlockingHold:  blocked,
 		AutoApproval:     autoApproval,
 	}, nil
@@ -119,8 +122,31 @@ func SubmitOrder(ctx context.Context, pool *pgxpool.Pool, cfg *Config, orderID, 
 		reason = "blocked by active hold"
 	} else if !gates.ConsentSatisfied {
 		reason = "awaiting FERPA consent"
+	} else if !gates.PaymentSatisfied {
+		reason = "awaiting payment"
 	} else if auto && target == transcriptorder.OrderProcessing {
 		reason = "auto-approved"
+	}
+	// Persist quote / zero-total payment state when fees are enabled.
+	if cfg != nil && cfg.FeesEnabled {
+		q, _, qerr := QuoteOrder(ctx, pool, cfg, o, QuoteOptions{})
+		if qerr == nil && q != nil {
+			var waiverID *uuid.UUID
+			_ = PersistOrderQuote(ctx, pool, orderID, q, waiverID, !q.RequiresPayment)
+			if !q.RequiresPayment {
+				gates.PaymentSatisfied = true
+				target = transcriptorder.ResolveSubmitTarget(gates)
+				if !gates.HasBlockingHold && gates.ConsentSatisfied {
+					if auto && target == transcriptorder.OrderProcessing {
+						reason = "auto-approved"
+					} else if target == transcriptorder.OrderInReview {
+						reason = "submitted"
+					} else if target == transcriptorder.OrderPendingPayment {
+						reason = "awaiting payment"
+					}
+				}
+			}
+		}
 	}
 	actor := userID
 	if _, err := transitionOrderTx(ctx, pool, transitionParams{
@@ -200,7 +226,7 @@ func TransitionOrder(ctx context.Context, pool *pgxpool.Pool, cfg *Config, in Tr
 		return nil, err
 	}
 
-	// Re-verify holds and consent before any forward path that could issue.
+	// Re-verify holds, consent, and payment before any forward path that could issue.
 	if to == OrderStatus(transcriptorder.OrderProcessing) || to == OrderStatus(transcriptorder.OrderCompleted) ||
 		to == OrderStatus(transcriptorder.OrderInReview) {
 		gates, gerr := GateContextForOrder(ctx, pool, o, cfg != nil && cfg.AutoApprovalEnabled)
@@ -216,6 +242,11 @@ func TransitionOrder(ctx context.Context, pool *pgxpool.Pool, cfg *Config, in Tr
 			r := "blocked by missing or revoked consent"
 			reason = &r
 			telemetry.RecordBusinessEvent("transcript_consent_gate_blocked")
+		} else if !gates.PaymentSatisfied {
+			to = OrderStatus(transcriptorder.OrderPendingPayment)
+			r := "blocked pending payment"
+			reason = &r
+			telemetry.RecordBusinessEvent("transcript_payment_gate_blocked")
 		}
 		if err := transcriptorder.ValidateOrderTransition(
 			transcriptorder.OrderStatus(from),
@@ -494,6 +525,8 @@ func ListAdminOrders(ctx context.Context, pool *pgxpool.Pool, f AdminOrderListFi
 
 	rows, err := pool.Query(ctx, `
 SELECT o.id, o.user_id, o.org_id, o.status, o.consent_id, o.total_amount, o.currency, o.legacy_request_id,
+       COALESCE(o.payment_status, 'unpaid'), o.payment_ref, o.waiver_id,
+       COALESCE(o.amount_refunded, 0), COALESCE(o.free_allotment_applied, FALSE),
        o.created_at, o.submitted_at,
        u.email,
        COALESCE((
@@ -544,15 +577,18 @@ LIMIT $5 OFFSET $6
 	for rows.Next() {
 		var row AdminOrderRow
 		var status string
+		var paymentStatus string
 		var holdMsg *string
 		if err := rows.Scan(
 			&row.ID, &row.UserID, &row.OrgID, &status, &row.ConsentID, &row.TotalAmount, &row.Currency,
-			&row.LegacyRequestID, &row.CreatedAt, &row.SubmittedAt,
+			&row.LegacyRequestID, &paymentStatus, &row.PaymentRef, &row.WaiverID,
+			&row.AmountRefunded, &row.FreeAllotmentApplied, &row.CreatedAt, &row.SubmittedAt,
 			&row.UserEmail, &row.ActiveHoldCount, &holdMsg,
 		); err != nil {
 			return nil, err
 		}
 		row.Status = OrderStatus(status)
+		row.PaymentStatus = OrderPaymentStatus(paymentStatus)
 		row.OldestHoldMsg = holdMsg
 		out = append(out, row)
 	}

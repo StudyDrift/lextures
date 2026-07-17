@@ -152,6 +152,7 @@ var allowedOrderTransitions = map[OrderStatus]map[OrderStatus]struct{}{
 	},
 	OrderInReview: {
 		OrderPendingConsent: {}, // consent revoked (T04)
+		OrderPendingPayment: {}, // payment gate (T05)
 		OrderOnHold:         {},
 		OrderProcessing:     {},
 		OrderRejected:       {},
@@ -159,6 +160,7 @@ var allowedOrderTransitions = map[OrderStatus]map[OrderStatus]struct{}{
 	},
 	OrderOnHold: {
 		OrderPendingConsent: {}, // consent revoked (T04)
+		OrderPendingPayment: {}, // payment gate (T05)
 		OrderInReview:       {},
 		OrderProcessing:     {},
 		OrderCanceled:       {},
@@ -166,6 +168,7 @@ var allowedOrderTransitions = map[OrderStatus]map[OrderStatus]struct{}{
 	},
 	OrderProcessing: {
 		OrderPendingConsent: {}, // consent revoked before delivery (T04)
+		OrderPendingPayment: {}, // payment gate (T05)
 		OrderCompleted:      {},
 		OrderOnHold:         {},
 		OrderCanceled:       {},

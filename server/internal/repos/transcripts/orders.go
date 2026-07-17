@@ -9,6 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/lextures/lextures/server/internal/models/transcriptfees"
 )
 
 var (
@@ -21,18 +23,26 @@ var (
 
 // Order is a transcript order owned by a student.
 type Order struct {
-	ID              uuid.UUID
-	UserID          uuid.UUID
-	OrgID           *uuid.UUID
-	Status          OrderStatus
-	ConsentID       *uuid.UUID
-	TotalAmount     *int
-	Currency        *string
-	LegacyRequestID *uuid.UUID
-	CreatedAt       time.Time
-	SubmittedAt     *time.Time
-	Items           []OrderItem
+	ID                   uuid.UUID
+	UserID               uuid.UUID
+	OrgID                *uuid.UUID
+	Status               OrderStatus
+	ConsentID            *uuid.UUID
+	TotalAmount          *int
+	Currency             *string
+	LegacyRequestID      *uuid.UUID
+	PaymentStatus        OrderPaymentStatus
+	PaymentRef           *string
+	WaiverID             *uuid.UUID
+	AmountRefunded       int
+	FreeAllotmentApplied bool
+	CreatedAt            time.Time
+	SubmittedAt          *time.Time
+	Items                []OrderItem
 }
+
+// OrderPaymentStatus is the T05 payment gate state on an order.
+type OrderPaymentStatus = transcriptfees.PaymentStatus
 
 // OrderItem is one recipient × document × delivery method.
 type OrderItem struct {
@@ -67,6 +77,8 @@ type CreateOrderInput struct {
 
 const orderSelectColumns = `
 id, user_id, org_id, status, consent_id, total_amount, currency, legacy_request_id,
+COALESCE(payment_status, 'unpaid'), payment_ref, waiver_id,
+COALESCE(amount_refunded, 0), COALESCE(free_allotment_applied, FALSE),
 created_at, submitted_at`
 
 const orderItemSelectColumns = `
@@ -75,14 +87,17 @@ status, delivered_at, created_at`
 
 func scanOrder(row pgx.Row, o *Order) error {
 	var status string
+	var paymentStatus string
 	err := row.Scan(
 		&o.ID, &o.UserID, &o.OrgID, &status, &o.ConsentID, &o.TotalAmount, &o.Currency,
-		&o.LegacyRequestID, &o.CreatedAt, &o.SubmittedAt,
+		&o.LegacyRequestID, &paymentStatus, &o.PaymentRef, &o.WaiverID,
+		&o.AmountRefunded, &o.FreeAllotmentApplied, &o.CreatedAt, &o.SubmittedAt,
 	)
 	if err != nil {
 		return err
 	}
 	o.Status = OrderStatus(status)
+	o.PaymentStatus = OrderPaymentStatus(paymentStatus)
 	return nil
 }
 

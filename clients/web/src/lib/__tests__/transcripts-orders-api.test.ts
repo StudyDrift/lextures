@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  checkoutTranscriptOrder,
   createTranscriptOrder,
   fetchAdminTranscriptOrders,
   fetchTranscriptConsentPreview,
+  fetchTranscriptOrderQuote,
   searchTranscriptRecipients,
   signTranscriptConsent,
   submitTranscriptOrder,
@@ -155,5 +157,42 @@ describe('transcripts orders API', () => {
     })
     expect(signed.order.status).toBe('in_review')
     expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({ method: 'POST' })
+  })
+
+  it('quotes and checkouts a transcript order', async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            orderId: 'ord-4',
+            feesEnabled: true,
+            paymentStatus: 'unpaid',
+            quote: {
+              currency: 'usd',
+              lines: [{ code: 'base', description: 'Base', amount: 1000 }],
+              subtotal: 1000,
+              waiverAmount: 0,
+              freeAllotmentApplied: false,
+              total: 1000,
+              requiresPayment: true,
+            },
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            waived: true,
+            order: { id: 'ord-4', status: 'in_review', paymentStatus: 'waived', createdAt: '2026-07-17T00:00:00Z', items: [] },
+          }),
+          { status: 200 },
+        ),
+      )
+    const quote = await fetchTranscriptOrderQuote('ord-4', 'FULLWAIVE')
+    expect(quote.quote.total).toBe(1000)
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('waiverCode=FULLWAIVE')
+    const checkout = await checkoutTranscriptOrder('ord-4', { waiverCode: 'FULLWAIVE' })
+    expect('waived' in checkout && checkout.waived).toBe(true)
   })
 })

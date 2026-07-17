@@ -31,7 +31,7 @@ receive, or verify** them through the fulfillment network (T05–T12).
 | T02 | [Recipient directory & multi-destination orders](../../completed/transcripts/T02-recipient-directory-and-orders.md) ✅ | BLOCKER | HE · K12 · SL | Order model + searchable receiver network (schools, employers, app services, self) |
 | T03 | [Order lifecycle, registrar fulfillment & holds](../../completed/transcripts/T03-order-lifecycle-fulfillment-holds.md) ✅ | BLOCKER | HE · K12 | Review/approve/hold/fulfill workflow + financial/registrar holds that block issuance |
 | T04 | [FERPA consent & e-signature authorization](../../completed/transcripts/T04-ferpa-consent-esignature.md) ✅ | BLOCKER | HE · K12 | Signed, scoped, auditable release authorization before records leave the institution |
-| T05 | [Transcript fees, payments & waivers](T05-fees-payments-waivers.md) | MAJOR | HE · SL | Per-order/per-recipient/rush fees, fee waivers, refunds via existing Stripe billing |
+| T05 | [Transcript fees, payments & waivers](../../completed/transcripts/T05-fees-payments-waivers.md) ✅ | MAJOR | HE · SL | Per-order/per-recipient/rush fees, fee waivers, refunds via existing Stripe billing |
 | T06 | [Electronic delivery & interoperability standards](T06-electronic-delivery-standards.md) | BLOCKER | HE · K12 | PESC XML / EDI TS130 / SPEEDE / signed-PDF adapters; secure links; delivery receipts |
 | T07 | [Inbound receiving & transfer-credit intake](T07-inbound-receiving-transfer-credit.md) | MAJOR | HE | Receive transcripts *from* other schools, parse PESC, match to applicant |
 | T08 | [Credential verification & tamper-evidence](T08-credential-verification.md) | MAJOR | HE · K12 · SL | Digitally signed, QR-verifiable documents + third-party verifier portal |

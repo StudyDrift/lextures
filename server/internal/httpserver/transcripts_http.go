@@ -102,6 +102,7 @@ type transcriptsConfigJSON struct {
 	AutoApprovalEnabled     bool    `json:"autoApprovalEnabled"`
 	RegistrarConsoleEnabled bool    `json:"registrarConsoleEnabled"`
 	ConsentRequired         bool    `json:"consentRequired"`
+	FeesEnabled             bool    `json:"feesEnabled"`
 }
 
 func configToJSON(c *transcriptsrepo.Config) transcriptsConfigJSON {
@@ -111,6 +112,7 @@ func configToJSON(c *transcriptsrepo.Config) transcriptsConfigJSON {
 		AutoApprovalEnabled:     c.AutoApprovalEnabled,
 		RegistrarConsoleEnabled: c.RegistrarConsoleEnabled,
 		ConsentRequired:         c.ConsentRequired,
+		FeesEnabled:             c.FeesEnabled,
 	}
 	if c.WebhookURL != nil {
 		out.WebhookURL = *c.WebhookURL
@@ -132,11 +134,13 @@ type transcriptsStudentConfigJSON struct {
 	OfficialEnabled    bool    `json:"officialEnabled"`
 	OrdersUIEnabled    bool    `json:"ordersUiEnabled"`
 	ConsentRequired    bool    `json:"consentRequired"`
+	FeesEnabled        bool    `json:"feesEnabled"`
 }
 
 func studentConfigToJSON(c *transcriptsrepo.Config) transcriptsStudentConfigJSON {
 	out := transcriptsStudentConfigJSON{
 		OfficialEnabled: c.OfficialEnabled,
+		FeesEnabled:     c.FeesEnabled,
 		OrdersUIEnabled: c.OrdersUIEnabled,
 		ConsentRequired: c.ConsentRequired,
 	}
@@ -157,6 +161,7 @@ func (d Deps) registerTranscriptsRoutes(r chi.Router) {
 	r.Get("/api/v1/transcripts/requests", d.handleGetTranscriptRequests())
 	d.registerTranscriptDocumentRoutes(r)
 	d.registerTranscriptOrderRoutes(r)
+	d.registerTranscriptFeeRoutes(r)
 }
 
 // GET /api/v1/admin/transcripts/config
@@ -191,6 +196,7 @@ type putTranscriptsConfigBody struct {
 	AutoApprovalEnabled     *bool   `json:"autoApprovalEnabled"`
 	RegistrarConsoleEnabled *bool   `json:"registrarConsoleEnabled"`
 	ConsentRequired         *bool   `json:"consentRequired"`
+	FeesEnabled             *bool   `json:"feesEnabled"`
 }
 
 // PUT /api/v1/admin/transcripts/config
@@ -238,6 +244,7 @@ func (d Deps) handlePutAdminTranscriptsConfig() http.HandlerFunc {
 			AutoApprovalEnabled:     body.AutoApprovalEnabled,
 			RegistrarConsoleEnabled: body.RegistrarConsoleEnabled,
 			ConsentRequired:         body.ConsentRequired,
+			FeesEnabled:             body.FeesEnabled,
 		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save transcripts config.")
