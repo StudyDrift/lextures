@@ -17,6 +17,8 @@ const (
 	JobTypeBoardAnalyticsRollup       = "scheduled.board_analytics_rollup"
 	JobTypeBoardExportRetention       = "scheduled.board_export_retention"
 	JobTypeBoardContentRetention      = "scheduled.board_content_retention"
+	JobTypeQuizgameUsageRollup        = "scheduled.quizgame_usage_rollup"
+	JobTypeQuizgameRetention          = "scheduled.quizgame_retention"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -137,6 +139,20 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "50 3 * * *", // daily 03:50 UTC
 			JobType:        JobTypeBoardContentRetention,
 			Description:    "Purge archived collaboration boards past retention window (VC.10).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "quizgame_usage_rollup",
+			Spec:           "25 1 * * *", // daily 01:25 UTC
+			JobType:        JobTypeQuizgameUsageRollup,
+			Description:    "Refresh Live Quiz daily usage rollups for admin analytics (IQ.11).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "quizgame_retention",
+			Spec:           "55 3 * * *", // daily 03:55 UTC
+			JobType:        JobTypeQuizgameRetention,
+			Description:    "Anonymise/delete aged Live Quiz responses and purge guest data (IQ.11).",
 			DefaultEnabled: true,
 		},
 	}

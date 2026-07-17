@@ -138,7 +138,7 @@ func asFloat(v any) (float64, bool) {
 	}
 }
 
-// StubPoints awards a simple placeholder score until IQ.5 owns formulae.
+// StubPoints is retained for legacy unit tests; production scoring lives in quizgame/scoring.
 // Correct standard = 1000; double = 2000; no_points / incorrect / poll = 0.
 func StubPoints(pointsStyle string, correct bool, questionType string) int {
 	if questionType == "poll" || questionType == "word_cloud" || !correct {

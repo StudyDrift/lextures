@@ -50,11 +50,11 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>Lextures uses Face ID or Touch ID to unlock the app after it has been in the background.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Lextures uses the camera so you can photograph handwritten work for assignment submissions.</string>
+	<string>Lextures uses the camera so you can photograph handwritten work for assignments and collaboration boards.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Lextures uses your photo library so you can attach images and videos to assignment submissions.</string>
+	<string>Lextures uses your photo library so you can attach images and videos to assignment submissions and collaboration boards.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Lextures uses the microphone for speech-to-text dictation in message and assignment fields.</string>
+	<string>Lextures uses the microphone for speech-to-text dictation and to record audio reflections on collaboration boards.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Lextures uses speech recognition so you can dictate long responses instead of typing.</string>
 	<key>CFBundleURLTypes</key>

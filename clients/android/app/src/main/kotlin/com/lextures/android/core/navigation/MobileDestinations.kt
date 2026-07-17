@@ -116,6 +116,7 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
     OfficeHours("mobile_ia_course_officeHours", "office-hours"),
     Groups("mobile_ia_course_groups", "groups"),
     CollabDocs("mobile_ia_course_collabDocs", "collab-docs"),
+    Boards("mobile_ia_course_boards", "boards"),
     Grading("mobile_ia_course_grading", "grading"),
     InstructorInsights("mobile_ia_course_insights", "insights"),
     Settings("mobile_ia_course_settings", "settings"),
@@ -139,6 +140,7 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
             CourseDeepLinkSection.Library -> Library
             CourseDeepLinkSection.Groups -> Groups
             CourseDeepLinkSection.CollabDocs -> CollabDocs
+            CourseDeepLinkSection.Boards -> Boards
             CourseDeepLinkSection.Behavior -> Behavior
             CourseDeepLinkSection.HallPass -> HallPass
             CourseDeepLinkSection.Insights -> InstructorInsights
@@ -411,6 +413,7 @@ object MobileDestinations {
                     CourseWorkspaceSection.Feed,
                     CourseWorkspaceSection.Groups,
                     CourseWorkspaceSection.CollabDocs,
+                    CourseWorkspaceSection.Boards,
                     CourseWorkspaceSection.Live,
                     CourseWorkspaceSection.OfficeHours,
                 ),
@@ -522,6 +525,7 @@ object MobileDestinations {
         if (ctx.course.isOfficeHoursEnabled) add(CourseWorkspaceSection.OfficeHours)
         if (ctx.course.isGroupSpacesEnabled) add(CourseWorkspaceSection.Groups)
         if (ctx.course.isCollabDocsEnabled) add(CourseWorkspaceSection.CollabDocs)
+        if (ctx.course.isVisualBoardsEnabled) add(CourseWorkspaceSection.Boards)
         if (ctx.course.isAttendanceEnabled && (ctx.course.viewerIsStaff || ctx.hasAttendanceSessions)) {
             add(CourseWorkspaceSection.Attendance)
         }

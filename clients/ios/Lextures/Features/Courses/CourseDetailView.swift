@@ -25,6 +25,8 @@ struct CourseDetailView: View {
     @State private var takeAttendanceRoute: TakeAttendanceRoute?
     @State private var selectedAttendanceSession: AttendanceSession?
     @State private var structureSocket = CourseStructureSocket()
+    /// Deep link to Boards when the course flag is off (FR-6 / AC-6).
+    @State private var boardsDeepLinkUnavailable = false
 
     init(
         course: CourseSummary,
@@ -90,7 +92,11 @@ struct CourseDetailView: View {
                         StalenessChip(label: cacheLabel)
                     }
 
-                    sectionContent
+                    if boardsDeepLinkUnavailable {
+                        BoardsUnavailableView()
+                    } else {
+                        sectionContent
+                    }
                 }
                 .padding(16)
             }
@@ -187,7 +193,9 @@ struct CourseDetailView: View {
             shell.activeCourse = course
             shell.activeCourseRoot = shell.rootDestination
             shell.activeCourseSections = allSections
-            if let initialSection, allSections.contains(initialSection) {
+            if initialSection == .boards, !allSections.contains(.boards) {
+                boardsDeepLinkUnavailable = true
+            } else if let initialSection, allSections.contains(initialSection) {
                 shell.activeCourseSection = initialSection
             } else if !allSections.contains(shell.activeCourseSection) {
                 shell.activeCourseSection = allSections.first ?? .modules
@@ -237,6 +245,11 @@ struct CourseDetailView: View {
             CourseGroupsSection(course: course)
         case .collabDocs:
             CourseCollabDocsSection(course: course)
+        case .boards:
+            BoardsListView(
+                course: course,
+                initialBoardId: section == .boards ? initialItemId : nil
+            )
         case .people:
             CoursePeopleSection(course: course)
         case .live:

@@ -24,7 +24,8 @@ class ApiClient(
         body: String? = null,
         accessToken: String? = null,
         idempotencyKey: String? = null,
-    ): Pair<String, Int> = requestRaw(path, method, body, accessToken, idempotencyKey)
+        extraHeaders: Map<String, String> = emptyMap(),
+    ): Pair<String, Int> = requestRaw(path, method, body, accessToken, idempotencyKey, extraHeaders = extraHeaders)
 
     suspend fun requestRaw(
         path: String,
@@ -33,6 +34,7 @@ class ApiClient(
         accessToken: String? = null,
         idempotencyKey: String? = null,
         isRetryAfterRefresh: Boolean = false,
+        extraHeaders: Map<String, String> = emptyMap(),
     ): Pair<String, Int> {
         val builder = Request.Builder()
             .url(AppConfiguration.apiUrl(path))
@@ -55,6 +57,10 @@ class ApiClient(
 
         if (!idempotencyKey.isNullOrBlank()) {
             builder.header("X-Idempotency-Key", idempotencyKey)
+        }
+
+        for ((key, value) in extraHeaders) {
+            if (value.isNotBlank()) builder.header(key, value)
         }
 
         val response = try {
@@ -83,6 +89,7 @@ class ApiClient(
                                     accessToken = newToken,
                                     idempotencyKey = idempotencyKey,
                                     isRetryAfterRefresh = true,
+                                    extraHeaders = extraHeaders,
                                 )
                             }
                         }

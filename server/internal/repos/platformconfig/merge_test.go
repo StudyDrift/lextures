@@ -221,4 +221,69 @@ func TestMerge_IqLiveHostingDefaultOffWhenDBUnset(t *testing.T) {
 	}
 }
 
+// Plan IQ.6: mode sub-flags default OFF when platform settings row is unset.
+func TestMerge_IqModeFlagsDefaultOffWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFIqTeamMode || got.FFIqStudentPaced || got.FFIqHomework {
+		t.Fatal("expected IQ.6 mode flags false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFIqTeamMode: &on, FFIqStudentPaced: &on, FFIqHomework: &on})
+	if !got.FFIqTeamMode || !got.FFIqStudentPaced || !got.FFIqHomework {
+		t.Fatal("expected DB true to enable IQ.6 mode flags")
+	}
+}
+
+// Plan IQ.7: gradebook push sub-flag defaults OFF when platform settings row is unset.
+func TestMerge_IqGradebookPushDefaultOffWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFIqGradebookPush {
+		t.Fatal("expected FFIqGradebookPush false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFIqGradebookPush: &on})
+	if !got.FFIqGradebookPush {
+		t.Fatal("expected DB true to enable IQ.7 gradebook push")
+	}
+}
+
+// Plan IQ.8: public kit catalog defaults OFF when platform settings row is unset.
+func TestMerge_IqPublicKitCatalogDefaultOffWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFIqPublicKitCatalog {
+		t.Fatal("expected FFIqPublicKitCatalog false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFIqPublicKitCatalog: &on})
+	if !got.FFIqPublicKitCatalog {
+		t.Fatal("expected DB true to enable IQ.8 public kit catalog")
+	}
+}
+
+// Plan IQ.9: guest join defaults OFF when platform settings row is unset.
+func TestMerge_IqGuestJoinDefaultOffWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFIqGuestJoin {
+		t.Fatal("expected FFIqGuestJoin false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFIqGuestJoin: &on})
+	if !got.FFIqGuestJoin {
+		t.Fatal("expected DB true to enable IQ.9 guest join")
+	}
+}
+
+// Plan IQ.10: AI generation defaults OFF when platform settings row is unset.
+func TestMerge_IqAiGenerationDefaultOffWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFIqAiGeneration {
+		t.Fatal("expected FFIqAiGeneration false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFIqAiGeneration: &on})
+	if !got.FFIqAiGeneration {
+		t.Fatal("expected DB true to enable IQ.10 AI generation")
+	}
+}
+
 func ptr(s string) *string { return &s }

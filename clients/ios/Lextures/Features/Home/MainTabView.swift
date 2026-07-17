@@ -52,6 +52,8 @@ final class AppShellModel {
     var pendingInsights = false
     var pendingCheckout: PendingCheckoutContext?
     var checkoutReturnPhase: CheckoutReturnPhase?
+    /// Public board share-link token pending presentation (VC.M6).
+    var pendingBoardLinkToken: String?
 
     // MARK: Drawer navigation
 
@@ -228,6 +230,8 @@ final class AppShellModel {
             }
             pendingParentRoute = parentRoute(studentId: studentId, section: section)
             selectShellTab(.children)
+        case let .boardLink(token):
+            pendingBoardLinkToken = token
         }
     }
 
@@ -411,6 +415,14 @@ struct MainTabView: View {
         .overlay {
             if let phase = shell.checkoutReturnPhase {
                 CheckoutReturnOverlay(phase: phase)
+            }
+        }
+        .fullScreenCover(item: Binding(
+            get: { shell.pendingBoardLinkToken.map { BoardLinkToken(token: $0) } },
+            set: { shell.pendingBoardLinkToken = $0?.token }
+        )) { item in
+            BoardPublicView(token: item.token) {
+                shell.pendingBoardLinkToken = nil
             }
         }
         .sheet(isPresented: Bindable(shell).showUniversalSearch) {
@@ -982,6 +994,11 @@ struct LMSSkeletonList: View {
             }
         }
     }
+}
+
+private struct BoardLinkToken: Identifiable {
+    var id: String { token }
+    var token: String
 }
 
 /// Small circular progress ring (course completion) — echoes the health-app ring.

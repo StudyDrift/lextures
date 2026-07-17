@@ -87,11 +87,40 @@ func setupQuizKitTest(t *testing.T, ctx context.Context, role string, courseFlag
 
 	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
 	tok, _ := signer.Sign(ctx, row.ID, em, "", "", nil)
-	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: config.Config{
+	cfg := config.Config{
 		FFInteractiveQuizzes: masterFlag,
 		FFIqLiveHosting:      masterFlag,
-	}})
+		FFIqTeamMode:         masterFlag,
+		FFIqStudentPaced:     masterFlag,
+		FFIqHomework:         masterFlag,
+		FFIqGradebookPush:    masterFlag,
+	}
+	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: cfg})
 	return pool, h, tok, cc, courseID
+}
+
+func setupQuizKitTestWithCfg(
+	t *testing.T,
+	ctx context.Context,
+	role string,
+	courseFlag, masterFlag bool,
+	mutate func(*config.Config),
+) (*pgxpool.Pool, http.Handler, string, string, uuid.UUID) {
+	t.Helper()
+	pool, _, tok, cc, courseID := setupQuizKitTest(t, ctx, role, courseFlag, masterFlag)
+	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
+	cfg := config.Config{
+		FFInteractiveQuizzes: masterFlag,
+		FFIqLiveHosting:      masterFlag,
+		FFIqTeamMode:         masterFlag,
+		FFIqStudentPaced:     masterFlag,
+		FFIqHomework:         masterFlag,
+		FFIqGradebookPush:    masterFlag,
+	}
+	if mutate != nil {
+		mutate(&cfg)
+	}
+	return pool, NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: cfg}), tok, cc, courseID
 }
 
 func TestQuizKits_FeatureGate_Pg(t *testing.T) {

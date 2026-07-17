@@ -128,6 +128,13 @@ export type PlatformFeatures = {
   ffBoardsExternalSharing: boolean
   ffInteractiveQuizzes: boolean
   ffIqLiveHosting: boolean
+  ffIqTeamMode: boolean
+  ffIqStudentPaced: boolean
+  ffIqHomework: boolean
+  ffIqGradebookPush: boolean
+  ffIqPublicKitCatalog: boolean
+  ffIqGuestJoin: boolean
+  ffIqAiGeneration: boolean
   ffEmailSes: boolean
   loading: boolean
   refresh: () => Promise<void>
@@ -246,6 +253,13 @@ const defaultFeatures: PlatformFeatures = {
   ffBoardsExternalSharing: false,
   ffInteractiveQuizzes: false,
   ffIqLiveHosting: false,
+  ffIqTeamMode: false,
+  ffIqStudentPaced: false,
+  ffIqHomework: false,
+  ffIqGradebookPush: false,
+  ffIqPublicKitCatalog: false,
+  ffIqGuestJoin: false,
+  ffIqAiGeneration: false,
   ffEmailSes: false,
   loading: true,
   refresh: async () => {},
@@ -363,6 +377,13 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffBoardsExternalSharing: false,
   ffInteractiveQuizzes: false,
   ffIqLiveHosting: false,
+  ffIqTeamMode: false,
+  ffIqStudentPaced: false,
+  ffIqHomework: false,
+  ffIqGradebookPush: false,
+  ffIqPublicKitCatalog: false,
+  ffIqGuestJoin: false,
+  ffIqAiGeneration: false,
   ffEmailSes: false,
   })
   const [loading, setLoading] = useState(true)
@@ -489,6 +510,13 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffBoardsExternalSharing: data.ffBoardsExternalSharing === true,
           ffInteractiveQuizzes: data.ffInteractiveQuizzes === true,
           ffIqLiveHosting: data.ffIqLiveHosting === true,
+          ffIqTeamMode: data.ffIqTeamMode === true,
+          ffIqStudentPaced: data.ffIqStudentPaced === true,
+          ffIqHomework: data.ffIqHomework === true,
+          ffIqGradebookPush: data.ffIqGradebookPush === true,
+          ffIqPublicKitCatalog: data.ffIqPublicKitCatalog === true,
+          ffIqGuestJoin: data.ffIqGuestJoin === true,
+          ffIqAiGeneration: data.ffIqAiGeneration === true,
           ffEmailSes: data.ffEmailSes === true,
         }
         setFeatures({
@@ -568,6 +596,13 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffBoardsExternalSharing: next.ffBoardsExternalSharing === true,
           ffInteractiveQuizzes: next.ffInteractiveQuizzes === true,
           ffIqLiveHosting: next.ffIqLiveHosting === true,
+          ffIqTeamMode: next.ffIqTeamMode === true,
+          ffIqStudentPaced: next.ffIqStudentPaced === true,
+          ffIqHomework: next.ffIqHomework === true,
+          ffIqGradebookPush: next.ffIqGradebookPush === true,
+          ffIqPublicKitCatalog: next.ffIqPublicKitCatalog === true,
+          ffIqGuestJoin: next.ffIqGuestJoin === true,
+          ffIqAiGeneration: next.ffIqAiGeneration === true,
           ffEmailSes: next.ffEmailSes === true,
         })
         setPlatformFeaturesSnapshot(next)

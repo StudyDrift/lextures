@@ -32,6 +32,7 @@ const (
 	FeatureSyllabusGeneration         = "syllabus_generation"
 	FeatureTranslation                = "translation"
 	FeatureQuizGeneration             = "quiz_generation"
+	FeatureLiveQuizKitGeneration      = "live_quiz_kit_generation"
 	FeatureReadingLevelSimplification = "reading_level_simplification"
 	FeatureContentTranslation         = "content_translation"
 	FeatureAltTextSuggestion          = "alt_text_suggestion"

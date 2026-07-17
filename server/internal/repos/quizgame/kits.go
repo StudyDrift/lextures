@@ -21,20 +21,28 @@ const maxPageSize = 100
 
 // Kit is one quiz kit row.
 type Kit struct {
-	ID            string    `json:"id"`
-	CourseID      string    `json:"courseId"`
-	Title         string    `json:"title"`
-	Description   string    `json:"description"`
-	Slug          string    `json:"slug"`
-	CoverImageRef *string   `json:"coverImageRef"`
-	Status        string    `json:"status"`
-	Visibility    string    `json:"visibility"`
-	Tags          []string  `json:"tags"`
-	QuestionCount int       `json:"questionCount"`
-	Archived      bool      `json:"archived"`
-	CreatedBy     *string   `json:"createdBy"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
+	ID               string    `json:"id"`
+	CourseID         string    `json:"courseId"`
+	Title            string    `json:"title"`
+	Description      string    `json:"description"`
+	Slug             string    `json:"slug"`
+	CoverImageRef    *string   `json:"coverImageRef"`
+	Status           string    `json:"status"`
+	Visibility       string    `json:"visibility"`
+	Tags             []string  `json:"tags"`
+	QuestionCount    int       `json:"questionCount"`
+	Archived         bool      `json:"archived"`
+	CreatedBy        *string   `json:"createdBy"`
+	CreatedAt        time.Time `json:"createdAt"`
+	UpdatedAt        time.Time `json:"updatedAt"`
+	IsTemplate       bool      `json:"isTemplate"`
+	TemplateScope    *string   `json:"templateScope,omitempty"`
+	DerivedFromKitID *string   `json:"derivedFromKitId,omitempty"`
+	Attribution      string    `json:"attribution"`
+	Subject          *string   `json:"subject,omitempty"`
+	GradeBand        *string   `json:"gradeBand,omitempty"`
+	Language         *string   `json:"language,omitempty"`
+	CatalogStatus    string    `json:"catalogStatus"`
 }
 
 // ListOpts filters and paginates kit listings.
@@ -68,19 +76,26 @@ type PatchKitInput struct {
 
 func scanKit(row pgx.Row) (Kit, error) {
 	var k Kit
-	var id, courseID uuid.UUID
-	var createdBy uuid.NullUUID
+	var id uuid.UUID
+	var courseID uuid.NullUUID
+	var createdBy, derived uuid.NullUUID
 	var cover *string
 	var tags []string
+	var templateScope *string
+	var subject, gradeBand, language *string
 	if err := row.Scan(
 		&id, &courseID, &k.Title, &k.Description, &k.Slug, &cover,
 		&k.Status, &k.Visibility, &tags, &k.QuestionCount, &k.Archived,
 		&createdBy, &k.CreatedAt, &k.UpdatedAt,
+		&k.IsTemplate, &templateScope, &derived, &k.Attribution,
+		&subject, &gradeBand, &language, &k.CatalogStatus,
 	); err != nil {
 		return Kit{}, err
 	}
 	k.ID = id.String()
-	k.CourseID = courseID.String()
+	if courseID.Valid {
+		k.CourseID = courseID.UUID.String()
+	}
 	k.CoverImageRef = cover
 	if tags == nil {
 		tags = []string{}
@@ -90,13 +105,26 @@ func scanKit(row pgx.Row) (Kit, error) {
 		s := createdBy.UUID.String()
 		k.CreatedBy = &s
 	}
+	k.TemplateScope = templateScope
+	if derived.Valid {
+		s := derived.UUID.String()
+		k.DerivedFromKitID = &s
+	}
+	k.Subject = subject
+	k.GradeBand = gradeBand
+	k.Language = language
+	if k.CatalogStatus == "" {
+		k.CatalogStatus = "unlisted"
+	}
 	return k, nil
 }
 
 func selectKitCols() string {
 	return `k.id, k.course_id, k.title, k.description, k.slug, k.cover_image_ref,
 		k.status::text, k.visibility::text, k.tags, k.question_count, k.archived,
-		k.created_by, k.created_at, k.updated_at`
+		k.created_by, k.created_at, k.updated_at,
+		k.is_template, k.template_scope, k.derived_from_kit_id, k.attribution,
+		k.subject, k.grade_band, k.language, k.catalog_status`
 }
 
 func normalizePage(page, pageSize int) (int, int) {
@@ -118,7 +146,7 @@ func List(ctx context.Context, pool *pgxpool.Pool, courseCode string, opts ListO
 	q := strings.TrimSpace(opts.Query)
 	tag := strings.TrimSpace(opts.Tag)
 
-	where := `WHERE c.course_code = $1`
+	where := `WHERE c.course_code = $1 AND k.is_template = FALSE`
 	args := []any{courseCode}
 	argN := 2
 	if !opts.IncludeArchived {
@@ -258,10 +286,8 @@ func Create(ctx context.Context, pool *pgxpool.Pool, courseCode string, createdB
 		row := tx.QueryRow(ctx, `
 			INSERT INTO quizgame.kits (course_id, title, description, slug, tags, created_by)
 			VALUES ($1, $2, $3, $4, $5, $6)
-			RETURNING id, course_id, title, description, slug, cover_image_ref,
-				status::text, visibility::text, tags, question_count, archived,
-				created_by, created_at, updated_at
-		`, courseID, title, description, slug, tags, createdBy)
+			RETURNING `+selectKitColsReturning(),
+			courseID, title, description, slug, tags, createdBy)
 		k, err := scanKit(row)
 		if err == nil {
 			if _, relErr := tx.Exec(ctx, "RELEASE SAVEPOINT "+sp); relErr != nil {
@@ -343,9 +369,7 @@ func Patch(ctx context.Context, pool *pgxpool.Pool, courseCode, kitID string, in
 			updated_at = NOW()
 		FROM course.courses c
 		WHERE c.id = k.course_id AND c.course_code = $1 AND k.id = $2
-		RETURNING k.id, k.course_id, k.title, k.description, k.slug, k.cover_image_ref,
-			k.status::text, k.visibility::text, k.tags, k.question_count, k.archived,
-			k.created_by, k.created_at, k.updated_at
+		RETURNING `+selectKitCols()+`
 	`, courseCode, id, in.Title, in.Description, in.CoverImageRef, in.Status, in.Visibility, tags, in.Archived)
 	k, err := scanKit(row)
 	if err != nil {
@@ -371,8 +395,8 @@ func Restore(ctx context.Context, pool *pgxpool.Pool, courseCode, kitID string) 
 	return Patch(ctx, pool, courseCode, kitID, PatchKitInput{Archived: &archived, Status: &status})
 }
 
-// Duplicate creates a metadata-only copy of a kit (no questions in IQ.1).
-func Duplicate(ctx context.Context, pool *pgxpool.Pool, courseCode, kitID string, createdBy uuid.UUID) (*Kit, error) {
+// Duplicate deep-copies a kit (questions + media refs) into the same or another course.
+func Duplicate(ctx context.Context, pool *pgxpool.Pool, courseCode, kitID string, createdBy uuid.UUID, targetCourseCode string) (*Kit, error) {
 	src, err := Get(ctx, pool, courseCode, kitID)
 	if err != nil {
 		return nil, err
@@ -380,11 +404,17 @@ func Duplicate(ctx context.Context, pool *pgxpool.Pool, courseCode, kitID string
 	if src == nil {
 		return nil, nil
 	}
-	title := src.Title + " (copy)"
-	if len(title) > maxTitleLen {
-		title = title[:maxTitleLen]
+	target := strings.TrimSpace(targetCourseCode)
+	if target == "" {
+		target = courseCode
 	}
-	return Create(ctx, pool, courseCode, createdBy, title, src.Description, src.Tags)
+	return DeepCopyKit(ctx, pool, DeepCopyOpts{
+		SourceKitID:      kitID,
+		TargetCourseCode: target,
+		CreatedBy:        createdBy,
+		DropBankLinks:    target != courseCode,
+		CopyCatalogMeta:  true,
+	})
 }
 
 func isUniqueViolation(err error) bool {

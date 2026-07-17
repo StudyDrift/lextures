@@ -18,38 +18,46 @@ var ErrVersionConflict = errors.New("quizgame: version conflict")
 
 // Question is one quizgame.questions row.
 type Question struct {
-	ID               string          `json:"id"`
-	KitID            string          `json:"kitId"`
-	Position         int             `json:"position"`
-	QuestionType     string          `json:"questionType"`
-	Prompt           string          `json:"prompt"`
-	PromptMediaRef   *string         `json:"promptMediaRef"`
-	PromptMediaAlt   *string         `json:"promptMediaAlt"`
-	Options          json.RawMessage `json:"options"`
-	CorrectAnswer    json.RawMessage `json:"correctAnswer"`
-	TimeLimitSeconds int             `json:"timeLimitSeconds"`
-	PointsStyle      string          `json:"pointsStyle"`
-	AnswerShuffle    bool            `json:"answerShuffle"`
-	Explanation      *string         `json:"explanation"`
-	SourceQuestionID *string         `json:"sourceQuestionId"`
-	Version          int             `json:"version"`
-	CreatedAt        time.Time       `json:"createdAt"`
-	UpdatedAt        time.Time       `json:"updatedAt"`
+	ID                   string          `json:"id"`
+	KitID                string          `json:"kitId"`
+	Position             int             `json:"position"`
+	QuestionType         string          `json:"questionType"`
+	Prompt               string          `json:"prompt"`
+	PromptMediaRef       *string         `json:"promptMediaRef"`
+	PromptMediaAlt       *string         `json:"promptMediaAlt"`
+	Options              json.RawMessage `json:"options"`
+	CorrectAnswer        json.RawMessage `json:"correctAnswer"`
+	TimeLimitSeconds     int             `json:"timeLimitSeconds"`
+	PointsStyle          string          `json:"pointsStyle"`
+	AnswerShuffle        bool            `json:"answerShuffle"`
+	Explanation          *string         `json:"explanation"`
+	SourceQuestionID     *string         `json:"sourceQuestionId"`
+	Source               string          `json:"source"`
+	NeedsReview          bool            `json:"needsReview"`
+	GenerationJobID      *string         `json:"generationJobId"`
+	GenerationConfidence *float64        `json:"generationConfidence"`
+	Version              int             `json:"version"`
+	CreatedAt            time.Time       `json:"createdAt"`
+	UpdatedAt            time.Time       `json:"updatedAt"`
 }
 
 // CreateQuestionInput is used for create and as the merge base for patch.
 type CreateQuestionInput struct {
-	QuestionType     string
-	Prompt           string
-	PromptMediaRef   *string
-	PromptMediaAlt   *string
-	Options          []Option
-	CorrectAnswer    json.RawMessage
-	TimeLimitSeconds int
-	PointsStyle      string
-	AnswerShuffle    *bool
-	Explanation      *string
-	SourceQuestionID *string
+	QuestionType         string
+	Prompt               string
+	PromptMediaRef       *string
+	PromptMediaAlt       *string
+	Options              []Option
+	CorrectAnswer        json.RawMessage
+	TimeLimitSeconds     int
+	PointsStyle          string
+	AnswerShuffle        *bool
+	Explanation          *string
+	SourceQuestionID     *string
+	Source               string
+	NeedsReview          *bool
+	GenerationJobID      *string
+	GenerationConfidence *float64
 }
 
 // PatchQuestionInput is a partial update with optimistic concurrency.
@@ -91,19 +99,31 @@ func selectQuestionCols() string {
 	return `q.id, q.kit_id, q.position, q.question_type::text, q.prompt,
 		q.prompt_media_ref, q.prompt_media_alt, q.options, q.correct_answer,
 		q.time_limit_seconds, q.points_style::text, q.answer_shuffle, q.explanation,
-		q.source_question_id, q.version, q.created_at, q.updated_at`
+		q.source_question_id, q.source, q.needs_review, q.generation_job_id, q.generation_confidence,
+		q.version, q.created_at, q.updated_at`
+}
+
+func returningQuestionCols() string {
+	return `id, kit_id, position, question_type::text, prompt,
+		prompt_media_ref, prompt_media_alt, options, correct_answer,
+		time_limit_seconds, points_style::text, answer_shuffle, explanation,
+		source_question_id, source, needs_review, generation_job_id, generation_confidence,
+		version, created_at, updated_at`
 }
 
 func scanQuestion(row pgx.Row) (Question, error) {
 	var q Question
 	var id, kitID uuid.UUID
-	var source uuid.NullUUID
+	var bankSource uuid.NullUUID
+	var genJob uuid.NullUUID
+	var conf *float32
 	var opts, corr []byte
 	if err := row.Scan(
 		&id, &kitID, &q.Position, &q.QuestionType, &q.Prompt,
 		&q.PromptMediaRef, &q.PromptMediaAlt, &opts, &corr,
 		&q.TimeLimitSeconds, &q.PointsStyle, &q.AnswerShuffle, &q.Explanation,
-		&source, &q.Version, &q.CreatedAt, &q.UpdatedAt,
+		&bankSource, &q.Source, &q.NeedsReview, &genJob, &conf,
+		&q.Version, &q.CreatedAt, &q.UpdatedAt,
 	); err != nil {
 		return Question{}, err
 	}
@@ -116,9 +136,20 @@ func scanQuestion(row pgx.Row) (Question, error) {
 	if len(corr) > 0 {
 		q.CorrectAnswer = json.RawMessage(corr)
 	}
-	if source.Valid {
-		s := source.UUID.String()
+	if bankSource.Valid {
+		s := bankSource.UUID.String()
 		q.SourceQuestionID = &s
+	}
+	if q.Source == "" {
+		q.Source = QuestionSourceAuthored
+	}
+	if genJob.Valid {
+		s := genJob.UUID.String()
+		q.GenerationJobID = &s
+	}
+	if conf != nil {
+		c := float64(*conf)
+		q.GenerationConfidence = &c
 	}
 	return q, nil
 }
@@ -230,13 +261,47 @@ func CreateQuestion(ctx context.Context, pool *pgxpool.Pool, courseCode, kitID s
 	if in.AnswerShuffle != nil {
 		shuffle = *in.AnswerShuffle
 	}
-	var source any
+	var bankSource any
 	if in.SourceQuestionID != nil {
 		sid, err := uuid.Parse(*in.SourceQuestionID)
 		if err != nil {
 			return nil, fmt.Errorf("quizgame: invalid source_question_id")
 		}
-		source = sid
+		bankSource = sid
+	}
+	provenance := strings.TrimSpace(in.Source)
+	if provenance == "" {
+		provenance = QuestionSourceAuthored
+	}
+	switch provenance {
+	case QuestionSourceAuthored, QuestionSourceAIGenerated, QuestionSourceBankImport:
+	default:
+		return nil, fmt.Errorf("quizgame: invalid question source")
+	}
+	needsReview := false
+	if in.NeedsReview != nil {
+		needsReview = *in.NeedsReview
+	} else if provenance == QuestionSourceAIGenerated {
+		needsReview = true
+	}
+	var genJob any
+	if in.GenerationJobID != nil && strings.TrimSpace(*in.GenerationJobID) != "" {
+		gid, err := uuid.Parse(*in.GenerationJobID)
+		if err != nil {
+			return nil, fmt.Errorf("quizgame: invalid generation_job_id")
+		}
+		genJob = gid
+	}
+	var conf any
+	if in.GenerationConfidence != nil {
+		c := *in.GenerationConfidence
+		if c < 0 {
+			c = 0
+		}
+		if c > 1 {
+			c = 1
+		}
+		conf = c
 	}
 
 	tx, err := pool.Begin(ctx)
@@ -257,19 +322,16 @@ func CreateQuestion(ctx context.Context, pool *pgxpool.Pool, courseCode, kitID s
 		INSERT INTO quizgame.questions (
 			kit_id, position, question_type, prompt, prompt_media_ref, prompt_media_alt,
 			options, correct_answer, time_limit_seconds, points_style, answer_shuffle,
-			explanation, source_question_id
+			explanation, source_question_id, source, needs_review, generation_job_id, generation_confidence
 		) VALUES (
 			$1, $2, $3::quizgame.question_type, $4, $5, $6,
 			$7::jsonb, $8::jsonb, $9, $10::quizgame.points_style, $11,
-			$12, $13
+			$12, $13, $14, $15, $16, $17
 		)
-		RETURNING id, kit_id, position, question_type::text, prompt,
-			prompt_media_ref, prompt_media_alt, options, correct_answer,
-			time_limit_seconds, points_style::text, answer_shuffle, explanation,
-			source_question_id, version, created_at, updated_at
+		RETURNING `+returningQuestionCols()+`
 	`, kid, pos, in.QuestionType, in.Prompt, in.PromptMediaRef, in.PromptMediaAlt,
 		[]byte(optsJSON), corr, in.TimeLimitSeconds, in.PointsStyle, shuffle,
-		in.Explanation, source)
+		in.Explanation, bankSource, provenance, needsReview, genJob, conf)
 	q, err := scanQuestion(row)
 	if err != nil {
 		return nil, err
@@ -377,16 +439,96 @@ func PatchQuestion(ctx context.Context, pool *pgxpool.Pool, courseCode, kitID, q
 			version = version + 1,
 			updated_at = NOW()
 		WHERE kit_id = $1 AND id = $2 AND version = $13
-		RETURNING id, kit_id, position, question_type::text, prompt,
-			prompt_media_ref, prompt_media_alt, options, correct_answer,
-			time_limit_seconds, points_style::text, answer_shuffle, explanation,
-			source_question_id, version, created_at, updated_at
+		RETURNING `+returningQuestionCols()+`
 	`, existing.KitID, qid, merged.QuestionType, merged.Prompt, merged.PromptMediaRef, merged.PromptMediaAlt,
 		[]byte(optsJSON), corr, merged.TimeLimitSeconds, merged.PointsStyle, ansShuffle,
 		merged.Explanation, expected)
 	q, err := scanQuestion(row)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, ErrVersionConflict
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &q, nil
+}
+
+// ReplaceQuestionContent overwrites an existing question's content (used by AI regenerate).
+func ReplaceQuestionContent(ctx context.Context, pool *pgxpool.Pool, courseCode, kitID, questionID string, in CreateQuestionInput) (*Question, error) {
+	if err := NormalizeCreateInput(&in); err != nil {
+		return nil, err
+	}
+	existing, err := GetQuestion(ctx, pool, courseCode, kitID, questionID)
+	if err != nil || existing == nil {
+		return existing, err
+	}
+	optsJSON, err := marshalOptions(in.Options)
+	if err != nil {
+		return nil, err
+	}
+	shuffle := true
+	if in.AnswerShuffle != nil {
+		shuffle = *in.AnswerShuffle
+	}
+	provenance := strings.TrimSpace(in.Source)
+	if provenance == "" {
+		provenance = QuestionSourceAIGenerated
+	}
+	needsReview := true
+	if in.NeedsReview != nil {
+		needsReview = *in.NeedsReview
+	}
+	var genJob any
+	if in.GenerationJobID != nil && strings.TrimSpace(*in.GenerationJobID) != "" {
+		gid, err := uuid.Parse(*in.GenerationJobID)
+		if err != nil {
+			return nil, fmt.Errorf("quizgame: invalid generation_job_id")
+		}
+		genJob = gid
+	}
+	var conf any
+	if in.GenerationConfidence != nil {
+		c := *in.GenerationConfidence
+		if c < 0 {
+			c = 0
+		}
+		if c > 1 {
+			c = 1
+		}
+		conf = c
+	}
+	var corr any
+	if len(in.CorrectAnswer) > 0 {
+		corr = []byte(in.CorrectAnswer)
+	}
+	qid, _ := uuid.Parse(questionID)
+	kid, _ := uuid.Parse(existing.KitID)
+	row := pool.QueryRow(ctx, `
+		UPDATE quizgame.questions
+		SET question_type = $3::quizgame.question_type,
+			prompt = $4,
+			prompt_media_ref = $5,
+			prompt_media_alt = $6,
+			options = $7::jsonb,
+			correct_answer = $8::jsonb,
+			time_limit_seconds = $9,
+			points_style = $10::quizgame.points_style,
+			answer_shuffle = $11,
+			explanation = $12,
+			source = $13,
+			needs_review = $14,
+			generation_job_id = $15,
+			generation_confidence = $16,
+			version = version + 1,
+			updated_at = NOW()
+		WHERE kit_id = $1 AND id = $2
+		RETURNING `+returningQuestionCols()+`
+	`, kid, qid, in.QuestionType, in.Prompt, in.PromptMediaRef, in.PromptMediaAlt,
+		[]byte(optsJSON), corr, in.TimeLimitSeconds, in.PointsStyle, shuffle,
+		in.Explanation, provenance, needsReview, genJob, conf)
+	q, err := scanQuestion(row)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
 	}
 	if err != nil {
 		return nil, err
@@ -837,8 +979,8 @@ func PushQuestionToBank(ctx context.Context, pool *pgxpool.Pool, courseCode, kit
 		}
 	}
 	meta, _ := json.Marshal(map[string]string{
-		"source":       "live_quiz_kit",
-		"kitId":        kitID,
+		"source":        "live_quiz_kit",
+		"kitId":         kitID,
 		"kitQuestionId": questionID,
 	})
 	var newID uuid.UUID

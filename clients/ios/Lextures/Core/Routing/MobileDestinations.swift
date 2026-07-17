@@ -242,6 +242,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
     case officeHours
     case groups
     case collabDocs
+    case boards
     case grading
     case instructorInsights
     case settings
@@ -265,6 +266,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .officeHours: return L.text("mobile.ia.course.officeHours")
         case .groups: return L.text("mobile.ia.course.groups")
         case .collabDocs: return L.text("mobile.ia.course.collabDocs")
+        case .boards: return L.text("mobile.ia.course.boards")
         case .grading: return L.text("mobile.ia.course.grading")
         case .instructorInsights: return L.text("mobile.ia.course.insights")
         case .settings: return L.text("mobile.ia.course.settings")
@@ -291,6 +293,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .officeHours: return "office-hours"
         case .groups: return "groups"
         case .collabDocs: return "collab-docs"
+        case .boards: return "boards"
         case .grading: return "grading"
         case .instructorInsights: return "insights"
         case .settings: return "settings"
@@ -315,6 +318,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .library: return .library
         case .groups: return .groups
         case .collabDocs: return .collabDocs
+        case .boards: return .boards
         case .behavior: return .behavior
         case .hallPass: return .hallPass
         case .insights: return .instructorInsights
@@ -584,7 +588,7 @@ enum MobileDestinations {
     static func courseDrawerGroups(_ sections: [CourseWorkspaceSection]) -> [CourseDrawerGroup] {
         let content: [CourseWorkspaceSection] = [.overview, .modules, .files, .library]
         let collaboration: [CourseWorkspaceSection] = [
-            .discussions, .feed, .groups, .collabDocs, .live, .officeHours,
+            .discussions, .feed, .groups, .collabDocs, .boards, .live, .officeHours,
         ]
         let grades: [CourseWorkspaceSection] = [.grades, .mastery]
         let people: [CourseWorkspaceSection] = [.people]
@@ -718,6 +722,7 @@ enum MobileDestinations {
         if course.isOfficeHoursEnabled { out.append(.officeHours) }
         if course.isGroupSpacesEnabled { out.append(.groups) }
         if course.isCollabDocsEnabled { out.append(.collabDocs) }
+        if course.isVisualBoardsEnabled { out.append(.boards) }
         if course.isAttendanceEnabled && (course.viewerIsStaff || ctx.hasAttendanceSessions) {
             out.append(.attendance)
         }

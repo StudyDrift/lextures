@@ -70,6 +70,7 @@ var disclosureFeatures = []FeatureCard{
 	{Key: "content_translation", Label: "Course content translation", Description: "Translates course materials for multilingual learners."},
 	{Key: "reading_level_simplification", Label: "Reading level simplification", Description: "Rewrites content to a simpler reading level."},
 	{Key: "quiz_generation", Label: "Adaptive quiz generation", Description: "Generates quiz items from course materials."},
+	{Key: "live_quiz_kit_generation", Label: "Live quiz kit generation", Description: "Drafts timed live-quiz questions from a topic, passage, or course content for instructor review."},
 	{Key: "vibe_generation", Label: "Interactive activity generation", Description: "Drafts self-contained HTML learning activities."},
 	{Key: "grader_agent", Label: "Grading agent", Description: "Suggests scores and feedback on student submissions."},
 	{Key: "lesson_generation", Label: "Lesson generator", Description: "Generates lesson plans, activities, and formative assessments from learning objectives."},
@@ -84,7 +85,7 @@ var platformModelBindings = []modelBinding{
 		modelID: user.DefaultCourseSetupModelID,
 		alias:   aiprovider.AliasCourseSetup,
 		purposes: []string{
-			"ai_tutor", "rag_notebook", "syllabus_generation", "quiz_generation", "lesson_generation", "ai_study_buddy",
+			"ai_tutor", "rag_notebook", "syllabus_generation", "quiz_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy",
 		},
 		dataSent: "Course context, prompts, and user questions necessary for the feature; PII is redacted where configured.",
 	},

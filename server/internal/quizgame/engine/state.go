@@ -16,6 +16,7 @@ type SnapshotQuestion struct {
 	PointsStyle      string         `json:"pointsStyle"`
 	AnswerShuffle    bool           `json:"answerShuffle"`
 	Explanation      *string        `json:"explanation,omitempty"`
+	SourceQuestionID *string        `json:"sourceQuestionId,omitempty"`
 }
 
 // Option is a choice without relying on repo types (engine is pure).

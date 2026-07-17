@@ -186,7 +186,10 @@ func reduceNext(s State, now time.Time) (State, []Event, error) {
 	switch s.Phase {
 	case PhaseLobby:
 		return reduceOpen(s, now)
-	case PhaseQuestionReveal, PhaseLeaderboard, PhaseQuestionLocked:
+	case PhaseQuestionReveal:
+		// IQ.5: show leaderboard between questions (and before podium).
+		return reduceLeaderboard(s, now)
+	case PhaseLeaderboard, PhaseQuestionLocked:
 		// advance
 	default:
 		return s, nil, ErrIllegalTransition{From: s.Phase, Action: ActionNext}
@@ -216,6 +219,18 @@ func reduceNext(s State, now time.Time) (State, []Event, error) {
 		return next, ev, nil
 	}
 	return opened, append(ev, openEv...), nil
+}
+
+func reduceLeaderboard(s State, now time.Time) (State, []Event, error) {
+	next := s
+	next.Phase = PhaseLeaderboard
+	return next, []Event{{
+		Type: "leaderboard",
+		Payload: map[string]any{
+			"questionIndex": s.QuestionIndex,
+			"at":            now.UTC().Format(time.RFC3339Nano),
+		},
+	}}, nil
 }
 
 func reduceSkip(s State, now time.Time) (State, []Event, error) {

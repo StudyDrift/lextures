@@ -22,6 +22,7 @@ import (
 	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
 	lprepo "github.com/lextures/lextures/server/internal/repos/learnerprofile"
 	pfrepo "github.com/lextures/lextures/server/internal/repos/productfeedback"
+	"github.com/lextures/lextures/server/internal/repos/quizgame"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/storageobjects"
 	"github.com/lextures/lextures/server/internal/service/coursereviews"
@@ -152,6 +153,14 @@ func ApproveDSAR(ctx context.Context, pool *pgxpool.Pool, id, adminID uuid.UUID)
 			return fmt.Errorf("gdpr: verify board erasure: %w", err)
 		} else if n > 0 {
 			return fmt.Errorf("gdpr: board erasure incomplete: %d rows remain", n)
+		}
+		if err := quizgame.EraseUserContent(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: erase live quiz content: %w", err)
+		}
+		if n, err := quizgame.CountUserContentRows(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: verify live quiz erasure: %w", err)
+		} else if n > 0 {
+			return fmt.Errorf("gdpr: live quiz erasure incomplete: %d rows remain", n)
 		}
 		if err := repo.AnonymiseUser(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: anonymise user: %w", err)
@@ -291,8 +300,9 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		AIInferenceLog  []map[string]any      `json:"aiInferenceLog,omitempty"`
 		LearnerProfile  any                   `json:"learnerProfile,omitempty"`
 		ProductFeedback []map[string]any      `json:"productFeedback,omitempty"`
-		Boards          board.UserBoardExport `json:"boards,omitempty"`
-		ExportedAt      string                `json:"exportedAt"`
+		Boards          board.UserBoardExport    `json:"boards,omitempty"`
+		LiveQuizzes     quizgame.UserQuizExport  `json:"liveQuizzes,omitempty"`
+		ExportedAt      string                   `json:"exportedAt"`
 	}
 
 	cs := make([]consentSummary, 0, len(consents))
@@ -314,6 +324,10 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	if err != nil {
 		return "", fmt.Errorf("gdpr: board export: %w", err)
 	}
+	liveQuizExport, err := quizgame.ExportUserContent(ctx, pool, userID)
+	if err != nil {
+		return "", fmt.Errorf("gdpr: live quiz export: %w", err)
+	}
 
 	var customFields map[string]any
 	if len(customRaw) > 0 {
@@ -329,6 +343,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		LearnerProfile:  learnerProfileExport,
 		ProductFeedback: productFeedbackExport,
 		Boards:          boardsExport,
+		LiveQuizzes:     liveQuizExport,
 		ExportedAt:      time.Now().UTC().Format(time.RFC3339),
 	}
 	b, err := json.Marshal(doc)

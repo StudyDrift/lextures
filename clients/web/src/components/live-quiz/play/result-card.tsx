@@ -24,7 +24,8 @@ export function ResultCard({
 
   const correct = !!ack.isCorrect
   const points = ack.points ?? 0
-  const isPollLike = ack.isCorrect === false && points === 0 && !ack.duplicate
+  const bd = ack.pointsBreakdown
+  const isPollLike = ack.isCorrect === false && points === 0 && !ack.duplicate && !bd?.base
 
   return (
     <div
@@ -48,6 +49,18 @@ export function ResultCard({
           {t('liveQuiz.answer.points', { points })}
         </p>
       )}
+      {bd && (bd.total > 0 || correct) ? (
+        <p className="mt-2 text-sm opacity-90" aria-label={t('liveQuiz.score.breakdownAria')}>
+          {t('liveQuiz.score.breakdown', {
+            base: bd.base,
+            speed: bd.speedBonus,
+            streak: bd.streakBonus,
+            total: bd.total,
+          })}
+          {bd.styleMultiplier === 2 ? ` ${t('liveQuiz.score.doubleApplied')}` : ''}
+          {bd.powerUp === 'double_or_nothing' ? ` ${t('liveQuiz.powerup.donApplied')}` : ''}
+        </p>
+      ) : null}
       {typeof ack.streak === 'number' && ack.streak > 0 && (
         <p className="mt-1 text-sm">{t('liveQuiz.answer.streak', { streak: ack.streak })}</p>
       )}

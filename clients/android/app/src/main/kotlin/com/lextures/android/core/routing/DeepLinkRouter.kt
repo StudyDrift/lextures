@@ -28,6 +28,9 @@ sealed class DeepLinkDestination {
         val studentId: String? = null,
         val section: ParentDeepLinkSection = ParentDeepLinkSection.Dashboard,
     ) : DeepLinkDestination()
+
+    /** Public board share link (`/board-links/{token}`). */
+    data class BoardLink(val token: String) : DeepLinkDestination()
 }
 
 enum class ParentDeepLinkSection {
@@ -53,6 +56,7 @@ enum class CourseDeepLinkSection {
     Library,
     Groups,
     CollabDocs,
+    Boards,
     Behavior,
     HallPass,
     Insights,
@@ -145,6 +149,10 @@ object DeepLinkRouter {
                     segments[1].equals("credentials", ignoreCase = true) -> DeepLinkDestination.Credentials
                     else -> DeepLinkDestination.Home
                 }
+                segments.firstOrNull()?.equals("board-links", ignoreCase = true) == true -> {
+                    val token = segments.getOrNull(1)?.trim().orEmpty()
+                    if (token.isNotEmpty()) DeepLinkDestination.BoardLink(token) else DeepLinkDestination.Home
+                }
                 else -> DeepLinkDestination.Home
             }
         }
@@ -178,6 +186,11 @@ object DeepLinkRouter {
             "collab-docs" -> DeepLinkDestination.Course(
                 code = courseCode,
                 section = CourseDeepLinkSection.CollabDocs,
+                itemId = segments.getOrNull(3),
+            )
+            "boards" -> DeepLinkDestination.Course(
+                code = courseCode,
+                section = CourseDeepLinkSection.Boards,
                 itemId = segments.getOrNull(3),
             )
             "gradebook" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Grades)

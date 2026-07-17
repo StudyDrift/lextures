@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -40,9 +41,9 @@ func (d Deps) interactiveQuizzesFeatureOff(w http.ResponseWriter, r *http.Reques
 }
 
 func kitJSON(k quizgame.Kit) map[string]any {
-	return map[string]any{
+	out := map[string]any{
 		"id":            k.ID,
-		"courseId":      k.CourseID,
+		"courseId":      nil,
 		"title":         k.Title,
 		"description":   k.Description,
 		"slug":          k.Slug,
@@ -55,7 +56,27 @@ func kitJSON(k quizgame.Kit) map[string]any {
 		"createdBy":     k.CreatedBy,
 		"createdAt":     k.CreatedAt.UTC().Format(time.RFC3339),
 		"updatedAt":     k.UpdatedAt.UTC().Format(time.RFC3339),
+		"isTemplate":    k.IsTemplate,
+		"attribution":   k.Attribution,
+		"catalogStatus": k.CatalogStatus,
+		"subject":       k.Subject,
+		"gradeBand":     k.GradeBand,
+		"language":      k.Language,
 	}
+	if k.CourseID != "" {
+		out["courseId"] = k.CourseID
+	}
+	if k.TemplateScope != nil {
+		out["templateScope"] = *k.TemplateScope
+	} else {
+		out["templateScope"] = nil
+	}
+	if k.DerivedFromKitID != nil {
+		out["derivedFromKitId"] = *k.DerivedFromKitID
+	} else {
+		out["derivedFromKitId"] = nil
+	}
+	return out
 }
 
 // handleListQuizKits is GET /api/v1/courses/{course_code}/live-quizzes/kits.
@@ -135,6 +156,15 @@ func (d Deps) handleCreateQuizKit() http.HandlerFunc {
 		var in reqBody
 		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		if err := quizgame.CheckKitsPerCourseQuota(r.Context(), d.Pool, courseCode); err != nil {
+			if errors.Is(err, quizgame.ErrKitsPerCourseQuota) {
+				telemetry.RecordBusinessEvent("quizgame.quota.kits_rejected")
+				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "Kit quota for this course has been reached.")
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not verify kit quotas.")
 			return
 		}
 		created, err := quizgame.Create(r.Context(), d.Pool, courseCode, viewer, in.Title, in.Description, in.Tags)
@@ -257,44 +287,9 @@ func (d Deps) handlePatchQuizKit() http.HandlerFunc {
 }
 
 // handleDuplicateQuizKit is POST /api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/duplicate.
+// Optional JSON body: { "targetCourseCode": "..." } for cross-course deep copy (IQ.8).
 func (d Deps) handleDuplicateQuizKit() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
-		courseCode, viewer, ok := d.requireCourseAccess(w, r)
-		if !ok {
-			return
-		}
-		if d.interactiveQuizzesFeatureOff(w, r, courseCode) {
-			return
-		}
-		hasPerm, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
-			return
-		}
-		if !hasPerm {
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
-			return
-		}
-		kitID := chi.URLParam(r, "kit_id")
-		created, err := quizgame.Duplicate(r.Context(), d.Pool, courseCode, kitID, viewer)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not duplicate quiz kit.")
-			return
-		}
-		if created == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Quiz kit not found.")
-			return
-		}
-		telemetry.RecordBusinessEvent("quizgame.kit.duplicated")
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusCreated)
-		_ = json.NewEncoder(w).Encode(kitJSON(*created))
-	}
+	return d.handleDuplicateQuizKitV2()
 }
 
 // handleArchiveQuizKit is POST /api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/archive.

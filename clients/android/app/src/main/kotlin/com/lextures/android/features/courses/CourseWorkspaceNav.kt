@@ -86,6 +86,7 @@ private fun sectionLabel(
         CourseWorkspaceSection.OfficeHours -> R.string.mobile_ia_course_officeHours
         CourseWorkspaceSection.Groups -> R.string.mobile_ia_course_groups
         CourseWorkspaceSection.CollabDocs -> R.string.mobile_ia_course_collabDocs
+        CourseWorkspaceSection.Boards -> R.string.mobile_ia_course_boards
         CourseWorkspaceSection.Grading -> R.string.mobile_ia_course_grading
         CourseWorkspaceSection.InstructorInsights -> R.string.mobile_ia_course_insights
         CourseWorkspaceSection.Settings -> R.string.mobile_ia_course_settings

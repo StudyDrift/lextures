@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/quizgame/engine"
+	"github.com/lextures/lextures/server/internal/quizgame/scoring"
 )
 
 var (
@@ -29,6 +30,13 @@ var (
 	ErrJoinCodeNotFound = errors.New("quizgame: join code not found")
 	ErrNicknameInvalid  = errors.New("quizgame: invalid nickname")
 )
+
+const sessionSelectCols = `
+	id, kit_id, course_id, host_id, join_code, mode::text, status::text, pacing,
+	kit_snapshot, current_index, current_phase, question_opened_at, question_deadline_at,
+	host_disconnected_at, settings, scoring_profile, scoring_profile_ver, scoring_config,
+	leaderboard_privacy, started_at, ended_at, created_at,
+	allow_guests, lobby_locked, names_muted, one_session_rule, max_joins_per_ip`
 
 // Session is one quizgame.sessions row.
 type Session struct {
@@ -47,18 +55,38 @@ type Session struct {
 	QuestionDeadlineAt *time.Time
 	HostDisconnectedAt *time.Time
 	Settings           json.RawMessage
+	ScoringProfile     string
+	ScoringProfileVer  int
+	ScoringConfig      json.RawMessage
+	LeaderboardPrivacy string
 	StartedAt          *time.Time
 	EndedAt            *time.Time
 	CreatedAt          time.Time
+	AllowGuests        bool
+	LobbyLocked        bool
+	NamesMuted         bool
+	OneSessionRule     string
+	MaxJoinsPerIP      int
 }
 
 // CreateGameInput starts a lobby session from a ready kit.
 type CreateGameInput struct {
-	CourseCode string
-	KitID      string
-	HostID     uuid.UUID
-	Pacing     string // manual | auto
-	Settings   json.RawMessage
+	CourseCode         string
+	KitID              string
+	HostID             uuid.UUID
+	Pacing             string // manual | auto
+	Mode               string // live_classic | team | student_paced | homework
+	Settings           json.RawMessage
+	TeamConfig         *engine.TeamConfig
+	PacedConfig        *engine.PacedConfig
+	ScoringProfile     string
+	ScoringConfig      scoring.Config
+	LeaderboardPrivacy string
+	PowerUpsEnabled    *bool // nil → profile default
+	NoJoinCode         bool  // homework attempts: no public join code
+	AllowGuests        bool
+	OneSessionRule     string
+	MaxJoinsPerIP      int // 0 → default 5
 }
 
 // CreateGame snapshots the kit, allocates a join code, and inserts a lobby session.
@@ -70,9 +98,28 @@ func CreateGame(ctx context.Context, pool *pgxpool.Pool, in CreateGameInput) (*S
 	if pacing != string(engine.PacingAuto) {
 		pacing = string(engine.PacingManual)
 	}
-	settings := in.Settings
+	mode := engine.NormalizeMode(in.Mode)
+	settings, err := engine.MergeModeSettingsInto(in.Settings, mode, in.TeamConfig, in.PacedConfig)
+	if err != nil {
+		return nil, err
+	}
 	if len(settings) == 0 {
 		settings = json.RawMessage(`{}`)
+	}
+	profile := scoring.NormalizeProfile(in.ScoringProfile)
+	cfg := scoring.ResolveConfig(profile, in.ScoringConfig)
+	if in.PowerUpsEnabled != nil {
+		cfg.PowerUpsEnabled = *in.PowerUpsEnabled
+	}
+	cfgJSON := scoring.MarshalConfig(cfg)
+	privacy := scoring.NormalizePrivacy(in.LeaderboardPrivacy)
+	oneSession := NormalizeOneSessionRule(in.OneSessionRule)
+	maxJoins := in.MaxJoinsPerIP
+	if maxJoins <= 0 {
+		maxJoins = 5
+	}
+	if maxJoins > 100 {
+		maxJoins = 100
 	}
 
 	kit, err := Get(ctx, pool, in.CourseCode, in.KitID)
@@ -111,29 +158,41 @@ func CreateGame(ctx context.Context, pool *pgxpool.Pool, in CreateGameInput) (*S
 		return nil, err
 	}
 
+	insertOnce := func(joinCode any) (*Session, error) {
+		var id uuid.UUID
+		err := pool.QueryRow(ctx, `
+			INSERT INTO quizgame.sessions (
+				kit_id, course_id, host_id, join_code, mode, status, pacing,
+				kit_snapshot, current_index, current_phase, settings,
+				scoring_profile, scoring_profile_ver, scoring_config, leaderboard_privacy,
+				allow_guests, one_session_rule, max_joins_per_ip
+			) VALUES ($1,$2,$3,$4,$5::quizgame.session_mode,'lobby',$6,$7,-1,'lobby',$8,$9,$10,$11::jsonb,$12,$13,$14,$15)
+			RETURNING id`,
+			kitUUID, courseID, in.HostID, joinCode, string(mode), pacing, snapJSON, settings,
+			profile, scoring.Version, []byte(cfgJSON), privacy,
+			in.AllowGuests, oneSession, maxJoins,
+		).Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		return GetSession(ctx, pool, id.String())
+	}
+
+	if in.NoJoinCode || mode == engine.ModeHomework {
+		return insertOnce(nil)
+	}
+
 	var sess *Session
 	for attempt := 0; attempt < 8; attempt++ {
 		code, err := engine.GenerateJoinCode(engine.JoinCodeDigits)
 		if err != nil {
 			return nil, err
 		}
-		var id uuid.UUID
-		err = pool.QueryRow(ctx, `
-			INSERT INTO quizgame.sessions (
-				kit_id, course_id, host_id, join_code, mode, status, pacing,
-				kit_snapshot, current_index, current_phase, settings
-			) VALUES ($1,$2,$3,$4,'live_classic','lobby',$5,$6,-1,'lobby',$7)
-			RETURNING id`,
-			kitUUID, courseID, in.HostID, code, pacing, snapJSON, settings,
-		).Scan(&id)
+		sess, err = insertOnce(code)
 		if err != nil {
 			if isUniqueViolation(err) {
 				continue
 			}
-			return nil, err
-		}
-		sess, err = GetSession(ctx, pool, id.String())
-		if err != nil {
 			return nil, err
 		}
 		return sess, nil
@@ -155,6 +214,7 @@ func buildKitSnapshot(kit *Kit, qs []Question) (engine.KitSnapshot, error) {
 			PointsStyle:      q.PointsStyle,
 			AnswerShuffle:    q.AnswerShuffle,
 			Explanation:      q.Explanation,
+			SourceQuestionID: q.SourceQuestionID,
 		}
 		var opts []Option
 		if len(q.Options) > 0 {
@@ -185,9 +245,7 @@ func GetSession(ctx context.Context, pool *pgxpool.Pool, sessionID string) (*Ses
 		return nil, ErrSessionNotFound
 	}
 	row := pool.QueryRow(ctx, `
-		SELECT id, kit_id, course_id, host_id, join_code, mode::text, status::text, pacing,
-			kit_snapshot, current_index, current_phase, question_opened_at, question_deadline_at,
-			host_disconnected_at, settings, started_at, ended_at, created_at
+		SELECT `+sessionSelectCols+`
 		FROM quizgame.sessions WHERE id = $1`, id)
 	return scanSession(row)
 }
@@ -216,9 +274,7 @@ func GetSessionByCourse(ctx context.Context, pool *pgxpool.Pool, courseCode, ses
 // LookupByJoinCode finds an active session by join code.
 func LookupByJoinCode(ctx context.Context, pool *pgxpool.Pool, code string) (*Session, error) {
 	row := pool.QueryRow(ctx, `
-		SELECT id, kit_id, course_id, host_id, join_code, mode::text, status::text, pacing,
-			kit_snapshot, current_index, current_phase, question_opened_at, question_deadline_at,
-			host_disconnected_at, settings, started_at, ended_at, created_at
+		SELECT `+sessionSelectCols+`
 		FROM quizgame.sessions
 		WHERE join_code = $1 AND status IN ('lobby','running','paused')
 		LIMIT 1`, code)
@@ -236,10 +292,13 @@ func scanSession(row pgx.Row) (*Session, error) {
 	var joinCode *string
 	var snap []byte
 	var settings []byte
+	var scoringConfig []byte
 	err := row.Scan(
 		&id, &kitID, &courseID, &hostID, &joinCode, &s.Mode, &s.Status, &s.Pacing,
 		&snap, &s.CurrentIndex, &s.CurrentPhase, &s.QuestionOpenedAt, &s.QuestionDeadlineAt,
-		&s.HostDisconnectedAt, &settings, &s.StartedAt, &s.EndedAt, &s.CreatedAt,
+		&s.HostDisconnectedAt, &settings, &s.ScoringProfile, &s.ScoringProfileVer, &scoringConfig,
+		&s.LeaderboardPrivacy, &s.StartedAt, &s.EndedAt, &s.CreatedAt,
+		&s.AllowGuests, &s.LobbyLocked, &s.NamesMuted, &s.OneSessionRule, &s.MaxJoinsPerIP,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, ErrSessionNotFound
@@ -262,6 +321,23 @@ func scanSession(row pgx.Row) (*Session, error) {
 		settings = []byte(`{}`)
 	}
 	s.Settings = settings
+	if len(scoringConfig) == 0 {
+		scoringConfig = []byte(`{}`)
+	}
+	s.ScoringConfig = scoringConfig
+	if s.ScoringProfile == "" {
+		s.ScoringProfile = scoring.ProfileCompetitive
+	}
+	if s.ScoringProfileVer == 0 {
+		s.ScoringProfileVer = scoring.Version
+	}
+	if s.LeaderboardPrivacy == "" {
+		s.LeaderboardPrivacy = scoring.PrivacyNames
+	}
+	s.OneSessionRule = NormalizeOneSessionRule(s.OneSessionRule)
+	if s.MaxJoinsPerIP <= 0 {
+		s.MaxJoinsPerIP = 5
+	}
 	return &s, nil
 }
 

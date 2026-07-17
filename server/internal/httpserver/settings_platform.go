@@ -168,6 +168,13 @@ type platformSettingsJSON struct {
 	FFBoardsExternalSharing            bool `json:"ffBoardsExternalSharing"`
 	FFInteractiveQuizzes               bool `json:"ffInteractiveQuizzes"`
 	FFIqLiveHosting                    bool `json:"ffIqLiveHosting"`
+	FFIqTeamMode                       bool `json:"ffIqTeamMode"`
+	FFIqStudentPaced                   bool `json:"ffIqStudentPaced"`
+	FFIqHomework                       bool `json:"ffIqHomework"`
+	FFIqGradebookPush                  bool `json:"ffIqGradebookPush"`
+	FFIqPublicKitCatalog               bool `json:"ffIqPublicKitCatalog"`
+	FFIqGuestJoin                      bool `json:"ffIqGuestJoin"`
+	FFIqAiGeneration                   bool `json:"ffIqAiGeneration"`
 	FFEmailSES                         bool `json:"ffEmailSes"`
 	FFPublicAPI                        bool `json:"ffPublicApi"`
 	FFStripeBilling                    bool `json:"ffStripeBilling"`
@@ -417,6 +424,13 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFBoardsExternalSharing:            merged.FFBoardsExternalSharing,
 			FFInteractiveQuizzes:               merged.FFInteractiveQuizzes,
 			FFIqLiveHosting:                    merged.FFIqLiveHosting,
+			FFIqTeamMode:                       merged.FFIqTeamMode,
+			FFIqStudentPaced:                   merged.FFIqStudentPaced,
+			FFIqHomework:                       merged.FFIqHomework,
+			FFIqGradebookPush:                  merged.FFIqGradebookPush,
+			FFIqPublicKitCatalog:               merged.FFIqPublicKitCatalog,
+			FFIqGuestJoin:                      merged.FFIqGuestJoin,
+			FFIqAiGeneration:                   merged.FFIqAiGeneration,
 			FFEmailSES:                         merged.FFEmailSES,
 			FFPublicAPI:                        merged.FFPublicAPI,
 			FFStripeBilling:                    merged.FFStripeBilling,
@@ -638,6 +652,13 @@ type putPlatformBody struct {
 	FFBoardsExternalSharing            *bool `json:"ffBoardsExternalSharing"`
 	FFInteractiveQuizzes               *bool `json:"ffInteractiveQuizzes"`
 	FFIqLiveHosting                    *bool `json:"ffIqLiveHosting"`
+	FFIqTeamMode                       *bool `json:"ffIqTeamMode"`
+	FFIqStudentPaced                   *bool `json:"ffIqStudentPaced"`
+	FFIqHomework                       *bool `json:"ffIqHomework"`
+	FFIqGradebookPush                  *bool `json:"ffIqGradebookPush"`
+	FFIqPublicKitCatalog               *bool `json:"ffIqPublicKitCatalog"`
+	FFIqGuestJoin                      *bool `json:"ffIqGuestJoin"`
+	FFIqAiGeneration                   *bool `json:"ffIqAiGeneration"`
 	FFEmailSES                         *bool `json:"ffEmailSes"`
 	FFPublicAPI                        *bool `json:"ffPublicApi"`
 	FFStripeBilling                    *bool `json:"ffStripeBilling"`
@@ -1045,6 +1066,13 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffboardsexternalsharing", body.FFBoardsExternalSharing, func(v bool) { wr.FFBoardsExternalSharing = &v })
 		setBool("ffinteractivequizzes", body.FFInteractiveQuizzes, func(v bool) { wr.FFInteractiveQuizzes = &v })
 		setBool("ffiqlivehosting", body.FFIqLiveHosting, func(v bool) { wr.FFIqLiveHosting = &v })
+		setBool("ffiqteammode", body.FFIqTeamMode, func(v bool) { wr.FFIqTeamMode = &v })
+		setBool("ffiqstudentpaced", body.FFIqStudentPaced, func(v bool) { wr.FFIqStudentPaced = &v })
+		setBool("ffiqhomework", body.FFIqHomework, func(v bool) { wr.FFIqHomework = &v })
+		setBool("ffiqgradebookpush", body.FFIqGradebookPush, func(v bool) { wr.FFIqGradebookPush = &v })
+		setBool("ffiqpublickitcatalog", body.FFIqPublicKitCatalog, func(v bool) { wr.FFIqPublicKitCatalog = &v })
+		setBool("ffiqguestjoin", body.FFIqGuestJoin, func(v bool) { wr.FFIqGuestJoin = &v })
+		setBool("ffiqaigeneration", body.FFIqAiGeneration, func(v bool) { wr.FFIqAiGeneration = &v })
 		setBool("ffemailses", body.FFEmailSES, func(v bool) { wr.FFEmailSES = &v })
 		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
@@ -1261,6 +1289,13 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFBoardsExternalSharing:            merged.FFBoardsExternalSharing,
 			FFInteractiveQuizzes:               merged.FFInteractiveQuizzes,
 			FFIqLiveHosting:                    merged.FFIqLiveHosting,
+			FFIqTeamMode:                       merged.FFIqTeamMode,
+			FFIqStudentPaced:                   merged.FFIqStudentPaced,
+			FFIqHomework:                       merged.FFIqHomework,
+			FFIqGradebookPush:                  merged.FFIqGradebookPush,
+			FFIqPublicKitCatalog:               merged.FFIqPublicKitCatalog,
+			FFIqGuestJoin:                      merged.FFIqGuestJoin,
+			FFIqAiGeneration:                   merged.FFIqAiGeneration,
 			FFEmailSES:                         merged.FFEmailSES,
 			FFPublicAPI:                        merged.FFPublicAPI,
 			FFStripeBilling:                    merged.FFStripeBilling,

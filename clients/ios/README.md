@@ -72,6 +72,7 @@ Prefer adding files through Xcode when possible so the project stays in sync.
 | `Lextures/Features/Home/` | Post-auth tab shell + shared LMS UI |
 | `Lextures/Features/Dashboard/` | Greeting, stats, due-this-week, course shortcuts |
 | `Lextures/Features/Courses/` | Course list, search, course structure detail |
+| `Lextures/Features/Boards/` | Collaboration boards list, post cards, composer, layouts, share sheet, public board-link view |
 | `Lextures/Features/Notebooks/` | Device-local markdown notebooks (global + per course) |
 | `Lextures/Features/Inbox/` | Mailbox folders, message detail, compose |
 | `Lextures/Core/Auth/` | API + Keychain session |
@@ -105,8 +106,23 @@ Access and refresh tokens are stored in the Keychain. MFA-required accounts show
 - `GET /api/v1/courses/{code}` — viewer enrollment roles
 - `GET /api/v1/courses/{code}/structure` — modules and due dates
 - `GET/POST/PATCH /api/v1/communication/messages` + `GET /api/v1/communication/unread-count` — inbox
+- Boards (flag-gated): REST under `/api/v1/courses/{code}/boards/*` plus the shared board WebSocket
 
 Notebooks are device-local (same model as the web app's localStorage notebooks, format v2), keyed per signed-in user.
+
+## Realtime sockets
+
+Per-screen sockets use `Core/Realtime/WebSocketClient` (JSON `{"authToken":…}` handshake, 2s reconnect):
+
+| Socket | Path | Screen |
+|--------|------|--------|
+| `RealtimeManager` | `/communication/ws`, `/notifications/ws` | App-wide |
+| `FeedSocket` | `/courses/{code}/feed/ws` | Feed |
+| `CourseStructureSocket` | `/courses/{code}/structure/ws` | Course detail |
+| `CourseFilesSocket` | `/courses/{code}/files/ws` | Course files |
+| `BoardSocket` | `/courses/{code}/boards/{id}/ws` | Board detail |
+
+`BoardSocket` listens for JSON `board.changed` frames and refetches posts/sections; binary Y.js frames from the web CRDT relay are ignored. Presence/live cursors are deferred (need a native CRDT binding).
 
 ## CI
 

@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
@@ -54,6 +55,8 @@
                 <data android:scheme="https" android:host="www.lextures.com" android:pathPrefix="/checkout/success" />
                 <data android:scheme="https" android:host="lextures.com" android:pathPrefix="/checkout/cancel" />
                 <data android:scheme="https" android:host="www.lextures.com" android:pathPrefix="/checkout/cancel" />
+                <data android:scheme="https" android:host="lextures.com" android:pathPrefix="/board-links" />
+                <data android:scheme="https" android:host="www.lextures.com" android:pathPrefix="/board-links" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

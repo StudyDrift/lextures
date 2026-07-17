@@ -22,6 +22,7 @@ import {
   Activity,
   Clock,
   LayoutGrid,
+  Gamepad2,
 } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
@@ -61,6 +62,7 @@ export function SideNavAdminLinks() {
     ffWebhooks,
     ffContentFilterIntegration,
     ffVisualBoards,
+    ffInteractiveQuizzes,
     ffIncompleteGradeWorkflow,
     ffGradeSubmission,
     ffAcademicCalendar,
@@ -198,6 +200,15 @@ export function SideNavAdminLinks() {
               icon={<LayoutGrid className="h-5 w-5" />}
             >
               Collaboration boards
+            </SideNavLink>
+          ) : null}
+          {ffInteractiveQuizzes ? (
+            <SideNavLink
+              to={orgPath('/admin/live-quizzes', orgId)}
+              className={() => (active('/admin/live-quizzes') ? sideNavActiveClass : '')}
+              icon={<Gamepad2 className="h-5 w-5" />}
+            >
+              Live Quizzes
             </SideNavLink>
           ) : null}
 

@@ -32,8 +32,13 @@ export type LiveGameStateFrame = {
     totalScore: number
     streak: number
     connected: boolean
+    renamedByHost?: boolean
+    isGuest?: boolean
   }>
   questionCount: number
+  namesMuted?: boolean
+  lobbyLocked?: boolean
+  allowGuests?: boolean
   openedAt?: string
   deadline?: string
   answerCount?: number
@@ -44,6 +49,16 @@ export type LiveGameStateFrame = {
     nickname: string
     totalScore: number
   }>
+  leaderboardPrivacy?: 'names' | 'nicknames' | 'hidden'
+  podium?: Array<{
+    rank: number
+    playerId: string
+    nickname: string
+    totalScore: number
+  }>
+  you?: { rank: number; totalScore: number; streak: number }
+  scoringProfile?: string
+  powerUpsEnabled?: boolean
   question?: {
     index: number
     questionType: string
@@ -56,12 +71,23 @@ export type LiveGameStateFrame = {
   }
 }
 
+export type PointsBreakdown = {
+  base: number
+  speedBonus: number
+  streakBonus: number
+  styleMultiplier: number
+  powerUp?: string
+  powerUpFactor: number
+  total: number
+}
+
 export type AnswerAck = {
   type: 'answer_ack'
   ok: boolean
   questionIndex?: number
   isCorrect?: boolean
   points?: number
+  pointsBreakdown?: PointsBreakdown
   responseMs?: number
   streak?: number
   totalScore?: number
@@ -80,6 +106,8 @@ export type LiveAnswerPayload =
   | { text: string }
   | { value: number }
   | { order: string[] }
+
+export type LivePowerUpKind = 'double_or_nothing' | 'shield'
 
 function wsURL(courseCode: string, gameId: string): string {
   const base = apiBase || (typeof window !== 'undefined' ? window.location.origin : '')
@@ -126,7 +154,8 @@ export function useLiveGame(opts: UseLiveGameOpts) {
       if (closedRef.current || kickedRef.current) return
       setConn(retryRef.current > 0 ? 'reconnecting' : 'connecting')
       const tok = getAccessToken()
-      if (!tok) {
+      // Guest players (IQ.9) connect with playerToken only.
+      if (!tok && !(role === 'player' && playerToken)) {
         timer = setTimeout(connect, 1500)
         return
       }
@@ -135,7 +164,7 @@ export function useLiveGame(opts: UseLiveGameOpts) {
       ws.onopen = () => {
         ws.send(
           JSON.stringify({
-            authToken: tok,
+            authToken: tok || '',
             role,
             playerToken: playerToken || undefined,
           }),
@@ -234,15 +263,27 @@ export function useLiveGame(opts: UseLiveGameOpts) {
     ws.send(JSON.stringify({ type, ...extra }))
   }
 
-  function submitAnswer(questionIndex: number, answer: LiveAnswerPayload) {
+  function submitAnswer(
+    questionIndex: number,
+    answer: LiveAnswerPayload,
+    opts?: { powerUp?: LivePowerUpKind },
+  ) {
     if (answeredIndexRef.current === questionIndex) return
     if (conn === 'kicked' || conn === 'ended') return
     answeredIndexRef.current = questionIndex
     send('answer', {
       questionIndex,
       answer,
+      powerUp: opts?.powerUp,
       clientSentAt: new Date().toISOString(),
     })
+  }
+
+  function claimPowerUp(questionIndex: number, kind: LivePowerUpKind) {
+    if (conn === 'kicked' || conn === 'ended') return
+    const ws = wsRef.current
+    if (!ws || ws.readyState !== WebSocket.OPEN) return
+    ws.send(JSON.stringify({ type: 'powerup', questionIndex, kind }))
   }
 
   const hasAnsweredCurrent =
@@ -261,6 +302,7 @@ export function useLiveGame(opts: UseLiveGameOpts) {
     playerId,
     hasAnsweredCurrent,
     submitAnswer,
+    claimPowerUp,
     open: () => send('open'),
     lock: () => send('lock'),
     reveal: () => send('reveal'),
@@ -270,5 +312,9 @@ export function useLiveGame(opts: UseLiveGameOpts) {
     resume: () => send('resume'),
     end: () => send('end'),
     kick: (id: string) => send('kick', { playerId: id }),
+    ban: (id: string) => send('ban', { playerId: id }),
+    rename: (id: string, nickname?: string) => send('rename', { playerId: id, nickname }),
+    muteNames: (muted: boolean) => send('mute_names', { muted }),
+    lockLobby: (locked: boolean) => send('lock_lobby', { locked }),
   }
 }
