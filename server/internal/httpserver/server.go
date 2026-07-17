@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/auth/hibp"
+	"github.com/lextures/lextures/server/internal/bannerevents"
 	"github.com/lextures/lextures/server/internal/canvasimportevents"
 	"github.com/lextures/lextures/server/internal/canvasimportqueue"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncevents"
@@ -61,6 +62,9 @@ type Deps struct {
 	PasswordChecker hibp.Checker
 	// NotifHub broadcasts SSE signals for real-time in-app notification bell updates (plan 6.3). Optional.
 	NotifHub *notifevents.Hub
+	// BannerHub fans out maintenance-banner create/update/clear signals to WebSocket
+	// subscribers so StatusBanner clears/refreshes in real time (plan 18.6). Optional.
+	BannerHub *bannerevents.Hub
 	// FeedHub fans out course-feed change signals to WebSocket subscribers so the
 	// SPA refreshes in real time when channels/messages change (including via CLI). Optional.
 	FeedHub *feedevents.Hub

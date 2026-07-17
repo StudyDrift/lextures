@@ -108,8 +108,10 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	// Course marketplace defaults ON (exception to the usual default-off convention; plan MKT1).
 	out.FFCourseMarketplace = mergeBool(db.FFCourseMarketplace, true)
 	out.FFFeedback = mergeBool(db.FFFeedback, true)
-	out.FFVisualBoards = mergeBool(db.FFVisualBoards, false)
-	out.FFBoardsRealtime = mergeBool(db.FFBoardsRealtime, false)
+	// Collaboration boards are course-scoped only; platform master switch removed.
+	out.FFVisualBoards = true
+	// Boards realtime defaults ON so multi-user boards sync live without a refresh.
+	out.FFBoardsRealtime = mergeBool(db.FFBoardsRealtime, true)
 	out.FFBoardsExternalSharing = mergeBool(db.FFBoardsExternalSharing, false)
 	out.FFInteractiveQuizzes = mergeBool(db.FFInteractiveQuizzes, false)
 	out.FFIqLiveHosting = mergeBool(db.FFIqLiveHosting, false)

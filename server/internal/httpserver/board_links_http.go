@@ -51,9 +51,6 @@ func (d Deps) registerBoardLinkRoutes(r chi.Router) {
 }
 
 func (d Deps) resolveActiveBoardLink(w http.ResponseWriter, r *http.Request) (*board.ResolvedShare, board.Capabilities, bool) {
-	if d.visualBoardsMasterOff(w) {
-		return nil, board.Capabilities{}, false
-	}
 	token := chi.URLParam(r, "token")
 	ip := r.RemoteAddr
 	if boardLinkRateLimited("resolve:"+ip, boardLinkResolveLimit) {
@@ -213,6 +210,7 @@ func (d Deps) handleBoardLinkCreatePost() http.HandlerFunc {
 				"A new post is waiting for approval on a board.")
 		}
 		telemetry.RecordBusinessEvent("board.link.post.created")
+		notifyBoardPeers(r.Context(), b.ID, "post.created", created.ID)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(boardPostJSONWithAttribution(

@@ -52,24 +52,27 @@ function SortableCard({
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="relative">
-      <div className="absolute end-2 top-2 z-10">
-        <CardArrangeMenu
-          post={post}
-          sections={sections}
-          siblings={siblings}
-          canArrange={canArrange}
-          onMoveToSection={(sectionId) => {
-            void onArrange(post.id, { sectionId }).then(() => onAnnounce(movedLabel))
-          }}
-          onReorder={(sortIndex) => void onArrange(post.id, { sortIndex })}
-        />
-      </div>
+    <div ref={setNodeRef} style={style}>
       <div
         {...(canArrange ? { ...attributes, ...listeners } : {})}
         className={canArrange ? 'cursor-grab active:cursor-grabbing' : undefined}
       >
-        <PostCard post={post} {...postCardEngagementProps(surface, post)} />
+        <PostCard
+          post={post}
+          {...postCardEngagementProps(surface, post)}
+          headerActions={
+            <CardArrangeMenu
+              post={post}
+              sections={sections}
+              siblings={siblings}
+              canArrange={canArrange}
+              onMoveToSection={(sectionId) => {
+                void onArrange(post.id, { sectionId }).then(() => onAnnounce(movedLabel))
+              }}
+              onReorder={(sortIndex) => void onArrange(post.id, { sortIndex })}
+            />
+          }
+        />
       </div>
     </div>
   )
@@ -146,7 +149,7 @@ export function ColumnsLayout(props: LayoutRendererProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [titleDraft, setTitleDraft] = useState('')
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
   const sections = [...props.sections].sort((a, b) => a.sortIndex - b.sortIndex)
   const activePost = activeId ? props.posts.find((p) => p.id === activeId) : null
@@ -199,6 +202,8 @@ export function ColumnsLayout(props: LayoutRendererProps) {
       sortIndex = midpointSortIndex(before, after)
     }
 
+    // Push section/order over the CRDT immediately so peers update before REST returns.
+    props.onLiveArrange?.(post.id, { sectionId: targetSectionId, sortIndex })
     try {
       await props.onArrange(post.id, { sectionId: targetSectionId, sortIndex })
       props.onAnnounce(t('boards.arrange.moved'))

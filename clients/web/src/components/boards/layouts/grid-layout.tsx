@@ -23,8 +23,10 @@ export function GridLayout(props: LayoutRendererProps) {
     >
       {posts.map((post) => (
         <li key={post.id} className="min-h-0">
-          <div className="relative h-full">
-            <div className="absolute end-2 top-2 z-10">
+          <PostCard
+            post={post}
+            {...postCardEngagementProps(props, post)}
+            headerActions={
               <CardArrangeMenu
                 post={post}
                 sections={props.sections}
@@ -33,9 +35,8 @@ export function GridLayout(props: LayoutRendererProps) {
                 onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
                 onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
               />
-            </div>
-            <PostCard post={post} {...postCardEngagementProps(props, post)} />
-          </div>
+            }
+          />
         </li>
       ))}
     </ul>

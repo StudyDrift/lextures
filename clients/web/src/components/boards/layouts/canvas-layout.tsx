@@ -8,6 +8,8 @@ import { postCardEngagementProps, type LayoutRendererProps } from './types'
 
 const DEFAULT_W = 260
 const DEFAULT_H = 180
+/** Throttle live CRDT position publishes so peers see drag without flooding the relay. */
+const LIVE_ARRANGE_MS = 40
 
 function postPosition(post: LayoutRendererProps['posts'][number], index: number): BoardPostPosition {
   if (post.position) return post.position
@@ -30,6 +32,11 @@ export function CanvasLayout(props: LayoutRendererProps) {
     orig: BoardPostPosition
   } | null>(null)
   const debounceTimers = useRef<Map<string, number>>(new Map())
+  const liveThrottleAt = useRef(0)
+  /** Local overlay so the dragging user sees smooth motion between CRDT ticks. */
+  const [livePositions, setLivePositions] = useState<Map<string, BoardPostPosition>>(() => new Map())
+  const livePositionsRef = useRef(livePositions)
+  livePositionsRef.current = livePositions
 
   useEffect(() => {
     const timers = debounceTimers.current
@@ -38,11 +45,39 @@ export function CanvasLayout(props: LayoutRendererProps) {
     }
   }, [])
 
+  function publishLive(postId: string, position: BoardPostPosition, force = false) {
+    const now = performance.now()
+    if (!force && now - liveThrottleAt.current < LIVE_ARRANGE_MS) {
+      setLivePositions((prev) => {
+        const next = new Map(prev)
+        next.set(postId, position)
+        return next
+      })
+      return
+    }
+    liveThrottleAt.current = now
+    setLivePositions((prev) => {
+      const next = new Map(prev)
+      next.set(postId, position)
+      return next
+    })
+    props.onLiveArrange?.(postId, { position })
+  }
+
   function persistPosition(postId: string, position: BoardPostPosition) {
     const existing = debounceTimers.current.get(postId)
     if (existing) window.clearTimeout(existing)
+    // Final CRDT publish immediately so peers converge; REST follows after debounce.
+    props.onLiveArrange?.(postId, { position })
     const timer = window.setTimeout(() => {
-      void props.onArrange(postId, { position })
+      void props.onArrange(postId, { position }).finally(() => {
+        setLivePositions((prev) => {
+          if (!prev.has(postId)) return prev
+          const next = new Map(prev)
+          next.delete(postId)
+          return next
+        })
+      })
       debounceTimers.current.delete(postId)
     }, 250)
     debounceTimers.current.set(postId, timer)
@@ -82,15 +117,7 @@ export function CanvasLayout(props: LayoutRendererProps) {
     const dx = (e.clientX - drag.startX) / zoom
     const dy = (e.clientY - drag.startY) / zoom
     const next = { ...drag.orig, x: drag.orig.x + dx, y: drag.orig.y + dy }
-    const el = containerRef.current?.querySelector(`[data-post-id="${drag.postId}"]`) as HTMLElement | null
-    if (el) {
-      el.style.left = `${next.x}px`
-      el.style.top = `${next.y}px`
-    }
-    dragRef.current = { ...drag, orig: drag.orig, startX: drag.startX, startY: drag.startY }
-    // keep visual via style; persist on up with accumulated delta stored on element dataset
-    el?.setAttribute('data-pending-x', String(next.x))
-    el?.setAttribute('data-pending-y', String(next.y))
+    publishLive(drag.postId, next)
   }
 
   function onBackgroundPointerUp(e: ReactPointerEvent) {
@@ -100,10 +127,9 @@ export function CanvasLayout(props: LayoutRendererProps) {
     }
     const drag = dragRef.current
     if (drag) {
-      const el = containerRef.current?.querySelector(`[data-post-id="${drag.postId}"]`) as HTMLElement | null
-      const x = Number(el?.getAttribute('data-pending-x') ?? drag.orig.x)
-      const y = Number(el?.getAttribute('data-pending-y') ?? drag.orig.y)
-      const position = { ...drag.orig, x, y }
+      const pending = livePositionsRef.current.get(drag.postId)
+      const position = pending ?? drag.orig
+      publishLive(drag.postId, position, true)
       persistPosition(drag.postId, position)
       props.onAnnounce(t('boards.arrange.moved'))
       dragRef.current = null
@@ -153,7 +179,7 @@ export function CanvasLayout(props: LayoutRendererProps) {
         >
           {props.awareness ? <BoardLiveCursors awareness={props.awareness} enabled /> : null}
           {props.posts.map((post, i) => {
-            const pos = postPosition(post, i)
+            const pos = livePositions.get(post.id) ?? postPosition(post, i)
             const canArrange = props.canArrangePost(post)
             return (
               <div
@@ -164,6 +190,15 @@ export function CanvasLayout(props: LayoutRendererProps) {
                 style={{ left: pos.x, top: pos.y, width: pos.w, minHeight: pos.h }}
                 onPointerDown={(e) => {
                   if (!canArrange || e.button !== 0) return
+                  // Don't steal clicks from card actions (delete, arrange, report, forms).
+                  const target = e.target as HTMLElement | null
+                  if (
+                    target?.closest(
+                      'button, a, input, textarea, select, label, [role="button"], [role="menuitem"], [role="menu"], [role="dialog"], [data-no-card-drag]',
+                    )
+                  ) {
+                    return
+                  }
                   e.stopPropagation()
                   dragRef.current = {
                     postId: post.id,
@@ -174,18 +209,21 @@ export function CanvasLayout(props: LayoutRendererProps) {
                   ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
                 }}
               >
-                <div className="absolute end-1 top-1 z-10">
-                  <CardArrangeMenu
-                    post={post}
-                    sections={props.sections}
-                    siblings={props.posts}
-                    canArrange={canArrange}
-                    onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
-                    onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
-                  />
-                </div>
                 <div className={canArrange ? 'cursor-grab active:cursor-grabbing' : undefined}>
-                  <PostCard post={post} {...postCardEngagementProps(props, post)} />
+                  <PostCard
+                    post={post}
+                    {...postCardEngagementProps(props, post)}
+                    headerActions={
+                      <CardArrangeMenu
+                        post={post}
+                        sections={props.sections}
+                        siblings={props.posts}
+                        canArrange={canArrange}
+                        onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
+                        onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
+                      />
+                    }
+                  />
                 </div>
                 {canArrange ? (
                   <div
@@ -196,23 +234,18 @@ export function CanvasLayout(props: LayoutRendererProps) {
                       const startX = e.clientX
                       const startY = e.clientY
                       const orig = { ...pos }
-                      const target = e.currentTarget.parentElement
+                      let pending = { ...orig }
                       const onMove = (ev: PointerEvent) => {
                         const w = Math.max(180, orig.w + (ev.clientX - startX) / zoom)
                         const h = Math.max(120, orig.h + (ev.clientY - startY) / zoom)
-                        if (target) {
-                          target.style.width = `${w}px`
-                          target.style.minHeight = `${h}px`
-                          target.setAttribute('data-pending-w', String(w))
-                          target.setAttribute('data-pending-h', String(h))
-                        }
+                        pending = { ...orig, w, h }
+                        publishLive(post.id, pending)
                       }
                       const onUp = () => {
                         window.removeEventListener('pointermove', onMove)
                         window.removeEventListener('pointerup', onUp)
-                        const w = Number(target?.getAttribute('data-pending-w') ?? orig.w)
-                        const h = Number(target?.getAttribute('data-pending-h') ?? orig.h)
-                        persistPosition(post.id, { ...orig, w, h })
+                        publishLive(post.id, pending, true)
+                        persistPosition(post.id, pending)
                       }
                       window.addEventListener('pointermove', onMove)
                       window.addEventListener('pointerup', onUp)

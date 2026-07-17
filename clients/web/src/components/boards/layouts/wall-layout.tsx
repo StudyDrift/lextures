@@ -23,8 +23,10 @@ export function WallLayout(props: LayoutRendererProps) {
     >
       {posts.map((post) => (
         <li key={post.id} className="mb-3 break-inside-avoid">
-          <div className="relative">
-            <div className="absolute end-2 top-2 z-10">
+          <PostCard
+            post={post}
+            {...postCardEngagementProps(props, post)}
+            headerActions={
               <CardArrangeMenu
                 post={post}
                 sections={props.sections}
@@ -33,9 +35,8 @@ export function WallLayout(props: LayoutRendererProps) {
                 onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
                 onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
               />
-            </div>
-            <PostCard post={post} {...postCardEngagementProps(props, post)} />
-          </div>
+            }
+          />
         </li>
       ))}
     </ul>

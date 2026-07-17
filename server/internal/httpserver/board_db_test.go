@@ -88,7 +88,8 @@ func setupBoardTest(t *testing.T, ctx context.Context, role string, courseFlag, 
 
 	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
 	tok, _ := signer.Sign(ctx, row.ID, em, "", "", nil)
-	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: config.Config{FFVisualBoards: masterFlag}})
+	_ = masterFlag // platform master switch removed; course flag is the only gate
+	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: config.Config{}})
 	return pool, h, tok, cc, courseID
 }
 
@@ -139,21 +140,6 @@ func TestBoards_FeatureGate_Pg(t *testing.T) {
 	}
 }
 
-func TestBoards_MasterFlagOff_Pg(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
-
-	pool, h, tok, cc, _ := setupBoardTest(t, ctx, "teacher", true, false)
-	defer pool.Close()
-
-	rr := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/courses/"+cc+"/boards", nil)
-	req.Header.Set("Authorization", "Bearer "+tok)
-	h.ServeHTTP(rr, req)
-	if rr.Code != http.StatusNotFound {
-		t.Fatalf("master off: expected 404, got %d %s", rr.Code, rr.Body.String())
-	}
-}
 
 func TestBoards_FullCRUD_Pg(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)

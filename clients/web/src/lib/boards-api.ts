@@ -75,9 +75,58 @@ export type Board = {
   locked: boolean
   frozenUntil: string | null
   capabilities?: BoardCapabilities
+  externalSharingAllowed?: boolean
+  minorModerationFloor?: boolean
   createdBy: string | null
   createdAt: string
   updatedAt: string
+}
+
+export type BoardOrgPolicies = {
+  orgId: string
+  externalSharing: boolean
+  minorModerationFloor: boolean
+  defaultAttribution: BoardAttribution
+  boardCapPerCourse: number | null
+  updatedAt?: string
+}
+
+export type BoardAdminOverview = {
+  boardCount: number
+  activeBoardCount: number
+  coursesWithBoards: number
+  coursesFeatureEnabled: number
+  storageBytes: number
+  topContentTypes: { contentType: string; count: number }[]
+  activeWindowDays: number
+}
+
+export type BoardContributorStat = {
+  userId: string
+  postCount: number
+  commentCount: number
+  reactionCount: number
+  contributionTotal: number
+}
+
+export type BoardDailyAnalytics = {
+  boardId: string
+  day: string
+  cardCount: number
+  contributorCount: number
+  reactionCount: number
+  commentCount: number
+}
+
+export type BoardAnalyticsSummary = {
+  boardId: string
+  cardCount: number
+  uniqueContributors: number
+  reactionCount: number
+  commentCount: number
+  lastActivityAt?: string
+  contributors: BoardContributorStat[]
+  daily: BoardDailyAnalytics[]
 }
 
 export type BoardReport = {
@@ -611,10 +660,78 @@ export async function uploadBoardAttachment(
   )
   if (!res.ok) {
     const txt = await res.text()
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(txt) as unknown
+    } catch {
+      parsed = null
+    }
+    const code =
+      parsed && typeof parsed === 'object' && 'error' in parsed
+        ? (parsed as { error?: { code?: string } }).error?.code
+        : undefined
+    if (code === 'QUOTA_EXCEEDED' || (res.status === 403 && txt.includes('Storage limit'))) {
+      throw new Error('QUOTA_EXCEEDED')
+    }
     throw new Error(`uploadBoardAttachment failed (${res.status}): ${txt}`)
   }
   const att = (await res.json()) as BoardAttachment
   return { ...att, url: absoluteUrl(att.url) }
+}
+
+export async function fetchBoardAnalytics(
+  courseCode: string,
+  boardId: string,
+  days = 14,
+): Promise<BoardAnalyticsSummary> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/boards/${encodeURIComponent(boardId)}/analytics?days=${days}`,
+    { headers: await authHeaders() },
+  )
+  if (!res.ok) throw new Error(`fetchBoardAnalytics failed (${res.status})`)
+  return (await res.json()) as BoardAnalyticsSummary
+}
+
+export async function fetchAdminBoardPolicies(orgId?: string): Promise<BoardOrgPolicies> {
+  const q = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
+  const res = await fetch(`${apiBase}/api/v1/admin/boards/policies${q}`, {
+    headers: await authHeaders(),
+  })
+  if (!res.ok) throw new Error(`fetchAdminBoardPolicies failed (${res.status})`)
+  return (await res.json()) as BoardOrgPolicies
+}
+
+export async function patchAdminBoardPolicies(
+  body: Partial<{
+    externalSharing: boolean
+    minorModerationFloor: boolean
+    defaultAttribution: BoardAttribution
+    boardCapPerCourse: number | null
+    clearBoardCap: boolean
+  }>,
+  orgId?: string,
+): Promise<BoardOrgPolicies> {
+  const q = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
+  const res = await fetch(`${apiBase}/api/v1/admin/boards/policies${q}`, {
+    method: 'PATCH',
+    headers: await authHeaders(),
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(`patchAdminBoardPolicies failed (${res.status})`)
+  return (await res.json()) as BoardOrgPolicies
+}
+
+export async function fetchAdminBoardsOverview(
+  orgId?: string,
+  activeDays = 30,
+): Promise<BoardAdminOverview> {
+  const params = new URLSearchParams({ activeDays: String(activeDays) })
+  if (orgId) params.set('orgId', orgId)
+  const res = await fetch(`${apiBase}/api/v1/admin/boards/overview?${params}`, {
+    headers: await authHeaders(),
+  })
+  if (!res.ok) throw new Error(`fetchAdminBoardsOverview failed (${res.status})`)
+  return (await res.json()) as BoardAdminOverview
 }
 
 export async function fetchBoardLinkPreview(
@@ -1135,6 +1252,178 @@ export async function resolveBoardReport(
     throw new Error(`resolveBoardReport failed (${res.status}): ${txt}`)
   }
   return (await res.json()) as BoardReport
+}
+
+export type BoardExportFormat = 'pdf' | 'csv' | 'image'
+
+export type BoardExportJob = {
+  id: string
+  boardId: string
+  format: BoardExportFormat
+  status: 'pending' | 'running' | 'done' | 'failed'
+  storageKey?: string | null
+  error: string
+  includeModeration: boolean
+  requestedBy?: string | null
+  createdAt: string
+  completedAt?: string | null
+  downloadUrl?: string | null
+}
+
+export type BoardEmbedMode = 'interactive' | 'readonly' | 'denied'
+
+export type BoardEmbedContext = {
+  mode: BoardEmbedMode
+  board: Board | null
+  posts: BoardPost[]
+  sections: BoardSection[]
+  capabilities: BoardCapabilities
+}
+
+export async function createBoardExport(
+  courseCode: string,
+  boardId: string,
+  input: { format: BoardExportFormat; includeModeration?: boolean },
+): Promise<BoardExportJob> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/boards/${encodeURIComponent(boardId)}/export`,
+    {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify(input),
+    },
+  )
+  if (!res.ok) {
+    const txt = await res.text()
+    throw new Error(`createBoardExport failed (${res.status}): ${txt}`)
+  }
+  const body = (await res.json()) as { job: BoardExportJob }
+  return body.job
+}
+
+export async function fetchBoardExportJob(
+  courseCode: string,
+  boardId: string,
+  jobId: string,
+): Promise<BoardExportJob> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/boards/${encodeURIComponent(boardId)}/export/${encodeURIComponent(jobId)}`,
+    { headers: await authHeaders() },
+  )
+  if (!res.ok) throw new Error(`fetchBoardExportJob failed (${res.status})`)
+  return (await res.json()) as BoardExportJob
+}
+
+export async function downloadBoardExport(
+  courseCode: string,
+  boardId: string,
+  jobId: string,
+): Promise<Blob> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/boards/${encodeURIComponent(boardId)}/export/${encodeURIComponent(jobId)}/content`,
+    { headers: await authHeaders(false) },
+  )
+  if (!res.ok) throw new Error(`downloadBoardExport failed (${res.status})`)
+  return res.blob()
+}
+
+/** Fetch QR image; returns blob + the URL encoded in the QR (from response header). */
+export async function fetchBoardQR(
+  courseCode: string,
+  boardId: string,
+  opts?: { format?: 'png' | 'svg'; size?: number; url?: string },
+): Promise<{ blob: Blob; accessUrl: string }> {
+  const params = new URLSearchParams()
+  if (opts?.format) params.set('format', opts.format)
+  if (opts?.size) params.set('size', String(opts.size))
+  if (opts?.url) params.set('url', opts.url)
+  const qs = params.toString()
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/boards/${encodeURIComponent(boardId)}/qr${qs ? `?${qs}` : ''}`,
+    { headers: await authHeaders(false) },
+  )
+  if (!res.ok) throw new Error(`fetchBoardQR failed (${res.status})`)
+  const accessUrl = res.headers.get('X-Board-Access-Url') ?? ''
+  return { blob: await res.blob(), accessUrl }
+}
+
+export async function fetchBoardEmbed(
+  courseCode: string,
+  boardId: string,
+): Promise<BoardEmbedContext> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/boards/${encodeURIComponent(boardId)}/embed`,
+    { headers: await authHeaders() },
+  )
+  if (!res.ok) throw new Error(`fetchBoardEmbed failed (${res.status})`)
+  const body = (await res.json()) as BoardEmbedContext
+  return {
+    mode: body.mode,
+    board: body.board ? normalizeBoard(body.board) : null,
+    posts: (body.posts ?? []).map(normalizePost),
+    sections: body.sections ?? [],
+    capabilities: body.capabilities ?? {
+      canView: false,
+      canPost: false,
+      canInteract: false,
+      canArrange: false,
+      canManage: false,
+    },
+  }
+}
+
+/** Client-side PNG snapshot of card titles for image export (VC.9 FR-6 / AC-7). */
+export function renderBoardSurfacePng(
+  title: string,
+  cards: Array<{ sectionTitle?: string; title: string; body?: string }>,
+): Promise<Blob> {
+  const width = 800
+  const lineH = 18
+  const pad = 24
+  const lines: string[] = [title, '']
+  let prevSec = ''
+  for (const c of cards) {
+    if (c.sectionTitle && c.sectionTitle !== prevSec) {
+      lines.push(`§ ${c.sectionTitle}`)
+      prevSec = c.sectionTitle
+    }
+    lines.push(`• ${c.title || 'Card'}`)
+    if (c.body) lines.push(`  ${c.body}`)
+    lines.push('')
+  }
+  if (cards.length === 0) lines.push('(empty board)')
+  const height = Math.max(200, pad * 2 + lines.length * lineH)
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return Promise.reject(new Error('canvas unsupported'))
+  ctx.fillStyle = '#fafafc'
+  ctx.fillRect(0, 0, width, height)
+  ctx.fillStyle = '#0f172a'
+  ctx.font = '600 16px system-ui, sans-serif'
+  let y = pad + 16
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!
+    if (i === 0) {
+      ctx.font = '700 20px system-ui, sans-serif'
+      ctx.fillStyle = '#0f172a'
+    } else if (line.startsWith('§ ')) {
+      ctx.font = '600 14px system-ui, sans-serif'
+      ctx.fillStyle = '#4338ca'
+    } else {
+      ctx.font = '400 14px system-ui, sans-serif'
+      ctx.fillStyle = '#1e293b'
+    }
+    ctx.fillText(line.slice(0, 100), pad, y)
+    y += lineH
+  }
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) reject(new Error('png encode failed'))
+      else resolve(blob)
+    }, 'image/png')
+  })
 }
 
 /** Extract YouTube / Vimeo embed ids for inline players. */

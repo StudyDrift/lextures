@@ -214,6 +214,7 @@ export default function App() {
             <Route path="/admin/demographics/student" element={<Pages.StudentDemographicsPage />} />
             <Route path="/admin/demographics/title1" element={<Pages.Title1ReportPage />} />
             <Route path="/admin/content-filter" element={<Pages.ContentFilterSettingsPage />} />
+            <Route path="/admin/boards" element={<Pages.BoardsGovernancePage />} />
             <Route path="/admin/sis" element={<Pages.SisIntegrationPage />} />
             <Route path="/admin/integrations" element={<Pages.IntegrationsAdminPage />} />
             <Route path="/admin/webhooks" element={<Pages.WebhooksAdminPage />} />

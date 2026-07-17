@@ -248,6 +248,23 @@ RETURNING `+bannerColumns,
 	return &b, nil
 }
 
+// GetByExternalID loads a banner keyed by external_id (Statuspage incidents).
+func GetByExternalID(ctx context.Context, pool *pgxpool.Pool, externalID string) (*Banner, error) {
+	row := pool.QueryRow(ctx, `
+SELECT `+bannerColumns+`
+FROM platform.banners
+WHERE external_id = $1
+LIMIT 1`, externalID)
+	b, err := scanBanner(row)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &b, nil
+}
+
 // DeactivateByExternalID marks a webhook-managed banner inactive.
 func DeactivateByExternalID(ctx context.Context, pool *pgxpool.Pool, externalID string) error {
 	_, err := pool.Exec(ctx, `

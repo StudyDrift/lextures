@@ -478,11 +478,11 @@ type Config struct {
 	// FFFeedback enables in-app product feedback submission (plan FB0). Default ON.
 	// Managed in Settings → Global platform (not process env).
 	FFFeedback bool
-	// FFVisualBoards enables collaboration boards (shared wall) across courses (plan VC.1). Default OFF.
-	// Managed in Settings → Global platform (not process env). Per-course visual_boards_enabled still required.
+	// FFVisualBoards is deprecated (always on). Collaboration boards are gated only by the
+	// per-course visual_boards_enabled flag. Retained for API compatibility with platform settings payloads.
 	FFVisualBoards bool
-	// FFBoardsRealtime enables the board Y.js WebSocket relay (plan VC.4). Default OFF.
-	// Requires FFVisualBoards and per-course visual_boards_enabled.
+	// FFBoardsRealtime enables the board Y.js WebSocket relay (plan VC.4). Default ON.
+	// Requires per-course visual_boards_enabled.
 	FFBoardsRealtime bool
 	// FFBoardsExternalSharing allows link/public board visibility and share links (plan VC.6). Default OFF.
 	FFBoardsExternalSharing bool

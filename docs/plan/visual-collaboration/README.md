@@ -64,8 +64,8 @@ Whiteboard and the real-time engine from Collaborative Documents.
 | VC.6 | ~~Sharing, access control & contributors~~ → [completed](../../completed/visual-collaboration/VC.6-sharing-access-contributors.md) | BLOCKER | VC.1 | L |
 | VC.7 | ~~Moderation, safety & content governance~~ → [completed](../../completed/visual-collaboration/VC.7-moderation-safety-governance.md) | BLOCKER | VC.2, VC.6 | M |
 | VC.8 | ~~Templates, duplication & board creation~~ → [completed](../../completed/visual-collaboration/VC.8-templates-and-duplication.md) | MAJOR | VC.1, VC.3 | M |
-| VC.9 | [Embedding, export & presentation](VC.9-embedding-export-presentation.md) | MAJOR | VC.2, VC.3 | M |
-| VC.10 | [Admin governance, analytics, quotas & lifecycle](VC.10-admin-analytics-quotas-lifecycle.md) | MAJOR | VC.1 | M |
+| VC.9 | ~~Embedding, export & presentation~~ → [completed](../../completed/visual-collaboration/VC.9-embedding-export-presentation.md) | MAJOR | VC.2, VC.3 | M |
+| VC.10 | ~~Admin governance, analytics, quotas & lifecycle~~ → [completed](../../completed/visual-collaboration/VC.10-admin-analytics-quotas-lifecycle.md) | MAJOR | VC.1 | M |
 
 ## Recommended sequencing
 
@@ -74,7 +74,49 @@ Whiteboard and the real-time engine from Collaborative Documents.
    the MVP that lets a class replace its incumbent tool for a brainstorm/exit-ticket use case.
 3. **VC.6 + VC.7** must ship before any external sharing is exposed (never open link-sharing without the
    moderation and access-control controls).
-4. **VC.5, VC.8, VC.9, VC.10** are parity/polish layers that can land in any order once the MVP is stable.
+4. **VC.5, VC.8, VC.9, VC.10** are parity/polish layers that can land in any order once the MVP is stable. All VC.1–VC.10 plans are now completed.
+
+## Mobile app plans (VC.M#)
+
+The web boards (VC.1–VC.10) are shipped; the native **iOS (SwiftUI)** and **Android (Jetpack Compose)** apps
+have no boards surface yet. The `VC.M#` plans bring boards to both native clients at parity, following the
+mobile conventions in [`../../MOBILE_PLAN.md`](../../MOBILE_PLAN.md) and the completed
+[`../../completed/mobile/`](../../completed/mobile/) series (two-client parity; both must build — iOS
+`xcodebuild build`, Android `./gradlew :app:compileDebugKotlin`; regenerate the Xcode project via
+`clients/ios/scripts/generate_xcodeproj.py`). No server changes are required — every REST route, feature flag,
+and the board WebSocket already exist from the web work.
+
+**Same-WebSocket reuse (the headline requirement).** Mobile connects to the **same** relay endpoint
+`GET /api/v1/courses/{code}/boards/{board_id}/ws` (`server/internal/httpserver/board_ws.go`) using the native
+`WebSocketClient` already shipped for feed/courses/notifications. That relay pushes a JSON
+`board.changed` text frame to every peer on *every* REST mutation (via `notifyBoardPeers`), and the web client
+persists its mutations through REST too — so a JSON-only mobile client on the same socket observes every
+add/edit/move/delete **without** porting the Y.js CRDT. The relay's binary Y.js frames (replay/sync/awareness)
+are safely ignored client-side. Presence/live-cursors are scoped as a follow-up (would need a native CRDT
+binding). See **VC.M4** for the full design.
+
+| ID | Plan | Mirrors | Severity | Depends on | Est. |
+|---|---|---|---|---|---|
+| VC.M1 | [Foundation, flag, board list & shell](VC.M1-mobile-foundation-and-flag.md) | VC.1 | BLOCKER | web VC.1 | M |
+| VC.M2 | [Posts & multi-format cards (view + compose)](VC.M2-mobile-posts-and-content.md) | VC.2 | BLOCKER | VC.M1 | L |
+| VC.M3 | [Layouts & arrangement](VC.M3-mobile-layouts-and-arrangement.md) | VC.3 | MAJOR | VC.M1, VC.M2 | L |
+| VC.M4 | [Real-time collaboration & presence (same WebSocket)](VC.M4-mobile-realtime-and-presence.md) | VC.4 | BLOCKER | VC.M1, VC.M2 | M |
+| VC.M5 | [Reactions, comments & assessment](VC.M5-mobile-reactions-comments-assessment.md) | VC.5 | MAJOR | VC.M2 | M |
+| VC.M6 | [Sharing, access control & attribution](VC.M6-mobile-sharing-access-attribution.md) | VC.6 | MAJOR | VC.M1 | M |
+| VC.M7 | [Moderation, safety & governance surfaces](VC.M7-mobile-moderation-safety.md) | VC.7 | BLOCKER | VC.M2, VC.M6 | M |
+
+**Recommended mobile sequencing**
+
+1. **VC.M1 → VC.M2 → VC.M4** is the mobile MVP: a flag-gated Boards surface, multi-format cards you can post
+   from a phone, and live updates over the shared WebSocket — enough for a class to use boards on mobile.
+2. **VC.M3** adds layout fidelity (columns/canvas/timeline/map) once the MVP is stable.
+3. **VC.M6 + VC.M7** gate correctly and must be present before any external-share (public/link) UI is exposed
+   on mobile — same rule as web VC.6/VC.7.
+4. **VC.M5** (engagement) can land any time after VC.M2.
+
+**Deferred on mobile (web-only for now):** VC.8 templates/duplication, VC.9 embedding/export/presentation, and
+VC.10 admin analytics/quotas/lifecycle are authoring- and admin-heavy surfaces better suited to the web app;
+they are out of scope for the mobile v1 set above and can be revisited as fast-follows if demand appears.
 
 ## Cross-cutting requirements (apply to every plan)
 

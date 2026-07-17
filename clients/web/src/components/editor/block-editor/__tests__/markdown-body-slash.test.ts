@@ -64,6 +64,18 @@ describe('filterSlashCommands', () => {
     expect(filterSlashCommands(commands, 'whiteboard').map((c) => c.id)).toEqual(['drawing'])
   })
 
+  it('includes Insert board when enabled and filters by keyword', () => {
+    const commands = slashCommandsForEditor({ board: true })
+    expect(commands.some((c) => c.id === 'board')).toBe(true)
+    expect(filterSlashCommands(commands, 'padlet').map((c) => c.id)).toEqual(['board'])
+    expect(filterSlashCommands(commands, 'collaboration').map((c) => c.id)).toEqual(['board'])
+  })
+
+  it('omits board command when disabled', () => {
+    const commands = slashCommandsForEditor({ board: false })
+    expect(commands.some((c) => c.id === 'board')).toBe(false)
+  })
+
   it('filters task by todo keyword', () => {
     const commands = slashCommandsForEditor({ equation: false })
     expect(filterSlashCommands(commands, 'todo').map((c) => c.id)).toEqual(['task'])

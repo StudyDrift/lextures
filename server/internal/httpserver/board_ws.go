@@ -28,6 +28,40 @@ const (
 
 var globalBoardRooms = yrelay.NewRegistry()
 
+// boardChangedEvent is a JSON text frame pushed to connected board peers when
+// REST mutations change posts/sections so clients can refetch without relying
+// solely on the mutating client's Y.js publish.
+type boardChangedEvent struct {
+	Type   string `json:"type"`
+	Reason string `json:"reason"`
+	PostID string `json:"postId,omitempty"`
+}
+
+// notifyBoardPeers broadcasts a board.changed text event to every client currently
+// in the board's Y.js room. No-op when nobody is connected.
+func notifyBoardPeers(ctx context.Context, boardID string, reason, postID string) {
+	id, err := uuid.Parse(boardID)
+	if err != nil {
+		return
+	}
+	room := globalBoardRooms.Get(id)
+	if room == nil || room.Len() == 0 {
+		return
+	}
+	payload, err := json.Marshal(boardChangedEvent{
+		Type:   "board.changed",
+		Reason: reason,
+		PostID: postID,
+	})
+	if err != nil {
+		return
+	}
+	writeCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	room.BroadcastText(writeCtx, uuid.Nil, payload)
+	telemetry.RecordBusinessEvent("board.ws.changed_notified")
+}
+
 // handleBoardWS is GET /api/v1/courses/{course_code}/boards/{board_id}/ws.
 // First message must be text JSON: {"authToken":"..."}.
 func (d Deps) handleBoardWS() http.HandlerFunc {
@@ -42,7 +76,7 @@ func (d Deps) handleBoardWS() http.HandlerFunc {
 			return
 		}
 		cfg := d.effectiveConfig()
-		if !cfg.FFVisualBoards || !cfg.FFBoardsRealtime {
+		if !cfg.FFBoardsRealtime {
 			http.Error(w, "boards realtime disabled", http.StatusNotFound)
 			return
 		}

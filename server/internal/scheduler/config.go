@@ -4,16 +4,19 @@ package scheduler
 // jobs.queue row with one of these as job_type; a handler registered in the
 // background worker performs the actual work (plan 17.4 FR-3, FR-4).
 const (
-	JobTypeLateSubmissionSweep = "scheduled.late_submission_sweep"
-	JobTypeExpiredTokenCleanup = "scheduled.expired_token_cleanup"
-	JobTypeRequestLogRetention = "scheduled.request_log_retention"
-	JobTypeDueDateReminder     = "scheduled.due_date_reminder"
-	JobTypeInactiveIntegration = "scheduled.inactive_integration_alert"
-	JobTypeTutorSessionRetention = "scheduled.tutor_session_retention"
-	JobTypeLearnerProfileFull       = "scheduled.learner_profile_full_recompute"
-	JobTypeLearnerProfileRetention  = "scheduled.learner_profile_retention"
-	JobTypeIntroCourseBackfill         = "scheduled.intro_course_backfill"
-	JobTypeIntroCourseCompletionSweep  = "scheduled.intro_course_completion_sweep"
+	JobTypeLateSubmissionSweep        = "scheduled.late_submission_sweep"
+	JobTypeExpiredTokenCleanup        = "scheduled.expired_token_cleanup"
+	JobTypeRequestLogRetention        = "scheduled.request_log_retention"
+	JobTypeDueDateReminder            = "scheduled.due_date_reminder"
+	JobTypeInactiveIntegration        = "scheduled.inactive_integration_alert"
+	JobTypeTutorSessionRetention      = "scheduled.tutor_session_retention"
+	JobTypeLearnerProfileFull         = "scheduled.learner_profile_full_recompute"
+	JobTypeLearnerProfileRetention    = "scheduled.learner_profile_retention"
+	JobTypeIntroCourseBackfill        = "scheduled.intro_course_backfill"
+	JobTypeIntroCourseCompletionSweep = "scheduled.intro_course_completion_sweep"
+	JobTypeBoardAnalyticsRollup       = "scheduled.board_analytics_rollup"
+	JobTypeBoardExportRetention       = "scheduled.board_export_retention"
+	JobTypeBoardContentRetention      = "scheduled.board_content_retention"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -113,6 +116,27 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "45 2 * * *", // daily 02:45 UTC
 			JobType:        JobTypeIntroCourseCompletionSweep,
 			Description:    "Re-check intro course completion for enrolled students (IC05).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "board_analytics_rollup",
+			Spec:           "20 1 * * *", // daily 01:20 UTC
+			JobType:        JobTypeBoardAnalyticsRollup,
+			Description:    "Refresh collaboration board daily analytics rollups (VC.10).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "board_export_retention",
+			Spec:           "40 3 * * *", // daily 03:40 UTC
+			JobType:        JobTypeBoardExportRetention,
+			Description:    "Purge expired board export files past retention window (VC.10).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "board_content_retention",
+			Spec:           "50 3 * * *", // daily 03:50 UTC
+			JobType:        JobTypeBoardContentRetention,
+			Description:    "Purge archived collaboration boards past retention window (VC.10).",
 			DefaultEnabled: true,
 		},
 	}

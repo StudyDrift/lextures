@@ -1,6 +1,6 @@
 # VC.9 — Embedding, Export & Presentation
 
-> Implementation plan. Source: net-new capability (real-time visual collaboration boards). Landscape: [visual-collaboration/README](README.md). Reuses the TipTap editor embed pattern (`clients/web/src/components/editor/extensions/whiteboard-node-view.tsx`).
+> Implementation plan. Source: net-new capability (real-time visual collaboration boards). Landscape: [visual-collaboration/README](../../plan/visual-collaboration/README.md). Reuses the TipTap editor embed pattern (`clients/web/src/components/editor/extensions/whiteboard-node-view.tsx`).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Visual Collaboration Boards |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Collaboration squad |
 | **Depends on** | VC.2, VC.3 |
@@ -112,7 +112,7 @@ node view; VC.9 gives boards the same reach plus a present mode and exports.
 
 ## 8. Data Model
 
-Migration `386_board_exports.sql` (minimal — most work is stateless):
+Migration `397_board_exports.sql` (minimal — most work is stateless; `386` was already taken):
 
 ```sql
 CREATE TABLE board.export_jobs (
@@ -192,7 +192,7 @@ Not AI-touching. (Optional future: an AI "summary slide" appended to present/exp
 
 - **Flag**: gated by `visual_boards_enabled`; embed node appears in the editor only when the course flag is
   on.
-- **Sequencing**: migration `386` → ship CSV + image + present mode → add PDF (server renderer) → add embed
+- **Sequencing**: migration `397` → ship CSV + image + present mode → add PDF (server renderer) → add embed
   node → add QR (after VC.6 external links).
 - **Rollback**: hide export/embed/present entrypoints; boards still fully usable.
 
@@ -228,6 +228,6 @@ Not AI-touching. (Optional future: an AI "summary slide" appended to present/exp
 - Existing files: `clients/web/src/components/editor/extensions/whiteboard-node-view.tsx`,
   `clients/web/src/components/editor/extensions/whiteboard-tip-tap.ts`,
   `clients/web/src/components/editor/block-editor/markdown-body-slash.ts`, `filestorage`, job queue.
-- Related plans: [VC.2](../../completed/visual-collaboration/VC.2-posts-and-content-types.md), [VC.3](../../completed/visual-collaboration/VC.3-board-layouts-and-arrangement.md),
+- Related plans: [VC.2](VC.2-posts-and-content-types.md), [VC.3](VC.3-board-layouts-and-arrangement.md),
   [VC.4](VC.4-realtime-collaboration-and-presence.md), [VC.6](VC.6-sharing-access-contributors.md),
   [VC.7](VC.7-moderation-safety-governance.md).

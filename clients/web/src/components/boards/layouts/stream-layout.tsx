@@ -20,8 +20,10 @@ export function StreamLayout(props: LayoutRendererProps) {
     <ul className="mx-auto flex w-full max-w-2xl flex-col gap-3" aria-label={t('boards.layout.stream')}>
       {posts.map((post) => (
         <li key={post.id}>
-          <div className="relative">
-            <div className="absolute end-2 top-2 z-10">
+          <PostCard
+            post={post}
+            {...postCardEngagementProps(props, post)}
+            headerActions={
               <CardArrangeMenu
                 post={post}
                 sections={props.sections}
@@ -30,9 +32,8 @@ export function StreamLayout(props: LayoutRendererProps) {
                 onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
                 onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
               />
-            </div>
-            <PostCard post={post} {...postCardEngagementProps(props, post)} />
-          </div>
+            }
+          />
         </li>
       ))}
     </ul>

@@ -45,6 +45,7 @@ func (d Deps) maintenanceBannerEnabled(w http.ResponseWriter) bool {
 
 func (d Deps) registerBannerRoutes(r chi.Router) {
 	r.Get("/api/v1/status/banner", d.handleGetStatusBanner())
+	r.Get("/api/v1/status/banner/ws", d.handleBannerWS())
 	r.Get("/api/v1/admin/banners", d.handleListBanners())
 	r.Post("/api/v1/admin/banners", d.handleCreateBanner())
 	r.Put("/api/v1/admin/banners/{id}", d.handleUpdateBanner())
@@ -236,6 +237,7 @@ func (d Deps) handleCreateBanner() http.HandlerFunc {
 		}
 		slog.Info("banner created", "banner_id", created.ID, "scope", created.Scope, "actor_id", actor)
 		telemetry.RecordBusinessEvent("banner_created")
+		d.publishBannerUpserted(&created)
 		writeJSON(w, http.StatusCreated, bannerToDTO(created))
 	}
 }
@@ -302,6 +304,11 @@ func (d Deps) handleUpdateBanner() http.HandlerFunc {
 		}
 		slog.Info("banner updated", "banner_id", updated.ID, "scope", updated.Scope)
 		telemetry.RecordBusinessEvent("banner_updated")
+		if updated.IsActive {
+			d.publishBannerUpserted(updated)
+		} else {
+			d.publishBannerCleared(updated)
+		}
 		writeJSON(w, http.StatusOK, bannerToDTO(*updated))
 	}
 }
@@ -337,6 +344,7 @@ func (d Deps) handleDeleteBanner() http.HandlerFunc {
 		}
 		slog.Info("banner deleted", "banner_id", id)
 		telemetry.RecordBusinessEvent("banner_deleted")
+		d.publishBannerCleared(existing)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
@@ -366,7 +374,14 @@ func (d Deps) handleStatuspageBannerWebhook() http.HandlerFunc {
 		externalID := "statuspage:" + strings.TrimSpace(inc.ID)
 		status := strings.ToLower(strings.TrimSpace(inc.Status))
 		if status == "resolved" || status == "completed" {
+			existing, _ := bannersrepo.GetByExternalID(r.Context(), d.Pool, externalID)
 			_ = bannersrepo.DeactivateByExternalID(r.Context(), d.Pool, externalID)
+			if existing != nil {
+				d.publishBannerCleared(existing)
+			} else if d.BannerHub != nil {
+				// Still notify clients so they refetch even if we could not resolve the row.
+				d.BannerHub.Cleared("", "global", "")
+			}
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
@@ -384,7 +399,7 @@ func (d Deps) handleStatuspageBannerWebhook() http.HandlerFunc {
 			return
 		}
 		ext := externalID
-		_, err = bannersrepo.UpsertByExternalID(r.Context(), d.Pool, bannersrepo.CreateParams{
+		upserted, err := bannersrepo.UpsertByExternalID(r.Context(), d.Pool, bannersrepo.CreateParams{
 			Scope:      bannersrepo.ScopeGlobal,
 			Message:    message,
 			Severity:   bannersrepo.Severity(severity),
@@ -397,6 +412,7 @@ func (d Deps) handleStatuspageBannerWebhook() http.HandlerFunc {
 		}
 		slog.Info("banner upserted from statuspage", "external_id", externalID, "status", inc.Status)
 		telemetry.RecordBusinessEvent("banner_statuspage_webhook")
+		d.publishBannerUpserted(&upserted)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

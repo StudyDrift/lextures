@@ -118,6 +118,7 @@ export const BehaviorDashboard = lazy(() => import('./pages/admin/BehaviorDashbo
 export const BroadcastComposer = lazy(() => import('./pages/admin/BroadcastComposer'))
 export const ConferenceScheduleGrid = lazy(() => import('./pages/admin/conference-schedule-grid'))
 export const ContentFilterSettingsPage = lazy(() => import('./pages/admin/content-filter-settings'))
+export const BoardsGovernancePage = lazy(() => import('./pages/admin/boards-governance'))
 export const StudentDemographicsPage = lazy(() => import('./pages/admin/student-demographics'))
 export const SisIntegrationPage = lazy(() => import('./pages/admin/sis-integration'))
 export const IntegrationsAdminPage = lazy(() => import('./pages/admin/integrations'))

@@ -17,11 +17,13 @@ import (
 
 	pkgai "github.com/lextures/lextures/server/internal/aidisclosure"
 	repoaidisclosure "github.com/lextures/lextures/server/internal/repos/aidisclosure"
+	"github.com/lextures/lextures/server/internal/repos/board"
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
 	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
 	lprepo "github.com/lextures/lextures/server/internal/repos/learnerprofile"
 	pfrepo "github.com/lextures/lextures/server/internal/repos/productfeedback"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	"github.com/lextures/lextures/server/internal/repos/storageobjects"
 	"github.com/lextures/lextures/server/internal/service/coursereviews"
 	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
 )
@@ -135,6 +137,21 @@ func ApproveDSAR(ctx context.Context, pool *pgxpool.Pool, id, adminID uuid.UUID)
 		}
 		if err := pfrepo.DeleteByUser(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: erase product feedback: %w", err)
+		}
+		atts, err := board.ListUserAttachmentsForErasure(ctx, pool, r.UserID)
+		if err != nil {
+			return fmt.Errorf("gdpr: list board attachments: %w", err)
+		}
+		for _, a := range atts {
+			_ = storageobjects.SoftDeleteByObjectKey(ctx, pool, a.StorageKey)
+		}
+		if err := board.EraseUserContent(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: erase board content: %w", err)
+		}
+		if n, err := board.CountUserContentRows(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: verify board erasure: %w", err)
+		} else if n > 0 {
+			return fmt.Errorf("gdpr: board erasure incomplete: %d rows remain", n)
 		}
 		if err := repo.AnonymiseUser(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: anonymise user: %w", err)
@@ -267,14 +284,15 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	}
 
 	type archiveDoc struct {
-		UserID          string           `json:"userId"`
-		Profile         profileRow       `json:"profile"`
-		Consents        []consentSummary `json:"consents"`
-		CustomFields    map[string]any   `json:"customFields,omitempty"`
-		AIInferenceLog  []map[string]any `json:"aiInferenceLog,omitempty"`
-		LearnerProfile  any              `json:"learnerProfile,omitempty"`
-		ProductFeedback []map[string]any `json:"productFeedback,omitempty"`
-		ExportedAt      string           `json:"exportedAt"`
+		UserID          string                `json:"userId"`
+		Profile         profileRow            `json:"profile"`
+		Consents        []consentSummary      `json:"consents"`
+		CustomFields    map[string]any        `json:"customFields,omitempty"`
+		AIInferenceLog  []map[string]any      `json:"aiInferenceLog,omitempty"`
+		LearnerProfile  any                   `json:"learnerProfile,omitempty"`
+		ProductFeedback []map[string]any      `json:"productFeedback,omitempty"`
+		Boards          board.UserBoardExport `json:"boards,omitempty"`
+		ExportedAt      string                `json:"exportedAt"`
 	}
 
 	cs := make([]consentSummary, 0, len(consents))
@@ -292,6 +310,10 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	aiLog := dsarAIInferenceSummary(ctx, pool, os.Getenv("JWT_SECRET"), userID)
 	learnerProfileExport := dsarLearnerProfileExport(ctx, pool, userID)
 	productFeedbackExport := dsarProductFeedbackExport(ctx, pool, userID)
+	boardsExport, err := board.ExportUserContent(ctx, pool, userID)
+	if err != nil {
+		return "", fmt.Errorf("gdpr: board export: %w", err)
+	}
 
 	var customFields map[string]any
 	if len(customRaw) > 0 {
@@ -306,6 +328,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		AIInferenceLog:  aiLog,
 		LearnerProfile:  learnerProfileExport,
 		ProductFeedback: productFeedbackExport,
+		Boards:          boardsExport,
 		ExportedAt:      time.Now().UTC().Format(time.RFC3339),
 	}
 	b, err := json.Marshal(doc)

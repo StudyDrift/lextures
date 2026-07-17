@@ -35,6 +35,10 @@ import { PostComposer } from '../../components/boards/post-composer'
 import { BoardShareDialog } from '../../components/boards/share-dialog'
 import { BoardModerationQueue } from '../../components/boards/moderation-queue'
 import { SaveAsTemplateDialog } from '../../components/boards/save-as-template-dialog'
+import { BoardPresentMode } from '../../components/boards/present-mode'
+import { BoardExportMenu } from '../../components/boards/export-menu'
+import { BoardQuickJoinPanel } from '../../components/boards/quick-join-panel'
+import { BoardAnalyticsPanel } from '../../components/boards/board-analytics'
 import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { usePermissions } from '../../context/use-permissions'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -55,7 +59,7 @@ export default function CourseBoardDetailPage() {
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
   const boardId = rawBoardId ? decodeURIComponent(rawBoardId) : ''
   const { allows, loading: permLoading } = usePermissions()
-  const { ffVisualBoards, ffBoardsRealtime } = usePlatformFeatures()
+  const { ffBoardsRealtime } = usePlatformFeatures()
   const canManageBoard = !permLoading && !!courseCode && allows(courseItemCreatePermission(courseCode))
   const viewerId = getJwtSubject()
 
@@ -73,11 +77,42 @@ export default function CourseBoardDetailPage() {
   const [shareOpen, setShareOpen] = useState(false)
   const [moderationOpen, setModerationOpen] = useState(false)
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false)
+  const [presentOpen, setPresentOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [quickJoinOpen, setQuickJoinOpen] = useState(false)
+  const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [minorsFloor, setMinorsFloor] = useState(false)
 
   const realtimeEnabled =
-    ffVisualBoards && ffBoardsRealtime && !!board && !board.archived && !loading && !error
+    ffBoardsRealtime && !!board && !board.archived && !loading && !error
   const refetchPostsTimer = useRef<number | null>(null)
+
+  const scheduleBoardRefetch = useCallback(
+    (opts?: { includeSections?: boolean }) => {
+      if (refetchPostsTimer.current) window.clearTimeout(refetchPostsTimer.current)
+      refetchPostsTimer.current = window.setTimeout(() => {
+        const tasks: Promise<void>[] = [
+          listBoardPosts(courseCode, boardId)
+            .then(setPosts)
+            .catch(() => {
+              /* keep local state; next reconnect/refetch will heal */
+            }),
+        ]
+        if (opts?.includeSections) {
+          tasks.push(
+            listBoardSections(courseCode, boardId)
+              .then(setSections)
+              .catch(() => {
+                /* keep local sections */
+              }),
+          )
+        }
+        void Promise.all(tasks)
+      }, 100)
+    },
+    [boardId, courseCode],
+  )
+
   const realtime = useBoardRealtime({
     courseCode,
     boardId,
@@ -85,15 +120,9 @@ export default function CourseBoardDetailPage() {
     displayName: viewerId ? viewerId.slice(0, 8) : t('boards.presence.anonymous'),
     posts,
     onRemoteCardAdded: () => setAnnounce(t('boards.sync.cardAdded')),
-    onUnknownPostIds: () => {
-      if (refetchPostsTimer.current) window.clearTimeout(refetchPostsTimer.current)
-      refetchPostsTimer.current = window.setTimeout(() => {
-        void listBoardPosts(courseCode, boardId)
-          .then(setPosts)
-          .catch(() => {
-            /* keep local state; next reconnect/refetch will heal */
-          })
-      }, 100)
+    onUnknownPostIds: () => scheduleBoardRefetch(),
+    onBoardChanged: (ev) => {
+      scheduleBoardRefetch({ includeSections: ev.reason.startsWith('section.') })
     },
   })
   const displayPosts = realtimeEnabled ? realtime.mergedPosts : posts
@@ -105,10 +134,6 @@ export default function CourseBoardDetailPage() {
     setLoading(true)
     setError(null)
     try {
-      if (!ffVisualBoards) {
-        setError(t('boards.error.disabled'))
-        return
-      }
       const course = await fetchCourse(courseCode)
       if (!course.visualBoardsEnabled) {
         setError(t('boards.error.disabled'))
@@ -121,6 +146,7 @@ export default function CourseBoardDetailPage() {
       ])
       setBoard(row)
       setTitleDraft(row.title)
+      if (row.minorModerationFloor != null) setMinorsFloor(row.minorModerationFloor)
       setPosts(postRows)
       setSections(sectionRows)
     } catch (err) {
@@ -128,7 +154,7 @@ export default function CourseBoardDetailPage() {
     } finally {
       setLoading(false)
     }
-  }, [boardId, courseCode, ffVisualBoards, t])
+  }, [boardId, courseCode, t])
 
   useEffect(() => {
     void load()
@@ -214,7 +240,22 @@ export default function CourseBoardDetailPage() {
   async function handleArrange(postId: string, input: ArrangeBoardPostInput) {
     realtime.publishArrangement(postId, input)
     const updated = await arrangeBoardPost(courseCode, boardId, postId, input)
+    // Keep CRDT arrangement aligned with the durable REST timestamp/fields.
+    realtime.publishArrangement(postId, {
+      id: postId,
+      sectionId: updated.sectionId ?? null,
+      sortIndex: updated.sortIndex,
+      position: updated.position ?? null,
+      eventDate: updated.eventDate ?? null,
+      lat: updated.lat ?? null,
+      lng: updated.lng ?? null,
+      updatedAt: updated.updatedAt,
+    })
     setPosts((prev) => prev.map((p) => (p.id === postId ? updated : p)))
+  }
+
+  function handleLiveArrange(postId: string, input: ArrangeBoardPostInput) {
+    realtime.publishArrangement(postId, input)
   }
 
   async function handleChangeLayout(next: BoardLayout) {
@@ -361,7 +402,7 @@ export default function CourseBoardDetailPage() {
                   <p className="text-sm text-slate-600 dark:text-neutral-300">{board.description}</p>
                 ) : null}
               </div>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="relative z-20 flex flex-wrap items-center gap-2">
                 {realtimeEnabled ? (
                   <>
                     <BoardSyncStatus connState={realtime.connState} />
@@ -382,6 +423,13 @@ export default function CourseBoardDetailPage() {
                     }}
                   />
                 ) : null}
+                <button
+                  type="button"
+                  className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  onClick={() => setPresentOpen(true)}
+                >
+                  {t('boards.present.action')}
+                </button>
                 {canManageBoard ? (
                   <div className="relative">
                     <button
@@ -394,7 +442,7 @@ export default function CourseBoardDetailPage() {
                       <MoreHorizontal className="h-5 w-5" aria-hidden />
                     </button>
                     {menuOpen ? (
-                      <div className="absolute end-0 z-10 mt-1 w-48 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900">
+                      <div className="absolute end-0 z-10 mt-1 w-52 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900">
                         <button
                           type="button"
                           className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
@@ -414,6 +462,36 @@ export default function CourseBoardDetailPage() {
                           }}
                         >
                           {t('boards.share.action')}
+                        </button>
+                        <button
+                          type="button"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          onClick={() => {
+                            setMenuOpen(false)
+                            setQuickJoinOpen(true)
+                          }}
+                        >
+                          {t('boards.export.quickJoinAction')}
+                        </button>
+                        <button
+                          type="button"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          onClick={() => {
+                            setMenuOpen(false)
+                            setExportOpen(true)
+                          }}
+                        >
+                          {t('boards.export.action')}
+                        </button>
+                        <button
+                          type="button"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          onClick={() => {
+                            setMenuOpen(false)
+                            setAnalyticsOpen(true)
+                          }}
+                        >
+                          {t('boards.analytics.action')}
                         </button>
                         <button
                           type="button"
@@ -581,6 +659,7 @@ export default function CourseBoardDetailPage() {
                 onDeletePost={(id) => void removePost(id)}
                 onPostUpdate={updatePost}
                 onArrange={handleArrange}
+                onLiveArrange={realtimeEnabled ? handleLiveArrange : undefined}
                 onSectionsChange={setSections}
                 onCreateSection={(title) => createBoardSection(courseCode, boardId, title)}
                 onDeleteSection={async (sectionId) => {
@@ -611,6 +690,14 @@ export default function CourseBoardDetailPage() {
         />
       ) : null}
       {board && canManageBoard ? (
+        <BoardAnalyticsPanel
+          open={analyticsOpen}
+          onClose={() => setAnalyticsOpen(false)}
+          courseCode={courseCode}
+          boardId={board.id}
+        />
+      ) : null}
+      {board && canManageBoard ? (
         <SaveAsTemplateDialog
           open={saveTemplateOpen}
           onClose={() => setSaveTemplateOpen(false)}
@@ -630,6 +717,34 @@ export default function CourseBoardDetailPage() {
               setBoard(row)
             })
           }}
+        />
+      ) : null}
+      {board ? (
+        <BoardPresentMode
+          open={presentOpen}
+          onClose={() => setPresentOpen(false)}
+          boardTitle={board.title}
+          posts={displayPosts}
+          sections={sections}
+        />
+      ) : null}
+      {board && canManageBoard ? (
+        <BoardExportMenu
+          open={exportOpen}
+          onClose={() => setExportOpen(false)}
+          courseCode={courseCode}
+          boardId={board.id}
+          boardTitle={board.title}
+          posts={posts}
+          sections={sections}
+        />
+      ) : null}
+      {board && canManageBoard ? (
+        <BoardQuickJoinPanel
+          open={quickJoinOpen}
+          onClose={() => setQuickJoinOpen(false)}
+          courseCode={courseCode}
+          boardId={board.id}
         />
       ) : null}
     </>

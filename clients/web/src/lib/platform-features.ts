@@ -220,10 +220,10 @@ const defaults: PlatformFeaturesSnapshot = {
   aiProviderAbstractionEnabled: false,
   ragNotebookEnabled: false,
   ffFeedback: true,
-  ffVisualBoards: false,
+  ffVisualBoards: true,
   ffInteractiveQuizzes: false,
   ffIqLiveHosting: false,
-  ffBoardsRealtime: false,
+  ffBoardsRealtime: true,
   ffBoardsExternalSharing: false,
   ffEmailSes: false,
 }

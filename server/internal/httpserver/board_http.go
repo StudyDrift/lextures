@@ -14,18 +14,9 @@ import (
 	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
-func (d Deps) visualBoardsMasterOff(w http.ResponseWriter) bool {
-	if !d.effectiveConfig().FFVisualBoards {
-		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Collaboration boards are not enabled.")
-		return true
-	}
-	return false
-}
-
+// visualBoardsFeatureOff returns true when boards are disabled for the course.
+// Access is controlled only by the per-course visualBoardsEnabled flag (no platform master switch).
 func (d Deps) visualBoardsFeatureOff(w http.ResponseWriter, r *http.Request, courseCode string) bool {
-	if d.visualBoardsMasterOff(w) {
-		return true
-	}
 	crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
 	if err != nil || crow == nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
@@ -125,11 +116,16 @@ func (d Deps) handleListBoards() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not list boards.")
 			return
 		}
+		pol, okPol := d.orgBoardPoliciesForCourse(w, r, courseCode)
+		if !okPol {
+			return
+		}
+		externalOK := board.ExternalSharingAllowed(d.effectiveConfig().FFBoardsExternalSharing, pol)
 		out := make([]map[string]any, 0, len(boards))
 		for _, b := range boards {
 			caps, err := board.ResolveAccess(r.Context(), d.Pool, &b, viewer, board.ResolveOpts{
 				CourseCode:             courseCode,
-				ExternalSharingAllowed: d.effectiveConfig().FFBoardsExternalSharing,
+				ExternalSharingAllowed: externalOK,
 			})
 			if err != nil || !caps.CanView {
 				continue
@@ -175,6 +171,21 @@ func (d Deps) handleCreateBoard() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
+		pol, ok := d.orgBoardPoliciesForCourse(w, r, courseCode)
+		if !ok {
+			return
+		}
+		exceeded, capErr := board.BoardCapExceeded(r.Context(), d.Pool, courseCode, pol)
+		if capErr != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not verify board limit.")
+			return
+		}
+		if exceeded {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden,
+				"This course has reached the organization board limit.")
+			telemetry.RecordBusinessEvent("board.create.cap_rejected")
+			return
+		}
 		from := strings.TrimSpace(r.URL.Query().Get("from"))
 		if from != "" {
 			if d.createBoardFromSelector(w, r, courseCode, viewer, in.Title, in.Description, from) {
@@ -194,11 +205,33 @@ func (d Deps) handleCreateBoard() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
+		created = d.applyCreatePolicies(r, courseCode, created, pol)
 		telemetry.RecordBusinessEvent("board.created")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(boardJSON(*created))
 	}
+}
+
+// applyCreatePolicies sets org default attribution and minors moderation floor on a new board (VC.10).
+func (d Deps) applyCreatePolicies(r *http.Request, courseCode string, created *board.Board, pol board.OrgPolicies) *board.Board {
+	if created == nil {
+		return created
+	}
+	attr := pol.DefaultAttribution
+	if attr == "" {
+		attr = board.AttributionNamed
+	}
+	mode, filter := board.ApplyMinorsModerationFloor(created.ModerationMode, created.FilterAction, d.minorsModerationFloor(r.Context(), courseCode))
+	patched, err := board.Patch(r.Context(), d.Pool, courseCode, created.ID, board.PatchBoardInput{
+		Attribution:    &attr,
+		ModerationMode: &mode,
+		FilterAction:   &filter,
+	})
+	if err != nil || patched == nil {
+		return created
+	}
+	return patched
 }
 
 // handleGetBoard is GET /api/v1/courses/{course_code}/boards/{board_id}.
@@ -222,7 +255,7 @@ func (d Deps) handleGetBoard() http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(boardJSONWithAccess(*b, caps))
+		_ = json.NewEncoder(w).Encode(d.boardJSONWithAccessAndPolicies(r, courseCode, *b, caps))
 	}
 }
 
@@ -420,7 +453,7 @@ func (d Deps) handlePatchBoard() http.HandlerFunc {
 		}
 		caps := board.Capabilities{CanView: true, CanPost: true, CanInteract: true, CanArrange: true, CanManage: true}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(boardJSONWithAccess(*updated, caps))
+		_ = json.NewEncoder(w).Encode(d.boardJSONWithAccessAndPolicies(r, courseCode, *updated, caps))
 	}
 }
 

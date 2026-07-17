@@ -33,22 +33,23 @@ export function TimelineLayout(props: LayoutRendererProps) {
                   })
                 : null}
             </time>
-            <div className="relative max-w-xl">
-              <div className="absolute end-2 top-2 z-10">
-                <CardArrangeMenu
-                  post={post}
-                  sections={props.sections}
-                  siblings={dated}
-                  canArrange={props.canArrangePost(post)}
-                  onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
-                  onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
-                  showTimeline
-                  onSetEventDate={(iso) =>
-                    void props.onArrange(post.id, { eventDate: iso })
-                  }
-                />
-              </div>
-              <PostCard post={post} {...postCardEngagementProps(props, post)} />
+            <div className="max-w-xl">
+              <PostCard
+                post={post}
+                {...postCardEngagementProps(props, post)}
+                headerActions={
+                  <CardArrangeMenu
+                    post={post}
+                    sections={props.sections}
+                    siblings={dated}
+                    canArrange={props.canArrangePost(post)}
+                    onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
+                    onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
+                    showTimeline
+                    onSetEventDate={(iso) => void props.onArrange(post.id, { eventDate: iso })}
+                  />
+                }
+              />
             </div>
           </li>
         ))}
@@ -66,22 +67,23 @@ export function TimelineLayout(props: LayoutRendererProps) {
         ) : (
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {undated.map((post) => (
-              <li key={post.id} className="relative">
-                <div className="absolute end-2 top-2 z-10">
-                  <CardArrangeMenu
-                    post={post}
-                    sections={props.sections}
-                    siblings={undated}
-                    canArrange={props.canArrangePost(post)}
-                    onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
-                    onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
-                    showTimeline
-                    onSetEventDate={(iso) =>
-                      void props.onArrange(post.id, { eventDate: iso })
-                    }
-                  />
-                </div>
-                <PostCard post={post} {...postCardEngagementProps(props, post)} />
+              <li key={post.id}>
+                <PostCard
+                  post={post}
+                  {...postCardEngagementProps(props, post)}
+                  headerActions={
+                    <CardArrangeMenu
+                      post={post}
+                      sections={props.sections}
+                      siblings={undated}
+                      canArrange={props.canArrangePost(post)}
+                      onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
+                      onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
+                      showTimeline
+                      onSetEventDate={(iso) => void props.onArrange(post.id, { eventDate: iso })}
+                    />
+                  }
+                />
               </li>
             ))}
           </ul>

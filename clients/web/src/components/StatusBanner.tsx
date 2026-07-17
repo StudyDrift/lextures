@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AlertTriangle, Info, X, XCircle } from 'lucide-react'
 import {
   BANNER_POLL_INTERVAL_MS,
@@ -7,6 +7,9 @@ import {
   isBannerDismissed,
   type MaintenanceBanner,
 } from '../lib/banner-api'
+import { getAccessToken } from '../lib/auth'
+import { wsUrl } from '../lib/api'
+import { closeWebSocket } from '../lib/close-websocket'
 import { usePlatformFeatures } from '../context/platform-features-context'
 
 function severityLabel(severity: MaintenanceBanner['severity']): string {
@@ -42,6 +45,14 @@ function SeverityIcon({ severity }: { severity: MaintenanceBanner['severity'] })
   }
 }
 
+type BannerChangedEvent = {
+  type?: string
+  action?: string
+  id?: string
+  scope?: string
+  orgId?: string
+}
+
 type StatusBannerProps = {
   orgSlug?: string | null
 }
@@ -50,6 +61,11 @@ export function StatusBanner({ orgSlug = null }: StatusBannerProps) {
   const { maintenanceBannerEnabled } = usePlatformFeatures()
   const [banner, setBanner] = useState<MaintenanceBanner | null>(null)
   const [hidden, setHidden] = useState(false)
+  const bannerRef = useRef<MaintenanceBanner | null>(null)
+
+  useEffect(() => {
+    bannerRef.current = banner
+  }, [banner])
 
   const loadBanner = useCallback(async () => {
     try {
@@ -76,6 +92,76 @@ export function StatusBanner({ orgSlug = null }: StatusBannerProps) {
       void loadBanner()
     }, BANNER_POLL_INTERVAL_MS)
     return () => window.clearInterval(timer)
+  }, [loadBanner, maintenanceBannerEnabled])
+
+  // Real-time clear/publish via WebSocket so admin "Clear active banner" removes it on all screens immediately.
+  useEffect(() => {
+    if (!maintenanceBannerEnabled) return
+
+    let ws: WebSocket | null = null
+    let closed = false
+    let reconnectTimer: number | undefined
+    let attempt = 0
+
+    const connect = () => {
+      if (closed) return
+      try {
+        ws = new WebSocket(wsUrl('/api/v1/status/banner/ws'))
+      } catch {
+        scheduleReconnect()
+        return
+      }
+
+      ws.onopen = () => {
+        attempt = 0
+        // Optional auth message (server drains it; mirrors other platform sockets).
+        const token = getAccessToken()
+        if (token && ws?.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ authToken: token }))
+        }
+      }
+
+      ws.onmessage = (ev) => {
+        try {
+          const data = JSON.parse(String(ev.data)) as BannerChangedEvent
+          if (data.type !== 'banner_changed') return
+          if (data.action === 'cleared') {
+            const current = bannerRef.current
+            // Immediate remove when the active banner (or any global clear) was deleted.
+            if (!data.id || (current && current.id === data.id)) {
+              setBanner(null)
+              setHidden(false)
+            }
+          }
+          // Always reconcile with the server so org/global priority stays correct.
+          void loadBanner()
+        } catch {
+          /* ignore malformed */
+        }
+      }
+
+      ws.onclose = () => {
+        if (!closed) scheduleReconnect()
+      }
+      ws.onerror = () => {
+        // onclose will fire after error; avoid double-scheduling
+      }
+    }
+
+    const scheduleReconnect = () => {
+      if (closed) return
+      const delay = Math.min(30_000, 1000 * 2 ** Math.min(attempt, 4))
+      attempt += 1
+      reconnectTimer = window.setTimeout(connect, delay)
+    }
+
+    connect()
+
+    return () => {
+      closed = true
+      if (reconnectTimer !== undefined) window.clearTimeout(reconnectTimer)
+      closeWebSocket(ws)
+    }
   }, [loadBanner, maintenanceBannerEnabled])
 
   if (!maintenanceBannerEnabled || !banner || hidden) {

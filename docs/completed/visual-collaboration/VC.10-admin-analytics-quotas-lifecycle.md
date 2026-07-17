@@ -1,6 +1,6 @@
 # VC.10 — Admin Governance, Analytics, Quotas & Lifecycle
 
-> Implementation plan. Source: net-new capability (real-time visual collaboration boards). Landscape: [visual-collaboration/README](README.md). Integrates the platform flag layer (`server/internal/repos/platformconfig/features.go`), storage quotas (`server/internal/service/storagequota`), and the observability layer (`server/internal/telemetry`).
+> Implementation plan. Source: net-new capability (real-time visual collaboration boards). Landscape: [visual-collaboration/README](../../plan/visual-collaboration/README.md). Integrates the platform flag layer (`server/internal/repos/platformconfig/features.go`), storage quotas (`server/internal/service/storagequota`), and the observability layer (`server/internal/telemetry`).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Visual Collaboration Boards |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Collaboration squad + Platform |
 | **Depends on** | VC.1 |
@@ -85,10 +85,10 @@ adds the admin, analytics, quota, and lifecycle layer that makes Boards enterpri
   p95 < 500 ms.
 - **Security** — analytics respect FERPA (managers see only their course; org admins see aggregates, not
   peer-visible student content); policy changes are audited.
-- **Privacy & Compliance** — full coverage by DSAR ([S01](../standards/S01-unified-data-subject-rights-orchestration.md)),
-  retention/deletion ([S02](../standards/S02-data-retention-deletion-engine.md)), and children's privacy
-  ([S08](../standards/S08-childrens-privacy-age-assurance-design-codes.md)); board content registered in the
-  data inventory/RoPA ([S05](../standards/S05-ropa-data-inventory-mapping.md)).
+- **Privacy & Compliance** — full coverage by DSAR ([S01](../../plan/standards/S01-unified-data-subject-rights-orchestration.md)),
+  retention/deletion ([S02](../../plan/standards/S02-data-retention-deletion-engine.md)), and children's privacy
+  ([S08](../../plan/standards/S08-childrens-privacy-age-assurance-design-codes.md)); board content registered in the
+  data inventory/RoPA ([S05](../../plan/standards/S05-ropa-data-inventory-mapping.md)).
 - **Accessibility** — admin/analytics dashboards are accessible; charts have table alternatives.
 - **Scalability** — analytics aggregation batched; quota checks O(1) on the hot upload path.
 - **Reliability** — deletion/erasure is verifiable (no orphaned attachments after erasure); idempotent
@@ -123,7 +123,7 @@ adds the admin, analytics, quota, and lifecycle layer that makes Boards enterpri
 
 ## 8. Data Model
 
-Migration `387_board_admin_analytics.sql`:
+Migration `398_board_admin_analytics.sql`:
 
 ```sql
 -- Platform master flag lives on the platform settings table (DB-managed, default FALSE),
@@ -193,7 +193,7 @@ of scope for GA; listed here as the home for future AI-on-boards features.
   `server/internal/service/storagequota` (quota enforcement),
   `server/internal/service/storageobjects`/`filestorage` (attachment accounting),
   `server/internal/telemetry` (metrics/traces — see the observability memory note),
-  DSAR/retention/deletion engines from [`../standards/`](../standards/),
+  DSAR/retention/deletion engines from [`../../plan/standards/`](../../plan/standards/),
   `clients/web/src/components/settings/platform-settings-panel.tsx`, existing analytics dashboards.
 - **New**: `server/internal/repos/board/policies.go`, `board/analytics.go`,
   `server/internal/httpserver/board_admin_http.go`, analytics rollup job (`server/internal/background/`),
@@ -261,10 +261,10 @@ of scope for GA; listed here as the home for future AI-on-boards features.
   `server/internal/service/storagequota/*`, `server/internal/service/storageobjects/*`,
   `server/internal/telemetry/*` (per the observability memory), `server/internal/httpserver/settings_platform.go`,
   `clients/web/src/components/settings/platform-settings-panel.tsx`.
-- Related plans: [VC.1](../../completed/visual-collaboration/VC.1-foundation-and-feature-flag.md), [VC.6](VC.6-sharing-access-contributors.md),
+- Related plans: [VC.1](VC.1-foundation-and-feature-flag.md), [VC.6](VC.6-sharing-access-contributors.md),
   [VC.7](VC.7-moderation-safety-governance.md), [VC.9](VC.9-embedding-export-presentation.md),
-  and the compliance engines in [`../standards/`](../standards/)
-  ([S01](../standards/S01-unified-data-subject-rights-orchestration.md),
-  [S02](../standards/S02-data-retention-deletion-engine.md),
-  [S05](../standards/S05-ropa-data-inventory-mapping.md),
-  [S08](../standards/S08-childrens-privacy-age-assurance-design-codes.md)).
+  and the compliance engines in [`../../plan/standards/`](../../plan/standards/)
+  ([S01](../../plan/standards/S01-unified-data-subject-rights-orchestration.md),
+  [S02](../../plan/standards/S02-data-retention-deletion-engine.md),
+  [S05](../../plan/standards/S05-ropa-data-inventory-mapping.md),
+  [S08](../../plan/standards/S08-childrens-privacy-age-assurance-design-codes.md)).

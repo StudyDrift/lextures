@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   applyReactionResult,
   boardPostReactionScore,
+  renderBoardSurfacePng,
   videoEmbedFromUrl,
   type BoardPost,
 } from '../boards-api'
@@ -46,6 +47,21 @@ describe('boardPostReactionScore', () => {
     ).toBeGreaterThan(
       boardPostReactionScore({ avgStars: 3, reactionCount: 100 } as BoardPost, 'star'),
     )
+  })
+})
+
+describe('renderBoardSurfacePng', () => {
+  it('produces a PNG blob from card rows when canvas 2d is available', async () => {
+    const canvas = document.createElement('canvas')
+    if (!canvas.getContext('2d')) {
+      // jsdom often lacks a real 2d context; skip rather than fail CI.
+      return
+    }
+    const blob = await renderBoardSurfacePng('Demo', [
+      { sectionTitle: 'Ideas', title: 'One', body: 'hello' },
+    ])
+    expect(blob.type).toBe('image/png')
+    expect(blob.size).toBeGreaterThan(50)
   })
 })
 

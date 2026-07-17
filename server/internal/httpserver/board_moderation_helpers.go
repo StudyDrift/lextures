@@ -33,6 +33,14 @@ func (d Deps) writeGateReject(w http.ResponseWriter, err error) bool {
 }
 
 func (d Deps) minorsModerationFloor(ctx context.Context, courseCode string) bool {
+	orgID, err := board.OrgIDForCourse(ctx, d.Pool, courseCode)
+	if err != nil {
+		return false
+	}
+	pol, err := board.ResolveOrgPolicies(ctx, d.Pool, orgID)
+	if err != nil || !pol.MinorModerationFloor {
+		return false
+	}
 	if !d.effectiveConfig().CoppaWorkflowEnabled {
 		return false
 	}

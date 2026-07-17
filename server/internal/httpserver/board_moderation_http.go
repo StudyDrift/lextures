@@ -115,6 +115,7 @@ func (d Deps) handlePostModerationAction(status, action string) http.HandlerFunc
 		tid, _ := uuid.Parse(postID)
 		_ = board.InsertModerationLog(r.Context(), d.Pool, boardID, &viewer, action, board.TargetPost, &tid, in.Reason)
 		telemetry.RecordBusinessEvent("board.moderation." + action)
+		notifyBoardPeers(r.Context(), boardID, "post.moderated", postID)
 		_ = b
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(boardPostJSONWithAttribution(*updated, courseCode, d.effectiveConfig().AvScanningEnabled, b.Attribution, caps))
@@ -175,6 +176,7 @@ func (d Deps) handleHideRemovePost(remove bool) http.HandlerFunc {
 		tid, _ := uuid.Parse(postID)
 		_ = board.InsertModerationLog(r.Context(), d.Pool, boardID, &viewer, action, board.TargetPost, &tid, in.Reason)
 		telemetry.RecordBusinessEvent("board.moderation." + action)
+		notifyBoardPeers(r.Context(), boardID, "post.moderated", postID)
 		_ = b
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(boardPostJSONWithAttribution(*updated, courseCode, d.effectiveConfig().AvScanningEnabled, b.Attribution, caps))

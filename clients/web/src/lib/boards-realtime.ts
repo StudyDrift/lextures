@@ -1,10 +1,13 @@
 /**
  * Board realtime — Y.js CRDT + awareness over the Go WebSocket relay (VC.4).
+ * REST mutations also push JSON `board.changed` text frames so peers refetch
+ * post bodies without relying solely on the mutating client's CRDT publish.
  */
 import { useEffect, useReducer, useRef, useState } from 'react'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import type { Awareness } from 'y-protocols/awareness'
+import { wsUrl } from './api'
 import { getAccessToken, getJwtSubject } from './auth'
 import type { BoardPost, BoardPostPosition, ArrangeBoardPostInput } from './boards-api'
 import { colorForUser } from '../components/collab/collab-utils'
@@ -30,26 +33,59 @@ export type BoardArrangement = {
   lat?: number | null
   lng?: number | null
   deleted?: boolean
+  /** ISO timestamp — newer CRDT/REST arrangement wins when merging. */
+  updatedAt?: string
+}
+
+export type BoardChangedEvent = {
+  type: 'board.changed'
+  reason: string
+  postId?: string
 }
 
 /** Base WebSocket URL; y-websocket appends `/{roomname}` (use roomname `ws`). */
 export function boardWsUrl(courseCode: string, boardId: string): string {
-  const base = (import.meta.env.VITE_API_URL ?? window.location.origin)
-    .replace(/^https?:\/\//, '')
-    .replace(/^http:\/\//, '')
-  const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
-  return `${proto}://${base}/api/v1/courses/${encodeURIComponent(courseCode)}/boards/${encodeURIComponent(boardId)}`
+  // Route through the shared helper so local Vite `/api` proxy upgrades work
+  // (direct :8080 WS fails when that port is SSH-tunneled without upgrades).
+  return wsUrl(`/api/v1/courses/${encodeURIComponent(courseCode)}/boards/${encodeURIComponent(boardId)}`)
 }
 
-function buildAuthWebSocket(token: string): typeof WebSocket {
+export function parseBoardChangedEvent(raw: string): BoardChangedEvent | null {
+  try {
+    const msg = JSON.parse(raw) as { type?: string; reason?: string; postId?: string }
+    if (msg.type !== 'board.changed' || typeof msg.reason !== 'string') return null
+    return {
+      type: 'board.changed',
+      reason: msg.reason,
+      postId: typeof msg.postId === 'string' ? msg.postId : undefined,
+    }
+  } catch {
+    return null
+  }
+}
+
+function buildAuthWebSocket(
+  token: string,
+  onTextMessage: (data: string) => void,
+): typeof WebSocket {
   return class AuthWebSocket extends WebSocket {
     constructor(url: string | URL, protocols?: string | string[]) {
       super(url, protocols)
       this.addEventListener('open', () => {
         this.send(JSON.stringify({ authToken: token }))
       })
+      this.addEventListener('message', (ev: MessageEvent) => {
+        if (typeof ev.data === 'string') {
+          onTextMessage(ev.data)
+        }
+      })
     }
   }
+}
+
+export function clonePosition(position: BoardPostPosition | null | undefined): BoardPostPosition | null | undefined {
+  if (position == null) return position
+  return { x: position.x, y: position.y, w: position.w, h: position.h }
 }
 
 export function arrangementFromPost(post: BoardPost): BoardArrangement {
@@ -57,10 +93,11 @@ export function arrangementFromPost(post: BoardPost): BoardArrangement {
     id: post.id,
     sectionId: post.sectionId ?? null,
     sortIndex: post.sortIndex,
-    position: post.position ?? null,
+    position: clonePosition(post.position) ?? null,
     eventDate: post.eventDate ?? null,
     lat: post.lat ?? null,
     lng: post.lng ?? null,
+    updatedAt: post.updatedAt,
   }
 }
 
@@ -69,11 +106,20 @@ export function applyArrangementToPost(post: BoardPost, arr: BoardArrangement): 
     ...post,
     sectionId: arr.sectionId === undefined ? post.sectionId : (arr.sectionId ?? undefined),
     sortIndex: arr.sortIndex ?? post.sortIndex,
-    position: arr.position === undefined ? post.position : (arr.position ?? undefined),
+    position: arr.position === undefined ? post.position : (clonePosition(arr.position) ?? undefined),
     eventDate: arr.eventDate === undefined ? post.eventDate : (arr.eventDate ?? undefined),
     lat: arr.lat === undefined ? post.lat : (arr.lat ?? undefined),
     lng: arr.lng === undefined ? post.lng : (arr.lng ?? undefined),
+    updatedAt: arr.updatedAt && (!post.updatedAt || arr.updatedAt > post.updatedAt) ? arr.updatedAt : post.updatedAt,
   }
+}
+
+/** Prefer CRDT arrangement when it is at least as new as the REST post. */
+export function shouldApplyCrdtArrangement(post: BoardPost, arr: BoardArrangement): boolean {
+  if (arr.deleted) return true
+  if (!arr.updatedAt) return true
+  if (!post.updatedAt) return true
+  return arr.updatedAt >= post.updatedAt
 }
 
 export function mergePostsWithCrdt(posts: BoardPost[], arrangements: Map<string, BoardArrangement>): BoardPost[] {
@@ -84,7 +130,7 @@ export function mergePostsWithCrdt(posts: BoardPost[], arrangements: Map<string,
       continue
     }
     const existing = byId.get(id)
-    if (existing) {
+    if (existing && shouldApplyCrdtArrangement(existing, arr)) {
       byId.set(id, applyArrangementToPost(existing, arr))
     }
   }
@@ -123,6 +169,8 @@ export type UseBoardRealtimeOptions = {
   onRemoteCardAdded?: () => void
   /** Called when CRDT introduces a post id not yet in local REST state (refetch bodies). */
   onUnknownPostIds?: (ids: string[]) => void
+  /** Called when the server pushes a REST-originated board.changed event. */
+  onBoardChanged?: (event: BoardChangedEvent) => void
 }
 
 export type UseBoardRealtimeResult = {
@@ -138,7 +186,16 @@ export type UseBoardRealtimeResult = {
 }
 
 export function useBoardRealtime(opts: UseBoardRealtimeOptions): UseBoardRealtimeResult {
-  const { courseCode, boardId, enabled, displayName, posts, onRemoteCardAdded, onUnknownPostIds } = opts
+  const {
+    courseCode,
+    boardId,
+    enabled,
+    displayName,
+    posts,
+    onRemoteCardAdded,
+    onUnknownPostIds,
+    onBoardChanged,
+  } = opts
   const [session, dispatchSession] = useReducer(sessionReducer, null)
   const [connState, setConnState] = useState<BoardConnState>('connecting')
   const [arrangements, setArrangements] = useState<Map<string, BoardArrangement>>(new Map())
@@ -150,8 +207,10 @@ export function useBoardRealtime(opts: UseBoardRealtimeOptions): UseBoardRealtim
   announceRef.current = onRemoteCardAdded
   const unknownRef = useRef(onUnknownPostIds)
   unknownRef.current = onUnknownPostIds
+  const changedRef = useRef(onBoardChanged)
+  changedRef.current = onBoardChanged
 
-  const wsUrl = boardWsUrl(courseCode, boardId)
+  const wsBase = boardWsUrl(courseCode, boardId)
   const userId = getJwtSubject() ?? ''
 
   useEffect(() => {
@@ -163,10 +222,13 @@ export function useBoardRealtime(opts: UseBoardRealtimeOptions): UseBoardRealtim
     seededRef.current = false
     const ydoc = new Y.Doc()
     const token = getAccessToken() ?? ''
-    const provider = new WebsocketProvider(wsUrl, 'ws', ydoc, {
+    const provider = new WebsocketProvider(wsBase, 'ws', ydoc, {
       connect: true,
       params: { token },
-      WebSocketPolyfill: buildAuthWebSocket(token),
+      WebSocketPolyfill: buildAuthWebSocket(token, (raw) => {
+        const ev = parseBoardChangedEvent(raw)
+        if (ev) changedRef.current?.(ev)
+      }),
     })
 
     const rafId = requestAnimationFrame(() => {
@@ -205,7 +267,7 @@ export function useBoardRealtime(opts: UseBoardRealtimeOptions): UseBoardRealtim
       provider.destroy()
       ydoc.destroy()
     }
-  }, [enabled, courseCode, boardId, wsUrl])
+  }, [enabled, courseCode, boardId, wsBase])
 
   useEffect(() => {
     if (!session?.provider.awareness || !enabled) return
@@ -237,6 +299,26 @@ export function useBoardRealtime(opts: UseBoardRealtimeOptions): UseBoardRealtim
     seededRef.current = true
   }, [session, enabled, connState, posts])
 
+  // Heal stale CRDT arrangement from newer REST reads (e.g. after board.changed refetch).
+  useEffect(() => {
+    if (!session || !enabled || connState !== 'connected' || posts.length === 0) return
+    const postsMap = session.ydoc.getMap<BoardArrangement>(BOARD_POSTS_MAP)
+    session.ydoc.transact(() => {
+      for (const post of posts) {
+        const prev = postsMap.get(post.id)
+        if (prev?.deleted) continue
+        const fromPost = arrangementFromPost(post)
+        if (!prev) {
+          postsMap.set(post.id, fromPost)
+          continue
+        }
+        if (!prev.updatedAt || (fromPost.updatedAt && fromPost.updatedAt > prev.updatedAt)) {
+          postsMap.set(post.id, { ...fromPost, deleted: prev.deleted })
+        }
+      }
+    })
+  }, [session, enabled, connState, posts])
+
   function publishArrangement(postId: string, input: ArrangeBoardPostInput | BoardArrangement) {
     if (!session) return
     const postsMap = session.ydoc.getMap<BoardArrangement>(BOARD_POSTS_MAP)
@@ -244,7 +326,9 @@ export function useBoardRealtime(opts: UseBoardRealtimeOptions): UseBoardRealtim
     const next: BoardArrangement = { ...prev, id: postId }
     if ('sectionId' in input && input.sectionId !== undefined) next.sectionId = input.sectionId
     if ('sortIndex' in input && input.sortIndex !== undefined) next.sortIndex = input.sortIndex
-    if ('position' in input && input.position !== undefined) next.position = input.position
+    if ('position' in input && input.position !== undefined) {
+      next.position = clonePosition(input.position) ?? null
+    }
     if ('eventDate' in input && input.eventDate !== undefined) {
       next.eventDate = input.eventDate
     }
@@ -255,6 +339,10 @@ export function useBoardRealtime(opts: UseBoardRealtimeOptions): UseBoardRealtim
       next.lng = null
     }
     if ('deleted' in input && input.deleted !== undefined) next.deleted = input.deleted
+    next.updatedAt =
+      'updatedAt' in input && typeof input.updatedAt === 'string' && input.updatedAt
+        ? input.updatedAt
+        : new Date().toISOString()
     session.ydoc.transact(() => {
       postsMap.set(postId, next)
     })
@@ -272,7 +360,12 @@ export function useBoardRealtime(opts: UseBoardRealtimeOptions): UseBoardRealtim
     session.ydoc.transact(() => {
       const postsMap = session.ydoc.getMap<BoardArrangement>(BOARD_POSTS_MAP)
       const prev = postsMap.get(postId) ?? { id: postId }
-      postsMap.set(postId, { ...prev, id: postId, deleted: true })
+      postsMap.set(postId, {
+        ...prev,
+        id: postId,
+        deleted: true,
+        updatedAt: new Date().toISOString(),
+      })
     })
   }
 

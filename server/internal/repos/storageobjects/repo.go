@@ -159,16 +159,16 @@ func ListPendingLegacy(ctx context.Context, pool *pgxpool.Pool, limit int) ([]uu
 
 // QuarantineRow is a quarantined file for the admin list.
 type QuarantineRow struct {
-	ObjectID     uuid.UUID
-	ObjectKey    string
-	VirusName    *string
-	UploadedBy   *uuid.UUID
-	UploaderName *string
+	ObjectID      uuid.UUID
+	ObjectKey     string
+	VirusName     *string
+	UploadedBy    *uuid.UUID
+	UploaderName  *string
 	UploaderEmail *string
-	CourseID     *uuid.UUID
-	CourseCode   *string
-	CourseTitle  *string
-	CreatedAt    time.Time
+	CourseID      *uuid.UUID
+	CourseCode    *string
+	CourseTitle   *string
+	CreatedAt     time.Time
 }
 
 // ListQuarantined returns quarantined objects for admin review.
@@ -209,6 +209,14 @@ func ListQuarantined(ctx context.Context, pool *pgxpool.Pool, limit int) ([]Quar
 func SoftDelete(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) error {
 	_, err := pool.Exec(ctx, `
 		UPDATE storage.objects SET deleted_at = now() WHERE id = $1`, id)
+	return err
+}
+
+// SoftDeleteByObjectKey marks an object deleted by its storage key.
+func SoftDeleteByObjectKey(ctx context.Context, pool *pgxpool.Pool, objectKey string) error {
+	_, err := pool.Exec(ctx, `
+		UPDATE storage.objects SET deleted_at = now()
+		WHERE object_key = $1 AND deleted_at IS NULL`, objectKey)
 	return err
 }
 

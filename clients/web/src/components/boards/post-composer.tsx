@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Mic, Square } from 'lucide-react'
 import {
@@ -29,6 +29,7 @@ type PostComposerProps = {
 
 export function PostComposer({ courseCode, boardId, onCreated }: PostComposerProps) {
   const { t } = useTranslation('common')
+  const dialogId = useId()
   const [open, setOpen] = useState(false)
   const [contentType, setContentType] = useState<BoardContentType>('text')
   const [title, setTitle] = useState('')
@@ -42,7 +43,10 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
   const mediaRecRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const dropRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const titleInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!open) return
@@ -80,6 +84,41 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
     setDrawing([])
     setContentType('text')
   }
+
+  function closePopover() {
+    reset()
+    setOpen(false)
+    triggerRef.current?.focus()
+  }
+
+  useEffect(() => {
+    if (!open) return
+    const focusTimer = window.setTimeout(() => {
+      titleInputRef.current?.focus()
+    }, 0)
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
+        closePopover()
+      }
+    }
+    function onPointerDown(e: PointerEvent) {
+      const target = e.target as Node | null
+      if (!target) return
+      if (rootRef.current?.contains(target)) return
+      closePopover()
+    }
+    document.addEventListener('keydown', onKeyDown, true)
+    document.addEventListener('pointerdown', onPointerDown, true)
+    return () => {
+      window.clearTimeout(focusTimer)
+      document.removeEventListener('keydown', onKeyDown, true)
+      document.removeEventListener('pointerdown', onPointerDown, true)
+    }
+    // closePopover closes over latest reset; re-bind only when open flips
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- open-only lifecycle
+  }, [open])
 
   async function startRecording() {
     try {
@@ -171,7 +210,8 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
         document.getElementById(`board-post-${created.id}`)?.focus()
       })
     } catch (err) {
-      toastMutationError(err instanceof Error ? err.message : String(err))
+      const msg = err instanceof Error ? err.message : String(err)
+      toastMutationError(msg === 'QUOTA_EXCEEDED' ? t('boards.compose.quotaExceeded') : msg)
     } finally {
       setSubmitting(false)
     }
@@ -190,24 +230,33 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
   }
 
   return (
-    <div className="relative">
-      {!open ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          aria-label={t('boards.compose.openAria')}
-        >
-          <Plus className="size-4" aria-hidden />
-          {t('boards.compose.open')}
-        </button>
-      ) : (
+    <div ref={rootRef} className="relative">
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => {
+          if (open) closePopover()
+          else setOpen(true)
+        }}
+        className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        aria-label={t('boards.compose.openAria')}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls={open ? dialogId : undefined}
+      >
+        <Plus className="size-4" aria-hidden />
+        {t('boards.compose.open')}
+      </button>
+
+      {open ? (
         <div
-          ref={dropRef}
+          id={dialogId}
+          ref={panelRef}
           onDragOver={(e) => e.preventDefault()}
           onDrop={onDrop}
-          className="fixed inset-x-0 bottom-0 z-40 max-h-[85vh] overflow-y-auto rounded-t-xl border border-slate-200 bg-white p-4 shadow-2xl sm:static sm:max-h-none sm:rounded-lg sm:shadow-md dark:border-neutral-700 dark:bg-neutral-900"
+          className="absolute end-0 top-full z-50 mt-2 w-[min(24rem,calc(100vw-1.5rem))] max-h-[min(32rem,calc(100dvh-6rem))] overflow-y-auto rounded-xl border border-slate-200 bg-white p-4 shadow-xl ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10"
           role="dialog"
+          aria-modal="true"
           aria-label={t('boards.compose.dialogAria')}
         >
           <div className="mb-3 flex flex-wrap gap-1" role="tablist" aria-label={t('boards.compose.typeSwitcher')}>
@@ -233,6 +282,7 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
             <label className="block text-sm">
               <span className="mb-1 block text-slate-600 dark:text-neutral-300">{t('boards.compose.titleLabel')}</span>
               <input
+                ref={titleInputRef}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
@@ -328,10 +378,7 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
           <div className="mt-4 flex flex-wrap justify-end gap-2">
             <button
               type="button"
-              onClick={() => {
-                reset()
-                setOpen(false)
-              }}
+              onClick={closePopover}
               className="rounded-md px-3 py-1.5 text-sm text-slate-600 dark:text-neutral-300"
               disabled={submitting}
             >
@@ -347,7 +394,7 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
             </button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
