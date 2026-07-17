@@ -130,10 +130,8 @@ func CheckAIGenerationQuota(ctx context.Context, pool *pgxpool.Pool, courseCode 
 	if err != nil {
 		return err
 	}
-	if !eff.AIGenerationEnabled {
-		// Section default off — still allow when platform ff is on; callers gate on FFIqAiGeneration.
-		// Quota only applies when a daily budget is set.
-	}
+	// AIGenerationEnabled is enforced by the HTTP handler via FFIqAiGeneration;
+	// this helper only applies the optional daily budget when configured.
 	if eff.AIGenerationsPerDay == nil {
 		return nil
 	}

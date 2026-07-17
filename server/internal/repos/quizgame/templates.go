@@ -74,7 +74,6 @@ func ListTemplates(ctx context.Context, pool *pgxpool.Pool, f ListTemplatesFilte
 	if search != "" {
 		q += fmt.Sprintf(` AND (k.title ILIKE $%d OR k.description ILIKE $%d)`, n, n)
 		args = append(args, "%"+search+"%")
-		n++
 	}
 
 	q += ` ORDER BY

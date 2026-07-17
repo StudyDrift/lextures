@@ -366,27 +366,27 @@ func writeQuizGameReportHTML(w http.ResponseWriter, sess *quizgame.Session, rep 
 	b.WriteString("<h1>")
 	b.WriteString(html.EscapeString(sess.KitSnapshot.Title))
 	b.WriteString("</h1>")
-	b.WriteString(fmt.Sprintf("<p>Players: %d · Answered: %d", rep.PlayerCount, rep.AnsweredCount))
+	fmt.Fprintf(&b, "<p>Players: %d · Answered: %d", rep.PlayerCount, rep.AnsweredCount)
 	if rep.ScoreAvg != nil {
-		b.WriteString(fmt.Sprintf(" · Avg score: %.2f", *rep.ScoreAvg))
+		fmt.Fprintf(&b, " · Avg score: %.2f", *rep.ScoreAvg)
 	}
 	if rep.ScoreMedian != nil {
-		b.WriteString(fmt.Sprintf(" · Median: %.2f", *rep.ScoreMedian))
+		fmt.Fprintf(&b, " · Median: %.2f", *rep.ScoreMedian)
 	}
 	b.WriteString("</p>")
 	b.WriteString("<h2>Per-question</h2><table><thead><tr><th>#</th><th>Prompt</th><th>Correct %</th><th>Avg ms</th><th>Answers</th></tr></thead><tbody>")
 	for _, q := range rep.PerQuestion {
-		b.WriteString(fmt.Sprintf("<tr><td>%d</td><td>%s</td><td>%.2f</td><td>%.0f</td><td>%d</td></tr>",
-			q.Index+1, html.EscapeString(q.Prompt), q.CorrectPct, q.AvgMs, q.AnswerCount))
+		fmt.Fprintf(&b, "<tr><td>%d</td><td>%s</td><td>%.2f</td><td>%.0f</td><td>%d</td></tr>",
+			q.Index+1, html.EscapeString(q.Prompt), q.CorrectPct, q.AvgMs, q.AnswerCount)
 	}
 	b.WriteString("</tbody></table>")
 	b.WriteString("<h2>Players</h2><table><thead><tr><th>Rank</th><th>Nickname</th><th>Score</th><th>Correct</th><th>Guest</th></tr></thead><tbody>")
 	for _, p := range players {
-		b.WriteString(fmt.Sprintf("<tr><td>%d</td><td>%s</td><td>%d</td><td>%d</td><td>%v</td></tr>",
-			p.Rank, html.EscapeString(p.Nickname), p.TotalScore, p.Correct, p.IsGuest))
+		fmt.Fprintf(&b, "<tr><td>%d</td><td>%s</td><td>%d</td><td>%d</td><td>%v</td></tr>",
+			p.Rank, html.EscapeString(p.Nickname), p.TotalScore, p.Correct, p.IsGuest)
 	}
 	b.WriteString("</tbody></table>")
-	b.WriteString(fmt.Sprintf("<p><small>Generated %s</small></p>", html.EscapeString(time.Now().UTC().Format(time.RFC3339))))
+	fmt.Fprintf(&b, "<p><small>Generated %s</small></p>", html.EscapeString(time.Now().UTC().Format(time.RFC3339)))
 	if !asPDF {
 		b.WriteString(`<p><button onclick="window.print()">Print / Save as PDF</button></p>`)
 	}
@@ -406,8 +406,8 @@ func writeQuizGameMyResultsHTML(w http.ResponseWriter, sess *quizgame.Session, r
 	b.WriteString("<h1>")
 	b.WriteString(html.EscapeString(sess.KitSnapshot.Title))
 	b.WriteString(" — My results</h1>")
-	b.WriteString(fmt.Sprintf("<p>Score: %d · Rank: %d of %d · Correct: %d / %d</p>",
-		results.TotalScore, results.Rank, results.PlayerCount, results.Correct, results.Answered))
+	fmt.Fprintf(&b, "<p>Score: %d · Rank: %d of %d · Correct: %d / %d</p>",
+		results.TotalScore, results.Rank, results.PlayerCount, results.Correct, results.Answered)
 	b.WriteString("<h2>Questions to review</h2>")
 	if len(results.ReviewThese) == 0 {
 		b.WriteString("<p>Nothing to review — nice work!</p>")

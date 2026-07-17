@@ -21,7 +21,7 @@ func TestQuizgameAdmin_SettingsQuotasReviewForceEnd_Pg(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 
-	pool, h, tok, cc, _ := setupQuizKitTest(t, ctx, "teacher", true, true)
+	pool, _, tok, cc, _ := setupQuizKitTest(t, ctx, "teacher", true, true)
 	defer pool.Close()
 
 	var teacherID uuid.UUID
@@ -39,7 +39,7 @@ func TestQuizgameAdmin_SettingsQuotasReviewForceEnd_Pg(t *testing.T) {
 	}
 
 	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
-	h = NewHandler(Deps{
+	h := NewHandler(Deps{
 		Pool:      pool,
 		JWTSigner: signer,
 		Config: config.Config{

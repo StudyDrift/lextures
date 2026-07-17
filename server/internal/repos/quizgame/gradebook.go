@@ -184,7 +184,7 @@ func PushGradebookLink(ctx context.Context, pool *pgxpool.Pool, in CreateGradebo
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	itemID := uuid.Nil
+	var itemID uuid.UUID
 	if existing != nil {
 		itemID, err = uuid.Parse(existing.GradebookItemID)
 		if err != nil {

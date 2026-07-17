@@ -1777,6 +1777,8 @@
   "liveQuiz.team.answerRule": "Answering",
   "liveQuiz.team.eachMember": "Each member answers",
   "liveQuiz.team.oneDevice": "One device per team",
+  "liveQuiz.team.autoBalance": "Auto-balance teams",
+  "liveQuiz.paced.start": "Start student-paced game",
   "liveQuiz.paced.shuffle": "Shuffle question order per player",
   "liveQuiz.paced.perQuestionTimers": "Per-question timers",
   "liveQuiz.paced.timeBudget": "Overall time budget (seconds, 0 = none)",
