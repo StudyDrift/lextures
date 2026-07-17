@@ -21,6 +21,7 @@ import {
   Archive,
   Activity,
   Clock,
+  LayoutGrid,
 } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
@@ -59,6 +60,7 @@ export function SideNavAdminLinks() {
     ffSisIntegration,
     ffWebhooks,
     ffContentFilterIntegration,
+    ffVisualBoards,
     ffIncompleteGradeWorkflow,
     ffGradeSubmission,
     ffAcademicCalendar,
@@ -189,6 +191,15 @@ export function SideNavAdminLinks() {
           >
             Scheduled jobs
           </SideNavLink>
+          {ffVisualBoards ? (
+            <SideNavLink
+              to={orgPath('/admin/boards', orgId)}
+              className={() => (active('/admin/boards') ? sideNavActiveClass : '')}
+              icon={<LayoutGrid className="h-5 w-5" />}
+            >
+              Collaboration boards
+            </SideNavLink>
+          ) : null}
 
           {showIntegrations ? (
             <>

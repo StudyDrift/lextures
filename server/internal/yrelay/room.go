@@ -106,6 +106,13 @@ func NewRegistry() *Registry {
 	return &Registry{rooms: make(map[uuid.UUID]*Room)}
 }
 
+// Get returns the room for id, or nil if none exists.
+func (reg *Registry) Get(id uuid.UUID) *Room {
+	reg.mu.RLock()
+	defer reg.mu.RUnlock()
+	return reg.rooms[id]
+}
+
 // GetOrCreate returns the room for id, creating it if needed.
 func (reg *Registry) GetOrCreate(id uuid.UUID) *Room {
 	reg.mu.Lock()

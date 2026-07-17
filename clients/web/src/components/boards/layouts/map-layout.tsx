@@ -128,20 +128,23 @@ export function MapLayout(props: LayoutRendererProps) {
       </div>
 
       {selected ? (
-        <div className="relative max-w-md">
-          <div className="absolute end-2 top-2 z-10">
-            <CardArrangeMenu
-              post={selected}
-              sections={props.sections}
-              siblings={props.posts}
-              canArrange={props.canArrangePost(selected)}
-              onMoveToSection={(sectionId) => void props.onArrange(selected.id, { sectionId })}
-              onReorder={(sortIndex) => void props.onArrange(selected.id, { sortIndex })}
-              showMap
-              onSetCoords={(lat, lng) => void props.onArrange(selected.id, { lat, lng })}
-            />
-          </div>
-          <PostCard post={selected} {...postCardEngagementProps(props, selected)} />
+        <div className="max-w-md">
+          <PostCard
+            post={selected}
+            {...postCardEngagementProps(props, selected)}
+            headerActions={
+              <CardArrangeMenu
+                post={selected}
+                sections={props.sections}
+                siblings={props.posts}
+                canArrange={props.canArrangePost(selected)}
+                onMoveToSection={(sectionId) => void props.onArrange(selected.id, { sectionId })}
+                onReorder={(sortIndex) => void props.onArrange(selected.id, { sortIndex })}
+                showMap
+                onSetCoords={(lat, lng) => void props.onArrange(selected.id, { lat, lng })}
+              />
+            }
+          />
         </div>
       ) : null}
 
@@ -152,20 +155,23 @@ export function MapLayout(props: LayoutRendererProps) {
           </h3>
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {unpinned.map((post) => (
-              <li key={post.id} className="relative">
-                <div className="absolute end-2 top-2 z-10">
-                  <CardArrangeMenu
-                    post={post}
-                    sections={props.sections}
-                    siblings={unpinned}
-                    canArrange={props.canArrangePost(post)}
-                    onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
-                    onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
-                    showMap
-                    onSetCoords={(lat, lng) => void props.onArrange(post.id, { lat, lng })}
-                  />
-                </div>
-                <PostCard post={post} {...postCardEngagementProps(props, post)} />
+              <li key={post.id}>
+                <PostCard
+                  post={post}
+                  {...postCardEngagementProps(props, post)}
+                  headerActions={
+                    <CardArrangeMenu
+                      post={post}
+                      sections={props.sections}
+                      siblings={unpinned}
+                      canArrange={props.canArrangePost(post)}
+                      onMoveToSection={(sectionId) => void props.onArrange(post.id, { sectionId })}
+                      onReorder={(sortIndex) => void props.onArrange(post.id, { sortIndex })}
+                      showMap
+                      onSetCoords={(lat, lng) => void props.onArrange(post.id, { lat, lng })}
+                    />
+                  }
+                />
               </li>
             ))}
           </ul>

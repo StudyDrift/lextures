@@ -26,7 +26,11 @@ import { MathBlock, MathInline } from '../extensions/math-tip-tap'
 import { setNotebookTaskContext } from '../../../lib/notebook-task-context'
 import { NotebookTask, type NotebookTaskContext } from '../extensions/notebook-task-tip-tap'
 import { WhiteboardBlock } from '../extensions/whiteboard-tip-tap'
+import { BoardBlock } from '../extensions/board-tip-tap'
+import { BoardPickerDialog } from '../../boards/board-picker-dialog'
+import { useCourseNavFeatures } from '../../../context/course-nav-features-context'
 import { altTextEnforcementFeatureEnabled } from '../../../lib/platform-features'
+import type { Board } from '../../../lib/boards-api'
 
 const editorShellClass = [
   'tiptap',
@@ -140,6 +144,9 @@ export function MarkdownBodyEditor({
   onEquationSlash,
   notebookTaskContext = null,
 }: MarkdownBodyEditorProps) {
+  const { visualBoardsEnabled } = useCourseNavFeatures()
+  const [boardPickerOpen, setBoardPickerOpen] = useState(false)
+  const boardInsertPosRef = useRef<number | null>(null)
   const skipEmit = useRef(false)
   const onChangeRef = useRef(onChange)
   const onFocusRef = useRef(onFocus)
@@ -350,13 +357,16 @@ export function MarkdownBodyEditor({
 
   const imageSlashEnabled = Boolean(uploadCourseImage) || Boolean(showImagePickerRow)
 
+  const boardSlashEnabled = Boolean(courseCode) && visualBoardsEnabled
+
   const slashCommands = useMemo(
     () =>
       slashCommandsForEditor({
         equation: Boolean(onEquationSlash),
         image: imageSlashEnabled,
+        board: boardSlashEnabled,
       }),
-    [onEquationSlash, imageSlashEnabled],
+    [onEquationSlash, imageSlashEnabled, boardSlashEnabled],
   )
 
   const filteredSlashCommands = useMemo(
@@ -409,6 +419,7 @@ export function MarkdownBodyEditor({
         MathBlock,
         MathInline,
         WhiteboardBlock,
+        BoardBlock,
         NotebookTask.configure({ notebookTaskContext }),
         Markdown.configure({ markedOptions: { gfm: true } }),
         Link.configure({
@@ -578,10 +589,31 @@ export function MarkdownBodyEditor({
       applySlashCommand(editor, command, { from: su.from, to: su.to }, {
         onEquation: onEquationSlashRef.current,
         onImage: () => setImageUploadOpen(true),
+        onBoard: () => {
+          boardInsertPosRef.current = su.from
+          setBoardPickerOpen(true)
+        },
       })
       setSlashUi(null)
     },
     [editor],
+  )
+
+  const insertPickedBoard = useCallback(
+    (board: Board) => {
+      if (!editor || !courseCode) return
+      const pos = boardInsertPosRef.current ?? editor.state.selection.from
+      boardInsertPosRef.current = null
+      editor
+        .chain()
+        .focus()
+        .insertContentAt(pos, {
+          type: 'board_block',
+          attrs: { boardId: board.id, courseCode },
+        })
+        .run()
+    },
+    [editor, courseCode],
   )
 
   const cancelSlash = useCallback(() => {
@@ -1065,6 +1097,14 @@ export function MarkdownBodyEditor({
           open={imageUploadOpen}
           onClose={() => setImageUploadOpen(false)}
           onUpload={handleImageModalUpload}
+        />
+      ) : null}
+      {courseCode && boardSlashEnabled ? (
+        <BoardPickerDialog
+          open={boardPickerOpen}
+          courseCode={courseCode}
+          onClose={() => setBoardPickerOpen(false)}
+          onPick={insertPickedBoard}
         />
       ) : null}
     </>

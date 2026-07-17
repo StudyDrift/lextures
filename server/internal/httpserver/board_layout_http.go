@@ -120,6 +120,7 @@ func (d Deps) handleCreateBoardSection() http.HandlerFunc {
 			return
 		}
 		telemetry.RecordBusinessEvent("board.section.created")
+		notifyBoardPeers(r.Context(), boardID, "section.created", "")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(boardSectionJSON(*created))
@@ -177,6 +178,7 @@ func (d Deps) handlePatchBoardSection() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Section not found.")
 			return
 		}
+		notifyBoardPeers(r.Context(), boardID, "section.updated", "")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(boardSectionJSON(*updated))
 	}
@@ -222,6 +224,7 @@ func (d Deps) handleDeleteBoardSection() http.HandlerFunc {
 			return
 		}
 		telemetry.RecordBusinessEvent("board.section.deleted")
+		notifyBoardPeers(r.Context(), boardID, "section.deleted", "")
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
@@ -332,6 +335,7 @@ func (d Deps) handleArrangeBoardPost() http.HandlerFunc {
 			return
 		}
 		telemetry.RecordBusinessEvent("board.post.arranged")
+		notifyBoardPeers(r.Context(), boardID, "post.arranged", postID)
 		avOn := d.effectiveConfig().AvScanningEnabled
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(boardPostJSON(*updated, courseCode, avOn))

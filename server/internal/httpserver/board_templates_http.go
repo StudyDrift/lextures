@@ -55,15 +55,15 @@ func templateJSON(t board.Template) map[string]any {
 
 func copyJobJSON(j board.CopyJob) map[string]any {
 	out := map[string]any{
-		"id":             j.ID,
-		"sourceBoardId":  j.SourceBoardID,
-		"mode":           j.Mode,
-		"title":          j.Title,
-		"status":         j.Status,
-		"progress":       j.Progress,
-		"error":          j.Error,
-		"createdAt":      j.CreatedAt.UTC().Format(time.RFC3339),
-		"updatedAt":      j.UpdatedAt.UTC().Format(time.RFC3339),
+		"id":            j.ID,
+		"sourceBoardId": j.SourceBoardID,
+		"mode":          j.Mode,
+		"title":         j.Title,
+		"status":        j.Status,
+		"progress":      j.Progress,
+		"error":         j.Error,
+		"createdAt":     j.CreatedAt.UTC().Format(time.RFC3339),
+		"updatedAt":     j.UpdatedAt.UTC().Format(time.RFC3339),
 	}
 	if j.ResultBoardID != nil {
 		out["resultBoardId"] = *j.ResultBoardID
@@ -92,9 +92,6 @@ func (d Deps) handleListBoardTemplates() http.HandlerFunc {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
-		if d.visualBoardsMasterOff(w) {
 			return
 		}
 		viewer, ok := d.meUserID(w, r)
@@ -338,6 +335,9 @@ func (d Deps) createBoardFromSelector(
 			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not create board from template.")
 			return true
+		}
+		if pol, ok := d.orgBoardPoliciesForCourse(w, r, targetCourseCode); ok {
+			created = d.applyCreatePolicies(r, targetCourseCode, created, pol)
 		}
 		telemetry.RecordBusinessEvent("board.created.from_template")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

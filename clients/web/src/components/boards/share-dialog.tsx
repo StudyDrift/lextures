@@ -33,6 +33,7 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
   const { t } = useTranslation('common')
   const titleId = useId()
   const { ffBoardsExternalSharing } = usePlatformFeatures()
+  const externalSharingAllowed = board.externalSharingAllowed ?? ffBoardsExternalSharing
   const [visibility, setVisibility] = useState<BoardVisibility>(board.visibility)
   const [visibilityTarget, setVisibilityTarget] = useState(board.visibilityTarget ?? '')
   const [attribution, setAttribution] = useState<BoardAttribution>(board.attribution)
@@ -61,7 +62,7 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
     void listBoardMembers(courseCode, board.id)
       .then(setMembers)
       .catch(() => setMembers([]))
-    if (ffBoardsExternalSharing) {
+    if (externalSharingAllowed) {
       void listBoardShares(courseCode, board.id)
         .then(setShares)
         .catch((err) => {
@@ -70,11 +71,11 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
           setShares([])
         })
     }
-  }, [open, board, courseCode, ffBoardsExternalSharing])
+  }, [open, board, courseCode, externalSharingAllowed])
 
   if (!open) return null
 
-  const visibilityOptions = ffBoardsExternalSharing
+  const visibilityOptions = externalSharingAllowed
     ? [...IN_COURSE_VIS, ...EXTERNAL_VIS]
     : IN_COURSE_VIS
 

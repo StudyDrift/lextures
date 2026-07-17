@@ -19,6 +19,7 @@ import (
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/auth/jwtblocklist"
 	"github.com/lextures/lextures/server/internal/background"
+	"github.com/lextures/lextures/server/internal/bannerevents"
 	"github.com/lextures/lextures/server/internal/canvasimportevents"
 	"github.com/lextures/lextures/server/internal/canvasimportqueue"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncevents"
@@ -268,6 +269,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		Lti:                       ltiRT,
 		BrandingResolver:          brandingResolver,
 		NotifHub:                  notifevents.New(),
+		BannerHub:                 bannerevents.New(),
 		FeedHub:                   feedevents.New(),
 		CanvasImportHub:           canvasImportHub,
 		CanvasImportQueue:         canvasImportQueue,

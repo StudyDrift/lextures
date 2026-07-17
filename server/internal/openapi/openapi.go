@@ -1391,7 +1391,7 @@ const spec = `{
       "get": {
         "tags": ["courses"],
         "summary": "List collaboration boards (plan VC.1)",
-        "description": "Requires platform ffVisualBoards and per-course visualBoardsEnabled. Returns 404 when either flag is off.",
+        "description": "Requires per-course visualBoardsEnabled. Returns 404 when the course flag is off.",
         "security": [ { "bearerAuth": [] } ],
         "parameters": [
           { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
@@ -1443,7 +1443,7 @@ const spec = `{
       "get": {
         "tags": ["courses"],
         "summary": "List board templates (plan VC.8)",
-        "description": "Gallery of built-in, course, and org templates. Requires ffVisualBoards.",
+        "description": "Gallery of built-in, course, and org templates. Requires per-course visualBoardsEnabled.",
         "security": [ { "bearerAuth": [] } ],
         "parameters": [
           { "name": "scope", "in": "query", "schema": { "type": "string", "enum": ["builtin", "course", "org"] } },
@@ -1505,6 +1505,182 @@ const spec = `{
         "responses": {
           "200": { "description": "BoardCopyJob" },
           "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/admin/boards/policies": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Get org collaboration board policies (plan VC.10)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "orgId", "in": "query", "required": false, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "BoardOrgPolicies" },
+          "403": { "description": "Forbidden" }
+        }
+      },
+      "patch": {
+        "tags": ["admin"],
+        "summary": "Update org collaboration board policies (plan VC.10)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "orgId", "in": "query", "required": false, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "externalSharing": { "type": "boolean" },
+                  "minorModerationFloor": { "type": "boolean" },
+                  "defaultAttribution": { "type": "string", "enum": ["named", "anon_to_peers", "anonymous"] },
+                  "boardCapPerCourse": { "type": "integer", "minimum": 0, "nullable": true },
+                  "clearBoardCap": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "BoardOrgPolicies" },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/admin/boards/overview": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Org collaboration boards adoption overview (plan VC.10)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "orgId", "in": "query", "required": false, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "activeDays", "in": "query", "required": false, "schema": { "type": "integer", "default": 30 } }
+        ],
+        "responses": {
+          "200": { "description": "BoardAdminOverview" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/analytics": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Board engagement analytics for managers (plan VC.10)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "days", "in": "query", "required": false, "schema": { "type": "integer", "default": 14 } }
+        ],
+        "responses": {
+          "200": { "description": "BoardAnalyticsSummary" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/export": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Start a board export job (plan VC.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["format"],
+                "properties": {
+                  "format": { "type": "string", "enum": ["pdf", "csv", "image"] },
+                  "includeModeration": { "type": "boolean", "default": false }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": { "description": "{ job: BoardExportJob }" },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/export/{job_id}": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get board export job status (plan VC.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "job_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "BoardExportJob" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/export/{job_id}/content": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Download a completed board export file (plan VC.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "job_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Export file bytes" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not ready or not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/qr": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "QR code for board quick-join (plan VC.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["png", "svg"], "default": "png" } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "minimum": 64, "maximum": 1024 } },
+          { "name": "url", "in": "query", "schema": { "type": "string" }, "description": "Optional share/access URL on PublicWebOrigin" }
+        ],
+        "responses": {
+          "200": { "description": "PNG or SVG QR image; X-Board-Access-Url header has the encoded URL" },
+          "400": { "description": "Invalid url" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/boards/{board_id}/embed": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Embed render context for a board (plan VC.9)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ mode, board, posts, sections, capabilities }" },
+          "404": { "description": "Feature disabled" }
         }
       }
     },
@@ -2021,7 +2197,7 @@ const spec = `{
       "get": {
         "tags": ["courses"],
         "summary": "Board realtime WebSocket (plan VC.4)",
-        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"…\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffVisualBoards, ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
+        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"…\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
         "parameters": [
           { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
           { "name": "board_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }

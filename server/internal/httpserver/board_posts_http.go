@@ -19,6 +19,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/board"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/organization"
+	"github.com/lextures/lextures/server/internal/repos/storageobjects"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/telemetry"
 	"github.com/lextures/lextures/server/internal/workers/avscan"
@@ -237,6 +238,7 @@ func (d Deps) handleCreateBoardPost() http.HandlerFunc {
 			d.flagAVBlockedAttachment(r.Context(), courseCode, b, created.ID)
 		}
 		telemetry.RecordBusinessEvent("board.post.created")
+		notifyBoardPeers(r.Context(), boardID, "post.created", created.ID)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(boardPostJSONWithAttribution(*created, courseCode, d.effectiveConfig().AvScanningEnabled, b.Attribution, caps))
@@ -335,6 +337,7 @@ func (d Deps) handlePatchBoardPost() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not update post.")
 			return
 		}
+		notifyBoardPeers(r.Context(), boardID, "post.updated", postID)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(boardPostJSON(*updated, courseCode, d.effectiveConfig().AvScanningEnabled))
 	}
@@ -374,6 +377,7 @@ func (d Deps) handleDeleteBoardPost() http.HandlerFunc {
 			return
 		}
 		telemetry.RecordBusinessEvent("board.post.deleted")
+		notifyBoardPeers(r.Context(), boardID, "post.deleted", postID)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
@@ -440,6 +444,27 @@ func (d Deps) handleBoardAttachmentMultipart(w http.ResponseWriter, r *http.Requ
 	storageKey := fmt.Sprintf("boards/%s/%s/%s%s", courseCode, boardID, fileUUID, ext)
 
 	cfg := d.effectiveConfig()
+	cid, _ := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+	tenantID, orgErr := organization.OrgIDForUser(r.Context(), d.Pool, viewer)
+	if orgErr != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify storage quota.")
+		return
+	}
+	if d.StorageQuota != nil && header.Size > 0 {
+		violation, qErr := d.StorageQuota.CheckAndReserve(r.Context(), tenantID, cid, viewer, header.Size)
+		if qErr != nil {
+			log.Printf("board-attachment: quota check err=%v", qErr)
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify storage quota.")
+			return
+		}
+		if violation != nil {
+			telemetry.RecordBusinessEvent("board.attachment.quota_rejected")
+			apierr.WriteJSON(w, http.StatusForbidden, CodeQuotaExceeded,
+				"Storage limit reached. Ask an administrator to increase the course storage quota.")
+			return
+		}
+	}
+
 	storage := d.Storage
 	if storage == nil {
 		root := strings.TrimSpace(cfg.CourseFilesRoot)
@@ -450,23 +475,29 @@ func (d Deps) handleBoardAttachmentMultipart(w http.ResponseWriter, r *http.Requ
 	}
 	if perr := storage.PutObject(r.Context(), storageKey, f, header.Size, mimeType); perr != nil {
 		log.Printf("board-attachment: PutObject key=%s err=%v", storageKey, perr)
+		if d.StorageQuota != nil && header.Size > 0 {
+			_ = d.StorageQuota.Release(r.Context(), tenantID, cid, viewer, header.Size)
+		}
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to store file.")
 		return
 	}
 
 	scanStatus := board.ScanClean
+	uploader := viewer
 	if cfg.AvScanningEnabled {
 		scanStatus = board.ScanPending
-		cid, _ := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
-		tenantID, orgErr := organization.OrgIDForUser(r.Context(), d.Pool, viewer)
-		if orgErr == nil && cid != nil {
+		if cid != nil {
 			bucket := cfg.StorageBucket
-			uploader := viewer
 			_, regErr := avscan.RegisterAndEnqueue(r.Context(), d.Pool, tenantID, cid,
 				storageKey, bucket, mimeType, header.Size, &uploader, true)
 			if regErr != nil {
 				log.Printf("board-attachment: av register err=%v", regErr)
 			}
+		}
+	} else if cid != nil {
+		if _, upsErr := storageobjects.Upsert(r.Context(), d.Pool, tenantID, cid,
+			storageKey, cfg.StorageBucket, mimeType, header.Size, &uploader, false); upsErr != nil {
+			log.Printf("board-attachment: storageobjects upsert err=%v", upsErr)
 		}
 	}
 
@@ -474,6 +505,9 @@ func (d Deps) handleBoardAttachmentMultipart(w http.ResponseWriter, r *http.Requ
 		storageKey, header.Filename, mimeType, altText, scanStatus, header.Size)
 	if err != nil {
 		log.Printf("board-attachment: db err=%v", err)
+		if d.StorageQuota != nil && header.Size > 0 {
+			_ = d.StorageQuota.Release(r.Context(), tenantID, cid, viewer, header.Size)
+		}
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to record attachment.")
 		return
 	}
@@ -522,6 +556,25 @@ func (d Deps) handleBoardAttachmentPresign(w http.ResponseWriter, r *http.Reques
 	ext := filepath.Ext(in.FileName)
 	storageKey := fmt.Sprintf("boards/%s/%s/%s%s", courseCode, boardID, uuid.New().String(), ext)
 	cfg := d.effectiveConfig()
+	cid, _ := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+	tenantID, orgErr := organization.OrgIDForUser(r.Context(), d.Pool, viewer)
+	if orgErr != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify storage quota.")
+		return
+	}
+	if d.StorageQuota != nil && in.SizeBytes > 0 {
+		violation, qErr := d.StorageQuota.CheckAndReserve(r.Context(), tenantID, cid, viewer, in.SizeBytes)
+		if qErr != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify storage quota.")
+			return
+		}
+		if violation != nil {
+			telemetry.RecordBusinessEvent("board.attachment.quota_rejected")
+			apierr.WriteJSON(w, http.StatusForbidden, CodeQuotaExceeded,
+				"Storage limit reached. Ask an administrator to increase the course storage quota.")
+			return
+		}
+	}
 
 	var putURL string
 	var expiresAt string
@@ -532,23 +585,46 @@ func (d Deps) handleBoardAttachmentPresign(w http.ResponseWriter, r *http.Reques
 		}
 		u, err := s3d.PresignedPutURL(r.Context(), storageKey, ttl)
 		if err != nil {
+			if d.StorageQuota != nil && in.SizeBytes > 0 {
+				_ = d.StorageQuota.Release(r.Context(), tenantID, cid, viewer, in.SizeBytes)
+			}
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "Storage unavailable.")
 			return
 		}
 		putURL = u
 		expiresAt = time.Now().Add(ttl).UTC().Format(time.RFC3339)
 	} else if d.Storage == nil {
+		if d.StorageQuota != nil && in.SizeBytes > 0 {
+			_ = d.StorageQuota.Release(r.Context(), tenantID, cid, viewer, in.SizeBytes)
+		}
 		apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Storage unavailable.")
 		return
 	}
 
 	scanStatus := board.ScanClean
+	uploader := viewer
 	if cfg.AvScanningEnabled {
 		scanStatus = board.ScanPending
+		if cid != nil {
+			bucket := cfg.StorageBucket
+			_, regErr := avscan.RegisterAndEnqueue(r.Context(), d.Pool, tenantID, cid,
+				storageKey, bucket, mimeType, in.SizeBytes, &uploader, true)
+			if regErr != nil {
+				log.Printf("board-attachment: av register err=%v", regErr)
+			}
+		}
+	} else if cid != nil {
+		if _, upsErr := storageobjects.Upsert(r.Context(), d.Pool, tenantID, cid,
+			storageKey, cfg.StorageBucket, mimeType, in.SizeBytes, &uploader, false); upsErr != nil {
+			log.Printf("board-attachment: storageobjects upsert err=%v", upsErr)
+		}
 	}
 	att, err := board.CreateAttachment(r.Context(), d.Pool, courseCode, boardID, viewer,
 		storageKey, in.FileName, mimeType, in.AltText, scanStatus, in.SizeBytes)
 	if err != nil || att == nil {
+		if d.StorageQuota != nil && in.SizeBytes > 0 {
+			_ = d.StorageQuota.Release(r.Context(), tenantID, cid, viewer, in.SizeBytes)
+		}
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to record attachment.")
 		return
 	}

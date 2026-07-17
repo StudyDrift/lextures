@@ -125,6 +125,7 @@ func CourseHasEnrolledMinors(ctx context.Context, pool *pgxpool.Pool, courseCode
 }
 
 // ExternalSharingBlocked reports whether link/public must be refused for this course.
+// externalAllowed should already combine the platform flag and org policy (VC.10).
 func ExternalSharingBlocked(ctx context.Context, pool *pgxpool.Pool, courseCode string, externalAllowed, coppaEnabled bool) (blocked bool, reason string, err error) {
 	if !externalAllowed {
 		return true, "external_sharing_disabled", nil

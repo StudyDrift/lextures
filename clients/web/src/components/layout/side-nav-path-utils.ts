@@ -102,6 +102,7 @@ export function isSettingsShellRoute(pathname: string): boolean {
     '/admin/conferences/',
     '/admin/demographics/',
     '/admin/content-filter',
+    '/admin/boards',
     '/admin/sis',
     '/admin/final-grades/',
     '/admin/incompletes',

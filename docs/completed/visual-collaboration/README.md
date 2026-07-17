@@ -13,3 +13,5 @@ Completed implementation plans for collaboration boards. Active plans remain in
 | VC.6 | [Sharing, access control & contributors](VC.6-sharing-access-contributors.md) |
 | VC.7 | [Moderation, safety & content governance](VC.7-moderation-safety-governance.md) |
 | VC.8 | [Templates, duplication & board creation](VC.8-templates-and-duplication.md) |
+| VC.9 | [Embedding, export & presentation](VC.9-embedding-export-presentation.md) |
+| VC.10 | [Admin governance, analytics, quotas & lifecycle](VC.10-admin-analytics-quotas-lifecycle.md) |

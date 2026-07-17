@@ -11,6 +11,7 @@ export type SlashCommandId =
   | 'paragraph'
   | 'image'
   | 'drawing'
+  | 'board'
   | 'task'
   | 'bulletList'
   | 'orderedList'
@@ -62,6 +63,12 @@ const BASE_SLASH_COMMANDS: SlashCommand[] = [
     label: 'Drawing',
     description: 'Insert a whiteboard to draw on',
     keywords: ['drawing', 'whiteboard', 'sketch', 'draw', 'canvas'],
+  },
+  {
+    id: 'board',
+    label: 'Insert board',
+    description: 'Embed a collaboration board',
+    keywords: ['board', 'collaboration', 'embed', 'padlet', 'visual'],
   },
   {
     id: 'task',
@@ -137,9 +144,11 @@ export function getBlockSlashRange(
 export function slashCommandsForEditor(options?: {
   equation?: boolean
   image?: boolean
+  board?: boolean
 }): SlashCommand[] {
   return BASE_SLASH_COMMANDS.filter((cmd) => {
     if (cmd.id === 'image') return Boolean(options?.image)
+    if (cmd.id === 'board') return Boolean(options?.board)
     return true
   }).concat(options?.equation ? [EQUATION_COMMAND] : [])
 }
@@ -168,7 +177,7 @@ export function applySlashCommand(
   editor: Editor,
   command: SlashCommand,
   range: { from: number; to: number },
-  options?: { onEquation?: () => void; onImage?: () => void },
+  options?: { onEquation?: () => void; onImage?: () => void; onBoard?: () => void },
 ): void {
   if (command.id === 'equation') {
     editor.chain().focus().deleteRange({ from: range.from, to: range.to }).run()
@@ -178,6 +187,11 @@ export function applySlashCommand(
   if (command.id === 'image') {
     editor.chain().focus().deleteRange({ from: range.from, to: range.to }).run()
     options?.onImage?.()
+    return
+  }
+  if (command.id === 'board') {
+    editor.chain().focus().deleteRange({ from: range.from, to: range.to }).run()
+    options?.onBoard?.()
     return
   }
   if (command.id === 'drawing') {

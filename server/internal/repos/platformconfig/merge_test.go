@@ -151,16 +151,16 @@ func TestMerge_FeedbackDefaultOnWhenDBUnset(t *testing.T) {
 	}
 }
 
-// Plan VC.1: FFVisualBoards defaults OFF when platform settings row is unset.
-func TestMerge_VisualBoardsDefaultOffWhenDBUnset(t *testing.T) {
+// Collaboration boards are course-scoped only; platform master is always on (ignored).
+func TestMerge_VisualBoardsAlwaysOn(t *testing.T) {
 	got := Merge(config.Config{}, nil)
-	if got.FFVisualBoards {
-		t.Fatal("expected FFVisualBoards false (default OFF) when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFVisualBoards: &on})
 	if !got.FFVisualBoards {
-		t.Fatal("expected DB true to enable visual boards")
+		t.Fatal("expected FFVisualBoards true (always on; course flag is the gate)")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFVisualBoards: &off})
+	if !got.FFVisualBoards {
+		t.Fatal("expected FFVisualBoards true even when DB stores false")
 	}
 }
 
@@ -177,11 +177,16 @@ func TestMerge_FFBoardsExternalSharingDefaultOff(t *testing.T) {
 	}
 }
 
-// Plan VC.4: FFBoardsRealtime defaults OFF when platform settings row is unset.
-func TestMerge_BoardsRealtimeDefaultOffWhenDBUnset(t *testing.T) {
+// Plan VC.4: FFBoardsRealtime defaults ON when platform settings row is unset.
+func TestMerge_BoardsRealtimeDefaultOnWhenDBUnset(t *testing.T) {
 	got := Merge(config.Config{}, nil)
+	if !got.FFBoardsRealtime {
+		t.Fatal("expected FFBoardsRealtime true (default ON) when DB unset")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFBoardsRealtime: &off})
 	if got.FFBoardsRealtime {
-		t.Fatal("expected FFBoardsRealtime false (default OFF) when DB unset")
+		t.Fatal("expected explicit DB false to disable boards realtime")
 	}
 	on := true
 	got = Merge(config.Config{}, &Row{FFBoardsRealtime: &on})

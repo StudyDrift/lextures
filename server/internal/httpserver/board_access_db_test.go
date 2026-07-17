@@ -104,6 +104,14 @@ func TestBoardAccess_ShareLinkPasswordRevoke_Pg(t *testing.T) {
 	defer cancel()
 	pool, _, teacherTok, courseCode, _ := setupBoardTest(t, ctx, "teacher", true, true)
 	defer pool.Close()
+	orgID, err := board.OrgIDForCourse(ctx, pool, courseCode)
+	if err != nil {
+		t.Fatalf("org: %v", err)
+	}
+	on := true
+	if _, err := board.UpsertOrgPolicies(ctx, pool, orgID, board.PatchOrgPoliciesInput{ExternalSharing: &on}); err != nil {
+		t.Fatalf("org policies: %v", err)
+	}
 	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
 	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: config.Config{
 		FFVisualBoards: true, FFBoardsExternalSharing: true,

@@ -68,15 +68,18 @@ export function CardArrangeMenu({
   }
 
   return (
-    <div className="relative">
+    <div className="relative inline-flex" data-no-card-drag onPointerDown={(e) => e.stopPropagation()}>
       <button
         type="button"
         aria-label={t('boards.arrange.menuAria')}
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        className="rounded p-1 text-slate-500 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:bg-neutral-800"
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpen((o) => !o)
+        }}
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
       >
-        <MoreVertical className="size-4" aria-hidden />
+        <MoreVertical className="size-4 shrink-0" strokeWidth={2} aria-hidden />
       </button>
       {open ? (
         <div

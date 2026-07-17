@@ -20,6 +20,8 @@ export type BoardSurfaceProps = {
   onDeletePost: (postId: string) => void
   onPostUpdate: (post: BoardPost) => void
   onArrange: (postId: string, input: ArrangeBoardPostInput) => Promise<void>
+  /** CRDT-only arrangement publish for live drag/resize (no REST). */
+  onLiveArrange?: (postId: string, input: ArrangeBoardPostInput) => void
   onSectionsChange: (sections: BoardSection[]) => void
   onCreateSection: (title: string) => Promise<BoardSection>
   onDeleteSection: (sectionId: string) => Promise<void>

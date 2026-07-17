@@ -16,9 +16,13 @@ func (d Deps) resolveBoardAccess(
 	viewer uuid.UUID,
 	b *board.Board,
 ) (board.Capabilities, bool) {
+	pol, ok := d.orgBoardPoliciesForCourse(w, r, courseCode)
+	if !ok {
+		return board.Capabilities{}, false
+	}
 	opts := board.ResolveOpts{
 		CourseCode:             courseCode,
-		ExternalSharingAllowed: d.effectiveConfig().FFBoardsExternalSharing,
+		ExternalSharingAllowed: board.ExternalSharingAllowed(d.effectiveConfig().FFBoardsExternalSharing, pol),
 	}
 	if d.effectiveConfig().CoppaWorkflowEnabled {
 		hasMinors, err := board.CourseHasEnrolledMinors(r.Context(), d.Pool, courseCode)
@@ -64,9 +68,14 @@ func (d Deps) loadBoardWithAccess(
 }
 
 func (d Deps) externalSharingAllowedForCourse(w http.ResponseWriter, r *http.Request, courseCode string) (bool, string, bool) {
+	pol, ok := d.orgBoardPoliciesForCourse(w, r, courseCode)
+	if !ok {
+		return false, "", false
+	}
 	cfg := d.effectiveConfig()
+	allowed := board.ExternalSharingAllowed(cfg.FFBoardsExternalSharing, pol)
 	blocked, reason, err := board.ExternalSharingBlocked(
-		r.Context(), d.Pool, courseCode, cfg.FFBoardsExternalSharing, cfg.CoppaWorkflowEnabled,
+		r.Context(), d.Pool, courseCode, allowed, cfg.CoppaWorkflowEnabled,
 	)
 	if err != nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to evaluate sharing policy.")
@@ -76,6 +85,20 @@ func (d Deps) externalSharingAllowedForCourse(w http.ResponseWriter, r *http.Req
 		return false, reason, true
 	}
 	return true, "", true
+}
+
+func (d Deps) orgBoardPoliciesForCourse(w http.ResponseWriter, r *http.Request, courseCode string) (board.OrgPolicies, bool) {
+	orgID, err := board.OrgIDForCourse(r.Context(), d.Pool, courseCode)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to resolve organization.")
+		return board.OrgPolicies{}, false
+	}
+	pol, err := board.ResolveOrgPolicies(r.Context(), d.Pool, orgID)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load board policies.")
+		return board.OrgPolicies{}, false
+	}
+	return pol, true
 }
 
 func applyAuthorVisibility(out map[string]any, authorID *string, guestName string, attribution string, caps board.Capabilities) {
@@ -105,6 +128,21 @@ func boardJSONWithAccess(b board.Board, caps board.Capabilities) map[string]any 
 		"canArrange":  caps.CanArrange,
 		"canManage":   caps.CanManage,
 	}
+	return out
+}
+
+func (d Deps) boardJSONWithAccessAndPolicies(r *http.Request, courseCode string, b board.Board, caps board.Capabilities) map[string]any {
+	out := boardJSONWithAccess(b, caps)
+	orgID, err := board.OrgIDForCourse(r.Context(), d.Pool, courseCode)
+	if err != nil {
+		return out
+	}
+	pol, err := board.ResolveOrgPolicies(r.Context(), d.Pool, orgID)
+	if err != nil {
+		return out
+	}
+	out["externalSharingAllowed"] = board.ExternalSharingAllowed(d.effectiveConfig().FFBoardsExternalSharing, pol)
+	out["minorModerationFloor"] = d.minorsModerationFloor(r.Context(), courseCode)
 	return out
 }
 

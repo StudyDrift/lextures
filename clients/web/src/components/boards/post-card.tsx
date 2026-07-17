@@ -7,7 +7,7 @@ import {
 } from '../../lib/boards-api'
 import { parseWhiteboardElements } from '../../lib/whiteboard/serialize'
 import type { DrawEl } from '../../lib/whiteboard/types'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ReactionControl } from './reactions/reaction-control'
 import { CommentThread } from './reactions/comment-thread'
 import { BoardReportDialog } from './report-dialog'
@@ -24,6 +24,8 @@ type PostCardProps = {
   onDelete?: (postId: string) => void
   onPostUpdate?: (post: BoardPost) => void
   onAnnounce?: (message: string) => void
+  /** Extra header actions (e.g. arrange menu) — rendered before report/delete so icons don't stack. */
+  headerActions?: ReactNode
 }
 
 function bodyPlain(post: BoardPost): string {
@@ -111,6 +113,7 @@ export function PostCard({
   onDelete,
   onPostUpdate,
   onAnnounce,
+  headerActions,
 }: PostCardProps) {
   const { t } = useTranslation('common')
   const [commentsOpen, setCommentsOpen] = useState(false)
@@ -121,6 +124,9 @@ export function PostCard({
   const showEngagement = !!courseCode && !!boardId && !!onPostUpdate
   const isPending = post.status === 'pending'
   const isRemoved = !!post.removed || (!!post.hidden && !canManageBoard)
+  const showReport = !!courseCode && !!boardId && !canManageBoard
+  const showDelete = canManage && !!onDelete
+  const hasHeaderActions = !!headerActions || showReport || showDelete
 
   return (
     <article
@@ -144,28 +150,41 @@ export function PostCard({
             </p>
           ) : null}
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          {courseCode && boardId && !canManageBoard ? (
-            <button
-              type="button"
-              onClick={() => setReportOpen(true)}
-              className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-neutral-800"
-              aria-label={t('boards.report.action')}
-            >
-              <Flag className="size-4" aria-hidden />
-            </button>
-          ) : null}
-          {canManage && onDelete ? (
-            <button
-              type="button"
-              onClick={() => onDelete(post.id)}
-              className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
-              aria-label={t('boards.post.delete')}
-            >
-              <Trash2 className="size-4" aria-hidden />
-            </button>
-          ) : null}
-        </div>
+        {hasHeaderActions ? (
+          <div
+            className="flex shrink-0 items-center gap-0.5 self-start"
+            data-no-card-drag
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            {headerActions}
+            {showReport ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setReportOpen(true)
+                }}
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                aria-label={t('boards.report.action')}
+              >
+                <Flag className="size-4 shrink-0" strokeWidth={2} aria-hidden />
+              </button>
+            ) : null}
+            {showDelete ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete?.(post.id)
+                }}
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
+                aria-label={t('boards.post.delete')}
+              >
+                <Trash2 className="size-4 shrink-0" strokeWidth={2} aria-hidden />
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       {isRemoved ? (

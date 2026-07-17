@@ -89,7 +89,6 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     ffCourseEvaluations,
     ffGradeSubmission,
     ffClassroomSignals,
-    ffVisualBoards,
     ffInteractiveQuizzes,
   } = usePlatformFeatures()
   const courseViewPreview = useCourseViewAs(courseCode)
@@ -107,7 +106,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
   const canManageCourse = !permLoading && allows(courseItemCreatePermission(courseCode))
   const canManageQuestionBank = !permLoading && allows(courseItemsCreatePermission(courseCode))
 
-  const boardsNavVisible = ffVisualBoards && visualBoardsEnabled
+  const boardsNavVisible = visualBoardsEnabled
   const liveQuizzesNavVisible = ffInteractiveQuizzes && interactiveQuizzesEnabled
   const showCollaboration =
     feedEnabled ||

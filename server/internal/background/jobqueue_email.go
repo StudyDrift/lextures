@@ -81,6 +81,9 @@ func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource) {
 	r.Register(JobTypeEmailDelivery, emailDeliveryHandler{pool: pool, cfg: cfg})
 	RegisterUserImportJob(r, pool, cfg)
 	RegisterBoardCopyJob(r, pool, localBoardBlobCopier{root: cfg.CourseFilesRoot})
+	exportStorage := LocalBoardExportStorageFromRoot(cfg.CourseFilesRoot)
+	RegisterBoardExportJob(r, pool, exportStorage)
+	RegisterBoardLifecycleJobs(r, pool, exportStorage)
 	registerScheduledJobs(r, pool, cfgSrc)
 }
 

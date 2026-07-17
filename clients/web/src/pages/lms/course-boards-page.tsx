@@ -6,7 +6,6 @@ import { listBoards, type Board } from '../../lib/boards-api'
 import { courseItemCreatePermission, fetchCourse } from '../../lib/courses-api'
 import { formatDate } from '../../lib/format'
 import { usePermissions } from '../../context/use-permissions'
-import { usePlatformFeatures } from '../../context/platform-features-context'
 import { CreateBoardDialog } from '../../components/boards/create-board-dialog'
 import { LmsPage } from './lms-page'
 
@@ -16,7 +15,6 @@ export default function CourseBoardsPage() {
   const { courseCode: rawCode } = useParams<{ courseCode: string }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
   const { allows, loading: permLoading } = usePermissions()
-  const { ffVisualBoards } = usePlatformFeatures()
   const canCreate = !permLoading && !!courseCode && allows(courseItemCreatePermission(courseCode))
 
   const [boards, setBoards] = useState<Board[]>([])
@@ -31,10 +29,6 @@ export default function CourseBoardsPage() {
     setLoading(true)
     setError(null)
     try {
-      if (!ffVisualBoards) {
-        setError(t('boards.error.disabled'))
-        return
-      }
       const course = await fetchCourse(courseCode)
       if (!course.visualBoardsEnabled) {
         setError(t('boards.error.disabled'))
@@ -46,7 +40,7 @@ export default function CourseBoardsPage() {
     } finally {
       setLoading(false)
     }
-  }, [courseCode, ffVisualBoards, t])
+  }, [courseCode, t])
 
   useEffect(() => {
     void load()
