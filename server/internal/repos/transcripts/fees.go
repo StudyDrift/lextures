@@ -770,7 +770,6 @@ func ApplyAdminRefund(
 	newRefunded := o.AmountRefunded + amount
 	if amount <= 0 {
 		newRefunded = total
-		amount = total - o.AmountRefunded
 	}
 	if newRefunded > total && total > 0 {
 		newRefunded = total
@@ -831,9 +830,10 @@ func AdvanceAfterPayment(
 		return o, nil
 	}
 	reason := "payment satisfied"
-	if o.PaymentStatus == OrderPaymentWaived {
+	switch o.PaymentStatus {
+	case OrderPaymentWaived:
 		reason = "fee waived"
-	} else if o.PaymentStatus == OrderPaymentFree {
+	case OrderPaymentFree:
 		reason = "no payment due"
 	}
 	if _, err := transitionOrderTx(ctx, pool, transitionParams{
