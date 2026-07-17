@@ -621,6 +621,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Let signed-in users submit product feedback from web and mobile clients. Admins triage submissions from the feedback queue.',
   },
   {
+    key: 'ffVisualBoards',
+    label: 'Collaboration boards',
+    description:
+      'Platform master switch for course collaboration boards (shared walls). Courses still need the per-course Boards toggle enabled.',
+  },
+  {
     key: 'ffInteractiveQuizzes',
     label: 'Live Quizzes',
     description:
@@ -636,7 +642,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffBoardsRealtime',
     label: 'Board realtime sync',
     description:
-      'Y.js WebSocket sync and presence for collaboration boards (on by default). Boards are enabled per course under course settings.',
+      'Y.js WebSocket sync and presence for collaboration boards. Requires Collaboration boards to be enabled.',
   },
   {
     key: 'ffBoardsExternalSharing',
