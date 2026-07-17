@@ -1,6 +1,9 @@
 import XCTest
 @testable import Lextures
 
+// Covers VC.M1–VC.M7 boards helpers in one suite.
+// swiftlint:disable type_body_length
+
 final class BoardsLogicTests: XCTestCase {
     func testCourseSummaryDecodesVisualBoardsEnabled() throws {
         let json = """
@@ -551,3 +554,5 @@ final class BoardsLogicTests: XCTestCase {
         XCTAssertEqual(BoardsLogic.shareURL(for: share)?.path, "/board-links/abc")
     }
 }
+
+// swiftlint:enable type_body_length

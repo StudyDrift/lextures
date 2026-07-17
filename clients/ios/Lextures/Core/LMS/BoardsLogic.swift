@@ -1,5 +1,8 @@
 import Foundation
 
+// Short locals keep date/sort/cluster helpers readable alongside API field names.
+// swiftlint:disable identifier_name
+
 /// Helpers for visual collaboration boards (VC.M1–VC.M7).
 enum BoardsLogic {
     private static let isoFractional: ISO8601DateFormatter = {
@@ -639,3 +642,5 @@ enum BoardsLogic {
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
+
+// swiftlint:enable identifier_name

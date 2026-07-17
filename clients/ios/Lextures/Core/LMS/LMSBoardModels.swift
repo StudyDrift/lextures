@@ -1,5 +1,8 @@
 import Foundation
 
+// Decoder locals and canvas position fields (x/y/w/h) match API JSON keys.
+// swiftlint:disable identifier_name
+
 /// Visual collaboration board (VC.M1–VC.M7). Subset of web `Board`; unknown fields ignored.
 struct Board: Codable, Identifiable, Hashable, Equatable {
     var id: String
@@ -960,3 +963,5 @@ enum BoardComposeValidation: Equatable {
     case missingAltText
     case missingAudio
 }
+
+// swiftlint:enable identifier_name

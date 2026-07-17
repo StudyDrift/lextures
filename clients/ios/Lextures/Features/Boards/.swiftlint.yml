@@ -1,4 +1,7 @@
 # Board detail is a large single-file SwiftUI screen (VC.M2–VC.M4).
+# Short locals (x/y/w/h, layout closures) match canvas/API coordinate style.
+disabled_rules:
+  - identifier_name
 type_body_length:
   warning: 350
   error: 750

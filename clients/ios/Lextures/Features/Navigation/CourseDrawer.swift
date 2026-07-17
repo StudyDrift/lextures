@@ -74,6 +74,7 @@ struct CourseDrawer: View {
 }
 
 /// SF Symbol for each course workspace section (drawer rows).
+// swiftlint:disable:next cyclomatic_complexity
 func courseSectionIcon(_ section: CourseWorkspaceSection) -> String {
     switch section {
     case .overview: return "doc.text"
