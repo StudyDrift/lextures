@@ -29,6 +29,9 @@ www/dist/
 
 # Test & coverage (Vitest)
 coverage/
+# Keep E2E.4 completed-feature coverage manifest/report (not Vitest output)
+!e2e/coverage/
+!e2e/coverage/**
 
 # Rust (Axum server)
 target/

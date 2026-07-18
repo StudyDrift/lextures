@@ -241,6 +241,44 @@ jobs:
       - name: Validate design-token contrast pairs (WCAG 2.1 AA)
         run: npm run contrast:check
 
+  e2e-coverage:
+    name: E2E coverage gate (E2E.4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Install e2e dependencies
+        working-directory: e2e
+        run: npm ci --prefer-offline --quiet
+
+      - name: Validate completed-feature coverage manifest
+        working-directory: e2e
+        run: npm run e2e:coverage:check
+
+      - name: Unit/integration coverage self-test
+        working-directory: e2e
+        run: npm run e2e:coverage:test
+
+      - name: Generate coverage report artifact
+        working-directory: e2e
+        run: npm run e2e:coverage:report
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-completed-feature-coverage
+          path: |
+            e2e/coverage/REPORT.md
+            e2e/coverage/completed-feature-manifest.json
+          if-no-files-found: error
+
   e2e-changes:
     name: Detect E2E-relevant changes
     runs-on: ubuntu-latest
@@ -261,6 +299,7 @@ jobs:
               - 'server/**'
               - 'clients/web/**'
               - 'e2e/**'
+              - 'docs/completed/**'
 
   e2e-build:
     name: E2E build (API + web)

@@ -78,3 +78,27 @@ Representative off → on → off journeys for risk-bearing flagged product fami
 3. Prefer one representative probe per kill switch; link existing happy-path specs in `linkedHappyPathSpecs`.
 4. Put Priority 1 work in the four shards above; Priority 2 samples live in `feature-lifecycle-priority2.spec.ts`.
 5. Global mutations must use `withFeatureLifecycleRestore` (platform lock + boolean restore).
+
+## Completed feature traceability (E2E.4)
+
+Every eligible Markdown story under `docs/completed/**` has a reviewed disposition in a coverage manifest. CI rejects missing entries, broken spec/doc links, unknown classifications, and unowned `missing` rows — without launching browsers.
+
+| Artifact | Purpose |
+|---|---|
+| `coverage/completed-feature-manifest.json` | Reviewed story → coverage mapping (source of truth) |
+| `lib/completed-feature-coverage.ts` | Exclusions, schema validation, report + diff helpers |
+| `scripts/coverage-check.ts` | `npm run e2e:coverage:check` |
+| `scripts/coverage-report.ts` | `npm run e2e:coverage:report` → `coverage/REPORT.md` |
+| `scripts/coverage-self-test.ts` | Fixture unit/integration tests (`npm run e2e:coverage:test`) |
+| `tests/completed-feature-coverage-meta.spec.ts` | Playwright-discoverable integrity checks |
+| `coverage/README.md` | Coverage levels + registration checklist |
+
+### Registering a newly completed story
+
+1. Move the plan into `docs/completed/…`.
+2. Add a manifest entry for that exact path (classification, owner, rationale).
+3. Link Playwright specs for `journey` / `smoke` / `api-contract`, or set `parentStoryId` / `manualEvidence` / owned `missing` fields as required.
+4. If the story is flagged, fill the six `flags.*` dimensions (or point at an E2E.1–E2E.3 family).
+5. Run `make e2e-coverage-check` (or the npm scripts above).
+
+Do **not** put tokens or external evidence URLs in the manifest. Prefer regenerating `REPORT.md` over hand-editing it.
