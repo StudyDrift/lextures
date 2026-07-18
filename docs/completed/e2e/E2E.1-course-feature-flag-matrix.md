@@ -10,8 +10,7 @@
 | **Section** | End-to-End Coverage |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | THIN |
-| **Estimated effort** | M (2–4w) |
+| **Status (today)** | DONE |
 | **Owner (proposed)** | Web Platform / QA |
 | **Depends on** | E2E.4 |
 | **Unblocks** | E2E.3 |

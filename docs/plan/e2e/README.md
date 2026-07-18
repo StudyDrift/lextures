@@ -6,7 +6,7 @@ This folder records the E2E gaps found by comparing the implemented feature regi
 
 | Area | Implemented surface | Existing coverage | Planned work |
 |---|---:|---|---|
-| Course feature settings | 25 API-persisted course flags; 24 settings rows plus conditional Canvas grade sync (`groupSpacesEnabled` is currently API-only) | Only Discussion forums and Course sections are toggled through the UI; a few other flags are enabled directly by feature-specific specs | [E2E.1](E2E.1-course-feature-flag-matrix.md) |
+| Course feature settings | 25 API-persisted course flags; 24 settings rows plus conditional Canvas grade sync (`groupSpacesEnabled` is currently API-only) | Matrix coverage in `e2e/tests/course-features-*.spec.ts` (see `e2e/README.md`) | [E2E.1](../completed/e2e/E2E.1-course-feature-flag-matrix.md) (completed) |
 | Platform feature settings | 132 boolean definitions in `PLATFORM_FEATURE_DEFINITIONS` at audit time | Feature specs often enable a flag through the API, but there is no registry-wide UI/persistence/authz contract | [E2E.2](E2E.2-platform-feature-flag-contract.md) |
 | Disabled and dependent behavior | Platform and course flags gate routes, navigation, APIs, and nested capabilities | Coverage is inconsistent; many happy-path specs do not test the off state or parent/child flag combinations | [E2E.3](E2E.3-flagged-feature-rollback-and-dependencies.md) |
 | Completed-feature traceability | 482 documents under `docs/completed` | Spec names cover many shipped features, but there is no durable story-to-test manifest and new completed docs can silently ship without E2E review | [E2E.4](E2E.4-completed-feature-traceability.md) |

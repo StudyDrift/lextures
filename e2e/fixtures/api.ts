@@ -3,7 +3,17 @@
  * All requests go directly to the API (bypassing the browser) for speed.
  */
 
+import {
+  ALL_COURSE_FEATURE_KEYS,
+  NON_POINTER_BOOL_KEYS,
+  type CourseFeatureKey,
+  extractCourseFeatureFlags,
+  readCourseFeatureFlag,
+} from '../lib/course-feature-matrix.js'
+
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
+
+export type CourseFeaturePatch = Partial<Record<CourseFeatureKey, boolean>>
 
 export interface UserCredentials {
   email: string
@@ -412,28 +422,18 @@ export async function apiEnableCourseFeatures(
     questionBankEnabled?: boolean
   } = {},
 ): Promise<void> {
-  const res = await fetch(
-    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/features`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      // Only bool (non-pointer) fields need explicit values; others default to false.
-      body: JSON.stringify({
-        feedEnabled: features.feedEnabled ?? false,
-        calendarEnabled: features.calendarEnabled ?? true,
-        questionBankEnabled: features.questionBankEnabled ?? true,
-        discussionsEnabled: features.discussionsEnabled ?? false,
-        lockdownModeEnabled: false,
-      }),
-    },
-  )
-  if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`Enable course features failed (${res.status}): ${body}`)
-  }
+  // Preserve existing non-pointer bools; only apply the requested overrides.
+  await apiPatchCourseFeatures(token, courseCode, {
+    ...(features.feedEnabled !== undefined ? { feedEnabled: features.feedEnabled } : {}),
+    ...(features.calendarEnabled !== undefined ? { calendarEnabled: features.calendarEnabled } : {}),
+    ...(features.questionBankEnabled !== undefined
+      ? { questionBankEnabled: features.questionBankEnabled }
+      : {}),
+    ...(features.discussionsEnabled !== undefined
+      ? { discussionsEnabled: features.discussionsEnabled }
+      : {}),
+    ...(features.notebookEnabled !== undefined ? { notebookEnabled: features.notebookEnabled } : {}),
+  })
 }
 
 export async function apiGetSettingsAccount(
@@ -629,20 +629,37 @@ export interface ApiCourseOutcome {
   links: ApiCourseOutcomeLink[]
 }
 
+/**
+ * Non-destructive PATCH for course features.
+ *
+ * The server treats six fields as plain `bool` (omit → false). This helper GETs the
+ * course first, preserves those fields unless explicitly overridden, and only sends
+ * pointer/`*bool` keys that the caller provided so omitted nullable flags stay intact.
+ */
 export async function apiPatchCourseFeatures(
   token: string,
   courseCode: string,
-  features: {
-    notebookEnabled?: boolean
-    feedEnabled?: boolean
-    calendarEnabled?: boolean
-    questionBankEnabled?: boolean
-    lockdownModeEnabled?: boolean
-    discussionsEnabled?: boolean
-    sectionsEnabled?: boolean
-    reportCardsEnabled?: boolean
-  },
+  features: CourseFeaturePatch,
 ): Promise<Record<string, unknown>> {
+  const current = await apiGetCourse(token, courseCode)
+  const body: Record<string, boolean> = {}
+
+  for (const key of NON_POINTER_BOOL_KEYS) {
+    const uiDefaultOn =
+      key === 'notebookEnabled' || key === 'feedEnabled' || key === 'calendarEnabled'
+    body[key] =
+      features[key] !== undefined
+        ? Boolean(features[key])
+        : readCourseFeatureFlag(current, key, uiDefaultOn)
+  }
+
+  for (const key of ALL_COURSE_FEATURE_KEYS) {
+    if ((NON_POINTER_BOOL_KEYS as readonly string[]).includes(key)) continue
+    if (features[key] !== undefined) {
+      body[key] = Boolean(features[key])
+    }
+  }
+
   const res = await fetch(
     `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/features`,
     {
@@ -651,23 +668,82 @@ export async function apiPatchCourseFeatures(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        notebookEnabled: features.notebookEnabled ?? true,
-        feedEnabled: features.feedEnabled ?? false,
-        calendarEnabled: features.calendarEnabled ?? true,
-        questionBankEnabled: features.questionBankEnabled ?? false,
-        lockdownModeEnabled: features.lockdownModeEnabled ?? false,
-        discussionsEnabled: features.discussionsEnabled ?? false,
-        sectionsEnabled: features.sectionsEnabled,
-        reportCardsEnabled: features.reportCardsEnabled,
-      }),
+      body: JSON.stringify(body),
     },
   )
   if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`Patch course features failed (${res.status}): ${body}`)
+    const text = await res.text()
+    throw new Error(
+      `Patch course features failed (${res.status}) course=${courseCode} keys=${Object.keys(features).join(',')}: ${text}`,
+    )
   }
   return res.json() as Promise<Record<string, unknown>>
+}
+
+/** Snapshot current feature flags for later restore. */
+export async function apiSnapshotCourseFeatures(
+  token: string,
+  courseCode: string,
+): Promise<Partial<Record<CourseFeatureKey, boolean>>> {
+  const course = await apiGetCourse(token, courseCode)
+  return extractCourseFeatureFlags(course)
+}
+
+/** Restore a prior feature-flag snapshot (idempotent; best-effort on failure). */
+export async function apiRestoreCourseFeatures(
+  token: string,
+  courseCode: string,
+  snapshot: Partial<Record<CourseFeatureKey, boolean>>,
+): Promise<void> {
+  await apiPatchCourseFeatures(token, courseCode, snapshot)
+}
+
+/** Poll until a course feature flag matches the expected value. */
+export async function apiWaitForCourseFeature(
+  token: string,
+  courseCode: string,
+  key: CourseFeatureKey,
+  expected: boolean,
+  opts: { uiDefaultOn?: boolean; timeoutMs?: number } = {},
+): Promise<void> {
+  const timeoutMs = opts.timeoutMs ?? 10_000
+  const started = Date.now()
+  let last: boolean | undefined
+  while (Date.now() - started < timeoutMs) {
+    const course = await apiGetCourse(token, courseCode)
+    last = readCourseFeatureFlag(course, key, opts.uiDefaultOn ?? false)
+    if (last === expected) return
+    await new Promise((r) => setTimeout(r, 200))
+  }
+  throw new Error(
+    `Timed out waiting for ${key}=${expected} on course=${courseCode} (last=${String(last)})`,
+  )
+}
+
+/** Raw PATCH without merge — for authz / contract tests only. */
+export async function apiPatchCourseFeaturesRaw(
+  token: string | null,
+  courseCode: string,
+  body: Record<string, unknown>,
+): Promise<{ status: number; json: Record<string, unknown> | null; text: string }> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) headers.Authorization = `Bearer ${token}`
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/features`,
+    {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify(body),
+    },
+  )
+  const text = await res.text()
+  let json: Record<string, unknown> | null = null
+  try {
+    json = text ? (JSON.parse(text) as Record<string, unknown>) : null
+  } catch {
+    json = null
+  }
+  return { status: res.status, json, text }
 }
 
 export async function apiArchiveCourseStructureItem(
@@ -946,21 +1022,7 @@ export async function apiEnableCollabDocs(
   token: string,
   courseCode: string,
 ): Promise<void> {
-  const res = await fetch(
-    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/features`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ collabDocsEnabled: true }),
-    },
-  )
-  if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`Enable collab docs failed (${res.status}): ${body}`)
-  }
+  await apiPatchCourseFeatures(token, courseCode, { collabDocsEnabled: true })
 }
 
 // ---------------------------------------------------------------------------
@@ -971,21 +1033,7 @@ export async function apiEnableGroupSpaces(
   token: string,
   courseCode: string,
 ): Promise<void> {
-  const res = await fetch(
-    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/features`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ groupSpacesEnabled: true }),
-    },
-  )
-  if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`Enable group spaces failed (${res.status}): ${body}`)
-  }
+  await apiPatchCourseFeatures(token, courseCode, { groupSpacesEnabled: true })
 }
 
 export interface GroupApi {
