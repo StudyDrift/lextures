@@ -330,7 +330,9 @@ export async function assertCourseWebOffState(
     await expect(page.getByText(family.web.disabledMessage)).toBeVisible({ timeout: 15_000 })
   }
   if (family.web.navLinkName) {
+    await page.goto(`/courses/${courseCode}`)
     const nav = page.getByRole('navigation', { name: 'Course menu' })
+    await expect(nav).toBeVisible({ timeout: 15_000 })
     await expect(nav.getByRole('link', { name: family.web.navLinkName })).toHaveCount(0)
   }
 }

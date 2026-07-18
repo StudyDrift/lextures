@@ -106,11 +106,11 @@ test.describe.serial('E2E.3 AI lifecycle', () => {
           courseCode,
           label: 'lesson generator off',
         })
-        // While off, a call must not reach inference — 404 only.
+        // Auth-first: unauthenticated requests get 401 before feature disclosure.
         await assertProbeDisabled(lessonProbe, {
           token: null,
           courseCode,
-          label: 'lesson generator unauth feature-first',
+          label: 'lesson generator unauth auth-first',
         })
         await setPlatformFlag(gaToken, 'ffLessonGenerator', true)
 
