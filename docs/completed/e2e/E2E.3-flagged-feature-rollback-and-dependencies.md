@@ -10,8 +10,7 @@
 | **Section** | End-to-End Coverage |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL |
-| **Estimated effort** | L (1–2mo) |
+| **Status (today)** | DONE |
 | **Owner (proposed)** | Feature teams / QA |
 | **Depends on** | E2E.1, E2E.2 |
 | **Unblocks** | Safe staged rollout of completed features |
@@ -142,4 +141,16 @@ Add expected off-state and rollback behavior to each feature runbook. Document t
 - `docs/completed/13-k12-specific/`
 - `docs/completed/14-higher-ed-specific/`
 - `docs/completed/15-self-learner-specific/`
+
+## 20. Implementation notes
+
+Delivered under `e2e/`:
+
+- Manifest + cycle detection: `lib/feature-lifecycle-manifest.ts`, `tests/feature-lifecycle-meta.spec.ts`
+- Lifecycle helpers (platform lock/restore + course restore): `lib/feature-lifecycle-helpers.ts`
+- Priority 1 shards: `feature-lifecycle-collaboration|credentials|commerce-api|ai.spec.ts`
+- Priority 2 samples: `feature-lifecycle-priority2.spec.ts`
+- Operator guide: `e2e/README.md` (E2E.3 section)
+
+Known product gaps are recorded on dependency edges (`knownGap`) rather than asserted permissively — notably parent portal API is account-type gated (not `ffParentPortal`), and `ffVisualBoards` is always-on in merge (course flag is the kill switch).
 

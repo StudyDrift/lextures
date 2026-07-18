@@ -55,3 +55,26 @@ Global platform toggles (`PLATFORM_FEATURE_DEFINITIONS`) are covered by a data-d
 3. Put exactly one `uiSample: true` per category (move the sample if you introduce a new category).
 4. If the flag is environment-owned, set `ownershipSource: 'environment'` — the Global platform switch stays read-only and shows its source badge.
 5. Prefer `updateMask` single-field PUTs; never round-trip masked secrets.
+
+## Flagged feature rollback & dependencies (E2E.3)
+
+Representative off → on → off journeys for risk-bearing flagged product families, plus parent/child dependency truth tables. Does **not** duplicate happy-path product coverage — link those specs from the manifest instead.
+
+| Artifact | Purpose |
+|---|---|
+| `lib/feature-lifecycle-manifest.ts` | Families, master/child flags, dependency edges, disabled HTTP contracts, linked happy-path specs |
+| `lib/feature-lifecycle-helpers.ts` | Platform+course restore, probe assertions, truth tables, data-preservation helpers |
+| `tests/feature-lifecycle-meta.spec.ts` | Manifest validation + parent-cycle detection (no stack required beyond Playwright) |
+| `tests/feature-lifecycle-collaboration.spec.ts` | Boards + live quizzes (Priority 1) |
+| `tests/feature-lifecycle-credentials.spec.ts` | Transcripts + parent portal (Priority 1) |
+| `tests/feature-lifecycle-commerce-api.spec.ts` | Payments/tax/revenue + public API/tokens (Priority 1) |
+| `tests/feature-lifecycle-ai.spec.ts` | Persistent tutor / study buddy / lesson generator (Priority 1) |
+| `tests/feature-lifecycle-priority2.spec.ts` | Representative Priority 2 family samples |
+
+### Registering a new lifecycle family
+
+1. Add a `LifecycleFamily` row (shard, masters, children, edges, probes with **exact** disabled statuses).
+2. If an edge is not parent-authoritative in product code, set `parentAuthoritative: false` and document `knownGap`.
+3. Prefer one representative probe per kill switch; link existing happy-path specs in `linkedHappyPathSpecs`.
+4. Put Priority 1 work in the four shards above; Priority 2 samples live in `feature-lifecycle-priority2.spec.ts`.
+5. Global mutations must use `withFeatureLifecycleRestore` (platform lock + boolean restore).
