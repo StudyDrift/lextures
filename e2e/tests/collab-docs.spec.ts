@@ -16,6 +16,7 @@ import {
   apiDeleteCollabDoc,
   apiEnableCollabDocs,
   apiListCollabDocs,
+  apiPatchCourseFeatures,
 } from '../fixtures/api.js'
 
 function expectCollabConnectionStatus(page: Page) {
@@ -30,7 +31,10 @@ test.describe('Collaborative documents', () => {
     coursePage: page,
     seededCourse,
   }) => {
-    // Feature is off by default — the page renders but shows a "not enabled" error.
+    // seededCourse enables collab docs; turn it off for the gate assertion.
+    await apiPatchCourseFeatures(seededCourse.instructorToken, seededCourse.courseCode, {
+      collabDocsEnabled: false,
+    })
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs`)
     await expect(
       page.getByText(/not enabled/i),

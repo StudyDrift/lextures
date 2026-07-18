@@ -17,6 +17,7 @@ import {
   apiGetGroupChannels,
   apiCreateGroupChannel,
   apiPostGroupMessage,
+  apiPatchCourseFeatures,
 } from '../fixtures/api.js'
 
 test.describe('Group Spaces', () => {
@@ -27,7 +28,10 @@ test.describe('Group Spaces', () => {
     coursePage: page,
     seededCourse,
   }) => {
-    // Feature is off by default — visiting /groups should redirect to course home.
+    // seededCourse enables group spaces; turn it off for the gate assertion.
+    await apiPatchCourseFeatures(seededCourse.instructorToken, seededCourse.courseCode, {
+      groupSpacesEnabled: false,
+    })
     await page.goto(`/courses/${seededCourse.courseCode}/groups`)
     // Should land on the course dashboard (not stay on /groups).
     await expect(page).not.toHaveURL(/\/groups/, { timeout: 8000 })
@@ -80,16 +84,21 @@ test.describe('Group Spaces', () => {
 
 test.describe('Group Spaces — feature off returns 404 on API', () => {
   test('GET /groups returns 404 when feature is disabled', async ({ seededCourse }) => {
+    await apiPatchCourseFeatures(seededCourse.instructorToken, seededCourse.courseCode, {
+      groupSpacesEnabled: false,
+    })
     const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
     const res = await fetch(
       `${apiBase}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/groups`,
       { headers: { Authorization: `Bearer ${seededCourse.instructorToken}` } },
     )
-    // Feature is off by default so we expect 404.
     expect(res.status).toBe(404)
   })
 
   test('GET /my-groups returns 404 when feature is disabled', async ({ seededCourse }) => {
+    await apiPatchCourseFeatures(seededCourse.instructorToken, seededCourse.courseCode, {
+      groupSpacesEnabled: false,
+    })
     const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
     const res = await fetch(
       `${apiBase}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/my-groups`,
