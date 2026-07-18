@@ -108,6 +108,14 @@ export async function assertUiToggleEnableFlow(
   )
 }
 
+function courseMenu(page: Page) {
+  return page.getByRole('navigation', { name: 'Course menu' })
+}
+
+function courseSettingsMenu(page: Page) {
+  return page.getByRole('navigation', { name: 'Course settings menu' })
+}
+
 export async function assertNavGate(
   page: Page,
   token: string,
@@ -123,22 +131,26 @@ export async function assertNavGate(
   await apiPatchCourseFeatures(token, courseCode, { [key]: true } as CourseFeaturePatch)
   await apiWaitForCourseFeature(token, courseCode, key, true, { uiDefaultOn })
   await page.goto(base)
-  await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15_000 })
+  await expect(courseMenu(page)).toBeVisible({ timeout: 15_000 })
 
   if (nav.offBehavior === 'top-bar') {
     await expect(page.getByRole('button', { name: nav.linkName })).toBeVisible({ timeout: 10_000 })
   } else if (nav.route.startsWith('settings/')) {
     await page.goto(`${base}/settings/general`)
-    await expect(page.getByRole('link', { name: nav.linkName })).toBeVisible({ timeout: 10_000 })
+    await expect(courseSettingsMenu(page).getByRole('link', { name: nav.linkName })).toBeVisible({
+      timeout: 10_000,
+    })
   } else {
-    await expect(page.getByRole('link', { name: nav.linkName })).toBeVisible({ timeout: 10_000 })
+    await expect(courseMenu(page).getByRole('link', { name: nav.linkName })).toBeVisible({
+      timeout: 10_000,
+    })
   }
 
   // Disabled: nav hidden and direct route gated.
   await apiPatchCourseFeatures(token, courseCode, { [key]: false } as CourseFeaturePatch)
   await apiWaitForCourseFeature(token, courseCode, key, false, { uiDefaultOn })
   await page.goto(base)
-  await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15_000 })
+  await expect(courseMenu(page)).toBeVisible({ timeout: 15_000 })
 
   if (nav.offBehavior === 'top-bar') {
     await expect(page.getByRole('button', { name: nav.linkName })).toHaveCount(0)
@@ -148,9 +160,9 @@ export async function assertNavGate(
   if (nav.route.startsWith('settings/')) {
     await page.goto(`${base}/settings/general`)
     // Sections settings link is conditional; Features tab remains.
-    await expect(page.getByRole('link', { name: nav.linkName })).toHaveCount(0)
+    await expect(courseSettingsMenu(page).getByRole('link', { name: nav.linkName })).toHaveCount(0)
   } else {
-    await expect(page.getByRole('link', { name: nav.linkName })).toHaveCount(0)
+    await expect(courseMenu(page).getByRole('link', { name: nav.linkName })).toHaveCount(0)
   }
 
   if (!nav.route) return

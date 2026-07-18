@@ -37,13 +37,16 @@ test.describe('Course features API-only flags', () => {
 
       await injectToken(page, studentToken)
       await page.goto(`/courses/${courseCode}`)
-      await expect(page.getByRole('link', { name: /^Groups$/ })).toBeVisible({ timeout: 12_000 })
+      const courseNav = page.getByRole('navigation', { name: 'Course menu' })
+      await expect(courseNav.getByRole('link', { name: /^Groups$/ })).toBeVisible({
+        timeout: 12_000,
+      })
 
       await apiPatchCourseFeatures(instructorToken, courseCode, { groupSpacesEnabled: false })
       await apiWaitForCourseFeature(instructorToken, courseCode, 'groupSpacesEnabled', false)
 
       await page.goto(`/courses/${courseCode}`)
-      await expect(page.getByRole('link', { name: /^Groups$/ })).toHaveCount(0)
+      await expect(courseNav.getByRole('link', { name: /^Groups$/ })).toHaveCount(0)
 
       await page.goto(`/courses/${courseCode}/groups`)
       await expect(page).not.toHaveURL(/\/groups/, { timeout: 10_000 })

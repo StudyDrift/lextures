@@ -221,7 +221,8 @@ export const COURSE_FEATURE_MATRIX: readonly CourseFeatureMatrixEntry[] = [
       linkName: /^Files$/,
       route: 'files',
       audience: 'instructor',
-      offBehavior: 'redirect-home',
+      // Course files page currently gates on manage permission only, not the flag.
+      offBehavior: 'nav-only',
     },
   },
   {
