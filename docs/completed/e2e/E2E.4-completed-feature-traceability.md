@@ -10,8 +10,7 @@
 | **Section** | End-to-End Coverage |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING |
-| **Estimated effort** | S (1w) |
+| **Status (today)** | DONE |
 | **Owner (proposed)** | QA / Developer Experience |
 | **Depends on** | None |
 | **Unblocks** | E2E.1, E2E.2, E2E.3 |
@@ -129,9 +128,9 @@ Document the coverage levels, how to register a story/spec, flag lifecycle expec
 
 ## 18. Open Questions
 
-1. Should the source manifest be YAML for reviewability or JSON/TypeScript for stronger tooling?
-2. Should test titles carry story IDs, or are exact spec-path links sufficient?
-3. Who approves `not-applicable` and `manual` dispositions for high-risk compliance stories?
+1. Should the source manifest be YAML for reviewability or JSON/TypeScript for stronger tooling? **Resolved:** JSON manifest + TypeScript validator (reviewable diffs, zero new deps, matches E2E.1–3 tooling).
+2. Should test titles carry story IDs, or are exact spec-path links sufficient? **Resolved:** exact spec-path links are required; optional `titles[]` when useful.
+3. Who approves `not-applicable` and `manual` dispositions for high-risk compliance stories? **Resolved for v1:** section owners in the manifest; compliance/trust rows use `manual` with owner + quarterly cadence.
 
 ## 19. References
 
@@ -139,4 +138,17 @@ Document the coverage levels, how to register a story/spec, flag lifecycle expec
 - `docs/completed/`
 - `e2e/tests/`
 - `e2e/playwright.config.ts`
-- Related plans: `docs/completed/e2e/E2E.1-course-feature-flag-matrix.md`, `docs/completed/e2e/E2E.2-platform-feature-flag-contract.md`, `E2E.3-flagged-feature-rollback-and-dependencies.md`.
+- Related plans: `docs/completed/e2e/E2E.1-course-feature-flag-matrix.md`, `docs/completed/e2e/E2E.2-platform-feature-flag-contract.md`, `docs/completed/e2e/E2E.3-flagged-feature-rollback-and-dependencies.md`.
+
+## 20. Implementation notes
+
+Delivered under `e2e/`:
+
+- Manifest + exclusions + validation + report/diff helpers: `lib/completed-feature-coverage.ts`
+- Reviewed baseline: `coverage/completed-feature-manifest.json` (all eligible `docs/completed` stories)
+- CLI gate / report / self-test: `npm run e2e:coverage:check|report|test` (also `make e2e-coverage-check`)
+- Meta spec: `tests/completed-feature-coverage-meta.spec.ts`
+- CI job: `e2e-coverage` in `.github/workflows/ci.yml` (no browsers); uploads `REPORT.md` artifact
+- Operator guide: `e2e/coverage/README.md`, `e2e/README.md` (E2E.4 section), PR checklist item
+
+Historical stories were bootstrapped as reviewed dispositions (`missing` rows are owned with severity + milestone). Deepening `smoke`/`missing` into full journeys is backlog work, not a gate against shipping the vocabulary.

@@ -1,4 +1,4 @@
-.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www intro-course-validate marketplace-courses-validate iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-build-ios-test mobile-test-ios mobile-test-ios-fast ios-xcodebuild android ios server web cli www
+.PHONY: dev desktop e2e e2e-run e2e-teardown e2e-coverage-check lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www intro-course-validate marketplace-courses-validate iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-build-ios-test mobile-test-ios mobile-test-ios-fast ios-xcodebuild android ios server web cli www
 
 # Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
 LINT_APPS := server web cli www
@@ -190,6 +190,10 @@ e2e-run:
 # Force-remove the Docker e2e stack and ephemeral volumes.
 e2e-teardown:
 	docker compose -f docker-compose.e2e.yml down -v
+
+# E2E.4 — completed-feature coverage gate (no browsers / no stack).
+e2e-coverage-check:
+	cd e2e && npm ci --prefer-offline --quiet && npm run e2e:coverage:test && npm run e2e:coverage:check && npm run e2e:coverage:report
 
 # Run Lighthouse on the signed-in global dashboard in dark mode (LH.1).
 # Requires API + web client already running (e.g. `make dev`).

@@ -9,7 +9,11 @@
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
     "lighthouse:dashboard:dark": "tsx scripts/run-lighthouse-dashboard.ts",
-    "lighthouse:dashboard": "tsx scripts/run-lighthouse-dashboard.ts"
+    "lighthouse:dashboard": "tsx scripts/run-lighthouse-dashboard.ts",
+    "e2e:coverage:check": "tsx scripts/coverage-check.ts",
+    "e2e:coverage:report": "tsx scripts/coverage-report.ts",
+    "e2e:coverage:test": "tsx scripts/coverage-self-test.ts",
+    "e2e:coverage:bootstrap": "tsx scripts/bootstrap-completed-coverage-manifest.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
