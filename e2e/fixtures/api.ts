@@ -10,6 +10,7 @@ import {
   extractCourseFeatureFlags,
   readCourseFeatureFlag,
 } from '../lib/course-feature-matrix.js'
+import { PLATFORM_BOOLEAN_SNAPSHOT_KEYS } from '../lib/platform-feature-matrix.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
 
@@ -1313,6 +1314,131 @@ export async function apiPatchPlatformSettings(
     const text = await res.text()
     throw new Error(`Patch platform settings failed (${res.status}): ${text}`)
   }
+}
+
+/** Alias used by E2E.2 platform feature contract helpers. */
+export const apiPutPlatformSettings = apiPatchPlatformSettings
+
+export async function apiPutPlatformSettingsRaw(
+  token: string | null,
+  body: Record<string, unknown> & { updateMask?: string[] },
+): Promise<Response> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) headers.Authorization = `Bearer ${token}`
+  return fetch(`${apiBase}/api/v1/settings/platform`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(body),
+  })
+}
+
+export async function apiGetPlatformSettings(
+  token: string,
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`${apiBase}/api/v1/settings/platform`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Get platform settings failed (${res.status}): ${text}`)
+  }
+  return res.json() as Promise<Record<string, unknown>>
+}
+
+export async function apiGetPlatformSettingsRaw(token: string | null): Promise<Response> {
+  const headers: Record<string, string> = {}
+  if (token) headers.Authorization = `Bearer ${token}`
+  return fetch(`${apiBase}/api/v1/settings/platform`, { headers })
+}
+
+export async function apiGetPlatformFeatures(
+  token: string,
+): Promise<Record<string, unknown>> {
+  const res = await fetch(`${apiBase}/api/v1/platform/features`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Get platform features failed (${res.status}): ${text}`)
+  }
+  return res.json() as Promise<Record<string, unknown>>
+}
+
+/**
+ * Snapshot only boolean platform feature keys. Never includes SMTP/SAML/SES secrets.
+ */
+export async function apiSnapshotPlatformBooleanSettings(
+  token: string,
+): Promise<Record<string, boolean>> {
+  const settings = await apiGetPlatformSettings(token)
+  const out: Record<string, boolean> = {}
+  for (const key of PLATFORM_BOOLEAN_SNAPSHOT_KEYS) {
+    if (typeof settings[key] === 'boolean') {
+      out[key] = settings[key] as boolean
+    }
+  }
+  return out
+}
+
+/**
+ * Restore boolean platform features via updateMask (secret-safe; omits masked secrets).
+ */
+export async function apiRestorePlatformBooleanSettings(
+  token: string,
+  snapshot: Record<string, boolean>,
+): Promise<void> {
+  const keys = Object.keys(snapshot)
+  if (keys.length === 0) return
+  // Chunk to keep payloads modest and avoid oversized masks.
+  const chunkSize = 40
+  for (let i = 0; i < keys.length; i += chunkSize) {
+    const chunk = keys.slice(i, i + chunkSize)
+    const body: Record<string, unknown> & { updateMask: string[] } = {
+      updateMask: chunk,
+    }
+    for (const key of chunk) {
+      body[key] = snapshot[key]
+    }
+    await apiPutPlatformSettings(token, body)
+  }
+}
+
+export async function apiWaitForPlatformSetting(
+  token: string,
+  key: string,
+  expected: boolean,
+  opts?: { timeoutMs?: number },
+): Promise<void> {
+  const timeoutMs = opts?.timeoutMs ?? 10_000
+  const started = Date.now()
+  while (Date.now() - started < timeoutMs) {
+    const settings = await apiGetPlatformSettings(token)
+    if (settings[key] === expected) return
+    await new Promise((r) => setTimeout(r, 150))
+  }
+  const final = await apiGetPlatformSettings(token)
+  throw new Error(
+    `Timed out waiting for platform setting ${key}=${expected} (got ${String(final[key])})`,
+  )
+}
+
+export async function apiWaitForPlatformFeature(
+  token: string,
+  key: string,
+  expected: boolean,
+  opts?: { timeoutMs?: number },
+): Promise<void> {
+  const timeoutMs = opts?.timeoutMs ?? 10_000
+  const started = Date.now()
+  while (Date.now() - started < timeoutMs) {
+    const features = await apiGetPlatformFeatures(token)
+    if (features[key] === expected) return
+    await new Promise((r) => setTimeout(r, 150))
+  }
+  const final = await apiGetPlatformFeatures(token)
+  throw new Error(
+    `Timed out waiting for platform feature ${key}=${expected} (got ${String(final[key])})`,
+  )
 }
 
 export type StudentAccommodationApi = {
