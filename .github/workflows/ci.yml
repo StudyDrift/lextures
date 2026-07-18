@@ -260,6 +260,7 @@ jobs:
             e2e:
               - 'server/**'
               - 'clients/web/**'
+              - 'e2e/**'
 
   e2e-build:
     name: E2E build (API + web)
