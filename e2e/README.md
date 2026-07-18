@@ -33,3 +33,25 @@ Course tools are covered by a data-driven matrix so every API-persisted course f
 ### Canvas grade sync
 
 Canvas grade sync is stored on the Canvas link, not the course-features endpoint. Cover it only when a fixture creates a linked Canvas course (conditional case; not part of the default matrix).
+
+## Platform feature flag contract (E2E.2)
+
+Global platform toggles (`PLATFORM_FEATURE_DEFINITIONS`) are covered by a data-driven contract so every displayed boolean has registry parity, API persistence, authz, and representative UI coverage.
+
+| Artifact | Purpose |
+|---|---|
+| `lib/platform-feature-matrix.ts` | Manifest: key, label, category, ownership, runtime key / settings-only rationale, UI sample |
+| `lib/platform-feature-matrix-helpers.ts` | Snapshot/restore (secret-safe), cross-worker lock, UI/API toggle helpers |
+| `fixtures/api.ts` → `apiPutPlatformSettings` / snapshot helpers | Masked PUT + boolean-only restore (never SMTP/SAML secrets) |
+| `tests/platform-features-matrix-meta.spec.ts` | Registry ↔ manifest parity (fails on missing classification) |
+| `tests/platform-features-authz.spec.ts` | Anon/learner/instructor/org-admin deny, omit preservation, save failure, keyboard, env read-only |
+| `tests/platform-features-api-contract-{a,b,c}.spec.ts` | Full database-owned registry via API (sharded) |
+| `tests/platform-features-ui-sample.spec.ts` | One Global platform UI toggle per category |
+
+### Registering a new platform flag
+
+1. Add the server field + `PlatformSettingsPayload` key and (usually) a `PLATFORM_FEATURE_DEFINITIONS` row.
+2. Add a matching row to `PLATFORM_FEATURE_MATRIX` (label must match the definition; set `runtimeKey` or a `settingsOnlyRationale`).
+3. Put exactly one `uiSample: true` per category (move the sample if you introduce a new category).
+4. If the flag is environment-owned, set `ownershipSource: 'environment'` — the Global platform switch stays read-only and shows its source badge.
+5. Prefer `updateMask` single-field PUTs; never round-trip masked secrets.

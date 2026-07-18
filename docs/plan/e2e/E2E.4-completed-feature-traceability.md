@@ -139,4 +139,4 @@ Document the coverage levels, how to register a story/spec, flag lifecycle expec
 - `docs/completed/`
 - `e2e/tests/`
 - `e2e/playwright.config.ts`
-- Related plans: `E2E.1-course-feature-flag-matrix.md`, `E2E.2-platform-feature-flag-contract.md`, `E2E.3-flagged-feature-rollback-and-dependencies.md`.
+- Related plans: `docs/completed/e2e/E2E.1-course-feature-flag-matrix.md`, `docs/completed/e2e/E2E.2-platform-feature-flag-contract.md`, `E2E.3-flagged-feature-rollback-and-dependencies.md`.

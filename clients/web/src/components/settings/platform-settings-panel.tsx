@@ -715,15 +715,24 @@ export function PlatformSettingsPanel() {
               visiblePlatformFeatures.map((feature) => {
                 const enabled = form[feature.key]
                 const source = feature.sourceKey ? form.sources[feature.sourceKey] : 'default'
+                const environmentOwned = source === 'environment'
                 return (
                   <FeatureToggleRow
                     key={feature.key}
                     label={feature.label}
                     description={feature.description}
                     enabled={enabled}
-                    disabled={featureSaving}
+                    disabled={featureSaving || environmentOwned}
+                    disabledReason={
+                      environmentOwned
+                        ? 'Managed by server environment configuration and cannot be changed here.'
+                        : undefined
+                    }
                     meta={sourceBadge(source)}
-                    onToggle={() => void persistPlatformFeature(feature.key, !enabled)}
+                    onToggle={() => {
+                      if (environmentOwned) return
+                      void persistPlatformFeature(feature.key, !enabled)
+                    }}
                   />
                 )
               })
@@ -739,7 +748,12 @@ export function PlatformSettingsPanel() {
             </p>
             <select
               value={form.mfaEnforcement}
-              disabled={featureSaving}
+              disabled={featureSaving || form.sources.mfaEnforcement === 'environment'}
+              title={
+                form.sources.mfaEnforcement === 'environment'
+                  ? 'Managed by server environment configuration and cannot be changed here.'
+                  : undefined
+              }
               onChange={(e) =>
                 void persistMfaEnforcement(e.target.value as PlatformSettingsPayload['mfaEnforcement'])
               }
