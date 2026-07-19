@@ -753,7 +753,11 @@ struct CourseCreateView: View {
                 _ = try await LMSAPI.patchCourseOutcome(
                     courseCode: course.courseCode,
                     outcomeId: outcome.id,
-                    body: PatchCourseOutcomeBody(moduleStructureItemId: module.id),
+                    body: PatchCourseOutcomeBody(
+                        title: nil,
+                        description: nil,
+                        moduleStructureItemId: module.id
+                    ),
                     accessToken: token
                 )
                 for sub in comp.subOutcomes {
