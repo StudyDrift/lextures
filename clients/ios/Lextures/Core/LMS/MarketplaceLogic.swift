@@ -192,6 +192,15 @@ enum MarketplaceLogic {
         }
     }
 
+    static func purchaseSourceLabel(_ source: String) -> String {
+        switch source {
+        case "free": return L.text("mobile.marketplace.purchases.source.free")
+        case "stripe": return L.text("mobile.marketplace.purchases.source.stripe")
+        case "comp": return L.text("mobile.marketplace.purchases.source.comp")
+        default: return L.text("mobile.marketplace.purchases.source.other")
+        }
+    }
+
     static func formatAcquiredAt(_ iso: String) -> String {
         let trimmed = iso.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count >= 10 else { return trimmed }
