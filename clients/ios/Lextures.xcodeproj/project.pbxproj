@@ -2244,6 +2244,7 @@
 				4BEEC1BFC23941D28DA54F21 /* OrgStructureAdminEntryCard.swift */,
 				A04C4D3F29874252B5E3F0CC /* PeopleAdminEntryCard.swift */,
 				966449FFE96E406CA035460A /* PlatformSettingsAdminEntryCard.swift */,
+				B03C1A11C4A5A51B00A7200D /* SettingsAdminHubEntryCard.swift */,
 				8B29EE05A6434945819DC76C /* ProfileDepthCards.swift */,
 				6CA43989054F4F4EBFD0AE56 /* ProfilePersonalDetailsView.swift */,
 				3556C513A996418B895DEA28 /* ProfileSecurityCard.swift */,
@@ -2410,6 +2411,7 @@
 			children = (
 				4A7CB5BADA16457E9E0F5843 /* AdvisingSettingsView.swift */,
 				8D61F1C147FE4F6888D57621 /* AiAdminHubView.swift */,
+				B03C1A11C4A5A51B00A7200B /* AuditLogAdminView.swift */,
 				4D4CE875CE3D4AFAB6E16679 /* AiGovernanceView.swift */,
 				76C676AE54804F479A8793A5 /* AiModelsSettingsView.swift */,
 				93338FBE6786460080E776E3 /* AiProviderSettingsView.swift */,
@@ -2565,8 +2567,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
-			files = (				B03C1A11C4A5A51B00A72012 /* AuditLogAdminLogicTests.swift in Sources */,
-				B03C1A11C4A5A51B00A72010 /* SettingsMenuLogicTests.swift in Sources */,
+			files = (
 				B03C1A11C4A5A51B00A7200E /* SettingsAdminHubEntryCard.swift in Sources */,
 				B03C1A11C4A5A51B00A7200C /* AuditLogAdminView.swift in Sources */,
 				B03C1A11C4A5A51B00A7200A /* SettingsAdminHubView.swift in Sources */,
@@ -3091,7 +3092,8 @@
 				DADC71645B4446A0AFEF5C35 /* WalletCETranscriptDetailView.swift in Sources */,
 				62AB39D9C5874BF7AAEFC36D /* WalletOfficialTranscriptDetailView.swift in Sources */,
 				4C5368A3A19B4CC5B4D0BCE2 /* WalletView.swift in Sources */,
-			);
+			
+);
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -3101,6 +3103,8 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				B03C1A11C4A5A51B00A72010 /* SettingsMenuLogicTests.swift in Sources */,
+				B03C1A11C4A5A51B00A72012 /* AuditLogAdminLogicTests.swift in Sources */,
 				B02C1A11C4A5A51B00A70606 /* CanvasImportLogicTests.swift in Sources */,
 				01AEC1002DDD4CD2A515EA08 /* AccessibilitySupportTests.swift in Sources */,
 				BEB8DA97678F467FA891B900 /* AccountIntegrationsLogicTests.swift in Sources */,
