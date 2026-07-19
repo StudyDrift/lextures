@@ -174,6 +174,8 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
       contentType: 'application/json',
       body: JSON.stringify({
         ...data,
+        // Annotations default ON opens inline SpeedGrader; keep modal dialog for this journey.
+        annotationEnabled: false,
         graderAgentEnabled: true,
         graderAgentReviewInboxEnabled: true,
         graderAgentSuggestModeEnabled: true,
