@@ -42,7 +42,7 @@ enum CourseCreateLogic {
         }
     }
 
-    enum AssessmentKind: String, CaseIterable, Identifiable, Hashable {
+    enum AssessmentKind: String, CaseIterable, Identifiable, Hashable, Codable {
         case quiz
         case assignment
 
