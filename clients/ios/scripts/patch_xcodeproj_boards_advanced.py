@@ -11,6 +11,7 @@ PBX = ROOT / "Lextures.xcodeproj" / "project.pbxproj"
 
 # name, build_id, ref_id, group_id, is_test
 ENTRIES: list[tuple[str, str, str, str, bool]] = [
+    ("LMSBoardAdvancedModels.swift", "M860B0DC2D3E4F5061728394", "M860B0DD3E4F5061728394A5", "B62295116F7F4935A884363D", False),
     ("BoardsAdvancedLogic.swift", "M860B01C2D3E4F5061728394", "M860B01D3E4F5061728394A5", "B62295116F7F4935A884363D", False),
     ("BoardsGovernanceAdminLogic.swift", "M860B02C2D3E4F5061728394", "M860B02D3E4F5061728394A5", "B62295116F7F4935A884363D", False),
     ("LMSAPIBoardTemplates.swift", "M860B03C2D3E4F5061728394", "M860B03D3E4F5061728394A5", "B62295116F7F4935A884363D", False),

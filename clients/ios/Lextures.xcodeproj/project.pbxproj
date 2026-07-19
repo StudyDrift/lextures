@@ -640,6 +640,7 @@
 		M860B0AC2D3E4F5061728394 /* BoardAnalyticsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B0AD3E4F5061728394A5 /* BoardAnalyticsSheet.swift */; };
 		M860B0BC2D3E4F5061728394 /* BoardsGovernanceAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B0BD3E4F5061728394A5 /* BoardsGovernanceAdminView.swift */; };
 		M860B0CC2D3E4F5061728394 /* BoardsAdvancedLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B0CD3E4F5061728394A5 /* BoardsAdvancedLogicTests.swift */; };
+		M860B0DC2D3E4F5061728394 /* LMSBoardAdvancedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B0DD3E4F5061728394A5 /* LMSBoardAdvancedModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1280,6 +1281,7 @@
 		M860B0AD3E4F5061728394A5 /* BoardAnalyticsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardAnalyticsSheet.swift; sourceTree = "<group>"; };
 		M860B0BD3E4F5061728394A5 /* BoardsGovernanceAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardsGovernanceAdminView.swift; sourceTree = "<group>"; };
 		M860B0CD3E4F5061728394A5 /* BoardsAdvancedLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardsAdvancedLogicTests.swift; sourceTree = "<group>"; };
+		M860B0DD3E4F5061728394A5 /* LMSBoardAdvancedModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSBoardAdvancedModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1560,6 +1562,7 @@
 		B62295116F7F4935A884363D /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				M860B0DD3E4F5061728394A5 /* LMSBoardAdvancedModels.swift */,
 				M860B05D3E4F5061728394A5 /* LMSAPIBoardAnalytics.swift */,
 				M860B04D3E4F5061728394A5 /* LMSAPIBoardExport.swift */,
 				M860B03D3E4F5061728394A5 /* LMSAPIBoardTemplates.swift */,
@@ -2651,6 +2654,8 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				M860B0DC2D3E4F5061728394 /* LMSBoardAdvancedModels.swift in Sources */,
+
 				M860B0BC2D3E4F5061728394 /* BoardsGovernanceAdminView.swift in Sources */,
 
 				M860B0AC2D3E4F5061728394 /* BoardAnalyticsSheet.swift in Sources */,
