@@ -176,57 +176,21 @@ func TestMerge_VisualBoardsAlwaysOn(t *testing.T) {
 	}
 }
 
-// AN.2: FFMotionNavigation defaults ON when platform settings row is unset (kill-switch).
-func TestMerge_FFMotionNavigationDefaultOn(t *testing.T) {
+// Motion kill-switches collapsed to FFMotionNavigation (Reveal/Lists follow).
+func TestMerge_FFMotionCollapsedKillSwitch(t *testing.T) {
 	got := Merge(config.Config{}, &Row{})
-	if !got.FFMotionNavigation {
-		t.Fatal("expected FFMotionNavigation true (default ON) when DB unset")
+	if !got.FFMotionNavigation || !got.FFMotionReveal || !got.FFMotionLists {
+		t.Fatal("expected all motion flags true (default ON) when DB unset")
 	}
 	off := false
 	got = Merge(config.Config{}, &Row{FFMotionNavigation: &off})
-	if got.FFMotionNavigation {
-		t.Fatal("expected FFMotionNavigation false when DB set false")
+	if got.FFMotionNavigation || got.FFMotionReveal || got.FFMotionLists {
+		t.Fatal("expected navigation kill-switch to disable all motion flags")
 	}
 	on := true
-	got = Merge(config.Config{}, &Row{FFMotionNavigation: &on})
-	if !got.FFMotionNavigation {
-		t.Fatal("expected FFMotionNavigation true when DB set")
-	}
-}
-
-// AN.3: FFMotionReveal defaults ON when platform settings row is unset (kill-switch).
-func TestMerge_FFMotionRevealDefaultOn(t *testing.T) {
-	got := Merge(config.Config{}, &Row{})
-	if !got.FFMotionReveal {
-		t.Fatal("expected FFMotionReveal true (default ON) when DB unset")
-	}
-	off := false
-	got = Merge(config.Config{}, &Row{FFMotionReveal: &off})
-	if got.FFMotionReveal {
-		t.Fatal("expected FFMotionReveal false when DB set false")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMotionReveal: &on})
-	if !got.FFMotionReveal {
-		t.Fatal("expected FFMotionReveal true when DB set")
-	}
-}
-
-// AN.4: FFMotionLists defaults ON when platform settings row is unset (kill-switch).
-func TestMerge_FFMotionListsDefaultOn(t *testing.T) {
-	got := Merge(config.Config{}, &Row{})
-	if !got.FFMotionLists {
-		t.Fatal("expected FFMotionLists true (default ON) when DB unset")
-	}
-	off := false
-	got = Merge(config.Config{}, &Row{FFMotionLists: &off})
-	if got.FFMotionLists {
-		t.Fatal("expected FFMotionLists false when DB set false")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMotionLists: &on})
-	if !got.FFMotionLists {
-		t.Fatal("expected FFMotionLists true when DB set")
+	got = Merge(config.Config{}, &Row{FFMotionNavigation: &on, FFMotionReveal: &off})
+	if !got.FFMotionNavigation || !got.FFMotionReveal || !got.FFMotionLists {
+		t.Fatal("expected navigation master to fan out ON to reveal/lists")
 	}
 }
 
@@ -274,47 +238,22 @@ func TestMerge_InteractiveQuizzesAlwaysOn(t *testing.T) {
 	}
 }
 
-// Plan IQ.3: FFIqLiveHosting defaults ON when platform settings row is unset.
-func TestMerge_IqLiveHostingDefaultOnWhenDBUnset(t *testing.T) {
+// IQ hosting/modes/gradebook are always on at platform (course flag is the gate).
+func TestMerge_IqCollapsedModesAlwaysOn(t *testing.T) {
 	got := Merge(config.Config{}, nil)
-	if !got.FFIqLiveHosting {
-		t.Fatal("expected FFIqLiveHosting true (default ON) when DB unset")
+	if !got.FFIqLiveHosting || !got.FFIqTeamMode || !got.FFIqStudentPaced || !got.FFIqHomework || !got.FFIqGradebookPush {
+		t.Fatal("expected collapsed IQ platform modes always on")
 	}
 	off := false
-	got = Merge(config.Config{}, &Row{FFIqLiveHosting: &off})
-	if got.FFIqLiveHosting {
-		t.Fatal("expected explicit DB false to disable iq live hosting")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFIqLiveHosting: &on})
-	if !got.FFIqLiveHosting {
-		t.Fatal("expected DB true to enable iq live hosting")
-	}
-}
-
-// Plan IQ.6: mode sub-flags default OFF when platform settings row is unset.
-func TestMerge_IqModeFlagsDefaultOffWhenDBUnset(t *testing.T) {
-	got := Merge(config.Config{}, nil)
-	if got.FFIqTeamMode || got.FFIqStudentPaced || got.FFIqHomework {
-		t.Fatal("expected IQ.6 mode flags false when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFIqTeamMode: &on, FFIqStudentPaced: &on, FFIqHomework: &on})
-	if !got.FFIqTeamMode || !got.FFIqStudentPaced || !got.FFIqHomework {
-		t.Fatal("expected DB true to enable IQ.6 mode flags")
-	}
-}
-
-// Plan IQ.7: gradebook push sub-flag defaults OFF when platform settings row is unset.
-func TestMerge_IqGradebookPushDefaultOffWhenDBUnset(t *testing.T) {
-	got := Merge(config.Config{}, nil)
-	if got.FFIqGradebookPush {
-		t.Fatal("expected FFIqGradebookPush false when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFIqGradebookPush: &on})
-	if !got.FFIqGradebookPush {
-		t.Fatal("expected DB true to enable IQ.7 gradebook push")
+	got = Merge(config.Config{}, &Row{
+		FFIqLiveHosting:   &off,
+		FFIqTeamMode:      &off,
+		FFIqStudentPaced:  &off,
+		FFIqHomework:      &off,
+		FFIqGradebookPush: &off,
+	})
+	if !got.FFIqLiveHosting || !got.FFIqTeamMode || !got.FFIqStudentPaced || !got.FFIqHomework || !got.FFIqGradebookPush {
+		t.Fatal("expected collapsed IQ modes on even when DB stores false")
 	}
 }
 
@@ -359,19 +298,69 @@ func TestMerge_IqAiGenerationDefaultOffWhenDBUnset(t *testing.T) {
 
 func ptr(s string) *string { return &s }
 
-// MOB.1: FFMobileCourseCreateV2 / FFMobileCreateCourse default OFF when unset.
+// MOB.1: mobile create V1/V2 collapsed — either column enables both.
 func TestMerge_FFMobileCourseCreateFlagsDefaultOff(t *testing.T) {
 	got := Merge(config.Config{}, nil)
-	if got.FFMobileCreateCourse {
-		t.Fatal("expected FFMobileCreateCourse false when DB unset")
-	}
-	if got.FFMobileCourseCreateV2 {
-		t.Fatal("expected FFMobileCourseCreateV2 false when DB unset")
+	if got.FFMobileCreateCourse || got.FFMobileCourseCreateV2 {
+		t.Fatal("expected mobile create flags false when DB unset")
 	}
 	on := true
-	got = Merge(config.Config{}, &Row{FFMobileCourseCreateV2: &on, FFMobileCreateCourse: &on})
+	got = Merge(config.Config{}, &Row{FFMobileCourseCreateV2: &on})
 	if !got.FFMobileCreateCourse || !got.FFMobileCourseCreateV2 {
-		t.Fatal("expected both mobile create flags true when DB set")
+		t.Fatal("expected V2 column alone to enable both mobile create flags")
+	}
+}
+
+func TestMerge_EnvOnlyStubsPreserved(t *testing.T) {
+	env := config.Config{OriginalityStubExternal: true, ClamAVStub: true, OERStub: true}
+	off := false
+	got := Merge(env, &Row{
+		OriginalityStubExternal: &off,
+		ClamAVStub:              &off,
+		OERStub:                 &off,
+	})
+	if !got.OriginalityStubExternal || !got.ClamAVStub || !got.OERStub {
+		t.Fatal("expected env-only stubs to survive Merge (DB must not override)")
+	}
+}
+
+func TestMerge_DefaultOnSecurityAndBaselines(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	for name, on := range map[string]bool{
+		"SessionManagementUIEnabled": got.SessionManagementUIEnabled,
+		"MFAEnabled":                 got.MFAEnabled,
+		"EmailNotificationsEnabled":  got.EmailNotificationsEnabled,
+		"GradebookCSVEnabled":        got.GradebookCSVEnabled,
+		"ResubmissionWorkflowEnabled": got.ResubmissionWorkflowEnabled,
+		"AnnotationEnabled":          got.AnnotationEnabled,
+		"AdminConsoleEnabled":        got.AdminConsoleEnabled,
+		"AdminSearchEnabled":         got.AdminSearchEnabled,
+		"FFWhatifGrades":             got.FFWhatifGrades,
+		"FFPeerReview":               got.FFPeerReview,
+		"FFConditionalRelease":       got.FFConditionalRelease,
+	} {
+		if !on {
+			t.Fatalf("expected %s default ON when DB unset", name)
+		}
+	}
+}
+
+func TestMerge_GraderChildrenFollowParent(t *testing.T) {
+	on := true
+	got := Merge(config.Config{}, &Row{GraderAgentEnabled: &on})
+	if !got.GraderAgentReviewInboxEnabled || !got.GraderAgentTextEntryGradingEnabled || !got.GraderAgentCancelRunEnabled {
+		t.Fatal("expected grader milestone children to follow parent ON")
+	}
+	if got.GraderAgentVisionGradingEnabled {
+		t.Fatal("expected vision grading to stay independently off")
+	}
+}
+
+func TestMerge_LpAdaptCollapse(t *testing.T) {
+	on := true
+	got := Merge(config.Config{}, &Row{LpAdaptTutorEnabled: &on})
+	if !got.LpAdaptRecommendationsEnabled || !got.LpAdaptReviewEnabled || !got.LpAdaptModalityEnabled || !got.LpAdaptTutorEnabled {
+		t.Fatal("expected any LpAdapt child ON to enable the full pack")
 	}
 }
 

@@ -41,7 +41,7 @@ type graderAgentBulkOutcome struct {
 }
 
 func (d Deps) graderAgentSuggestModeEnabled() bool {
-	return d.effectiveConfig().GraderAgentSuggestModeEnabled
+	return d.graderAgentEnabled()
 }
 
 func (d Deps) requireGraderAgentSuggestModeAccess(w http.ResponseWriter, r *http.Request) (courseCode string, viewer uuid.UUID, ok bool) {

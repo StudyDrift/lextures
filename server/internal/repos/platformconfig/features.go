@@ -5,30 +5,35 @@ import "github.com/lextures/lextures/server/internal/config"
 func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	// Feature flags are DB-managed (no env seed); a missing settings row means "all columns
 	// unset", so every flag falls back to its documented default below.
+	//
+	// Exception: OriginalityStubExternal, ClamAVStub, and OERStub are env-only test/dev
+	// seams (ORIGINALITY_STUB_EXTERNAL / CLAMAV_STUB / OER_STUB). They are loaded in
+	// config.Load and must not be overwritten from the platform settings row.
 	if db == nil {
 		db = &Row{}
 	}
 	out.SAMLSSOEnabled = mergeBool(db.SAMLSSOEnabled, false)
-	out.AnnotationEnabled = mergeBool(db.AnnotationEnabled, false)
-	out.FeedbackMediaEnabled = mergeBool(db.FeedbackMediaEnabled, false)
+	// DEFAULT-ON: shipped, low-risk authoring/security baselines (docs/plan/flags.md).
+	out.AnnotationEnabled = mergeBool(db.AnnotationEnabled, true)
+	out.FeedbackMediaEnabled = mergeBool(db.FeedbackMediaEnabled, true)
 	out.BlindGradingEnabled = mergeBool(db.BlindGradingEnabled, def.BlindGradingEnabled)
 	out.ModeratedGradingEnabled = mergeBool(db.ModeratedGradingEnabled, false)
 	out.OriginalityDetectionEnabled = mergeBool(db.OriginalityDetectionEnabled, false)
-	out.OriginalityStubExternal = mergeBool(db.OriginalityStubExternal, false)
+	// OriginalityStubExternal: env-only — leave out.* from config.Load.
 	out.GradePostingPoliciesEnabled = mergeBool(db.GradePostingPoliciesEnabled, def.GradePostingPoliciesEnabled)
-	out.GradebookCSVEnabled = mergeBool(db.GradebookCSVEnabled, false)
-	out.ResubmissionWorkflowEnabled = mergeBool(db.ResubmissionWorkflowEnabled, false)
+	out.GradebookCSVEnabled = mergeBool(db.GradebookCSVEnabled, true)
+	out.ResubmissionWorkflowEnabled = mergeBool(db.ResubmissionWorkflowEnabled, true)
 	out.LTIEnabled = mergeBool(db.LTIEnabled, false)
 	out.OneRosterEnabled = mergeBool(db.OneRosterEnabled, false)
 	out.ScimEnabled = mergeBool(db.ScimEnabled, false)
 	out.OIDCSSOEnabled = mergeBool(db.OIDCSSOEnabled, false)
 	out.CleverSSOEnabled = mergeBool(db.CleverSSOEnabled, false)
 	out.ClassLinkSSOEnabled = mergeBool(db.ClassLinkSSOEnabled, false)
-	out.MFAEnabled = mergeBool(db.MFAEnabled, false)
+	out.MFAEnabled = mergeBool(db.MFAEnabled, true)
 	out.MagicLinkEnabled = mergeBool(db.MagicLinkEnabled, def.MagicLinkEnabled)
 	out.MagicLinkEnrolledOnly = mergeBool(db.MagicLinkEnrolledOnly, false)
-	out.SessionManagementUIEnabled = mergeBool(db.SessionManagementUIEnabled, false)
-	out.EmailNotificationsEnabled = mergeBool(db.EmailNotificationsEnabled, false)
+	out.SessionManagementUIEnabled = mergeBool(db.SessionManagementUIEnabled, true)
+	out.EmailNotificationsEnabled = mergeBool(db.EmailNotificationsEnabled, true)
 	// SES email provider is opt-in (default off).
 	out.FFEmailSES = mergeBool(db.FFEmailSES, false)
 	out.PushNotificationsEnabled = mergeBool(db.PushNotificationsEnabled, false)
@@ -40,51 +45,74 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.StorageQuotasEnabled = mergeBool(db.StorageQuotasEnabled, false)
 	out.AtRiskAlertsEnabled = mergeBool(db.AtRiskAlertsEnabled, false)
 	out.AvScanningEnabled = mergeBool(db.AvScanningEnabled, false)
-	out.ClamAVStub = mergeBool(db.ClamAVStub, false)
+	// ClamAVStub / OERStub: env-only — leave out.* from config.Load.
 	out.H5PEnabled = mergeBool(db.H5PEnabled, false)
 	out.ScormIngestionEnabled = mergeBool(db.ScormIngestionEnabled, false)
 	out.OERLibraryEnabled = mergeBool(db.OERLibraryEnabled, false)
-	out.OERStub = mergeBool(db.OERStub, false)
-	out.ItemAnalysisEnabled = mergeBool(db.ItemAnalysisEnabled, false)
+	out.ItemAnalysisEnabled = mergeBool(db.ItemAnalysisEnabled, true)
 	out.StudentProgressEnabled = mergeBool(db.StudentProgressEnabled, true)
 	out.EngagementTrackingEnabled = mergeBool(db.EngagementTrackingEnabled, false)
 	out.SelfReflectionEnabled = mergeBool(db.SelfReflectionEnabled, false)
 	out.LearnerProfileEnabled = mergeBool(db.LearnerProfileEnabled, true)
-	out.LpAdaptRecommendationsEnabled = mergeBool(db.LpAdaptRecommendationsEnabled, false)
-	out.LpAdaptReviewEnabled = mergeBool(db.LpAdaptReviewEnabled, false)
-	out.LpAdaptModalityEnabled = mergeBool(db.LpAdaptModalityEnabled, false)
-	out.LpAdaptTutorEnabled = mergeBool(db.LpAdaptTutorEnabled, false)
+
+	// COLLAPSE LpAdapt*: one capability ("profile drives personalization").
+	// Any legacy child column that was ON enables the pack; all children then follow.
+	lpAdapt := mergeBool(db.LpAdaptRecommendationsEnabled, false) ||
+		mergeBool(db.LpAdaptReviewEnabled, false) ||
+		mergeBool(db.LpAdaptModalityEnabled, false) ||
+		mergeBool(db.LpAdaptTutorEnabled, false)
+	out.LpAdaptRecommendationsEnabled = lpAdapt
+	out.LpAdaptReviewEnabled = lpAdapt
+	out.LpAdaptModalityEnabled = lpAdapt
+	out.LpAdaptTutorEnabled = lpAdapt
+
 	out.IntroCourseEnabled = mergeBool(db.IntroCourseEnabled, true)
-	out.OutcomesReportEnabled = mergeBool(db.OutcomesReportEnabled, false)
+	out.OutcomesReportEnabled = mergeBool(db.OutcomesReportEnabled, true)
 	out.InstructorInsightsEnabled = mergeBool(db.InstructorInsightsEnabled, false)
-	out.EquationEditorEnabled = mergeBool(db.EquationEditorEnabled, false)
+	out.EquationEditorEnabled = mergeBool(db.EquationEditorEnabled, true)
 	out.ReadingLevelEnabled = mergeBool(db.ReadingLevelEnabled, false)
-	out.GraderAgentEnabled = mergeBool(db.GraderAgentEnabled, false)
-	out.GraderAgentReviewInboxEnabled = mergeBool(db.GraderAgentReviewInboxEnabled, false)
-	out.GraderAgentSuggestModeEnabled = mergeBool(db.GraderAgentSuggestModeEnabled, false)
-	out.GraderAgentTextEntryGradingEnabled = mergeBool(db.GraderAgentTextEntryGradingEnabled, true)
+
+	// COLLAPSE Grader Agent milestone flags into the parent (keep Vision as optional cost gate).
+	graderOn := mergeBool(db.GraderAgentEnabled, false)
+	out.GraderAgentEnabled = graderOn
+	out.GraderAgentReviewInboxEnabled = graderOn
+	out.GraderAgentSuggestModeEnabled = graderOn
+	out.GraderAgentTextEntryGradingEnabled = graderOn
 	out.GraderAgentVisionGradingEnabled = mergeBool(db.GraderAgentVisionGradingEnabled, false)
-	out.GraderAgentRunFiltersEnabled = mergeBool(db.GraderAgentRunFiltersEnabled, false)
-	out.GraderAgentCostEstimateEnabled = mergeBool(db.GraderAgentCostEstimateEnabled, false)
-	out.GraderAgentCancelRunEnabled = mergeBool(db.GraderAgentCancelRunEnabled, false)
+	out.GraderAgentRunFiltersEnabled = graderOn
+	out.GraderAgentCostEstimateEnabled = graderOn
+	out.GraderAgentCancelRunEnabled = graderOn
+
 	out.CodeExecutionEnabled = mergeBool(db.CodeExecutionEnabled, false)
-	out.AltTextEnforcementEnabled = mergeBool(db.AltTextEnforcementEnabled, false)
-	out.FFAltTextEnforcement = mergeBool(db.FFAltTextEnforcement, false)
+
+	// COLLAPSE alt-text soft/hard into one gate (enforce when enabled).
+	altText := mergeBool(db.AltTextEnforcementEnabled, false) || mergeBool(db.FFAltTextEnforcement, false)
+	out.AltTextEnforcementEnabled = altText
+	out.FFAltTextEnforcement = altText
+
 	out.FFHighContrastReducedMotion = mergeBool(db.FFHighContrastReducedMotion, false)
-	// AN.2 navigation transitions default ON; kill-switch via Settings → Global platform.
-	out.FFMotionNavigation = mergeBool(db.FFMotionNavigation, true)
-	// AN.3 load choreography default ON; kill-switch via Settings → Global platform.
-	out.FFMotionReveal = mergeBool(db.FFMotionReveal, true)
-	// AN.4 list/collection motion default ON; kill-switch via Settings → Global platform.
-	out.FFMotionLists = mergeBool(db.FFMotionLists, true)
-	out.FFMobileCreateCourse = mergeBool(db.FFMobileCreateCourse, false)
-	out.FFMobileCourseCreateV2 = mergeBool(db.FFMobileCourseCreateV2, false)
+
+	// COLLAPSE motion kill-switches into one (Navigation column is the master store).
+	motion := mergeBool(db.FFMotionNavigation, true)
+	out.FFMotionNavigation = motion
+	out.FFMotionReveal = motion
+	out.FFMotionLists = motion
+
+	// COLLAPSE mobile create V1/V2: either column enables create; V2 wizard is the only path.
+	mobileCreate := mergeBool(db.FFMobileCreateCourse, false) || mergeBool(db.FFMobileCourseCreateV2, false)
+	out.FFMobileCreateCourse = mobileCreate
+	out.FFMobileCourseCreateV2 = mobileCreate
+
 	out.FFMobileCanvasImport = mergeBool(db.FFMobileCanvasImport, false)
 	out.FFMobileAdminConsole = mergeBool(db.FFMobileAdminConsole, false)
 	out.FFMobileEnrollmentAdd = mergeBool(db.FFMobileEnrollmentAdd, false)
 	out.FFMobileLiveQuiz = mergeBool(db.FFMobileLiveQuiz, false)
-	out.FFParentPortal = mergeBool(db.FFParentPortal, false)
-	out.FFParentPortalV2 = mergeBool(db.FFParentPortalV2, false)
+
+	// COLLAPSE parent portal V2 into the parent (expanded sections always on with the portal).
+	parentPortal := mergeBool(db.FFParentPortal, false)
+	out.FFParentPortal = parentPortal
+	out.FFParentPortalV2 = parentPortal
+
 	out.FFReportCards = mergeBool(db.FFReportCards, false)
 	out.FFSISIntegration = mergeBool(db.FFSISIntegration, false)
 	out.FFCatalogIntegration = mergeBool(db.FFCatalogIntegration, false)
@@ -97,8 +125,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFContentFilterIntegration = mergeBool(db.FFContentFilterIntegration, false)
 	out.FFUiMode = mergeBool(db.FFUiMode, false)
 	out.FFGradeSubmission = mergeBool(db.FFGradeSubmission, false)
-	out.FFWhatifGrades = mergeBool(db.FFWhatifGrades, false)
-	out.FFGradeCurving = mergeBool(db.FFGradeCurving, false)
+	out.FFWhatifGrades = mergeBool(db.FFWhatifGrades, true)
+	out.FFGradeCurving = mergeBool(db.FFGradeCurving, true)
 	out.FFAcademicCalendar = mergeBool(db.FFAcademicCalendar, false)
 	out.FFPlagiarismChecks = mergeBool(db.FFPlagiarismChecks, false)
 	out.FFCourseEvaluations = mergeBool(db.FFCourseEvaluations, false)
@@ -129,12 +157,13 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFBoardsExternalSharing = mergeBool(db.FFBoardsExternalSharing, false)
 	// Live Quizzes are course-scoped only; platform master switch removed.
 	out.FFInteractiveQuizzes = true
-	// Live hosting is the core of Live Quizzes; default ON so course enable is enough to host.
-	out.FFIqLiveHosting = mergeBool(db.FFIqLiveHosting, true)
-	out.FFIqTeamMode = mergeBool(db.FFIqTeamMode, false)
-	out.FFIqStudentPaced = mergeBool(db.FFIqStudentPaced, false)
-	out.FFIqHomework = mergeBool(db.FFIqHomework, false)
-	out.FFIqGradebookPush = mergeBool(db.FFIqGradebookPush, false)
+	// COLLAPSE IQ hosting/modes/gradebook into the per-course Live Quizzes flag (always on at platform).
+	out.FFIqLiveHosting = true
+	out.FFIqTeamMode = true
+	out.FFIqStudentPaced = true
+	out.FFIqHomework = true
+	out.FFIqGradebookPush = true
+	// Real platform gates for Live Quizzes (security / AI spend / public listing).
 	out.FFIqPublicKitCatalog = mergeBool(db.FFIqPublicKitCatalog, false)
 	out.FFIqGuestJoin = mergeBool(db.FFIqGuestJoin, false)
 	out.FFIqAiGeneration = mergeBool(db.FFIqAiGeneration, false)
@@ -144,8 +173,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFRevenueShare = mergeBool(db.FFRevenueShare, false)
 	out.FFTaxCollection = mergeBool(db.FFTaxCollection, false)
 	out.FFLearningPaths = mergeBool(db.FFLearningPaths, false)
-	out.FFConditionalRelease = mergeBool(db.FFConditionalRelease, false)
-	out.FFPeerReview = mergeBool(db.FFPeerReview, false)
+	out.FFConditionalRelease = mergeBool(db.FFConditionalRelease, true)
+	out.FFPeerReview = mergeBool(db.FFPeerReview, true)
 	out.FFCompletionCredentials = mergeBool(db.FFCompletionCredentials, false)
 	out.FFCourseReviews = mergeBool(db.FFCourseReviews, false)
 	out.FFGamification = mergeBool(db.FFGamification, false)
@@ -163,12 +192,19 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFCalendarFeeds = mergeBool(db.FFCalendarFeeds, true)
 	out.FFRedisCache = mergeBool(db.FFRedisCache, false)
 	out.SpeechToTextEnabled = mergeBool(db.SpeechToTextEnabled, false)
-	out.AccommodationsEngineEnabled = mergeBool(db.AccommodationsEngineEnabled, false)
-	out.FFAccommodationsEngine = mergeBool(db.FFAccommodationsEngine, false)
-	out.ReadAloudEnabled = mergeBool(db.ReadAloudEnabled, false)
-	out.FFReadAloud = mergeBool(db.FFReadAloud, false)
+
+	// COLLAPSE accommodations audit into the engine master (always audit when engine runs).
+	accommodations := mergeBool(db.AccommodationsEngineEnabled, false)
+	out.AccommodationsEngineEnabled = accommodations
+	out.FFAccommodationsEngine = accommodations
+
+	// COLLAPSE ReadAloud pair into one gate.
+	readAloud := mergeBool(db.ReadAloudEnabled, false) || mergeBool(db.FFReadAloud, false)
+	out.ReadAloudEnabled = readAloud
+	out.FFReadAloud = readAloud
+
 	out.TranslationMemoryEnabled = mergeBool(db.TranslationMemoryEnabled, false)
-	out.ReportExportEnabled = mergeBool(db.ReportExportEnabled, false)
+	out.ReportExportEnabled = mergeBool(db.ReportExportEnabled, true)
 	out.XAPIEmissionEnabled = mergeBool(db.XAPIEmissionEnabled, false)
 	out.LRSAnonymizeActors = mergeBool(db.LRSAnonymizeActors, false)
 	out.FERPAWorkflowEnabled = mergeBool(db.FERPAWorkflowEnabled, false)
@@ -180,16 +216,19 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.SOC2ModuleEnabled = mergeBool(db.SOC2ModuleEnabled, false)
 	out.IsoIsmsEnabled = mergeBool(db.IsoIsmsEnabled, false)
 	out.AdminAuditLogEnabled = mergeBool(db.AdminAuditLogEnabled, def.AdminAuditLogEnabled)
-	out.AdminConsoleEnabled = mergeBool(db.AdminConsoleEnabled, false)
+	out.AdminConsoleEnabled = mergeBool(db.AdminConsoleEnabled, true)
 	out.ImpersonationEnabled = mergeBool(db.ImpersonationEnabled, false)
 	out.BulkCsvImportEnabled = mergeBool(db.BulkCsvImportEnabled, false)
-	out.AdminSearchEnabled = mergeBool(db.AdminSearchEnabled, false)
+	out.AdminSearchEnabled = mergeBool(db.AdminSearchEnabled, true)
 	out.EmailTemplateEditorEnabled = mergeBool(db.EmailTemplateEditorEnabled, false)
 	out.MaintenanceBannerEnabled = mergeBool(db.MaintenanceBannerEnabled, true)
 	out.CustomFieldsEnabled = mergeBool(db.CustomFieldsEnabled, false)
 	out.SeatManagementEnabled = mergeBool(db.SeatManagementEnabled, false)
 	out.DataResidencyEnabled = mergeBool(db.DataResidencyEnabled, false)
 	out.AiDisclosureEnabled = mergeBool(db.AiDisclosureEnabled, def.AiDisclosureEnabled)
+	// Temporary rollout gates — owner + removal target (docs/completed/flags.md):
+	// RTLEnabled: i18n — remove after RTL audit; target 2026-Q4.
+	// FFReadingPreferences: a11y — flip default on after QA sign-off; target 2026-Q3.
 	out.RTLEnabled = mergeBool(db.RTLEnabled, false)
 	out.SecurityDisclosureModuleEnabled = mergeBool(db.SecurityDisclosureModuleEnabled, false)
 	out.BackupModuleEnabled = mergeBool(db.BackupModuleEnabled, false)

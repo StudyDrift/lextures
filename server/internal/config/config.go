@@ -86,6 +86,8 @@ type Config struct {
 	BlindGradingEnabled         bool
 	ModeratedGradingEnabled     bool
 	OriginalityDetectionEnabled bool
+	// OriginalityStubExternal is an env-only test/dev seam (ORIGINALITY_STUB_EXTERNAL).
+	// Not a platform settings toggle — see docs/completed/flags.md.
 	OriginalityStubExternal     bool
 	GradePostingPoliciesEnabled bool
 	GradebookCSVEnabled         bool
@@ -259,11 +261,13 @@ type Config struct {
 	// ClamAVAddr is the clamd TCP address (default localhost:3310).
 	ClamAVAddr string
 	// ClamAVStub when true uses in-process EICAR detection (tests/dev without clamd).
+	// Env-only (CLAMAV_STUB); not a platform settings toggle.
 	ClamAVStub bool
 
 	// OERLibraryEnabled gates the OER search and import UI (plan 8.9).
 	OERLibraryEnabled bool
 	// OERStub uses embedded catalog data instead of live OER provider APIs (dev/e2e).
+	// Env-only (OER_STUB); not a platform settings toggle.
 	OERStub bool
 
 	// ItemAnalysisEnabled gates CTT item analysis statistics for quizzes (plan 9.4).
@@ -924,6 +928,11 @@ func Load() Config {
 		StorageDefaultTenantQuotaGB: storageDefaultTenantQuotaGB(),
 
 		ClamAVAddr: stringDefault(firstNonEmptyTrimmed("CLAMAV_ADDR"), "localhost:3310"),
+
+		// Dev/e2e test doubles — env-only (never Settings → Global platform).
+		OriginalityStubExternal: boolEnv("ORIGINALITY_STUB_EXTERNAL"),
+		ClamAVStub:              boolEnv("CLAMAV_STUB"),
+		OERStub:                 boolEnv("OER_STUB"),
 
 		// Feature flags below are managed in Settings → Global platform (DB-backed) and
 		// resolved by platformconfig.Merge / applyPlatformBools. They are intentionally NOT

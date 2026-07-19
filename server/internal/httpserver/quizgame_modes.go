@@ -14,25 +14,13 @@ import (
 	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
-func (d Deps) iqModeAllowed(mode engine.SessionMode) bool {
-	cfg := d.effectiveConfig()
-	switch mode {
-	case engine.ModeTeam:
-		return cfg.FFIqTeamMode
-	case engine.ModeStudentPaced:
-		return cfg.FFIqStudentPaced
-	case engine.ModeHomework:
-		return cfg.FFIqHomework
-	default:
-		return true
-	}
+// iqModeAllowed: team / student-paced / homework are authoring options gated by the
+// course Live Quizzes flag only (platform sub-flags collapsed; docs/completed/flags.md).
+func (d Deps) iqModeAllowed(_ engine.SessionMode) bool {
+	return true
 }
 
 func (d Deps) iqHomeworkFeatureOff(w http.ResponseWriter, r *http.Request, courseCode string) bool {
-	if !d.effectiveConfig().FFIqHomework {
-		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Live quiz homework is not enabled.")
-		return true
-	}
 	return d.interactiveQuizzesFeatureOff(w, r, courseCode)
 }
 

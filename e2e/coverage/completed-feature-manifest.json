@@ -5253,6 +5253,20 @@
       "reviewed": true
     },
     {
+      "id": "flags",
+      "path": "docs/completed/flags.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "ops",
+      "coverage": "covered-by-parent",
+      "rationale": "Platform flag audit/collapse work; runtime contract covered by E2E.2 platform feature specs.",
+      "owner": "Web Platform / QA",
+      "parentStoryId": "E2E.2",
+      "reviewed": true
+    },
+    {
       "id": "grader-agent-workflow-canvas",
       "path": "docs/completed/grader-agent-workflow-canvas.md",
       "markets": [

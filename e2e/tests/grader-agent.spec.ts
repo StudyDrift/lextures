@@ -1,8 +1,10 @@
 import { test, expect, injectToken } from '../fixtures/test.js'
 import {
   apiCreateAssignment,
+  apiGetPlatformAdminToken,
   apiPatchAssignment,
   apiPatchAssignmentSubmissionTypes,
+  apiPatchPlatformSettings,
   apiPutSubmissionGrade,
   apiUploadAssignmentSubmission,
 } from '../fixtures/api.js'
@@ -44,6 +46,14 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
   coursePage,
   seededCourse,
 }) => {
+  // Annotations default ON (course GET mirrors platform AnnotationEnabled) and switch
+  // Grade submissions to inline SpeedGrader. Force off so this journey keeps the modal.
+  const adminToken = await apiGetPlatformAdminToken()
+  await apiPatchPlatformSettings(adminToken, {
+    annotationEnabled: false,
+    updateMask: ['annotationEnabled'],
+  })
+
   const assignment = await apiCreateAssignment(
     seededCourse.instructorToken,
     seededCourse.courseCode,
@@ -174,6 +184,7 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
       contentType: 'application/json',
       body: JSON.stringify({
         ...data,
+        annotationEnabled: false,
         graderAgentEnabled: true,
         graderAgentReviewInboxEnabled: true,
         graderAgentSuggestModeEnabled: true,
@@ -233,6 +244,14 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
 })
 
 test('Student sees AI disclosure on posted agent grade', async ({ page, seededCourse }) => {
+  // Prior tests in this file disable annotations. With feedback media default ON, the
+  // student workbench opens on the Media tab and omits the grade sidebar (disclosure).
+  const adminToken = await apiGetPlatformAdminToken()
+  await apiPatchPlatformSettings(adminToken, {
+    feedbackMediaEnabled: false,
+    updateMask: ['feedbackMediaEnabled'],
+  })
+
   const assignment = await apiCreateAssignment(
     seededCourse.instructorToken,
     seededCourse.courseCode,

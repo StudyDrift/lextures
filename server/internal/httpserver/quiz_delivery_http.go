@@ -33,8 +33,8 @@ func (d Deps) registerQuizDeliveryRoutes(r chi.Router) {
 }
 
 func (d Deps) ffAccommodationsAuditEnabled() bool {
-	cfg := d.effectiveConfig()
-	return cfg.FFAccommodationsEngine
+	// Audit always follows the accommodations engine master (collapsed; docs/completed/flags.md).
+	return d.effectiveConfig().AccommodationsEngineEnabled
 }
 
 func (d Deps) handleQuizStart() http.HandlerFunc {

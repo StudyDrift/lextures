@@ -1812,7 +1812,7 @@ export async function apiGetCourseStructure(
 const E2E_PLATFORM_ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
 const E2E_PLATFORM_ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? 'E2eTestPass1!'
 
-async function apiGetPlatformAdminToken(): Promise<string> {
+export async function apiGetPlatformAdminToken(): Promise<string> {
   const loginRes = await fetch(`${apiBase}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1833,13 +1833,18 @@ async function apiGetPlatformAdminToken(): Promise<string> {
   return access_token
 }
 
-/** Enable peer review via Settings → Global platform (requires platform admin). */
-export async function apiEnablePeerReview(): Promise<void> {
+/** Set peer review via Settings → Global platform (requires platform admin). */
+export async function apiSetPeerReview(enabled: boolean): Promise<void> {
   const token = await apiGetPlatformAdminToken()
   await apiPatchPlatformSettings(token, {
-    ffPeerReview: true,
+    ffPeerReview: enabled,
     updateMask: ['ffPeerReview'],
   })
+}
+
+/** Enable peer review via Settings → Global platform (requires platform admin). */
+export async function apiEnablePeerReview(): Promise<void> {
+  await apiSetPeerReview(true)
 }
 
 export async function apiPutPeerReviewConfig(

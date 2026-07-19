@@ -75,11 +75,6 @@ func (d Deps) handleQuizGameWS() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "server misconfiguration")
 			return
 		}
-		if !d.effectiveConfig().FFIqLiveHosting {
-			http.Error(w, "live quiz hosting disabled", http.StatusNotFound)
-			return
-		}
-
 		courseCode := chi.URLParam(r, "course_code")
 		gameIDRaw := chi.URLParam(r, "game_id")
 		gameID, err := uuid.Parse(gameIDRaw)

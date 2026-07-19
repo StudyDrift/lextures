@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/auth"
-	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/quizgame/engine"
 	"github.com/lextures/lextures/server/internal/repos/quizgame"
@@ -271,20 +270,15 @@ func TestQuizGames_StartJoinAnswerEnd_Pg(t *testing.T) {
 	}
 }
 
-func TestQuizGames_HostingSubFlagOff_Pg(t *testing.T) {
+func TestQuizGames_CourseFeatureOff_Pg(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 
-	pool, _, tok, cc, _ := setupQuizKitTest(t, ctx, "teacher", true, true)
+	// Platform IQ hosting sub-flags are always-on; the course Live Quizzes flag is the gate.
+	pool, h, tok, cc, _ := setupQuizKitTest(t, ctx, "teacher", false, true)
 	defer pool.Close()
 
-	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
-	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, Config: config.Config{
-		FFInteractiveQuizzes: true,
-		FFIqLiveHosting:      false,
-	}})
-	kitID := createKitViaAPI(t, h, tok, cc)
-
+	kitID := uuid.NewString()
 	body, _ := json.Marshal(map[string]any{"pacing": "manual"})
 	req := httptest.NewRequest(http.MethodPost,
 		"/api/v1/courses/"+cc+"/live-quizzes/kits/"+kitID+"/games", bytes.NewReader(body))
@@ -293,15 +287,7 @@ func TestQuizGames_HostingSubFlagOff_Pg(t *testing.T) {
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, req)
 	if w.Code != http.StatusNotFound {
-		t.Fatalf("want 404 when iq_live_hosting off, got %d %s", w.Code, w.Body.String())
-	}
-
-	req = httptest.NewRequest(http.MethodGet,
-		"/api/v1/courses/"+cc+"/live-quizzes/games/"+kitID+"/ws", nil)
-	w = httptest.NewRecorder()
-	h.ServeHTTP(w, req)
-	if w.Code != http.StatusNotFound {
-		t.Fatalf("ws want 404 got %d", w.Code)
+		t.Fatalf("want 404 when course interactive quizzes off, got %d %s", w.Code, w.Body.String())
 	}
 }
 
