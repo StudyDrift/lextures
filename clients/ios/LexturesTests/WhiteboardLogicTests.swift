@@ -56,11 +56,11 @@ final class WhiteboardLogicTests: XCTestCase {
 
     func testUndoRedoStack() {
         var history = WhiteboardLogic.History()
-        let a = [WhiteboardLogic.stroke(color: "#000000", width: 2, pts: [CGPoint(x: 0, y: 0), CGPoint(x: 1, y: 1)])]
-        let b = a + [WhiteboardLogic.line(color: "#111111", width: 2, from: .zero, to: CGPoint(x: 5, y: 5))]
-        history.push(a)
+        let before = [WhiteboardLogic.stroke(color: "#000000", width: 2, pts: [CGPoint(x: 0, y: 0), CGPoint(x: 1, y: 1)])]
+        let after = before + [WhiteboardLogic.line(color: "#111111", width: 2, from: .zero, to: CGPoint(x: 5, y: 5))]
+        history.push(before)
         XCTAssertTrue(history.canUndo)
-        let undone = history.undo(current: b)
+        let undone = history.undo(current: after)
         XCTAssertEqual(undone?.count, 1)
         let redone = history.redo(current: undone!)
         XCTAssertEqual(redone?.count, 2)

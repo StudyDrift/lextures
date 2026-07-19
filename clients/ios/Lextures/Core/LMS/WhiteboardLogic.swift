@@ -98,14 +98,14 @@ enum WhiteboardLogic {
     }
 
     static func rect(color: String, width: Double, from: CGPoint, to: CGPoint) -> WhiteboardElement {
-        let x = min(from.x, to.x)
-        let y = min(from.y, to.y)
+        let originX = min(from.x, to.x)
+        let originY = min(from.y, to.y)
         return WhiteboardElement(
             type: "rect",
             color: color,
             width: width,
-            rectX: Double(x),
-            rectY: Double(y),
+            rectX: Double(originX),
+            rectY: Double(originY),
             rectWidth: Double(abs(to.x - from.x)),
             rectHeight: Double(abs(to.y - from.y))
         )
@@ -225,8 +225,8 @@ enum WhiteboardLogic {
                 return [pair[0] + dx, pair[1] + dy]
             }
         case "rect":
-            if let x = element.rectX { next.rectX = x + dx }
-            if let y = element.rectY { next.rectY = y + dy }
+            if let rectX = element.rectX { next.rectX = rectX + dx }
+            if let rectY = element.rectY { next.rectY = rectY + dy }
         case "circle":
             if let cx = element.centerX { next.centerX = cx + dx }
             if let cy = element.centerY { next.centerY = cy + dy }
@@ -260,36 +260,36 @@ enum WhiteboardLogic {
             guard let pts = element.pts else { return nil }
             base["pts"] = pts
         case "rect":
-            guard let x = element.rectX, let y = element.rectY,
-                  let w = element.rectWidth, let h = element.rectHeight else { return nil }
-            base["x"] = x
-            base["y"] = y
-            base["w"] = w
-            base["h"] = h
+            guard let rectX = element.rectX, let rectY = element.rectY,
+                  let rectW = element.rectWidth, let rectH = element.rectHeight else { return nil }
+            base["x"] = rectX
+            base["y"] = rectY
+            base["w"] = rectW
+            base["h"] = rectH
         case "circle":
-            guard let cx = element.centerX, let cy = element.centerY,
-                  let rx = element.radiusX, let ry = element.radiusY else { return nil }
-            base["cx"] = cx
-            base["cy"] = cy
-            base["rx"] = rx
-            base["ry"] = ry
+            guard let centerX = element.centerX, let centerY = element.centerY,
+                  let radiusX = element.radiusX, let radiusY = element.radiusY else { return nil }
+            base["cx"] = centerX
+            base["cy"] = centerY
+            base["rx"] = radiusX
+            base["ry"] = radiusY
         case "line":
-            guard let x1 = element.point1X, let y1 = element.point1Y,
-                  let x2 = element.point2X, let y2 = element.point2Y else { return nil }
-            base["x1"] = x1
-            base["y1"] = y1
-            base["x2"] = x2
-            base["y2"] = y2
+            guard let point1X = element.point1X, let point1Y = element.point1Y,
+                  let point2X = element.point2X, let point2Y = element.point2Y else { return nil }
+            base["x1"] = point1X
+            base["y1"] = point1Y
+            base["x2"] = point2X
+            base["y2"] = point2Y
         case "triangle":
-            guard let x1 = element.point1X, let y1 = element.point1Y,
-                  let x2 = element.point2X, let y2 = element.point2Y,
-                  let x3 = element.point3X, let y3 = element.point3Y else { return nil }
-            base["x1"] = x1
-            base["y1"] = y1
-            base["x2"] = x2
-            base["y2"] = y2
-            base["x3"] = x3
-            base["y3"] = y3
+            guard let point1X = element.point1X, let point1Y = element.point1Y,
+                  let point2X = element.point2X, let point2Y = element.point2Y,
+                  let point3X = element.point3X, let point3Y = element.point3Y else { return nil }
+            base["x1"] = point1X
+            base["y1"] = point1Y
+            base["x2"] = point2X
+            base["y2"] = point2Y
+            base["x3"] = point3X
+            base["y3"] = point3Y
         default:
             return nil
         }
