@@ -790,6 +790,7 @@ struct CourseCreateView: View {
                         body: AddCourseOutcomeLinkBody(
                             structureItemId: item.id,
                             targetKind: sub.assessmentKind.rawValue,
+                            quizQuestionId: nil,
                             measurementLevel: "summative",
                             intensityLevel: "high",
                             subOutcomeId: subRow.id
