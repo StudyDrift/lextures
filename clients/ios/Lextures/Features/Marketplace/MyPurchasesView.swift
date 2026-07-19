@@ -67,7 +67,7 @@ struct MyPurchasesView: View {
             currency: purchase.currency,
             freeLabel: freeLabel
         )
-        let sourceKey = MarketplaceLogic.purchaseSourceLabelKey(purchase.source)
+        let sourceLabel = MarketplaceLogic.purchaseSourceLabel(purchase.source)
         LMSCard {
             VStack(alignment: .leading, spacing: 10) {
                 Text(purchase.title)
@@ -78,7 +78,7 @@ struct MyPurchasesView: View {
                         .font(.subheadline.weight(.semibold))
                     Text("·")
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                    Text(L.text(sourceKey))
+                    Text(sourceLabel)
                         .font(.caption)
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                     Spacer()
