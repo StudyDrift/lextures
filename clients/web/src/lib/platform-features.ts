@@ -274,26 +274,15 @@ const defaults: PlatformFeaturesSnapshot = {
 
 let loaded = false
 let snapshot: PlatformFeaturesSnapshot = { ...defaults }
-const snapshotListeners = new Set<() => void>()
 
 export function setPlatformFeaturesSnapshot(next: PlatformFeaturesSnapshot): void {
   snapshot = next
   loaded = true
-  for (const listener of snapshotListeners) listener()
 }
 
 export function resetPlatformFeaturesSnapshot(): void {
   snapshot = { ...defaults }
   loaded = false
-  for (const listener of snapshotListeners) listener()
-}
-
-/** Subscribe to snapshot updates (for mounts outside PlatformFeaturesProvider). */
-export function subscribePlatformFeatures(listener: () => void): () => void {
-  snapshotListeners.add(listener)
-  return () => {
-    snapshotListeners.delete(listener)
-  }
 }
 
 export function getPlatformFeatures(): PlatformFeaturesSnapshot {
