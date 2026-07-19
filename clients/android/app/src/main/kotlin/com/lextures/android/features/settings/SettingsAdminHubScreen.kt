@@ -141,13 +141,12 @@ fun SettingsAdminHubScreen(
         },
     ) { padding ->
         if (!canView) {
-            Column(Modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
-                LmsEmptyState(
-                    icon = Icons.Default.Lock,
-                    title = L.text(R.string.mobile_settings_menu_accessDenied_title),
-                    message = L.text(R.string.mobile_settings_menu_accessDenied_message),
-                )
-            }
+            LmsEmptyState(
+                icon = Icons.Default.Lock,
+                title = L.text(context, localePrefs, R.string.mobile_settings_menu_accessDenied_title),
+                message = L.text(context, localePrefs, R.string.mobile_settings_menu_accessDenied_message),
+                modifier = Modifier.padding(padding).padding(16.dp),
+            )
             return@Scaffold
         }
 

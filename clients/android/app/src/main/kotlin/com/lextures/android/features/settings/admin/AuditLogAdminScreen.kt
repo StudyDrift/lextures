@@ -73,6 +73,8 @@ fun AuditLogAdminScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val canView = AuditLogAdminLogic.canView(shell.platformFeatures, shell.permissions)
 
+    val loadErrorMessage = L.text(context, localePrefs, R.string.mobile_admin_auditLog_error)
+
     fun load() {
         val token = accessToken ?: return
         scope.launch {
@@ -81,7 +83,7 @@ fun AuditLogAdminScreen(
             try {
                 events = LmsApi.fetchAdminAuditLog(accessToken = token, action = actionFilter)
             } catch (_: Exception) {
-                errorMessage = L.text(R.string.mobile_admin_auditLog_error)
+                errorMessage = loadErrorMessage
                 events = emptyList()
             } finally {
                 loading = false
@@ -107,13 +109,12 @@ fun AuditLogAdminScreen(
         },
     ) { padding ->
         if (!canView) {
-            Column(Modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
-                LmsEmptyState(
-                    icon = Icons.Default.Lock,
-                    title = L.text(R.string.mobile_admin_auditLog_accessDenied_title),
-                    message = L.text(R.string.mobile_admin_auditLog_accessDenied_message),
-                )
-            }
+            LmsEmptyState(
+                icon = Icons.Default.Lock,
+                title = L.text(context, localePrefs, R.string.mobile_admin_auditLog_accessDenied_title),
+                message = L.text(context, localePrefs, R.string.mobile_admin_auditLog_accessDenied_message),
+                modifier = Modifier.padding(padding).padding(16.dp),
+            )
             return@Scaffold
         }
 
