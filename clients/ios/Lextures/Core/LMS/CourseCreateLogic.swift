@@ -336,20 +336,24 @@ enum CourseCreateLogic {
         if competencies.isEmpty {
             return .message("mobile.createCourse.error.competency.minOne")
         }
-        for (i, c) in competencies.enumerated() {
-            let title = c.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        for (compIndex, competency) in competencies.enumerated() {
+            let title = competency.title.trimmingCharacters(in: .whitespacesAndNewlines)
             if title.isEmpty {
-                return .message("mobile.createCourse.error.competency.titleRequired", "\(i + 1)")
+                return .message("mobile.createCourse.error.competency.titleRequired", "\(compIndex + 1)")
             }
-            if c.subOutcomes.isEmpty {
+            if competency.subOutcomes.isEmpty {
                 return .message("mobile.createCourse.error.competency.subOutcomeMinOne", title)
             }
-            for (j, s) in c.subOutcomes.enumerated() {
-                let subTitle = s.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            for (subIndex, subOutcome) in competency.subOutcomes.enumerated() {
+                let subTitle = subOutcome.title.trimmingCharacters(in: .whitespacesAndNewlines)
                 if subTitle.isEmpty {
-                    return .message("mobile.createCourse.error.competency.subOutcomeTitleRequired", title, "\(j + 1)")
+                    return .message(
+                        "mobile.createCourse.error.competency.subOutcomeTitleRequired",
+                        title,
+                        "\(subIndex + 1)"
+                    )
                 }
-                if s.assessmentTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                if subOutcome.assessmentTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     return .message("mobile.createCourse.error.competency.assessmentTitleRequired", subTitle)
                 }
             }
