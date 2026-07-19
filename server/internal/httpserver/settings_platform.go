@@ -216,6 +216,7 @@ type platformSettingsJSON struct {
 	FFMobileCanvasImport         bool    `json:"ffMobileCanvasImport"`
 	FFMobileAdminConsole         bool    `json:"ffMobileAdminConsole"`
 	FFMobileEnrollmentAdd        bool    `json:"ffMobileEnrollmentAdd"`
+	FFMobileLiveQuiz             bool    `json:"ffMobileLiveQuiz"`
 	FFClassroomSignals           bool    `json:"ffClassroomSignals"`
 	FFLibraryIntegration         bool    `json:"ffLibraryIntegration"`
 	DiagnosticAssessmentsEnabled bool    `json:"diagnosticAssessmentsEnabled"`
@@ -481,6 +482,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFMobileCanvasImport:               merged.FFMobileCanvasImport,
 			FFMobileAdminConsole:               merged.FFMobileAdminConsole,
 			FFMobileEnrollmentAdd:              merged.FFMobileEnrollmentAdd,
+			FFMobileLiveQuiz:                   merged.FFMobileLiveQuiz,
 			FFClassroomSignals:                 merged.FFClassroomSignals,
 			FFLibraryIntegration:               merged.FFLibraryIntegration,
 			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,
@@ -720,6 +722,7 @@ type putPlatformBody struct {
 	FFMobileCanvasImport         *bool    `json:"ffMobileCanvasImport"`
 	FFMobileAdminConsole         *bool    `json:"ffMobileAdminConsole"`
 	FFMobileEnrollmentAdd        *bool    `json:"ffMobileEnrollmentAdd"`
+	FFMobileLiveQuiz             *bool    `json:"ffMobileLiveQuiz"`
 	FFClassroomSignals           *bool    `json:"ffClassroomSignals"`
 	FFLibraryIntegration         *bool    `json:"ffLibraryIntegration"`
 	DiagnosticAssessmentsEnabled *bool    `json:"diagnosticAssessmentsEnabled"`
@@ -1143,6 +1146,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffmobilecanvasimport", body.FFMobileCanvasImport, func(v bool) { wr.FFMobileCanvasImport = &v })
 		setBool("ffmobileadminconsole", body.FFMobileAdminConsole, func(v bool) { wr.FFMobileAdminConsole = &v })
 		setBool("ffmobileenrollmentadd", body.FFMobileEnrollmentAdd, func(v bool) { wr.FFMobileEnrollmentAdd = &v })
+		setBool("ffmobilelivequiz", body.FFMobileLiveQuiz, func(v bool) { wr.FFMobileLiveQuiz = &v })
 		setBool("ffclassroomsignals", body.FFClassroomSignals, func(v bool) { wr.FFClassroomSignals = &v })
 		setBool("fflibraryintegration", body.FFLibraryIntegration, func(v bool) { wr.FFLibraryIntegration = &v })
 		setBool("diagnosticassessmentsenabled", body.DiagnosticAssessmentsEnabled, func(v bool) { wr.DiagnosticAssessmentsEnabled = &v })
@@ -1376,6 +1380,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFMobileCanvasImport:               merged.FFMobileCanvasImport,
 			FFMobileAdminConsole:               merged.FFMobileAdminConsole,
 			FFMobileEnrollmentAdd:              merged.FFMobileEnrollmentAdd,
+			FFMobileLiveQuiz:                   merged.FFMobileLiveQuiz,
 			FFClassroomSignals:                 merged.FFClassroomSignals,
 			FFLibraryIntegration:               merged.FFLibraryIntegration,
 			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,

@@ -27,6 +27,7 @@ object CourseFeaturesLogic {
         srs("srs"),
         standardsAlignment("standardsAlignment"),
         visualBoards("visualBoards"),
+        interactiveQuizzes("interactiveQuizzes"),
         whiteboard("whiteboard"),
     }
 
@@ -55,6 +56,7 @@ object CourseFeaturesLogic {
         ToolRow(Tool.srs),
         ToolRow(Tool.standardsAlignment),
         ToolRow(Tool.visualBoards),
+        ToolRow(Tool.interactiveQuizzes),
         ToolRow(Tool.whiteboard),
     )
 
@@ -91,6 +93,7 @@ object CourseFeaturesLogic {
         Tool.srs -> com.lextures.android.R.string.mobile_courseSettings_features_tool_srs_label
         Tool.standardsAlignment -> com.lextures.android.R.string.mobile_courseSettings_features_tool_standardsAlignment_label
         Tool.visualBoards -> com.lextures.android.R.string.mobile_courseSettings_features_tool_visualBoards_label
+        Tool.interactiveQuizzes -> com.lextures.android.R.string.mobile_courseSettings_features_tool_interactiveQuizzes_label
         Tool.whiteboard -> com.lextures.android.R.string.mobile_courseSettings_features_tool_whiteboard_label
     }
 
@@ -117,6 +120,7 @@ object CourseFeaturesLogic {
         Tool.srs -> com.lextures.android.R.string.mobile_courseSettings_features_tool_srs_description
         Tool.standardsAlignment -> com.lextures.android.R.string.mobile_courseSettings_features_tool_standardsAlignment_description
         Tool.visualBoards -> com.lextures.android.R.string.mobile_courseSettings_features_tool_visualBoards_description
+        Tool.interactiveQuizzes -> com.lextures.android.R.string.mobile_courseSettings_features_tool_interactiveQuizzes_description
         Tool.whiteboard -> com.lextures.android.R.string.mobile_courseSettings_features_tool_whiteboard_description
     }
 
@@ -147,6 +151,7 @@ object CourseFeaturesLogic {
         Tool.srs -> course.srsEnabled == true
         Tool.standardsAlignment -> course.standardsAlignmentEnabled == true
         Tool.visualBoards -> course.visualBoardsEnabled == true
+        Tool.interactiveQuizzes -> course.interactiveQuizzesEnabled == true
         Tool.whiteboard -> course.whiteboardEnabled == true
     }
 
@@ -173,6 +178,7 @@ object CourseFeaturesLogic {
         Tool.srs -> course.copy(srsEnabled = enabled)
         Tool.standardsAlignment -> course.copy(standardsAlignmentEnabled = enabled)
         Tool.visualBoards -> course.copy(visualBoardsEnabled = enabled)
+        Tool.interactiveQuizzes -> course.copy(interactiveQuizzesEnabled = enabled)
         Tool.whiteboard -> course.copy(whiteboardEnabled = enabled)
     }
 
@@ -200,6 +206,7 @@ object CourseFeaturesLogic {
         whiteboardEnabled = course.whiteboardEnabled == true,
         reportCardsEnabled = course.reportCardsEnabled == true,
         visualBoardsEnabled = course.visualBoardsEnabled == true,
+        interactiveQuizzesEnabled = course.interactiveQuizzesEnabled == true,
     )
 
     fun shouldConfirmDisable(currentlyEnabled: Boolean): Boolean = currentlyEnabled
@@ -244,6 +251,7 @@ data class CourseFeaturesPatch(
     val whiteboardEnabled: Boolean,
     val reportCardsEnabled: Boolean,
     val visualBoardsEnabled: Boolean,
+    val interactiveQuizzesEnabled: Boolean,
 )
 
 @kotlinx.serialization.Serializable

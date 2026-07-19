@@ -4,6 +4,7 @@ import com.lextures.android.core.design.UIMode
 import com.lextures.android.core.lms.AdvisingLogic
 import com.lextures.android.core.lms.CourseSettingsLogic
 import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.lms.LiveQuizLogic
 import com.lextures.android.core.lms.EvaluationLogic
 import com.lextures.android.core.lms.EvaluationStatus
 import com.lextures.android.core.lms.ImmersiveReaderCapabilities
@@ -117,6 +118,7 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
     Groups("mobile_ia_course_groups", "groups"),
     CollabDocs("mobile_ia_course_collabDocs", "collab-docs"),
     Boards("mobile_ia_course_boards", "boards"),
+    LiveQuizzes("mobile_ia_course_liveQuizzes", "live-quizzes"),
     Grading("mobile_ia_course_grading", "grading"),
     InstructorInsights("mobile_ia_course_insights", "insights"),
     Settings("mobile_ia_course_settings", "settings"),
@@ -141,6 +143,7 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
             CourseDeepLinkSection.Groups -> Groups
             CourseDeepLinkSection.CollabDocs -> CollabDocs
             CourseDeepLinkSection.Boards -> Boards
+            CourseDeepLinkSection.LiveQuizzes -> LiveQuizzes
             CourseDeepLinkSection.Behavior -> Behavior
             CourseDeepLinkSection.HallPass -> HallPass
             CourseDeepLinkSection.Insights -> InstructorInsights
@@ -237,6 +240,7 @@ data class MobilePlatformFeatures(
     val ffMobileCanvasImport: Boolean = false,
     val ffMobileAdminConsole: Boolean = false,
     val ffMobileEnrollmentAdd: Boolean = false,
+    val ffMobileLiveQuiz: Boolean = false,
     val ffEnrollmentStateMachine: Boolean = false,
     val adminConsoleEnabled: Boolean = false,
     val adminAuditLogEnabled: Boolean = true,
@@ -334,6 +338,7 @@ data class MobilePlatformFeatures(
             ffMobileCanvasImport = features?.ffMobileCanvasImport == true,
             ffMobileAdminConsole = features?.ffMobileAdminConsole == true,
             ffMobileEnrollmentAdd = features?.ffMobileEnrollmentAdd == true,
+            ffMobileLiveQuiz = features?.ffMobileLiveQuiz == true,
             ffEnrollmentStateMachine = features?.ffEnrollmentStateMachine == true,
             adminConsoleEnabled = features?.adminConsoleEnabled == true,
             adminAuditLogEnabled = features?.adminAuditLogEnabled != false,
@@ -437,6 +442,7 @@ object MobileDestinations {
                     CourseWorkspaceSection.Groups,
                     CourseWorkspaceSection.CollabDocs,
                     CourseWorkspaceSection.Boards,
+                    CourseWorkspaceSection.LiveQuizzes,
                     CourseWorkspaceSection.Live,
                     CourseWorkspaceSection.OfficeHours,
                 ),
@@ -549,6 +555,9 @@ object MobileDestinations {
         if (ctx.course.isGroupSpacesEnabled) add(CourseWorkspaceSection.Groups)
         if (ctx.course.isCollabDocsEnabled) add(CourseWorkspaceSection.CollabDocs)
         if (ctx.course.isVisualBoardsEnabled) add(CourseWorkspaceSection.Boards)
+        if (LiveQuizLogic.shouldShowWorkspaceSection(ctx.course, ctx.platformFeatures)) {
+            add(CourseWorkspaceSection.LiveQuizzes)
+        }
         if (ctx.course.isAttendanceEnabled && (ctx.course.viewerIsStaff || ctx.hasAttendanceSessions)) {
             add(CourseWorkspaceSection.Attendance)
         }

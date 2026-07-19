@@ -85,6 +85,7 @@ import com.lextures.android.features.officehours.CourseOfficeHoursSection
 import com.lextures.android.features.discussions.CourseDiscussionsSection
 import com.lextures.android.features.feed.CourseFeedSection
 import com.lextures.android.features.boards.BoardsListScreen
+import com.lextures.android.features.livequiz.LiveQuizHubScreen
 import com.lextures.android.features.boards.BoardsUnavailableScreen
 import com.lextures.android.features.groups.CourseCollabDocsSection
 import com.lextures.android.features.groups.CourseGroupsSection
@@ -560,6 +561,12 @@ fun CourseDetailScreen(
                             } else {
                                 null
                             },
+                        )
+                    }
+                    CourseWorkspaceSection.LiveQuizzes -> item {
+                        LiveQuizHubScreen(
+                            session = session,
+                            course = course,
                         )
                     }
                     CourseWorkspaceSection.People -> item {

@@ -78,6 +78,7 @@ fun courseSectionIcon(section: CourseWorkspaceSection): ImageVector = when (sect
     CourseWorkspaceSection.Groups -> Icons.Filled.Group
     CourseWorkspaceSection.CollabDocs -> Icons.Filled.Description
     CourseWorkspaceSection.Boards -> Icons.Filled.GridView
+    CourseWorkspaceSection.LiveQuizzes -> Icons.Filled.RateReview
     CourseWorkspaceSection.Grading -> Icons.Filled.FactCheck
     CourseWorkspaceSection.InstructorInsights -> Icons.Filled.BarChart
     CourseWorkspaceSection.Settings -> Icons.Filled.Settings
@@ -105,6 +106,7 @@ fun courseSectionLabelRes(section: CourseWorkspaceSection): Int = when (section)
     CourseWorkspaceSection.Groups -> R.string.mobile_ia_course_groups
     CourseWorkspaceSection.CollabDocs -> R.string.mobile_ia_course_collabDocs
     CourseWorkspaceSection.Boards -> R.string.mobile_ia_course_boards
+    CourseWorkspaceSection.LiveQuizzes -> R.string.mobile_ia_course_liveQuizzes
     CourseWorkspaceSection.Grading -> R.string.mobile_ia_course_grading
     CourseWorkspaceSection.InstructorInsights -> R.string.mobile_ia_course_insights
     CourseWorkspaceSection.Settings -> R.string.mobile_ia_course_settings

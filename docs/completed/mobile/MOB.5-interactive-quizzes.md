@@ -13,11 +13,27 @@
 | **Section** | Mobile parity |
 | **Severity** | BLOCKER (K12) / MAJOR (HE, SL) |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | **DONE (Phase 1)** |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Mobile team |
 | **Depends on** | IQ.1–IQ.11 (shipped) |
 | **Unblocks** | MOB.3 live-quizzes governance item |
+
+
+## Implementation notes (2026-07-19)
+
+Phase 1 delivered: student play on iOS + Android (join by code, all 8 answer types, live WS state, leaderboard, my-results, reconnect).
+
+- **Flag**: `ffMobileLiveQuiz` (DB `ff_mobile_live_quiz`, default OFF) gates mobile live-quiz UI together with per-course `interactiveQuizzesEnabled`.
+- **Logic**: `LiveQuizLogic` + `LiveGameLogic` (iOS/Android) — nickname validation, join error mapping, answer payload serialization, phase→surface mapping, reconnect delay, dual-flag workspace gating.
+- **API**: `LMSAPILiveQuiz` / `LiveQuizApi` — `lookupJoinCode`, auth + guest join, `fetchMyGameResults`, course kits list.
+- **Realtime**: dedicated `LiveGameSocket` with `{authToken, role, playerToken}` handshake + `hello`/`catchup`/`answer` (shared JWT-only `WebSocketClient` unchanged).
+- **UI**: course "Live quizzes" hub + global `/play` / `/play/{code}` join→nickname→lobby/play/results flow; shape-labeled answer tiles.
+- **i18n**: `mobile.liveQuiz.*`, `mobile.ia.course.liveQuizzes`; synced via `scripts/sync-mobile-locales.py`.
+- **Observability**: client counters `live_quiz_{join,answer,reconnect,end}` (mode/type only, no answer content).
+- **Tests**: unit coverage for logic + nav gating; platformconfig merge default-off; e2e API smoke `e2e/tests/mobile-live-quiz-join.spec.ts`.
+- **Phases 2–4**: host/modes, kits authoring/library, reports + AI remain planned under this feature ID.
+
 
 ## 1. Problem Statement
 

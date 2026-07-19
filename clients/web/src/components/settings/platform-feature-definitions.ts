@@ -762,6 +762,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Add people to a course roster from iOS and Android People, with role selection and state actions (MOB.4).',
   },
   {
+    key: 'ffMobileLiveQuiz',
+    label: 'Mobile live quiz',
+    description:
+      'Join and play interactive live quizzes from iOS and Android with join codes, answer surfaces, and leaderboards (MOB.5).',
+  },
+  {
     key: 'ffReportCards',
     label: 'Report cards',
     description: 'Standards-based report card generation and distribution for K-12 terms.',

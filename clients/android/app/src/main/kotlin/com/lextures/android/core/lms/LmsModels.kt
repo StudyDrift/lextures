@@ -66,6 +66,8 @@ data class CourseSummary(
     val whiteboardEnabled: Boolean? = null,
     /** VC.M1 — visual collaboration boards (opt-in; default off). */
     val visualBoardsEnabled: Boolean? = null,
+    /** IQ / MOB.5 — interactive live quizzes (opt-in; default off). */
+    val interactiveQuizzesEnabled: Boolean? = null,
     val requireCaptions: Boolean? = null,
     val viewerEnrollmentInvitationPending: Boolean? = null,
     val viewerPendingEnrollmentId: String? = null,
@@ -115,6 +117,7 @@ data class CourseSummary(
     val isCollabDocsEnabled: Boolean get() = collabDocsEnabled == true
 
     val isVisualBoardsEnabled: Boolean get() = visualBoardsEnabled == true
+    val isInteractiveQuizzesEnabled: Boolean get() = interactiveQuizzesEnabled == true
 }
 
 @Serializable
