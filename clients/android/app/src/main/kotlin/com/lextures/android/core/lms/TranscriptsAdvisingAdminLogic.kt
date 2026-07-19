@@ -36,7 +36,7 @@ object TranscriptsAdvisingAdminLogic {
     }
 
     fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean =
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
 
     fun canManage(permissions: Collection<String>): Boolean =
         RBAC_MANAGE_PERMISSION in permissions
@@ -48,12 +48,12 @@ object TranscriptsAdvisingAdminLogic {
         features.ffAdvisingIntegration
 
     fun shouldShowEntry(features: MobilePlatformFeatures, permissions: Collection<String>): Boolean =
-        adminSettingsEnabled(features) &&
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings &&
             canManage(permissions) &&
             (isTranscriptsEnabled(features) || isAdvisingEnabled(features))
 
     fun canView(features: MobilePlatformFeatures, permissions: Collection<String>): Boolean =
-        shouldShowEntry(features, permissions)
+        adminSettingsEnabled(features) && canManage(permissions)
 
     fun canViewTranscripts(features: MobilePlatformFeatures, permissions: Collection<String>): Boolean =
         adminSettingsEnabled(features) && canManage(permissions) && isTranscriptsEnabled(features)

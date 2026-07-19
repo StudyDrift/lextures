@@ -70,7 +70,7 @@ enum AiModelsAdminLogic {
     ]
 
     static func adminSettingsEnabled(_ features: MobilePlatformFeatures) -> Bool {
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
     }
 
     static func canManage(permissions: [String]) -> Bool {
@@ -78,11 +78,11 @@ enum AiModelsAdminLogic {
     }
 
     static func shouldShowEntry(features: MobilePlatformFeatures, permissions: [String]) -> Bool {
-        adminSettingsEnabled(features) && canManage(permissions: permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManage(permissions: permissions)
     }
 
     static func canView(features: MobilePlatformFeatures, permissions: [String]) -> Bool {
-        shouldShowEntry(features: features, permissions: permissions)
+        adminSettingsEnabled(features) && canManage(permissions: permissions)
     }
 
     /// Builds the PUT body. The OpenRouter key is write-only: only send a new key when the

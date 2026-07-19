@@ -134,6 +134,10 @@ fun ProfileTab(
     var showIntegrationsAdmin by remember { mutableStateOf(false) }
     var showTranscriptsAdvisingAdmin by remember { mutableStateOf(false) }
     var showPlatformSettingsAdmin by remember { mutableStateOf(false) }
+    var showSettingsAdminHub by remember { mutableStateOf(false) }
+    var settingsAdminHubInitialPage by remember {
+        mutableStateOf<com.lextures.android.core.lms.SettingsMenuLogic.ItemId?>(null)
+    }
     var personalDetailsVisible by remember { mutableStateOf(false) }
     var researchVisible by remember { mutableStateOf(false) }
     var showMoreHub by remember { mutableStateOf(false) }
@@ -177,6 +181,27 @@ fun ProfileTab(
             com.lextures.android.core.routing.SettingsDeepLinkSection.LearnerProfile -> {
                 if (com.lextures.android.core.lms.LearnerProfileLogic.learnerProfileEnabled(shell.platformFeatures)) {
                     showLearnerProfile = true
+                }
+            }
+            com.lextures.android.core.routing.SettingsDeepLinkSection.AdminHub -> {
+                if (com.lextures.android.core.lms.SettingsMenuLogic.shouldShowHubEntry(
+                        shell.platformFeatures,
+                        shell.permissions,
+                    )
+                ) {
+                    settingsAdminHubInitialPage = null
+                    showSettingsAdminHub = true
+                }
+            }
+            com.lextures.android.core.routing.SettingsDeepLinkSection.AuditLog -> {
+                if (com.lextures.android.core.lms.SettingsMenuLogic.shouldShowHubEntry(
+                        shell.platformFeatures,
+                        shell.permissions,
+                    )
+                ) {
+                    settingsAdminHubInitialPage =
+                        com.lextures.android.core.lms.SettingsMenuLogic.ItemId.AuditLog
+                    showSettingsAdminHub = true
                 }
             }
             null -> Unit
@@ -399,6 +424,21 @@ fun ProfileTab(
             shell = shell,
             localePrefs = localePreferences,
             onBack = { showTranscriptsAdvisingAdmin = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showSettingsAdminHub) {
+        com.lextures.android.features.settings.SettingsAdminHubScreen(
+            session = session,
+            shell = shell,
+            localePrefs = localePreferences,
+            onBack = {
+                showSettingsAdminHub = false
+                settingsAdminHubInitialPage = null
+            },
+            initialPage = settingsAdminHubInitialPage,
             modifier = modifier,
         )
         return
@@ -991,6 +1031,24 @@ fun ProfileTab(
                     title = L.text(R.string.mobile_admin_transcriptsAdvising_hub_title),
                     subtitle = L.text(R.string.mobile_admin_transcriptsAdvising_hub_entry_subtitle),
                     onClick = { showTranscriptsAdvisingAdmin = true },
+                )
+            }
+        }
+
+        if (com.lextures.android.core.lms.SettingsMenuLogic.shouldShowHubEntry(
+                shell.platformFeatures,
+                shell.permissions,
+            )
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Settings,
+                    title = L.text(R.string.mobile_settings_menu_title),
+                    subtitle = L.text(R.string.mobile_settings_menu_entry_subtitle),
+                    onClick = {
+                        settingsAdminHubInitialPage = null
+                        showSettingsAdminHub = true
+                    },
                 )
             }
         }

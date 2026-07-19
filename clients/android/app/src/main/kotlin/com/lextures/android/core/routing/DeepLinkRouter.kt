@@ -4,6 +4,10 @@ enum class SettingsDeepLinkSection {
     Account,
     Notifications,
     LearnerProfile,
+    /** MOB.3 Settings/Admin hub. */
+    AdminHub,
+    /** MOB.3 Audit log page inside the admin hub. */
+    AuditLog,
 }
 
 /** Parsed navigation target from a push tap, app link, or in-app notification action URL. */
@@ -129,6 +133,14 @@ object DeepLinkRouter {
                     val section = when (segments.getOrNull(1)?.lowercase()) {
                         "notifications" -> SettingsDeepLinkSection.Notifications
                         "learner-profile" -> SettingsDeepLinkSection.LearnerProfile
+                        "admin", "admin-console" -> {
+                            if (segments.getOrNull(2)?.lowercase() == "audit-log") {
+                                SettingsDeepLinkSection.AuditLog
+                            } else {
+                                SettingsDeepLinkSection.AdminHub
+                            }
+                        }
+                        "audit-log" -> SettingsDeepLinkSection.AuditLog
                         else -> SettingsDeepLinkSection.Account
                     }
                     DeepLinkDestination.Settings(section)

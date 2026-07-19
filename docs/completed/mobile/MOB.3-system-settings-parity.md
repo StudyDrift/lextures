@@ -12,11 +12,27 @@
 | **Section** | Mobile parity |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL |
+| **Status (today)** | **DONE (Phase 1)** |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Mobile team (phased) |
 | **Depends on** | — |
 | **Unblocks** | Admin-on-mobile workflows |
+
+
+---
+
+## Implementation notes (2026-07-19)
+
+Phase 1 delivered: Settings/Admin hub shell + Audit log (read-only).
+
+- **Flag**: `ffMobileAdminConsole` (DB `ff_mobile_admin_console`, default OFF) gates the mobile Settings/Admin hub.
+- **Logic**: `SettingsMenuLogic` registry (iOS/Android) mirrors web inventory groups (Platform, School operations, Student records, Integrations, Compliance & security) with permission × feature-flag gating; shipped M14 screens are linked, not duplicated. Legacy Profile entry cards hide when the hub flag is on.
+- **Audit log**: `AuditLogAdminLogic` + `AuditLogAdminView` / `AuditLogAdminScreen` call `GET /api/v1/admin-console/audit-log` with action filter (web AdminAuditLog parity). Gated by hub flag + `adminConsoleEnabled` + `adminAuditLogEnabled` + `global:app:rbac:manage`.
+- **Deep links**: `/settings/admin`, `/settings/admin/audit-log`, `/settings/audit-log`.
+- **i18n**: `mobile.settings.menu.*`, `mobile.admin.auditLog.*`; synced via `scripts/sync-mobile-locales.py`.
+- **Tests**: unit coverage for menu registry gating/search and audit-log helpers; e2e API smoke `e2e/tests/mobile-admin-console-audit-log.spec.ts` (XCUITest/Espresso not present in repo).
+- **Phases 2–3**: remaining pages from §8 remain planned under this feature ID’s later phases.
+
 
 ## 1. Problem Statement
 

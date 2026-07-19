@@ -8,7 +8,7 @@ enum OrgStructureAdminLogic {
     static let orgListLimit = 200
 
     static func adminSettingsEnabled(_ features: MobilePlatformFeatures) -> Bool {
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
     }
 
     static func canManageOrganizations(permissions: [String]) -> Bool {
@@ -23,7 +23,8 @@ enum OrgStructureAdminLogic {
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        adminSettingsEnabled(features)
+        !features.ffMobileAdminConsole
+            && features.ffMobileAdminSettings
             && (canManageOrganizations(permissions: permissions)
                 || canManageOrgUnitsAndTerms(permissions: permissions))
     }
@@ -32,7 +33,9 @@ enum OrgStructureAdminLogic {
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        shouldShowEntry(features: features, permissions: permissions)
+        adminSettingsEnabled(features)
+            && (canManageOrganizations(permissions: permissions)
+                || canManageOrgUnitsAndTerms(permissions: permissions))
     }
 
     static func webOrganizationsPath() -> String { "/settings/organizations" }

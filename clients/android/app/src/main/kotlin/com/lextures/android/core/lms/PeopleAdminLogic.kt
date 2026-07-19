@@ -10,7 +10,7 @@ object PeopleAdminLogic {
     const val DEFAULT_PER_PAGE = 25
 
     fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean =
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
 
     fun canManagePeople(permissions: List<String>): Boolean =
         permissions.contains(RBAC_MANAGE_PERMISSION)
@@ -19,12 +19,13 @@ object PeopleAdminLogic {
         features: MobilePlatformFeatures,
         permissions: List<String>,
     ): Boolean =
-        adminSettingsEnabled(features) && canManagePeople(permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManagePeople(permissions)
 
     fun canView(
         features: MobilePlatformFeatures,
         permissions: List<String>,
-    ): Boolean = shouldShowEntry(features, permissions)
+    ): Boolean =
+        adminSettingsEnabled(features) && canManagePeople(permissions)
 
     fun webSettingsPath(): String = "/settings/people"
 

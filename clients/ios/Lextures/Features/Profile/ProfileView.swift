@@ -15,6 +15,7 @@ struct ProfileView: View {
     @State private var notificationPrefsNav = false
     @State private var editProfileNav = false
     @State private var learnerProfileNav = false
+    @State private var settingsAdminHubNav = false
     @State private var showShareFeedback = false
     @State private var feedbackSuccessMessage: String?
     @State private var localeError: String?
@@ -36,6 +37,7 @@ struct ProfileView: View {
                         }
                         ProfilePersonalCard()
                         IntegrationsEntryCard()
+                        SettingsAdminHubEntryCard()
                         ArchivedCoursesAdminEntryCard()
                         RolesPermissionsAdminEntryCard()
                         PeopleAdminEntryCard()
@@ -132,6 +134,15 @@ struct ProfileView: View {
             .navigationDestination(for: PlatformSettingsAdminRoute.self) { _ in
                 PlatformSettingsView()
             }
+            .navigationDestination(for: SettingsAdminHubRoute.self) { _ in
+                SettingsAdminHubView()
+            }
+            .navigationDestination(for: AuditLogAdminRoute.self) { _ in
+                AuditLogAdminView()
+            }
+            .navigationDestination(isPresented: $settingsAdminHubNav) {
+                SettingsAdminHubView()
+            }
             .navigationDestination(for: MoreHubRoute.self) { _ in
                 MoreHubView()
             }
@@ -227,6 +238,13 @@ struct ProfileView: View {
         case .learnerProfile:
             if LearnerProfileLogic.learnerProfileEnabled(shell.platformFeatures) {
                 learnerProfileNav = true
+            }
+        case .adminHub, .auditLog:
+            if SettingsMenuLogic.shouldShowHubEntry(
+                features: shell.platformFeatures,
+                permissions: shell.permissions
+            ) {
+                settingsAdminHubNav = true
             }
         }
     }

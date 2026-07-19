@@ -750,6 +750,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Import a Canvas course on iOS and Android with credentials, scope toggles, and live progress (MOB.2).',
   },
   {
+    key: 'ffMobileAdminConsole',
+    label: 'Mobile admin console',
+    description:
+      'Settings/Admin hub on iOS and Android with web-parity menu groups and audit log (MOB.3).',
+  },
+  {
     key: 'ffReportCards',
     label: 'Report cards',
     description: 'Standards-based report card generation and distribution for K-12 terms.',

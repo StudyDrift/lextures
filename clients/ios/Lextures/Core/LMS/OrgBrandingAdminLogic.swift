@@ -37,7 +37,7 @@ enum OrgBrandingAdminLogic {
     }
 
     static func adminSettingsEnabled(_ features: MobilePlatformFeatures) -> Bool {
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
     }
 
     static func canManageOrgBranding(permissions: [String]) -> Bool {
@@ -48,14 +48,14 @@ enum OrgBrandingAdminLogic {
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        adminSettingsEnabled(features) && canManageOrgBranding(permissions: permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManageOrgBranding(permissions: permissions)
     }
 
     static func canView(
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        shouldShowEntry(features: features, permissions: permissions)
+        adminSettingsEnabled(features) && canManageOrgBranding(permissions: permissions)
     }
 
     static func webOrgBrandingPath() -> String { "/settings/org-branding" }

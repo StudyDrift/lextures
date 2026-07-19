@@ -62,6 +62,7 @@ export type PlatformFeatures = {
   ffMobileCreateCourse: boolean
   ffMobileCourseCreateV2: boolean
   ffMobileCanvasImport: boolean
+  ffMobileAdminConsole: boolean
   ffLibrary: boolean
   ffBroadcasts: boolean
   ffClassroomSignals: boolean
@@ -74,6 +75,7 @@ export type PlatformFeatures = {
   ffSisIntegration: boolean
   ffWebhooks: boolean
   adminConsoleEnabled: boolean
+  adminAuditLogEnabled: boolean
   impersonationEnabled: boolean
   bulkCsvImportEnabled: boolean
   adminSearchEnabled: boolean
@@ -196,6 +198,7 @@ const defaultFeatures: PlatformFeatures = {
   ffMobileCreateCourse: false,
   ffMobileCourseCreateV2: false,
   ffMobileCanvasImport: false,
+  ffMobileAdminConsole: false,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
@@ -208,6 +211,7 @@ const defaultFeatures: PlatformFeatures = {
   ffSisIntegration: false,
   ffWebhooks: false,
   adminConsoleEnabled: false,
+  adminAuditLogEnabled: true,
   impersonationEnabled: false,
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
@@ -327,7 +331,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffMotionLists: true,
     ffMobileCreateCourse: false,
     ffMobileCourseCreateV2: false,
-  ffMobileCanvasImport: false,
+    ffMobileCanvasImport: false,
+    ffMobileAdminConsole: false,
     ffLibrary: false,
     ffBroadcasts: false,
     ffClassroomSignals: false,
@@ -340,6 +345,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffSisIntegration: false,
   ffWebhooks: false,
   adminConsoleEnabled: false,
+  adminAuditLogEnabled: true,
   impersonationEnabled: false,
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
@@ -467,6 +473,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMobileCreateCourse: data.ffMobileCreateCourse === true,
           ffMobileCourseCreateV2: data.ffMobileCourseCreateV2 === true,
           ffMobileCanvasImport: data.ffMobileCanvasImport === true,
+          ffMobileAdminConsole: data.ffMobileAdminConsole === true,
           ffLibrary: data.ffLibrary === true,
           ffBroadcasts: data.ffBroadcasts === true,
           ffClassroomSignals: data.ffClassroomSignals === true,
@@ -479,6 +486,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffSisIntegration: data.ffSisIntegration === true,
           ffWebhooks: data.ffWebhooks === true,
           adminConsoleEnabled: data.adminConsoleEnabled === true,
+          adminAuditLogEnabled: data.adminAuditLogEnabled !== false,
           impersonationEnabled: data.impersonationEnabled === true,
           bulkCsvImportEnabled: data.bulkCsvImportEnabled === true,
           adminSearchEnabled: data.adminSearchEnabled === true,
@@ -563,6 +571,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMobileCreateCourse: next.ffMobileCreateCourse === true,
           ffMobileCourseCreateV2: next.ffMobileCourseCreateV2 === true,
           ffMobileCanvasImport: next.ffMobileCanvasImport === true,
+          ffMobileAdminConsole: next.ffMobileAdminConsole === true,
           ffLibrary: next.ffLibrary === true,
           ffBroadcasts: next.ffBroadcasts === true,
           ffClassroomSignals: next.ffClassroomSignals === true,
@@ -575,6 +584,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffSisIntegration: next.ffSisIntegration === true,
           ffWebhooks: next.ffWebhooks === true,
           adminConsoleEnabled: next.adminConsoleEnabled === true,
+          adminAuditLogEnabled: next.adminAuditLogEnabled !== false,
           impersonationEnabled: next.impersonationEnabled === true,
           bulkCsvImportEnabled: next.bulkCsvImportEnabled === true,
           adminSearchEnabled: next.adminSearchEnabled === true,

@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B03C1A11C4A5A51B00A72002 /* SettingsMenuLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C1A11C4A5A51B00A72001 /* SettingsMenuLogic.swift */; };
+		B03C1A11C4A5A51B00A72004 /* AuditLogAdminLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C1A11C4A5A51B00A72003 /* AuditLogAdminLogic.swift */; };
+		B03C1A11C4A5A51B00A72006 /* LMSFeatureModelsAuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C1A11C4A5A51B00A72005 /* LMSFeatureModelsAuditLog.swift */; };
+		B03C1A11C4A5A51B00A72008 /* LMSAPIAuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C1A11C4A5A51B00A72007 /* LMSAPIAuditLog.swift */; };
+		B03C1A11C4A5A51B00A7200A /* SettingsAdminHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C1A11C4A5A51B00A72009 /* SettingsAdminHubView.swift */; };
+		B03C1A11C4A5A51B00A7200C /* AuditLogAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C1A11C4A5A51B00A7200B /* AuditLogAdminView.swift */; };
+		B03C1A11C4A5A51B00A7200E /* SettingsAdminHubEntryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C1A11C4A5A51B00A7200D /* SettingsAdminHubEntryCard.swift */; };
+		B03C1A11C4A5A51B00A72010 /* SettingsMenuLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C1A11C4A5A51B00A7200F /* SettingsMenuLogicTests.swift */; };
+		B03C1A11C4A5A51B00A72012 /* AuditLogAdminLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C1A11C4A5A51B00A72011 /* AuditLogAdminLogicTests.swift */; };
 		B02C1A11C4A5A51B00A70606 /* CanvasImportLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02C1A11C4A5A51B00A71606 /* CanvasImportLogicTests.swift */; };
 		B02C1A11C4A5A51B00A70505 /* CanvasImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02C1A11C4A5A51B00A71505 /* CanvasImportView.swift */; };
 		B02C1A11C4A5A51B00A70404 /* CanvasImportObservability.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02C1A11C4A5A51B00A71404 /* CanvasImportObservability.swift */; };
@@ -609,6 +618,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B03C1A11C4A5A51B00A72001 /* SettingsMenuLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMenuLogic.swift; sourceTree = "<group>"; };
+		B03C1A11C4A5A51B00A72003 /* AuditLogAdminLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogAdminLogic.swift; sourceTree = "<group>"; };
+		B03C1A11C4A5A51B00A72005 /* LMSFeatureModelsAuditLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsAuditLog.swift; sourceTree = "<group>"; };
+		B03C1A11C4A5A51B00A72007 /* LMSAPIAuditLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIAuditLog.swift; sourceTree = "<group>"; };
+		B03C1A11C4A5A51B00A72009 /* SettingsAdminHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAdminHubView.swift; sourceTree = "<group>"; };
+		B03C1A11C4A5A51B00A7200B /* AuditLogAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogAdminView.swift; sourceTree = "<group>"; };
+		B03C1A11C4A5A51B00A7200D /* SettingsAdminHubEntryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAdminHubEntryCard.swift; sourceTree = "<group>"; };
+		B03C1A11C4A5A51B00A7200F /* SettingsMenuLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMenuLogicTests.swift; sourceTree = "<group>"; };
+		B03C1A11C4A5A51B00A72011 /* AuditLogAdminLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogAdminLogicTests.swift; sourceTree = "<group>"; };
 		B02C1A11C4A5A51B00A71606 /* CanvasImportLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasImportLogicTests.swift; sourceTree = "<group>"; };
 		B02C1A11C4A5A51B00A71505 /* CanvasImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasImportView.swift; sourceTree = "<group>"; };
 		B02C1A11C4A5A51B00A71404 /* CanvasImportObservability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasImportObservability.swift; sourceTree = "<group>"; };
@@ -1239,6 +1257,8 @@
 		98D67F731BF5451A9402BAA2 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+								B03C1A11C4A5A51B00A7200F /* SettingsMenuLogicTests.swift */,
+								B03C1A11C4A5A51B00A72011 /* AuditLogAdminLogicTests.swift */,
 				B02C1A11C4A5A51B00A71606 /* CanvasImportLogicTests.swift */,
 				934E1B2E95284AE5B8ED1F60 /* AccessibilitySupportTests.swift */,
 				174FC4D48AA746DF9086B8D5 /* AccountIntegrationsLogicTests.swift */,
@@ -1489,6 +1509,10 @@
 				B02C1A11C4A5A51B00A71404 /* CanvasImportObservability.swift */,
 				B02C1A11C4A5A51B00A71303 /* LMSAPICanvasImport.swift */,
 				B02C1A11C4A5A51B00A71202 /* LMSFeatureModelsCanvasImport.swift */,
+								B03C1A11C4A5A51B00A72001 /* SettingsMenuLogic.swift */,
+								B03C1A11C4A5A51B00A72003 /* AuditLogAdminLogic.swift */,
+								B03C1A11C4A5A51B00A72005 /* LMSFeatureModelsAuditLog.swift */,
+								B03C1A11C4A5A51B00A72007 /* LMSAPIAuditLog.swift */,
 				B02C1A11C4A5A51B00A71101 /* CanvasImportLogic.swift */,
 				3E55BB4FD5C04443BB5ED4A4 /* AccountAccommodationModels.swift */,
 				344D394B30C44ACCB4AB6E01 /* AccountIntegrationsLogic.swift */,
@@ -2293,7 +2317,8 @@
 			isa = PBXGroup;
 			children = (
 				387083D5EF7A4F1DA444B863 /* Admin */,
-			);
+							B03C1A11C4A5A51B00A72009 /* SettingsAdminHubView.swift */,
+);
 			path = Settings;
 			sourceTree = "<group>";
 		};
@@ -2540,7 +2565,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
-			files = (
+			files = (				B03C1A11C4A5A51B00A72012 /* AuditLogAdminLogicTests.swift in Sources */,
+				B03C1A11C4A5A51B00A72010 /* SettingsMenuLogicTests.swift in Sources */,
+				B03C1A11C4A5A51B00A7200E /* SettingsAdminHubEntryCard.swift in Sources */,
+				B03C1A11C4A5A51B00A7200C /* AuditLogAdminView.swift in Sources */,
+				B03C1A11C4A5A51B00A7200A /* SettingsAdminHubView.swift in Sources */,
+				B03C1A11C4A5A51B00A72008 /* LMSAPIAuditLog.swift in Sources */,
+				B03C1A11C4A5A51B00A72006 /* LMSFeatureModelsAuditLog.swift in Sources */,
+				B03C1A11C4A5A51B00A72004 /* AuditLogAdminLogic.swift in Sources */,
+				B03C1A11C4A5A51B00A72002 /* SettingsMenuLogic.swift in Sources */,
+
 				B02C1A11C4A5A51B00A70505 /* CanvasImportView.swift in Sources */,
 				B02C1A11C4A5A51B00A70404 /* CanvasImportObservability.swift in Sources */,
 				B02C1A11C4A5A51B00A70303 /* LMSAPICanvasImport.swift in Sources */,

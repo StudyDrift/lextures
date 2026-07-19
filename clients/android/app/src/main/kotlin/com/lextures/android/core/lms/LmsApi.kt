@@ -48,6 +48,25 @@ object LmsApi {
 
     // Global platform configuration (M14.6)
 
+    /** GET `/api/v1/admin-console/audit-log` — org-scoped admin audit events (MOB.3). */
+    suspend fun fetchAdminAuditLog(
+        accessToken: String,
+        orgId: String? = null,
+        action: String? = null,
+    ): List<AdminAuditEvent> = withContext(Dispatchers.IO) {
+        val params = mutableListOf<String>()
+        if (!orgId.isNullOrBlank()) params += "orgId=${encodeQuery(orgId)}"
+        AuditLogAdminLogic.normalizedActionFilter(action.orEmpty())?.let {
+            params += "action=${encodeQuery(it)}"
+        }
+        val qs = if (params.isEmpty()) "" else "?${params.joinToString("&")}"
+        val (body, _) = client.request(
+            path = "/api/v1/admin-console/audit-log$qs",
+            accessToken = accessToken,
+        )
+        decode<AdminAuditLogResponse>(body).events
+    }
+
     suspend fun fetchPlatformSettings(accessToken: String): PlatformSettingsSnapshot =
         withContext(Dispatchers.IO) {
             val (body, code) = client.request(

@@ -29,7 +29,7 @@ enum PlatformSettingsAdminLogic {
     }
 
     static func adminSettingsEnabled(_ features: MobilePlatformFeatures) -> Bool {
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
     }
 
     static func canManage(permissions: [String]) -> Bool {
@@ -37,11 +37,11 @@ enum PlatformSettingsAdminLogic {
     }
 
     static func shouldShowEntry(features: MobilePlatformFeatures, permissions: [String]) -> Bool {
-        adminSettingsEnabled(features) && canManage(permissions: permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManage(permissions: permissions)
     }
 
     static func canView(features: MobilePlatformFeatures, permissions: [String]) -> Bool {
-        shouldShowEntry(features: features, permissions: permissions)
+        adminSettingsEnabled(features) && canManage(permissions: permissions)
     }
 
     static func value(for key: String, in settings: PlatformSettingsSnapshot) -> Bool {

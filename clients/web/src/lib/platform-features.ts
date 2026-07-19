@@ -48,6 +48,7 @@ export type PlatformFeaturesSnapshot = {
   ffMobileCreateCourse?: boolean
   ffMobileCourseCreateV2?: boolean
   ffMobileCanvasImport?: boolean
+  ffMobileAdminConsole?: boolean
   ffLibrary?: boolean
   ffBroadcasts?: boolean
   ffClassroomSignals?: boolean
@@ -60,6 +61,7 @@ export type PlatformFeaturesSnapshot = {
   ffSisIntegration?: boolean
   ffWebhooks?: boolean
   adminConsoleEnabled?: boolean
+  adminAuditLogEnabled?: boolean
   impersonationEnabled?: boolean
   bulkCsvImportEnabled?: boolean
   adminSearchEnabled?: boolean
@@ -174,6 +176,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffMobileCreateCourse: false,
   ffMobileCourseCreateV2: false,
   ffMobileCanvasImport: false,
+  ffMobileAdminConsole: false,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
@@ -186,6 +189,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffSisIntegration: false,
   ffWebhooks: false,
   adminConsoleEnabled: false,
+  adminAuditLogEnabled: true,
   impersonationEnabled: false,
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
