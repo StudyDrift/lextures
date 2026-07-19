@@ -7478,6 +7478,35 @@
       }
     },
     {
+      "id": "MOB.5",
+      "path": "docs/completed/mobile/MOB.5-interactive-quizzes.md",
+      "markets": [
+        "K12",
+        "HE",
+        "SL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "api-contract",
+      "rationale": "Phase 1 mobile live-quiz student play (join/answer/leaderboard). Native unit tests cover nickname, answer payloads, WS frame parse, and dual-flag gating; Playwright API smoke covers ffMobileLiveQuiz exposure and join-code lookup/guest join rejection.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/mobile-live-quiz-join.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Flag ffMobileLiveQuiz is Settings \u2192 Global platform toggle (E2E.2 matrix) and depends on per-course interactiveQuizzesEnabled. Play UX covered by native unit tests; API contract covers feature exposure and unknown join-code 404/guest rejection."
+      }
+    },
+    {
       "id": "T01",
       "path": "docs/completed/transcripts/T01-official-transcript-generation.md",
       "markets": [

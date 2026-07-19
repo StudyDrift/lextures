@@ -779,6 +779,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'core',
   },
   {
+    key: 'ffMobileLiveQuiz',
+    label: 'Mobile live quiz',
+    description:
+      'Join and play interactive live quizzes from iOS and Android with join codes, answer surfaces, and leaderboards (MOB.5).',
+    pack: 'core',
+  },
+  {
     key: 'ffReportCards',
     label: 'Report cards',
     description: 'Standards-based report card generation and distribution for K-12 terms.',

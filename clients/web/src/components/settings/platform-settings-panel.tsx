@@ -175,6 +175,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffMobileCanvasImport: false,
     ffMobileAdminConsole: false,
     ffMobileEnrollmentAdd: false,
+  ffMobileLiveQuiz: false,
     ffUiMode: false,
     ffReadAloud: false,
     ffAltTextEnforcement: false,

@@ -67,6 +67,45 @@ class MobileDestinationsTest {
     }
 
     @Test
+    fun courseWorkspaceShowsLiveQuizzesWhenCourseAndMobileFlagsEnabled() {
+        val on = CourseSummary(
+            id = "1",
+            courseCode = "demo",
+            title = "Demo",
+            viewerEnrollmentRoles = listOf("student"),
+            interactiveQuizzesEnabled = true,
+        )
+        val off = CourseSummary(
+            id = "1",
+            courseCode = "demo",
+            title = "Demo",
+            viewerEnrollmentRoles = listOf("student"),
+            interactiveQuizzesEnabled = false,
+        )
+        val featuresOn = MobilePlatformFeatures(ffMobileLiveQuiz = true)
+        val featuresOff = MobilePlatformFeatures(ffMobileLiveQuiz = false)
+        assertTrue(
+            MobileDestinations.courseWorkspaceSections(
+                CourseWorkspaceContext(course = on, platformFeatures = featuresOn),
+            ).contains(CourseWorkspaceSection.LiveQuizzes),
+        )
+        assertFalse(
+            MobileDestinations.courseWorkspaceSections(
+                CourseWorkspaceContext(course = off, platformFeatures = featuresOn),
+            ).contains(CourseWorkspaceSection.LiveQuizzes),
+        )
+        assertFalse(
+            MobileDestinations.courseWorkspaceSections(
+                CourseWorkspaceContext(course = on, platformFeatures = featuresOff),
+            ).contains(CourseWorkspaceSection.LiveQuizzes),
+        )
+        assertEquals(
+            CourseWorkspaceSection.LiveQuizzes,
+            CourseWorkspaceSection.from(CourseDeepLinkSection.LiveQuizzes),
+        )
+    }
+
+    @Test
     fun courseWorkspaceHidesDisabledFeatures() {
         val course = CourseSummary(
             id = "1",

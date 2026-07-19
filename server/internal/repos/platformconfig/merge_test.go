@@ -402,3 +402,16 @@ func TestMerge_FFMobileEnrollmentAddDefaultOff(t *testing.T) {
 		t.Fatal("expected FFMobileEnrollmentAdd true when DB set")
 	}
 }
+
+// MOB.5: FFMobileLiveQuiz default OFF when unset.
+func TestMerge_FFMobileLiveQuizDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFMobileLiveQuiz {
+		t.Fatal("expected FFMobileLiveQuiz false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMobileLiveQuiz: &on})
+	if !got.FFMobileLiveQuiz {
+		t.Fatal("expected FFMobileLiveQuiz true when DB set")
+	}
+}

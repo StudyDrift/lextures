@@ -499,6 +499,7 @@ data class PlatformFeatures(
     val ffMobileCanvasImport: Boolean? = null,
     val ffMobileAdminConsole: Boolean? = null,
     val ffMobileEnrollmentAdd: Boolean? = null,
+    val ffMobileLiveQuiz: Boolean? = null,
     val ffEnrollmentStateMachine: Boolean? = null,
     val adminConsoleEnabled: Boolean? = null,
     val adminAuditLogEnabled: Boolean? = null,

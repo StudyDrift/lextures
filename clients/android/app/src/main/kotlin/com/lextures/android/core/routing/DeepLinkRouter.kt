@@ -35,6 +35,8 @@ sealed class DeepLinkDestination {
 
     /** Public board share link (`/board-links/{token}`). */
     data class BoardLink(val token: String) : DeepLinkDestination()
+    /** Live quiz join / play (`/play` or `/play/{code}`). */
+    data class LiveQuizPlay(val code: String? = null) : DeepLinkDestination()
 }
 
 enum class ParentDeepLinkSection {
@@ -61,6 +63,7 @@ enum class CourseDeepLinkSection {
     Groups,
     CollabDocs,
     Boards,
+    LiveQuizzes,
     Behavior,
     HallPass,
     Insights,
@@ -165,6 +168,10 @@ object DeepLinkRouter {
                     val token = segments.getOrNull(1)?.trim().orEmpty()
                     if (token.isNotEmpty()) DeepLinkDestination.BoardLink(token) else DeepLinkDestination.Home
                 }
+                segments.firstOrNull()?.equals("play", ignoreCase = true) == true -> {
+                    val code = segments.getOrNull(1)?.trim()?.takeIf { it.isNotEmpty() }
+                    DeepLinkDestination.LiveQuizPlay(code)
+                }
                 else -> DeepLinkDestination.Home
             }
         }
@@ -204,6 +211,10 @@ object DeepLinkRouter {
                 code = courseCode,
                 section = CourseDeepLinkSection.Boards,
                 itemId = segments.getOrNull(3),
+            )
+            "live-quizzes" -> DeepLinkDestination.Course(
+                code = courseCode,
+                section = CourseDeepLinkSection.LiveQuizzes,
             )
             "gradebook" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Grades)
             "assignments", "quizzes", "modules" -> {

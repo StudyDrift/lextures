@@ -80,6 +80,14 @@
 		D0DF9FEA1F5E40B3A9EBBD9A /* CourseImportExportLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B6F3D6195DD4E1A85F70714 /* CourseImportExportLogic.swift */; };
 		90218E2E31144DE59F23AAD2 /* CourseOutcomesLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8B5D64144F4862B01A3829 /* CourseOutcomesLogic.swift */; };
 		7FEBFE2F26DF4424B36EAE33 /* CoursePeopleLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31222F3A065C4FA9BD536D22 /* CoursePeopleLogic.swift */; };
+		52C61A883EDB4A039EB4A323 /* LiveQuizLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F23ABDD0CAD42949FF7D1A4 /* LiveQuizLogic.swift */; };
+		43084463DCDE404895F82E54 /* LiveGameLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = C902EFCBE93B4A3D939902C1 /* LiveGameLogic.swift */; };
+		CD6EF078B1C5416D8899EC20 /* LMSAPILiveQuiz.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F9EA9530094BBBBB5FD33B /* LMSAPILiveQuiz.swift */; };
+		AB99CB3B1C74464EB9ECBAD1 /* LiveGameSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA1EDC4F424BC7AA95F878 /* LiveGameSocket.swift */; };
+		9B0F3945587F4758BF2DE84B /* LiveQuizHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC5DE1D6CF94CF09F31A80A /* LiveQuizHubView.swift */; };
+		7A116AAA659F43448D6BAB9D /* LiveQuizPlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3E937E77C943DEB2DC5B23 /* LiveQuizPlayView.swift */; };
+		7802C1BA768541E89E4F09BB /* LiveQuizPlaySurfaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6582A1E55644FCC9F715649 /* LiveQuizPlaySurfaces.swift */; };
+		1DEBBABFBA924F6096117D29 /* LiveQuizLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B989A12B52E4B7D90AEF708 /* LiveQuizLogicTests.swift */; };
 		C85D4DCE905247439C436523 /* CoursePeopleObservability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 736818AC795B473FA5D4A8E8 /* CoursePeopleObservability.swift */; };
 		AA1F1CECAC9046689400E44F /* CoursePlagiarismLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF1F186C3CE4041AFA92C23 /* CoursePlagiarismLogic.swift */; };
 		4DAE17B04E7C4402B8B8A277 /* CourseReviewLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72186FA953E24E81923CEF5E /* CourseReviewLogic.swift */; };
@@ -694,6 +702,14 @@
 		1B6F3D6195DD4E1A85F70714 /* CourseImportExportLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseImportExportLogic.swift; sourceTree = "<group>"; };
 		5B8B5D64144F4862B01A3829 /* CourseOutcomesLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseOutcomesLogic.swift; sourceTree = "<group>"; };
 		31222F3A065C4FA9BD536D22 /* CoursePeopleLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleLogic.swift; sourceTree = "<group>"; };
+		2F23ABDD0CAD42949FF7D1A4 /* LiveQuizLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveQuizLogic.swift; sourceTree = "<group>"; };
+		C902EFCBE93B4A3D939902C1 /* LiveGameLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveGameLogic.swift; sourceTree = "<group>"; };
+		08F9EA9530094BBBBB5FD33B /* LMSAPILiveQuiz.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPILiveQuiz.swift; sourceTree = "<group>"; };
+		82BA1EDC4F424BC7AA95F878 /* LiveGameSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveGameSocket.swift; sourceTree = "<group>"; };
+		CBC5DE1D6CF94CF09F31A80A /* LiveQuizHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveQuizHubView.swift; sourceTree = "<group>"; };
+		6E3E937E77C943DEB2DC5B23 /* LiveQuizPlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveQuizPlayView.swift; sourceTree = "<group>"; };
+		B6582A1E55644FCC9F715649 /* LiveQuizPlaySurfaces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveQuizPlaySurfaces.swift; sourceTree = "<group>"; };
+		1B989A12B52E4B7D90AEF708 /* LiveQuizLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveQuizLogicTests.swift; sourceTree = "<group>"; };
 		736818AC795B473FA5D4A8E8 /* CoursePeopleObservability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleObservability.swift; sourceTree = "<group>"; };
 		1DF1F186C3CE4041AFA92C23 /* CoursePlagiarismLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePlagiarismLogic.swift; sourceTree = "<group>"; };
 		72186FA953E24E81923CEF5E /* CourseReviewLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseReviewLogic.swift; sourceTree = "<group>"; };
@@ -1287,6 +1303,7 @@
 				5CDA61B88C1240FF82AFB861 /* CourseImportExportLogicTests.swift */,
 				D48D99289AC740C1902EEB44 /* CourseOutcomesLogicTests.swift */,
 				BAEA43F5A8E74423945971BE /* CoursePeopleLogicTests.swift */,
+				1B989A12B52E4B7D90AEF708 /* LiveQuizLogicTests.swift */,
 				53230D1065E94F8CB6C41DF3 /* CoursePlagiarismLogicTests.swift */,
 				6030F8C9166145C7B95BF598 /* CourseReviewLogicTests.swift */,
 				FAF8CA11FD6A40AFAAFCE7D9 /* CourseSectionsLogicTests.swift */,
@@ -1386,6 +1403,7 @@
 				445C1E5DBDB24C2BB2DC5B51 /* Behavior */,
 				C203BF7145CA41009947FC01 /* Billing */,
 				5A215B5D66E342278E63F8C3 /* Boards */,
+				4B5F36FDE79149A7A9260758 /* LiveQuiz */,
 				BCFF389D21274E98B79815D4 /* Catalog */,
 				2965A12E32D34BBF8BB0F0D3 /* Courses */,
 				5C1742F4D1764561BA1FDBF0 /* Credentials */,
@@ -1543,6 +1561,9 @@
 				1B6F3D6195DD4E1A85F70714 /* CourseImportExportLogic.swift */,
 				5B8B5D64144F4862B01A3829 /* CourseOutcomesLogic.swift */,
 				31222F3A065C4FA9BD536D22 /* CoursePeopleLogic.swift */,
+				2F23ABDD0CAD42949FF7D1A4 /* LiveQuizLogic.swift */,
+				C902EFCBE93B4A3D939902C1 /* LiveGameLogic.swift */,
+				08F9EA9530094BBBBB5FD33B /* LMSAPILiveQuiz.swift */,
 				736818AC795B473FA5D4A8E8 /* CoursePeopleObservability.swift */,
 				1DF1F186C3CE4041AFA92C23 /* CoursePlagiarismLogic.swift */,
 				72186FA953E24E81923CEF5E /* CourseReviewLogic.swift */,
@@ -1844,6 +1865,17 @@
 				DB580C0382BA4DC4B5ABDFB0 /* PurchaseFlow.swift */,
 			);
 			path = Billing;
+			sourceTree = "<group>";
+		};
+		4B5F36FDE79149A7A9260758 /* LiveQuiz */ = {
+			isa = PBXGroup;
+			children = (
+				82BA1EDC4F424BC7AA95F878 /* LiveGameSocket.swift */,
+				CBC5DE1D6CF94CF09F31A80A /* LiveQuizHubView.swift */,
+				6E3E937E77C943DEB2DC5B23 /* LiveQuizPlayView.swift */,
+				B6582A1E55644FCC9F715649 /* LiveQuizPlaySurfaces.swift */,
+			);
+			path = LiveQuiz;
 			sourceTree = "<group>";
 		};
 		5A215B5D66E342278E63F8C3 /* Boards */ = {
@@ -2642,6 +2674,13 @@
 				D0DF9FEA1F5E40B3A9EBBD9A /* CourseImportExportLogic.swift in Sources */,
 				90218E2E31144DE59F23AAD2 /* CourseOutcomesLogic.swift in Sources */,
 				7FEBFE2F26DF4424B36EAE33 /* CoursePeopleLogic.swift in Sources */,
+				52C61A883EDB4A039EB4A323 /* LiveQuizLogic.swift in Sources */,
+				43084463DCDE404895F82E54 /* LiveGameLogic.swift in Sources */,
+				CD6EF078B1C5416D8899EC20 /* LMSAPILiveQuiz.swift in Sources */,
+				AB99CB3B1C74464EB9ECBAD1 /* LiveGameSocket.swift in Sources */,
+				9B0F3945587F4758BF2DE84B /* LiveQuizHubView.swift in Sources */,
+				7A116AAA659F43448D6BAB9D /* LiveQuizPlayView.swift in Sources */,
+				7802C1BA768541E89E4F09BB /* LiveQuizPlaySurfaces.swift in Sources */,
 				C85D4DCE905247439C436523 /* CoursePeopleObservability.swift in Sources */,
 				AA1F1CECAC9046689400E44F /* CoursePlagiarismLogic.swift in Sources */,
 				4DAE17B04E7C4402B8B8A277 /* CourseReviewLogic.swift in Sources */,
@@ -3135,6 +3174,7 @@
 				609C621D998947BA82F900FA /* CourseImportExportLogicTests.swift in Sources */,
 				B201FF6F69F6486DB7A08DB0 /* CourseOutcomesLogicTests.swift in Sources */,
 				2075097164634B4E9F88C444 /* CoursePeopleLogicTests.swift in Sources */,
+				1DEBBABFBA924F6096117D29 /* LiveQuizLogicTests.swift in Sources */,
 				0A21A527855840D0B6440AA0 /* CoursePlagiarismLogicTests.swift in Sources */,
 				395A0ADD066745968862AD20 /* CourseReviewLogicTests.swift in Sources */,
 				56D5E387B92A4FE5AED5B667 /* CourseSectionsLogicTests.swift in Sources */,

@@ -5,7 +5,9 @@ import Foundation
 /// `URLSessionWebSocketTask` connects asynchronously after `resume()`; sending before
 /// `urlSession(_:webSocketTask:didOpenWithProtocol:)` returns POSIX 57 ("Socket is not connected")
 /// on device. Android and the web SPA wait for `onOpen` before the auth frame — this does the same.
-private final class WebSocketSessionSupport: NSObject, URLSessionWebSocketDelegate, @unchecked Sendable {
+/// Shared session/delegate for URLSession WebSocket open signaling.
+/// Internal so feature sockets (e.g. live quiz) can reuse the same handshake wait.
+final class WebSocketSessionSupport: NSObject, URLSessionWebSocketDelegate, @unchecked Sendable {
     static let shared = WebSocketSessionSupport()
 
     lazy var session: URLSession = {

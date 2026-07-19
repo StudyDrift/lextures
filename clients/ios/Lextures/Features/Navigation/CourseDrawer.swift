@@ -96,6 +96,7 @@ func courseSectionIcon(_ section: CourseWorkspaceSection) -> String {
     case .groups: return "person.3"
     case .collabDocs: return "doc.richtext"
     case .boards: return "rectangle.3.group"
+    case .liveQuizzes: return "gamecontroller"
     case .behavior: return "hand.thumbsup"
     case .hallPass: return "figure.walk"
     }

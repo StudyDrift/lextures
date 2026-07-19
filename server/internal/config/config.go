@@ -340,6 +340,8 @@ type Config struct {
 	FFMobileAdminConsole bool
 	// FFMobileEnrollmentAdd enables adding course enrollments from the mobile People roster (MOB.4). Default OFF.
 	FFMobileEnrollmentAdd bool
+	// FFMobileLiveQuiz enables interactive live quizzes on iOS and Android (MOB.5). Default OFF.
+	FFMobileLiveQuiz bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).

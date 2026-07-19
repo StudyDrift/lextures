@@ -106,6 +106,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFMobileCanvasImport = mergeBool(db.FFMobileCanvasImport, false)
 	out.FFMobileAdminConsole = mergeBool(db.FFMobileAdminConsole, false)
 	out.FFMobileEnrollmentAdd = mergeBool(db.FFMobileEnrollmentAdd, false)
+	out.FFMobileLiveQuiz = mergeBool(db.FFMobileLiveQuiz, false)
 
 	// COLLAPSE parent portal V2 into the parent (expanded sections always on with the portal).
 	parentPortal := mergeBool(db.FFParentPortal, false)

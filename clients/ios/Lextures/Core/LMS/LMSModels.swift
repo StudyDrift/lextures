@@ -58,6 +58,8 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var whiteboardEnabled: Bool?
     /// VC.M1 — visual collaboration boards (opt-in; default off).
     var visualBoardsEnabled: Bool?
+    /// IQ / MOB.5 — interactive live quizzes (opt-in; default off).
+    var interactiveQuizzesEnabled: Bool?
     var requireCaptions: Bool?
     var viewerEnrollmentInvitationPending: Bool?
     var viewerPendingEnrollmentId: String?
@@ -98,6 +100,8 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var isCollabDocsEnabled: Bool { collabDocsEnabled == true }
 
     var isVisualBoardsEnabled: Bool { visualBoardsEnabled == true }
+
+    var isInteractiveQuizzesEnabled: Bool { interactiveQuizzesEnabled == true }
 
     var isPinned: Bool { catalogPinned == true }
 

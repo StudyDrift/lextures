@@ -76,6 +76,44 @@ final class MobileDestinationsTests: XCTestCase {
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .boards), .boards)
     }
 
+    func testCourseWorkspaceShowsLiveQuizzesWhenCourseAndMobileFlagsEnabled() {
+        let on = CourseSummary(
+            id: "1",
+            courseCode: "demo",
+            title: "Demo",
+            description: "",
+            viewerEnrollmentRoles: ["student"],
+            interactiveQuizzesEnabled: true
+        )
+        let off = CourseSummary(
+            id: "1",
+            courseCode: "demo",
+            title: "Demo",
+            description: "",
+            viewerEnrollmentRoles: ["student"],
+            interactiveQuizzesEnabled: false
+        )
+        var features = MobilePlatformFeatures()
+        features.ffMobileLiveQuiz = true
+        XCTAssertTrue(
+            MobileDestinations.courseWorkspaceSections(
+                CourseWorkspaceContext(course: on, platformFeatures: features)
+            ).contains(.liveQuizzes)
+        )
+        XCTAssertFalse(
+            MobileDestinations.courseWorkspaceSections(
+                CourseWorkspaceContext(course: off, platformFeatures: features)
+            ).contains(.liveQuizzes)
+        )
+        features.ffMobileLiveQuiz = false
+        XCTAssertFalse(
+            MobileDestinations.courseWorkspaceSections(
+                CourseWorkspaceContext(course: on, platformFeatures: features)
+            ).contains(.liveQuizzes)
+        )
+        XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .liveQuizzes), .liveQuizzes)
+    }
+
     func testCourseWorkspaceHidesDisabledFeatures() {
         let course = CourseSummary(
             id: "1",
