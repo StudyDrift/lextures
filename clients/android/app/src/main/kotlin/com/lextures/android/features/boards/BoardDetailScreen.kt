@@ -18,10 +18,12 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -53,9 +55,12 @@ import com.lextures.android.core.lms.BoardPost
 import com.lextures.android.core.lms.BoardPostsApi
 import com.lextures.android.core.lms.BoardSection
 import com.lextures.android.core.lms.BoardSortMode
+import com.lextures.android.core.lms.BoardsAdvancedLogic
+import com.lextures.android.core.lms.BoardsAdvancedObservability
 import com.lextures.android.core.lms.BoardsApi
 import com.lextures.android.core.lms.BoardsLogic
 import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.navigation.MobilePlatformFeatures
 import com.lextures.android.core.network.ApiError
 import com.lextures.android.core.realtime.BoardSocket
 import com.lextures.android.features.home.LmsErrorBanner
@@ -73,6 +78,7 @@ fun BoardDetailScreen(
     canManage: Boolean = false,
     permissions: List<String> = emptyList(),
     currentUserId: String? = null,
+    platformFeatures: MobilePlatformFeatures = MobilePlatformFeatures(),
     onBack: () -> Unit,
     onBoardChanged: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -104,6 +110,10 @@ fun BoardDetailScreen(
     var showShare by remember { mutableStateOf(false) }
     var showModerationQueue by remember { mutableStateOf(false) }
     var showModerationSettings by remember { mutableStateOf(false) }
+    var showSaveAsTemplate by remember { mutableStateOf(false) }
+    var showExport by remember { mutableStateOf(false) }
+    var showPresent by remember { mutableStateOf(false) }
+    var showAnalytics by remember { mutableStateOf(false) }
     var editingPost by remember { mutableStateOf<BoardPost?>(null) }
     var editTitle by remember { mutableStateOf("") }
     var editBody by remember { mutableStateOf("") }
@@ -114,6 +124,13 @@ fun BoardDetailScreen(
 
     val managesBoard = remember(board, course.courseCode, permissions, canManage) {
         BoardsLogic.canManageBoard(board, course.courseCode, permissions) || canManage
+    }
+    val canAdvancedManage = remember(course.isVisualBoardsEnabled, platformFeatures, managesBoard) {
+        BoardsAdvancedLogic.canExportOrPresent(
+            course.isVisualBoardsEnabled,
+            platformFeatures,
+            managesBoard,
+        )
     }
     val canPost = remember(board, course.courseCode, permissions, managesBoard) {
         BoardsLogic.canPost(board, course.courseCode, permissions) &&
@@ -306,6 +323,16 @@ fun BoardDetailScreen(
         }
     }
 
+    if (showPresent) {
+        BoardPresentModeScreen(
+            boardTitle = board?.title ?: titleHint,
+            posts = posts,
+            sections = sections,
+            onClose = { showPresent = false },
+        )
+        return
+    }
+
     val title = board?.title?.takeIf { it.isNotBlank() }
         ?: titleHint.takeIf { it.isNotBlank() }
         ?: L.text(R.string.mobile_boards_detailTitle)
@@ -345,6 +372,69 @@ fun BoardDetailScreen(
                                 showShare = true
                             },
                         )
+                        if (canAdvancedManage) {
+                            DropdownMenuItem(
+                                text = { Text(L.text(R.string.mobile_boards_present_action)) },
+                                onClick = {
+                                    menuOpen = false
+                                    showPresent = true
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(L.text(R.string.mobile_boards_export_action)) },
+                                onClick = {
+                                    menuOpen = false
+                                    showExport = true
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(L.text(R.string.mobile_boards_templates_saveAction)) },
+                                onClick = {
+                                    menuOpen = false
+                                    showSaveAsTemplate = true
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(L.text(R.string.mobile_boards_analytics_action)) },
+                                onClick = {
+                                    menuOpen = false
+                                    showAnalytics = true
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        if (board?.locked == true) {
+                                            L.text(R.string.mobile_boards_admin_unlockBoard)
+                                        } else {
+                                            L.text(R.string.mobile_boards_admin_lockBoard)
+                                        },
+                                    )
+                                },
+                                onClick = {
+                                    menuOpen = false
+                                    scope.launch {
+                                        val token = accessToken ?: return@launch
+                                        val current = board ?: return@launch
+                                        try {
+                                            board = BoardModerationApi.patchBoardModeration(
+                                                course.courseCode,
+                                                boardId,
+                                                locked = !current.locked,
+                                                accessToken = token,
+                                            )
+                                            BoardsAdvancedObservability.record(
+                                                "board_admin_lifecycle_action",
+                                                mapOf("action" to if (board?.locked == true) "lock" else "unlock"),
+                                            )
+                                            onBoardChanged()
+                                        } catch (e: Exception) {
+                                            errorMessage = session.mapError(e)
+                                        }
+                                    }
+                                },
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(L.text(R.string.mobile_boards_moderation_queueAction)) },
                             onClick = {
@@ -682,6 +772,47 @@ fun BoardDetailScreen(
         }
     }
 
+    if (showSaveAsTemplate) {
+        ModalBottomSheet(
+            onDismissRequest = { showSaveAsTemplate = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            BoardSaveAsTemplateSheet(
+                courseCode = course.courseCode,
+                boardId = boardId,
+                defaultTitle = board?.title ?: titleHint,
+                session = session,
+                onDismiss = { showSaveAsTemplate = false },
+            )
+        }
+    }
+    if (showExport) {
+        ModalBottomSheet(
+            onDismissRequest = { showExport = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            BoardExportSheet(
+                courseCode = course.courseCode,
+                boardId = boardId,
+                boardTitle = board?.title ?: titleHint,
+                session = session,
+                onDismiss = { showExport = false },
+            )
+        }
+    }
+    if (showAnalytics) {
+        ModalBottomSheet(
+            onDismissRequest = { showAnalytics = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            BoardAnalyticsSheet(
+                courseCode = course.courseCode,
+                boardId = boardId,
+                session = session,
+                onDismiss = { showAnalytics = false },
+            )
+        }
+    }
     editingPost?.let { post ->
         AlertDialog(
             onDismissRequest = { editingPost = null },

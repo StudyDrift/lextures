@@ -47,6 +47,7 @@ import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.settings.admin.AiAdminHubScreen
 import com.lextures.android.features.settings.admin.ArchivedCoursesAdminScreen
 import com.lextures.android.features.settings.admin.AuditLogAdminScreen
+import com.lextures.android.features.settings.admin.BoardsGovernanceAdminScreen
 import com.lextures.android.features.settings.admin.IntegrationsAdminScreen
 import com.lextures.android.features.settings.admin.OrgBrandingAdminScreen
 import com.lextures.android.features.settings.admin.OrgStructureAdminScreen
@@ -122,6 +123,10 @@ fun SettingsAdminHubScreen(
         }
         SettingsMenuLogic.ItemId.AuditLog -> {
             AuditLogAdminScreen(session, shell, localePrefs, onBack = { openPage = null }, modifier)
+            return
+        }
+        SettingsMenuLogic.ItemId.BoardsGovernance -> {
+            BoardsGovernanceAdminScreen(session, shell, localePrefs, onBack = { openPage = null }, modifier)
             return
         }
         null -> Unit

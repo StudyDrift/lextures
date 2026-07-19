@@ -15,11 +15,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,9 +45,12 @@ import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.Board
+import com.lextures.android.core.lms.BoardCopyMode
+import com.lextures.android.core.lms.BoardsAdvancedLogic
 import com.lextures.android.core.lms.BoardsApi
 import com.lextures.android.core.lms.BoardsLogic
 import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.navigation.MobilePlatformFeatures
 import com.lextures.android.core.network.ApiError
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.home.LmsCard
@@ -63,6 +69,7 @@ fun BoardsUnavailableScreen(modifier: Modifier = Modifier) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BoardsListScreen(
     session: AuthSession,
@@ -70,6 +77,7 @@ fun BoardsListScreen(
     permissions: List<String>,
     currentUserId: String? = null,
     initialBoardId: String? = null,
+    platformFeatures: MobilePlatformFeatures = MobilePlatformFeatures(),
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
@@ -84,6 +92,8 @@ fun BoardsListScreen(
     var includeArchived by remember { mutableStateOf(false) }
     var featureUnavailable by remember { mutableStateOf(false) }
     var showNewBoard by remember { mutableStateOf(false) }
+    var showCreateMenu by remember { mutableStateOf(false) }
+    var showTemplatePicker by remember { mutableStateOf(false) }
     var newTitle by remember { mutableStateOf("") }
     var newDescription by remember { mutableStateOf("") }
     var openBoard by remember { mutableStateOf<Board?>(null) }
@@ -91,10 +101,17 @@ fun BoardsListScreen(
     var renameTarget by remember { mutableStateOf<Board?>(null) }
     var renameTitle by remember { mutableStateOf("") }
     var archiveTarget by remember { mutableStateOf<Board?>(null) }
+    var duplicateTarget by remember { mutableStateOf<Board?>(null) }
     var overflowBoardId by remember { mutableStateOf<String?>(null) }
 
     val canCreate = remember(course.courseCode, permissions) {
         BoardsLogic.canCreateBoards(course.courseCode, permissions)
+    }
+    val canUseTemplates = remember(course.isVisualBoardsEnabled, platformFeatures, canCreate) {
+        BoardsAdvancedLogic.canUseTemplates(course.isVisualBoardsEnabled, platformFeatures, canCreate)
+    }
+    val advancedEnabled = remember(course.isVisualBoardsEnabled, platformFeatures) {
+        BoardsAdvancedLogic.isAdvancedEnabled(course.isVisualBoardsEnabled, platformFeatures)
     }
     val visibleBoards = remember(boards, includeArchived) {
         BoardsLogic.sortedBoards(boards, includeArchived)
@@ -140,6 +157,7 @@ fun BoardsListScreen(
             canManage = canCreate,
             permissions = permissions,
             currentUserId = currentUserId,
+            platformFeatures = platformFeatures,
             onBack = { openBoard = null },
             onBoardChanged = { scope.launch { load() } },
         )
@@ -176,9 +194,30 @@ fun BoardsListScreen(
                 Text(L.text(R.string.mobile_boards_showArchived), color = textPrimary())
             }
             if (canCreate) {
-                TextButton(onClick = { showNewBoard = true }) {
+                TextButton(onClick = { showCreateMenu = true }) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Text(L.text(R.string.mobile_boards_newBoard))
+                }
+                DropdownMenu(
+                    expanded = showCreateMenu,
+                    onDismissRequest = { showCreateMenu = false },
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(L.text(R.string.mobile_boards_newBoard)) },
+                        onClick = {
+                            showCreateMenu = false
+                            showNewBoard = true
+                        },
+                    )
+                    if (canUseTemplates) {
+                        DropdownMenuItem(
+                            text = { Text(L.text(R.string.mobile_boards_templates_fromTemplate)) },
+                            onClick = {
+                                showCreateMenu = false
+                                showTemplatePicker = true
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -256,6 +295,15 @@ fun BoardsListScreen(
                                         renameTitle = board.title
                                     },
                                 )
+                                if (advancedEnabled) {
+                                    DropdownMenuItem(
+                                        text = { Text(L.text(R.string.mobile_boards_templates_duplicate)) },
+                                        onClick = {
+                                            overflowBoardId = null
+                                            duplicateTarget = board
+                                        },
+                                    )
+                                }
                                 if (!board.archived) {
                                     DropdownMenuItem(
                                         text = { Text(L.text(R.string.mobile_boards_archive)) },
@@ -398,5 +446,76 @@ fun BoardsListScreen(
                 }
             },
         )
+    }
+
+    duplicateTarget?.let { target ->
+        AlertDialog(
+            onDismissRequest = { duplicateTarget = null },
+            title = { Text(L.text(R.string.mobile_boards_templates_duplicateTitle)) },
+            text = { Text(L.text(R.string.mobile_boards_templates_duplicateMessage)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        duplicateTarget = null
+                        scope.launch {
+                            val token = accessToken ?: return@launch
+                            try {
+                                val board = duplicateBoardWithPolling(
+                                    courseCode = course.courseCode,
+                                    sourceBoardId = target.id,
+                                    mode = BoardCopyMode.Structure,
+                                    title = target.title,
+                                    accessToken = token,
+                                )
+                                load()
+                                if (board != null) openBoard = board
+                            } catch (e: Exception) {
+                                errorMessage = L.text(R.string.mobile_boards_templates_duplicateError)
+                            }
+                        }
+                    },
+                ) { Text(L.text(R.string.mobile_boards_templates_duplicateStructure)) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        duplicateTarget = null
+                        scope.launch {
+                            val token = accessToken ?: return@launch
+                            try {
+                                val board = duplicateBoardWithPolling(
+                                    courseCode = course.courseCode,
+                                    sourceBoardId = target.id,
+                                    mode = BoardCopyMode.Full,
+                                    title = target.title,
+                                    accessToken = token,
+                                )
+                                load()
+                                if (board != null) openBoard = board
+                            } catch (_: Exception) {
+                                errorMessage = L.text(R.string.mobile_boards_templates_duplicateError)
+                            }
+                        }
+                    },
+                ) { Text(L.text(R.string.mobile_boards_templates_duplicateFull)) }
+            },
+        )
+    }
+
+    if (showTemplatePicker) {
+        ModalBottomSheet(
+            onDismissRequest = { showTemplatePicker = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            BoardTemplatePickerSheet(
+                courseCode = course.courseCode,
+                session = session,
+                onCreated = { board ->
+                    scope.launch { load() }
+                    openBoard = board
+                },
+                onDismiss = { showTemplatePicker = false },
+            )
+        }
     }
 }

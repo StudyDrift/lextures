@@ -127,6 +127,8 @@ struct SettingsAdminHubView: View {
             IntegrationsAdminView()
         case .auditLog:
             AuditLogAdminView()
+        case .boardsGovernance:
+            BoardsGovernanceAdminView()
         }
     }
 

@@ -29,6 +29,10 @@ struct BoardDetailView: View {
     @State private var showShare = false
     @State private var showModerationQueue = false
     @State private var showModerationSettings = false
+    @State private var showSaveAsTemplate = false
+    @State private var showExport = false
+    @State private var showPresent = false
+    @State private var showAnalytics = false
     @State private var editingPost: BoardPost?
     @State private var editBody = ""
     @State private var editTitle = ""
@@ -49,6 +53,14 @@ struct BoardDetailView: View {
             courseCode: course.courseCode,
             permissions: shell.permissions
         ) || canManage
+    }
+
+    private var canAdvancedManage: Bool {
+        BoardsAdvancedLogic.canExportOrPresent(
+            courseEnabled: course.isVisualBoardsEnabled,
+            features: shell.platformFeatures,
+            canManage: managesBoard
+        )
     }
 
     private var canPost: Bool {
@@ -164,6 +176,20 @@ struct BoardDetailView: View {
                         Button(L.text("mobile.boards.share.action")) {
                             showShare = true
                         }
+                        if canAdvancedManage {
+                            Button(L.text("mobile.boards.present.action")) {
+                                showPresent = true
+                            }
+                            Button(L.text("mobile.boards.export.action")) {
+                                showExport = true
+                            }
+                            Button(L.text("mobile.boards.templates.saveAction")) {
+                                showSaveAsTemplate = true
+                            }
+                            Button(L.text("mobile.boards.analytics.action")) {
+                                showAnalytics = true
+                            }
+                        }
                         Button(L.text("mobile.boards.moderation.queueAction")) {
                             showModerationQueue = true
                         }
@@ -177,6 +203,15 @@ struct BoardDetailView: View {
                                 : L.text("mobile.boards.layout.lock")
                         ) {
                             Task { await toggleLock() }
+                        }
+                        if canAdvancedManage {
+                            Button(
+                                boardLocked
+                                    ? L.text("mobile.boards.admin.unlockBoard")
+                                    : L.text("mobile.boards.admin.lockBoard")
+                            ) {
+                                Task { await toggleBoardLifecycleLock() }
+                            }
                         }
                         Button(L.text("mobile.boards.rename")) {
                             renameTitle = board?.title ?? ""
@@ -232,6 +267,30 @@ struct BoardDetailView: View {
                 )
                 .presentationDetents([.medium, .large])
             }
+        }
+        .sheet(isPresented: $showSaveAsTemplate) {
+            BoardSaveAsTemplateSheet(
+                courseCode: course.courseCode,
+                boardId: boardId,
+                defaultTitle: board?.title ?? titleHint
+            )
+        }
+        .sheet(isPresented: $showExport) {
+            BoardExportSheet(
+                courseCode: course.courseCode,
+                boardId: boardId,
+                boardTitle: board?.title ?? titleHint
+            )
+        }
+        .sheet(isPresented: $showAnalytics) {
+            BoardAnalyticsSheet(courseCode: course.courseCode, boardId: boardId)
+        }
+        .fullScreenCover(isPresented: $showPresent) {
+            BoardPresentModeView(
+                boardTitle: board?.title ?? titleHint,
+                posts: posts,
+                sections: sections
+            )
         }
         .alert(L.text("mobile.boards.rename"), isPresented: $showRename) {
             TextField(L.text("mobile.boards.titlePlaceholder"), text: $renameTitle)
@@ -608,6 +667,26 @@ struct BoardDetailView: View {
             )
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.boards.renameError")
+        }
+    }
+
+    private func toggleBoardLifecycleLock() async {
+        guard let token = session.accessToken, let board else { return }
+        do {
+            let updated = try await LMSAPI.patchBoardModeration(
+                courseCode: course.courseCode,
+                boardId: boardId,
+                locked: !board.locked,
+                accessToken: token
+            )
+            self.board = updated
+            BoardsAdvancedObservability.record(
+                "board_admin_lifecycle_action",
+                attributes: ["action": updated.locked ? "lock" : "unlock"]
+            )
+            onBoardChanged?()
+        } catch {
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.boards.admin.lifecycleError")
         }
     }
 

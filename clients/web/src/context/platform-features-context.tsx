@@ -67,6 +67,7 @@ export type PlatformFeatures = {
   ffMobileLiveQuiz: boolean
   ffMobileWhiteboardEdit: boolean
   ffMobileMarketplacePurchase: boolean
+  ffMobileBoardsAdvanced: boolean
   ffLibrary: boolean
   ffBroadcasts: boolean
   ffClassroomSignals: boolean
@@ -207,6 +208,7 @@ const defaultFeatures: PlatformFeatures = {
   ffMobileLiveQuiz: false,
   ffMobileWhiteboardEdit: false,
   ffMobileMarketplacePurchase: false,
+  ffMobileBoardsAdvanced: false,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
@@ -345,6 +347,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffMobileLiveQuiz: false,
   ffMobileWhiteboardEdit: false,
   ffMobileMarketplacePurchase: false,
+  ffMobileBoardsAdvanced: false,
     ffLibrary: false,
     ffBroadcasts: false,
     ffClassroomSignals: false,
@@ -490,6 +493,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMobileLiveQuiz: data.ffMobileLiveQuiz === true,
           ffMobileWhiteboardEdit: data.ffMobileWhiteboardEdit === true,
           ffMobileMarketplacePurchase: data.ffMobileMarketplacePurchase === true,
+          ffMobileBoardsAdvanced: data.ffMobileBoardsAdvanced === true,
           ffLibrary: data.ffLibrary === true,
           ffBroadcasts: data.ffBroadcasts === true,
           ffClassroomSignals: data.ffClassroomSignals === true,
@@ -592,6 +596,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMobileLiveQuiz: next.ffMobileLiveQuiz === true,
           ffMobileWhiteboardEdit: next.ffMobileWhiteboardEdit === true,
           ffMobileMarketplacePurchase: next.ffMobileMarketplacePurchase === true,
+          ffMobileBoardsAdvanced: next.ffMobileBoardsAdvanced === true,
           ffLibrary: next.ffLibrary === true,
           ffBroadcasts: next.ffBroadcasts === true,
           ffClassroomSignals: next.ffClassroomSignals === true,

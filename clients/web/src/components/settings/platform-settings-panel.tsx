@@ -178,6 +178,7 @@ function emptyForm(): PlatformSettingsPayload {
   ffMobileLiveQuiz: false,
   ffMobileWhiteboardEdit: false,
   ffMobileMarketplacePurchase: false,
+  ffMobileBoardsAdvanced: false,
     ffUiMode: false,
     ffReadAloud: false,
     ffAltTextEnforcement: false,

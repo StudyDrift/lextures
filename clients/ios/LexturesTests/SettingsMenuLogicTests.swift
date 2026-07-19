@@ -64,6 +64,7 @@ final class SettingsMenuLogicTests: XCTestCase {
     func testPhase1RegistryGroupsMatchWebInventoryLabels() {
         let labels = Dictionary(uniqueKeysWithValues: SettingsMenuLogic.phase1Registry.map { ($0.group, $0.items) })
         XCTAssertEqual(labels[.platform]?.contains(.platformSettings), true)
+        XCTAssertEqual(labels[.platform]?.contains(.boardsGovernance), true)
         XCTAssertEqual(labels[.compliance]?.contains(.auditLog), true)
         XCTAssertEqual(labels[.integrations]?.contains(.integrations), true)
         XCTAssertEqual(labels[.studentRecords]?.contains(.transcriptsAdvising), true)

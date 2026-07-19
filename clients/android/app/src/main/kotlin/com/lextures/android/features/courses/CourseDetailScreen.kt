@@ -556,6 +556,7 @@ fun CourseDetailScreen(
                             course = course,
                             permissions = shell?.permissions.orEmpty(),
                             currentUserId = shell?.profile?.id,
+                            platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
                             initialBoardId = if (selectedSection == CourseWorkspaceSection.Boards) {
                                 deepLinkThreadId
                             } else {

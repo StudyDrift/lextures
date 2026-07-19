@@ -13,11 +13,23 @@
 | **Section** | Mobile parity |
 | **Severity** | MINOR (parity) / MAJOR for governance |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL |
+| **Status (today)** | **DONE** |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile team |
 | **Depends on** | VC.M1–VC.M7 (shipped) |
 | **Unblocks** | MOB.3 boards-governance item |
+
+## Implementation notes (2026-07-19)
+
+Mobile VC.8–VC.10 parity behind `ffMobileBoardsAdvanced` (DB `ff_mobile_boards_advanced`, default OFF). Link-token viewing already shipped in VC.M6 (`BoardPublicView` / `BoardPublicScreen`).
+
+- **Flag**: `ffMobileBoardsAdvanced` gates templates, duplication, export, present, analytics, and Settings → Boards governance.
+- **APIs**: `LMSAPIBoardTemplates` / `BoardTemplatesApi`, `LMSAPIBoardExport` / `BoardExportApi`, `LMSAPIBoardAnalytics` / `BoardAnalyticsApi`.
+- **Logic**: `BoardsAdvancedLogic` (gating, template filter, export poll backoff, present ordering) + `BoardsGovernanceAdminLogic`.
+- **UI**: template picker, save-as-template, export sheet (OS share), present mode, board analytics sheet; admin governance in Settings hub.
+- **i18n**: `mobile.boards.templates|export|present|analytics|admin.*`; synced via `scripts/sync-mobile-locales.py`.
+- **Observability**: `board_{template_used,saved_as_template,exported,presented}`, `board_admin_{analytics_viewed,lifecycle_action}`.
+- **Tests**: iOS/Android unit coverage; e2e API smoke `e2e/tests/mobile-boards-advanced.spec.ts`.
 
 ## 1. Problem Statement
 

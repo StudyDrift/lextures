@@ -541,4 +541,167 @@ enum class BoardComposeValidation {
     MissingAudio,
 }
 
+// region MOB.8 advanced (templates / export / analytics / governance)
+
+enum class BoardTemplateScope(val apiValue: String) {
+    Builtin("builtin"),
+    Course("course"),
+    Org("org"),
+}
+
+@Serializable
+data class BoardTemplate(
+    val id: String,
+    val scope: String = "builtin",
+    val courseId: String? = null,
+    val orgId: String? = null,
+    val title: String = "",
+    val description: String = "",
+    val tags: List<String> = emptyList(),
+    val createdBy: String? = null,
+    val createdAt: String = "",
+)
+
+@Serializable
+data class BoardTemplatesListResponse(
+    val templates: List<BoardTemplate> = emptyList(),
+)
+
+enum class BoardCopyMode(val apiValue: String) {
+    Structure("structure"),
+    Full("full"),
+}
+
+@Serializable
+data class BoardCopyJob(
+    val id: String,
+    val sourceBoardId: String = "",
+    val mode: String = "structure",
+    val title: String = "",
+    val status: String = "pending",
+    val progress: Double = 0.0,
+    val resultBoardId: String? = null,
+    val error: String = "",
+    val createdAt: String = "",
+    val updatedAt: String = "",
+)
+
+@Serializable
+data class BoardCopyJobResponse(
+    val job: BoardCopyJob,
+)
+
+sealed class BoardCreateResult {
+    data class BoardResult(val board: Board) : BoardCreateResult()
+    data class JobResult(val job: BoardCopyJob) : BoardCreateResult()
+}
+
+@Serializable
+data class SaveBoardAsTemplateBody(
+    val scope: String,
+    val title: String = "",
+    val description: String = "",
+    val tags: List<String> = emptyList(),
+    val includePosts: Boolean = false,
+)
+
+enum class BoardExportFormat(val apiValue: String) {
+    Pdf("pdf"),
+    Csv("csv"),
+    Image("image"),
+}
+
+@Serializable
+data class BoardExportJob(
+    val id: String,
+    val boardId: String = "",
+    val format: String = "pdf",
+    val status: String = "pending",
+    val storageKey: String? = null,
+    val error: String = "",
+    val includeModeration: Boolean = false,
+    val requestedBy: String? = null,
+    val createdAt: String = "",
+    val completedAt: String? = null,
+    val downloadUrl: String? = null,
+)
+
+@Serializable
+data class BoardExportJobResponse(
+    val job: BoardExportJob,
+)
+
+@Serializable
+data class CreateBoardExportBody(
+    val format: String,
+    val includeModeration: Boolean = false,
+)
+
+@Serializable
+data class BoardContributorStat(
+    val userId: String = "",
+    val postCount: Int = 0,
+    val commentCount: Int = 0,
+    val reactionCount: Int = 0,
+    val contributionTotal: Int = 0,
+)
+
+@Serializable
+data class BoardDailyAnalytics(
+    val boardId: String = "",
+    val day: String = "",
+    val cardCount: Int = 0,
+    val contributorCount: Int = 0,
+    val reactionCount: Int = 0,
+    val commentCount: Int = 0,
+)
+
+@Serializable
+data class BoardAnalyticsSummary(
+    val boardId: String = "",
+    val cardCount: Int = 0,
+    val uniqueContributors: Int = 0,
+    val reactionCount: Int = 0,
+    val commentCount: Int = 0,
+    val lastActivityAt: String? = null,
+    val contributors: List<BoardContributorStat> = emptyList(),
+    val daily: List<BoardDailyAnalytics> = emptyList(),
+)
+
+@Serializable
+data class BoardOrgPolicies(
+    val orgId: String = "",
+    val externalSharing: Boolean = true,
+    val minorModerationFloor: Boolean = false,
+    val defaultAttribution: String = "named",
+    val boardCapPerCourse: Int? = null,
+    val updatedAt: String? = null,
+)
+
+@Serializable
+data class BoardContentTypeCount(
+    val contentType: String = "",
+    val count: Int = 0,
+)
+
+@Serializable
+data class BoardAdminOverview(
+    val boardCount: Int = 0,
+    val activeBoardCount: Int = 0,
+    val coursesWithBoards: Int = 0,
+    val coursesFeatureEnabled: Int = 0,
+    val storageBytes: Long = 0,
+    val topContentTypes: List<BoardContentTypeCount> = emptyList(),
+    val activeWindowDays: Int = 30,
+)
+
+@Serializable
+data class PatchBoardOrgPoliciesBody(
+    val externalSharing: Boolean? = null,
+    val minorModerationFloor: Boolean? = null,
+    val defaultAttribution: String? = null,
+    val boardCapPerCourse: Int? = null,
+    val clearBoardCap: Boolean? = null,
+)
+
 // endregion

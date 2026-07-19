@@ -119,6 +119,12 @@ class MobileDestinationsTest {
         assertTrue(MobilePlatformFeatures.from(purchaseOn).ffMobileMarketplacePurchase)
         assertFalse(MobilePlatformFeatures.from(purchaseOff).ffMobileMarketplacePurchase)
         assertFalse(MobilePlatformFeatures.from(null).ffMobileMarketplacePurchase)
+
+        val boardsOn = PlatformFeatures(ffMobileBoardsAdvanced = true)
+        val boardsOff = PlatformFeatures(ffMobileBoardsAdvanced = false)
+        assertTrue(MobilePlatformFeatures.from(boardsOn).ffMobileBoardsAdvanced)
+        assertFalse(MobilePlatformFeatures.from(boardsOff).ffMobileBoardsAdvanced)
+        assertFalse(MobilePlatformFeatures.from(null).ffMobileBoardsAdvanced)
     }
 
     @Test

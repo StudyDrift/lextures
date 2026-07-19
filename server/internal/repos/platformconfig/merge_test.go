@@ -441,3 +441,16 @@ func TestMerge_FFMobileMarketplacePurchaseDefaultOff(t *testing.T) {
 		t.Fatal("expected FFMobileMarketplacePurchase true when DB set")
 	}
 }
+
+// MOB.8: FFMobileBoardsAdvanced default OFF when unset.
+func TestMerge_FFMobileBoardsAdvancedDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFMobileBoardsAdvanced {
+		t.Fatal("expected FFMobileBoardsAdvanced false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMobileBoardsAdvanced: &on})
+	if !got.FFMobileBoardsAdvanced {
+		t.Fatal("expected FFMobileBoardsAdvanced true when DB set")
+	}
+}

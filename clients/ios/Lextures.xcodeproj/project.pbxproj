@@ -628,6 +628,18 @@
 		M760W02C2D3E4F5061728394 /* LMSAPIWhiteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = M760W02D3E4F5061728394A5 /* LMSAPIWhiteboard.swift */; };
 		M760W03C2D3E4F5061728394 /* WhiteboardLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M760W03D3E4F5061728394A5 /* WhiteboardLogicTests.swift */; };
 		M770P01C2D3E4F5061728394 /* MyPurchasesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M770P01D3E4F5061728394A5 /* MyPurchasesView.swift */; };
+		M860B01C2D3E4F5061728394 /* BoardsAdvancedLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B01D3E4F5061728394A5 /* BoardsAdvancedLogic.swift */; };
+		M860B02C2D3E4F5061728394 /* BoardsGovernanceAdminLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B02D3E4F5061728394A5 /* BoardsGovernanceAdminLogic.swift */; };
+		M860B03C2D3E4F5061728394 /* LMSAPIBoardTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B03D3E4F5061728394A5 /* LMSAPIBoardTemplates.swift */; };
+		M860B04C2D3E4F5061728394 /* LMSAPIBoardExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B04D3E4F5061728394A5 /* LMSAPIBoardExport.swift */; };
+		M860B05C2D3E4F5061728394 /* LMSAPIBoardAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B05D3E4F5061728394A5 /* LMSAPIBoardAnalytics.swift */; };
+		M860B06C2D3E4F5061728394 /* BoardTemplatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B06D3E4F5061728394A5 /* BoardTemplatePickerView.swift */; };
+		M860B07C2D3E4F5061728394 /* BoardSaveAsTemplateSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B07D3E4F5061728394A5 /* BoardSaveAsTemplateSheet.swift */; };
+		M860B08C2D3E4F5061728394 /* BoardExportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B08D3E4F5061728394A5 /* BoardExportSheet.swift */; };
+		M860B09C2D3E4F5061728394 /* BoardPresentModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B09D3E4F5061728394A5 /* BoardPresentModeView.swift */; };
+		M860B0AC2D3E4F5061728394 /* BoardAnalyticsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B0AD3E4F5061728394A5 /* BoardAnalyticsSheet.swift */; };
+		M860B0BC2D3E4F5061728394 /* BoardsGovernanceAdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B0BD3E4F5061728394A5 /* BoardsGovernanceAdminView.swift */; };
+		M860B0CC2D3E4F5061728394 /* BoardsAdvancedLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M860B0CD3E4F5061728394A5 /* BoardsAdvancedLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1256,6 +1268,18 @@
 		M760W02D3E4F5061728394A5 /* LMSAPIWhiteboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIWhiteboard.swift; sourceTree = "<group>"; };
 		M760W03D3E4F5061728394A5 /* WhiteboardLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardLogicTests.swift; sourceTree = "<group>"; };
 		M770P01D3E4F5061728394A5 /* MyPurchasesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPurchasesView.swift; sourceTree = "<group>"; };
+		M860B01D3E4F5061728394A5 /* BoardsAdvancedLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardsAdvancedLogic.swift; sourceTree = "<group>"; };
+		M860B02D3E4F5061728394A5 /* BoardsGovernanceAdminLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardsGovernanceAdminLogic.swift; sourceTree = "<group>"; };
+		M860B03D3E4F5061728394A5 /* LMSAPIBoardTemplates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIBoardTemplates.swift; sourceTree = "<group>"; };
+		M860B04D3E4F5061728394A5 /* LMSAPIBoardExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIBoardExport.swift; sourceTree = "<group>"; };
+		M860B05D3E4F5061728394A5 /* LMSAPIBoardAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIBoardAnalytics.swift; sourceTree = "<group>"; };
+		M860B06D3E4F5061728394A5 /* BoardTemplatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardTemplatePickerView.swift; sourceTree = "<group>"; };
+		M860B07D3E4F5061728394A5 /* BoardSaveAsTemplateSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardSaveAsTemplateSheet.swift; sourceTree = "<group>"; };
+		M860B08D3E4F5061728394A5 /* BoardExportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardExportSheet.swift; sourceTree = "<group>"; };
+		M860B09D3E4F5061728394A5 /* BoardPresentModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardPresentModeView.swift; sourceTree = "<group>"; };
+		M860B0AD3E4F5061728394A5 /* BoardAnalyticsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardAnalyticsSheet.swift; sourceTree = "<group>"; };
+		M860B0BD3E4F5061728394A5 /* BoardsGovernanceAdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardsGovernanceAdminView.swift; sourceTree = "<group>"; };
+		M860B0CD3E4F5061728394A5 /* BoardsAdvancedLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardsAdvancedLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1283,6 +1307,7 @@
 		98D67F731BF5451A9402BAA2 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				M860B0CD3E4F5061728394A5 /* BoardsAdvancedLogicTests.swift */,
 				M760W03D3E4F5061728394A5 /* WhiteboardLogicTests.swift */,
 								B03C1A11C4A5A51B00A7200F /* SettingsMenuLogicTests.swift */,
 								B03C1A11C4A5A51B00A72011 /* AuditLogAdminLogicTests.swift */,
@@ -1535,6 +1560,11 @@
 		B62295116F7F4935A884363D /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				M860B05D3E4F5061728394A5 /* LMSAPIBoardAnalytics.swift */,
+				M860B04D3E4F5061728394A5 /* LMSAPIBoardExport.swift */,
+				M860B03D3E4F5061728394A5 /* LMSAPIBoardTemplates.swift */,
+				M860B02D3E4F5061728394A5 /* BoardsGovernanceAdminLogic.swift */,
+				M860B01D3E4F5061728394A5 /* BoardsAdvancedLogic.swift */,
 				M760W02D3E4F5061728394A5 /* LMSAPIWhiteboard.swift */,
 				M760W01D3E4F5061728394A5 /* WhiteboardLogic.swift */,
 				B02C1A11C4A5A51B00A71404 /* CanvasImportObservability.swift */,
@@ -1892,6 +1922,11 @@
 		5A215B5D66E342278E63F8C3 /* Boards */ = {
 			isa = PBXGroup;
 			children = (
+				M860B0AD3E4F5061728394A5 /* BoardAnalyticsSheet.swift */,
+				M860B09D3E4F5061728394A5 /* BoardPresentModeView.swift */,
+				M860B08D3E4F5061728394A5 /* BoardExportSheet.swift */,
+				M860B07D3E4F5061728394A5 /* BoardSaveAsTemplateSheet.swift */,
+				M860B06D3E4F5061728394A5 /* BoardTemplatePickerView.swift */,
 				67A5892437234918923BF325 /* Layouts */,
 				C27762665B55400BBD5B4F38 /* Public */,
 				8D65A78247C846EB95579E90 /* BoardComposerView.swift */,
@@ -2456,6 +2491,7 @@
 		387083D5EF7A4F1DA444B863 /* Admin */ = {
 			isa = PBXGroup;
 			children = (
+				M860B0BD3E4F5061728394A5 /* BoardsGovernanceAdminView.swift */,
 				4A7CB5BADA16457E9E0F5843 /* AdvisingSettingsView.swift */,
 				8D61F1C147FE4F6888D57621 /* AiAdminHubView.swift */,
 				B03C1A11C4A5A51B00A7200B /* AuditLogAdminView.swift */,
@@ -2615,6 +2651,28 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				M860B0BC2D3E4F5061728394 /* BoardsGovernanceAdminView.swift in Sources */,
+
+				M860B0AC2D3E4F5061728394 /* BoardAnalyticsSheet.swift in Sources */,
+
+				M860B09C2D3E4F5061728394 /* BoardPresentModeView.swift in Sources */,
+
+				M860B08C2D3E4F5061728394 /* BoardExportSheet.swift in Sources */,
+
+				M860B07C2D3E4F5061728394 /* BoardSaveAsTemplateSheet.swift in Sources */,
+
+				M860B06C2D3E4F5061728394 /* BoardTemplatePickerView.swift in Sources */,
+
+				M860B05C2D3E4F5061728394 /* LMSAPIBoardAnalytics.swift in Sources */,
+
+				M860B04C2D3E4F5061728394 /* LMSAPIBoardExport.swift in Sources */,
+
+				M860B03C2D3E4F5061728394 /* LMSAPIBoardTemplates.swift in Sources */,
+
+				M860B02C2D3E4F5061728394 /* BoardsGovernanceAdminLogic.swift in Sources */,
+
+				M860B01C2D3E4F5061728394 /* BoardsAdvancedLogic.swift in Sources */,
+
 				M770P01C2D3E4F5061728394 /* MyPurchasesView.swift in Sources */,
 
 				M760W02C2D3E4F5061728394 /* LMSAPIWhiteboard.swift in Sources */,
@@ -3164,6 +3222,8 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				M860B0CC2D3E4F5061728394 /* BoardsAdvancedLogicTests.swift in Sources */,
+
 				M760W03C2D3E4F5061728394 /* WhiteboardLogicTests.swift in Sources */,
 
 				B03C1A11C4A5A51B00A72010 /* SettingsMenuLogicTests.swift in Sources */,

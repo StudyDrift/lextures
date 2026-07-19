@@ -30,7 +30,7 @@ Implementation plans for web-client features that the iOS and Android apps do
 | [MOB.5](MOB.5-interactive-quizzes.md) | Interactive quizzes | `pages/live-quiz-play-page.tsx`, `components/live-quiz/*` | none | MISSING | BLOCKER (K12) | L |
 | [MOB.6](../../completed/mobile/MOB.6-whiteboards.md) | Whiteboards (authoring) | `components/whiteboard/*` | **DONE** (save-based authoring) | DONE | MAJOR | M |
 | [MOB.7](../../completed/mobile/MOB.7-marketplace-purchases.md) | Marketplace purchases & library | `pages/marketplace/*`, `pages/checkout/*`, `/me/purchases` | **DONE** (Stripe handoff + Purchased courses) | DONE | MAJOR | M |
-| [MOB.8](MOB.8-collaboration-boards-completion.md) | Collaboration boards completion | `components/boards/*` (VC.8–VC.10) | VC.M1–M7 shipped; M8–M10 absent | PARTIAL | MINOR | M |
+| [MOB.8](../../completed/mobile/MOB.8-collaboration-boards-completion.md) | Collaboration boards completion | `components/boards/*` (VC.8–VC.10) | **DONE** (templates/export/present/governance) | DONE | MINOR | M |
 
 ## Sequencing at a glance
 
@@ -41,7 +41,7 @@ MOB.4 (independent)
 MOB.5 (independent; backend IQ.1–IQ.11 shipped)
 MOB.6 (done — save-based; realtime follow-up if needed)
 MOB.7 (done — external Stripe checkout; IAP deferred)
-MOB.8 ◀── depends on shipped VC.M1–M7
+MOB.8 (done — templates/export/present/governance behind ffMobileBoardsAdvanced)
 ```
 
 ## Cross-platform note
