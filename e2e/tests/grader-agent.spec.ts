@@ -1,8 +1,10 @@
 import { test, expect, injectToken } from '../fixtures/test.js'
 import {
   apiCreateAssignment,
+  apiGetPlatformAdminToken,
   apiPatchAssignment,
   apiPatchAssignmentSubmissionTypes,
+  apiPatchPlatformSettings,
   apiPutSubmissionGrade,
   apiUploadAssignmentSubmission,
 } from '../fixtures/api.js'
@@ -44,6 +46,14 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
   coursePage,
   seededCourse,
 }) => {
+  // Annotations default ON (course GET mirrors platform AnnotationEnabled) and switch
+  // Grade submissions to inline SpeedGrader. Force off so this journey keeps the modal.
+  const adminToken = await apiGetPlatformAdminToken()
+  await apiPatchPlatformSettings(adminToken, {
+    annotationEnabled: false,
+    updateMask: ['annotationEnabled'],
+  })
+
   const assignment = await apiCreateAssignment(
     seededCourse.instructorToken,
     seededCourse.courseCode,
@@ -174,7 +184,6 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
       contentType: 'application/json',
       body: JSON.stringify({
         ...data,
-        // Annotations default ON opens inline SpeedGrader; keep modal dialog for this journey.
         annotationEnabled: false,
         graderAgentEnabled: true,
         graderAgentReviewInboxEnabled: true,
