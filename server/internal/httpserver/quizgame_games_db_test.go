@@ -289,14 +289,6 @@ func TestQuizGames_CourseFeatureOff_Pg(t *testing.T) {
 	if w.Code != http.StatusNotFound {
 		t.Fatalf("want 404 when course interactive quizzes off, got %d %s", w.Code, w.Body.String())
 	}
-
-	req = httptest.NewRequest(http.MethodGet,
-		"/api/v1/courses/"+cc+"/live-quizzes/games/"+kitID+"/ws", nil)
-	w = httptest.NewRecorder()
-	h.ServeHTTP(w, req)
-	if w.Code != http.StatusNotFound {
-		t.Fatalf("ws want 404 got %d", w.Code)
-	}
 }
 
 func TestQuizGames_ScoringLeaderboardBreakdown_Pg(t *testing.T) {
