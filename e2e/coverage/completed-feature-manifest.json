@@ -7420,6 +7420,35 @@
       }
     },
     {
+      "id": "MOB.3",
+      "path": "docs/completed/mobile/MOB.3-system-settings-parity.md",
+      "markets": [
+        "K12",
+        "HE",
+        "SL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "api-contract",
+      "rationale": "Phase 1 mobile Settings/Admin hub + audit log. Native unit tests cover menu gating; Playwright API smoke covers admin-console audit-log authz and ffMobileAdminConsole exposure.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/mobile-admin-console-audit-log.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": true,
+        "dependency": false,
+        "rollback": true,
+        "notes": "Flag ffMobileAdminConsole is Settings \u2192 Global platform toggle (E2E.2 matrix). Hub/menu UX covered by native unit tests; API contract covers audit-log 401/403 and admin list/filter."
+      }
+    },
+    {
       "id": "T01",
       "path": "docs/completed/transcripts/T01-official-transcript-generation.md",
       "markets": [
