@@ -32,3 +32,7 @@ struct PatchCourseSyllabusRequest: Codable, Equatable {
 struct CreateCourseModuleRequest: Codable, Equatable {
     var title: String
 }
+
+struct CreateModuleItemRequest: Codable, Equatable {
+    var title: String
+}

@@ -64,6 +64,7 @@ struct PlatformFeatures: Decodable {
     var ffMobileInstructorInsights: Bool?
     var ffMobileCourseSettings: Bool?
     var ffMobileCreateCourse: Bool?
+    var ffMobileCourseCreateV2: Bool?
     var ffConsortiumSharing: Bool?
     var graderAgentEnabled: Bool?
     var ffPlagiarismChecks: Bool?

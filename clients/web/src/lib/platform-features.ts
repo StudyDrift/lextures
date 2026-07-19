@@ -45,6 +45,8 @@ export type PlatformFeaturesSnapshot = {
   ffMotionNavigation?: boolean
   ffMotionReveal?: boolean
   ffMotionLists?: boolean
+  ffMobileCreateCourse?: boolean
+  ffMobileCourseCreateV2?: boolean
   ffLibrary?: boolean
   ffBroadcasts?: boolean
   ffClassroomSignals?: boolean
@@ -168,6 +170,8 @@ const defaults: PlatformFeaturesSnapshot = {
   ffMotionNavigation: true,
   ffMotionReveal: true,
   ffMotionLists: true,
+  ffMobileCreateCourse: false,
+  ffMobileCourseCreateV2: false,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,

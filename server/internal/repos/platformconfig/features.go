@@ -77,6 +77,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFMotionReveal = mergeBool(db.FFMotionReveal, true)
 	// AN.4 list/collection motion default ON; kill-switch via Settings → Global platform.
 	out.FFMotionLists = mergeBool(db.FFMotionLists, true)
+	out.FFMobileCreateCourse = mergeBool(db.FFMobileCreateCourse, false)
+	out.FFMobileCourseCreateV2 = mergeBool(db.FFMobileCourseCreateV2, false)
 	out.FFParentPortal = mergeBool(db.FFParentPortal, false)
 	out.FFParentPortalV2 = mergeBool(db.FFParentPortalV2, false)
 	out.FFReportCards = mergeBool(db.FFReportCards, false)

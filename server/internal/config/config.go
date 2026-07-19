@@ -170,12 +170,12 @@ type Config struct {
 	VAPIDSubject string
 
 	// Native push (APNs / FCM) credentials for mobile apps (plans 21.5, M0.1).
-	APNSP8Key               string
-	APNSKeyID               string
-	APNSTeamID              string
-	APNSBundleID            string
-	APNSEnvironment         string // "development" or "production"
-	FCMServiceAccountJSON   string
+	APNSP8Key             string
+	APNSKeyID             string
+	APNSTeamID            string
+	APNSBundleID          string
+	APNSEnvironment       string // "development" or "production"
+	FCMServiceAccountJSON string
 
 	// VirtualClassroomEnabled gates the virtual meeting / live classroom feature (plan 6.4).
 	VirtualClassroomEnabled bool
@@ -326,6 +326,10 @@ type Config struct {
 	FFMotionReveal bool
 	// FFMotionLists enables list insert/remove/reorder and drag-lift motion (AN.4). Default ON; kill-switch.
 	FFMotionLists bool
+	// FFMobileCreateCourse enables the mobile New course entry and basic create wizard (M11.5). Default OFF.
+	FFMobileCreateCourse bool
+	// FFMobileCourseCreateV2 enables mobile create-wizard parity: competency builder, Canvas entry, drafts (MOB.1). Default OFF.
+	FFMobileCourseCreateV2 bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).
@@ -687,10 +691,10 @@ type Config struct {
 	// RabbitMQURL is the AMQP connection URL for background job queues (Canvas import, etc.).
 	RabbitMQURL string
 	// SQS queue URLs (full https://sqs.<region>.amazonaws.com/... URLs). Used when QueueBackend is "sqs".
-	SQSCanvasImportURL          string
-	SQSCanvasSubmissionSyncURL  string
-	SQSSmsNotificationURL       string
-	SQSGradingAgentURL          string
+	SQSCanvasImportURL         string
+	SQSCanvasSubmissionSyncURL string
+	SQSSmsNotificationURL      string
+	SQSGradingAgentURL         string
 	// CanvasImportQueueName is the RabbitMQ queue for Canvas LMS imports (default canvas.course.import).
 	CanvasImportQueueName string
 	// CanvasImportConcurrency is how many Canvas import jobs the queue consumer processes in parallel.
@@ -820,7 +824,7 @@ func Load() Config {
 		SMTPPassword: firstNonEmptyTrimmed("SMTP_PASSWORD"),
 		SMTPFrom:     firstNonEmptyTrimmed("SMTP_FROM"),
 
-		EmailProvider:       strings.ToLower(firstNonEmptyTrimmed("EMAIL_PROVIDER")),
+		EmailProvider: strings.ToLower(firstNonEmptyTrimmed("EMAIL_PROVIDER")),
 		// Region: SES_REGION, else AWS_REGION. Credentials: optional SES_ACCESS_KEY_ID /
 		// SES_SECRET_ACCESS_KEY; when empty the default AWS chain is used (env, IAM role, …).
 		SESRegion:           firstNonEmptyTrimmed("SES_REGION", "AWS_REGION"),
@@ -931,7 +935,7 @@ func Load() Config {
 
 		TurnstileSecretKey: strings.TrimSpace(os.Getenv("TURNSTILE_SECRET_KEY")),
 
-		StripeSecretKey: strings.TrimSpace(os.Getenv("STRIPE_SECRET_KEY")),
+		StripeSecretKey:      strings.TrimSpace(os.Getenv("STRIPE_SECRET_KEY")),
 		StripeWebhookSecret:  strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET")),
 		StripeMonthlyPriceID: strings.TrimSpace(os.Getenv("STRIPE_MONTHLY_PRICE_ID")),
 		StripeAnnualPriceID:  strings.TrimSpace(os.Getenv("STRIPE_ANNUAL_PRICE_ID")),

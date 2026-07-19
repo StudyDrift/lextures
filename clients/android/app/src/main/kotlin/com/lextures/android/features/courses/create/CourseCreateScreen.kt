@@ -17,9 +17,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -65,11 +73,18 @@ import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.i18n.L
 import com.lextures.android.core.i18n.LocalLocalePreferences
+import com.lextures.android.core.lms.AddCourseOutcomeLinkBody
+import com.lextures.android.core.lms.CourseCreateDraftStore
 import com.lextures.android.core.lms.CourseCreateLogic
+import com.lextures.android.core.lms.CourseCreateObservability
 import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.lms.CreateCourseOutcomeBody
+import com.lextures.android.core.lms.CreateCourseOutcomeSubOutcomeBody
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.OrgTerm
+import com.lextures.android.core.lms.PatchCourseOutcomeBody
 import com.lextures.android.core.lms.PatchCourseSyllabusRequest
+import com.lextures.android.core.navigation.MobilePlatformFeatures
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsErrorBanner
 import kotlinx.coroutines.launch
@@ -83,13 +98,19 @@ fun CourseCreateScreen(
     onFinished: (CourseSummary) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    features: MobilePlatformFeatures? = null,
 ) {
     val accessToken by session.accessToken.collectAsState()
+    val userEmail by session.userEmail.collectAsState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val localePrefs = LocalLocalePreferences.current
+    val draftStore = remember { CourseCreateDraftStore(context) }
 
-    var step by remember { mutableStateOf(CourseCreateLogic.WizardStep.Basics) }
+    val platformFeatures = features ?: shell?.platformFeatures ?: MobilePlatformFeatures()
+    val v2Enabled = CourseCreateLogic.courseCreateV2Enabled(platformFeatures)
+
+    var step by remember { mutableStateOf(CourseCreateLogic.initialWizardStep(v2Enabled)) }
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var courseMode by remember { mutableStateOf(CourseCreateLogic.CourseMode.Traditional) }
@@ -97,6 +118,7 @@ fun CourseCreateScreen(
     var selectedGradeLevel by remember { mutableStateOf("") }
     var selectedTemplateId by remember { mutableStateOf(CourseCreateLogic.DEFAULT_TEMPLATE_ID) }
     var firstModuleTitle by remember { mutableStateOf("") }
+    var competencies by remember { mutableStateOf(listOf(CourseCreateLogic.CompetencyDraft.empty())) }
     var createdCourse by remember { mutableStateOf<CourseSummary?>(null) }
     var terms by remember { mutableStateOf<List<OrgTerm>>(emptyList()) }
     var loadingTerms by remember { mutableStateOf(false) }
@@ -104,27 +126,90 @@ fun CourseCreateScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var titleError by remember { mutableStateOf<String?>(null) }
     var showCancelConfirm by remember { mutableStateOf(false) }
+    var showCanvasComingSoon by remember { mutableStateOf(false) }
     var termMenuExpanded by remember { mutableStateOf(false) }
     var gradeMenuExpanded by remember { mutableStateOf(false) }
+    var draftKey by remember { mutableStateOf("") }
+    var didRestoreDraft by remember { mutableStateOf(false) }
+    var recordedStart by remember { mutableStateOf(false) }
+    var draftReady by remember { mutableStateOf(false) }
 
     val isCompetency = courseMode == CourseCreateLogic.CourseMode.CompetencyBased
 
-    LaunchedEffect(accessToken) {
-        val token = accessToken ?: return@LaunchedEffect
-        loadingTerms = true
-        val orgId = CourseCreateLogic.resolveOrgId(token, existingCourses)
-        terms = if (orgId != null) {
-            runCatching { LmsApi.fetchOrgTerms(orgId, token) }.getOrDefault(emptyList())
-        } else {
-            emptyList()
+    fun clearDraft() {
+        if (draftKey.isNotEmpty()) draftStore.clear(draftKey)
+    }
+
+    fun persistDraft() {
+        if (!v2Enabled || draftKey.isEmpty()) return
+        draftStore.save(
+            draftKey,
+            CourseCreateDraftStore.Draft(
+                step = step.number,
+                title = title,
+                description = description,
+                courseMode = courseMode.value,
+                selectedTermId = selectedTermId,
+                selectedGradeLevel = selectedGradeLevel,
+                selectedTemplateId = selectedTemplateId,
+                firstModuleTitle = firstModuleTitle,
+                createdCourseCode = createdCourse?.courseCode,
+                competencies = competencies,
+                createSource = null,
+            ),
+        )
+    }
+
+    fun maybeRecordStarted() {
+        if (!v2Enabled || recordedStart) return
+        CourseCreateObservability.recordStarted(context, courseMode.value, selectedTemplateId)
+        recordedStart = true
+    }
+
+    fun restoreDraft(draft: CourseCreateDraftStore.Draft) {
+        var restoredStep = CourseCreateLogic.WizardStep.fromNumber(draft.step)
+        if (restoredStep == CourseCreateLogic.WizardStep.Source && !v2Enabled) {
+            restoredStep = CourseCreateLogic.WizardStep.Basics
         }
-        loadingTerms = false
+        step = restoredStep
+        title = draft.title
+        description = draft.description
+        courseMode = CourseCreateLogic.CourseMode.fromCourseType(draft.courseMode)
+        selectedTermId = draft.selectedTermId
+        selectedGradeLevel = draft.selectedGradeLevel
+        selectedTemplateId = draft.selectedTemplateId
+        firstModuleTitle = draft.firstModuleTitle
+        competencies = draft.competencies.ifEmpty { listOf(CourseCreateLogic.CompetencyDraft.empty()) }
+        val code = draft.createdCourseCode
+        if (!code.isNullOrBlank()) {
+            createdCourse = CourseSummary(
+                id = code,
+                courseCode = code,
+                title = draft.title,
+                description = draft.description,
+                published = false,
+                courseType = draft.courseMode,
+                termId = draft.selectedTermId.takeIf { it.isNotEmpty() },
+                gradeLevel = draft.selectedGradeLevel.takeIf { it.isNotEmpty() },
+            )
+        }
+    }
+
+    fun formatCompetencyError(error: CourseCreateLogic.CompetencyValidationError): String {
+        val resName = error.key.replace('.', '_')
+        val resId = context.resources.getIdentifier(resName, "string", context.packageName)
+        if (resId == 0) return error.key
+        return when (error.args.size) {
+            0 -> L.text(context, localePrefs, resId)
+            else -> L.format(context, localePrefs, resId, *error.args.toTypedArray())
+        }
     }
 
     fun attemptDismiss() {
         if (CourseCreateLogic.shouldConfirmCancel(createdCourse?.courseCode)) {
             showCancelConfirm = true
         } else {
+            clearDraft()
             onDismiss()
         }
     }
@@ -144,7 +229,7 @@ fun CourseCreateScreen(
                 step = CourseCreateLogic.WizardStep.Basics
             }
             CourseCreateLogic.WizardStep.Finish -> step = CourseCreateLogic.WizardStep.Syllabus
-            CourseCreateLogic.WizardStep.Basics -> Unit
+            CourseCreateLogic.WizardStep.Basics, CourseCreateLogic.WizardStep.Source -> Unit
         }
     }
 
@@ -179,6 +264,9 @@ fun CourseCreateScreen(
                     )
                     LmsApi.createCourse(body, token)
                 }
+                if (v2Enabled) {
+                    CourseCreateObservability.recordStepCompleted(context, 1)
+                }
                 step = CourseCreateLogic.WizardStep.Syllabus
             } catch (e: Exception) {
                 errorMessage = session.mapError(e)
@@ -210,6 +298,9 @@ fun CourseCreateScreen(
                 if (!isCompetency) {
                     firstModuleTitle = CourseCreateLogic.suggestedFirstModuleTitle(selectedTemplateId, firstModuleTitle)
                 }
+                if (v2Enabled) {
+                    CourseCreateObservability.recordStepCompleted(context, 2)
+                }
                 step = CourseCreateLogic.WizardStep.Finish
             } catch (e: Exception) {
                 errorMessage = session.mapError(e)
@@ -233,6 +324,11 @@ fun CourseCreateScreen(
                         LmsApi.createCourseModule(course.courseCode, moduleTitle, token)
                     }
                 }
+                if (v2Enabled) {
+                    CourseCreateObservability.recordStepCompleted(context, 3)
+                    CourseCreateObservability.recordFinished(context, courseMode.value, selectedTemplateId)
+                }
+                clearDraft()
                 shell?.refresh(token)
                 val refreshed = runCatching { LmsApi.fetchCourse(course.courseCode, token) }.getOrDefault(course)
                 onFinished(refreshed)
@@ -251,11 +347,153 @@ fun CourseCreateScreen(
         scope.launch {
             submitting = true
             errorMessage = null
+            clearDraft()
             shell?.refresh(token)
             val refreshed = runCatching { LmsApi.fetchCourse(course.courseCode, token) }.getOrDefault(course)
             submitting = false
             onFinished(refreshed)
         }
+    }
+
+    fun finishCompetencyBased() {
+        val course = createdCourse ?: return
+        val token = accessToken ?: return
+        val validation = CourseCreateLogic.validateCompetencies(competencies)
+        if (validation != null) {
+            errorMessage = formatCompetencyError(validation)
+            return
+        }
+        scope.launch {
+            submitting = true
+            errorMessage = null
+            try {
+                for (comp in competencies) {
+                    val module = LmsApi.createCourseModule(
+                        course.courseCode,
+                        comp.title.trim(),
+                        token,
+                    )
+                    val outcome = LmsApi.createCourseOutcome(
+                        course.courseCode,
+                        CreateCourseOutcomeBody(
+                            title = comp.title.trim(),
+                            description = comp.description.trim(),
+                        ),
+                        token,
+                    )
+                    LmsApi.patchCourseOutcome(
+                        course.courseCode,
+                        outcome.id,
+                        PatchCourseOutcomeBody(moduleStructureItemId = module.id),
+                        token,
+                    )
+                    for (sub in comp.subOutcomes) {
+                        val subRow = LmsApi.createCourseOutcomeSubOutcome(
+                            course.courseCode,
+                            outcome.id,
+                            CreateCourseOutcomeSubOutcomeBody(
+                                title = sub.title.trim(),
+                                description = sub.description.trim(),
+                            ),
+                            token,
+                        )
+                        val assessmentTitle = sub.assessmentTitle.trim()
+                        val item = when (sub.assessmentKind) {
+                            CourseCreateLogic.AssessmentKind.Assignment ->
+                                LmsApi.createModuleAssignment(
+                                    course.courseCode,
+                                    module.id,
+                                    assessmentTitle,
+                                    token,
+                                )
+                            CourseCreateLogic.AssessmentKind.Quiz ->
+                                LmsApi.createModuleQuiz(
+                                    course.courseCode,
+                                    module.id,
+                                    assessmentTitle,
+                                    token,
+                                )
+                        }
+                        LmsApi.addCourseOutcomeLink(
+                            course.courseCode,
+                            outcome.id,
+                            AddCourseOutcomeLinkBody(
+                                structureItemId = item.id,
+                                targetKind = sub.assessmentKind.value,
+                                measurementLevel = "summative",
+                                intensityLevel = "high",
+                                subOutcomeId = subRow.id,
+                            ),
+                            token,
+                        )
+                    }
+                }
+                CourseCreateObservability.recordStepCompleted(context, 3)
+                CourseCreateObservability.recordFinished(context, courseMode.value, selectedTemplateId)
+                clearDraft()
+                shell?.refresh(token)
+                val refreshed = runCatching { LmsApi.fetchCourse(course.courseCode, token) }.getOrDefault(course)
+                onFinished(refreshed)
+            } catch (e: Exception) {
+                errorMessage = session.mapError(e)
+                    .ifBlank { L.text(context, localePrefs, R.string.mobile_createCourse_error_competencyFailed) }
+            } finally {
+                submitting = false
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        step = CourseCreateLogic.initialWizardStep(v2Enabled)
+        val orgId = CourseCreateLogic.resolveOrgId(accessToken, existingCourses)
+        draftKey = draftStore.storageKey(userEmail, orgId)
+        if (v2Enabled && !didRestoreDraft) {
+            draftStore.load(draftKey)?.let { restoreDraft(it) }
+            didRestoreDraft = true
+        }
+        if (step != CourseCreateLogic.WizardStep.Source) {
+            maybeRecordStarted()
+        }
+        draftReady = true
+    }
+
+    LaunchedEffect(accessToken) {
+        val token = accessToken ?: return@LaunchedEffect
+        loadingTerms = true
+        val orgId = CourseCreateLogic.resolveOrgId(token, existingCourses)
+        terms = if (orgId != null) {
+            runCatching { LmsApi.fetchOrgTerms(orgId, token) }.getOrDefault(emptyList())
+        } else {
+            emptyList()
+        }
+        loadingTerms = false
+    }
+
+    LaunchedEffect(
+        draftReady,
+        step,
+        title,
+        description,
+        courseMode,
+        selectedTermId,
+        selectedGradeLevel,
+        selectedTemplateId,
+        firstModuleTitle,
+        competencies,
+        createdCourse?.courseCode,
+    ) {
+        if (draftReady) persistDraft()
+    }
+
+    if (showCanvasComingSoon) {
+        CanvasImportComingSoonScreen(
+            onDismiss = {
+                showCanvasComingSoon = false
+                step = CourseCreateLogic.WizardStep.Source
+            },
+            modifier = modifier,
+        )
+        return
     }
 
     Surface(modifier = modifier.fillMaxSize()) {
@@ -276,39 +514,41 @@ fun CourseCreateScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                Text(
-                    text = stringResource(R.string.mobile_createCourse_stepOf, step.number, 3),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = textSecondary(),
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    CourseCreateLogic.WizardStep.entries.forEach { s ->
-                        val active = s.number <= step.number
-                        Column(modifier = Modifier.weight(1f)) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(if (active) LexturesColors.Primary else textSecondary().copy(alpha = 0.25f)),
-                            )
-                            Text(
-                                text = stringResource(
-                                    when {
-                                        s == CourseCreateLogic.WizardStep.Finish && isCompetency ->
-                                            R.string.mobile_createCourse_step_competencies
-                                        s == CourseCreateLogic.WizardStep.Basics ->
-                                            R.string.mobile_createCourse_step_basics
-                                        s == CourseCreateLogic.WizardStep.Syllabus ->
-                                            R.string.mobile_createCourse_step_syllabus
-                                        else -> R.string.mobile_createCourse_step_module
-                                    },
-                                ),
-                                fontSize = 11.sp,
-                                color = if (active) textPrimary() else textSecondary(),
-                                maxLines = 1,
-                            )
+                if (step != CourseCreateLogic.WizardStep.Source) {
+                    Text(
+                        text = stringResource(R.string.mobile_createCourse_stepOf, step.number, 3),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = textSecondary(),
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                        CourseCreateLogic.WizardStep.progressSteps.forEach { s ->
+                            val active = s.number <= step.number
+                            Column(modifier = Modifier.weight(1f)) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(4.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(if (active) LexturesColors.Primary else textSecondary().copy(alpha = 0.25f)),
+                                )
+                                Text(
+                                    text = stringResource(
+                                        when {
+                                            s == CourseCreateLogic.WizardStep.Finish && isCompetency ->
+                                                R.string.mobile_createCourse_step_competencies
+                                            s == CourseCreateLogic.WizardStep.Basics ->
+                                                R.string.mobile_createCourse_step_basics
+                                            s == CourseCreateLogic.WizardStep.Syllabus ->
+                                                R.string.mobile_createCourse_step_syllabus
+                                            else -> R.string.mobile_createCourse_step_module
+                                        },
+                                    ),
+                                    fontSize = 11.sp,
+                                    color = if (active) textPrimary() else textSecondary(),
+                                    maxLines = 1,
+                                )
+                            }
                         }
                     }
                 }
@@ -316,6 +556,29 @@ fun CourseCreateScreen(
                 errorMessage?.let { LmsErrorBanner(it) }
 
                 when (step) {
+                    CourseCreateLogic.WizardStep.Source -> {
+                        Text(
+                            stringResource(R.string.mobile_createCourse_source_intro),
+                            color = textSecondary(),
+                            fontSize = 14.sp,
+                        )
+                        SourceOptionCard(
+                            title = stringResource(R.string.mobile_createCourse_source_scratch_title),
+                            summary = stringResource(R.string.mobile_createCourse_source_scratch_summary),
+                            icon = Icons.Default.NoteAdd,
+                            onClick = {
+                                step = CourseCreateLogic.WizardStep.Basics
+                                maybeRecordStarted()
+                            },
+                        )
+                        SourceOptionCard(
+                            title = stringResource(R.string.mobile_createCourse_source_canvas_title),
+                            summary = stringResource(R.string.mobile_createCourse_source_canvas_summary),
+                            icon = Icons.Default.CloudDownload,
+                            onClick = { showCanvasComingSoon = true },
+                        )
+                    }
+
                     CourseCreateLogic.WizardStep.Basics -> {
                         Text(stringResource(R.string.mobile_createCourse_field_title), fontWeight = FontWeight.SemiBold, color = textPrimary())
                         OutlinedTextField(
@@ -447,15 +710,22 @@ fun CourseCreateScreen(
 
                     CourseCreateLogic.WizardStep.Finish -> {
                         if (isCompetency) {
-                            Text(
-                                stringResource(R.string.mobile_createCourse_competency_handoffTitle),
-                                style = LexturesType.display(18),
-                                color = textPrimary(),
-                            )
-                            Text(
-                                stringResource(R.string.mobile_createCourse_competency_handoffBody),
-                                color = textSecondary(),
-                            )
+                            if (v2Enabled) {
+                                CompetencyEditor(
+                                    competencies = competencies,
+                                    onChange = { competencies = it },
+                                )
+                            } else {
+                                Text(
+                                    stringResource(R.string.mobile_createCourse_competency_handoffTitle),
+                                    style = LexturesType.display(18),
+                                    color = textPrimary(),
+                                )
+                                Text(
+                                    stringResource(R.string.mobile_createCourse_competency_handoffBody),
+                                    color = textSecondary(),
+                                )
+                            }
                         } else {
                             Text(stringResource(R.string.mobile_createCourse_firstModule_label), fontWeight = FontWeight.SemiBold, color = textPrimary())
                             OutlinedTextField(
@@ -482,9 +752,19 @@ fun CourseCreateScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (step != CourseCreateLogic.WizardStep.Basics) {
-                    OutlinedButton(onClick = { goBack() }, enabled = !submitting) {
-                        Text(stringResource(R.string.mobile_createCourse_action_back))
+                when {
+                    step != CourseCreateLogic.WizardStep.Basics && step != CourseCreateLogic.WizardStep.Source -> {
+                        OutlinedButton(onClick = { goBack() }, enabled = !submitting) {
+                            Text(stringResource(R.string.mobile_createCourse_action_back))
+                        }
+                    }
+                    step == CourseCreateLogic.WizardStep.Basics && v2Enabled -> {
+                        OutlinedButton(
+                            onClick = { step = CourseCreateLogic.WizardStep.Source },
+                            enabled = !submitting,
+                        ) {
+                            Text(stringResource(R.string.mobile_createCourse_action_back))
+                        }
                     }
                 }
                 Spacer(Modifier.weight(1f))
@@ -493,27 +773,39 @@ fun CourseCreateScreen(
                         Text(stringResource(R.string.mobile_createCourse_firstModule_skip))
                     }
                 }
-                Button(
-                    onClick = {
-                        when (step) {
-                            CourseCreateLogic.WizardStep.Basics -> submitBasics()
-                            CourseCreateLogic.WizardStep.Syllabus -> continueFromSyllabus()
-                            CourseCreateLogic.WizardStep.Finish -> {
-                                if (isCompetency) finishCompetencyHandoff() else finishTraditional(skipModule = false)
+                if (step != CourseCreateLogic.WizardStep.Source) {
+                    Button(
+                        onClick = {
+                            when (step) {
+                                CourseCreateLogic.WizardStep.Source -> Unit
+                                CourseCreateLogic.WizardStep.Basics -> submitBasics()
+                                CourseCreateLogic.WizardStep.Syllabus -> continueFromSyllabus()
+                                CourseCreateLogic.WizardStep.Finish -> {
+                                    when {
+                                        isCompetency && v2Enabled -> finishCompetencyBased()
+                                        isCompetency -> finishCompetencyHandoff()
+                                        else -> finishTraditional(skipModule = false)
+                                    }
+                                }
                             }
+                        },
+                        enabled = !submitting,
+                    ) {
+                        if (submitting) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = textPrimary())
+                        } else {
+                            Text(
+                                stringResource(
+                                    when {
+                                        step == CourseCreateLogic.WizardStep.Finish && isCompetency && v2Enabled ->
+                                            R.string.mobile_createCourse_action_createCompetencies
+                                        step == CourseCreateLogic.WizardStep.Finish ->
+                                            R.string.mobile_createCourse_action_createOpen
+                                        else -> R.string.mobile_createCourse_action_continue
+                                    },
+                                ),
+                            )
                         }
-                    },
-                    enabled = !submitting,
-                ) {
-                    if (submitting) {
-                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = textPrimary())
-                    } else {
-                        Text(
-                            stringResource(
-                                if (step == CourseCreateLogic.WizardStep.Finish) R.string.mobile_createCourse_action_createOpen
-                                else R.string.mobile_createCourse_action_continue,
-                            ),
-                        )
                     }
                 }
             }
@@ -526,7 +818,13 @@ fun CourseCreateScreen(
             title = { Text(stringResource(R.string.mobile_createCourse_cancel_confirm)) },
             text = { Text(stringResource(R.string.mobile_createCourse_cancel_message)) },
             confirmButton = {
-                TextButton(onClick = onDismiss) {
+                TextButton(
+                    onClick = {
+                        clearDraft()
+                        showCancelConfirm = false
+                        onDismiss()
+                    },
+                ) {
                     Text(stringResource(R.string.mobile_createCourse_cancel_leave))
                 }
             },
@@ -536,6 +834,246 @@ fun CourseCreateScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun SourceOptionCard(
+    title: String,
+    summary: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        color = cardBackground(),
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = LexturesColors.Primary,
+                modifier = Modifier.size(28.dp),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(title, style = LexturesType.display(16), color = textPrimary())
+                Text(summary, fontSize = 12.sp, color = textSecondary())
+            }
+        }
+    }
+}
+
+@Composable
+private fun CompetencyEditor(
+    competencies: List<CourseCreateLogic.CompetencyDraft>,
+    onChange: (List<CourseCreateLogic.CompetencyDraft>) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            stringResource(R.string.mobile_createCourse_competency_intro),
+            color = textSecondary(),
+            fontSize = 14.sp,
+        )
+        competencies.forEachIndexed { index, comp ->
+            CompetencyCard(
+                index = index,
+                competency = comp,
+                canRemove = competencies.size > 1,
+                onUpdate = { updated ->
+                    onChange(competencies.toMutableList().also { it[index] = updated })
+                },
+                onRemove = {
+                    onChange(competencies.toMutableList().also { it.removeAt(index) })
+                },
+            )
+        }
+        TextButton(
+            onClick = { onChange(competencies + CourseCreateLogic.CompetencyDraft.empty()) },
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.size(6.dp))
+            Text(stringResource(R.string.mobile_createCourse_competency_add))
+        }
+    }
+}
+
+@Composable
+private fun CompetencyCard(
+    index: Int,
+    competency: CourseCreateLogic.CompetencyDraft,
+    canRemove: Boolean,
+    onUpdate: (CourseCreateLogic.CompetencyDraft) -> Unit,
+    onRemove: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = cardBackground(),
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(
+                    onClick = { onUpdate(competency.copy(expanded = !competency.expanded)) },
+                ) {
+                    Icon(
+                        imageVector = if (competency.expanded) Icons.Default.ExpandMore else Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.size(4.dp))
+                    Text(
+                        stringResource(R.string.mobile_createCourse_competency_heading, index + 1),
+                        fontWeight = FontWeight.SemiBold,
+                        color = textPrimary(),
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                if (canRemove) {
+                    IconButton(onClick = onRemove) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.mobile_createCourse_competency_remove),
+                            tint = LexturesColors.Error,
+                        )
+                    }
+                }
+            }
+
+            if (competency.expanded) {
+                OutlinedTextField(
+                    value = competency.title,
+                    onValueChange = { onUpdate(competency.copy(title = it)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    placeholder = { Text(stringResource(R.string.mobile_createCourse_competency_titlePlaceholder)) },
+                )
+                OutlinedTextField(
+                    value = competency.description,
+                    onValueChange = { onUpdate(competency.copy(description = it)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                    placeholder = { Text(stringResource(R.string.mobile_createCourse_competency_descriptionPlaceholder)) },
+                )
+
+                competency.subOutcomes.forEachIndexed { subIndex, sub ->
+                    SubOutcomeEditor(
+                        index = subIndex,
+                        subOutcome = sub,
+                        canRemove = competency.subOutcomes.size > 1,
+                        onUpdate = { updated ->
+                            onUpdate(
+                                competency.copy(
+                                    subOutcomes = competency.subOutcomes.toMutableList().also { it[subIndex] = updated },
+                                ),
+                            )
+                        },
+                        onRemove = {
+                            onUpdate(
+                                competency.copy(
+                                    subOutcomes = competency.subOutcomes.toMutableList().also { it.removeAt(subIndex) },
+                                ),
+                            )
+                        },
+                    )
+                }
+
+                TextButton(
+                    onClick = {
+                        onUpdate(
+                            competency.copy(
+                                subOutcomes = competency.subOutcomes + CourseCreateLogic.SubOutcomeDraft.empty(),
+                            ),
+                        )
+                    },
+                ) {
+                    Text(stringResource(R.string.mobile_createCourse_competency_addSubOutcome))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubOutcomeEditor(
+    index: Int,
+    subOutcome: CourseCreateLogic.SubOutcomeDraft,
+    canRemove: Boolean,
+    onUpdate: (CourseCreateLogic.SubOutcomeDraft) -> Unit,
+    onRemove: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        color = cardBackground(),
+        border = BorderStroke(1.dp, textSecondary().copy(alpha = 0.25f)),
+    ) {
+        Column(
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.mobile_createCourse_competency_subOutcomeHeading, index + 1),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                    color = textPrimary(),
+                )
+                Spacer(Modifier.weight(1f))
+                if (canRemove) {
+                    IconButton(onClick = onRemove, modifier = Modifier.size(36.dp)) {
+                        Icon(Icons.Default.Remove, contentDescription = null, tint = LexturesColors.Error)
+                    }
+                }
+            }
+            OutlinedTextField(
+                value = subOutcome.title,
+                onValueChange = { onUpdate(subOutcome.copy(title = it)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text(stringResource(R.string.mobile_createCourse_competency_subOutcomeTitlePlaceholder)) },
+            )
+            OutlinedTextField(
+                value = subOutcome.description,
+                onValueChange = { onUpdate(subOutcome.copy(description = it)) },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+                placeholder = { Text(stringResource(R.string.mobile_createCourse_competency_subOutcomeDescriptionPlaceholder)) },
+            )
+            OutlinedTextField(
+                value = subOutcome.assessmentTitle,
+                onValueChange = { onUpdate(subOutcome.copy(assessmentTitle = it)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text(stringResource(R.string.mobile_createCourse_competency_assessmentTitlePlaceholder)) },
+            )
+            Text(
+                stringResource(R.string.mobile_createCourse_competency_assessmentKind),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+                color = textPrimary(),
+            )
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = subOutcome.assessmentKind == CourseCreateLogic.AssessmentKind.Quiz,
+                    onClick = { onUpdate(subOutcome.copy(assessmentKind = CourseCreateLogic.AssessmentKind.Quiz)) },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                ) { Text(stringResource(R.string.mobile_createCourse_competency_assessment_quiz)) }
+                SegmentedButton(
+                    selected = subOutcome.assessmentKind == CourseCreateLogic.AssessmentKind.Assignment,
+                    onClick = { onUpdate(subOutcome.copy(assessmentKind = CourseCreateLogic.AssessmentKind.Assignment)) },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                ) { Text(stringResource(R.string.mobile_createCourse_competency_assessment_assignment)) }
+            }
+        }
     }
 }
 

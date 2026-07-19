@@ -54,4 +54,36 @@ extension LMSAPI {
         )
         return try decode(OrgTermsResponse.self, from: data).terms ?? []
     }
+
+    static func createModuleAssignment(
+        courseCode: String,
+        moduleId: String,
+        title: String,
+        accessToken: String
+    ) async throws -> CourseStructureItem {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/structure/modules/\(encodePath(moduleId))/assignments",
+            method: "POST",
+            body: CreateModuleItemRequest(title: title),
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(CourseStructureItem.self, from: data)
+    }
+
+    static func createModuleQuiz(
+        courseCode: String,
+        moduleId: String,
+        title: String,
+        accessToken: String
+    ) async throws -> CourseStructureItem {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/structure/modules/\(encodePath(moduleId))/quizzes",
+            method: "POST",
+            body: CreateModuleItemRequest(title: title),
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(CourseStructureItem.self, from: data)
+    }
 }

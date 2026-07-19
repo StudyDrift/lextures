@@ -148,6 +148,8 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_motion_navigation", w.FFMotionNavigation)
 	addBool("ff_motion_reveal", w.FFMotionReveal)
 	addBool("ff_motion_lists", w.FFMotionLists)
+	addBool("ff_mobile_create_course", w.FFMobileCreateCourse)
+	addBool("ff_mobile_course_create_v2", w.FFMobileCourseCreateV2)
 	addBool("ff_parent_portal", w.FFParentPortal)
 	addBool("ff_parent_portal_v2", w.FFParentPortalV2)
 	addBool("ff_report_cards", w.FFReportCards)

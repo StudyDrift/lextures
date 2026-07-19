@@ -12,13 +12,25 @@
 | **Section** | Mobile parity |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL |
+| **Status (today)** | **DONE** |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile team |
 | **Depends on** | — (course APIs shipped) |
 | **Unblocks** | MOB.2 (Canvas import is a create entry point) |
 
+
 ---
+
+## Implementation notes (2026-07-18)
+
+- **Flag**: `ffMobileCourseCreateV2` (DB-backed, default OFF) stages competency authoring, Canvas create entry, draft resume, and telemetry. Base entry still gated by `ffMobileCreateCourse` *or* v2.
+- **Also wired**: `ffMobileCreateCourse` to platform settings (was client-decode-only) so the New course entry can be enabled from Settings → Global platform.
+- **Logic**: `CourseCreateLogic` on iOS/Android — source chooser, competency/sub-outcome drafts, `validateCompetencies` parity with web, draft store, observability counters.
+- **API**: `createModuleAssignment` / `createModuleQuiz`; Android `createCourseOutcomeSubOutcome`; `PatchCourseOutcomeBody.moduleStructureItemId`.
+- **UI**: `CourseCreateView` / `CourseCreateScreen` — source step, competency editor (v2), Canvas coming-soon handoff to MOB.2; traditional path unchanged.
+- **i18n**: `mobile.createCourse.*` extended; synced via `scripts/sync-mobile-locales.py`.
+- **Tests**: unit coverage for permission/v2 gate, competency validation, template/update parity (XCUITest/Espresso not present in repo).
+
 
 ## 1. Problem Statement
 

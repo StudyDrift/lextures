@@ -7375,6 +7375,28 @@
       "reviewed": true
     },
     {
+      "id": "MOB.1",
+      "path": "docs/completed/mobile/MOB.1-course-creation-wizard.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story (iOS/Android unit-tested); web Playwright suite is not the coverage surface. Platform flags ffMobileCreateCourse / ffMobileCourseCreateV2 are in the E2E.2 registry.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": false,
+        "enabledJourney": false,
+        "authorization": false,
+        "dependency": false,
+        "rollback": false,
+        "notes": "Flags are Settings → Global platform toggles (E2E.2 matrix). Mobile create journeys covered by native unit tests, not Playwright."
+      }
+    },
+    {
       "id": "T01",
       "path": "docs/completed/transcripts/T01-official-transcript-generation.md",
       "markets": [

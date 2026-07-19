@@ -138,6 +138,8 @@ function emptyForm(): PlatformSettingsPayload {
     ffMotionNavigation: true,
     ffMotionReveal: true,
     ffMotionLists: true,
+    ffMobileCreateCourse: false,
+    ffMobileCourseCreateV2: false,
     ffUiMode: false,
     ffReadAloud: false,
     ffAltTextEnforcement: false,

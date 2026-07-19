@@ -21,7 +21,7 @@ class CourseCreateLogicTest {
         assertFalse(
             CourseCreateLogic.shouldShowNewCourseAction(
                 permissions = perms,
-                features = MobilePlatformFeatures(ffMobileCreateCourse = false),
+                features = MobilePlatformFeatures(ffMobileCreateCourse = false, ffMobileCourseCreateV2 = false),
                 isOnline = true,
             ),
         )
@@ -44,6 +44,76 @@ class CourseCreateLogicTest {
                 permissions = emptyList(),
                 features = MobilePlatformFeatures(ffMobileCreateCourse = true),
                 isOnline = true,
+            ),
+        )
+        assertTrue(
+            CourseCreateLogic.shouldShowNewCourseAction(
+                permissions = perms,
+                features = MobilePlatformFeatures(ffMobileCreateCourse = false, ffMobileCourseCreateV2 = true),
+                isOnline = true,
+            ),
+        )
+        assertTrue(
+            CourseCreateLogic.courseCreateV2Enabled(
+                MobilePlatformFeatures(ffMobileCourseCreateV2 = true),
+            ),
+        )
+        assertEquals(CourseCreateLogic.WizardStep.Source, CourseCreateLogic.initialWizardStep(true))
+        assertEquals(CourseCreateLogic.WizardStep.Basics, CourseCreateLogic.initialWizardStep(false))
+    }
+
+    @Test
+    fun validateCompetenciesParity() {
+        assertEquals(
+            "mobile.createCourse.error.competency.minOne",
+            CourseCreateLogic.validateCompetencies(emptyList())?.key,
+        )
+        assertEquals(
+            "mobile.createCourse.error.competency.titleRequired",
+            CourseCreateLogic.validateCompetencies(listOf(CourseCreateLogic.CompetencyDraft.empty()))?.key,
+        )
+        assertEquals(
+            "mobile.createCourse.error.competency.subOutcomeMinOne",
+            CourseCreateLogic.validateCompetencies(
+                listOf(CourseCreateLogic.CompetencyDraft(title = "Reading", subOutcomes = emptyList())),
+            )?.key,
+        )
+        assertEquals(
+            "mobile.createCourse.error.competency.subOutcomeTitleRequired",
+            CourseCreateLogic.validateCompetencies(
+                listOf(
+                    CourseCreateLogic.CompetencyDraft(
+                        title = "Reading",
+                        subOutcomes = listOf(
+                            CourseCreateLogic.SubOutcomeDraft(title = "", assessmentTitle = "Quiz 1"),
+                        ),
+                    ),
+                ),
+            )?.key,
+        )
+        assertEquals(
+            "mobile.createCourse.error.competency.assessmentTitleRequired",
+            CourseCreateLogic.validateCompetencies(
+                listOf(
+                    CourseCreateLogic.CompetencyDraft(
+                        title = "Reading",
+                        subOutcomes = listOf(
+                            CourseCreateLogic.SubOutcomeDraft(title = "Main idea", assessmentTitle = ""),
+                        ),
+                    ),
+                ),
+            )?.key,
+        )
+        assertNull(
+            CourseCreateLogic.validateCompetencies(
+                listOf(
+                    CourseCreateLogic.CompetencyDraft(
+                        title = "Reading",
+                        subOutcomes = listOf(
+                            CourseCreateLogic.SubOutcomeDraft(title = "Main idea", assessmentTitle = "Quiz 1"),
+                        ),
+                    ),
+                ),
             ),
         )
     }
