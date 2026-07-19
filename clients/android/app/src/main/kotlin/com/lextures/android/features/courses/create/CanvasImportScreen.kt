@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -486,7 +487,7 @@ fun CanvasImportScreen(
                                                 contentDescription = null,
                                                 tint = if (importMode == mode) LexturesColors.Primary else textSecondary(),
                                             )
-                                            Spacer(Modifier = Modifier.padding(6.dp))
+                                            Spacer(Modifier.width(6.dp))
                                             Text(
                                                 L.text(
                                                     context,
@@ -590,7 +591,7 @@ fun CanvasImportScreen(
                         ) {
                             Text(L.text(context, localePrefs, R.string.mobile_canvasImport_action_back))
                         }
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier.weight(1f))
                         Button(
                             onClick = { startImport() },
                             enabled = !busy &&
