@@ -113,6 +113,12 @@ class MobileDestinationsTest {
         assertTrue(MobilePlatformFeatures.from(on).ffMobileWhiteboardEdit)
         assertFalse(MobilePlatformFeatures.from(off).ffMobileWhiteboardEdit)
         assertFalse(MobilePlatformFeatures.from(null).ffMobileWhiteboardEdit)
+
+        val purchaseOn = PlatformFeatures(ffMobileMarketplacePurchase = true)
+        val purchaseOff = PlatformFeatures(ffMobileMarketplacePurchase = false)
+        assertTrue(MobilePlatformFeatures.from(purchaseOn).ffMobileMarketplacePurchase)
+        assertFalse(MobilePlatformFeatures.from(purchaseOff).ffMobileMarketplacePurchase)
+        assertFalse(MobilePlatformFeatures.from(null).ffMobileMarketplacePurchase)
     }
 
     @Test

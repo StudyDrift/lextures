@@ -627,6 +627,7 @@
 		M760W01C2D3E4F5061728394 /* WhiteboardLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = M760W01D3E4F5061728394A5 /* WhiteboardLogic.swift */; };
 		M760W02C2D3E4F5061728394 /* LMSAPIWhiteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = M760W02D3E4F5061728394A5 /* LMSAPIWhiteboard.swift */; };
 		M760W03C2D3E4F5061728394 /* WhiteboardLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M760W03D3E4F5061728394A5 /* WhiteboardLogicTests.swift */; };
+		M770P01C2D3E4F5061728394 /* MyPurchasesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M770P01D3E4F5061728394A5 /* MyPurchasesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1254,6 +1255,7 @@
 		M760W01D3E4F5061728394A5 /* WhiteboardLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardLogic.swift; sourceTree = "<group>"; };
 		M760W02D3E4F5061728394A5 /* LMSAPIWhiteboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIWhiteboard.swift; sourceTree = "<group>"; };
 		M760W03D3E4F5061728394A5 /* WhiteboardLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardLogicTests.swift; sourceTree = "<group>"; };
+		M770P01D3E4F5061728394A5 /* MyPurchasesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPurchasesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2148,6 +2150,7 @@
 		CABDDB4B529B4EE5A34A5A32 /* Marketplace */ = {
 			isa = PBXGroup;
 			children = (
+				M770P01D3E4F5061728394A5 /* MyPurchasesView.swift */,
 				DCFA0489180C461E9C66A15A /* MarketplaceDetailView.swift */,
 				E5C950A03841458C955FCF7B /* MarketplaceView.swift */,
 			);
@@ -2612,6 +2615,8 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				M770P01C2D3E4F5061728394 /* MyPurchasesView.swift in Sources */,
+
 				M760W02C2D3E4F5061728394 /* LMSAPIWhiteboard.swift in Sources */,
 
 				M760W01C2D3E4F5061728394 /* WhiteboardLogic.swift in Sources */,

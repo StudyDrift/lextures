@@ -69,6 +69,32 @@ struct MarketplaceClaimResult: Codable {
     var courseCode: String
 }
 
+struct MarketplaceCheckoutResult: Codable {
+    var sessionId: String?
+    var checkoutUrl: String?
+    var alreadyOwned: Bool?
+    var courseCode: String?
+    var courseId: String?
+}
+
+struct CoursePurchase: Codable, Identifiable, Hashable {
+    var courseCode: String
+    var courseId: String
+    var title: String
+    var priceCents: Int
+    var currency: String
+    var source: String
+    var acquiredAt: String
+    var receiptUrl: String?
+    var entitlementId: String
+
+    var id: String { entitlementId }
+}
+
+struct CoursePurchasesResponse: Codable {
+    var purchases: [CoursePurchase]?
+}
+
 struct CourseCatalogListing: Codable, Hashable {
     var isPublic: Bool
     var category: String?

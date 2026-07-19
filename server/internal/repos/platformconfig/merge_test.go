@@ -428,3 +428,16 @@ func TestMerge_FFMobileWhiteboardEditDefaultOff(t *testing.T) {
 		t.Fatal("expected FFMobileWhiteboardEdit true when DB set")
 	}
 }
+
+// MOB.7: FFMobileMarketplacePurchase default OFF when unset.
+func TestMerge_FFMobileMarketplacePurchaseDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFMobileMarketplacePurchase {
+		t.Fatal("expected FFMobileMarketplacePurchase false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMobileMarketplacePurchase: &on})
+	if !got.FFMobileMarketplacePurchase {
+		t.Fatal("expected FFMobileMarketplacePurchase true when DB set")
+	}
+}

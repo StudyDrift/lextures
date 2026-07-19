@@ -29,6 +29,7 @@ import com.lextures.android.core.i18n.LocalePreferences
 import com.lextures.android.core.lms.BillingLogic
 import com.lextures.android.core.lms.CheckoutTaxQuote
 import com.lextures.android.core.lms.LmsApi
+import com.lextures.android.core.lms.MarketplaceObservability
 import com.lextures.android.core.lms.PendingCheckoutContext
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
@@ -48,6 +49,8 @@ fun PurchaseFlowSheet(
     priceCents: Int,
     currency: String,
     onDismiss: () -> Unit,
+    marketplaceSlug: String? = null,
+    onAlreadyOwned: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -150,6 +153,33 @@ fun PurchaseFlowSheet(
                                 courseCode = courseCode,
                                 title = title,
                             )
+                            if (!marketplaceSlug.isNullOrBlank()) {
+                                val result = LmsApi.checkoutMarketplaceCourse(marketplaceSlug, token)
+                                if (result.alreadyOwned) {
+                                    shell?.pendingCheckout = null
+                                    onDismiss()
+                                    onAlreadyOwned?.invoke()
+                                    return@launch
+                                }
+                                val url = result.checkoutUrl
+                                if (url.isNullOrBlank()) {
+                                    shell?.pendingCheckout = null
+                                    errorMessage = L.text(
+                                        context,
+                                        localePrefs,
+                                        com.lextures.android.R.string.mobile_billing_checkoutError,
+                                    )
+                                    MarketplaceObservability.record(
+                                        "marketplace_purchase_failed",
+                                        mapOf("reason" to "url"),
+                                    )
+                                    return@launch
+                                }
+                                onDismiss()
+                                BillingCheckout.openCheckoutUrl(context, url)
+                                return@launch
+                            }
+
                             val result = LmsApi.startCheckout(
                                 courseId = courseId,
                                 successUrl = BillingLogic.checkoutSuccessUrl(courseId),
@@ -166,6 +196,12 @@ fun PurchaseFlowSheet(
                                 localePrefs,
                                 com.lextures.android.R.string.mobile_billing_checkoutError,
                             )
+                            if (!marketplaceSlug.isNullOrBlank()) {
+                                MarketplaceObservability.record(
+                                    "marketplace_purchase_failed",
+                                    mapOf("reason" to "start"),
+                                )
+                            }
                         } finally {
                             purchasing = false
                         }

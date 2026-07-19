@@ -33,7 +33,7 @@ enum class MarketplaceSortMode(val apiValue: String) {
     Price("price"),
 }
 
-/** Marketplace helpers (plan MKT6). Paid purchases use Path B (web hand-off). */
+/** Marketplace helpers (MKT6 / MOB.7). Paid path: Stripe checkout handoff when flagged. */
 object MarketplaceLogic {
     const val MAX_PRICE_MAJOR = 99_999.99
     const val MIN_PAID_CENTS = 50
@@ -41,6 +41,10 @@ object MarketplaceLogic {
     val currencies = listOf(
         "usd", "eur", "gbp", "cad", "aud", "jpy", "chf", "sek", "nok", "dkk", "nzd", "sgd", "hkd", "mxn",
     )
+
+    /** In-app claim/buy + Purchased courses library (MOB.7). Default off via platform flag. */
+    fun purchaseEnabled(features: MobilePlatformFeatures): Boolean =
+        features.ffCourseMarketplace && features.ffMobileMarketplacePurchase
 
     fun isPaid(priceCents: Int): Boolean = priceCents > 0
 
@@ -131,9 +135,44 @@ object MarketplaceLogic {
         marketplaceListed = marketplaceListed,
     )
 
-    fun ctaLabelKey(owned: Boolean, priceCents: Int): String = when {
+    fun ctaLabelKey(owned: Boolean, priceCents: Int, purchaseEnabled: Boolean = false): String = when {
         owned -> "goToCourse"
         isFree(priceCents) -> "enrollFree"
+        purchaseEnabled -> "buy"
         else -> "buyOnWeb"
+    }
+
+    fun purchaseSourceLabelKey(source: String): String = when (source) {
+        "free" -> "mobile.marketplace.purchases.source.free"
+        "stripe" -> "mobile.marketplace.purchases.source.stripe"
+        "comp" -> "mobile.marketplace.purchases.source.comp"
+        else -> "mobile.marketplace.purchases.source.other"
+    }
+
+    fun formatAcquiredAt(iso: String): String {
+        val trimmed = iso.trim()
+        return if (trimmed.length >= 10) trimmed.take(10) else trimmed
+    }
+}
+
+object MarketplaceObservability {
+    private val counters = java.util.concurrent.ConcurrentHashMap<String, Int>()
+
+    fun record(event: String, attributes: Map<String, String> = emptyMap()) {
+        val key = if (attributes.isEmpty()) {
+            event
+        } else {
+            event + "|" + attributes.toSortedMap().entries.joinToString(",") { "${it.key}=${it.value}" }
+        }
+        counters.merge(key, 1, Int::plus)
+    }
+
+    fun count(event: String): Int =
+        counters.entries
+            .filter { it.key == event || it.key.startsWith("$event|") }
+            .sumOf { it.value }
+
+    fun resetForTests() {
+        counters.clear()
     }
 }

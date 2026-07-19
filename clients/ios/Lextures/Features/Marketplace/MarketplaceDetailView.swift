@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Marketplace course detail with free claim and paid web hand-off (MKT6 Path B).
+/// Marketplace course detail with free claim and paid Stripe checkout handoff (MKT6 / MOB.7).
 struct MarketplaceDetailView: View {
     @Environment(AuthSession.self) private var session
     @Environment(AppShellModel.self) private var shell
@@ -14,6 +14,11 @@ struct MarketplaceDetailView: View {
     @State private var errorMessage: String?
     @State private var claiming = false
     @State private var claimError: String?
+    @State private var showPurchase = false
+
+    private var purchaseEnabled: Bool {
+        MarketplaceLogic.purchaseEnabled(shell.platformFeatures)
+    }
 
     var body: some View {
         ZStack {
@@ -41,7 +46,27 @@ struct MarketplaceDetailView: View {
         }
         .navigationTitle(detail?.course.title ?? L.text("mobile.marketplace.landingTitle"))
         .navigationBarTitleDisplayMode(.inline)
-        .task { await load() }
+        .task {
+            MarketplaceObservability.record("marketplace_viewed")
+            await load()
+        }
+        .sheet(isPresented: $showPurchase) {
+            if let detail {
+                PurchaseFlowSheet(
+                    courseId: detail.course.id,
+                    courseCode: detail.course.courseCode,
+                    title: detail.course.title,
+                    priceCents: detail.priceCents,
+                    currency: detail.priceCurrency,
+                    marketplaceSlug: slug,
+                    onAlreadyOwned: {
+                        Task {
+                            await reloadOwnedAndOpen(detail.course.courseCode)
+                        }
+                    }
+                )
+            }
+        }
     }
 
     @ViewBuilder
@@ -145,13 +170,19 @@ struct MarketplaceDetailView: View {
                 HStack {
                     Text(priceLabel)
                         .font(.title3.weight(.bold))
+                        .accessibilityLabel(L.text("mobile.marketplace.priceLabel"))
+                        .accessibilityValue(priceLabel)
                     Spacer()
                     actionButton(detail)
                 }
                 if MarketplaceLogic.isPaid(priceCents: detail.priceCents) && !detail.course.owned {
-                    Text(L.text("mobile.marketplace.paidWebHint"))
-                        .font(.caption)
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                    Text(
+                        purchaseEnabled
+                            ? L.text("mobile.marketplace.paidCheckoutHint")
+                            : L.text("mobile.marketplace.paidWebHint")
+                    )
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                 }
             }
         }
@@ -166,11 +197,20 @@ struct MarketplaceDetailView: View {
             .buttonStyle(.borderedProminent)
             .tint(LexturesTheme.primary)
         } else if MarketplaceLogic.isPaid(priceCents: detail.priceCents) {
-            Button(L.text("mobile.marketplace.buyOnWeb")) {
-                openURL(AppConfiguration.webURL(path: MarketplaceLogic.marketplaceWebPath(slug: slug)))
+            if purchaseEnabled {
+                Button(L.text("mobile.marketplace.buy")) {
+                    showPurchase = true
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(LexturesTheme.primary)
+                .disabled(session.accessToken == nil)
+            } else {
+                Button(L.text("mobile.marketplace.buyOnWeb")) {
+                    openURL(AppConfiguration.webURL(path: MarketplaceLogic.marketplaceWebPath(slug: slug)))
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(LexturesTheme.primary)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(LexturesTheme.primary)
         } else {
             Button {
                 Task { await claim(detail) }
@@ -212,9 +252,24 @@ struct MarketplaceDetailView: View {
             let result = try await LMSAPI.claimMarketplaceCourse(slug: slug, accessToken: token)
             let code = result.courseCode.isEmpty ? detail.course.courseCode : result.courseCode
             await openOwnedCourse(code)
+        } catch let error as APIError {
+            if case let .httpStatus(status, message: _) = error, status == 402 {
+                claimError = L.text("mobile.marketplace.claimPaidError")
+            } else {
+                claimError = L.text("mobile.marketplace.claimError")
+            }
         } catch {
             claimError = L.text("mobile.marketplace.claimError")
         }
+    }
+
+    private func reloadOwnedAndOpen(_ courseCode: String) async {
+        claimError = nil
+        if var current = detail {
+            current.course.owned = true
+            detail = current
+        }
+        await openOwnedCourse(courseCode)
     }
 
     private func openOwnedCourse(_ courseCode: String) async {

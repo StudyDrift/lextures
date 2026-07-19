@@ -82,7 +82,50 @@ extension LMSAPI {
         guard (200 ... 299).contains(response.statusCode) else {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
-        return try decode(MarketplaceClaimResult.self, from: data)
+        let result = try decode(MarketplaceClaimResult.self, from: data)
+        MarketplaceObservability.record(
+            "marketplace_claim",
+            attributes: ["already_owned": result.alreadyOwned == true ? "1" : "0"]
+        )
+        return result
+    }
+
+    /// Paid marketplace checkout (MOB.7) — Stripe session URL or already-owned.
+    static func checkoutMarketplaceCourse(
+        slug: String,
+        accessToken: String
+    ) async throws -> MarketplaceCheckoutResult {
+        let (data, response) = try await client.requestRaw(
+            path: "/api/v1/marketplace/courses/\(encodePath(slug))/checkout",
+            method: "POST",
+            bodyData: Data("{}".utf8),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        let result = try decode(MarketplaceCheckoutResult.self, from: data)
+        if result.alreadyOwned == true {
+            MarketplaceObservability.record("marketplace_checkout_started", attributes: ["already_owned": "1"])
+        } else {
+            MarketplaceObservability.record("marketplace_checkout_started")
+        }
+        return result
+    }
+
+    static func fetchMyPurchases(accessToken: String) async throws -> [CoursePurchase] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/me/purchases",
+            authorized: true,
+            accessToken: accessToken
+        )
+        if response.statusCode == 404 { return [] }
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        MarketplaceObservability.record("purchases_list_viewed")
+        return try decode(CoursePurchasesResponse.self, from: data).purchases ?? []
     }
 
     static func fetchCourseCatalogListing(

@@ -793,6 +793,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'core',
   },
   {
+    key: 'ffMobileMarketplacePurchase',
+    label: 'Mobile marketplace purchases',
+    description:
+      'Claim free marketplace courses, buy paid courses via Stripe checkout handoff, and browse Purchased courses on iOS and Android (MOB.7).',
+    pack: 'marketplace',
+  },
+  {
     key: 'ffReportCards',
     label: 'Report cards',
     description: 'Standards-based report card generation and distribution for K-12 terms.',

@@ -2,6 +2,11 @@ import XCTest
 @testable import Lextures
 
 final class MarketplaceLogicTests: XCTestCase {
+    override func setUp() {
+        super.setUp()
+        MarketplaceObservability.resetForTests()
+    }
+
     func testIsPaidAndFree() {
         XCTAssertTrue(MarketplaceLogic.isPaid(priceCents: 1999))
         XCTAssertFalse(MarketplaceLogic.isPaid(priceCents: 0))
@@ -75,7 +80,39 @@ final class MarketplaceLogicTests: XCTestCase {
         XCTAssertEqual(MarketplaceLogic.ctaLabelKey(owned: true, priceCents: 0), "goToCourse")
         XCTAssertEqual(MarketplaceLogic.ctaLabelKey(owned: false, priceCents: 0), "enrollFree")
         XCTAssertEqual(MarketplaceLogic.ctaLabelKey(owned: false, priceCents: 500), "buyOnWeb")
+        XCTAssertEqual(
+            MarketplaceLogic.ctaLabelKey(owned: false, priceCents: 500, purchaseEnabled: true),
+            "buy"
+        )
         XCTAssertEqual(MarketplaceLogic.marketplaceWebPath(slug: "spanish-a1"), "/marketplace/spanish-a1")
+    }
+
+    func testPurchaseEnabledRequiresBothFlags() {
+        var features = MobilePlatformFeatures()
+        XCTAssertFalse(MarketplaceLogic.purchaseEnabled(features))
+        features.ffCourseMarketplace = true
+        XCTAssertFalse(MarketplaceLogic.purchaseEnabled(features))
+        features.ffMobileMarketplacePurchase = true
+        XCTAssertTrue(MarketplaceLogic.purchaseEnabled(features))
+    }
+
+    func testPurchaseSourceAndAcquiredFormatting() {
+        XCTAssertEqual(
+            MarketplaceLogic.purchaseSourceLabelKey("free"),
+            "mobile.marketplace.purchases.source.free"
+        )
+        XCTAssertEqual(
+            MarketplaceLogic.purchaseSourceLabelKey("stripe"),
+            "mobile.marketplace.purchases.source.stripe"
+        )
+        XCTAssertEqual(MarketplaceLogic.formatAcquiredAt("2026-07-19T12:00:00Z"), "2026-07-19")
+    }
+
+    func testObservabilityCounters() {
+        MarketplaceObservability.record("marketplace_viewed")
+        MarketplaceObservability.record("marketplace_claim", attributes: ["already_owned": "0"])
+        XCTAssertEqual(MarketplaceObservability.count(for: "marketplace_viewed"), 1)
+        XCTAssertEqual(MarketplaceObservability.count(for: "marketplace_claim"), 1)
     }
 
     func testMoreDestinationsGating() {

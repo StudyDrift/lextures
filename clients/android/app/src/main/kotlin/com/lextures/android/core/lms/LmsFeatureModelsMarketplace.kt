@@ -78,6 +78,33 @@ data class MarketplaceClaimResult(
 )
 
 @Serializable
+data class MarketplaceCheckoutResult(
+    val sessionId: String? = null,
+    val checkoutUrl: String? = null,
+    val alreadyOwned: Boolean = false,
+    val courseCode: String? = null,
+    val courseId: String? = null,
+)
+
+@Serializable
+data class CoursePurchase(
+    val courseCode: String,
+    val courseId: String,
+    val title: String,
+    val priceCents: Int = 0,
+    val currency: String = "usd",
+    val source: String = "stripe",
+    val acquiredAt: String = "",
+    val receiptUrl: String? = null,
+    val entitlementId: String = "",
+)
+
+@Serializable
+data class CoursePurchasesResponse(
+    val purchases: List<CoursePurchase> = emptyList(),
+)
+
+@Serializable
 data class CourseCatalogListing(
     val isPublic: Boolean = false,
     val category: String? = null,

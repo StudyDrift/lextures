@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Dns
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Notifications
@@ -151,6 +152,7 @@ fun ProfileTab(
     var openCatalogCourseSlug by remember { mutableStateOf<String?>(null) }
     var openMarketplaceSlug by remember { mutableStateOf<String?>(null) }
     var showBilling by remember { mutableStateOf(false) }
+    var showPurchases by remember { mutableStateOf(false) }
     var openCredential by remember { mutableStateOf<com.lextures.android.core.lms.IssuedCredentialSummary?>(null) }
     var openPortfolioId by remember { mutableStateOf<String?>(null) }
     var openPortfolioTitle by remember { mutableStateOf<String?>(null) }
@@ -277,6 +279,21 @@ fun ProfileTab(
                 session = session,
                 shell = shell,
                 localePrefs = localePreferences,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        return
+    }
+
+    if (showPurchases) {
+        Column(modifier = modifier.fillMaxSize()) {
+            TextButton(onClick = { showPurchases = false }) {
+                Text(L.text(context, localePreferences, R.string.mobile_ia_close))
+            }
+            com.lextures.android.features.marketplace.MyPurchasesScreen(
+                session = session,
+                shell = shell,
+                onBack = { showPurchases = false },
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -1434,6 +1451,27 @@ fun ProfileTab(
             Text(text = "Account", style = LexturesType.display(17), color = textPrimary())
             InfoRow(Icons.Default.Person, "Display name", displayName)
             InfoRow(Icons.Default.Email, "Email", email.ifEmpty { "—" })
+            if (com.lextures.android.core.lms.MarketplaceLogic.purchaseEnabled(shell.platformFeatures)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showPurchases = true }
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = accentColor())
+                        Text(
+                            L.text(context, localePreferences, R.string.mobile_marketplace_purchases_title),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = textPrimary(),
+                        )
+                    }
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = textSecondary())
+                }
+            }
             if (com.lextures.android.core.lms.BillingLogic.billingEnabled(shell.platformFeatures)) {
                 Row(
                     modifier = Modifier

@@ -12,6 +12,7 @@ struct ProfileView: View {
     @State private var confirmingClearSearchHistory = false
     @State private var navigatedMoreDestination: MoreDestination?
     @State private var billingNav: BillingRoute?
+    @State private var purchasesNav: MyPurchasesRoute?
     @State private var notificationPrefsNav = false
     @State private var editProfileNav = false
     @State private var learnerProfileNav = false
@@ -68,7 +69,7 @@ struct ProfileView: View {
                         ProfileUIModeCard()
                         accessibilityCard
                         ProfileSecurityCard()
-                        ProfileAccountCard(billingNav: $billingNav)
+                        ProfileAccountCard(billingNav: $billingNav, purchasesNav: $purchasesNav)
                         ProfileNotificationsCard()
                         ProfileLegalCard()
                         ProfileAboutCard()
@@ -148,6 +149,9 @@ struct ProfileView: View {
             }
             .navigationDestination(item: $billingNav) { _ in
                 BillingView()
+            }
+            .navigationDestination(item: $purchasesNav) { _ in
+                MyPurchasesView()
             }
             .navigationDestination(for: MoreDestination.self) { destination in
                 ProfileMoreDestinationScreen(destination: destination)
