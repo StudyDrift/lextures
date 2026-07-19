@@ -418,6 +418,8 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileCourseCreateV2 = false
     var ffMobileCanvasImport = false
     var ffMobileAdminConsole = false
+    var ffMobileEnrollmentAdd = false
+    var ffEnrollmentStateMachine = false
     var adminConsoleEnabled = false
     var adminAuditLogEnabled = true
     var ffConsortiumSharing = false
@@ -496,6 +498,8 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileCourseCreateV2: features?.ffMobileCourseCreateV2 == true,
             ffMobileCanvasImport: features?.ffMobileCanvasImport == true,
             ffMobileAdminConsole: features?.ffMobileAdminConsole == true,
+            ffMobileEnrollmentAdd: features?.ffMobileEnrollmentAdd == true,
+            ffEnrollmentStateMachine: features?.ffEnrollmentStateMachine == true,
             adminConsoleEnabled: features?.adminConsoleEnabled == true,
             adminAuditLogEnabled: features?.adminAuditLogEnabled != false,
             ffConsortiumSharing: features?.ffConsortiumSharing == true,

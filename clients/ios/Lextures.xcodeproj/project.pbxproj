@@ -80,6 +80,7 @@
 		D0DF9FEA1F5E40B3A9EBBD9A /* CourseImportExportLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B6F3D6195DD4E1A85F70714 /* CourseImportExportLogic.swift */; };
 		90218E2E31144DE59F23AAD2 /* CourseOutcomesLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8B5D64144F4862B01A3829 /* CourseOutcomesLogic.swift */; };
 		7FEBFE2F26DF4424B36EAE33 /* CoursePeopleLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31222F3A065C4FA9BD536D22 /* CoursePeopleLogic.swift */; };
+		C85D4DCE905247439C436523 /* CoursePeopleObservability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 736818AC795B473FA5D4A8E8 /* CoursePeopleObservability.swift */; };
 		AA1F1CECAC9046689400E44F /* CoursePlagiarismLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF1F186C3CE4041AFA92C23 /* CoursePlagiarismLogic.swift */; };
 		4DAE17B04E7C4402B8B8A277 /* CourseReviewLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72186FA953E24E81923CEF5E /* CourseReviewLogic.swift */; };
 		1258B0D4DAAE4FEF8DB7C581 /* CourseSectionsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81821A7CDD5C490885743414 /* CourseSectionsLogic.swift */; };
@@ -693,6 +694,7 @@
 		1B6F3D6195DD4E1A85F70714 /* CourseImportExportLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseImportExportLogic.swift; sourceTree = "<group>"; };
 		5B8B5D64144F4862B01A3829 /* CourseOutcomesLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseOutcomesLogic.swift; sourceTree = "<group>"; };
 		31222F3A065C4FA9BD536D22 /* CoursePeopleLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleLogic.swift; sourceTree = "<group>"; };
+		736818AC795B473FA5D4A8E8 /* CoursePeopleObservability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleObservability.swift; sourceTree = "<group>"; };
 		1DF1F186C3CE4041AFA92C23 /* CoursePlagiarismLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePlagiarismLogic.swift; sourceTree = "<group>"; };
 		72186FA953E24E81923CEF5E /* CourseReviewLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseReviewLogic.swift; sourceTree = "<group>"; };
 		81821A7CDD5C490885743414 /* CourseSectionsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSectionsLogic.swift; sourceTree = "<group>"; };
@@ -1541,6 +1543,7 @@
 				1B6F3D6195DD4E1A85F70714 /* CourseImportExportLogic.swift */,
 				5B8B5D64144F4862B01A3829 /* CourseOutcomesLogic.swift */,
 				31222F3A065C4FA9BD536D22 /* CoursePeopleLogic.swift */,
+				736818AC795B473FA5D4A8E8 /* CoursePeopleObservability.swift */,
 				1DF1F186C3CE4041AFA92C23 /* CoursePlagiarismLogic.swift */,
 				72186FA953E24E81923CEF5E /* CourseReviewLogic.swift */,
 				81821A7CDD5C490885743414 /* CourseSectionsLogic.swift */,
@@ -2639,6 +2642,7 @@
 				D0DF9FEA1F5E40B3A9EBBD9A /* CourseImportExportLogic.swift in Sources */,
 				90218E2E31144DE59F23AAD2 /* CourseOutcomesLogic.swift in Sources */,
 				7FEBFE2F26DF4424B36EAE33 /* CoursePeopleLogic.swift in Sources */,
+				C85D4DCE905247439C436523 /* CoursePeopleObservability.swift in Sources */,
 				AA1F1CECAC9046689400E44F /* CoursePlagiarismLogic.swift in Sources */,
 				4DAE17B04E7C4402B8B8A277 /* CourseReviewLogic.swift in Sources */,
 				1258B0D4DAAE4FEF8DB7C581 /* CourseSectionsLogic.swift in Sources */,

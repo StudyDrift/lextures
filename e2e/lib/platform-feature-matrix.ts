@@ -866,6 +866,18 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     gatedSurface: null,
   },
   {
+    key: 'ffMobileEnrollmentAdd',
+    label: 'Mobile enrollment add',
+    category: 'platform',
+    ownershipSource: 'database',
+    sourceKey: null,
+    runtimeKey: 'ffMobileEnrollmentAdd',
+    settingsOnlyRationale: null,
+    secretSensitive: false,
+    uiSample: false,
+    gatedSurface: null,
+  },
+  {
     key: 'ffMotionNavigation',
     label: 'Navigation transitions',
     category: 'accessibility',

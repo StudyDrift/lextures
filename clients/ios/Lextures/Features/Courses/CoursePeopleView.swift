@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Staff course roster: search, filters, message, and remove (M11.4).
+/// Staff course roster: search, filters, add, message, state, and remove (M11.4 / MOB.4).
 struct CoursePeopleSection: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
     let course: CourseSummary
@@ -19,6 +20,7 @@ struct CoursePeopleSection: View {
     @State private var sectionFilter = ""
     @State private var selectedEnrollment: CourseEnrollment?
     @State private var removeTarget: CourseEnrollment?
+    @State private var showAddSheet = false
     @State private var composeMode = false
     @State private var messageSubject = ""
     @State private var messageBody = ""
@@ -26,6 +28,15 @@ struct CoursePeopleSection: View {
 
     private var canRemove: Bool {
         CoursePeopleLogic.canUpdateEnrollments(courseCode: course.courseCode, permissions: permissions)
+    }
+
+    private var canAdd: Bool {
+        CoursePeopleLogic.canAddEnrollments(
+            courseCode: course.courseCode,
+            permissions: permissions,
+            features: shell.platformFeatures,
+            isOnline: NetworkMonitor.shared.isOnline
+        )
     }
 
     private var filteredEnrollments: [CourseEnrollment] {
@@ -65,6 +76,24 @@ struct CoursePeopleSection: View {
             if loading && enrollments.isEmpty {
                 LMSSkeletonList(count: 4)
             } else {
+                if canAdd {
+                    Button {
+                        showAddSheet = true
+                        successMessage = nil
+                        errorMessage = nil
+                    } label: {
+                        Label(L.text("mobile.people.add.button"), systemImage: "person.badge.plus")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 11)
+                    }
+                    .background(LexturesTheme.accent(for: colorScheme))
+                    .foregroundStyle(colorScheme == .dark ? LexturesTheme.primaryDeep : .white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(L.text("mobile.people.add.button"))
+                }
+
                 searchField
                 roleFilterChips
                 if course.isSectionsEnabled && !sections.isEmpty {
@@ -78,7 +107,9 @@ struct CoursePeopleSection: View {
                             ? L.text("mobile.people.empty")
                             : L.text("mobile.people.noResults"),
                         message: enrollments.isEmpty
-                            ? L.text("mobile.people.emptyHint")
+                            ? (canAdd
+                                ? L.text("mobile.people.emptyHintAdd")
+                                : L.text("mobile.people.emptyHint"))
                             : L.text("mobile.people.noResultsHint")
                     )
                 } else {
@@ -91,6 +122,13 @@ struct CoursePeopleSection: View {
         .task { await load() }
         .sheet(item: $selectedEnrollment) { enrollment in
             enrollmentSheet(enrollment)
+        }
+        .sheet(isPresented: $showAddSheet) {
+            CoursePeopleAddSheet(courseCode: course.courseCode) { summary in
+                showAddSheet = false
+                successMessage = addSuccessMessage(summary)
+                Task { await load() }
+            }
         }
         .confirmationDialog(
             L.text("mobile.people.remove.confirmTitle"),
@@ -207,6 +245,8 @@ struct CoursePeopleSection: View {
                             .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                         if enrollment.invitationPending == true {
                             invitedBadge
+                        } else if shell.platformFeatures.ffEnrollmentStateMachine {
+                            stateBadge(enrollment.state)
                         }
                     }
                     Text(CoursePeopleLogic.roleLabel(enrollment))
@@ -241,6 +281,22 @@ struct CoursePeopleSection: View {
             .padding(.vertical, 2)
             .background(LexturesTheme.amber.opacity(0.14))
             .clipShape(Capsule())
+            .accessibilityLabel(L.text("mobile.people.invited"))
+    }
+
+    private func stateBadge(_ state: String?) -> some View {
+        let inactive = CoursePeopleLogic.isInactiveState(state)
+        return Text(L.dynamicText(CoursePeopleLogic.stateLabelKey(state)))
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(inactive ? LexturesTheme.textSecondary(for: colorScheme) : LexturesTheme.brandTeal)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                (inactive ? LexturesTheme.textSecondary(for: colorScheme) : LexturesTheme.brandTeal)
+                    .opacity(0.14)
+            )
+            .clipShape(Capsule())
+            .accessibilityLabel(L.dynamicText(CoursePeopleLogic.stateLabelKey(state)))
     }
 
     private func enrollmentSheet(_ enrollment: CourseEnrollment) -> some View {
@@ -279,7 +335,17 @@ struct CoursePeopleSection: View {
                                 LMSDates.relative(lastAccess)
                             )
                         }
-                        if let state = enrollment.state, !state.isEmpty {
+                        if enrollment.invitationPending == true {
+                            detailRow(
+                                L.text("mobile.people.detail.state"),
+                                L.text("mobile.people.invited")
+                            )
+                        } else if shell.platformFeatures.ffEnrollmentStateMachine {
+                            detailRow(
+                                L.text("mobile.people.detail.state"),
+                                L.dynamicText(CoursePeopleLogic.stateLabelKey(enrollment.state))
+                            )
+                        } else if let state = enrollment.state, !state.isEmpty {
                             detailRow(L.text("mobile.people.detail.state"), state.capitalized)
                         }
 
@@ -318,7 +384,14 @@ struct CoursePeopleSection: View {
     }
 
     private func actionButtons(_ enrollment: CourseEnrollment) -> some View {
-        VStack(spacing: 10) {
+        let canChangeState = CoursePeopleLogic.canChangeEnrollmentState(
+            enrollment: enrollment,
+            courseCode: course.courseCode,
+            permissions: permissions,
+            features: shell.platformFeatures,
+            isOnline: NetworkMonitor.shared.isOnline
+        )
+        return VStack(spacing: 10) {
             Button {
                 composeMode = true
             } label: {
@@ -338,6 +411,31 @@ struct CoursePeopleSection: View {
                 Text(L.text("mobile.people.message.offline"))
                     .font(.caption)
                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            }
+
+            if canChangeState {
+                Button {
+                    Task { await toggleEnrollmentState(enrollment) }
+                } label: {
+                    if actionBusy {
+                        ProgressView().controlSize(.small).frame(maxWidth: .infinity)
+                    } else {
+                        Text(
+                            CoursePeopleLogic.isInactiveState(enrollment.state)
+                                ? L.text("mobile.people.state.reactivate")
+                                : L.text("mobile.people.state.deactivate")
+                        )
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+                .padding(.vertical, 11)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(LexturesTheme.fieldBorder(for: colorScheme), lineWidth: 1)
+                )
+                .buttonStyle(.plain)
+                .disabled(actionBusy || !NetworkMonitor.shared.isOnline)
             }
 
             if canRemove {
@@ -475,9 +573,167 @@ struct CoursePeopleSection: View {
             if selectedEnrollment?.id == enrollment.id {
                 selectedEnrollment = nil
             }
+            CoursePeopleObservability.recordRemoved(role: enrollment.role)
             successMessage = L.text("mobile.people.remove.success")
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.people.remove.error")
+        }
+    }
+
+    private func toggleEnrollmentState(_ enrollment: CourseEnrollment) async {
+        guard let token = session.accessToken, NetworkMonitor.shared.isOnline else { return }
+        let nextState = CoursePeopleLogic.deactivateState(for: enrollment.state)
+        actionBusy = true
+        errorMessage = nil
+        defer { actionBusy = false }
+        do {
+            let updated = try await LMSAPI.patchEnrollmentState(
+                courseCode: course.courseCode,
+                enrollmentId: enrollment.id,
+                body: PatchEnrollmentStateRequest(state: nextState, reason: nil),
+                accessToken: token
+            )
+            let newState = updated.state ?? nextState
+            if let index = enrollments.firstIndex(where: { $0.id == enrollment.id }) {
+                enrollments[index].state = newState
+            }
+            if selectedEnrollment?.id == enrollment.id {
+                selectedEnrollment?.state = newState
+            }
+            CoursePeopleObservability.recordStateChanged(role: enrollment.role, state: newState)
+            successMessage = L.text(
+                CoursePeopleLogic.isInactiveState(newState)
+                    ? "mobile.people.state.deactivateSuccess"
+                    : "mobile.people.state.reactivateSuccess"
+            )
+        } catch {
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.people.state.error")
+        }
+    }
+
+    private func addSuccessMessage(_ summary: CoursePeopleAddResultSummary) -> String {
+        var parts: [String] = []
+        if summary.didAdd {
+            parts.append(L.format("mobile.people.add.success.added", summary.added.count as Int))
+        }
+        if !summary.alreadyEnrolled.isEmpty {
+            parts.append(L.format("mobile.people.add.success.alreadyEnrolled", summary.alreadyEnrolled.count as Int))
+        }
+        if !summary.notFound.isEmpty {
+            parts.append(L.format("mobile.people.add.success.notFound", summary.notFound.count as Int))
+        }
+        return parts.isEmpty ? L.text("mobile.people.add.success") : parts.joined(separator: " ")
+    }
+}
+
+private struct CoursePeopleAddSheet: View {
+    @Environment(AuthSession.self) private var session
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+
+    let courseCode: String
+    let onAdded: (CoursePeopleAddResultSummary) -> Void
+
+    @State private var emailsText = ""
+    @State private var selectedRole = "student"
+    @State private var busy = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                if let errorMessage {
+                    Section {
+                        Text(errorMessage)
+                            .foregroundStyle(.red)
+                            .font(.caption)
+                    }
+                }
+                Section {
+                    Text(L.text("mobile.people.add.emailsHint"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    TextEditor(text: $emailsText)
+                        .frame(minHeight: 100)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
+                        .autocorrectionDisabled()
+                        .accessibilityLabel(L.text("mobile.people.add.emails"))
+                } header: {
+                    Text(L.text("mobile.people.add.emails"))
+                }
+                Section {
+                    Picker(L.text("mobile.people.add.role"), selection: $selectedRole) {
+                        ForEach(CoursePeopleLogic.assignableRoles) { role in
+                            Text(L.dynamicText(role.labelKey)).tag(role.value)
+                        }
+                    }
+                    .accessibilityLabel(L.text("mobile.people.add.role"))
+                } header: {
+                    Text(L.text("mobile.people.add.role"))
+                } footer: {
+                    Text(L.text("mobile.people.add.existingAccountsOnly"))
+                }
+            }
+            .navigationTitle(L.text("mobile.people.add.title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L.text("mobile.common.cancel")) { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(busy ? L.text("mobile.people.add.submitting") : L.text("mobile.people.add.submit")) {
+                        Task { await submit() }
+                    }
+                    .disabled(busy || emailsText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func submit() async {
+        guard let token = session.accessToken, NetworkMonitor.shared.isOnline else {
+            errorMessage = L.text("mobile.people.add.error.offline")
+            return
+        }
+        let validation = CoursePeopleLogic.validateEmailsForAdd(emailsText)
+        switch validation {
+        case .emailsRequired, .invalidEmail:
+            if let key = validation.errorKey {
+                errorMessage = L.dynamicText(key)
+            }
+            return
+        case .ok(let emails):
+            busy = true
+            errorMessage = nil
+            defer { busy = false }
+            do {
+                let request = CoursePeopleLogic.buildAddRequest(emails: emails, courseRole: selectedRole)
+                let response = try await LMSAPI.addCourseEnrollments(
+                    courseCode: courseCode,
+                    body: request,
+                    accessToken: token
+                )
+                let summary = CoursePeopleLogic.summarizeAddResponse(response)
+                CoursePeopleObservability.recordAdded(
+                    role: CoursePeopleLogic.normalizeCourseRole(selectedRole),
+                    addedCount: summary.added.count,
+                    alreadyCount: summary.alreadyEnrolled.count,
+                    notFoundCount: summary.notFound.count
+                )
+                if !summary.didAdd && summary.hasConflicts {
+                    if !summary.alreadyEnrolled.isEmpty {
+                        errorMessage = L.text("mobile.people.add.error.alreadyEnrolled")
+                    } else {
+                        errorMessage = L.text("mobile.people.add.error.notFound")
+                    }
+                    return
+                }
+                onAdded(summary)
+            } catch {
+                errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.people.add.error.generic")
+            }
         }
     }
 }

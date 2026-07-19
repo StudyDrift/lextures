@@ -7,7 +7,8 @@ final class CoursePeopleLogicTests: XCTestCase {
         name: String? = nil,
         role: String,
         sectionId: String? = nil,
-        invited: Bool = false
+        invited: Bool = false,
+        state: String? = nil
     ) -> CourseEnrollment {
         CourseEnrollment(
             id: id,
@@ -20,7 +21,7 @@ final class CoursePeopleLogicTests: XCTestCase {
             sectionId: sectionId,
             sectionCode: nil,
             sectionName: nil,
-            state: nil,
+            state: state,
             invitationPending: invited
         )
     }
@@ -90,6 +91,132 @@ final class CoursePeopleLogicTests: XCTestCase {
             CoursePeopleLogic.canUpdateEnrollments(
                 courseCode: "BIO101",
                 permissions: ["course:BIO101:enrollments:read"]
+            )
+        )
+    }
+
+    func testCanAddEnrollmentsRequiresFlagPermissionAndOnline() {
+        var features = MobilePlatformFeatures()
+        let perms = ["course:BIO101:enrollments:update"]
+        XCTAssertFalse(
+            CoursePeopleLogic.canAddEnrollments(
+                courseCode: "BIO101",
+                permissions: perms,
+                features: features,
+                isOnline: true
+            )
+        )
+        features.ffMobileEnrollmentAdd = true
+        XCTAssertTrue(
+            CoursePeopleLogic.canAddEnrollments(
+                courseCode: "BIO101",
+                permissions: perms,
+                features: features,
+                isOnline: true
+            )
+        )
+        XCTAssertFalse(
+            CoursePeopleLogic.canAddEnrollments(
+                courseCode: "BIO101",
+                permissions: perms,
+                features: features,
+                isOnline: false
+            )
+        )
+        XCTAssertFalse(
+            CoursePeopleLogic.canAddEnrollments(
+                courseCode: "BIO101",
+                permissions: ["course:BIO101:enrollments:read"],
+                features: features,
+                isOnline: true
+            )
+        )
+    }
+
+    func testParseAndValidateEmails() {
+        let emails = CoursePeopleLogic.parseEmails("Alex@School.edu, blair@school.edu; casey@school.edu\nnate@school.edu")
+        XCTAssertEqual(emails, ["alex@school.edu", "blair@school.edu", "casey@school.edu", "nate@school.edu"])
+
+        XCTAssertEqual(
+            CoursePeopleLogic.validateEmailsForAdd(""),
+            .emailsRequired
+        )
+        XCTAssertEqual(
+            CoursePeopleLogic.validateEmailsForAdd("").errorKey,
+            "mobile.people.add.error.emailsRequired"
+        )
+        XCTAssertEqual(
+            CoursePeopleLogic.validateEmailsForAdd("not-an-email"),
+            .invalidEmail
+        )
+        XCTAssertEqual(
+            CoursePeopleLogic.validateEmailsForAdd("not-an-email").errorKey,
+            "mobile.people.add.error.invalidEmail"
+        )
+        XCTAssertEqual(
+            CoursePeopleLogic.validateEmailsForAdd("ok@school.edu"),
+            .ok(["ok@school.edu"])
+        )
+    }
+
+    func testBuildAddRequestAndSummarize() {
+        let request = CoursePeopleLogic.buildAddRequest(
+            emails: ["a@school.edu", "b@school.edu"],
+            courseRole: "Teacher"
+        )
+        XCTAssertEqual(request.emails, "a@school.edu\nb@school.edu")
+        XCTAssertEqual(request.courseRole, "instructor")
+        XCTAssertTrue(CoursePeopleLogic.isAssignableRole("ta"))
+
+        let summary = CoursePeopleLogic.summarizeAddResponse(
+            AddCourseEnrollmentsResponse(
+                added: ["a@school.edu"],
+                alreadyEnrolled: ["b@school.edu"],
+                notFound: ["c@school.edu"]
+            )
+        )
+        XCTAssertTrue(summary.didAdd)
+        XCTAssertTrue(summary.hasConflicts)
+        XCTAssertEqual(summary.alreadyEnrolled, ["b@school.edu"])
+    }
+
+    func testStateHelpersAndChangeGate() {
+        XCTAssertTrue(CoursePeopleLogic.isInactiveState("dropped"))
+        XCTAssertFalse(CoursePeopleLogic.isInactiveState("active"))
+        XCTAssertEqual(CoursePeopleLogic.deactivateState(for: "active"), "dropped")
+        XCTAssertEqual(CoursePeopleLogic.deactivateState(for: "dropped"), "active")
+        XCTAssertEqual(CoursePeopleLogic.stateLabelKey("waitlist"), "mobile.people.state.waitlist")
+
+        var features = MobilePlatformFeatures(ffEnrollmentStateMachine: true)
+        let student = enrollment(id: "1", role: "student", state: "active")
+        let teacher = enrollment(id: "2", role: "teacher")
+        let perms = ["course:BIO101:enrollments:update"]
+        XCTAssertTrue(
+            CoursePeopleLogic.canChangeEnrollmentState(
+                enrollment: student,
+                courseCode: "BIO101",
+                permissions: perms,
+                features: features,
+                isOnline: true
+            )
+        )
+        XCTAssertFalse(
+            CoursePeopleLogic.canChangeEnrollmentState(
+                enrollment: teacher,
+                courseCode: "BIO101",
+                permissions: perms,
+                features: features,
+                isOnline: true
+            )
+        )
+        features.ffEnrollmentStateMachine = false
+        XCTAssertFalse(
+            CoursePeopleLogic.canChangeEnrollmentState(
+                enrollment: student,
+                courseCode: "BIO101",
+                permissions: perms,
+                features: features,
+                isOnline: true
             )
         )
     }

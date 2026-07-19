@@ -20,7 +20,34 @@ struct CoursePeopleGroup: Identifiable, Hashable {
     var id: String { kind.rawValue }
 }
 
+struct CoursePeopleAssignableRole: Identifiable, Hashable {
+    var value: String
+    var labelKey: String
+
+    var id: String { value }
+}
+
+struct CoursePeopleAddResultSummary: Equatable {
+    var added: [String]
+    var alreadyEnrolled: [String]
+    var notFound: [String]
+
+    var hasConflicts: Bool { !alreadyEnrolled.isEmpty || !notFound.isEmpty }
+    var didAdd: Bool { !added.isEmpty }
+}
+
 enum CoursePeopleLogic {
+    static let assignableRoles: [CoursePeopleAssignableRole] = [
+        .init(value: "student", labelKey: "mobile.people.role.student"),
+        .init(value: "instructor", labelKey: "mobile.people.role.teacher"),
+        .init(value: "ta", labelKey: "mobile.people.role.ta"),
+        .init(value: "designer", labelKey: "mobile.people.add.role.designer"),
+        .init(value: "observer", labelKey: "mobile.people.add.role.observer"),
+        .init(value: "auditor", labelKey: "mobile.people.add.role.auditor"),
+        .init(value: "librarian", labelKey: "mobile.people.add.role.librarian"),
+    ]
+
+    static let managedEnrollmentStates = ["active", "dropped", "withdrawn", "waitlist", "audit", "no_credit", "incomplete"]
     static func normalizedRole(_ role: String) -> String {
         role.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
@@ -146,5 +173,137 @@ enum CoursePeopleLogic {
 
     static func canUpdateEnrollments(courseCode: String, permissions: [String]) -> Bool {
         permissions.contains("course:\(courseCode):enrollments:update")
+    }
+
+    static func enrollmentAddEnabled(_ features: MobilePlatformFeatures) -> Bool {
+        features.ffMobileEnrollmentAdd
+    }
+
+    static func canAddEnrollments(
+        courseCode: String,
+        permissions: [String],
+        features: MobilePlatformFeatures,
+        isOnline: Bool
+    ) -> Bool {
+        guard enrollmentAddEnabled(features) else { return false }
+        guard isOnline else { return false }
+        return canUpdateEnrollments(courseCode: courseCode, permissions: permissions)
+    }
+
+    static func canChangeEnrollmentState(
+        enrollment: CourseEnrollment,
+        courseCode: String,
+        permissions: [String],
+        features: MobilePlatformFeatures,
+        isOnline: Bool
+    ) -> Bool {
+        guard features.ffEnrollmentStateMachine else { return false }
+        guard isOnline else { return false }
+        guard canUpdateEnrollments(courseCode: courseCode, permissions: permissions) else { return false }
+        return isStudentRole(enrollment.role)
+    }
+
+    static func parseEmails(_ raw: String) -> [String] {
+        let separators = CharacterSet(charactersIn: ",;\n\r\t ")
+        var seen = Set<String>()
+        var emails: [String] = []
+        for part in raw.components(separatedBy: separators) {
+            let email = part.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            guard !email.isEmpty else { continue }
+            guard seen.insert(email).inserted else { continue }
+            emails.append(email)
+        }
+        return emails
+    }
+
+    static func isValidEmail(_ email: String) -> Bool {
+        let trimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= 3, trimmed.count <= 254 else { return false }
+        guard let at = trimmed.firstIndex(of: "@") else { return false }
+        let local = trimmed[..<at]
+        let domain = trimmed[trimmed.index(after: at)...]
+        guard !local.isEmpty, !domain.isEmpty else { return false }
+        guard domain.contains(".") else { return false }
+        guard !local.contains("@"), !domain.contains("@") else { return false }
+        return true
+    }
+
+    enum AddEmailValidation: Error, Equatable {
+        case emailsRequired
+        case invalidEmail
+        case ok([String])
+
+        var errorKey: String? {
+            switch self {
+            case .emailsRequired: return "mobile.people.add.error.emailsRequired"
+            case .invalidEmail: return "mobile.people.add.error.invalidEmail"
+            case .ok: return nil
+            }
+        }
+    }
+
+    static func validateEmailsForAdd(_ raw: String) -> AddEmailValidation {
+        let emails = parseEmails(raw)
+        guard !emails.isEmpty else { return .emailsRequired }
+        let invalid = emails.filter { !isValidEmail($0) }
+        if !invalid.isEmpty {
+            return .invalidEmail
+        }
+        return .ok(emails)
+    }
+
+    static func normalizeCourseRole(_ role: String) -> String {
+        let value = role.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if value == "teacher" || value == "owner" { return "instructor" }
+        return value
+    }
+
+    static func isAssignableRole(_ role: String) -> Bool {
+        let normalized = normalizeCourseRole(role)
+        return assignableRoles.contains { $0.value == normalized }
+    }
+
+    static func buildAddRequest(emails: [String], courseRole: String) -> AddCourseEnrollmentsRequest {
+        AddCourseEnrollmentsRequest(
+            emails: emails.joined(separator: "\n"),
+            courseRole: normalizeCourseRole(courseRole)
+        )
+    }
+
+    static func summarizeAddResponse(_ response: AddCourseEnrollmentsResponse) -> CoursePeopleAddResultSummary {
+        CoursePeopleAddResultSummary(
+            added: response.added ?? [],
+            alreadyEnrolled: response.alreadyEnrolled ?? [],
+            notFound: response.notFound ?? []
+        )
+    }
+
+    static func normalizedState(_ state: String?) -> String {
+        let value = state?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+        return value.isEmpty ? "active" : value
+    }
+
+    static func isInactiveState(_ state: String?) -> Bool {
+        switch normalizedState(state) {
+        case "dropped", "withdrawn", "no_credit": return true
+        default: return false
+        }
+    }
+
+    static func stateLabelKey(_ state: String?) -> String {
+        switch normalizedState(state) {
+        case "active": return "mobile.people.state.active"
+        case "waitlist": return "mobile.people.state.waitlist"
+        case "dropped": return "mobile.people.state.dropped"
+        case "withdrawn": return "mobile.people.state.withdrawn"
+        case "audit": return "mobile.people.state.audit"
+        case "no_credit": return "mobile.people.state.noCredit"
+        case "incomplete": return "mobile.people.state.incomplete"
+        default: return "mobile.people.state.active"
+        }
+    }
+
+    static func deactivateState(for current: String?) -> String {
+        isInactiveState(current) ? "active" : "dropped"
     }
 }

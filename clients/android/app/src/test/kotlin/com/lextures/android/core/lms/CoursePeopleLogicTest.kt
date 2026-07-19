@@ -1,5 +1,6 @@
 package com.lextures.android.core.lms
 
+import com.lextures.android.core.navigation.MobilePlatformFeatures
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -11,12 +12,16 @@ class CoursePeopleLogicTest {
         name: String? = null,
         role: String,
         sectionId: String? = null,
+        state: String? = null,
+        invited: Boolean = false,
     ) = CourseEnrollment(
         id = id,
         userId = "user-$id",
         displayName = name,
         role = role,
         sectionId = sectionId,
+        state = state,
+        invitationPending = invited,
     )
 
     @Test
@@ -81,6 +86,119 @@ class CoursePeopleLogicTest {
             CoursePeopleLogic.canUpdateEnrollments(
                 courseCode = "BIO101",
                 permissions = listOf("course:BIO101:enrollments:read"),
+            ),
+        )
+    }
+
+    @Test
+    fun canAddEnrollmentsRequiresFlagPermissionAndOnline() {
+        val perms = listOf("course:BIO101:enrollments:update")
+        assertFalse(
+            CoursePeopleLogic.canAddEnrollments(
+                courseCode = "BIO101",
+                permissions = perms,
+                features = MobilePlatformFeatures(ffMobileEnrollmentAdd = false),
+                isOnline = true,
+            ),
+        )
+        assertTrue(
+            CoursePeopleLogic.canAddEnrollments(
+                courseCode = "BIO101",
+                permissions = perms,
+                features = MobilePlatformFeatures(ffMobileEnrollmentAdd = true),
+                isOnline = true,
+            ),
+        )
+        assertFalse(
+            CoursePeopleLogic.canAddEnrollments(
+                courseCode = "BIO101",
+                permissions = perms,
+                features = MobilePlatformFeatures(ffMobileEnrollmentAdd = true),
+                isOnline = false,
+            ),
+        )
+        assertFalse(
+            CoursePeopleLogic.canAddEnrollments(
+                courseCode = "BIO101",
+                permissions = listOf("course:BIO101:enrollments:read"),
+                features = MobilePlatformFeatures(ffMobileEnrollmentAdd = true),
+                isOnline = true,
+            ),
+        )
+    }
+
+    @Test
+    fun parseAndValidateEmails() {
+        assertEquals(
+            listOf("alex@school.edu", "blair@school.edu", "casey@school.edu"),
+            CoursePeopleLogic.parseEmails("Alex@School.edu, blair@school.edu; casey@school.edu"),
+        )
+        assertTrue(CoursePeopleLogic.validateEmailsForAdd("").isFailure)
+        assertTrue(CoursePeopleLogic.validateEmailsForAdd("not-an-email").isFailure)
+        assertEquals(
+            listOf("ok@school.edu"),
+            CoursePeopleLogic.validateEmailsForAdd("ok@school.edu").getOrThrow(),
+        )
+    }
+
+    @Test
+    fun buildAddRequestAndSummarize() {
+        val request = CoursePeopleLogic.buildAddRequest(
+            emails = listOf("a@school.edu", "b@school.edu"),
+            courseRole = "Teacher",
+        )
+        assertEquals("a@school.edu\nb@school.edu", request.emails)
+        assertEquals("instructor", request.courseRole)
+        assertTrue(CoursePeopleLogic.isAssignableRole("ta"))
+
+        val summary = CoursePeopleLogic.summarizeAddResponse(
+            AddCourseEnrollmentsResponse(
+                added = listOf("a@school.edu"),
+                alreadyEnrolled = listOf("b@school.edu"),
+                notFound = listOf("c@school.edu"),
+            ),
+        )
+        assertTrue(summary.didAdd)
+        assertTrue(summary.hasConflicts)
+        assertEquals(listOf("b@school.edu"), summary.alreadyEnrolled)
+    }
+
+    @Test
+    fun stateHelpersAndChangeGate() {
+        assertTrue(CoursePeopleLogic.isInactiveState("dropped"))
+        assertFalse(CoursePeopleLogic.isInactiveState("active"))
+        assertEquals("dropped", CoursePeopleLogic.deactivateState("active"))
+        assertEquals("active", CoursePeopleLogic.deactivateState("dropped"))
+        assertEquals("mobile.people.state.waitlist", CoursePeopleLogic.stateLabelKey("waitlist"))
+
+        val student = enrollment(id = "1", role = "student", state = "active")
+        val teacher = enrollment(id = "2", role = "teacher")
+        val perms = listOf("course:BIO101:enrollments:update")
+        assertTrue(
+            CoursePeopleLogic.canChangeEnrollmentState(
+                enrollment = student,
+                courseCode = "BIO101",
+                permissions = perms,
+                features = MobilePlatformFeatures(ffEnrollmentStateMachine = true),
+                isOnline = true,
+            ),
+        )
+        assertFalse(
+            CoursePeopleLogic.canChangeEnrollmentState(
+                enrollment = teacher,
+                courseCode = "BIO101",
+                permissions = perms,
+                features = MobilePlatformFeatures(ffEnrollmentStateMachine = true),
+                isOnline = true,
+            ),
+        )
+        assertFalse(
+            CoursePeopleLogic.canChangeEnrollmentState(
+                enrollment = student,
+                courseCode = "BIO101",
+                permissions = perms,
+                features = MobilePlatformFeatures(ffEnrollmentStateMachine = false),
+                isOnline = true,
             ),
         )
     }

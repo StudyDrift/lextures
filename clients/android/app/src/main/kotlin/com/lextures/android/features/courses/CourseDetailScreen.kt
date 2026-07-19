@@ -563,7 +563,11 @@ fun CourseDetailScreen(
                         )
                     }
                     CourseWorkspaceSection.People -> item {
-                        CoursePeopleSection(session = session, course = course)
+                        CoursePeopleSection(
+                            session = session,
+                            course = course,
+                            platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
+                        )
                     }
                     CourseWorkspaceSection.Live -> item {
                         CourseLiveSection(

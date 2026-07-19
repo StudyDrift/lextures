@@ -5,19 +5,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,23 +40,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.OfflineBanner
 import com.lextures.android.core.design.ProfileAvatar
 import com.lextures.android.core.design.StalenessChip
-import com.lextures.android.core.design.accentColor
-import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.CourseEnrollment
 import com.lextures.android.core.lms.CoursePeopleGroupKind
 import com.lextures.android.core.lms.CoursePeopleLogic
+import com.lextures.android.core.lms.CoursePeopleObservability
 import com.lextures.android.core.lms.CoursePeopleRoleFilter
 import com.lextures.android.core.lms.CourseSection
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.EnrollmentMessageBody
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
+import com.lextures.android.core.lms.PatchEnrollmentStateRequest
+import com.lextures.android.core.navigation.MobilePlatformFeatures
 import com.lextures.android.core.offline.OfflineCacheKey
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.home.LmsCard
@@ -58,15 +66,16 @@ import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSegmentedChips
 import com.lextures.android.features.home.LmsSkeletonList
-import com.lextures.android.core.design.LexturesColors
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 
-/** Staff course roster: search, filters, message, and remove (M11.4). */
+/** Staff course roster: search, filters, add, message, state, and remove (M11.4 / MOB.4). */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoursePeopleSection(
     session: AuthSession,
     course: CourseSummary,
+    platformFeatures: MobilePlatformFeatures = MobilePlatformFeatures(),
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
@@ -88,6 +97,7 @@ fun CoursePeopleSection(
     var sectionFilter by remember { mutableStateOf("") }
     var selectedEnrollment by remember { mutableStateOf<CourseEnrollment?>(null) }
     var removeTarget by remember { mutableStateOf<CourseEnrollment?>(null) }
+    var showAddSheet by remember { mutableStateOf(false) }
     var composeMode by remember { mutableStateOf(false) }
     var messageSubject by remember { mutableStateOf("") }
     var messageBody by remember { mutableStateOf("") }
@@ -95,6 +105,14 @@ fun CoursePeopleSection(
 
     val canRemove = remember(course.courseCode, permissions) {
         CoursePeopleLogic.canUpdateEnrollments(course.courseCode, permissions)
+    }
+    val canAdd = remember(course.courseCode, permissions, platformFeatures, isOnline) {
+        CoursePeopleLogic.canAddEnrollments(
+            courseCode = course.courseCode,
+            permissions = permissions,
+            features = platformFeatures,
+            isOnline = isOnline,
+        )
     }
 
     val filteredEnrollments = remember(enrollments, searchText, roleFilter, sectionFilter) {
@@ -159,6 +177,23 @@ fun CoursePeopleSection(
         when {
             loading && enrollments.isEmpty() -> LmsSkeletonList(count = 4)
             else -> {
+                if (canAdd) {
+                    Button(
+                        onClick = {
+                            showAddSheet = true
+                            successMessage = null
+                            errorMessage = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(Icons.Default.PersonAdd, contentDescription = null)
+                        Text(
+                            text = L.text(R.string.mobile_people_add_button),
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                    }
+                }
+
                 OutlinedTextField(
                     value = searchText,
                     onValueChange = { searchText = it },
@@ -199,7 +234,11 @@ fun CoursePeopleSection(
                             L.text(R.string.mobile_people_noResults)
                         },
                         message = if (enrollments.isEmpty()) {
-                            L.text(R.string.mobile_people_emptyHint)
+                            if (canAdd) {
+                                L.text(R.string.mobile_people_emptyHintAdd)
+                            } else {
+                                L.text(R.string.mobile_people_emptyHint)
+                            }
                         } else {
                             L.text(R.string.mobile_people_noResultsHint)
                         },
@@ -217,6 +256,7 @@ fun CoursePeopleSection(
                                 if (index > 0) HorizontalDivider()
                                 RosterRow(
                                     enrollment = enrollment,
+                                    showStateBadge = platformFeatures.ffEnrollmentStateMachine,
                                     onClick = {
                                         selectedEnrollment = enrollment
                                         composeMode = false
@@ -233,7 +273,38 @@ fun CoursePeopleSection(
         }
     }
 
+    if (showAddSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAddSheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            CoursePeopleAddSheet(
+                session = session,
+                courseCode = course.courseCode,
+                isOnline = isOnline,
+                onDismiss = { showAddSheet = false },
+                onAdded = { summary ->
+                    showAddSheet = false
+                    successMessage = addSuccessMessage(appContext, summary)
+                    scope.launch {
+                        val token = accessToken ?: return@launch
+                        runCatching {
+                            LmsApi.fetchCourseEnrollments(course.courseCode, token)
+                        }.onSuccess { enrollments = it }
+                    }
+                },
+            )
+        }
+    }
+
     selectedEnrollment?.let { enrollment ->
+        val canChangeState = CoursePeopleLogic.canChangeEnrollmentState(
+            enrollment = enrollment,
+            courseCode = course.courseCode,
+            permissions = permissions,
+            features = platformFeatures,
+            isOnline = isOnline,
+        )
         EnrollmentDetailDialog(
             enrollment = enrollment,
             composeMode = composeMode,
@@ -241,6 +312,8 @@ fun CoursePeopleSection(
             messageBody = messageBody,
             actionBusy = actionBusy,
             canRemove = canRemove,
+            canChangeState = canChangeState,
+            showState = platformFeatures.ffEnrollmentStateMachine,
             isOnline = isOnline,
             onDismiss = { selectedEnrollment = null },
             onCompose = { composeMode = true },
@@ -265,6 +338,44 @@ fun CoursePeopleSection(
                         selectedEnrollment = null
                         composeMode = false
                         successMessage = appContext.getString(R.string.mobile_people_message_success)
+                    } catch (e: Exception) {
+                        errorMessage = session.mapError(e)
+                    } finally {
+                        actionBusy = false
+                    }
+                }
+            },
+            onToggleState = {
+                scope.launch {
+                    val token = accessToken ?: return@launch
+                    if (!isOnline) return@launch
+                    val nextState = CoursePeopleLogic.deactivateState(enrollment.state)
+                    actionBusy = true
+                    errorMessage = null
+                    try {
+                        val updated = LmsApi.patchEnrollmentState(
+                            courseCode = course.courseCode,
+                            enrollmentId = enrollment.id,
+                            payload = PatchEnrollmentStateRequest(state = nextState),
+                            accessToken = token,
+                        )
+                        val newState = updated.state ?: nextState
+                        enrollments = enrollments.map {
+                            if (it.id == enrollment.id) it.copy(state = newState) else it
+                        }
+                        selectedEnrollment = selectedEnrollment?.copy(state = newState)
+                        CoursePeopleObservability.recordStateChanged(
+                            context = appContext,
+                            role = enrollment.role,
+                            state = newState,
+                        )
+                        successMessage = appContext.getString(
+                            if (CoursePeopleLogic.isInactiveState(newState)) {
+                                R.string.mobile_people_state_deactivateSuccess
+                            } else {
+                                R.string.mobile_people_state_reactivateSuccess
+                            },
+                        )
                     } catch (e: Exception) {
                         errorMessage = session.mapError(e)
                     } finally {
@@ -309,6 +420,10 @@ fun CoursePeopleSection(
                                 if (selectedEnrollment?.id == target.id) {
                                     selectedEnrollment = null
                                 }
+                                CoursePeopleObservability.recordRemoved(
+                                    context = appContext,
+                                    role = target.role,
+                                )
                                 successMessage = appContext.getString(R.string.mobile_people_remove_success)
                             } catch (e: Exception) {
                                 errorMessage = session.mapError(e)
@@ -342,6 +457,7 @@ private fun groupTitle(kind: CoursePeopleGroupKind): String =
 @Composable
 private fun RosterRow(
     enrollment: CourseEnrollment,
+    showStateBadge: Boolean,
     onClick: () -> Unit,
 ) {
     Row(
@@ -367,6 +483,8 @@ private fun RosterRow(
                 )
                 if (enrollment.invitationPending == true) {
                     InvitedBadge()
+                } else if (showStateBadge) {
+                    StateBadge(enrollment.state)
                 }
             }
             Text(
@@ -414,6 +532,31 @@ private fun InvitedBadge() {
 }
 
 @Composable
+private fun StateBadge(state: String?) {
+    val inactive = CoursePeopleLogic.isInactiveState(state)
+    Text(
+        text = localizedStateLabel(state),
+        fontSize = 11.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = if (inactive) textSecondary() else LexturesColors.BrandTeal,
+        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+    )
+}
+
+@Composable
+private fun localizedStateLabel(state: String?): String =
+    when (CoursePeopleLogic.normalizedState(state)) {
+        "active" -> L.text(R.string.mobile_people_state_active)
+        "waitlist" -> L.text(R.string.mobile_people_state_waitlist)
+        "dropped" -> L.text(R.string.mobile_people_state_dropped)
+        "withdrawn" -> L.text(R.string.mobile_people_state_withdrawn)
+        "audit" -> L.text(R.string.mobile_people_state_audit)
+        "no_credit" -> L.text(R.string.mobile_people_state_noCredit)
+        "incomplete" -> L.text(R.string.mobile_people_state_incomplete)
+        else -> L.text(R.string.mobile_people_state_active)
+    }
+
+@Composable
 private fun EnrollmentDetailDialog(
     enrollment: CourseEnrollment,
     composeMode: Boolean,
@@ -421,12 +564,15 @@ private fun EnrollmentDetailDialog(
     messageBody: String,
     actionBusy: Boolean,
     canRemove: Boolean,
+    canChangeState: Boolean,
+    showState: Boolean,
     isOnline: Boolean,
     onDismiss: () -> Unit,
     onCompose: () -> Unit,
     onSubjectChange: (String) -> Unit,
     onBodyChange: (String) -> Unit,
     onSend: () -> Unit,
+    onToggleState: () -> Unit,
     onRemove: () -> Unit,
 ) {
     AlertDialog(
@@ -459,11 +605,27 @@ private fun EnrollmentDetailDialog(
                         LmsDates.relative(lastAccess),
                     )
                 }
-                enrollment.state?.takeIf { it.isNotEmpty() }?.let { state ->
-                    DetailLine(
-                        L.text(R.string.mobile_people_detail_state),
-                        state.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-                    )
+                when {
+                    enrollment.invitationPending == true -> {
+                        DetailLine(
+                            L.text(R.string.mobile_people_detail_state),
+                            L.text(R.string.mobile_people_invited),
+                        )
+                    }
+                    showState -> {
+                        DetailLine(
+                            L.text(R.string.mobile_people_detail_state),
+                            localizedStateLabel(enrollment.state),
+                        )
+                    }
+                    !enrollment.state.isNullOrEmpty() -> {
+                        DetailLine(
+                            L.text(R.string.mobile_people_detail_state),
+                            enrollment.state.replaceFirstChar {
+                                if (it.isLowerCase()) it.titlecase() else it.toString()
+                            },
+                        )
+                    }
                 }
 
                 if (composeMode) {
@@ -510,6 +672,17 @@ private fun EnrollmentDetailDialog(
         },
         dismissButton = {
             Row {
+                if (!composeMode && canChangeState) {
+                    TextButton(onClick = onToggleState, enabled = isOnline && !actionBusy) {
+                        Text(
+                            if (CoursePeopleLogic.isInactiveState(enrollment.state)) {
+                                L.text(R.string.mobile_people_state_reactivate)
+                            } else {
+                                L.text(R.string.mobile_people_state_deactivate)
+                            },
+                        )
+                    }
+                }
                 if (!composeMode && canRemove) {
                     TextButton(onClick = onRemove, enabled = isOnline) {
                         Text(L.text(R.string.mobile_people_remove))
@@ -528,5 +701,170 @@ private fun DetailLine(label: String, value: String) {
     Column {
         Text(text = label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = textSecondary())
         Text(text = value, fontSize = 13.sp, color = textPrimary())
+    }
+}
+
+@Composable
+private fun CoursePeopleAddSheet(
+    session: AuthSession,
+    courseCode: String,
+    isOnline: Boolean,
+    onDismiss: () -> Unit,
+    onAdded: (com.lextures.android.core.lms.CoursePeopleAddResultSummary) -> Unit,
+) {
+    val accessToken by session.accessToken.collectAsState()
+    val context = LocalContext.current
+    val appContext = context.applicationContext
+    val scope = rememberCoroutineScope()
+    var emailsText by remember { mutableStateOf("") }
+    var selectedRole by remember { mutableStateOf("student") }
+    var busy by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = L.text(R.string.mobile_people_add_title),
+            fontWeight = FontWeight.SemiBold,
+            color = textPrimary(),
+        )
+        errorMessage?.let { LmsErrorBanner(it) }
+        Text(
+            text = L.text(R.string.mobile_people_add_emailsHint),
+            fontSize = 12.sp,
+            color = textSecondary(),
+        )
+        OutlinedTextField(
+            value = emailsText,
+            onValueChange = { emailsText = it },
+            label = { Text(L.text(R.string.mobile_people_add_emails)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 100.dp),
+            minLines = 4,
+        )
+        Text(
+            text = L.text(R.string.mobile_people_add_role),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = textSecondary(),
+        )
+        LmsSegmentedChips(
+            options = CoursePeopleLogic.assignableRoles.map { role ->
+                role.value to assignableRoleLabel(role.value)
+            },
+            selectedId = selectedRole,
+            onSelect = { selectedRole = it },
+        )
+        Text(
+            text = L.text(R.string.mobile_people_add_existingAccountsOnly),
+            fontSize = 12.sp,
+            color = textSecondary(),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(onClick = onDismiss) {
+                Text(L.text(R.string.mobile_common_cancel))
+            }
+            Button(
+                onClick = {
+                    val token = accessToken ?: return@Button
+                    if (!isOnline) {
+                        errorMessage = appContext.getString(R.string.mobile_people_add_error_offline)
+                        return@Button
+                    }
+                    val validated = CoursePeopleLogic.validateEmailsForAdd(emailsText)
+                    validated.onFailure { err ->
+                        errorMessage = when (err.message) {
+                            "mobile.people.add.error.emailsRequired" ->
+                                appContext.getString(R.string.mobile_people_add_error_emailsRequired)
+                            "mobile.people.add.error.invalidEmail" ->
+                                appContext.getString(R.string.mobile_people_add_error_invalidEmail)
+                            else -> appContext.getString(R.string.mobile_people_add_error_generic)
+                        }
+                    }
+                    val emails = validated.getOrNull() ?: return@Button
+                    scope.launch {
+                        busy = true
+                        errorMessage = null
+                        try {
+                            val request = CoursePeopleLogic.buildAddRequest(emails, selectedRole)
+                            val response = LmsApi.addCourseEnrollments(courseCode, request, token)
+                            val summary = CoursePeopleLogic.summarizeAddResponse(response)
+                            CoursePeopleObservability.recordAdded(
+                                context = appContext,
+                                role = CoursePeopleLogic.normalizeCourseRole(selectedRole),
+                                addedCount = summary.added.size,
+                                alreadyCount = summary.alreadyEnrolled.size,
+                                notFoundCount = summary.notFound.size,
+                            )
+                            if (!summary.didAdd && summary.hasConflicts) {
+                                errorMessage = if (summary.alreadyEnrolled.isNotEmpty()) {
+                                    appContext.getString(R.string.mobile_people_add_error_alreadyEnrolled)
+                                } else {
+                                    appContext.getString(R.string.mobile_people_add_error_notFound)
+                                }
+                            } else {
+                                onAdded(summary)
+                            }
+                        } catch (e: Exception) {
+                            errorMessage = session.mapError(e)
+                        } finally {
+                            busy = false
+                        }
+                    }
+                },
+                enabled = !busy && emailsText.trim().isNotEmpty(),
+            ) {
+                Text(
+                    if (busy) {
+                        L.text(R.string.mobile_people_add_submitting)
+                    } else {
+                        L.text(R.string.mobile_people_add_submit)
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun assignableRoleLabel(role: String): String =
+    when (role) {
+        "student" -> L.text(R.string.mobile_people_role_student)
+        "instructor" -> L.text(R.string.mobile_people_role_teacher)
+        "ta" -> L.text(R.string.mobile_people_role_ta)
+        "designer" -> L.text(R.string.mobile_people_add_role_designer)
+        "observer" -> L.text(R.string.mobile_people_add_role_observer)
+        "auditor" -> L.text(R.string.mobile_people_add_role_auditor)
+        "librarian" -> L.text(R.string.mobile_people_add_role_librarian)
+        else -> role
+    }
+
+private fun addSuccessMessage(
+    context: android.content.Context,
+    summary: com.lextures.android.core.lms.CoursePeopleAddResultSummary,
+): String {
+    val parts = mutableListOf<String>()
+    if (summary.didAdd) {
+        parts += context.getString(R.string.mobile_people_add_success_added, summary.added.size)
+    }
+    if (summary.alreadyEnrolled.isNotEmpty()) {
+        parts += context.getString(
+            R.string.mobile_people_add_success_alreadyEnrolled,
+            summary.alreadyEnrolled.size,
+        )
+    }
+    if (summary.notFound.isNotEmpty()) {
+        parts += context.getString(R.string.mobile_people_add_success_notFound, summary.notFound.size)
+    }
+    return if (parts.isEmpty()) {
+        context.getString(R.string.mobile_people_add_success)
+    } else {
+        parts.joinToString(" ")
     }
 }

@@ -81,6 +81,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFMobileCourseCreateV2 = mergeBool(db.FFMobileCourseCreateV2, false)
 	out.FFMobileCanvasImport = mergeBool(db.FFMobileCanvasImport, false)
 	out.FFMobileAdminConsole = mergeBool(db.FFMobileAdminConsole, false)
+	out.FFMobileEnrollmentAdd = mergeBool(db.FFMobileEnrollmentAdd, false)
 	out.FFParentPortal = mergeBool(db.FFParentPortal, false)
 	out.FFParentPortalV2 = mergeBool(db.FFParentPortalV2, false)
 	out.FFReportCards = mergeBool(db.FFReportCards, false)

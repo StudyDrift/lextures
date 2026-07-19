@@ -7449,6 +7449,35 @@
       }
     },
     {
+      "id": "MOB.4",
+      "path": "docs/completed/mobile/MOB.4-course-enrollment-management.md",
+      "markets": [
+        "K12",
+        "HE",
+        "SL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "api-contract",
+      "rationale": "Mobile People enrollment add + state change. Native unit tests cover gating/validation; Playwright API smoke covers ffMobileEnrollmentAdd exposure and enrollments POST authz.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/mobile-enrollment-add.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": true,
+        "dependency": false,
+        "rollback": true,
+        "notes": "Flag ffMobileEnrollmentAdd is Settings \u2192 Global platform toggle (E2E.2 matrix). Add/state UX covered by native unit tests; API contract covers feature exposure and instructor vs student POST authz."
+      }
+    },
+    {
       "id": "T01",
       "path": "docs/completed/transcripts/T01-official-transcript-generation.md",
       "markets": [
