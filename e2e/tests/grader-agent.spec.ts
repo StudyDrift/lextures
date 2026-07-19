@@ -244,6 +244,14 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
 })
 
 test('Student sees AI disclosure on posted agent grade', async ({ page, seededCourse }) => {
+  // Prior tests in this file disable annotations. With feedback media default ON, the
+  // student workbench opens on the Media tab and omits the grade sidebar (disclosure).
+  const adminToken = await apiGetPlatformAdminToken()
+  await apiPatchPlatformSettings(adminToken, {
+    feedbackMediaEnabled: false,
+    updateMask: ['feedbackMediaEnabled'],
+  })
+
   const assignment = await apiCreateAssignment(
     seededCourse.instructorToken,
     seededCourse.courseCode,
