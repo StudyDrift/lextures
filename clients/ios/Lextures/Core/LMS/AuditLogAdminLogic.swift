@@ -21,12 +21,12 @@ enum AuditLogAdminLogic {
     }
 
     static func targetLabel(type: String?, id: String?) -> String {
-        let t = (type ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        let i = (id ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        if t.isEmpty && i.isEmpty { return "—" }
-        if i.isEmpty { return t }
-        if t.isEmpty { return i }
-        return "\(t) / \(i)"
+        let targetType = (type ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let targetId = (id ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if targetType.isEmpty && targetId.isEmpty { return "—" }
+        if targetId.isEmpty { return targetType }
+        if targetType.isEmpty { return targetId }
+        return "\(targetType) / \(targetId)"
     }
 
     static func webPath() -> String { "/org-admin/audit-log" }
