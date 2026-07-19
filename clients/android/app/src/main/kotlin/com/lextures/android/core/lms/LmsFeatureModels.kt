@@ -500,6 +500,7 @@ data class PlatformFeatures(
     val ffMobileAdminConsole: Boolean? = null,
     val ffMobileEnrollmentAdd: Boolean? = null,
     val ffMobileLiveQuiz: Boolean? = null,
+    val ffMobileWhiteboardEdit: Boolean? = null,
     val ffEnrollmentStateMachine: Boolean? = null,
     val adminConsoleEnabled: Boolean? = null,
     val adminAuditLogEnabled: Boolean? = null,
@@ -1034,6 +1035,12 @@ data class CourseWhiteboard(
 @Serializable
 data class CourseWhiteboardsResponse(
     val whiteboards: List<CourseWhiteboard>? = null,
+)
+
+@Serializable
+data class WhiteboardUpsertRequest(
+    val title: String,
+    val canvasData: List<WhiteboardElement> = emptyList(),
 )
 
 // endregion

@@ -51,6 +51,7 @@ export type PlatformFeaturesSnapshot = {
   ffMobileAdminConsole?: boolean
   ffMobileEnrollmentAdd?: boolean
   ffMobileLiveQuiz?: boolean
+  ffMobileWhiteboardEdit?: boolean
   ffLibrary?: boolean
   ffBroadcasts?: boolean
   ffClassroomSignals?: boolean
@@ -181,6 +182,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffMobileAdminConsole: false,
   ffMobileEnrollmentAdd: false,
   ffMobileLiveQuiz: false,
+  ffMobileWhiteboardEdit: false,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,

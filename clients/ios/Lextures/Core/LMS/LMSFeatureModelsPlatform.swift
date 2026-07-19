@@ -69,6 +69,7 @@ struct PlatformFeatures: Decodable {
     var ffMobileAdminConsole: Bool?
     var ffMobileEnrollmentAdd: Bool?
     var ffMobileLiveQuiz: Bool?
+    var ffMobileWhiteboardEdit: Bool?
     var ffEnrollmentStateMachine: Bool?
     var adminConsoleEnabled: Bool?
     var adminAuditLogEnabled: Bool?

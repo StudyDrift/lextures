@@ -7521,6 +7521,35 @@
       }
     },
     {
+      "id": "MOB.6",
+      "path": "docs/completed/mobile/MOB.6-whiteboards.md",
+      "markets": [
+        "K12",
+        "HE",
+        "SL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "api-contract",
+      "rationale": "Mobile course whiteboard authoring (create/draw/save/delete) with web-compatible canvasData. Native unit tests cover tools, serialize, undo/redo, and flag gating; Playwright API smoke covers ffMobileWhiteboardEdit exposure and create/update/delete.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/mobile-whiteboard-edit.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": false,
+        "rollback": true,
+        "notes": "Flag ffMobileWhiteboardEdit is Settings \u2192 Global platform toggle (E2E.2 matrix). Authoring UX covered by native unit tests; API contract covers feature exposure and whiteboard CRUD with web schema elements. Realtime collaboration deferred (web is save-based LWW)."
+      }
+    },
+    {
       "id": "T01",
       "path": "docs/completed/transcripts/T01-official-transcript-generation.md",
       "markets": [

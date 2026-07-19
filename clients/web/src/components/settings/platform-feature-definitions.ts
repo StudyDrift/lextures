@@ -786,6 +786,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'core',
   },
   {
+    key: 'ffMobileWhiteboardEdit',
+    label: 'Mobile whiteboard edit',
+    description:
+      'Create, draw, save, and delete course whiteboards on iOS and Android with web-compatible canvas data (MOB.6).',
+    pack: 'core',
+  },
+  {
     key: 'ffReportCards',
     label: 'Report cards',
     description: 'Standards-based report card generation and distribution for K-12 terms.',

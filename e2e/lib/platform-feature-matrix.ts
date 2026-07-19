@@ -794,6 +794,18 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     gatedSurface: null,
   },
   {
+    key: 'ffMobileWhiteboardEdit',
+    label: 'Mobile whiteboard edit',
+    category: 'platform',
+    ownershipSource: 'database',
+    sourceKey: null,
+    runtimeKey: 'ffMobileWhiteboardEdit',
+    settingsOnlyRationale: null,
+    secretSensitive: false,
+    uiSample: false,
+    gatedSurface: null,
+  },
+  {
     key: 'ffMotionNavigation',
     label: 'Motion / animation',
     category: 'accessibility',

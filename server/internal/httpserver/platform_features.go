@@ -63,6 +63,7 @@ type platformFeaturesJSON struct {
 	FFMobileAdminConsole               bool `json:"ffMobileAdminConsole"`
 	FFMobileEnrollmentAdd              bool `json:"ffMobileEnrollmentAdd"`
 	FFMobileLiveQuiz                   bool `json:"ffMobileLiveQuiz"`
+	FFMobileWhiteboardEdit             bool `json:"ffMobileWhiteboardEdit"`
 	FFParentPortal                     bool `json:"ffParentPortal"`
 	FFParentPortalV2                   bool `json:"ffParentPortalV2"`
 	FFReportCards                      bool `json:"ffReportCards"`
@@ -221,6 +222,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFMobileAdminConsole:               cfg.FFMobileAdminConsole,
 		FFMobileEnrollmentAdd:              cfg.FFMobileEnrollmentAdd,
 		FFMobileLiveQuiz:                   cfg.FFMobileLiveQuiz,
+		FFMobileWhiteboardEdit:             cfg.FFMobileWhiteboardEdit,
 		FFParentPortal:                     cfg.FFParentPortal,
 		FFParentPortalV2:                   cfg.FFParentPortalV2,
 		FFReportCards:                      cfg.FFReportCards,

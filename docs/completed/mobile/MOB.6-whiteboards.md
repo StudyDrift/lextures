@@ -13,11 +13,26 @@
 | **Section** | Mobile parity |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | THIN (view-only) |
+| **Status (today)** | **DONE** |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile team |
 | **Depends on** | — |
 | **Unblocks** | — |
+
+
+
+## Implementation notes (2026-07-19)
+
+Save-based authoring on iOS + Android (web schema parity). Realtime collaboration deferred — web whiteboard is last-writer-wins PUT of `canvasData`.
+
+- **Flag**: `ffMobileWhiteboardEdit` (DB `ff_mobile_whiteboard_edit`, default OFF) gates create/edit/delete toolbar; view-only preserved when off.
+- **Spike (§18 Q1)**: web is save-based (no WS channel); conflict policy = last-writer-wins with debounced autosave.
+- **Logic**: `WhiteboardLogic` (iOS/Android) — tools (select/pen/line/rect/circle/triangle/eraser), colors/widths, undo/redo, hit-test erase, translate/pick, web-compatible serialize, stylus-exclusive helper.
+- **API**: `LMSAPIWhiteboard` / `LmsApi` create/update/delete; list/get unchanged.
+- **UI**: editable `WhiteboardView` / `WhiteboardEditorScreen` with floating toolbar + autosave; create from meeting detail when flagged.
+- **i18n**: `mobile.whiteboard.*`; synced via `scripts/sync-mobile-locales.py`.
+- **Observability**: `whiteboard_{created,edited,saved,deleted,undo}` (tool name only, no content).
+- **Tests**: unit coverage for logic/serialize/undo; platformconfig merge default-off; e2e API smoke `e2e/tests/mobile-whiteboard-edit.spec.ts`.
 
 ## 1. Problem Statement
 

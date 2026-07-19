@@ -114,6 +114,15 @@ final class MobileDestinationsTests: XCTestCase {
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .liveQuizzes), .liveQuizzes)
     }
 
+    func testPlatformFeaturesMapsMobileWhiteboardEdit() {
+        var raw = PlatformFeatures()
+        raw.ffMobileWhiteboardEdit = true
+        XCTAssertTrue(MobilePlatformFeatures.from(raw).ffMobileWhiteboardEdit)
+        raw.ffMobileWhiteboardEdit = false
+        XCTAssertFalse(MobilePlatformFeatures.from(raw).ffMobileWhiteboardEdit)
+        XCTAssertFalse(MobilePlatformFeatures.from(nil).ffMobileWhiteboardEdit)
+    }
+
     func testCourseWorkspaceHidesDisabledFeatures() {
         let course = CourseSummary(
             id: "1",

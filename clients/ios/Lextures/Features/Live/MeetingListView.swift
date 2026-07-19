@@ -57,7 +57,15 @@ struct MeetingListView: View {
             )
         }
         .sheet(item: $openWhiteboard) { board in
-            WhiteboardView(course: course, board: board)
+            WhiteboardView(
+                course: course,
+                board: board,
+                canEdit: WhiteboardLogic.canEdit(
+                    viewerIsStaff: course.viewerIsStaff,
+                    features: shell.platformFeatures
+                ),
+                onDeleted: { openWhiteboard = nil }
+            )
         }
     }
 
