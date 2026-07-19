@@ -1,7 +1,10 @@
 package com.lextures.android.core.lms
 
 import com.lextures.android.core.navigation.MobilePlatformFeatures
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Canvas course import helpers (MOB.2) — credentials, include map, WS parsing, gates.
@@ -148,8 +151,8 @@ object CanvasImportLogic {
 
     fun parseWSMessage(raw: String): WSMessage? {
         return try {
-            val json = JSONObject(raw)
-            val typeRaw = json.optString("type")
+            val obj = jsonParser.parseToJsonElement(raw).jsonObject
+            val typeRaw = obj["type"]?.jsonPrimitive?.contentOrNull.orEmpty()
             val type = when (typeRaw) {
                 "progress" -> WSMessageType.Progress
                 "complete" -> WSMessageType.Complete
@@ -159,13 +162,15 @@ object CanvasImportLogic {
             }
             WSMessage(
                 type = type,
-                message = json.optString("message").takeIf { it.isNotBlank() },
-                courseCode = json.optString("courseCode").takeIf { it.isNotBlank() },
+                message = obj["message"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() },
+                courseCode = obj["courseCode"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() },
             )
         } catch (_: Exception) {
             null
         }
     }
+
+    private val jsonParser = Json { ignoreUnknownKeys = true }
 
     fun isTerminal(type: WSMessageType): Boolean = when (type) {
         WSMessageType.Complete, WSMessageType.CoursesUpdated, WSMessageType.Error -> true
