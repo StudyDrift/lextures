@@ -417,6 +417,9 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileCreateCourse = false
     var ffMobileCourseCreateV2 = false
     var ffMobileCanvasImport = false
+    var ffMobileAdminConsole = false
+    var adminConsoleEnabled = false
+    var adminAuditLogEnabled = true
     var ffConsortiumSharing = false
     var graderAgentEnabled = false
     var ffPlagiarismChecks = false
@@ -492,6 +495,9 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileCreateCourse: features?.ffMobileCreateCourse == true,
             ffMobileCourseCreateV2: features?.ffMobileCourseCreateV2 == true,
             ffMobileCanvasImport: features?.ffMobileCanvasImport == true,
+            ffMobileAdminConsole: features?.ffMobileAdminConsole == true,
+            adminConsoleEnabled: features?.adminConsoleEnabled == true,
+            adminAuditLogEnabled: features?.adminAuditLogEnabled != false,
             ffConsortiumSharing: features?.ffConsortiumSharing == true,
             graderAgentEnabled: features?.graderAgentEnabled == true,
             ffPlagiarismChecks: features?.ffPlagiarismChecks == true,

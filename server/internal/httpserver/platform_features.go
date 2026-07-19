@@ -60,6 +60,7 @@ type platformFeaturesJSON struct {
 	FFMobileCreateCourse               bool `json:"ffMobileCreateCourse"`
 	FFMobileCourseCreateV2             bool `json:"ffMobileCourseCreateV2"`
 	FFMobileCanvasImport               bool `json:"ffMobileCanvasImport"`
+	FFMobileAdminConsole               bool `json:"ffMobileAdminConsole"`
 	FFParentPortal                     bool `json:"ffParentPortal"`
 	FFParentPortalV2                   bool `json:"ffParentPortalV2"`
 	FFReportCards                      bool `json:"ffReportCards"`
@@ -138,6 +139,7 @@ type platformFeaturesJSON struct {
 
 	AiDisclosureEnabled        bool `json:"aiDisclosureEnabled"`
 	AdminConsoleEnabled        bool `json:"adminConsoleEnabled"`
+	AdminAuditLogEnabled       bool `json:"adminAuditLogEnabled"`
 	ImpersonationEnabled       bool `json:"impersonationEnabled"`
 	BulkCsvImportEnabled       bool `json:"bulkCsvImportEnabled"`
 	AdminSearchEnabled         bool `json:"adminSearchEnabled"`
@@ -214,6 +216,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFMobileCreateCourse:               cfg.FFMobileCreateCourse,
 		FFMobileCourseCreateV2:             cfg.FFMobileCourseCreateV2,
 		FFMobileCanvasImport:               cfg.FFMobileCanvasImport,
+		FFMobileAdminConsole:               cfg.FFMobileAdminConsole,
 		FFParentPortal:                     cfg.FFParentPortal,
 		FFParentPortalV2:                   cfg.FFParentPortalV2,
 		FFReportCards:                      cfg.FFReportCards,
@@ -301,6 +304,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		AdaptiveLearnerModelEnabled:  cfg.AdaptiveLearnerModelEnabled,
 		LearnerModelEMAAlpha:         cfg.LearnerModelEMAAlpha,
 		AdminConsoleEnabled:          cfg.AdminConsoleEnabled,
+		AdminAuditLogEnabled:         cfg.AdminAuditLogEnabled,
 		ImpersonationEnabled:         cfg.ImpersonationEnabled,
 		BulkCsvImportEnabled:         cfg.BulkCsvImportEnabled,
 		AdminSearchEnabled:           cfg.AdminSearchEnabled,

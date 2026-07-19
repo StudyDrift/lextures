@@ -49,16 +49,16 @@ object AiModelsAdminLogic {
     )
 
     fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean =
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
 
     fun canManage(permissions: Collection<String>): Boolean =
         permissions.contains(RBAC_MANAGE_PERMISSION)
 
     fun shouldShowEntry(features: MobilePlatformFeatures, permissions: Collection<String>): Boolean =
-        adminSettingsEnabled(features) && canManage(permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManage(permissions)
 
     fun canView(features: MobilePlatformFeatures, permissions: Collection<String>): Boolean =
-        shouldShowEntry(features, permissions)
+        adminSettingsEnabled(features) && canManage(permissions)
 
     /**
      * Builds the PUT body. The OpenRouter key is write-only: only send a new key when the

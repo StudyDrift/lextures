@@ -387,3 +387,16 @@ func TestMerge_FFMobileCanvasImportDefaultOff(t *testing.T) {
 		t.Fatal("expected FFMobileCanvasImport true when DB set")
 	}
 }
+
+// MOB.3: FFMobileAdminConsole default OFF when unset.
+func TestMerge_FFMobileAdminConsoleDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFMobileAdminConsole {
+		t.Fatal("expected FFMobileAdminConsole false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMobileAdminConsole: &on})
+	if !got.FFMobileAdminConsole {
+		t.Fatal("expected FFMobileAdminConsole true when DB set")
+	}
+}

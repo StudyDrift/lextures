@@ -8,7 +8,7 @@ object RolesPermissionsAdminLogic {
     const val RBAC_MANAGE_PERMISSION = "global:app:rbac:manage"
 
     fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean =
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
 
     fun canManageRoles(permissions: List<String>): Boolean =
         permissions.contains(RBAC_MANAGE_PERMISSION)
@@ -17,12 +17,13 @@ object RolesPermissionsAdminLogic {
         features: MobilePlatformFeatures,
         permissions: List<String>,
     ): Boolean =
-        adminSettingsEnabled(features) && canManageRoles(permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManageRoles(permissions)
 
     fun canView(
         features: MobilePlatformFeatures,
         permissions: List<String>,
-    ): Boolean = shouldShowEntry(features, permissions)
+    ): Boolean =
+        adminSettingsEnabled(features) && canManageRoles(permissions)
 
     fun webSettingsPath(): String = "/settings/roles"
 

@@ -44,7 +44,7 @@ object OrgBrandingAdminLogic {
     }
 
     fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean =
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
 
     fun canManageOrgBranding(permissions: List<String>): Boolean =
         permissions.contains(RBAC_MANAGE_PERMISSION) ||
@@ -53,12 +53,14 @@ object OrgBrandingAdminLogic {
     fun shouldShowEntry(
         features: MobilePlatformFeatures,
         permissions: List<String>,
-    ): Boolean = adminSettingsEnabled(features) && canManageOrgBranding(permissions)
+    ): Boolean =
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManageOrgBranding(permissions)
 
     fun canView(
         features: MobilePlatformFeatures,
         permissions: List<String>,
-    ): Boolean = shouldShowEntry(features, permissions)
+    ): Boolean =
+        adminSettingsEnabled(features) && canManageOrgBranding(permissions)
 
     fun webOrgBrandingPath(): String = "/settings/org-branding"
 

@@ -7,7 +7,7 @@ enum PeopleAdminLogic {
     static let defaultPerPage = 25
 
     static func adminSettingsEnabled(_ features: MobilePlatformFeatures) -> Bool {
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
     }
 
     static func canManagePeople(permissions: [String]) -> Bool {
@@ -18,14 +18,14 @@ enum PeopleAdminLogic {
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        adminSettingsEnabled(features) && canManagePeople(permissions: permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManagePeople(permissions: permissions)
     }
 
     static func canView(
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        shouldShowEntry(features: features, permissions: permissions)
+        adminSettingsEnabled(features) && canManagePeople(permissions: permissions)
     }
 
     static func webSettingsPath() -> String {

@@ -177,6 +177,7 @@ final class AppShellModel {
 
     var pendingBilling = false
     var pendingProfileSettingsRoute: SettingsDeepLinkSection?
+    var pendingSettingsAdminPage: SettingsMenuLogic.ItemId?
     var pendingParentStudentId: String?
     var pendingParentRoute: ParentRoute?
 
@@ -213,6 +214,14 @@ final class AppShellModel {
         case let .settings(section):
             selectShellTab(.profile)
             pendingProfileSettingsRoute = section
+            switch section {
+            case .auditLog:
+                pendingSettingsAdminPage = .auditLog
+            case .adminHub:
+                pendingSettingsAdminPage = nil
+            case .account, .notifications, .learnerProfile:
+                break
+            }
         case let .checkoutSuccess(courseId):
             checkoutReturnPhase = .success(courseId: courseId)
         case .checkoutCancel:
@@ -267,6 +276,11 @@ final class AppShellModel {
     func consumePendingProfileSettingsRoute() -> SettingsDeepLinkSection? {
         defer { pendingProfileSettingsRoute = nil }
         return pendingProfileSettingsRoute
+    }
+
+    func consumePendingSettingsAdminPage() -> SettingsMenuLogic.ItemId? {
+        defer { pendingSettingsAdminPage = nil }
+        return pendingSettingsAdminPage
     }
 
     func selectShellTab(_ tab: ShellTab) {

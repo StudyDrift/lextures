@@ -27,15 +27,16 @@ object PlatformSettingsAdminLogic {
         descriptionResName = "mobile_admin_platform_feature_${name}_description",
     )
 
-    fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean = features.ffMobileAdminSettings
+    fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean =
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
 
     fun canManage(permissions: List<String>): Boolean = RBAC_MANAGE_PERMISSION in permissions
 
     fun shouldShowEntry(features: MobilePlatformFeatures, permissions: List<String>): Boolean =
-        adminSettingsEnabled(features) && canManage(permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManage(permissions)
 
     fun canView(features: MobilePlatformFeatures, permissions: List<String>): Boolean =
-        shouldShowEntry(features, permissions)
+        adminSettingsEnabled(features) && canManage(permissions)
 
     fun value(key: String, settings: PlatformSettingsSnapshot): Boolean = when (key) {
         "ffFeedback" -> settings.ffFeedback

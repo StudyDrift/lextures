@@ -141,6 +141,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffMobileCreateCourse: false,
     ffMobileCourseCreateV2: false,
     ffMobileCanvasImport: false,
+    ffMobileAdminConsole: false,
     ffUiMode: false,
     ffReadAloud: false,
     ffAltTextEnforcement: false,

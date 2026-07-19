@@ -332,6 +332,8 @@ type Config struct {
 	FFMobileCourseCreateV2 bool
 	// FFMobileCanvasImport enables the mobile Canvas course import wizard (MOB.2). Default OFF.
 	FFMobileCanvasImport bool
+	// FFMobileAdminConsole enables the mobile Settings/Admin hub (grouped menu + audit log) (MOB.3). Default OFF.
+	FFMobileAdminConsole bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).

@@ -5,7 +5,7 @@ enum RolesPermissionsAdminLogic {
     static let rbacManagePermission = "global:app:rbac:manage"
 
     static func adminSettingsEnabled(_ features: MobilePlatformFeatures) -> Bool {
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
     }
 
     static func canManageRoles(permissions: [String]) -> Bool {
@@ -16,14 +16,14 @@ enum RolesPermissionsAdminLogic {
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        adminSettingsEnabled(features) && canManageRoles(permissions: permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManageRoles(permissions: permissions)
     }
 
     static func canView(
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        shouldShowEntry(features: features, permissions: permissions)
+        adminSettingsEnabled(features) && canManageRoles(permissions: permissions)
     }
 
     static func webSettingsPath() -> String {

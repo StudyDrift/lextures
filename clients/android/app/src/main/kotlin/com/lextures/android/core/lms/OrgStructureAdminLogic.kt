@@ -21,7 +21,7 @@ object OrgStructureAdminLogic {
     }
 
     fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean =
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
 
     fun canManageOrganizations(permissions: List<String>): Boolean =
         permissions.contains(RBAC_MANAGE_PERMISSION)
@@ -34,13 +34,15 @@ object OrgStructureAdminLogic {
         features: MobilePlatformFeatures,
         permissions: List<String>,
     ): Boolean =
-        adminSettingsEnabled(features) &&
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings &&
             (canManageOrganizations(permissions) || canManageOrgUnitsAndTerms(permissions))
 
     fun canView(
         features: MobilePlatformFeatures,
         permissions: List<String>,
-    ): Boolean = shouldShowEntry(features, permissions)
+    ): Boolean =
+        adminSettingsEnabled(features) &&
+            (canManageOrganizations(permissions) || canManageOrgUnitsAndTerms(permissions))
 
     fun webOrganizationsPath(): String = "/settings/organizations"
     fun webOrgUnitsPath(): String = "/settings/org-units"

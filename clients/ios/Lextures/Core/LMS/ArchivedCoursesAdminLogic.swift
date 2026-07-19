@@ -5,7 +5,7 @@ enum ArchivedCoursesAdminLogic {
     static let rbacManagePermission = "global:app:rbac:manage"
 
     static func adminSettingsEnabled(_ features: MobilePlatformFeatures) -> Bool {
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
     }
 
     static func canManageArchivedCourses(permissions: [String]) -> Bool {
@@ -16,14 +16,14 @@ enum ArchivedCoursesAdminLogic {
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        adminSettingsEnabled(features) && canManageArchivedCourses(permissions: permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManageArchivedCourses(permissions: permissions)
     }
 
     static func canView(
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        shouldShowEntry(features: features, permissions: permissions)
+        adminSettingsEnabled(features) && canManageArchivedCourses(permissions: permissions)
     }
 
     static func filterRows(_ rows: [ArchivedCourseRow], query: String) -> [ArchivedCourseRow] {

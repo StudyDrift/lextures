@@ -8,7 +8,7 @@ object ArchivedCoursesAdminLogic {
     const val RBAC_MANAGE_PERMISSION = "global:app:rbac:manage"
 
     fun adminSettingsEnabled(features: MobilePlatformFeatures): Boolean =
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
 
     fun canManageArchivedCourses(permissions: List<String>): Boolean =
         permissions.contains(RBAC_MANAGE_PERMISSION)
@@ -17,12 +17,13 @@ object ArchivedCoursesAdminLogic {
         features: MobilePlatformFeatures,
         permissions: List<String>,
     ): Boolean =
-        adminSettingsEnabled(features) && canManageArchivedCourses(permissions)
+        !features.ffMobileAdminConsole && features.ffMobileAdminSettings && canManageArchivedCourses(permissions)
 
     fun canView(
         features: MobilePlatformFeatures,
         permissions: List<String>,
-    ): Boolean = shouldShowEntry(features, permissions)
+    ): Boolean =
+        adminSettingsEnabled(features) && canManageArchivedCourses(permissions)
 
     fun filterRows(rows: List<ArchivedCourseRow>, query: String): List<ArchivedCourseRow> {
         val trimmed = query.trim()

@@ -5,6 +5,10 @@ enum SettingsDeepLinkSection: Equatable {
     case account
     case notifications
     case learnerProfile
+    /// MOB.3 Settings/Admin hub.
+    case adminHub
+    /// MOB.3 Audit log page inside the admin hub.
+    case auditLog
 }
 
 enum DeepLinkDestination: Equatable {
@@ -177,6 +181,13 @@ enum DeepLinkRouter {
             return .settings(.notifications)
         case "learner-profile":
             return .settings(.learnerProfile)
+        case "admin", "admin-console":
+            if segments.count >= 3, segments[2].lowercased() == "audit-log" {
+                return .settings(.auditLog)
+            }
+            return .settings(.adminHub)
+        case "audit-log":
+            return .settings(.auditLog)
         default:
             return .settings(.account)
         }

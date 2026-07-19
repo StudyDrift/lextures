@@ -68,7 +68,7 @@ enum TranscriptsAdvisingAdminLogic {
     }
 
     static func adminSettingsEnabled(_ features: MobilePlatformFeatures) -> Bool {
-        features.ffMobileAdminSettings
+        features.ffMobileAdminSettings || features.ffMobileAdminConsole
     }
 
     static func canManage(permissions: [String]) -> Bool {
@@ -87,7 +87,8 @@ enum TranscriptsAdvisingAdminLogic {
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        adminSettingsEnabled(features)
+        !features.ffMobileAdminConsole
+            && features.ffMobileAdminSettings
             && canManage(permissions: permissions)
             && (isTranscriptsEnabled(features) || isAdvisingEnabled(features))
     }
@@ -96,7 +97,7 @@ enum TranscriptsAdvisingAdminLogic {
         features: MobilePlatformFeatures,
         permissions: [String]
     ) -> Bool {
-        shouldShowEntry(features: features, permissions: permissions)
+        adminSettingsEnabled(features) && canManage(permissions: permissions)
     }
 
     static func canViewTranscripts(
