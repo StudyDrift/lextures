@@ -48,10 +48,10 @@ final class BoardsAdvancedLogicTests: XCTestCase {
             BoardSection(id: "s1", boardId: "b", title: "A", sortIndex: 1),
         ]
         let posts = [
-            BoardPost(id: "p3", boardId: "b", contentType: "text", sectionId: "s2", sortIndex: 0, title: "Later"),
-            BoardPost(id: "p1", boardId: "b", contentType: "text", sectionId: "s1", sortIndex: 2, title: "Second"),
-            BoardPost(id: "p2", boardId: "b", contentType: "text", sectionId: "s1", sortIndex: 1, title: "First"),
-            BoardPost(id: "p4", boardId: "b", contentType: "text", sectionId: nil, sortIndex: 0, title: "Unsectioned"),
+            BoardPost(id: "p3", boardId: "b", contentType: "text", title: "Later", sectionId: "s2", sortIndex: 0),
+            BoardPost(id: "p1", boardId: "b", contentType: "text", title: "Second", sectionId: "s1", sortIndex: 2),
+            BoardPost(id: "p2", boardId: "b", contentType: "text", title: "First", sectionId: "s1", sortIndex: 1),
+            BoardPost(id: "p4", boardId: "b", contentType: "text", title: "Unsectioned", sectionId: nil, sortIndex: 0),
         ]
         XCTAssertEqual(
             BoardsAdvancedLogic.orderedPostsForPresent(posts: posts, sections: sections).map(\.id),
