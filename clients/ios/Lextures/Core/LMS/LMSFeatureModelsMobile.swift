@@ -175,6 +175,29 @@ struct CourseEnrollmentsResponse: Codable {
     var enrollments: [CourseEnrollment]
 }
 
+struct AddCourseEnrollmentsRequest: Encodable {
+    var emails: String
+    var courseRole: String
+}
+
+struct AddCourseEnrollmentsResponse: Decodable {
+    var added: [String]?
+    var alreadyEnrolled: [String]?
+    var notFound: [String]?
+}
+
+struct PatchEnrollmentStateRequest: Encodable {
+    var state: String
+    var reason: String?
+}
+
+struct PatchEnrollmentStateResponse: Decodable {
+    var id: String?
+    var state: String?
+    var stateChangedAt: String?
+    var stateReason: String?
+}
+
 struct EnrollmentMessageBody: Encodable {
     var subject: String
     var body: String

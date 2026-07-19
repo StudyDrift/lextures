@@ -67,6 +67,8 @@ struct PlatformFeatures: Decodable {
     var ffMobileCourseCreateV2: Bool?
     var ffMobileCanvasImport: Bool?
     var ffMobileAdminConsole: Bool?
+    var ffMobileEnrollmentAdd: Bool?
+    var ffEnrollmentStateMachine: Bool?
     var adminConsoleEnabled: Bool?
     var adminAuditLogEnabled: Bool?
     var ffConsortiumSharing: Bool?

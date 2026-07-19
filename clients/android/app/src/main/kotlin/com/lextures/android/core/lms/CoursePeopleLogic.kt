@@ -1,5 +1,7 @@
 package com.lextures.android.core.lms
 
+import com.lextures.android.core.navigation.MobilePlatformFeatures
+
 enum class CoursePeopleRoleFilter {
     All,
     Staff,
@@ -18,7 +20,34 @@ data class CoursePeopleGroup(
     val enrollments: List<CourseEnrollment>,
 )
 
+data class CoursePeopleAssignableRole(
+    val value: String,
+    val labelKey: String,
+)
+
+data class CoursePeopleAddResultSummary(
+    val added: List<String>,
+    val alreadyEnrolled: List<String>,
+    val notFound: List<String>,
+) {
+    val hasConflicts: Boolean get() = alreadyEnrolled.isNotEmpty() || notFound.isNotEmpty()
+    val didAdd: Boolean get() = added.isNotEmpty()
+}
+
 object CoursePeopleLogic {
+    val assignableRoles: List<CoursePeopleAssignableRole> = listOf(
+        CoursePeopleAssignableRole("student", "mobile.people.role.student"),
+        CoursePeopleAssignableRole("instructor", "mobile.people.role.teacher"),
+        CoursePeopleAssignableRole("ta", "mobile.people.role.ta"),
+        CoursePeopleAssignableRole("designer", "mobile.people.add.role.designer"),
+        CoursePeopleAssignableRole("observer", "mobile.people.add.role.observer"),
+        CoursePeopleAssignableRole("auditor", "mobile.people.add.role.auditor"),
+        CoursePeopleAssignableRole("librarian", "mobile.people.add.role.librarian"),
+    )
+
+    val managedEnrollmentStates: List<String> = listOf(
+        "active", "dropped", "withdrawn", "waitlist", "audit", "no_credit", "incomplete",
+    )
     fun normalizedRole(role: String): String = role.trim().lowercase()
 
     fun enrollmentRoleRank(role: String): Int =
@@ -118,4 +147,111 @@ object CoursePeopleLogic {
 
     fun canUpdateEnrollments(courseCode: String, permissions: List<String>): Boolean =
         permissions.contains("course:$courseCode:enrollments:update")
+
+    fun enrollmentAddEnabled(features: MobilePlatformFeatures): Boolean =
+        features.ffMobileEnrollmentAdd
+
+    fun canAddEnrollments(
+        courseCode: String,
+        permissions: List<String>,
+        features: MobilePlatformFeatures,
+        isOnline: Boolean,
+    ): Boolean {
+        if (!enrollmentAddEnabled(features)) return false
+        if (!isOnline) return false
+        return canUpdateEnrollments(courseCode, permissions)
+    }
+
+    fun canChangeEnrollmentState(
+        enrollment: CourseEnrollment,
+        courseCode: String,
+        permissions: List<String>,
+        features: MobilePlatformFeatures,
+        isOnline: Boolean,
+    ): Boolean {
+        if (!features.ffEnrollmentStateMachine) return false
+        if (!isOnline) return false
+        if (!canUpdateEnrollments(courseCode, permissions)) return false
+        return isStudentRole(enrollment.role)
+    }
+
+    fun parseEmails(raw: String): List<String> {
+        val seen = linkedSetOf<String>()
+        raw.split(',', ';', '\n', '\r', '\t', ' ')
+            .map { it.trim().lowercase() }
+            .filter { it.isNotEmpty() }
+            .forEach { seen.add(it) }
+        return seen.toList()
+    }
+
+    fun isValidEmail(email: String): Boolean {
+        val trimmed = email.trim()
+        if (trimmed.length !in 3..254) return false
+        val at = trimmed.indexOf('@')
+        if (at <= 0 || at >= trimmed.lastIndex) return false
+        val local = trimmed.substring(0, at)
+        val domain = trimmed.substring(at + 1)
+        if (local.isEmpty() || domain.isEmpty()) return false
+        if (!domain.contains('.')) return false
+        if ('@' in local || '@' in domain) return false
+        return true
+    }
+
+    fun validateEmailsForAdd(raw: String): Result<List<String>> {
+        val emails = parseEmails(raw)
+        if (emails.isEmpty()) return Result.failure(IllegalArgumentException("mobile.people.add.error.emailsRequired"))
+        if (emails.any { !isValidEmail(it) }) {
+            return Result.failure(IllegalArgumentException("mobile.people.add.error.invalidEmail"))
+        }
+        return Result.success(emails)
+    }
+
+    fun normalizeCourseRole(role: String): String {
+        val value = role.trim().lowercase()
+        return if (value == "teacher" || value == "owner") "instructor" else value
+    }
+
+    fun isAssignableRole(role: String): Boolean {
+        val normalized = normalizeCourseRole(role)
+        return assignableRoles.any { it.value == normalized }
+    }
+
+    fun buildAddRequest(emails: List<String>, courseRole: String): AddCourseEnrollmentsRequest =
+        AddCourseEnrollmentsRequest(
+            emails = emails.joinToString("\n"),
+            courseRole = normalizeCourseRole(courseRole),
+        )
+
+    fun summarizeAddResponse(response: AddCourseEnrollmentsResponse): CoursePeopleAddResultSummary =
+        CoursePeopleAddResultSummary(
+            added = response.added,
+            alreadyEnrolled = response.alreadyEnrolled,
+            notFound = response.notFound,
+        )
+
+    fun normalizedState(state: String?): String {
+        val value = state?.trim()?.lowercase().orEmpty()
+        return value.ifEmpty { "active" }
+    }
+
+    fun isInactiveState(state: String?): Boolean =
+        when (normalizedState(state)) {
+            "dropped", "withdrawn", "no_credit" -> true
+            else -> false
+        }
+
+    fun stateLabelKey(state: String?): String =
+        when (normalizedState(state)) {
+            "active" -> "mobile.people.state.active"
+            "waitlist" -> "mobile.people.state.waitlist"
+            "dropped" -> "mobile.people.state.dropped"
+            "withdrawn" -> "mobile.people.state.withdrawn"
+            "audit" -> "mobile.people.state.audit"
+            "no_credit" -> "mobile.people.state.noCredit"
+            "incomplete" -> "mobile.people.state.incomplete"
+            else -> "mobile.people.state.active"
+        }
+
+    fun deactivateState(forCurrent: String?): String =
+        if (isInactiveState(forCurrent)) "active" else "dropped"
 }

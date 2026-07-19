@@ -400,3 +400,16 @@ func TestMerge_FFMobileAdminConsoleDefaultOff(t *testing.T) {
 		t.Fatal("expected FFMobileAdminConsole true when DB set")
 	}
 }
+
+// MOB.4: FFMobileEnrollmentAdd default OFF when unset.
+func TestMerge_FFMobileEnrollmentAddDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFMobileEnrollmentAdd {
+		t.Fatal("expected FFMobileEnrollmentAdd false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMobileEnrollmentAdd: &on})
+	if !got.FFMobileEnrollmentAdd {
+		t.Fatal("expected FFMobileEnrollmentAdd true when DB set")
+	}
+}

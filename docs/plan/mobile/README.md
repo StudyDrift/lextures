@@ -25,8 +25,8 @@ Implementation plans for web-client features that the iOS and Android apps do
 |---|---|---|---|---|---|---|
 | [MOB.1](../../completed/mobile/MOB.1-course-creation-wizard.md) | Course creation wizard | `pages/lms/course-create.tsx` | Full parity behind `ffMobileCourseCreateV2` | **DONE** | MAJOR | M |
 | [MOB.2](../../completed/mobile/MOB.2-canvas-course-import.md) | Canvas course import | `pages/lms/canvas-import-courses-panel.tsx` | Full wizard behind `ffMobileCanvasImport` | **DONE** | MAJOR | M |
-| [MOB.3](MOB.3-system-settings-parity.md) | System settings parity | `pages/admin/*`, `components/settings/*`, `side-nav-admin-links.tsx` | ~20 admin views, partial menu | PARTIAL | MAJOR | L |
-| [MOB.4](MOB.4-course-enrollment-management.md) | Course enrollment management | `components/enrollment/*`, `people-api.ts` | view/remove only (`CoursePeopleView`) | MISSING (add) | MAJOR | S |
+| [MOB.3](../../completed/mobile/MOB.3-system-settings-parity.md) | System settings parity | `pages/admin/*`, `components/settings/*`, `side-nav-admin-links.tsx` | Phase 1 hub + audit log behind `ffMobileAdminConsole` | **DONE (Phase 1)** | MAJOR | L |
+| [MOB.4](../../completed/mobile/MOB.4-course-enrollment-management.md) | Course enrollment management | `components/enrollment/*`, `courses-api.ts` enrollments | Add/state/message/remove on People behind `ffMobileEnrollmentAdd` | **DONE** | MAJOR | S |
 | [MOB.5](MOB.5-interactive-quizzes.md) | Interactive quizzes | `pages/live-quiz-play-page.tsx`, `components/live-quiz/*` | none | MISSING | BLOCKER (K12) | L |
 | [MOB.6](MOB.6-whiteboards.md) | Whiteboards (authoring) | `components/whiteboard/*` | read-only viewer (`Live/WhiteboardView`) | THIN | MAJOR | M |
 | [MOB.7](MOB.7-marketplace-purchases.md) | Marketplace purchases & library | `pages/marketplace/*`, `pages/checkout/*`, `pages/*/me/purchases` | browse only; paid = "buy on web" | PARTIAL | MAJOR | M |

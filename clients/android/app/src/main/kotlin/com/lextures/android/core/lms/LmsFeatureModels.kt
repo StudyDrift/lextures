@@ -498,6 +498,8 @@ data class PlatformFeatures(
     val ffMobileCourseCreateV2: Boolean? = null,
     val ffMobileCanvasImport: Boolean? = null,
     val ffMobileAdminConsole: Boolean? = null,
+    val ffMobileEnrollmentAdd: Boolean? = null,
+    val ffEnrollmentStateMachine: Boolean? = null,
     val adminConsoleEnabled: Boolean? = null,
     val adminAuditLogEnabled: Boolean? = null,
     val ffConsortiumSharing: Boolean? = null,
@@ -837,6 +839,33 @@ data class CourseEnrollment(
 @Serializable
 data class CourseEnrollmentsResponse(
     val enrollments: List<CourseEnrollment> = emptyList(),
+)
+
+@Serializable
+data class AddCourseEnrollmentsRequest(
+    val emails: String,
+    val courseRole: String,
+)
+
+@Serializable
+data class AddCourseEnrollmentsResponse(
+    val added: List<String> = emptyList(),
+    val alreadyEnrolled: List<String> = emptyList(),
+    val notFound: List<String> = emptyList(),
+)
+
+@Serializable
+data class PatchEnrollmentStateRequest(
+    val state: String,
+    val reason: String? = null,
+)
+
+@Serializable
+data class PatchEnrollmentStateResponse(
+    val id: String? = null,
+    val state: String? = null,
+    val stateChangedAt: String? = null,
+    val stateReason: String? = null,
 )
 
 @Serializable

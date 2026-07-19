@@ -1931,6 +1931,37 @@ object LmsApi {
         decode<EnrollmentMessageResponse>(responseBody).id.orEmpty()
     }
 
+    suspend fun addCourseEnrollments(
+        courseCode: String,
+        payload: AddCourseEnrollmentsRequest,
+        accessToken: String,
+    ): AddCourseEnrollmentsResponse = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/enrollments",
+            method = "POST",
+            body = client.encodeBody(payload, AddCourseEnrollmentsRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode<AddCourseEnrollmentsResponse>(responseBody)
+    }
+
+    suspend fun patchEnrollmentState(
+        courseCode: String,
+        enrollmentId: String,
+        payload: PatchEnrollmentStateRequest,
+        accessToken: String,
+    ): PatchEnrollmentStateResponse = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/enrollments/${encodePath(enrollmentId)}/state",
+            method = "PATCH",
+            body = client.encodeBody(payload, PatchEnrollmentStateRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode<PatchEnrollmentStateResponse>(responseBody)
+    }
+
     // Onboarding (plan 15.11 / M1.3)
 
     /** Returns null when the onboarding feature flag is off (HTTP 404). */

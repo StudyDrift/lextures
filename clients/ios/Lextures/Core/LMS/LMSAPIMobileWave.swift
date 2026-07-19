@@ -216,6 +216,43 @@ extension LMSAPI {
         return try decode(EnrollmentMessageResponse.self, from: data).id ?? ""
     }
 
+    static func addCourseEnrollments(
+        courseCode: String,
+        body: AddCourseEnrollmentsRequest,
+        accessToken: String
+    ) async throws -> AddCourseEnrollmentsResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/enrollments",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AddCourseEnrollmentsResponse.self, from: data)
+    }
+
+    static func patchEnrollmentState(
+        courseCode: String,
+        enrollmentId: String,
+        body: PatchEnrollmentStateRequest,
+        accessToken: String
+    ) async throws -> PatchEnrollmentStateResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/enrollments/\(encodePath(enrollmentId))/state",
+            method: "PATCH",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(PatchEnrollmentStateResponse.self, from: data)
+    }
+
     // MARK: - Universal search (M0.6)
 
     static func fetchSearchIndex(accessToken: String) async throws -> SearchIndexResponse {

@@ -113,6 +113,7 @@ export type PlatformSettingsPayload = {
   ffMobileCourseCreateV2: boolean
   ffMobileCanvasImport: boolean
   ffMobileAdminConsole: boolean
+  ffMobileEnrollmentAdd: boolean
   ffUiMode: boolean
   ffReadAloud: boolean
   ffAltTextEnforcement: boolean

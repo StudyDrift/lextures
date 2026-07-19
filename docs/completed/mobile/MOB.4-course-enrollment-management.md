@@ -14,11 +14,24 @@
 | **Section** | Mobile parity |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING (add path) |
+| **Status (today)** | **DONE** |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Mobile team |
 | **Depends on** | — |
 | **Unblocks** | — |
+
+
+## Implementation notes (2026-07-18)
+
+Delivered course enrollment management on the mobile People roster (iOS + Android).
+
+- **Flag**: `ffMobileEnrollmentAdd` (DB `ff_mobile_enrollment_add`, default OFF) gates Add people + related write UI.
+- **Logic**: `CoursePeopleLogic` (iOS/Android) — assignable roles, email parse/validate, add request building, result summary, enrollment state helpers, permission×flag×online gating.
+- **API**: `POST .../enrollments` (add by email + `courseRole`), `PATCH .../enrollments/{id}/state` (deactivate/reactivate). Message + remove already shipped (M11.4). Invitee approve/decline remains on course detail (server requires enrollment owner).
+- **UI**: People screen gains Add people button/sheet (emails + role), state badges, deactivate/reactivate on student rows when `ffEnrollmentStateMachine` is on.
+- **i18n**: `mobile.people.add.*`, `mobile.people.state.*`, `mobile.people.emptyHintAdd`; synced via `scripts/sync-mobile-locales.py`.
+- **Observability**: client-only counters `enrollment_{added,state_changed,removed}` (role only, no PII).
+- **Tests**: unit coverage for add gating, email validation, request building, state helpers (iOS `CoursePeopleLogicTests`, Android `CoursePeopleLogicTest`); platformconfig merge default-off test; e2e API smoke `e2e/tests/mobile-enrollment-add.spec.ts`.
 
 ## 1. Problem Statement
 
