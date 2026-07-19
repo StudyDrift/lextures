@@ -186,13 +186,38 @@ export const FEATURE_LIFECYCLE_FAMILIES: readonly LifecycleFamily[] = [
         key: 'interactiveQuizzesEnabled',
         notes: 'Kit CRUD is course-scoped; no platform master for kits',
       },
-      { kind: 'platform', key: 'ffIqLiveHosting' },
+      {
+        kind: 'platform',
+        key: 'ffIqLiveHosting',
+        alwaysOn: true,
+        notes: 'COLLAPSE (docs/plan/flags.md): hosting is merged into the per-course flag; platform master is always-on',
+      },
     ],
     children: [
-      { kind: 'platform', key: 'ffIqTeamMode' },
-      { kind: 'platform', key: 'ffIqStudentPaced' },
-      { kind: 'platform', key: 'ffIqHomework' },
-      { kind: 'platform', key: 'ffIqGradebookPush' },
+      {
+        kind: 'platform',
+        key: 'ffIqTeamMode',
+        alwaysOn: true,
+        notes: 'COLLAPSE: quiz mode, no longer an independent platform kill-switch; always-on in merge',
+      },
+      {
+        kind: 'platform',
+        key: 'ffIqStudentPaced',
+        alwaysOn: true,
+        notes: 'COLLAPSE: quiz mode, no longer an independent platform kill-switch; always-on in merge',
+      },
+      {
+        kind: 'platform',
+        key: 'ffIqHomework',
+        alwaysOn: true,
+        notes: 'COLLAPSE: quiz mode, no longer an independent platform kill-switch; always-on in merge',
+      },
+      {
+        kind: 'platform',
+        key: 'ffIqGradebookPush',
+        alwaysOn: true,
+        notes: 'COLLAPSE: folded into the per-course Live Quizzes flag; always-on in merge',
+      },
       { kind: 'platform', key: 'ffIqPublicKitCatalog' },
       { kind: 'platform', key: 'ffIqGuestJoin' },
       { kind: 'platform', key: 'ffIqAiGeneration' },
@@ -337,16 +362,18 @@ export const FEATURE_LIFECYCLE_FAMILIES: readonly LifecycleFamily[] = [
     linkedHappyPathSpecs: ['parent-portal.spec.ts'],
     masterFlags: [{ kind: 'platform', key: 'ffParentPortal' }],
     children: [
-      { kind: 'platform', key: 'ffParentPortalV2' },
+      {
+        kind: 'platform',
+        key: 'ffParentPortalV2',
+        notes: 'COLLAPSE (docs/plan/flags.md): merge now mirrors ffParentPortal exactly; expanded sections are always included',
+      },
       { kind: 'platform', key: 'ffReportCards' },
     ],
     edges: [
       {
         parent: { kind: 'platform', key: 'ffParentPortal' },
         child: { kind: 'platform', key: 'ffParentPortalV2' },
-        parentAuthoritative: false,
-        knownGap:
-          'API does not gate on ffParentPortal; UI v2 sections check ffParentPortalV2 only (parent not authoritative yet)',
+        parentAuthoritative: true,
       },
       {
         parent: { kind: 'platform', key: 'ffParentPortalV2' },
@@ -633,21 +660,27 @@ export const FEATURE_LIFECYCLE_FAMILIES: readonly LifecycleFamily[] = [
     linkedHappyPathSpecs: [],
     masterFlags: [{ kind: 'platform', key: 'ffMotionNavigation' }],
     children: [
-      { kind: 'platform', key: 'ffMotionLists' },
-      { kind: 'platform', key: 'ffMotionReveal' },
+      {
+        kind: 'platform',
+        key: 'ffMotionLists',
+        notes: 'COLLAPSE (docs/plan/flags.md): merged into ffMotionNavigation, the single motion kill-switch',
+      },
+      {
+        kind: 'platform',
+        key: 'ffMotionReveal',
+        notes: 'COLLAPSE (docs/plan/flags.md): merged into ffMotionNavigation, the single motion kill-switch',
+      },
     ],
     edges: [
       {
         parent: { kind: 'platform', key: 'ffMotionNavigation' },
         child: { kind: 'platform', key: 'ffMotionLists' },
-        parentAuthoritative: false,
-        knownGap: 'Motion flags are independent UI preferences today',
+        parentAuthoritative: true,
       },
       {
         parent: { kind: 'platform', key: 'ffMotionNavigation' },
         child: { kind: 'platform', key: 'ffMotionReveal' },
-        parentAuthoritative: false,
-        knownGap: 'Motion flags are independent UI preferences today',
+        parentAuthoritative: true,
       },
     ],
     probes: [],

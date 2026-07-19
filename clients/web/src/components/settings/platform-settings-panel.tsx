@@ -5,8 +5,39 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { PLATFORM_SECRET_PLACEHOLDER } from '../../lib/platform-settings'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { FeatureToggleRow } from './feature-toggle-row'
-import { PLATFORM_FEATURE_DEFINITIONS, type PlatformFeatureDefinition } from './platform-feature-definitions'
+import {
+  PLATFORM_FEATURE_DEFINITIONS,
+  type PlatformFeatureDefinition,
+  type PlatformFeaturePack,
+} from './platform-feature-definitions'
 import type { FieldSource, PlatformSettingsPayload } from './platform-settings-types'
+
+/** Display order + heading for each capability pack in the Platform features grid. */
+const PLATFORM_FEATURE_PACK_ORDER: readonly PlatformFeaturePack[] = [
+  'core',
+  'admin',
+  'accessibility',
+  'ai',
+  'integrations',
+  'marketplace',
+  'higherEd',
+  'k12',
+  'compliance',
+]
+
+const PLATFORM_FEATURE_PACK_LABELS: Record<PlatformFeaturePack, string> = {
+  core: 'Core LMS',
+  admin: 'Admin',
+  accessibility: 'Accessibility',
+  ai: 'AI',
+  integrations: 'Integrations & infrastructure',
+  marketplace: 'Marketplace & self-learner',
+  higherEd: 'Higher education',
+  k12: 'K-12',
+  compliance: 'Compliance & legal',
+}
+
+const UNPACKED_LABEL = 'Other'
 
 export type { PlatformSettingsPayload } from './platform-settings-types'
 
@@ -35,15 +66,15 @@ function emptyForm(): PlatformSettingsPayload {
     samlSpEntityId: '',
     samlSpX509Pem: '',
     samlSpPrivateKeyPem: '',
-    annotationEnabled: false,
-    feedbackMediaEnabled: false,
+    annotationEnabled: true,
+    feedbackMediaEnabled: true,
     blindGradingEnabled: true,
     moderatedGradingEnabled: false,
     originalityDetectionEnabled: false,
     originalityStubExternal: false,
     gradePostingPoliciesEnabled: true,
-    gradebookCsvEnabled: false,
-    resubmissionWorkflowEnabled: false,
+    gradebookCsvEnabled: true,
+    resubmissionWorkflowEnabled: true,
     ltiEnabled: false,
     oneRosterEnabled: false,
     scimEnabled: false,
@@ -55,20 +86,21 @@ function emptyForm(): PlatformSettingsPayload {
     lpAdaptModalityEnabled: false,
     lpAdaptTutorEnabled: false,
     introCourseEnabled: true,
-    outcomesReportEnabled: false,
+    outcomesReportEnabled: true,
     atRiskAlertsEnabled: false,
     h5pEnabled: false,
     scormIngestionEnabled: false,
     oerLibraryEnabled: false,
     oerStub: false,
-    itemAnalysisEnabled: false,
+    itemAnalysisEnabled: true,
     xapiEmissionEnabled: false,
-    equationEditorEnabled: false,
+    equationEditorEnabled: true,
     readingLevelEnabled: false,
     graderAgentEnabled: false,
+    // Collapsed grader-agent children follow the (off) parent.
     graderAgentReviewInboxEnabled: false,
     graderAgentSuggestModeEnabled: false,
-    graderAgentTextEntryGradingEnabled: true,
+    graderAgentTextEntryGradingEnabled: false,
     graderAgentVisionGradingEnabled: false,
     graderAgentRunFiltersEnabled: false,
     graderAgentCostEstimateEnabled: false,
@@ -84,10 +116,10 @@ function emptyForm(): PlatformSettingsPayload {
     ffTranscriptInbound: false,
     ffDiplomas: false,
     ffWebhooks: false,
-    adminConsoleEnabled: false,
+    adminConsoleEnabled: true,
     impersonationEnabled: false,
     bulkCsvImportEnabled: false,
-    adminSearchEnabled: false,
+    adminSearchEnabled: true,
     customFieldsEnabled: false,
     seatManagementEnabled: false,
     emailTemplateEditorEnabled: false,
@@ -103,14 +135,14 @@ function emptyForm(): PlatformSettingsPayload {
     ffRevenueShare: false,
     ffTaxCollection: false,
     ffLearningPaths: false,
-    ffConditionalRelease: false,
-    ffPeerReview: false,
+    ffConditionalRelease: true,
+    ffPeerReview: true,
     ffCompletionCredentials: false,
     ffCompetencyBadges: false,
     badgesDefaultPublic: false,
     ffOnboardingFlow: false,
-    ffWhatifGrades: false,
-    ffGradeCurving: false,
+    ffWhatifGrades: true,
+    ffGradeCurving: true,
     ffAiStudyBuddy: false,
     ffLessonGenerator: false,
     ffPersistentTutor: false,
@@ -156,11 +188,12 @@ function emptyForm(): PlatformSettingsPayload {
     ffFeedback: true,
     ffVisualBoards: true,
     ffInteractiveQuizzes: true,
+    // Collapsed into the per-course Live Quizzes flag; always-on in the platform merge.
     ffIqLiveHosting: true,
-    ffIqTeamMode: false,
-    ffIqStudentPaced: false,
-    ffIqHomework: false,
-    ffIqGradebookPush: false,
+    ffIqTeamMode: true,
+    ffIqStudentPaced: true,
+    ffIqHomework: true,
+    ffIqGradebookPush: true,
     ffIqPublicKitCatalog: false,
     ffIqGuestJoin: false,
     ffIqAiGeneration: false,
@@ -176,8 +209,8 @@ function emptyForm(): PlatformSettingsPayload {
     storageQuotasEnabled: false,
     avScanningEnabled: false,
     virtualClassroomEnabled: true,
-    sessionManagementUiEnabled: false,
-    mfaEnabled: false,
+    sessionManagementUiEnabled: true,
+    mfaEnabled: true,
     mfaEnforcement: 'none',
     smtpHost: '',
     smtpPort: 587,
@@ -262,6 +295,28 @@ export function PlatformSettingsPanel() {
       (f) => f.label.toLowerCase().includes(q) || f.description.toLowerCase().includes(q),
     )
   }, [featureQuery])
+
+  /** Group visible features by pack, in a fixed operator-facing pack order; A–Z within a pack. */
+  const visiblePlatformFeaturePacks = useMemo(() => {
+    const byPack = new Map<string, PlatformFeatureDefinition[]>()
+    for (const feature of visiblePlatformFeatures) {
+      const pack = feature.pack ?? UNPACKED_LABEL
+      const bucket = byPack.get(pack)
+      if (bucket) {
+        bucket.push(feature)
+      } else {
+        byPack.set(pack, [feature])
+      }
+    }
+    const orderedKeys = [...PLATFORM_FEATURE_PACK_ORDER, UNPACKED_LABEL]
+    return orderedKeys
+      .filter((pack) => byPack.has(pack))
+      .map((pack) => ({
+        pack,
+        label: pack === UNPACKED_LABEL ? UNPACKED_LABEL : PLATFORM_FEATURE_PACK_LABELS[pack as PlatformFeaturePack],
+        features: byPack.get(pack) ?? [],
+      }))
+  }, [visiblePlatformFeatures])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -711,36 +766,46 @@ export function PlatformSettingsPanel() {
             />
           </div>
 
-          <div className="mt-1 divide-y divide-slate-100 dark:divide-neutral-800">
+          <div className="mt-1">
             {visiblePlatformFeatures.length === 0 ? (
               <p className="py-6 text-center text-sm text-slate-400 dark:text-neutral-500">
                 No features match &ldquo;{featureQuery}&rdquo;
               </p>
             ) : (
-              visiblePlatformFeatures.map((feature) => {
-                const enabled = form[feature.key]
-                const source = feature.sourceKey ? form.sources[feature.sourceKey] : 'default'
-                const environmentOwned = source === 'environment'
-                return (
-                  <FeatureToggleRow
-                    key={feature.key}
-                    label={feature.label}
-                    description={feature.description}
-                    enabled={enabled}
-                    disabled={featureSaving || environmentOwned}
-                    disabledReason={
-                      environmentOwned
-                        ? 'Managed by server environment configuration and cannot be changed here.'
-                        : undefined
-                    }
-                    meta={sourceBadge(source)}
-                    onToggle={() => {
-                      if (environmentOwned) return
-                      void persistPlatformFeature(feature.key, !enabled)
-                    }}
-                  />
-                )
-              })
+              visiblePlatformFeaturePacks.map(({ pack, label, features }) => (
+                <div key={pack} className="border-t border-slate-100 first:border-t-0 dark:border-neutral-800">
+                  <h4 className="pt-5 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500">
+                    {label}
+                  </h4>
+                  <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+                    {features.map((feature) => {
+                      const enabled = form[feature.key]
+                      const source = feature.sourceKey ? form.sources[feature.sourceKey] : 'default'
+                      const environmentOwned = source === 'environment'
+                      return (
+                        <FeatureToggleRow
+                          key={feature.key}
+                          label={feature.label}
+                          description={feature.description}
+                          enabled={enabled}
+                          disabled={featureSaving || environmentOwned}
+                          disabledReason={
+                            environmentOwned
+                              ? 'Managed by server environment configuration and cannot be changed here.'
+                              : undefined
+                          }
+                          meta={sourceBadge(source)}
+                          deriveFrom={feature.deriveFrom}
+                          onToggle={() => {
+                            if (environmentOwned) return
+                            void persistPlatformFeature(feature.key, !enabled)
+                          }}
+                        />
+                      )
+                    })}
+                  </div>
+                </div>
+              ))
             )}
           </div>
 

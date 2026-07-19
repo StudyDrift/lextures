@@ -32,12 +32,13 @@ func (d Deps) graderAgentEnabled() bool {
 	return d.effectiveConfig().GraderAgentEnabled
 }
 
+// Milestone sub-capabilities follow the parent master switch (docs/completed/flags.md).
 func (d Deps) graderAgentReviewInboxEnabled() bool {
-	return d.effectiveConfig().GraderAgentReviewInboxEnabled
+	return d.graderAgentEnabled()
 }
 
 func (d Deps) graderAgentTextEntryGradingEnabled() bool {
-	return d.effectiveConfig().GraderAgentTextEntryGradingEnabled
+	return d.graderAgentEnabled()
 }
 
 func (d Deps) graderAgentVisionGradingEnabled() bool {
@@ -45,15 +46,15 @@ func (d Deps) graderAgentVisionGradingEnabled() bool {
 }
 
 func (d Deps) graderAgentRunFiltersEnabled() bool {
-	return d.effectiveConfig().GraderAgentRunFiltersEnabled
+	return d.graderAgentEnabled()
 }
 
 func (d Deps) graderAgentCostEstimateEnabled() bool {
-	return d.effectiveConfig().GraderAgentCostEstimateEnabled
+	return d.graderAgentEnabled()
 }
 
 func (d Deps) graderAgentCancelRunEnabled() bool {
-	return d.effectiveConfig().GraderAgentCancelRunEnabled
+	return d.graderAgentEnabled()
 }
 
 func (d Deps) requireGraderAgentReviewInboxAccess(w http.ResponseWriter, r *http.Request) (courseCode string, viewer uuid.UUID, ok bool) {

@@ -48,6 +48,8 @@ var configEnvKeys = []string{
 
 	"ORIGINALITY_DETECTION_ENABLED",
 	"ORIGINALITY_STUB_EXTERNAL",
+	"CLAMAV_STUB",
+	"OER_STUB",
 	"PORT",
 	"PUBLIC_WEB_ORIGIN",
 	"RESUBMISSION_WORKFLOW_ENABLED",
@@ -140,6 +142,17 @@ func TestAiProviderAbstractionEnabled_RollbackOff(t *testing.T) {
 	c := Load()
 	if c.AiProviderAbstractionEnabled {
 		t.Fatalf("AiProviderAbstractionEnabled: want false when AI_PROVIDER_ABSTRACTION_ENABLED=0")
+	}
+}
+
+func TestLoad_EnvOnlyStubs(t *testing.T) {
+	baseEnv(t)
+	t.Setenv("ORIGINALITY_STUB_EXTERNAL", "1")
+	t.Setenv("CLAMAV_STUB", "true")
+	t.Setenv("OER_STUB", "yes")
+	c := Load()
+	if !c.OriginalityStubExternal || !c.ClamAVStub || !c.OERStub {
+		t.Fatalf("stubs: originality=%v clamav=%v oer=%v", c.OriginalityStubExternal, c.ClamAVStub, c.OERStub)
 	}
 }
 

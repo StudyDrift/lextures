@@ -12,7 +12,7 @@ import (
 )
 
 func TestGraderAgentCancelRun_DisabledReturns404(t *testing.T) {
-	d := Deps{Config: config.Config{GraderAgentEnabled: true, GraderAgentCancelRunEnabled: false}}
+	d := Deps{Config: config.Config{GraderAgentEnabled: false}}
 	runID := uuid.New()
 	req := httptest.NewRequest(
 		http.MethodPost,

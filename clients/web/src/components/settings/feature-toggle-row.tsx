@@ -10,6 +10,8 @@ type Props = {
   onToggle: () => void
   /** Optional badge or hint shown beside the label (e.g. env/database source). */
   meta?: ReactNode
+  /** Short human hint for DERIVE (credential-gated) flags, e.g. "SAML SP certificate + private key". */
+  deriveFrom?: string
 }
 
 export function FeatureToggleRow({
@@ -20,6 +22,7 @@ export function FeatureToggleRow({
   disabledReason,
   onToggle,
   meta,
+  deriveFrom,
 }: Props) {
   const descriptionId = disabledReason ? `${slug(label)}-disabled-reason` : undefined
 
@@ -29,8 +32,25 @@ export function FeatureToggleRow({
         <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
           {label}
           {meta ? <span className="font-normal">{meta}</span> : null}
+          {deriveFrom ? (
+            <span
+              className="ms-2 rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-950/60 dark:text-amber-200"
+              data-testid="feature-toggle-config-gated-badge"
+            >
+              Config-gated
+            </span>
+          ) : null}
         </p>
         <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{description}</p>
+        {deriveFrom ? (
+          <p
+            className="mt-1 text-xs text-slate-400 dark:text-neutral-500"
+            data-testid="feature-toggle-derive-note"
+          >
+            Requires: {deriveFrom}
+            {!enabled ? ' — won\u2019t take effect until these credentials are configured.' : ''}
+          </p>
+        ) : null}
         {disabled && disabledReason ? (
           <p
             id={descriptionId}

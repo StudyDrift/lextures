@@ -49,10 +49,8 @@ func quizJoinRateLimited(key string) bool {
 }
 
 func (d Deps) iqLiveHostingOff(w http.ResponseWriter) bool {
-	if !d.effectiveConfig().FFIqLiveHosting {
-		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Live quiz hosting is not enabled.")
-		return true
-	}
+	// Live hosting is always on at platform; course Live Quizzes flag is the gate.
+	_ = w
 	return false
 }
 

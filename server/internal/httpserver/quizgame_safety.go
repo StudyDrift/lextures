@@ -33,7 +33,7 @@ func clientRemoteIP(r *http.Request) string {
 // Under-13 (COPPA) courses always block public guest join — teacher-mediated enrolled only.
 func (d Deps) guestJoinAllowed(r *http.Request, courseCode string, sess *quizgame.Session) bool {
 	cfg := d.effectiveConfig()
-	if !cfg.FFIqLiveHosting || !cfg.FFIqGuestJoin {
+	if !cfg.FFIqGuestJoin {
 		return false
 	}
 	if sess == nil || !sess.AllowGuests {

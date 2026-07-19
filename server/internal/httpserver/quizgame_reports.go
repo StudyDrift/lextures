@@ -21,10 +21,8 @@ import (
 )
 
 func (d Deps) iqGradebookPushOff(w http.ResponseWriter) bool {
-	if !d.effectiveConfig().FFIqGradebookPush {
-		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
-		return true
-	}
+	// Gradebook push follows the course Live Quizzes flag (platform sub-flag collapsed).
+	_ = w
 	return false
 }
 

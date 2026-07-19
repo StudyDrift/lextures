@@ -248,6 +248,8 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     BACKUP_MODULE_ENABLED="true" \
     AV_SCANNING_ENABLED="true" \
     CLAMAV_STUB="true" \
+    OER_STUB="true" \
+    ORIGINALITY_STUB_EXTERNAL="true" \
     STORAGE_QUOTAS_ENABLED="true" \
     FEATURE_ENGAGEMENT_TRACKING="true" \
     FF_SIS_INTEGRATION="true" \
@@ -260,7 +262,6 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     FF_CLASSROOM_SIGNALS="true" \
     FF_PLAGIARISM_CHECKS="true" \
     ORIGINALITY_DETECTION_ENABLED="true" \
-    ORIGINALITY_STUB_EXTERNAL="true" \
     PORT="${E2E_API_PORT}" \
     "${E2E_SERVER_BIN}" &
 else
@@ -277,6 +278,8 @@ else
     BACKUP_MODULE_ENABLED="true" \
     AV_SCANNING_ENABLED="true" \
     CLAMAV_STUB="true" \
+    OER_STUB="true" \
+    ORIGINALITY_STUB_EXTERNAL="true" \
     STORAGE_QUOTAS_ENABLED="true" \
     FEATURE_ENGAGEMENT_TRACKING="true" \
     FF_SIS_INTEGRATION="true" \
@@ -289,7 +292,6 @@ else
     FF_CLASSROOM_SIGNALS="true" \
     FF_PLAGIARISM_CHECKS="true" \
     ORIGINALITY_DETECTION_ENABLED="true" \
-    ORIGINALITY_STUB_EXTERNAL="true" \
     PORT="${E2E_API_PORT}" \
     go run ./cmd/server &
 fi

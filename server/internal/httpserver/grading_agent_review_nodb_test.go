@@ -9,7 +9,7 @@ import (
 )
 
 func TestGraderAgentReviewInbox_DisabledReturns404(t *testing.T) {
-	d := Deps{Config: config.Config{GraderAgentEnabled: true, GraderAgentReviewInboxEnabled: false}}
+	d := Deps{Config: config.Config{GraderAgentEnabled: false}}
 	item := "00000000-0000-0000-0000-000000000001"
 	tests := []struct {
 		method string

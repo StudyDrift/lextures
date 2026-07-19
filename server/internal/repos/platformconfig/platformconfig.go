@@ -1602,7 +1602,8 @@ func ResolveSources(env config.Config, db *Row) Sources {
 	s.BlindGradingEnabled = sourceBoolDB(db.BlindGradingEnabled)
 	s.ModeratedGradingEnabled = sourceBoolDB(db.ModeratedGradingEnabled)
 	s.OriginalityDetectionEnabled = sourceBoolDB(db.OriginalityDetectionEnabled)
-	s.OriginalityStubExternal = sourceBoolDB(db.OriginalityStubExternal)
+	// Test doubles are env-only (ORIGINALITY_STUB_EXTERNAL); never DB-owned.
+	s.OriginalityStubExternal = SourceEnvironment
 	s.GradePostingPoliciesEnabled = sourceBoolDB(db.GradePostingPoliciesEnabled)
 	s.GradebookCSVEnabled = sourceBoolDB(db.GradebookCSVEnabled)
 	s.ResubmissionWorkflowEnabled = sourceBoolDB(db.ResubmissionWorkflowEnabled)
@@ -1637,7 +1638,7 @@ func sourcesAllEnvironment(env config.Config) Sources {
 		BlindGradingEnabled:         SourceDefault,
 		ModeratedGradingEnabled:     SourceDefault,
 		OriginalityDetectionEnabled: SourceDefault,
-		OriginalityStubExternal:     SourceDefault,
+		OriginalityStubExternal:     SourceEnvironment,
 		GradePostingPoliciesEnabled: SourceDefault,
 		GradebookCSVEnabled:         SourceDefault,
 		ResubmissionWorkflowEnabled: SourceDefault,

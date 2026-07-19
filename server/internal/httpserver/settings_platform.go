@@ -951,10 +951,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			v := *body.OriginalityDetectionEnabled
 			wr.OriginalityDetectionEnabled = &v
 		})
-		set("originalitystubexternal", body.OriginalityStubExternal != nil, func() {
-			v := *body.OriginalityStubExternal
-			wr.OriginalityStubExternal = &v
-		})
+		// originalityStubExternal / clamavStub / oerStub are env-only; ignore PUT writes.
 		set("gradepostingpoliciesenabled", body.GradePostingPoliciesEnabled != nil, func() {
 			v := *body.GradePostingPoliciesEnabled
 			wr.GradePostingPoliciesEnabled = &v
@@ -998,41 +995,63 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("storagequotasenabled", body.StorageQuotasEnabled, func(v bool) { wr.StorageQuotasEnabled = &v })
 		setBool("atriskalertsenabled", body.AtRiskAlertsEnabled, func(v bool) { wr.AtRiskAlertsEnabled = &v })
 		setBool("avscanningenabled", body.AvScanningEnabled, func(v bool) { wr.AvScanningEnabled = &v })
-		setBool("clamavstub", body.ClamAVStub, func(v bool) { wr.ClamAVStub = &v })
+		// clamavStub / oerStub are env-only; ignore PUT writes.
 		setBool("h5penabled", body.H5PEnabled, func(v bool) { wr.H5PEnabled = &v })
 		setBool("scormingestionenabled", body.ScormIngestionEnabled, func(v bool) { wr.ScormIngestionEnabled = &v })
 		setBool("oerlibraryenabled", body.OERLibraryEnabled, func(v bool) { wr.OERLibraryEnabled = &v })
-		setBool("oerstub", body.OERStub, func(v bool) { wr.OERStub = &v })
 		setBool("itemanalysisenabled", body.ItemAnalysisEnabled, func(v bool) { wr.ItemAnalysisEnabled = &v })
 		setBool("studentprogressenabled", body.StudentProgressEnabled, func(v bool) { wr.StudentProgressEnabled = &v })
 		setBool("engagementtrackingenabled", body.EngagementTrackingEnabled, func(v bool) { wr.EngagementTrackingEnabled = &v })
 		setBool("selfreflectionenabled", body.SelfReflectionEnabled, func(v bool) { wr.SelfReflectionEnabled = &v })
 		setBool("learnerprofileenabled", body.LearnerProfileEnabled, func(v bool) { wr.LearnerProfileEnabled = &v })
-		setBool("lpadaptrecommendationsenabled", body.LpAdaptRecommendationsEnabled, func(v bool) { wr.LpAdaptRecommendationsEnabled = &v })
-		setBool("lpadaptreviewenabled", body.LpAdaptReviewEnabled, func(v bool) { wr.LpAdaptReviewEnabled = &v })
-		setBool("lpadaptmodalityenabled", body.LpAdaptModalityEnabled, func(v bool) { wr.LpAdaptModalityEnabled = &v })
-		setBool("lpadapttutorenabled", body.LpAdaptTutorEnabled, func(v bool) { wr.LpAdaptTutorEnabled = &v })
+		// LpAdapt collapse: any child write fans out to all four columns.
+		setLpAdapt := func(v bool) {
+			wr.LpAdaptRecommendationsEnabled = &v
+			wr.LpAdaptReviewEnabled = &v
+			wr.LpAdaptModalityEnabled = &v
+			wr.LpAdaptTutorEnabled = &v
+		}
+		setBool("lpadaptrecommendationsenabled", body.LpAdaptRecommendationsEnabled, setLpAdapt)
+		setBool("lpadaptreviewenabled", body.LpAdaptReviewEnabled, setLpAdapt)
+		setBool("lpadaptmodalityenabled", body.LpAdaptModalityEnabled, setLpAdapt)
+		setBool("lpadapttutorenabled", body.LpAdaptTutorEnabled, setLpAdapt)
 		setBool("introcourseenabled", body.IntroCourseEnabled, func(v bool) { wr.IntroCourseEnabled = &v })
 		setBool("outcomesreportenabled", body.OutcomesReportEnabled, func(v bool) { wr.OutcomesReportEnabled = &v })
 		setBool("instructorinsightsenabled", body.InstructorInsightsEnabled, func(v bool) { wr.InstructorInsightsEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("readinglevelenabled", body.ReadingLevelEnabled, func(v bool) { wr.ReadingLevelEnabled = &v })
-		setBool("graderagentenabled", body.GraderAgentEnabled, func(v bool) { wr.GraderAgentEnabled = &v })
-		setBool("graderagentreviewinboxenabled", body.GraderAgentReviewInboxEnabled, func(v bool) { wr.GraderAgentReviewInboxEnabled = &v })
-		setBool("graderagentsuggestmodeenabled", body.GraderAgentSuggestModeEnabled, func(v bool) { wr.GraderAgentSuggestModeEnabled = &v })
-		setBool("graderagenttextentrygradingenabled", body.GraderAgentTextEntryGradingEnabled, func(v bool) { wr.GraderAgentTextEntryGradingEnabled = &v })
+		setBool("graderagentenabled", body.GraderAgentEnabled, func(v bool) {
+			wr.GraderAgentEnabled = &v
+			// Milestone sub-flags follow the parent (Vision stays independently writable).
+			wr.GraderAgentReviewInboxEnabled = &v
+			wr.GraderAgentSuggestModeEnabled = &v
+			wr.GraderAgentTextEntryGradingEnabled = &v
+			wr.GraderAgentRunFiltersEnabled = &v
+			wr.GraderAgentCostEstimateEnabled = &v
+			wr.GraderAgentCancelRunEnabled = &v
+		})
+		// Collapsed grader children: ignore independent writes (Merge derives from parent).
 		setBool("graderagentvisiongradingenabled", body.GraderAgentVisionGradingEnabled, func(v bool) { wr.GraderAgentVisionGradingEnabled = &v })
-		setBool("graderagentrunfiltersenabled", body.GraderAgentRunFiltersEnabled, func(v bool) { wr.GraderAgentRunFiltersEnabled = &v })
-		setBool("graderagentcostestimateenabled", body.GraderAgentCostEstimateEnabled, func(v bool) { wr.GraderAgentCostEstimateEnabled = &v })
-		setBool("graderagentcancelrunenabled", body.GraderAgentCancelRunEnabled, func(v bool) { wr.GraderAgentCancelRunEnabled = &v })
 		setBool("codeexecutionenabled", body.CodeExecutionEnabled, func(v bool) { wr.CodeExecutionEnabled = &v })
-		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
-		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
+		setAltText := func(v bool) {
+			wr.AltTextEnforcementEnabled = &v
+			wr.FFAltTextEnforcement = &v
+		}
+		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, setAltText)
+		setBool("ffalttextenforcement", body.FFAltTextEnforcement, setAltText)
 		setBool("speechtotextenabled", body.SpeechToTextEnabled, func(v bool) { wr.SpeechToTextEnabled = &v })
-		setBool("accommodationsengineenabled", body.AccommodationsEngineEnabled, func(v bool) { wr.AccommodationsEngineEnabled = &v })
-		setBool("ffaccommodationsengine", body.FFAccommodationsEngine, func(v bool) { wr.FFAccommodationsEngine = &v })
-		setBool("readaloudenabled", body.ReadAloudEnabled, func(v bool) { wr.ReadAloudEnabled = &v })
-		setBool("ffreadaloud", body.FFReadAloud, func(v bool) { wr.FFReadAloud = &v })
+		setAccommodations := func(v bool) {
+			wr.AccommodationsEngineEnabled = &v
+			wr.FFAccommodationsEngine = &v
+		}
+		setBool("accommodationsengineenabled", body.AccommodationsEngineEnabled, setAccommodations)
+		setBool("ffaccommodationsengine", body.FFAccommodationsEngine, setAccommodations)
+		setReadAloud := func(v bool) {
+			wr.ReadAloudEnabled = &v
+			wr.FFReadAloud = &v
+		}
+		setBool("readaloudenabled", body.ReadAloudEnabled, setReadAloud)
+		setBool("ffreadaloud", body.FFReadAloud, setReadAloud)
 		setBool("translationmemoryenabled", body.TranslationMemoryEnabled, func(v bool) { wr.TranslationMemoryEnabled = &v })
 		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
@@ -1042,7 +1061,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("stateprivacyenabled", body.StatePrivacyEnabled, func(v bool) { wr.StatePrivacyEnabled = &v })
 		setBool("backupmoduleenabled", body.BackupModuleEnabled, func(v bool) { wr.BackupModuleEnabled = &v })
 		setBool("originalitydetectionenabled", body.OriginalityDetectionEnabled, func(v bool) { wr.OriginalityDetectionEnabled = &v })
-		setBool("originalitystubexternal", body.OriginalityStubExternal, func(v bool) { wr.OriginalityStubExternal = &v })
+		// originalityStubExternal is env-only; ignore PUT writes.
 		setBool("ffuimode", body.FFUiMode, func(v bool) { wr.FFUiMode = &v })
 		setBool("isoismsenabled", body.IsoIsmsEnabled, func(v bool) { wr.IsoIsmsEnabled = &v })
 		setBool("adminauditlogenabled", body.AdminAuditLogEnabled, func(v bool) { wr.AdminAuditLogEnabled = &v })
@@ -1057,8 +1076,12 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
 		setBool("securitydisclosuremoduleenabled", body.SecurityDisclosureModuleEnabled, func(v bool) { wr.SecurityDisclosureModuleEnabled = &v })
-		setBool("ffparentportal", body.FFParentPortal, func(v bool) { wr.FFParentPortal = &v })
-		setBool("ffparentportalv2", body.FFParentPortalV2, func(v bool) { wr.FFParentPortalV2 = &v })
+		setParentPortal := func(v bool) {
+			wr.FFParentPortal = &v
+			wr.FFParentPortalV2 = &v
+		}
+		setBool("ffparentportal", body.FFParentPortal, setParentPortal)
+		setBool("ffparentportalv2", body.FFParentPortalV2, setParentPortal)
 		setBool("ffreportcards", body.FFReportCards, func(v bool) { wr.FFReportCards = &v })
 		setBool("fflibrary", body.FFLibrary, func(v bool) { wr.FFLibrary = &v })
 		setBool("ffbroadcasts", body.FFBroadcasts, func(v bool) { wr.FFBroadcasts = &v })
@@ -1093,15 +1116,10 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffcoursemarketplace", body.FFCourseMarketplace, func(v bool) { wr.FFCourseMarketplace = &v })
 		setBool("fffeedback", body.FFFeedback, func(v bool) { wr.FFFeedback = &v })
-		setBool("ffvisualboards", body.FFVisualBoards, func(v bool) { wr.FFVisualBoards = &v })
+		// ffVisualBoards / ffInteractiveQuizzes and collapsed IQ mode flags are always-on at
+		// platform level; ignore PUT writes (Merge hard-wires effective values).
 		setBool("ffboardsrealtime", body.FFBoardsRealtime, func(v bool) { wr.FFBoardsRealtime = &v })
 		setBool("ffboardsexternalsharing", body.FFBoardsExternalSharing, func(v bool) { wr.FFBoardsExternalSharing = &v })
-		setBool("ffinteractivequizzes", body.FFInteractiveQuizzes, func(v bool) { wr.FFInteractiveQuizzes = &v })
-		setBool("ffiqlivehosting", body.FFIqLiveHosting, func(v bool) { wr.FFIqLiveHosting = &v })
-		setBool("ffiqteammode", body.FFIqTeamMode, func(v bool) { wr.FFIqTeamMode = &v })
-		setBool("ffiqstudentpaced", body.FFIqStudentPaced, func(v bool) { wr.FFIqStudentPaced = &v })
-		setBool("ffiqhomework", body.FFIqHomework, func(v bool) { wr.FFIqHomework = &v })
-		setBool("ffiqgradebookpush", body.FFIqGradebookPush, func(v bool) { wr.FFIqGradebookPush = &v })
 		setBool("ffiqpublickitcatalog", body.FFIqPublicKitCatalog, func(v bool) { wr.FFIqPublicKitCatalog = &v })
 		setBool("ffiqguestjoin", body.FFIqGuestJoin, func(v bool) { wr.FFIqGuestJoin = &v })
 		setBool("ffiqaigeneration", body.FFIqAiGeneration, func(v bool) { wr.FFIqAiGeneration = &v })
@@ -1135,11 +1153,20 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
 		setBool("soc2moduleenabled", body.SOC2ModuleEnabled, func(v bool) { wr.SOC2ModuleEnabled = &v })
 		setBool("ffreadingpreferences", body.FFReadingPreferences, func(v bool) { wr.FFReadingPreferences = &v })
-		setBool("ffmotionnavigation", body.FFMotionNavigation, func(v bool) { wr.FFMotionNavigation = &v })
-		setBool("ffmotionreveal", body.FFMotionReveal, func(v bool) { wr.FFMotionReveal = &v })
-		setBool("ffmotionlists", body.FFMotionLists, func(v bool) { wr.FFMotionLists = &v })
-		setBool("ffmobilecreatecourse", body.FFMobileCreateCourse, func(v bool) { wr.FFMobileCreateCourse = &v })
-		setBool("ffmobilecoursecreatev2", body.FFMobileCourseCreateV2, func(v bool) { wr.FFMobileCourseCreateV2 = &v })
+		setMotion := func(v bool) {
+			wr.FFMotionNavigation = &v
+			wr.FFMotionReveal = &v
+			wr.FFMotionLists = &v
+		}
+		setBool("ffmotionnavigation", body.FFMotionNavigation, setMotion)
+		setBool("ffmotionreveal", body.FFMotionReveal, setMotion)
+		setBool("ffmotionlists", body.FFMotionLists, setMotion)
+		setMobileCreate := func(v bool) {
+			wr.FFMobileCreateCourse = &v
+			wr.FFMobileCourseCreateV2 = &v
+		}
+		setBool("ffmobilecreatecourse", body.FFMobileCreateCourse, setMobileCreate)
+		setBool("ffmobilecoursecreatev2", body.FFMobileCourseCreateV2, setMobileCreate)
 		setBool("ffmobilecanvasimport", body.FFMobileCanvasImport, func(v bool) { wr.FFMobileCanvasImport = &v })
 		setBool("ffmobileadminconsole", body.FFMobileAdminConsole, func(v bool) { wr.FFMobileAdminConsole = &v })
 		setBool("ffmobileenrollmentadd", body.FFMobileEnrollmentAdd, func(v bool) { wr.FFMobileEnrollmentAdd = &v })
