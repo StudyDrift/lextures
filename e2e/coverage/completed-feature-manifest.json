@@ -4404,6 +4404,24 @@
       "reviewed": true
     },
     {
+      "id": "AN.5",
+      "path": "docs/completed/animations/AN.5-overlays-surfaces.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Playwright smoke for command-palette overlay phase, reduced-motion fade, and toaster motion class.",
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/overlay-motion.spec.ts"
+        }
+      ],
+      "reviewed": true
+    },
+    {
       "id": "attendance",
       "path": "docs/completed/attendance.md",
       "markets": [
