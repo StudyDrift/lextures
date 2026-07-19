@@ -1,6 +1,6 @@
 # Completed feature E2E coverage report
 
-Total stories: **482**
+Total stories: **483**
 
 ## Coverage levels
 
@@ -9,7 +9,7 @@ Total stories: **482**
 | journey | 81 |
 | smoke | 170 |
 | api-contract | 4 |
-| covered-by-parent | 11 |
+| covered-by-parent | 12 |
 | manual | 8 |
 | not-applicable | 152 |
 | missing | 56 |
@@ -21,14 +21,14 @@ Total stories: **482**
 | cli | 48 |
 | docs | 7 |
 | mobile | 88 |
-| ops | 15 |
+| ops | 16 |
 | web | 324 |
 
 ## By market tag
 
 | Market | Count |
 |---|---:|
-| ALL | 437 |
+| ALL | 438 |
 | HE | 19 |
 | K12 | 17 |
 | SL | 16 |
@@ -136,7 +136,7 @@ Total stories: **482**
 | 19-ai-capabilities | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | 20-docs-trust | 0 | 0 | 0 | 0 | 2 | 0 | 0 |
 | 21-cli | 0 | 0 | 0 | 0 | 0 | 8 | 0 |
-| _root | 6 | 5 | 0 | 0 | 0 | 5 | 0 |
+| _root | 6 | 5 | 0 | 1 | 0 | 5 | 0 |
 | agent-grader | 0 | 6 | 0 | 0 | 0 | 0 | 3 |
 | ai-providers | 0 | 8 | 0 | 0 | 0 | 0 | 1 |
 | animations | 0 | 3 | 0 | 0 | 0 | 0 | 1 |
