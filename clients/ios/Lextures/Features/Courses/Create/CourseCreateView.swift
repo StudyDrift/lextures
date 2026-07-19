@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Full-screen create-course wizard (M11.5).
+/// Full-screen create-course wizard (M11.5 / MOB.1).
 struct CourseCreateView: View {
     @Environment(AuthSession.self) private var session
     @Environment(AppShellModel.self) private var shell
@@ -18,6 +18,7 @@ struct CourseCreateView: View {
     @State private var selectedGradeLevel = ""
     @State private var selectedTemplateId = CourseCreateLogic.defaultTemplateId
     @State private var firstModuleTitle = ""
+    @State private var competencies: [CourseCreateLogic.CompetencyDraft] = [.empty()]
     @State private var createdCourse: CourseSummary?
     @State private var terms: [OrgTerm] = []
     @State private var loadingTerms = false
@@ -25,21 +26,30 @@ struct CourseCreateView: View {
     @State private var errorMessage: String?
     @State private var titleError: String?
     @State private var showCancelConfirm = false
+    @State private var showCanvasComingSoon = false
+    @State private var draftKey = ""
+    @State private var didRestoreDraft = false
+    @State private var recordedStart = false
 
     private var isCompetency: Bool { courseMode == .competencyBased }
+    private var v2Enabled: Bool { CourseCreateLogic.courseCreateV2Enabled(shell.platformFeatures) }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea()
                 VStack(spacing: 0) {
-                    progressHeader
+                    if step != .source {
+                        progressHeader
+                    }
                     ScrollView {
                         VStack(alignment: .leading, spacing: 16) {
                             if let errorMessage {
                                 LMSErrorBanner(message: errorMessage)
                             }
                             switch step {
+                            case .source:
+                                sourceStep
                             case .basics:
                                 basicsStep
                             case .syllabus:
@@ -70,13 +80,30 @@ struct CourseCreateView: View {
                 titleVisibility: .visible
             ) {
                 Button(L.text("mobile.createCourse.cancel.leave"), role: .destructive) {
+                    clearDraft()
                     dismiss()
                 }
                 Button(L.text("mobile.common.close"), role: .cancel) {}
             } message: {
                 Text(L.text("mobile.createCourse.cancel.message"))
             }
-            .task { await loadTerms() }
+            .sheet(isPresented: $showCanvasComingSoon) {
+                CanvasImportComingSoonView {
+                    showCanvasComingSoon = false
+                    step = .source
+                }
+            }
+            .task { await bootstrap() }
+            .onChange(of: step) { _, _ in persistDraft() }
+            .onChange(of: title) { _, _ in persistDraft() }
+            .onChange(of: description) { _, _ in persistDraft() }
+            .onChange(of: courseMode) { _, _ in persistDraft() }
+            .onChange(of: selectedTermId) { _, _ in persistDraft() }
+            .onChange(of: selectedGradeLevel) { _, _ in persistDraft() }
+            .onChange(of: selectedTemplateId) { _, _ in persistDraft() }
+            .onChange(of: firstModuleTitle) { _, _ in persistDraft() }
+            .onChange(of: competencies) { _, _ in persistDraft() }
+            .onChange(of: createdCourse?.courseCode) { _, _ in persistDraft() }
         }
     }
 
@@ -86,7 +113,7 @@ struct CourseCreateView: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             HStack(spacing: 8) {
-                ForEach(CourseCreateLogic.WizardStep.allCases) { wizardStep in
+                ForEach(CourseCreateLogic.WizardStep.progressSteps) { wizardStep in
                     let active = wizardStep <= step
                     VStack(alignment: .leading, spacing: 4) {
                         Capsule()
@@ -105,6 +132,56 @@ struct CourseCreateView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+    }
+
+    private var sourceStep: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L.text("mobile.createCourse.source.intro"))
+                .font(.subheadline)
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            sourceCard(
+                title: L.text("mobile.createCourse.source.scratch.title"),
+                summary: L.text("mobile.createCourse.source.scratch.summary"),
+                systemImage: "doc.badge.plus"
+            ) {
+                step = .basics
+                maybeRecordStarted()
+            }
+            sourceCard(
+                title: L.text("mobile.createCourse.source.canvas.title"),
+                summary: L.text("mobile.createCourse.source.canvas.summary"),
+                systemImage: "square.and.arrow.down.on.square"
+            ) {
+                showCanvasComingSoon = true
+            }
+        }
+    }
+
+    private func sourceCard(title: String, summary: String, systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: systemImage)
+                    .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                    .frame(width: 28, height: 28)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    Text(summary)
+                        .font(.caption)
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(LexturesTheme.cardBackground(for: colorScheme))
+            )
+        }
+        .buttonStyle(.plain)
+        .frame(minHeight: 44)
     }
 
     private var basicsStep: some View {
@@ -216,11 +293,15 @@ struct CourseCreateView: View {
     private var finishStep: some View {
         VStack(alignment: .leading, spacing: 14) {
             if isCompetency {
-                Text(L.text("mobile.createCourse.competency.handoffTitle"))
-                    .font(.headline)
-                Text(L.text("mobile.createCourse.competency.handoffBody"))
-                    .font(.subheadline)
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                if v2Enabled {
+                    competencyEditor
+                } else {
+                    Text(L.text("mobile.createCourse.competency.handoffTitle"))
+                        .font(.headline)
+                    Text(L.text("mobile.createCourse.competency.handoffBody"))
+                        .font(.subheadline)
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                }
             } else {
                 fieldLabel(L.text("mobile.createCourse.firstModule.label"))
                 TextField(L.text("mobile.createCourse.firstModule.placeholder"), text: $firstModuleTitle)
@@ -232,11 +313,121 @@ struct CourseCreateView: View {
         }
     }
 
+    private var competencyEditor: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L.text("mobile.createCourse.competency.intro"))
+                .font(.subheadline)
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+
+            ForEach(Array(competencies.enumerated()), id: \.element.id) { index, _ in
+                competencyCard(index: index)
+            }
+
+            Button {
+                competencies.append(.empty())
+            } label: {
+                Label(L.text("mobile.createCourse.competency.add"), systemImage: "plus.circle")
+            }
+            .frame(minHeight: 44)
+        }
+    }
+
+    private func competencyCard(index: Int) -> some View {
+        let binding = $competencies[index]
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Button {
+                    competencies[index].expanded.toggle()
+                } label: {
+                    HStack {
+                        Image(systemName: competencies[index].expanded ? "chevron.down" : "chevron.right")
+                        Text(L.format("mobile.createCourse.competency.heading", index + 1))
+                            .font(.headline)
+                    }
+                }
+                .buttonStyle(.plain)
+                Spacer()
+                if competencies.count > 1 {
+                    Button(role: .destructive) {
+                        competencies.remove(at: index)
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .accessibilityLabel(L.text("mobile.createCourse.competency.remove"))
+                }
+            }
+
+            if competencies[index].expanded {
+                TextField(L.text("mobile.createCourse.competency.titlePlaceholder"), text: binding.title)
+                    .textFieldStyle(.roundedBorder)
+                TextField(L.text("mobile.createCourse.competency.descriptionPlaceholder"), text: binding.description, axis: .vertical)
+                    .lineLimit(2...4)
+                    .textFieldStyle(.roundedBorder)
+
+                ForEach(Array(competencies[index].subOutcomes.enumerated()), id: \.element.id) { subIndex, _ in
+                    subOutcomeEditor(compIndex: index, subIndex: subIndex)
+                }
+
+                Button {
+                    competencies[index].subOutcomes.append(.empty())
+                } label: {
+                    Text(L.text("mobile.createCourse.competency.addSubOutcome"))
+                }
+                .frame(minHeight: 44)
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(LexturesTheme.cardBackground(for: colorScheme))
+        )
+    }
+
+    private func subOutcomeEditor(compIndex: Int, subIndex: Int) -> some View {
+        let binding = $competencies[compIndex].subOutcomes[subIndex]
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(L.format("mobile.createCourse.competency.subOutcomeHeading", subIndex + 1))
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                if competencies[compIndex].subOutcomes.count > 1 {
+                    Button(role: .destructive) {
+                        competencies[compIndex].subOutcomes.remove(at: subIndex)
+                    } label: {
+                        Image(systemName: "minus.circle")
+                    }
+                }
+            }
+            TextField(L.text("mobile.createCourse.competency.subOutcomeTitlePlaceholder"), text: binding.title)
+                .textFieldStyle(.roundedBorder)
+            TextField(L.text("mobile.createCourse.competency.subOutcomeDescriptionPlaceholder"), text: binding.description, axis: .vertical)
+                .lineLimit(2...3)
+                .textFieldStyle(.roundedBorder)
+            TextField(L.text("mobile.createCourse.competency.assessmentTitlePlaceholder"), text: binding.assessmentTitle)
+                .textFieldStyle(.roundedBorder)
+            Picker(L.text("mobile.createCourse.competency.assessmentKind"), selection: binding.assessmentKind) {
+                Text(L.text("mobile.createCourse.competency.assessment.quiz")).tag(CourseCreateLogic.AssessmentKind.quiz)
+                Text(L.text("mobile.createCourse.competency.assessment.assignment")).tag(CourseCreateLogic.AssessmentKind.assignment)
+            }
+            .pickerStyle(.segmented)
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(LexturesTheme.textSecondary(for: colorScheme).opacity(0.25), lineWidth: 1)
+        )
+    }
+
     private var bottomBar: some View {
         HStack(spacing: 12) {
-            if step != .basics {
+            if step != .basics && step != .source {
                 Button(L.text("mobile.createCourse.action.back")) {
                     goBack()
+                }
+                .disabled(submitting)
+            } else if step == .basics && v2Enabled {
+                Button(L.text("mobile.createCourse.action.back")) {
+                    step = .source
                 }
                 .disabled(submitting)
             }
@@ -247,18 +438,20 @@ struct CourseCreateView: View {
                 }
                 .disabled(submitting)
             }
-            Button {
-                Task { await primaryAction() }
-            } label: {
-                if submitting {
-                    ProgressView()
-                        .frame(minWidth: 100)
-                } else {
-                    Text(primaryButtonTitle)
+            if step != .source {
+                Button {
+                    Task { await primaryAction() }
+                } label: {
+                    if submitting {
+                        ProgressView()
+                            .frame(minWidth: 100)
+                    } else {
+                        Text(primaryButtonTitle)
+                    }
                 }
+                .buttonStyle(.borderedProminent)
+                .disabled(submitting)
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(submitting)
         }
         .padding(16)
         .background(.ultraThinMaterial)
@@ -266,9 +459,14 @@ struct CourseCreateView: View {
 
     private var primaryButtonTitle: String {
         switch step {
+        case .source:
+            return L.text("mobile.createCourse.action.continue")
         case .basics, .syllabus:
             return L.text("mobile.createCourse.action.continue")
         case .finish:
+            if isCompetency && v2Enabled {
+                return L.text("mobile.createCourse.action.createCompetencies")
+            }
             return L.text("mobile.createCourse.action.createOpen")
         }
     }
@@ -283,6 +481,7 @@ struct CourseCreateView: View {
         if CourseCreateLogic.shouldConfirmCancel(createdCourseCode: createdCourse?.courseCode) {
             showCancelConfirm = true
         } else {
+            clearDraft()
             dismiss()
         }
     }
@@ -302,24 +501,98 @@ struct CourseCreateView: View {
             step = .basics
         case .finish:
             step = .syllabus
-        case .basics:
+        case .basics, .source:
             break
         }
     }
 
     private func primaryAction() async {
         switch step {
+        case .source:
+            break
         case .basics:
             await submitBasics()
         case .syllabus:
             await continueFromSyllabus()
         case .finish:
             if isCompetency {
-                await finishCompetencyHandoff()
+                if v2Enabled {
+                    await finishCompetencyBased()
+                } else {
+                    await finishCompetencyHandoff()
+                }
             } else {
                 await finishTraditional(skipModule: false)
             }
         }
+    }
+
+    private func bootstrap() async {
+        step = CourseCreateLogic.initialWizardStep(v2Enabled: v2Enabled)
+        let orgId = CourseCreateLogic.resolveOrgId(accessToken: session.accessToken, courses: existingCourses)
+        draftKey = CourseCreateDraftStore.storageKey(userId: session.userEmail, orgId: orgId)
+        if v2Enabled, !didRestoreDraft, let draft = CourseCreateDraftStore.load(key: draftKey) {
+            restore(draft)
+            didRestoreDraft = true
+        }
+        await loadTerms()
+        if step != .source {
+            maybeRecordStarted()
+        }
+    }
+
+    private func restore(_ draft: CourseCreateDraftStore.Draft) {
+        step = CourseCreateLogic.WizardStep(rawValue: draft.step) ?? .basics
+        if step == .source && !v2Enabled { step = .basics }
+        title = draft.title
+        description = draft.description
+        courseMode = CourseCreateLogic.modeFromCourseType(draft.courseMode)
+        selectedTermId = draft.selectedTermId
+        selectedGradeLevel = draft.selectedGradeLevel
+        selectedTemplateId = draft.selectedTemplateId
+        firstModuleTitle = draft.firstModuleTitle
+        competencies = draft.competencies.isEmpty ? [.empty()] : draft.competencies
+        if let code = draft.createdCourseCode, !code.isEmpty {
+            createdCourse = CourseSummary(
+                id: code,
+                courseCode: code,
+                title: draft.title,
+                description: draft.description,
+                published: false,
+                courseType: draft.courseMode,
+                termId: draft.selectedTermId.isEmpty ? nil : draft.selectedTermId,
+                gradeLevel: draft.selectedGradeLevel.isEmpty ? nil : draft.selectedGradeLevel
+            )
+        }
+    }
+
+    private func persistDraft() {
+        guard v2Enabled, !draftKey.isEmpty else { return }
+        let draft = CourseCreateDraftStore.Draft(
+            step: step.rawValue,
+            title: title,
+            description: description,
+            courseMode: courseMode.rawValue,
+            selectedTermId: selectedTermId,
+            selectedGradeLevel: selectedGradeLevel,
+            selectedTemplateId: selectedTemplateId,
+            firstModuleTitle: firstModuleTitle,
+            createdCourseCode: createdCourse?.courseCode,
+            competencies: competencies,
+            createSource: nil
+        )
+        CourseCreateDraftStore.save(key: draftKey, draft: draft)
+    }
+
+    private func clearDraft() {
+        guard !draftKey.isEmpty else { return }
+        CourseCreateDraftStore.clear(key: draftKey)
+    }
+
+    private func maybeRecordStarted() {
+        guard v2Enabled, !recordedStart else { return }
+        CourseCreateObservability.recordStarted(mode: courseMode.rawValue, templateId: selectedTemplateId)
+        recordedStart = true
     }
 
     private func loadTerms() async {
@@ -368,6 +641,9 @@ struct CourseCreateView: View {
                 )
                 createdCourse = try await LMSAPI.createCourse(body: body, accessToken: token)
             }
+            if v2Enabled {
+                CourseCreateObservability.recordStepCompleted(step: 1)
+            }
             step = .syllabus
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription
@@ -396,6 +672,9 @@ struct CourseCreateView: View {
                     existing: firstModuleTitle
                 )
             }
+            if v2Enabled {
+                CourseCreateObservability.recordStepCompleted(step: 2)
+            }
             step = .finish
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription
@@ -419,6 +698,11 @@ struct CourseCreateView: View {
                     )
                 }
             }
+            if v2Enabled {
+                CourseCreateObservability.recordStepCompleted(step: 3)
+                CourseCreateObservability.recordFinished(mode: courseMode.rawValue, templateId: selectedTemplateId)
+            }
+            clearDraft()
             await shell.refresh(accessToken: token)
             let refreshed = (try? await LMSAPI.fetchCourse(courseCode: course.courseCode, accessToken: token)) ?? course
             onFinished(refreshed)
@@ -434,9 +718,108 @@ struct CourseCreateView: View {
         submitting = true
         errorMessage = nil
         defer { submitting = false }
+        clearDraft()
         await shell.refresh(accessToken: token)
         let refreshed = (try? await LMSAPI.fetchCourse(courseCode: course.courseCode, accessToken: token)) ?? course
         onFinished(refreshed)
         dismiss()
+    }
+
+    private func finishCompetencyBased() async {
+        guard let course = createdCourse, let token = session.accessToken else { return }
+        if let validation = CourseCreateLogic.validateCompetencies(competencies) {
+            errorMessage = formatCompetencyError(validation)
+            return
+        }
+        submitting = true
+        errorMessage = nil
+        defer { submitting = false }
+        do {
+            for comp in competencies {
+                let module = try await LMSAPI.createCourseModule(
+                    courseCode: course.courseCode,
+                    title: comp.title.trimmingCharacters(in: .whitespacesAndNewlines),
+                    accessToken: token
+                )
+                let outcome = try await LMSAPI.createCourseOutcome(
+                    courseCode: course.courseCode,
+                    body: CreateCourseOutcomeBody(
+                        title: comp.title.trimmingCharacters(in: .whitespacesAndNewlines),
+                        description: comp.description.trimmingCharacters(in: .whitespacesAndNewlines)
+                    ),
+                    accessToken: token
+                )
+                _ = try await LMSAPI.patchCourseOutcome(
+                    courseCode: course.courseCode,
+                    outcomeId: outcome.id,
+                    body: PatchCourseOutcomeBody(moduleStructureItemId: module.id),
+                    accessToken: token
+                )
+                for sub in comp.subOutcomes {
+                    let subRow = try await LMSAPI.createCourseOutcomeSubOutcome(
+                        courseCode: course.courseCode,
+                        outcomeId: outcome.id,
+                        body: CreateCourseOutcomeSubOutcomeBody(
+                            title: sub.title.trimmingCharacters(in: .whitespacesAndNewlines),
+                            description: sub.description.trimmingCharacters(in: .whitespacesAndNewlines)
+                        ),
+                        accessToken: token
+                    )
+                    let assessmentTitle = sub.assessmentTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let item: CourseStructureItem
+                    switch sub.assessmentKind {
+                    case .assignment:
+                        item = try await LMSAPI.createModuleAssignment(
+                            courseCode: course.courseCode,
+                            moduleId: module.id,
+                            title: assessmentTitle,
+                            accessToken: token
+                        )
+                    case .quiz:
+                        item = try await LMSAPI.createModuleQuiz(
+                            courseCode: course.courseCode,
+                            moduleId: module.id,
+                            title: assessmentTitle,
+                            accessToken: token
+                        )
+                    }
+                    _ = try await LMSAPI.addCourseOutcomeLink(
+                        courseCode: course.courseCode,
+                        outcomeId: outcome.id,
+                        body: AddCourseOutcomeLinkBody(
+                            structureItemId: item.id,
+                            targetKind: sub.assessmentKind.rawValue,
+                            measurementLevel: "summative",
+                            intensityLevel: "high",
+                            subOutcomeId: subRow.id
+                        ),
+                        accessToken: token
+                    )
+                }
+            }
+            CourseCreateObservability.recordStepCompleted(step: 3)
+            CourseCreateObservability.recordFinished(mode: courseMode.rawValue, templateId: selectedTemplateId)
+            clearDraft()
+            await shell.refresh(accessToken: token)
+            let refreshed = (try? await LMSAPI.fetchCourse(courseCode: course.courseCode, accessToken: token)) ?? course
+            onFinished(refreshed)
+            dismiss()
+        } catch {
+            errorMessage = (error as? LocalizedError)?.errorDescription
+                ?? L.text("mobile.createCourse.error.competencyFailed")
+        }
+    }
+
+    private func formatCompetencyError(_ error: CourseCreateLogic.CompetencyValidationError) -> String {
+        switch error.args.count {
+        case 0:
+            return L.text(String.LocalizationValue(error.key))
+        case 1:
+            return L.format(String.LocalizationValue(error.key), error.args[0])
+        case 2:
+            return L.format(String.LocalizationValue(error.key), error.args[0], error.args[1])
+        default:
+            return L.text(String.LocalizationValue(error.key))
+        }
     }
 }

@@ -732,6 +732,18 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Animate list insert/remove/reorder and drag-lift. Turn off to disable instantly (AN.4 kill-switch).',
   },
   {
+    key: 'ffMobileCreateCourse',
+    label: 'Mobile create course',
+    description:
+      'Show the New course entry and basic create wizard on iOS and Android (M11.5).',
+  },
+  {
+    key: 'ffMobileCourseCreateV2',
+    label: 'Mobile create course v2',
+    description:
+      'Full mobile create-wizard parity: competency authoring, Canvas import entry, and draft resume (MOB.1).',
+  },
+  {
     key: 'ffReportCards',
     label: 'Report cards',
     description: 'Standards-based report card generation and distribution for K-12 terms.',

@@ -42,6 +42,20 @@ struct CreateCourseOutcomeBody: Encodable {
 struct PatchCourseOutcomeBody: Encodable {
     var title: String?
     var description: String?
+    var moduleStructureItemId: String?
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(title, forKey: .title)
+        try container.encodeIfPresent(description, forKey: .description)
+        try container.encodeIfPresent(moduleStructureItemId, forKey: .moduleStructureItemId)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case title
+        case description
+        case moduleStructureItemId
+    }
 }
 
 struct AddCourseOutcomeLinkBody: Encodable {

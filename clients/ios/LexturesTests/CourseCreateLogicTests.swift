@@ -11,6 +11,7 @@ final class CourseCreateLogicTests: XCTestCase {
     func testShouldShowNewCourseActionRequiresFlagPermissionAndOnline() {
         var features = MobilePlatformFeatures()
         features.ffMobileCreateCourse = false
+        features.ffMobileCourseCreateV2 = false
         let perms = [CourseCreateLogic.courseCreatePermission]
         XCTAssertFalse(
             CourseCreateLogic.shouldShowNewCourseAction(permissions: perms, features: features, isOnline: true)
@@ -26,6 +27,56 @@ final class CourseCreateLogicTests: XCTestCase {
         XCTAssertFalse(
             CourseCreateLogic.shouldShowNewCourseAction(permissions: [], features: features, isOnline: true)
         )
+
+        features.ffMobileCreateCourse = false
+        features.ffMobileCourseCreateV2 = true
+        XCTAssertTrue(
+            CourseCreateLogic.shouldShowNewCourseAction(permissions: perms, features: features, isOnline: true)
+        )
+        XCTAssertTrue(CourseCreateLogic.courseCreateV2Enabled(features))
+        XCTAssertEqual(CourseCreateLogic.initialWizardStep(v2Enabled: true), .source)
+        XCTAssertEqual(CourseCreateLogic.initialWizardStep(v2Enabled: false), .basics)
+    }
+
+    func testValidateCompetenciesParity() {
+        XCTAssertEqual(
+            CourseCreateLogic.validateCompetencies([])?.key,
+            "mobile.createCourse.error.competency.minOne"
+        )
+
+        var incomplete = CourseCreateLogic.CompetencyDraft.empty()
+        incomplete.title = ""
+        XCTAssertEqual(
+            CourseCreateLogic.validateCompetencies([incomplete])?.key,
+            "mobile.createCourse.error.competency.titleRequired"
+        )
+
+        incomplete.title = "Reading"
+        incomplete.subOutcomes = []
+        XCTAssertEqual(
+            CourseCreateLogic.validateCompetencies([incomplete])?.key,
+            "mobile.createCourse.error.competency.subOutcomeMinOne"
+        )
+
+        incomplete.subOutcomes = [CourseCreateLogic.SubOutcomeDraft(title: "", assessmentTitle: "Quiz 1")]
+        XCTAssertEqual(
+            CourseCreateLogic.validateCompetencies([incomplete])?.key,
+            "mobile.createCourse.error.competency.subOutcomeTitleRequired"
+        )
+
+        incomplete.subOutcomes = [CourseCreateLogic.SubOutcomeDraft(title: "Main idea", assessmentTitle: "")]
+        XCTAssertEqual(
+            CourseCreateLogic.validateCompetencies([incomplete])?.key,
+            "mobile.createCourse.error.competency.assessmentTitleRequired"
+        )
+
+        let valid = CourseCreateLogic.CompetencyDraft(
+            title: "Reading",
+            subOutcomes: [
+                CourseCreateLogic.SubOutcomeDraft(title: "Main idea", assessmentTitle: "Quiz 1"),
+            ]
+        )
+        XCTAssertNil(CourseCreateLogic.validateCompetencies([valid]))
     }
 
     func testValidateTitleRequired() {

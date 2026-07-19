@@ -358,3 +358,19 @@ func TestMerge_IqAiGenerationDefaultOffWhenDBUnset(t *testing.T) {
 }
 
 func ptr(s string) *string { return &s }
+
+// MOB.1: FFMobileCourseCreateV2 / FFMobileCreateCourse default OFF when unset.
+func TestMerge_FFMobileCourseCreateFlagsDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFMobileCreateCourse {
+		t.Fatal("expected FFMobileCreateCourse false when DB unset")
+	}
+	if got.FFMobileCourseCreateV2 {
+		t.Fatal("expected FFMobileCourseCreateV2 false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMobileCourseCreateV2: &on, FFMobileCreateCourse: &on})
+	if !got.FFMobileCreateCourse || !got.FFMobileCourseCreateV2 {
+		t.Fatal("expected both mobile create flags true when DB set")
+	}
+}

@@ -49,6 +49,7 @@ data class CreateCourseOutcomeBody(
 data class PatchCourseOutcomeBody(
     val title: String? = null,
     val description: String? = null,
+    val moduleStructureItemId: String? = null,
 )
 
 @Serializable

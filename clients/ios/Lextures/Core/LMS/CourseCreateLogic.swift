@@ -1,6 +1,6 @@
 import Foundation
 
-/// Course create wizard helpers (M11.5) — permission gate, templates, validation, step state.
+/// Course create wizard helpers (M11.5 / MOB.1) — permission gate, templates, validation, step state.
 enum CourseCreateLogic {
     static let courseCreatePermission = "global:app:course:create"
     static let blankTemplateId = "blank"
@@ -21,7 +21,91 @@ enum CourseCreateLogic {
         }
     }
 
+    enum CreateSource: String, CaseIterable, Identifiable, Hashable {
+        case scratch
+        case canvas
+
+        var id: String { rawValue }
+
+        var titleKey: String {
+            switch self {
+            case .scratch: return "mobile.createCourse.source.scratch.title"
+            case .canvas: return "mobile.createCourse.source.canvas.title"
+            }
+        }
+
+        var summaryKey: String {
+            switch self {
+            case .scratch: return "mobile.createCourse.source.scratch.summary"
+            case .canvas: return "mobile.createCourse.source.canvas.summary"
+            }
+        }
+    }
+
+    enum AssessmentKind: String, CaseIterable, Identifiable, Hashable {
+        case quiz
+        case assignment
+
+        var id: String { rawValue }
+
+        var labelKey: String {
+            switch self {
+            case .quiz: return "mobile.createCourse.competency.assessment.quiz"
+            case .assignment: return "mobile.createCourse.competency.assessment.assignment"
+            }
+        }
+    }
+
+    struct SubOutcomeDraft: Identifiable, Equatable, Hashable, Codable {
+        var id: String
+        var title: String
+        var description: String
+        var assessmentTitle: String
+        var assessmentKind: AssessmentKind
+
+        init(
+            id: String = UUID().uuidString.lowercased(),
+            title: String = "",
+            description: String = "",
+            assessmentTitle: String = "",
+            assessmentKind: AssessmentKind = .quiz
+        ) {
+            self.id = id
+            self.title = title
+            self.description = description
+            self.assessmentTitle = assessmentTitle
+            self.assessmentKind = assessmentKind
+        }
+
+        static func empty() -> SubOutcomeDraft { SubOutcomeDraft() }
+    }
+
+    struct CompetencyDraft: Identifiable, Equatable, Hashable, Codable {
+        var id: String
+        var title: String
+        var description: String
+        var subOutcomes: [SubOutcomeDraft]
+        var expanded: Bool
+
+        init(
+            id: String = UUID().uuidString.lowercased(),
+            title: String = "",
+            description: String = "",
+            subOutcomes: [SubOutcomeDraft] = [SubOutcomeDraft.empty()],
+            expanded: Bool = true
+        ) {
+            self.id = id
+            self.title = title
+            self.description = description
+            self.subOutcomes = subOutcomes
+            self.expanded = expanded
+        }
+
+        static func empty() -> CompetencyDraft { CompetencyDraft() }
+    }
+
     enum WizardStep: Int, CaseIterable, Identifiable, Comparable {
+        case source = 0
         case basics = 1
         case syllabus = 2
         case finish = 3
@@ -32,8 +116,12 @@ enum CourseCreateLogic {
             lhs.rawValue < rhs.rawValue
         }
 
+        /// Progress steps shown in the header (excludes source chooser).
+        static var progressSteps: [WizardStep] { [.basics, .syllabus, .finish] }
+
         var labelKey: String {
             switch self {
+            case .source: return "mobile.createCourse.step.source"
             case .basics: return "mobile.createCourse.step.basics"
             case .syllabus: return "mobile.createCourse.step.syllabus"
             case .finish: return "mobile.createCourse.step.module"
@@ -202,7 +290,11 @@ enum CourseCreateLogic {
     static let gradeLevels: [String] = CourseSettingsLogic.gradeLevels
 
     static func createCourseEnabled(_ features: MobilePlatformFeatures) -> Bool {
-        features.ffMobileCreateCourse
+        features.ffMobileCreateCourse || features.ffMobileCourseCreateV2
+    }
+
+    static func courseCreateV2Enabled(_ features: MobilePlatformFeatures) -> Bool {
+        features.ffMobileCourseCreateV2
     }
 
     static func canCreateCourses(permissions: [String]) -> Bool {
@@ -219,9 +311,48 @@ enum CourseCreateLogic {
         return isOnline
     }
 
+    static func initialWizardStep(v2Enabled: Bool) -> WizardStep {
+        v2Enabled ? .source : .basics
+    }
+
     static func validateTitle(_ title: String) -> String? {
         if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return "mobile.createCourse.error.titleRequired"
+        }
+        return nil
+    }
+
+    /// Parity with web `validateCompetencies` (localized message keys + format args).
+    struct CompetencyValidationError: Equatable {
+        var key: String
+        var args: [String]
+
+        static func message(_ key: String, _ args: String...) -> CompetencyValidationError {
+            CompetencyValidationError(key: key, args: args)
+        }
+    }
+
+    static func validateCompetencies(_ competencies: [CompetencyDraft]) -> CompetencyValidationError? {
+        if competencies.isEmpty {
+            return .message("mobile.createCourse.error.competency.minOne")
+        }
+        for (i, c) in competencies.enumerated() {
+            let title = c.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            if title.isEmpty {
+                return .message("mobile.createCourse.error.competency.titleRequired", "\(i + 1)")
+            }
+            if c.subOutcomes.isEmpty {
+                return .message("mobile.createCourse.error.competency.subOutcomeMinOne", title)
+            }
+            for (j, s) in c.subOutcomes.enumerated() {
+                let subTitle = s.title.trimmingCharacters(in: .whitespacesAndNewlines)
+                if subTitle.isEmpty {
+                    return .message("mobile.createCourse.error.competency.subOutcomeTitleRequired", title, "\(j + 1)")
+                }
+                if s.assessmentTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    return .message("mobile.createCourse.error.competency.assessmentTitleRequired", subTitle)
+                }
+            }
         }
         return nil
     }

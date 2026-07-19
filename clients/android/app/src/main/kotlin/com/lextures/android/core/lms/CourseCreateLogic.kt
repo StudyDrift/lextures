@@ -5,7 +5,7 @@ import org.json.JSONObject
 import java.util.Base64
 import java.util.UUID
 
-/** Course create wizard helpers (M11.5) — permission gate, templates, validation, step state. */
+/** Course create wizard helpers (M11.5 / MOB.1) — permission gate, templates, validation, step state. */
 object CourseCreateLogic {
     const val COURSE_CREATE_PERMISSION = "global:app:course:create"
     const val BLANK_TEMPLATE_ID = "blank"
@@ -23,7 +23,47 @@ object CourseCreateLogic {
         }
     }
 
+    enum class CreateSource(val value: String) {
+        Scratch("scratch"),
+        Canvas("canvas"),
+    }
+
+    enum class AssessmentKind(val value: String) {
+        Quiz("quiz"),
+        Assignment("assignment"),
+    }
+
+    data class SubOutcomeDraft(
+        val id: String = UUID.randomUUID().toString().lowercase(),
+        val title: String = "",
+        val description: String = "",
+        val assessmentTitle: String = "",
+        val assessmentKind: AssessmentKind = AssessmentKind.Quiz,
+    ) {
+        companion object {
+            fun empty(): SubOutcomeDraft = SubOutcomeDraft()
+        }
+    }
+
+    data class CompetencyDraft(
+        val id: String = UUID.randomUUID().toString().lowercase(),
+        val title: String = "",
+        val description: String = "",
+        val subOutcomes: List<SubOutcomeDraft> = listOf(SubOutcomeDraft.empty()),
+        val expanded: Boolean = true,
+    ) {
+        companion object {
+            fun empty(): CompetencyDraft = CompetencyDraft()
+        }
+    }
+
+    data class CompetencyValidationError(
+        val key: String,
+        val args: List<String> = emptyList(),
+    )
+
     enum class WizardStep(val number: Int) {
+        Source(0),
         Basics(1),
         Syllabus(2),
         Finish(3),
@@ -31,6 +71,7 @@ object CourseCreateLogic {
 
         companion object {
             fun fromNumber(n: Int): WizardStep = entries.firstOrNull { it.number == n } ?: Basics
+            val progressSteps: List<WizardStep> = listOf(Basics, Syllabus, Finish)
         }
     }
 
@@ -185,7 +226,11 @@ object CourseCreateLogic {
 
     val gradeLevels: List<String> = CourseSettingsLogic.gradeLevels
 
-    fun createCourseEnabled(features: MobilePlatformFeatures): Boolean = features.ffMobileCreateCourse
+    fun createCourseEnabled(features: MobilePlatformFeatures): Boolean =
+        features.ffMobileCreateCourse || features.ffMobileCourseCreateV2
+
+    fun courseCreateV2Enabled(features: MobilePlatformFeatures): Boolean =
+        features.ffMobileCourseCreateV2
 
     fun canCreateCourses(permissions: List<String>): Boolean =
         permissions.contains(COURSE_CREATE_PERMISSION)
@@ -200,8 +245,49 @@ object CourseCreateLogic {
         return isOnline
     }
 
+    fun initialWizardStep(v2Enabled: Boolean): WizardStep =
+        if (v2Enabled) WizardStep.Source else WizardStep.Basics
+
     fun validateTitle(title: String): String? =
         if (title.trim().isEmpty()) "mobile.createCourse.error.titleRequired" else null
+
+    /** Parity with web `validateCompetencies` (localized message keys + format args). */
+    fun validateCompetencies(competencies: List<CompetencyDraft>): CompetencyValidationError? {
+        if (competencies.isEmpty()) {
+            return CompetencyValidationError("mobile.createCourse.error.competency.minOne")
+        }
+        competencies.forEachIndexed { i, c ->
+            val title = c.title.trim()
+            if (title.isEmpty()) {
+                return CompetencyValidationError(
+                    "mobile.createCourse.error.competency.titleRequired",
+                    listOf("${i + 1}"),
+                )
+            }
+            if (c.subOutcomes.isEmpty()) {
+                return CompetencyValidationError(
+                    "mobile.createCourse.error.competency.subOutcomeMinOne",
+                    listOf(title),
+                )
+            }
+            c.subOutcomes.forEachIndexed { j, s ->
+                val subTitle = s.title.trim()
+                if (subTitle.isEmpty()) {
+                    return CompetencyValidationError(
+                        "mobile.createCourse.error.competency.subOutcomeTitleRequired",
+                        listOf(title, "${j + 1}"),
+                    )
+                }
+                if (s.assessmentTitle.trim().isEmpty()) {
+                    return CompetencyValidationError(
+                        "mobile.createCourse.error.competency.assessmentTitleRequired",
+                        listOf(subTitle),
+                    )
+                }
+            }
+        }
+        return null
+    }
 
     fun template(id: String): StarterTemplate? = starterTemplates.firstOrNull { it.id == id }
 

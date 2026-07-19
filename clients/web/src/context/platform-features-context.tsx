@@ -59,6 +59,8 @@ export type PlatformFeatures = {
   ffMotionNavigation: boolean
   ffMotionReveal: boolean
   ffMotionLists: boolean
+  ffMobileCreateCourse: boolean
+  ffMobileCourseCreateV2: boolean
   ffLibrary: boolean
   ffBroadcasts: boolean
   ffClassroomSignals: boolean
@@ -190,6 +192,8 @@ const defaultFeatures: PlatformFeatures = {
   ffMotionNavigation: true,
   ffMotionReveal: true,
   ffMotionLists: true,
+  ffMobileCreateCourse: false,
+  ffMobileCourseCreateV2: false,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
@@ -319,6 +323,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffMotionNavigation: true,
     ffMotionReveal: true,
     ffMotionLists: true,
+    ffMobileCreateCourse: false,
+    ffMobileCourseCreateV2: false,
     ffLibrary: false,
     ffBroadcasts: false,
     ffClassroomSignals: false,
@@ -455,6 +461,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMotionNavigation: data.ffMotionNavigation !== false,
           ffMotionReveal: data.ffMotionReveal !== false,
           ffMotionLists: data.ffMotionLists !== false,
+          ffMobileCreateCourse: data.ffMobileCreateCourse === true,
+          ffMobileCourseCreateV2: data.ffMobileCourseCreateV2 === true,
           ffLibrary: data.ffLibrary === true,
           ffBroadcasts: data.ffBroadcasts === true,
           ffClassroomSignals: data.ffClassroomSignals === true,
@@ -548,6 +556,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMotionNavigation: next.ffMotionNavigation !== false,
           ffMotionReveal: next.ffMotionReveal !== false,
           ffMotionLists: next.ffMotionLists !== false,
+          ffMobileCreateCourse: next.ffMobileCreateCourse === true,
+          ffMobileCourseCreateV2: next.ffMobileCourseCreateV2 === true,
           ffLibrary: next.ffLibrary === true,
           ffBroadcasts: next.ffBroadcasts === true,
           ffClassroomSignals: next.ffClassroomSignals === true,

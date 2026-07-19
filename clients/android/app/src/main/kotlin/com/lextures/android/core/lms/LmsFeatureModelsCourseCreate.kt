@@ -37,3 +37,8 @@ data class PatchCourseSyllabusRequest(
 data class CreateCourseModuleRequest(
     val title: String,
 )
+
+@Serializable
+data class CreateModuleItemRequest(
+    val title: String,
+)

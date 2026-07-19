@@ -167,6 +167,38 @@ object LmsApi {
             decode<OrgTermsResponse>(body).terms.orEmpty()
         }
 
+    /** POST `/api/v1/courses/{code}/structure/modules/{moduleId}/assignments` (MOB.1). */
+    suspend fun createModuleAssignment(
+        courseCode: String,
+        moduleId: String,
+        title: String,
+        accessToken: String,
+    ): CourseStructureItem = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/structure/modules/${encodePath(moduleId)}/assignments",
+            method = "POST",
+            body = client.encodeBody(CreateModuleItemRequest(title), CreateModuleItemRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<CourseStructureItem>(response)
+    }
+
+    /** POST `/api/v1/courses/{code}/structure/modules/{moduleId}/quizzes` (MOB.1). */
+    suspend fun createModuleQuiz(
+        courseCode: String,
+        moduleId: String,
+        title: String,
+        accessToken: String,
+    ): CourseStructureItem = withContext(Dispatchers.IO) {
+        val (response, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/structure/modules/${encodePath(moduleId)}/quizzes",
+            method = "POST",
+            body = client.encodeBody(CreateModuleItemRequest(title), CreateModuleItemRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<CourseStructureItem>(response)
+    }
+
     suspend fun updateCourse(
         courseCode: String,
         body: CourseUpdateRequest,
@@ -392,6 +424,22 @@ object LmsApi {
         )
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
         decode<CourseOutcomeLink>(response)
+    }
+
+    suspend fun createCourseOutcomeSubOutcome(
+        courseCode: String,
+        outcomeId: String,
+        body: CreateCourseOutcomeSubOutcomeBody,
+        accessToken: String,
+    ): CourseOutcomeSubOutcome = withContext(Dispatchers.IO) {
+        val (response, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/outcomes/${encodePath(outcomeId)}/sub-outcomes",
+            method = "POST",
+            body = json.encodeToString(CreateCourseOutcomeSubOutcomeBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+        decode<CourseOutcomeSubOutcome>(response)
     }
 
     suspend fun deleteCourseOutcomeLink(
