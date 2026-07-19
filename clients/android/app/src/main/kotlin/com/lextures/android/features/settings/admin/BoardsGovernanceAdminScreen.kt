@@ -154,7 +154,7 @@ fun BoardsGovernanceAdminScreen(
                 }
                 policies?.let { pol ->
                     LmsCard {
-                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(L.text(R.string.mobile_boards_admin_policiesTitle), color = textPrimary())
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(L.text(R.string.mobile_boards_admin_externalSharing), modifier = Modifier.weight(1f))

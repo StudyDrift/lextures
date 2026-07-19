@@ -35,7 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier.Modifier
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
@@ -81,6 +81,8 @@ fun BoardTemplatePickerSheet(
     var error by remember { mutableStateOf<String?>(null) }
     var creatingId by remember { mutableStateOf<String?>(null) }
     val scopeIo = rememberCoroutineScope()
+    val loadError = L.text(R.string.mobile_boards_templates_loadError)
+    val createError = L.text(R.string.mobile_boards_templates_createError)
 
     val visible = remember(templates, scope, query) {
         BoardsAdvancedLogic.filterTemplates(templates, scope, query)
@@ -93,7 +95,7 @@ fun BoardTemplatePickerSheet(
             val token = session.accessToken.value ?: return@LaunchedEffect
             templates = BoardTemplatesApi.listTemplates(courseCode = courseCode, accessToken = token)
         } catch (_: Exception) {
-            error = L.text(R.string.mobile_boards_templates_loadError)
+            error = loadError
         } finally {
             loading = false
         }
@@ -158,7 +160,7 @@ fun BoardTemplatePickerSheet(
                                             onCreated(board)
                                             onDismiss()
                                         } catch (_: Exception) {
-                                            error = L.text(R.string.mobile_boards_templates_createError)
+                                            error = createError
                                         } finally {
                                             creatingId = null
                                         }
@@ -196,6 +198,7 @@ fun BoardSaveAsTemplateSheet(
     var saving by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scopeIo = rememberCoroutineScope()
+    val saveError = L.text(R.string.mobile_boards_templates_saveError)
 
     Column(Modifier = Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState())) {
         Text(L.text(R.string.mobile_boards_templates_saveAction), style = MaterialTheme.typography.titleLarge)
@@ -248,7 +251,7 @@ fun BoardSaveAsTemplateSheet(
                             )
                             onDismiss()
                         } catch (_: Exception) {
-                            error = L.text(R.string.mobile_boards_templates_saveError)
+                            error = saveError
                         } finally {
                             saving = false
                         }
@@ -273,6 +276,10 @@ fun BoardExportSheet(
     var status by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     val scopeIo = rememberCoroutineScope()
+    val exportQueued = L.text(R.string.mobile_boards_export_queued)
+    val exportRunning = L.text(R.string.mobile_boards_export_running)
+    val exportReady = L.text(R.string.mobile_boards_export_ready)
+    val exportFailed = L.text(R.string.mobile_boards_export_failed)
 
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Text(L.text(R.string.mobile_boards_export_title), style = MaterialTheme.typography.titleLarge)
@@ -293,14 +300,14 @@ fun BoardExportSheet(
                         val token = session.accessToken.value ?: return@launch
                         busy = format
                         error = null
-                        status = L.text(R.string.mobile_boards_export_queued)
+                        status = exportQueued
                         try {
                             var job = BoardExportApi.createExport(
                                 courseCode, boardId, format, includeModeration, token,
                             )
                             var attempt = 0
                             while (!BoardsAdvancedLogic.isExportTerminal(job.status)) {
-                                status = L.text(R.string.mobile_boards_export_running)
+                                status = exportRunning
                                 delay((BoardsAdvancedLogic.pollDelaySeconds(attempt) * 1000).toLong())
                                 job = BoardExportApi.fetchExportJob(courseCode, boardId, job.id, token)
                                 attempt++
@@ -309,7 +316,7 @@ fun BoardExportSheet(
                             if (!job.status.equals("done", ignoreCase = true)) {
                                 throw IllegalStateException(job.error)
                             }
-                            status = L.text(R.string.mobile_boards_export_ready)
+                            status = exportReady
                             val bytes = BoardExportApi.downloadExport(courseCode, boardId, job.id, token)
                             val ext = BoardsAdvancedLogic.exportFileExtension(format)
                             val mime = BoardsAdvancedLogic.exportMimeType(format)
@@ -329,7 +336,7 @@ fun BoardExportSheet(
                             context.startActivity(Intent.createChooser(share, label))
                             BoardsAdvancedObservability.record("board_exported", mapOf("format" to format.apiValue))
                         } catch (_: Exception) {
-                            error = L.text(R.string.mobile_boards_export_failed)
+                            error = exportFailed
                             status = null
                         } finally {
                             busy = null
@@ -459,6 +466,7 @@ fun BoardAnalyticsSheet(
     var summary by remember { mutableStateOf<BoardAnalyticsSummary?>(null) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    val analyticsLoadError = L.text(R.string.mobile_boards_analytics_loadError)
 
     LaunchedEffect(boardId) {
         BoardsAdvancedObservability.record("board_admin_analytics_viewed")
@@ -467,7 +475,7 @@ fun BoardAnalyticsSheet(
             val token = session.accessToken.value ?: return@LaunchedEffect
             summary = BoardAnalyticsApi.fetchBoardAnalytics(courseCode, boardId, accessToken = token)
         } catch (_: Exception) {
-            error = L.text(R.string.mobile_boards_analytics_loadError)
+            error = analyticsLoadError
         } finally {
             loading = false
         }

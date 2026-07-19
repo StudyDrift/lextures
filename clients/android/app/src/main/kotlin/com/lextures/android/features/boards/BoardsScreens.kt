@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -81,7 +82,7 @@ fun BoardsListScreen(
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
     val scope = rememberCoroutineScope()
@@ -103,6 +104,7 @@ fun BoardsListScreen(
     var archiveTarget by remember { mutableStateOf<Board?>(null) }
     var duplicateTarget by remember { mutableStateOf<Board?>(null) }
     var overflowBoardId by remember { mutableStateOf<String?>(null) }
+    val duplicateError = L.text(R.string.mobile_boards_templates_duplicateError)
 
     val canCreate = remember(course.courseCode, permissions) {
         BoardsLogic.canCreateBoards(course.courseCode, permissions)
@@ -470,7 +472,7 @@ fun BoardsListScreen(
                                 load()
                                 if (board != null) openBoard = board
                             } catch (e: Exception) {
-                                errorMessage = L.text(R.string.mobile_boards_templates_duplicateError)
+                                errorMessage = duplicateError
                             }
                         }
                     },
@@ -493,7 +495,7 @@ fun BoardsListScreen(
                                 load()
                                 if (board != null) openBoard = board
                             } catch (_: Exception) {
-                                errorMessage = L.text(R.string.mobile_boards_templates_duplicateError)
+                                errorMessage = duplicateError
                             }
                         }
                     },
