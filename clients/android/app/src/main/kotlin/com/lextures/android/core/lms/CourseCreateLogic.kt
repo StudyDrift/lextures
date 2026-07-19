@@ -232,6 +232,19 @@ object CourseCreateLogic {
     fun courseCreateV2Enabled(features: MobilePlatformFeatures): Boolean =
         features.ffMobileCourseCreateV2
 
+    fun canvasImportEnabled(features: MobilePlatformFeatures): Boolean =
+        features.ffMobileCanvasImport
+
+    fun shouldShowCanvasImportSource(
+        permissions: List<String>,
+        features: MobilePlatformFeatures,
+        isOnline: Boolean,
+    ): Boolean = CanvasImportLogic.shouldShowCanvasImportEntry(
+        permissions = permissions,
+        features = features,
+        isOnline = isOnline,
+    )
+
     fun canCreateCourses(permissions: List<String>): Boolean =
         permissions.contains(COURSE_CREATE_PERMISSION)
 

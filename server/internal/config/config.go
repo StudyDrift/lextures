@@ -330,6 +330,8 @@ type Config struct {
 	FFMobileCreateCourse bool
 	// FFMobileCourseCreateV2 enables mobile create-wizard parity: competency builder, Canvas entry, drafts (MOB.1). Default OFF.
 	FFMobileCourseCreateV2 bool
+	// FFMobileCanvasImport enables the mobile Canvas course import wizard (MOB.2). Default OFF.
+	FFMobileCanvasImport bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).

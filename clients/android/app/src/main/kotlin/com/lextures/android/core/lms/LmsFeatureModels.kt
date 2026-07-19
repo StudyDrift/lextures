@@ -496,6 +496,7 @@ data class PlatformFeatures(
     val ffMobileCourseSettings: Boolean? = null,
     val ffMobileCreateCourse: Boolean? = null,
     val ffMobileCourseCreateV2: Boolean? = null,
+    val ffMobileCanvasImport: Boolean? = null,
     val ffConsortiumSharing: Boolean? = null,
     val graderAgentEnabled: Boolean? = null,
     val ffPlagiarismChecks: Boolean? = null,

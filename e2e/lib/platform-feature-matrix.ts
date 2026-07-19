@@ -842,6 +842,18 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     gatedSurface: null,
   },
   {
+    key: 'ffMobileCanvasImport',
+    label: 'Mobile Canvas import',
+    category: 'platform',
+    ownershipSource: 'database',
+    sourceKey: null,
+    runtimeKey: 'ffMobileCanvasImport',
+    settingsOnlyRationale: null,
+    secretSensitive: false,
+    uiSample: false,
+    gatedSurface: null,
+  },
+  {
     key: 'ffMotionNavigation',
     label: 'Navigation transitions',
     category: 'accessibility',

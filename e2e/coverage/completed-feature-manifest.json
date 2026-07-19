@@ -7393,7 +7393,30 @@
         "authorization": false,
         "dependency": false,
         "rollback": false,
-        "notes": "Flags are Settings → Global platform toggles (E2E.2 matrix). Mobile create journeys covered by native unit tests, not Playwright."
+        "notes": "Flags are Settings \u2192 Global platform toggles (E2E.2 matrix). Mobile create journeys covered by native unit tests, not Playwright."
+      }
+    },
+    {
+      "id": "MOB.2",
+      "path": "docs/completed/mobile/MOB.2-canvas-course-import.md",
+      "markets": [
+        "HE",
+        "K12"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story (iOS/Android unit-tested); web Playwright suite is not the coverage surface. Platform flag ffMobileCanvasImport is in the E2E.2 registry.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": false,
+        "enabledJourney": false,
+        "authorization": false,
+        "dependency": false,
+        "rollback": false,
+        "notes": "Flag is Settings \u2192 Global platform toggle (E2E.2 matrix). Mobile Canvas import journeys covered by native unit tests, not Playwright."
       }
     },
     {

@@ -13,11 +13,25 @@
 | **Section** | Mobile parity |
 | **Severity** | MAJOR |
 | **Markets** | HE / K12 |
-| **Status (today)** | MISSING |
+| **Status (today)** | **DONE** |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile team |
 | **Depends on** | MOB.1 (create entry point) |
 | **Unblocks** | — |
+
+
+---
+
+## Implementation notes (2026-07-19)
+
+- **Flag**: `ffMobileCanvasImport` (DB `ff_mobile_canvas_import`, default OFF) gates the Canvas source card on the MOB.1 create wizard.
+- **Logic**: `CanvasImportLogic` on iOS/Android — credentials validation, include-map toggles, WS message parsing, cancel/abort, token non-persistence helpers.
+- **API**: `LMSAPICanvasImport` / `CanvasImportApi` — list Canvas courses, queue import, stream progress via `/api/v1/ws/canvas-import/{jobId}`.
+- **UI**: `CanvasImportView` / `CanvasImportScreen` — credentials → select+scope → live importing; replaces MOB.1 coming-soon handoff when the flag is on.
+- **Security**: Canvas access token held only in memory for the request lifetime; never written to Keychain/DataStore; telemetry stores category counts only.
+- **i18n**: `mobile.canvasImport.*`; synced via `scripts/sync-mobile-locales.py`.
+- **Tests**: unit coverage for validation, include serialization, WS parsing, gate, token-absence helper (XCUITest/Espresso not present in repo).
+
 
 ## 1. Problem Statement
 

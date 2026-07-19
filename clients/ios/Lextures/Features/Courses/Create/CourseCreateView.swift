@@ -26,7 +26,7 @@ struct CourseCreateView: View {
     @State private var errorMessage: String?
     @State private var titleError: String?
     @State private var showCancelConfirm = false
-    @State private var showCanvasComingSoon = false
+    @State private var showCanvasImport = false
     @State private var draftKey = ""
     @State private var didRestoreDraft = false
     @State private var recordedStart = false
@@ -87,11 +87,19 @@ struct CourseCreateView: View {
             } message: {
                 Text(L.text("mobile.createCourse.cancel.message"))
             }
-            .sheet(isPresented: $showCanvasComingSoon) {
-                CanvasImportComingSoonView(onBackToSource: {
-                    showCanvasComingSoon = false
-                    step = .source
-                })
+            .sheet(isPresented: $showCanvasImport) {
+                CanvasImportView(
+                    existingCourses: existingCourses,
+                    onFinished: { created in
+                        showCanvasImport = false
+                        onFinished(created)
+                        dismiss()
+                    },
+                    onBackToSource: {
+                        showCanvasImport = false
+                        step = .source
+                    }
+                )
             }
             .task { await bootstrap() }
             .onChange(of: step) { _, _ in persistDraft() }
@@ -147,12 +155,18 @@ struct CourseCreateView: View {
                 step = .basics
                 maybeRecordStarted()
             }
-            sourceCard(
-                title: L.text("mobile.createCourse.source.canvas.title"),
-                summary: L.text("mobile.createCourse.source.canvas.summary"),
-                systemImage: "square.and.arrow.down.on.square"
+            if CourseCreateLogic.shouldShowCanvasImportSource(
+                permissions: shell.permissions,
+                features: shell.platformFeatures,
+                isOnline: NetworkMonitor.shared.isOnline
             ) {
-                showCanvasComingSoon = true
+                sourceCard(
+                    title: L.text("mobile.createCourse.source.canvas.title"),
+                    summary: L.text("mobile.createCourse.source.canvas.summary"),
+                    systemImage: "square.and.arrow.down.on.square"
+                ) {
+                    showCanvasImport = true
+                }
             }
         }
     }

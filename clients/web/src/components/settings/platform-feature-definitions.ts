@@ -744,6 +744,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Full mobile create-wizard parity: competency authoring, Canvas import entry, and draft resume (MOB.1).',
   },
   {
+    key: 'ffMobileCanvasImport',
+    label: 'Mobile Canvas import',
+    description:
+      'Import a Canvas course on iOS and Android with credentials, scope toggles, and live progress (MOB.2).',
+  },
+  {
     key: 'ffReportCards',
     label: 'Report cards',
     description: 'Standards-based report card generation and distribution for K-12 terms.',

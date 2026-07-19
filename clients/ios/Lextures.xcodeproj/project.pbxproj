@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B02C1A11C4A5A51B00A70606 /* CanvasImportLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02C1A11C4A5A51B00A71606 /* CanvasImportLogicTests.swift */; };
+		B02C1A11C4A5A51B00A70505 /* CanvasImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02C1A11C4A5A51B00A71505 /* CanvasImportView.swift */; };
+		B02C1A11C4A5A51B00A70404 /* CanvasImportObservability.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02C1A11C4A5A51B00A71404 /* CanvasImportObservability.swift */; };
+		B02C1A11C4A5A51B00A70303 /* LMSAPICanvasImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02C1A11C4A5A51B00A71303 /* LMSAPICanvasImport.swift */; };
+		B02C1A11C4A5A51B00A70202 /* LMSFeatureModelsCanvasImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02C1A11C4A5A51B00A71202 /* LMSFeatureModelsCanvasImport.swift */; };
+		B02C1A11C4A5A51B00A70101 /* CanvasImportLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02C1A11C4A5A51B00A71101 /* CanvasImportLogic.swift */; };
 		1F2204425C934681A255B7F8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D48535FE9A4747BCB7A4976B /* AppDelegate.swift */; };
 		7E7A0E27C10C47B8ABEDE34F /* LexturesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A9E324AE01846B6A2DC8E2B /* LexturesApp.swift */; };
 		1F81CC13095A42AC858D89C8 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2DE6C7613A947D3A29F2575 /* RootView.swift */; };
@@ -603,6 +609,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B02C1A11C4A5A51B00A71606 /* CanvasImportLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasImportLogicTests.swift; sourceTree = "<group>"; };
+		B02C1A11C4A5A51B00A71505 /* CanvasImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasImportView.swift; sourceTree = "<group>"; };
+		B02C1A11C4A5A51B00A71404 /* CanvasImportObservability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasImportObservability.swift; sourceTree = "<group>"; };
+		B02C1A11C4A5A51B00A71303 /* LMSAPICanvasImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICanvasImport.swift; sourceTree = "<group>"; };
+		B02C1A11C4A5A51B00A71202 /* LMSFeatureModelsCanvasImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsCanvasImport.swift; sourceTree = "<group>"; };
+		B02C1A11C4A5A51B00A71101 /* CanvasImportLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasImportLogic.swift; sourceTree = "<group>"; };
 		B91296DD09704C09828A032C /* Lextures.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lextures.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A735E63915AF4F678584334D /* LexturesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LexturesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D48535FE9A4747BCB7A4976B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -1227,6 +1239,7 @@
 		98D67F731BF5451A9402BAA2 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				B02C1A11C4A5A51B00A71606 /* CanvasImportLogicTests.swift */,
 				934E1B2E95284AE5B8ED1F60 /* AccessibilitySupportTests.swift */,
 				174FC4D48AA746DF9086B8D5 /* AccountIntegrationsLogicTests.swift */,
 				5F63D86EAB6C47D0BE750FF4 /* AdvisingLogicTests.swift */,
@@ -1473,6 +1486,10 @@
 		B62295116F7F4935A884363D /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				B02C1A11C4A5A51B00A71404 /* CanvasImportObservability.swift */,
+				B02C1A11C4A5A51B00A71303 /* LMSAPICanvasImport.swift */,
+				B02C1A11C4A5A51B00A71202 /* LMSFeatureModelsCanvasImport.swift */,
+				B02C1A11C4A5A51B00A71101 /* CanvasImportLogic.swift */,
 				3E55BB4FD5C04443BB5ED4A4 /* AccountAccommodationModels.swift */,
 				344D394B30C44ACCB4AB6E01 /* AccountIntegrationsLogic.swift */,
 				2E815C85DDB24D3BB6ACA9D3 /* AdvisingLogic.swift */,
@@ -2333,6 +2350,7 @@
 		2B03EC44D1B1464BB3386389 /* Create */ = {
 			isa = PBXGroup;
 			children = (
+				B02C1A11C4A5A51B00A71505 /* CanvasImportView.swift */,
 				F1EBE04578B343D4AFB15508 /* CanvasImportComingSoonView.swift */,
 				80B4308311AB487CA4469BF5 /* CourseCreateView.swift */,
 			);
@@ -2523,6 +2541,11 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				B02C1A11C4A5A51B00A70505 /* CanvasImportView.swift in Sources */,
+				B02C1A11C4A5A51B00A70404 /* CanvasImportObservability.swift in Sources */,
+				B02C1A11C4A5A51B00A70303 /* LMSAPICanvasImport.swift in Sources */,
+				B02C1A11C4A5A51B00A70202 /* LMSFeatureModelsCanvasImport.swift in Sources */,
+				B02C1A11C4A5A51B00A70101 /* CanvasImportLogic.swift in Sources */,
 				1F2204425C934681A255B7F8 /* AppDelegate.swift in Sources */,
 				7E7A0E27C10C47B8ABEDE34F /* LexturesApp.swift in Sources */,
 				1F81CC13095A42AC858D89C8 /* RootView.swift in Sources */,
@@ -3044,6 +3067,7 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				B02C1A11C4A5A51B00A70606 /* CanvasImportLogicTests.swift in Sources */,
 				01AEC1002DDD4CD2A515EA08 /* AccessibilitySupportTests.swift in Sources */,
 				BEB8DA97678F467FA891B900 /* AccountIntegrationsLogicTests.swift in Sources */,
 				D49C5DF4B2804312BEE348CA /* AdvisingLogicTests.swift in Sources */,

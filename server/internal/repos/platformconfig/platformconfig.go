@@ -115,6 +115,7 @@ type Row struct {
 	FFMotionLists                      *bool
 	FFMobileCreateCourse               *bool
 	FFMobileCourseCreateV2             *bool
+	FFMobileCanvasImport               *bool
 	FFParentPortal                     *bool
 	FFParentPortalV2                   *bool
 	FFReportCards                      *bool
@@ -326,6 +327,7 @@ type Write struct {
 	FFMotionLists                      *bool
 	FFMobileCreateCourse               *bool
 	FFMobileCourseCreateV2             *bool
+	FFMobileCanvasImport               *bool
 	FFParentPortal                     *bool
 	FFParentPortalV2                   *bool
 	FFReportCards                      *bool
@@ -534,6 +536,7 @@ SELECT
 	ff_motion_lists,
 	ff_mobile_create_course,
 	ff_mobile_course_create_v2,
+	ff_mobile_canvas_import,
 	ff_parent_portal,
 	ff_parent_portal_v2,
 	ff_report_cards,
@@ -734,6 +737,7 @@ WHERE id = 1
 		&r.FFMotionLists,
 		&r.FFMobileCreateCourse,
 		&r.FFMobileCourseCreateV2,
+		&r.FFMobileCanvasImport,
 		&r.FFParentPortal,
 		&r.FFParentPortalV2,
 		&r.FFReportCards,
@@ -985,6 +989,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_motion_lists,
 	ff_mobile_create_course,
 	ff_mobile_course_create_v2,
+	ff_mobile_canvas_import,
 	ff_parent_portal,
 	ff_parent_portal_v2,
 	ff_report_cards,
@@ -1178,6 +1183,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_motion_lists = COALESCE(EXCLUDED.ff_motion_lists, settings.platform_app_settings.ff_motion_lists),
 	ff_mobile_create_course = COALESCE(EXCLUDED.ff_mobile_create_course, settings.platform_app_settings.ff_mobile_create_course),
 	ff_mobile_course_create_v2 = COALESCE(EXCLUDED.ff_mobile_course_create_v2, settings.platform_app_settings.ff_mobile_course_create_v2),
+	ff_mobile_canvas_import = COALESCE(EXCLUDED.ff_mobile_canvas_import, settings.platform_app_settings.ff_mobile_canvas_import),
 	ff_parent_portal = COALESCE(EXCLUDED.ff_parent_portal, settings.platform_app_settings.ff_parent_portal),
 	ff_parent_portal_v2 = COALESCE(EXCLUDED.ff_parent_portal_v2, settings.platform_app_settings.ff_parent_portal_v2),
 	ff_report_cards = COALESCE(EXCLUDED.ff_report_cards, settings.platform_app_settings.ff_report_cards),
@@ -1360,6 +1366,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFMotionLists,
 		w.FFMobileCreateCourse,
 		w.FFMobileCourseCreateV2,
+		w.FFMobileCanvasImport,
 		w.FFParentPortal,
 		w.FFParentPortalV2,
 		w.FFReportCards,

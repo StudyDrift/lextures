@@ -126,7 +126,7 @@ fun CourseCreateScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var titleError by remember { mutableStateOf<String?>(null) }
     var showCancelConfirm by remember { mutableStateOf(false) }
-    var showCanvasComingSoon by remember { mutableStateOf(false) }
+    var showCanvasImport by remember { mutableStateOf(false) }
     var termMenuExpanded by remember { mutableStateOf(false) }
     var gradeMenuExpanded by remember { mutableStateOf(false) }
     var draftKey by remember { mutableStateOf("") }
@@ -135,6 +135,8 @@ fun CourseCreateScreen(
     var draftReady by remember { mutableStateOf(false) }
 
     val isCompetency = courseMode == CourseCreateLogic.CourseMode.CompetencyBased
+    val offline = remember { com.lextures.android.core.offline.OfflineService.get(context) }
+    val isOnline by offline.networkMonitor.isOnline.collectAsState()
 
     fun clearDraft() {
         if (draftKey.isNotEmpty()) draftStore.clear(draftKey)
@@ -485,10 +487,13 @@ fun CourseCreateScreen(
         if (draftReady) persistDraft()
     }
 
-    if (showCanvasComingSoon) {
-        CanvasImportComingSoonScreen(
+    if (showCanvasImport) {
+        CanvasImportScreen(
+            session = session,
+            existingCourses = existingCourses,
+            onFinished = onFinished,
             onDismiss = {
-                showCanvasComingSoon = false
+                showCanvasImport = false
                 step = CourseCreateLogic.WizardStep.Source
             },
             modifier = modifier,
@@ -571,12 +576,19 @@ fun CourseCreateScreen(
                                 maybeRecordStarted()
                             },
                         )
-                        SourceOptionCard(
-                            title = stringResource(R.string.mobile_createCourse_source_canvas_title),
-                            summary = stringResource(R.string.mobile_createCourse_source_canvas_summary),
-                            icon = Icons.Default.CloudDownload,
-                            onClick = { showCanvasComingSoon = true },
-                        )
+                        if (CourseCreateLogic.shouldShowCanvasImportSource(
+                                permissions = shell?.permissions.orEmpty(),
+                                features = platformFeatures,
+                                isOnline = isOnline,
+                            )
+                        ) {
+                            SourceOptionCard(
+                                title = stringResource(R.string.mobile_createCourse_source_canvas_title),
+                                summary = stringResource(R.string.mobile_createCourse_source_canvas_summary),
+                                icon = Icons.Default.CloudDownload,
+                                onClick = { showCanvasImport = true },
+                            )
+                        }
                     }
 
                     CourseCreateLogic.WizardStep.Basics -> {
