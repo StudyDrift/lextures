@@ -124,14 +124,12 @@ fun LiveQuizHubScreen(
             kits.isEmpty() -> Text(text = L.text(R.string.mobile_liveQuiz_hub_empty), color = textSecondary())
             else -> kits.forEach { kit ->
                 LmsCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(Modifier = Modifier.padding(12.dp)) {
-                        Text(kit.title, color = textPrimary(), fontWeight = FontWeight.Medium)
-                        kit.questionCount?.let { count ->
-                            Text(
-                                text = L.format(R.string.mobile_liveQuiz_hub_questionCount, count),
-                                color = textSecondary(),
-                            )
-                        }
+                    Text(kit.title, color = textPrimary(), fontWeight = FontWeight.Medium)
+                    kit.questionCount?.let { count ->
+                        Text(
+                            text = L.format(R.string.mobile_liveQuiz_hub_questionCount, count),
+                            color = textSecondary(),
+                        )
                     }
                 }
             }
