@@ -103,7 +103,13 @@ fun LiveQuizHubScreen(
                 onClick = { showJoin = true },
                 modifier = Modifier
                     .testTag("liveQuiz.join.button")
-                    .semantics { contentDescription = L.text(R.string.mobile_liveQuiz_join_button) },
+                    .semantics {
+                        contentDescription = L.text(
+                            context,
+                            localePrefs,
+                            R.string.mobile_liveQuiz_join_button,
+                        )
+                    },
             ) {
                 Text(L.text(R.string.mobile_liveQuiz_join_button))
             }
