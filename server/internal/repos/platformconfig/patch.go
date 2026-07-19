@@ -153,6 +153,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_mobile_canvas_import", w.FFMobileCanvasImport)
 	addBool("ff_mobile_admin_console", w.FFMobileAdminConsole)
 	addBool("ff_mobile_enrollment_add", w.FFMobileEnrollmentAdd)
+	addBool("ff_mobile_live_quiz", w.FFMobileLiveQuiz)
 	addBool("ff_parent_portal", w.FFParentPortal)
 	addBool("ff_parent_portal_v2", w.FFParentPortalV2)
 	addBool("ff_report_cards", w.FFReportCards)

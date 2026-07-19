@@ -250,6 +250,8 @@ struct CourseDetailView: View {
                 course: course,
                 initialBoardId: section == .boards ? initialItemId : nil
             )
+        case .liveQuizzes:
+            LiveQuizHubView(course: course)
         case .people:
             CoursePeopleSection(course: course)
         case .live:

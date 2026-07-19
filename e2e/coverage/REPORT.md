@@ -1,6 +1,6 @@
 # Completed feature E2E coverage report
 
-Total stories: **477**
+Total stories: **482**
 
 ## Coverage levels
 
@@ -8,10 +8,10 @@ Total stories: **477**
 |---|---:|
 | journey | 81 |
 | smoke | 170 |
-| api-contract | 1 |
+| api-contract | 4 |
 | covered-by-parent | 11 |
 | manual | 8 |
-| not-applicable | 150 |
+| not-applicable | 152 |
 | missing | 56 |
 
 ## By client
@@ -20,7 +20,7 @@ Total stories: **477**
 |---|---:|
 | cli | 48 |
 | docs | 7 |
-| mobile | 83 |
+| mobile | 88 |
 | ops | 15 |
 | web | 324 |
 
@@ -28,10 +28,10 @@ Total stories: **477**
 
 | Market | Count |
 |---|---:|
-| ALL | 436 |
-| HE | 15 |
-| K12 | 13 |
-| SL | 13 |
+| ALL | 437 |
+| HE | 19 |
+| K12 | 17 |
+| SL | 16 |
 
 ## Missing journeys (severity / owner / milestone)
 
@@ -103,6 +103,11 @@ Total stories: **477**
 | 09 | disabledState, authorization, dependency, rollback | [docs/completed/09-platform-feature-flags-without-admin-toggle.md](../../docs/completed/09-platform-feature-flags-without-admin-toggle.md) |
 | 15.8 | disabledState, authorization, dependency, rollback | [docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md](../../docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md) |
 | IQ.1 | disabledState, authorization, dependency, rollback | [docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md](../../docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md) |
+| MOB.1 | disabledState, enabledJourney, authorization, dependency, rollback | [docs/completed/mobile/MOB.1-course-creation-wizard.md](../../docs/completed/mobile/MOB.1-course-creation-wizard.md) |
+| MOB.2 | disabledState, enabledJourney, authorization, dependency, rollback | [docs/completed/mobile/MOB.2-canvas-course-import.md](../../docs/completed/mobile/MOB.2-canvas-course-import.md) |
+| MOB.3 | enabledJourney, dependency | [docs/completed/mobile/MOB.3-system-settings-parity.md](../../docs/completed/mobile/MOB.3-system-settings-parity.md) |
+| MOB.4 | enabledJourney, dependency | [docs/completed/mobile/MOB.4-course-enrollment-management.md](../../docs/completed/mobile/MOB.4-course-enrollment-management.md) |
+| MOB.5 | enabledJourney | [docs/completed/mobile/MOB.5-interactive-quizzes.md](../../docs/completed/mobile/MOB.5-interactive-quizzes.md) |
 | T01 | disabledState, authorization, dependency, rollback | [docs/completed/transcripts/T01-official-transcript-generation.md](../../docs/completed/transcripts/T01-official-transcript-generation.md) |
 | VC.1 | disabledState, authorization, dependency, rollback | [docs/completed/visual-collaboration/VC.1-foundation-and-feature-flag.md](../../docs/completed/visual-collaboration/VC.1-foundation-and-feature-flag.md) |
 
@@ -147,7 +152,7 @@ Total stories: **477**
 | lighthouse | 0 | 3 | 0 | 0 | 0 | 0 | 0 |
 | marketplace | 1 | 9 | 0 | 1 | 0 | 0 | 0 |
 | marketplace-courses | 0 | 2 | 0 | 2 | 0 | 0 | 0 |
-| mobile | 0 | 0 | 0 | 0 | 0 | 75 | 0 |
+| mobile | 0 | 0 | 3 | 0 | 0 | 77 | 0 |
 | transcripts | 2 | 7 | 0 | 3 | 0 | 0 | 0 |
 | visual-collaboration | 0 | 7 | 0 | 3 | 0 | 7 | 0 |
 | web | 4 | 2 | 0 | 0 | 0 | 0 | 1 |

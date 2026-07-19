@@ -54,6 +54,8 @@ final class AppShellModel {
     var checkoutReturnPhase: CheckoutReturnPhase?
     /// Public board share-link token pending presentation (VC.M6).
     var pendingBoardLinkToken: String?
+    var pendingLiveQuizCode: String? = nil
+    var showLiveQuizPlay = false
 
     // MARK: Drawer navigation
 
@@ -241,6 +243,9 @@ final class AppShellModel {
             selectShellTab(.children)
         case let .boardLink(token):
             pendingBoardLinkToken = token
+        case let .liveQuizPlay(code):
+            pendingLiveQuizCode = code
+            showLiveQuizPlay = true
         }
     }
 
@@ -441,6 +446,9 @@ struct MainTabView: View {
             BoardPublicView(token: item.token) {
                 shell.pendingBoardLinkToken = nil
             }
+        }
+        .sheet(isPresented: Bindable(shell).showLiveQuizPlay) {
+            LiveQuizPlayView(initialCode: shell.pendingLiveQuizCode)
         }
         .sheet(isPresented: Bindable(shell).showUniversalSearch) {
             if shell.universalSearchEnabled {

@@ -133,6 +133,9 @@ class HomeShellState {
     var checkoutReturnPhase by mutableStateOf<com.lextures.android.core.lms.CheckoutReturnPhase?>(null)
     /** Public board share-link token pending presentation (VC.M6). */
     var pendingBoardLinkToken by mutableStateOf<String?>(null)
+    /** Live quiz join code pending presentation (MOB.5). Null code opens blank join. */
+    var pendingLiveQuizCode by mutableStateOf<String?>(null)
+    var showLiveQuizPlay by mutableStateOf(false)
     var pendingBilling by mutableStateOf(false)
     var pendingProfileSettingsRoute by mutableStateOf<SettingsDeepLinkSection?>(null)
     var pendingParentStudentId by mutableStateOf<String?>(null)
@@ -286,6 +289,11 @@ class HomeShellState {
                 }
                 is DeepLinkDestination.BoardLink -> {
                     pendingBoardLinkToken = destination.token
+                    rootDestination
+                }
+                is DeepLinkDestination.LiveQuizPlay -> {
+                    pendingLiveQuizCode = destination.code
+                    showLiveQuizPlay = true
                     rootDestination
                 }
             },
@@ -549,6 +557,25 @@ fun HomeScreen(
                 com.lextures.android.features.boards.publicboard.BoardPublicScreen(
                     token = token,
                     onClose = { shell.pendingBoardLinkToken = null },
+                )
+            }
+        }
+
+        if (shell.showLiveQuizPlay) {
+            Dialog(
+                onDismissRequest = {
+                    shell.showLiveQuizPlay = false
+                    shell.pendingLiveQuizCode = null
+                },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                com.lextures.android.features.livequiz.LiveQuizPlayScreen(
+                    session = session,
+                    initialCode = shell.pendingLiveQuizCode,
+                    onClose = {
+                        shell.showLiveQuizPlay = false
+                        shell.pendingLiveQuizCode = null
+                    },
                 )
             }
         }

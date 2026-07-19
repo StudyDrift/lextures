@@ -118,4 +118,22 @@ class DeepLinkRouterTest {
         assertEquals("tok-abc", (destination as DeepLinkDestination.BoardLink).token)
         assertTrue(DeepLinkRouter.resolve("/board-links/") is DeepLinkDestination.Home)
     }
+
+    @Test
+    fun resolvesLiveQuizPlayPath() {
+        val withCode = DeepLinkRouter.resolve("https://lextures.com/play/AB12")
+        assertTrue(withCode is DeepLinkDestination.LiveQuizPlay)
+        assertEquals("AB12", (withCode as DeepLinkDestination.LiveQuizPlay).code)
+
+        val blank = DeepLinkRouter.resolve("/play")
+        assertTrue(blank is DeepLinkDestination.LiveQuizPlay)
+        assertEquals(null, (blank as DeepLinkDestination.LiveQuizPlay).code)
+
+        val course = DeepLinkRouter.resolve("/courses/demo/live-quizzes")
+        assertTrue(course is DeepLinkDestination.Course)
+        assertEquals(
+            CourseDeepLinkSection.LiveQuizzes,
+            (course as DeepLinkDestination.Course).section,
+        )
+    }
 }

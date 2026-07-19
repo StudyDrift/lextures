@@ -26,6 +26,7 @@ struct CourseDestinationPlaceholder: View {
         case .groups: return "person.3"
         case .collabDocs: return "doc.text"
         case .boards: return "rectangle.3.group"
+        case .liveQuizzes: return "gamecontroller"
         default: return "sparkles"
         }
     }

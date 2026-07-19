@@ -25,6 +25,7 @@ enum CourseFeaturesLogic {
         case srs
         case standardsAlignment
         case visualBoards
+        case interactiveQuizzes
         case whiteboard
 
         var id: String { rawValue }
@@ -61,6 +62,7 @@ enum CourseFeaturesLogic {
         .init(tool: .srs),
         .init(tool: .standardsAlignment),
         .init(tool: .visualBoards),
+        .init(tool: .interactiveQuizzes),
         .init(tool: .whiteboard),
     ]
 
@@ -97,6 +99,7 @@ enum CourseFeaturesLogic {
         .srs: { $0.srsEnabled == true },
         .standardsAlignment: { $0.standardsAlignmentEnabled == true },
         .visualBoards: { $0.visualBoardsEnabled == true },
+        .interactiveQuizzes: { $0.interactiveQuizzesEnabled == true },
         .whiteboard: { $0.whiteboardEnabled == true },
     ]
 
@@ -123,6 +126,7 @@ enum CourseFeaturesLogic {
         .srs: { $0.srsEnabled = $1 },
         .standardsAlignment: { $0.standardsAlignmentEnabled = $1 },
         .visualBoards: { $0.visualBoardsEnabled = $1 },
+        .interactiveQuizzes: { $0.interactiveQuizzesEnabled = $1 },
         .whiteboard: { $0.whiteboardEnabled = $1 },
     ]
 
@@ -160,7 +164,8 @@ enum CourseFeaturesLogic {
             attendanceEnabled: course.attendanceEnabled == true,
             whiteboardEnabled: course.whiteboardEnabled == true,
             reportCardsEnabled: course.reportCardsEnabled == true,
-            visualBoardsEnabled: course.visualBoardsEnabled == true
+            visualBoardsEnabled: course.visualBoardsEnabled == true,
+            interactiveQuizzesEnabled: course.interactiveQuizzesEnabled == true
         )
     }
 
@@ -228,6 +233,7 @@ struct CourseFeaturesPatch: Codable, Equatable {
     var whiteboardEnabled: Bool
     var reportCardsEnabled: Bool
     var visualBoardsEnabled: Bool
+    var interactiveQuizzesEnabled: Bool
 }
 
 struct CourseCaptionPolicyPatch: Codable, Equatable {
