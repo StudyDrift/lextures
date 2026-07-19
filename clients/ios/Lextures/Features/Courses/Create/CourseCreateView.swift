@@ -88,10 +88,10 @@ struct CourseCreateView: View {
                 Text(L.text("mobile.createCourse.cancel.message"))
             }
             .sheet(isPresented: $showCanvasComingSoon) {
-                CanvasImportComingSoonView {
+                CanvasImportComingSoonView(onBackToSource: {
                     showCanvasComingSoon = false
                     step = .source
-                }
+                })
             }
             .task { await bootstrap() }
             .onChange(of: step) { _, _ in persistDraft() }
@@ -553,16 +553,17 @@ struct CourseCreateView: View {
         firstModuleTitle = draft.firstModuleTitle
         competencies = draft.competencies.isEmpty ? [.empty()] : draft.competencies
         if let code = draft.createdCourseCode, !code.isEmpty {
-            createdCourse = CourseSummary(
+            var summary = CourseSummary(
                 id: code,
                 courseCode: code,
                 title: draft.title,
                 description: draft.description,
-                published: false,
-                courseType: draft.courseMode,
-                termId: draft.selectedTermId.isEmpty ? nil : draft.selectedTermId,
-                gradeLevel: draft.selectedGradeLevel.isEmpty ? nil : draft.selectedGradeLevel
+                published: false
             )
+            summary.gradeLevel = draft.selectedGradeLevel.isEmpty ? nil : draft.selectedGradeLevel
+            summary.termId = draft.selectedTermId.isEmpty ? nil : draft.selectedTermId
+            summary.courseType = draft.courseMode
+            createdCourse = summary
         }
     }
 
