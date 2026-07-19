@@ -172,8 +172,8 @@ enum CanvasImportLogic {
     }
 
     static func filterCourses(_ courses: [CanvasCourseListItem], query: String) -> [CanvasCourseListItem] {
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return courses }
+        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalizedQuery.isEmpty else { return courses }
         return courses.filter { course in
             let haystack = [
                 course.name,
@@ -183,7 +183,7 @@ enum CanvasImportLogic {
             ]
             .joined(separator: " ")
             .lowercased()
-            return haystack.contains(q)
+            return haystack.contains(normalizedQuery)
         }
     }
 
