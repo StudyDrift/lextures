@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Student play flow: code → nickname → lobby/play/results (MOB.5 Phase 1).
 struct LiveQuizPlayView: View {
-    @EnvironmentObject private var session: SessionStore
+    @Environment(AuthSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 

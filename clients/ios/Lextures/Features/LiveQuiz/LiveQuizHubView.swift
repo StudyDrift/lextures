@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Course workspace hub for interactive quizzes (MOB.5 Phase 1).
 struct LiveQuizHubView: View {
-    @EnvironmentObject private var session: SessionStore
+    @Environment(AuthSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
 
     let course: CourseSummary
