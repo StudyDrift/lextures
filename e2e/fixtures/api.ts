@@ -1812,7 +1812,7 @@ export async function apiGetCourseStructure(
 const E2E_PLATFORM_ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
 const E2E_PLATFORM_ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? 'E2eTestPass1!'
 
-async function apiGetPlatformAdminToken(): Promise<string> {
+export async function apiGetPlatformAdminToken(): Promise<string> {
   const loginRes = await fetch(`${apiBase}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
