@@ -4,6 +4,7 @@
 import { test, expect, uniqueEmail } from '../fixtures/test.js'
 import {
   apiEnablePeerReview,
+  apiSetPeerReview,
   apiPutPeerReviewConfig,
   apiPostPeerReviewAllocate,
   apiGetPeerReviewAssigned,
@@ -16,6 +17,8 @@ import {
 
 test.describe('Peer Review', () => {
   test('assigned endpoint returns 404 when feature is disabled', async ({ seededCourse }) => {
+    // Peer review defaults ON after the platform flag audit; force off for the gate check.
+    await apiSetPeerReview(false)
     const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
     const res = await fetch(`${apiBase}/api/v1/peer-review/assigned`, {
       headers: { Authorization: `Bearer ${seededCourse.studentToken}` },

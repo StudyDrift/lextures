@@ -1833,13 +1833,18 @@ async function apiGetPlatformAdminToken(): Promise<string> {
   return access_token
 }
 
-/** Enable peer review via Settings → Global platform (requires platform admin). */
-export async function apiEnablePeerReview(): Promise<void> {
+/** Set peer review via Settings → Global platform (requires platform admin). */
+export async function apiSetPeerReview(enabled: boolean): Promise<void> {
   const token = await apiGetPlatformAdminToken()
   await apiPatchPlatformSettings(token, {
-    ffPeerReview: true,
+    ffPeerReview: enabled,
     updateMask: ['ffPeerReview'],
   })
+}
+
+/** Enable peer review via Settings → Global platform (requires platform admin). */
+export async function apiEnablePeerReview(): Promise<void> {
+  await apiSetPeerReview(true)
 }
 
 export async function apiPutPeerReviewConfig(
