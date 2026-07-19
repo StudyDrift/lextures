@@ -24,7 +24,7 @@ Implementation plans for web-client features that the iOS and Android apps do
 | ID | Plan | Web reference | Mobile today | Status | Severity | Effort |
 |---|---|---|---|---|---|---|
 | [MOB.1](../../completed/mobile/MOB.1-course-creation-wizard.md) | Course creation wizard | `pages/lms/course-create.tsx` | Full parity behind `ffMobileCourseCreateV2` | **DONE** | MAJOR | M |
-| [MOB.2](MOB.2-canvas-course-import.md) | Canvas course import | `components/lms/canvas-import-courses-panel.tsx` | none | MISSING | MAJOR | M |
+| [MOB.2](../../completed/mobile/MOB.2-canvas-course-import.md) | Canvas course import | `pages/lms/canvas-import-courses-panel.tsx` | Full wizard behind `ffMobileCanvasImport` | **DONE** | MAJOR | M |
 | [MOB.3](MOB.3-system-settings-parity.md) | System settings parity | `pages/admin/*`, `components/settings/*`, `side-nav-admin-links.tsx` | ~20 admin views, partial menu | PARTIAL | MAJOR | L |
 | [MOB.4](MOB.4-course-enrollment-management.md) | Course enrollment management | `components/enrollment/*`, `people-api.ts` | view/remove only (`CoursePeopleView`) | MISSING (add) | MAJOR | S |
 | [MOB.5](MOB.5-interactive-quizzes.md) | Interactive quizzes | `pages/live-quiz-play-page.tsx`, `components/live-quiz/*` | none | MISSING | BLOCKER (K12) | L |

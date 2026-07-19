@@ -416,6 +416,7 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileCourseSettings = false
     var ffMobileCreateCourse = false
     var ffMobileCourseCreateV2 = false
+    var ffMobileCanvasImport = false
     var ffConsortiumSharing = false
     var graderAgentEnabled = false
     var ffPlagiarismChecks = false
@@ -490,6 +491,7 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileCourseSettings: features?.ffMobileCourseSettings == true,
             ffMobileCreateCourse: features?.ffMobileCreateCourse == true,
             ffMobileCourseCreateV2: features?.ffMobileCourseCreateV2 == true,
+            ffMobileCanvasImport: features?.ffMobileCanvasImport == true,
             ffConsortiumSharing: features?.ffConsortiumSharing == true,
             graderAgentEnabled: features?.graderAgentEnabled == true,
             ffPlagiarismChecks: features?.ffPlagiarismChecks == true,

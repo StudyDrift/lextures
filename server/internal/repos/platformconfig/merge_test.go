@@ -374,3 +374,16 @@ func TestMerge_FFMobileCourseCreateFlagsDefaultOff(t *testing.T) {
 		t.Fatal("expected both mobile create flags true when DB set")
 	}
 }
+
+// MOB.2: FFMobileCanvasImport default OFF when unset.
+func TestMerge_FFMobileCanvasImportDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFMobileCanvasImport {
+		t.Fatal("expected FFMobileCanvasImport false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMobileCanvasImport: &on})
+	if !got.FFMobileCanvasImport {
+		t.Fatal("expected FFMobileCanvasImport true when DB set")
+	}
+}

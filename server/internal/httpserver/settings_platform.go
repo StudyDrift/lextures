@@ -213,6 +213,7 @@ type platformSettingsJSON struct {
 	FFMotionLists                bool    `json:"ffMotionLists"`
 	FFMobileCreateCourse         bool    `json:"ffMobileCreateCourse"`
 	FFMobileCourseCreateV2       bool    `json:"ffMobileCourseCreateV2"`
+	FFMobileCanvasImport         bool    `json:"ffMobileCanvasImport"`
 	FFClassroomSignals           bool    `json:"ffClassroomSignals"`
 	FFLibraryIntegration         bool    `json:"ffLibraryIntegration"`
 	DiagnosticAssessmentsEnabled bool    `json:"diagnosticAssessmentsEnabled"`
@@ -475,6 +476,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFMotionLists:                      merged.FFMotionLists,
 			FFMobileCreateCourse:               merged.FFMobileCreateCourse,
 			FFMobileCourseCreateV2:             merged.FFMobileCourseCreateV2,
+			FFMobileCanvasImport:               merged.FFMobileCanvasImport,
 			FFClassroomSignals:                 merged.FFClassroomSignals,
 			FFLibraryIntegration:               merged.FFLibraryIntegration,
 			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,
@@ -711,6 +713,7 @@ type putPlatformBody struct {
 	FFMotionLists                *bool    `json:"ffMotionLists"`
 	FFMobileCreateCourse         *bool    `json:"ffMobileCreateCourse"`
 	FFMobileCourseCreateV2       *bool    `json:"ffMobileCourseCreateV2"`
+	FFMobileCanvasImport         *bool    `json:"ffMobileCanvasImport"`
 	FFClassroomSignals           *bool    `json:"ffClassroomSignals"`
 	FFLibraryIntegration         *bool    `json:"ffLibraryIntegration"`
 	DiagnosticAssessmentsEnabled *bool    `json:"diagnosticAssessmentsEnabled"`
@@ -1131,6 +1134,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffmotionlists", body.FFMotionLists, func(v bool) { wr.FFMotionLists = &v })
 		setBool("ffmobilecreatecourse", body.FFMobileCreateCourse, func(v bool) { wr.FFMobileCreateCourse = &v })
 		setBool("ffmobilecoursecreatev2", body.FFMobileCourseCreateV2, func(v bool) { wr.FFMobileCourseCreateV2 = &v })
+		setBool("ffmobilecanvasimport", body.FFMobileCanvasImport, func(v bool) { wr.FFMobileCanvasImport = &v })
 		setBool("ffclassroomsignals", body.FFClassroomSignals, func(v bool) { wr.FFClassroomSignals = &v })
 		setBool("fflibraryintegration", body.FFLibraryIntegration, func(v bool) { wr.FFLibraryIntegration = &v })
 		setBool("diagnosticassessmentsenabled", body.DiagnosticAssessmentsEnabled, func(v bool) { wr.DiagnosticAssessmentsEnabled = &v })
@@ -1361,6 +1365,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFMotionLists:                      merged.FFMotionLists,
 			FFMobileCreateCourse:               merged.FFMobileCreateCourse,
 			FFMobileCourseCreateV2:             merged.FFMobileCourseCreateV2,
+			FFMobileCanvasImport:               merged.FFMobileCanvasImport,
 			FFClassroomSignals:                 merged.FFClassroomSignals,
 			FFLibraryIntegration:               merged.FFLibraryIntegration,
 			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,

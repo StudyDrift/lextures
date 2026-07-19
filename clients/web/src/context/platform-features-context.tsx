@@ -61,6 +61,7 @@ export type PlatformFeatures = {
   ffMotionLists: boolean
   ffMobileCreateCourse: boolean
   ffMobileCourseCreateV2: boolean
+  ffMobileCanvasImport: boolean
   ffLibrary: boolean
   ffBroadcasts: boolean
   ffClassroomSignals: boolean
@@ -194,6 +195,7 @@ const defaultFeatures: PlatformFeatures = {
   ffMotionLists: true,
   ffMobileCreateCourse: false,
   ffMobileCourseCreateV2: false,
+  ffMobileCanvasImport: false,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
@@ -325,6 +327,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffMotionLists: true,
     ffMobileCreateCourse: false,
     ffMobileCourseCreateV2: false,
+  ffMobileCanvasImport: false,
     ffLibrary: false,
     ffBroadcasts: false,
     ffClassroomSignals: false,
@@ -463,6 +466,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMotionLists: data.ffMotionLists !== false,
           ffMobileCreateCourse: data.ffMobileCreateCourse === true,
           ffMobileCourseCreateV2: data.ffMobileCourseCreateV2 === true,
+          ffMobileCanvasImport: data.ffMobileCanvasImport === true,
           ffLibrary: data.ffLibrary === true,
           ffBroadcasts: data.ffBroadcasts === true,
           ffClassroomSignals: data.ffClassroomSignals === true,
@@ -558,6 +562,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMotionLists: next.ffMotionLists !== false,
           ffMobileCreateCourse: next.ffMobileCreateCourse === true,
           ffMobileCourseCreateV2: next.ffMobileCourseCreateV2 === true,
+          ffMobileCanvasImport: next.ffMobileCanvasImport === true,
           ffLibrary: next.ffLibrary === true,
           ffBroadcasts: next.ffBroadcasts === true,
           ffClassroomSignals: next.ffClassroomSignals === true,

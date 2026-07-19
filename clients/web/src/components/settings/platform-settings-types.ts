@@ -111,6 +111,7 @@ export type PlatformSettingsPayload = {
   ffMotionLists: boolean
   ffMobileCreateCourse: boolean
   ffMobileCourseCreateV2: boolean
+  ffMobileCanvasImport: boolean
   ffUiMode: boolean
   ffReadAloud: boolean
   ffAltTextEnforcement: boolean

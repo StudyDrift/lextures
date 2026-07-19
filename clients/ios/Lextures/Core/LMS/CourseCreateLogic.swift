@@ -297,6 +297,22 @@ enum CourseCreateLogic {
         features.ffMobileCourseCreateV2
     }
 
+    static func canvasImportEnabled(_ features: MobilePlatformFeatures) -> Bool {
+        features.ffMobileCanvasImport
+    }
+
+    static func shouldShowCanvasImportSource(
+        permissions: [String],
+        features: MobilePlatformFeatures,
+        isOnline: Bool
+    ) -> Bool {
+        CanvasImportLogic.shouldShowCanvasImportEntry(
+            permissions: permissions,
+            features: features,
+            isOnline: isOnline
+        )
+    }
+
     static func canCreateCourses(permissions: [String]) -> Bool {
         permissions.contains(courseCreatePermission)
     }
