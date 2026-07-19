@@ -3196,7 +3196,39 @@ object LmsApi {
                 accessToken = accessToken,
             )
             if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
-            decode(body)
+            val result = decode<MarketplaceClaimResult>(body)
+            MarketplaceObservability.record(
+                "marketplace_claim",
+                mapOf("already_owned" to if (result.alreadyOwned) "1" else "0"),
+            )
+            result
+        }
+
+    /** Paid marketplace checkout (MOB.7) — Stripe session URL or already-owned. */
+    suspend fun checkoutMarketplaceCourse(slug: String, accessToken: String): MarketplaceCheckoutResult =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/marketplace/courses/${encodePath(slug)}/checkout",
+                method = "POST",
+                body = "{}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            val result = decode<MarketplaceCheckoutResult>(body)
+            MarketplaceObservability.record(
+                "marketplace_checkout_started",
+                if (result.alreadyOwned) mapOf("already_owned" to "1") else emptyMap(),
+            )
+            result
+        }
+
+    suspend fun fetchMyPurchases(accessToken: String): List<CoursePurchase> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request("/api/v1/me/purchases", accessToken = accessToken)
+            if (code == 404) return@withContext emptyList()
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            MarketplaceObservability.record("purchases_list_viewed")
+            decode<CoursePurchasesResponse>(body).purchases
         }
 
     suspend fun fetchCourseCatalogListing(courseCode: String, accessToken: String): CourseCatalogListing =

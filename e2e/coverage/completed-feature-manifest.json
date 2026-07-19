@@ -7550,6 +7550,34 @@
       }
     },
     {
+      "id": "MOB.7",
+      "path": "docs/completed/mobile/MOB.7-marketplace-purchases.md",
+      "markets": [
+        "SL",
+        "HE"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "api-contract",
+      "rationale": "Mobile marketplace purchase loop: free claim, paid Stripe checkout handoff via PurchaseFlow, Purchased courses from /me/purchases, owned Open CTA. Native unit tests cover flag gating and CTA labels; Playwright API smoke covers ffMobileMarketplacePurchase, claim\u2192purchases list, and checkout response shape.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/mobile-marketplace-purchases.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Flag ffMobileMarketplacePurchase is Settings \u2192 Global platform toggle (E2E.2 matrix). Paid path uses external Stripe checkout (not IAP). Rollback restores Buy on web."
+      }
+    },
+    {
       "id": "T01",
       "path": "docs/completed/transcripts/T01-official-transcript-generation.md",
       "markets": [

@@ -65,7 +65,7 @@ enum MarketplaceSortMode: String, CaseIterable, Identifiable {
     }
 }
 
-/// Marketplace helpers (plan MKT6). Paid purchases use Path B (web hand-off).
+/// Marketplace helpers (MKT6 / MOB.7). Paid path: Stripe checkout handoff when flagged.
 enum MarketplaceLogic {
     static let maxPriceMajor = 99_999.99
     static let minPaidCents = 50
@@ -73,6 +73,11 @@ enum MarketplaceLogic {
     static let currencies = [
         "usd", "eur", "gbp", "cad", "aud", "jpy", "chf", "sek", "nok", "dkk", "nzd", "sgd", "hkd", "mxn",
     ]
+
+    /// In-app claim/buy + Purchased courses library (MOB.7). Default off via platform flag.
+    static func purchaseEnabled(_ features: MobilePlatformFeatures) -> Bool {
+        features.ffCourseMarketplace && features.ffMobileMarketplacePurchase
+    }
 
     static func isPaid(priceCents: Int) -> Bool { priceCents > 0 }
 
@@ -172,9 +177,52 @@ enum MarketplaceLogic {
         )
     }
 
-    static func ctaLabelKey(owned: Bool, priceCents: Int) -> String {
+    static func ctaLabelKey(owned: Bool, priceCents: Int, purchaseEnabled: Bool = false) -> String {
         if owned { return "goToCourse" }
         if isFree(priceCents: priceCents) { return "enrollFree" }
-        return "buyOnWeb"
+        return purchaseEnabled ? "buy" : "buyOnWeb"
     }
+
+    static func purchaseSourceLabelKey(_ source: String) -> String {
+        switch source {
+        case "free": return "mobile.marketplace.purchases.source.free"
+        case "stripe": return "mobile.marketplace.purchases.source.stripe"
+        case "comp": return "mobile.marketplace.purchases.source.comp"
+        default: return "mobile.marketplace.purchases.source.other"
+        }
+    }
+
+    static func formatAcquiredAt(_ iso: String) -> String {
+        let trimmed = iso.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= 10 else { return trimmed }
+        return String(trimmed.prefix(10))
+    }
+}
+
+enum MarketplaceObservability {
+    private static var counters: [String: Int] = [:]
+    private static let lock = NSLock()
+
+    static func record(_ event: String, attributes: [String: String] = [:]) {
+        lock.lock()
+        defer { lock.unlock() }
+        let key = attributes.isEmpty
+            ? event
+            : event + "|" + attributes.keys.sorted().map { "\($0)=\(attributes[$0] ?? "")" }.joined(separator: ",")
+        counters[key, default: 0] += 1
+    }
+
+    static func count(for event: String) -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return counters.filter { $0.key == event || $0.key.hasPrefix(event + "|") }.values.reduce(0, +)
+    }
+
+    #if DEBUG
+    static func resetForTests() {
+        lock.lock()
+        counters.removeAll()
+        lock.unlock()
+    }
+    #endif
 }

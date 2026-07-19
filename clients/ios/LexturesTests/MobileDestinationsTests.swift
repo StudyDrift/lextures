@@ -121,6 +121,12 @@ final class MobileDestinationsTests: XCTestCase {
         raw.ffMobileWhiteboardEdit = false
         XCTAssertFalse(MobilePlatformFeatures.from(raw).ffMobileWhiteboardEdit)
         XCTAssertFalse(MobilePlatformFeatures.from(nil).ffMobileWhiteboardEdit)
+
+        raw.ffMobileMarketplacePurchase = true
+        XCTAssertTrue(MobilePlatformFeatures.from(raw).ffMobileMarketplacePurchase)
+        raw.ffMobileMarketplacePurchase = false
+        XCTAssertFalse(MobilePlatformFeatures.from(raw).ffMobileMarketplacePurchase)
+        XCTAssertFalse(MobilePlatformFeatures.from(nil).ffMobileMarketplacePurchase)
     }
 
     func testCourseWorkspaceHidesDisabledFeatures() {

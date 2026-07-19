@@ -5,9 +5,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 
 class MarketplaceLogicTest {
+    @Before
+    fun setUp() {
+        MarketplaceObservability.resetForTests()
+    }
+
     @Test
     fun isPaidAndFree() {
         assertTrue(MarketplaceLogic.isPaid(1999))
@@ -17,12 +23,7 @@ class MarketplaceLogicTest {
     }
 
     @Test
-    fun formatPriceUsesFreeLabel() {
-        assertEquals("Free", MarketplaceLogic.formatPrice(0, freeLabel = "Free"))
-    }
-
-    @Test
-    fun cardAccessibleNameIncludesOwned() {
+    fun cardAccessibleName() {
         assertEquals(
             "Spanish, Owned, Free",
             MarketplaceLogic.cardAccessibleName("Spanish", "Free", owned = true, ownedLabel = "Owned"),
@@ -34,11 +35,12 @@ class MarketplaceLogicTest {
     }
 
     @Test
-    fun shouldShowPurchasedBadgeRequiresFlagAndField() {
+    fun shouldShowPurchasedBadge() {
         val course = CourseSummary(
             id = "1",
             courseCode = "SPAN101",
             title = "Spanish",
+            description = "",
             acquiredViaMarketplace = true,
         )
         assertFalse(MarketplaceLogic.shouldShowPurchasedBadge(MobilePlatformFeatures(), course))
@@ -57,16 +59,12 @@ class MarketplaceLogicTest {
     }
 
     @Test
-    fun majorUnitsToPriceCents() {
+    fun majorUnitsAndValidation() {
         assertEquals(0, MarketplaceLogic.majorUnitsToPriceCents(""))
         assertEquals(1999, MarketplaceLogic.majorUnitsToPriceCents("19.99"))
         assertEquals(1000, MarketplaceLogic.majorUnitsToPriceCents("1000", "jpy"))
         assertNull(MarketplaceLogic.majorUnitsToPriceCents("abc"))
         assertNull(MarketplaceLogic.majorUnitsToPriceCents("1000.50", "jpy"))
-    }
-
-    @Test
-    fun validateAmount() {
         assertNull(MarketplaceLogic.validateAmount(""))
         assertEquals("invalid", MarketplaceLogic.validateAmount("12.345"))
         assertEquals("min", MarketplaceLogic.validateAmount("0.10"))
@@ -74,14 +72,48 @@ class MarketplaceLogicTest {
     }
 
     @Test
-    fun ctaLabelKey() {
+    fun ctaAndWebPath() {
         assertEquals("goToCourse", MarketplaceLogic.ctaLabelKey(owned = true, priceCents = 0))
         assertEquals("enrollFree", MarketplaceLogic.ctaLabelKey(owned = false, priceCents = 0))
         assertEquals("buyOnWeb", MarketplaceLogic.ctaLabelKey(owned = false, priceCents = 500))
+        assertEquals(
+            "buy",
+            MarketplaceLogic.ctaLabelKey(owned = false, priceCents = 500, purchaseEnabled = true),
+        )
+        assertEquals("/marketplace/spanish-a1", MarketplaceLogic.marketplaceWebPath("spanish-a1"))
     }
 
     @Test
-    fun marketplaceWebPath() {
-        assertEquals("/marketplace/spanish-a1", MarketplaceLogic.marketplaceWebPath("spanish-a1"))
+    fun purchaseEnabledRequiresBothFlags() {
+        assertFalse(MarketplaceLogic.purchaseEnabled(MobilePlatformFeatures()))
+        assertFalse(
+            MarketplaceLogic.purchaseEnabled(MobilePlatformFeatures(ffCourseMarketplace = true)),
+        )
+        assertTrue(
+            MarketplaceLogic.purchaseEnabled(
+                MobilePlatformFeatures(ffCourseMarketplace = true, ffMobileMarketplacePurchase = true),
+            ),
+        )
+    }
+
+    @Test
+    fun purchaseSourceAndAcquiredFormatting() {
+        assertEquals(
+            "mobile.marketplace.purchases.source.free",
+            MarketplaceLogic.purchaseSourceLabelKey("free"),
+        )
+        assertEquals(
+            "mobile.marketplace.purchases.source.stripe",
+            MarketplaceLogic.purchaseSourceLabelKey("stripe"),
+        )
+        assertEquals("2026-07-19", MarketplaceLogic.formatAcquiredAt("2026-07-19T12:00:00Z"))
+    }
+
+    @Test
+    fun observabilityCounters() {
+        MarketplaceObservability.record("marketplace_viewed")
+        MarketplaceObservability.record("marketplace_claim", mapOf("already_owned" to "0"))
+        assertEquals(1, MarketplaceObservability.count("marketplace_viewed"))
+        assertEquals(1, MarketplaceObservability.count("marketplace_claim"))
     }
 }

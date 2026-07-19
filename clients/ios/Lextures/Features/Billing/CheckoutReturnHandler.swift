@@ -81,6 +81,7 @@ struct CheckoutReturnOverlay: View {
         switch phase {
         case .cancel:
             status = .cancelled
+            MarketplaceObservability.record("marketplace_cancelled")
         case let .success(courseId):
             await verify(courseId: courseId)
         }
@@ -125,6 +126,7 @@ struct CheckoutReturnOverlay: View {
                     }
                     shell.pendingCheckout = nil
                     status = .ready
+                    MarketplaceObservability.record("marketplace_purchase_succeeded")
                     return
                 }
             } catch {

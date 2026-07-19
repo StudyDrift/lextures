@@ -218,6 +218,7 @@ type platformSettingsJSON struct {
 	FFMobileEnrollmentAdd        bool    `json:"ffMobileEnrollmentAdd"`
 	FFMobileLiveQuiz             bool    `json:"ffMobileLiveQuiz"`
 	FFMobileWhiteboardEdit       bool    `json:"ffMobileWhiteboardEdit"`
+	FFMobileMarketplacePurchase  bool    `json:"ffMobileMarketplacePurchase"`
 	FFClassroomSignals           bool    `json:"ffClassroomSignals"`
 	FFLibraryIntegration         bool    `json:"ffLibraryIntegration"`
 	DiagnosticAssessmentsEnabled bool    `json:"diagnosticAssessmentsEnabled"`
@@ -485,6 +486,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFMobileEnrollmentAdd:              merged.FFMobileEnrollmentAdd,
 			FFMobileLiveQuiz:                   merged.FFMobileLiveQuiz,
 			FFMobileWhiteboardEdit:             merged.FFMobileWhiteboardEdit,
+			FFMobileMarketplacePurchase:        merged.FFMobileMarketplacePurchase,
 			FFClassroomSignals:                 merged.FFClassroomSignals,
 			FFLibraryIntegration:               merged.FFLibraryIntegration,
 			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,
@@ -726,6 +728,7 @@ type putPlatformBody struct {
 	FFMobileEnrollmentAdd        *bool    `json:"ffMobileEnrollmentAdd"`
 	FFMobileLiveQuiz             *bool    `json:"ffMobileLiveQuiz"`
 	FFMobileWhiteboardEdit       *bool    `json:"ffMobileWhiteboardEdit"`
+	FFMobileMarketplacePurchase  *bool    `json:"ffMobileMarketplacePurchase"`
 	FFClassroomSignals           *bool    `json:"ffClassroomSignals"`
 	FFLibraryIntegration         *bool    `json:"ffLibraryIntegration"`
 	DiagnosticAssessmentsEnabled *bool    `json:"diagnosticAssessmentsEnabled"`
@@ -1178,6 +1181,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffmobileenrollmentadd", body.FFMobileEnrollmentAdd, func(v bool) { wr.FFMobileEnrollmentAdd = &v })
 		setBool("ffmobilelivequiz", body.FFMobileLiveQuiz, func(v bool) { wr.FFMobileLiveQuiz = &v })
 		setBool("ffmobilewhiteboardedit", body.FFMobileWhiteboardEdit, func(v bool) { wr.FFMobileWhiteboardEdit = &v })
+		setBool("ffmobilemarketplacepurchase", body.FFMobileMarketplacePurchase, func(v bool) { wr.FFMobileMarketplacePurchase = &v })
 		setBool("ffclassroomsignals", body.FFClassroomSignals, func(v bool) { wr.FFClassroomSignals = &v })
 		setBool("fflibraryintegration", body.FFLibraryIntegration, func(v bool) { wr.FFLibraryIntegration = &v })
 		setBool("diagnosticassessmentsenabled", body.DiagnosticAssessmentsEnabled, func(v bool) { wr.DiagnosticAssessmentsEnabled = &v })
@@ -1413,6 +1417,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFMobileEnrollmentAdd:              merged.FFMobileEnrollmentAdd,
 			FFMobileLiveQuiz:                   merged.FFMobileLiveQuiz,
 			FFMobileWhiteboardEdit:             merged.FFMobileWhiteboardEdit,
+			FFMobileMarketplacePurchase:        merged.FFMobileMarketplacePurchase,
 			FFClassroomSignals:                 merged.FFClassroomSignals,
 			FFLibraryIntegration:               merged.FFLibraryIntegration,
 			DiagnosticAssessmentsEnabled:       merged.DiagnosticAssessmentsEnabled,

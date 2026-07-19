@@ -344,6 +344,8 @@ type Config struct {
 	FFMobileLiveQuiz bool
 	// FFMobileWhiteboardEdit enables course whiteboard authoring on iOS and Android (MOB.6). Default OFF.
 	FFMobileWhiteboardEdit bool
+	// FFMobileMarketplacePurchase enables in-app marketplace claim/buy + Purchased courses (MOB.7). Default OFF.
+	FFMobileMarketplacePurchase bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).

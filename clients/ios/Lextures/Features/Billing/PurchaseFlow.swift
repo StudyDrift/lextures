@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Paid course checkout sheet: tax quote + Stripe web checkout handoff (M9.2).
+/// Paid course checkout sheet: tax quote + Stripe web checkout handoff (M9.2 / MOB.7).
 struct PurchaseFlowSheet: View {
     @Environment(AuthSession.self) private var session
     @Environment(AppShellModel.self) private var shell
@@ -13,6 +13,9 @@ struct PurchaseFlowSheet: View {
     let title: String
     let priceCents: Int
     let currency: String
+    /// When set, uses marketplace checkout endpoint instead of catalog billing checkout (MOB.7).
+    var marketplaceSlug: String? = nil
+    var onAlreadyOwned: (() -> Void)? = nil
 
     @State private var quote: CheckoutTaxQuote?
     @State private var loadingQuote = false
@@ -58,6 +61,8 @@ struct PurchaseFlowSheet: View {
                         .buttonStyle(.borderedProminent)
                         .tint(LexturesTheme.primary)
                         .disabled(purchasing || session.accessToken == nil)
+                        .accessibilityLabel(L.text("mobile.billing.purchase"))
+                        .accessibilityValue(BillingLogic.formatMoney(cents: displayTotalCents, currency: currency))
 
                         Text(L.text("mobile.billing.storePolicyNote"))
                             .font(.caption2)
@@ -144,6 +149,25 @@ struct PurchaseFlowSheet: View {
                 courseCode: courseCode,
                 title: title
             )
+            if let marketplaceSlug, !marketplaceSlug.isEmpty {
+                let result = try await LMSAPI.checkoutMarketplaceCourse(slug: marketplaceSlug, accessToken: token)
+                if result.alreadyOwned == true {
+                    shell.pendingCheckout = nil
+                    dismiss()
+                    onAlreadyOwned?()
+                    return
+                }
+                guard let urlString = result.checkoutUrl, let url = URL(string: urlString) else {
+                    shell.pendingCheckout = nil
+                    errorMessage = L.text("mobile.billing.checkoutError")
+                    MarketplaceObservability.record("marketplace_purchase_failed", attributes: ["reason": "url"])
+                    return
+                }
+                dismiss()
+                openURL(url)
+                return
+            }
+
             let result = try await LMSAPI.startCheckout(
                 courseId: courseId,
                 successUrl: BillingLogic.checkoutSuccessURL(courseId: courseId).absoluteString,
@@ -160,6 +184,9 @@ struct PurchaseFlowSheet: View {
         } catch {
             shell.pendingCheckout = nil
             errorMessage = L.text("mobile.billing.checkoutError")
+            if marketplaceSlug != nil {
+                MarketplaceObservability.record("marketplace_purchase_failed", attributes: ["reason": "start"])
+            }
         }
     }
 }

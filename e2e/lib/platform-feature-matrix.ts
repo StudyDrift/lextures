@@ -806,6 +806,18 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     gatedSurface: null,
   },
   {
+    key: 'ffMobileMarketplacePurchase',
+    label: 'Mobile marketplace purchases',
+    category: 'platform',
+    ownershipSource: 'database',
+    sourceKey: null,
+    runtimeKey: 'ffMobileMarketplacePurchase',
+    settingsOnlyRationale: null,
+    secretSensitive: false,
+    uiSample: false,
+    gatedSurface: null,
+  },
+  {
     key: 'ffMotionNavigation',
     label: 'Motion / animation',
     category: 'accessibility',

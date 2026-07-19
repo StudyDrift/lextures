@@ -310,6 +310,7 @@ struct ProfileAccountCard: View {
     @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
     @Binding var billingNav: BillingRoute?
+    @Binding var purchasesNav: MyPurchasesRoute?
 
     var body: some View {
         LMSCard {
@@ -323,6 +324,18 @@ struct ProfileAccountCard: View {
                 value: shell.profile?.email ?? session.userEmail ?? L.text("mobile.emDash"),
                 systemImage: "envelope"
             )
+            if MarketplaceLogic.purchaseEnabled(shell.platformFeatures) {
+                Divider()
+                Button {
+                    purchasesNav = MyPurchasesRoute()
+                } label: {
+                    Label(L.text("mobile.marketplace.purchases.title"), systemImage: "cart")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(LexturesTheme.primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+            }
             if BillingLogic.billingEnabled(shell.platformFeatures) {
                 Divider()
                 Button {

@@ -58,7 +58,10 @@ fun CheckoutReturnOverlay(
 
     LaunchedEffect(phase, accessToken) {
         when (phase) {
-            CheckoutReturnPhase.Cancel -> status = CheckoutStatus.Cancelled
+            CheckoutReturnPhase.Cancel -> {
+                status = CheckoutStatus.Cancelled
+                com.lextures.android.core.lms.MarketplaceObservability.record("marketplace_cancelled")
+            }
             is CheckoutReturnPhase.Success -> {
                 val token = accessToken ?: run {
                     status = CheckoutStatus.Timeout
@@ -88,6 +91,7 @@ fun CheckoutReturnOverlay(
                         }
                         shell.pendingCheckout = null
                         status = CheckoutStatus.Ready
+                        com.lextures.android.core.lms.MarketplaceObservability.record("marketplace_purchase_succeeded")
                         return@LaunchedEffect
                     }
                     if (attempt < BillingLogic.ENTITLEMENT_POLL_ATTEMPTS - 1) {

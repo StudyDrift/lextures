@@ -116,6 +116,7 @@ export type PlatformSettingsPayload = {
   ffMobileEnrollmentAdd: boolean
   ffMobileLiveQuiz: boolean
   ffMobileWhiteboardEdit: boolean
+  ffMobileMarketplacePurchase: boolean
   ffUiMode: boolean
   ffReadAloud: boolean
   ffAltTextEnforcement: boolean

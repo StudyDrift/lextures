@@ -13,11 +13,25 @@
 | **Section** | Mobile parity |
 | **Severity** | MAJOR |
 | **Markets** | SL / HE (CE) |
-| **Status (today)** | PARTIAL |
+| **Status (today)** | **DONE** |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile team + Billing |
 | **Depends on** | App Store / Play purchase-policy decision (§18 Q1) |
 | **Unblocks** | — |
+
+
+## Implementation notes (2026-07-19)
+
+External Stripe checkout handoff (not StoreKit/Play IAP) — same compliant browser path as catalog `PurchaseFlow`.
+
+- **§18 Q1 decision**: external Stripe Checkout via Safari/Custom Tab + return deep links; IAP deferred (economics + receipt-validation server work).
+- **Flag**: `ffMobileMarketplacePurchase` (DB `ff_mobile_marketplace_purchase`, default OFF) gates paid in-app buy + Purchased courses entry; free claim remains available when marketplace is on; flag off restores "Buy on web".
+- **Logic**: `MarketplaceLogic.purchaseEnabled` / `ctaLabelKey(..., purchaseEnabled)`; `MarketplaceObservability` events (`marketplace_viewed|claim|checkout_started|purchase_succeeded|purchase_failed|cancelled`, `purchases_list_viewed`).
+- **API**: iOS/Android `checkoutMarketplaceCourse`, `fetchMyPurchases`; reuse tax quote + `CheckoutReturnOverlay`.
+- **UI**: Marketplace detail opens `PurchaseFlowSheet` with `marketplaceSlug`; new `MyPurchasesView` / `MyPurchasesScreen` from Profile; owned shows Open.
+- **i18n**: `mobile.marketplace.buy`, `paidCheckoutHint`, `purchases.*`; synced via `scripts/sync-mobile-locales.py`.
+- **Tests**: unit coverage for CTA/flag/source formatting/observability; platformconfig merge default-off; e2e API smoke `e2e/tests/mobile-marketplace-purchases.spec.ts`.
+
 
 ## 1. Problem Statement
 

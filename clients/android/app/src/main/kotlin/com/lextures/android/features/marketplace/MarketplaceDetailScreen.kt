@@ -38,8 +38,11 @@ import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.MarketplaceCourseDetail
 import com.lextures.android.core.lms.MarketplaceLogic
+import com.lextures.android.core.lms.MarketplaceObservability
 import com.lextures.android.core.navigation.CourseWorkspaceSection
 import com.lextures.android.core.navigation.RootDestination
+import com.lextures.android.core.network.ApiError
+import com.lextures.android.features.billing.PurchaseFlowSheet
 import com.lextures.android.features.courses.CourseDetailScreen
 import com.lextures.android.features.home.CourseHeroImage
 import com.lextures.android.features.home.HomeShellState
@@ -68,8 +71,12 @@ fun MarketplaceDetailScreen(
     var claiming by remember { mutableStateOf(false) }
     var claimError by remember { mutableStateOf<String?>(null) }
     var openCourse by remember { mutableStateOf<CourseSummary?>(null) }
+    var showPurchase by remember { mutableStateOf(false) }
+
+    val purchaseEnabled = MarketplaceLogic.purchaseEnabled(shell.platformFeatures)
 
     LaunchedEffect(accessToken, slug) {
+        MarketplaceObservability.record("marketplace_viewed")
         loading = true
         errorMessage = null
         try {
@@ -229,11 +236,22 @@ fun MarketplaceDetailScreen(
                             }) {
                                 Text(L.text(context, localePrefs, R.string.mobile_marketplace_goToCourse))
                             }
-                            MarketplaceLogic.isPaid(current.priceCents) -> Button(onClick = {
-                                val url = AppConfiguration.webUrl(MarketplaceLogic.marketplaceWebPath(slug))
-                                context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-                            }) {
-                                Text(L.text(context, localePrefs, R.string.mobile_marketplace_buyOnWeb))
+                            MarketplaceLogic.isPaid(current.priceCents) -> {
+                                if (purchaseEnabled) {
+                                    Button(
+                                        onClick = { showPurchase = true },
+                                        enabled = accessToken != null,
+                                    ) {
+                                        Text(L.text(context, localePrefs, R.string.mobile_marketplace_buy))
+                                    }
+                                } else {
+                                    Button(onClick = {
+                                        val url = AppConfiguration.webUrl(MarketplaceLogic.marketplaceWebPath(slug))
+                                        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                                    }) {
+                                        Text(L.text(context, localePrefs, R.string.mobile_marketplace_buyOnWeb))
+                                    }
+                                }
                             }
                             else -> Button(
                                 onClick = {
@@ -243,11 +261,20 @@ fun MarketplaceDetailScreen(
                                     scope.launch {
                                         try {
                                             val result = LmsApi.claimMarketplaceCourse(slug, token)
-                                            val summary = LmsApi.fetchCourse(result.courseCode.ifBlank { course.courseCode }, token)
+                                            val summary = LmsApi.fetchCourse(
+                                                result.courseCode.ifBlank { course.courseCode },
+                                                token,
+                                            )
                                             shell.select(RootDestination.Courses)
                                             shell.activeCourse = summary
                                             shell.activeCourseSection = CourseWorkspaceSection.Modules
                                             openCourse = summary
+                                        } catch (e: ApiError.HttpStatus) {
+                                            claimError = if (e.code == 402) {
+                                                L.text(context, localePrefs, R.string.mobile_marketplace_claimPaidError)
+                                            } else {
+                                                L.text(context, localePrefs, R.string.mobile_marketplace_claimError)
+                                            }
                                         } catch (_: Exception) {
                                             claimError = L.text(context, localePrefs, R.string.mobile_marketplace_claimError)
                                         } finally {
@@ -271,11 +298,49 @@ fun MarketplaceDetailScreen(
 
                 if (MarketplaceLogic.isPaid(current.priceCents) && !course.owned) {
                     Text(
-                        L.text(context, localePrefs, R.string.mobile_marketplace_paidWebHint),
+                        L.text(
+                            context,
+                            localePrefs,
+                            if (purchaseEnabled) {
+                                R.string.mobile_marketplace_paidCheckoutHint
+                            } else {
+                                R.string.mobile_marketplace_paidWebHint
+                            },
+                        ),
                         fontSize = 12.sp,
                         color = textSecondary(),
                     )
                 }
+            }
+
+            if (showPurchase) {
+                PurchaseFlowSheet(
+                    session = session,
+                    shell = shell,
+                    localePrefs = localePrefs,
+                    courseId = current.course.id,
+                    courseCode = current.course.courseCode,
+                    title = current.course.title,
+                    priceCents = current.priceCents,
+                    currency = current.priceCurrency,
+                    marketplaceSlug = slug,
+                    onDismiss = { showPurchase = false },
+                    onAlreadyOwned = {
+                        val token = accessToken ?: return@PurchaseFlowSheet
+                        scope.launch {
+                            runCatching {
+                                val summary = LmsApi.fetchCourse(current.course.courseCode, token)
+                                detail = current.copy(course = current.course.copy(owned = true), owned = true)
+                                shell.select(RootDestination.Courses)
+                                shell.activeCourse = summary
+                                shell.activeCourseSection = CourseWorkspaceSection.Modules
+                                openCourse = summary
+                            }.onFailure {
+                                claimError = L.text(context, localePrefs, R.string.mobile_marketplace_openCourseError)
+                            }
+                        }
+                    },
+                )
             }
         }
     }
