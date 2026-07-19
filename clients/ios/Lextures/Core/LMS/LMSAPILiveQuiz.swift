@@ -127,12 +127,12 @@ struct LiveQuizKitsListResult: Codable, Equatable {
     var totalPages: Int?
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        kits = try c.decodeIfPresent([LiveQuizKitSummary].self, forKey: .kits) ?? []
-        total = try c.decodeIfPresent(Int.self, forKey: .total)
-        page = try c.decodeIfPresent(Int.self, forKey: .page)
-        pageSize = try c.decodeIfPresent(Int.self, forKey: .pageSize)
-        totalPages = try c.decodeIfPresent(Int.self, forKey: .totalPages)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        kits = try container.decodeIfPresent([LiveQuizKitSummary].self, forKey: .kits) ?? []
+        total = try container.decodeIfPresent(Int.self, forKey: .total)
+        page = try container.decodeIfPresent(Int.self, forKey: .page)
+        pageSize = try container.decodeIfPresent(Int.self, forKey: .pageSize)
+        totalPages = try container.decodeIfPresent(Int.self, forKey: .totalPages)
     }
 
     private enum CodingKeys: String, CodingKey {

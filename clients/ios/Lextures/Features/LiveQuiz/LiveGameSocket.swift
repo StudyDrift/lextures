@@ -127,7 +127,7 @@ final class LiveGameSocket {
             let message = try await task.receive()
             let data: Data?
             switch message {
-            case .data(let d): data = d
+            case .data(let bytes): data = bytes
             case .string(let text): data = text.data(using: .utf8)
             @unknown default: data = nil
             }

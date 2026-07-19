@@ -122,226 +122,46 @@ struct LiveQuizPlayView: View {
         let phase = LiveGameLogic.Phase.parse(gameState?.phase)
         let surface = LiveGameLogic.playSurface(for: phase, conn: conn)
         VStack(alignment: .leading, spacing: 12) {
-            connectionBadge
+            LiveQuizConnectionBadge(conn: conn)
             switch surface {
             case .connecting:
                 ProgressView(L.text("mobile.liveQuiz.play.connecting"))
             case .lobby, .waitingForHost:
-                lobbyView
+                LiveQuizLobbyView(
+                    kitTitle: gameState?.kitTitle ?? lookup?.kitTitle ?? "",
+                    playerCount: gameState?.players.count
+                )
             case .question:
-                questionView
+                if let question = gameState?.question {
+                    LiveQuizQuestionView(
+                        question: question,
+                        phase: phase,
+                        conn: conn,
+                        hasAnswered: answeredIndex == gameState?.questionIndex,
+                        deadline: gameState?.deadline,
+                        lastAck: lastAck,
+                        questionIndex: gameState?.questionIndex,
+                        selectedOptionId: $selectedOptionId,
+                        selectedOptionIds: $selectedOptionIds,
+                        answerText: $answerText,
+                        answerNumeric: $answerNumeric,
+                        orderIds: $orderIds,
+                        onSubmit: submitCurrentAnswer
+                    )
+                }
             case .leaderboard, .podium:
-                leaderboardView
+                LiveQuizLeaderboardView(gameState: gameState)
             case .ended:
-                endedView
+                LiveQuizEndedView(
+                    myResults: myResults,
+                    gameState: gameState,
+                    onLoadResults: { Task { await loadResults() } }
+                )
             case .kicked:
                 Text(L.text("mobile.liveQuiz.play.kicked"))
                     .foregroundStyle(.red)
             }
             Spacer(minLength: 0)
-        }
-    }
-
-    private var connectionBadge: some View {
-        let label: String = {
-            switch conn {
-            case .connecting: return L.text("mobile.liveQuiz.conn.connecting")
-            case .connected: return L.text("mobile.liveQuiz.conn.connected")
-            case .reconnecting: return L.text("mobile.liveQuiz.conn.reconnecting")
-            case .ended: return L.text("mobile.liveQuiz.conn.ended")
-            case .kicked: return L.text("mobile.liveQuiz.conn.kicked")
-            case .disconnected: return L.text("mobile.liveQuiz.conn.disconnected")
-            }
-        }()
-        return Text(label)
-            .font(.caption.weight(.medium))
-            .foregroundStyle(conn == .connected ? .green : LexturesTheme.textSecondary(for: colorScheme))
-            .accessibilityLabel(label)
-    }
-
-    private var lobbyView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(gameState?.kitTitle ?? lookup?.kitTitle ?? "")
-                .font(.title3.weight(.semibold))
-            Text(L.text("mobile.liveQuiz.play.lobbyWaiting"))
-                .font(.subheadline)
-                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            if let players = gameState?.players {
-                Text(L.format("mobile.liveQuiz.play.playerCount", players.count))
-                    .font(.caption)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var questionView: some View {
-        if let q = gameState?.question {
-            let qType = LiveGameLogic.QuestionType.parse(q.questionType) ?? .mcSingle
-            let hasAnswered = answeredIndex == gameState?.questionIndex
-            VStack(alignment: .leading, spacing: 12) {
-                Text(q.prompt)
-                    .font(.headline)
-                    .accessibilityAddTraits(.isHeader)
-                if let deadline = gameState?.deadline {
-                    Text(L.format("mobile.liveQuiz.play.deadline", deadline))
-                        .font(.caption)
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                }
-                answerSurface(type: qType, question: q, hasAnswered: hasAnswered)
-                if let lastAck, lastAck.questionIndex == gameState?.questionIndex {
-                    resultCard(lastAck)
-                }
-                if LiveGameLogic.canSubmitAnswer(
-                    phase: LiveGameLogic.Phase.parse(gameState?.phase),
-                    hasAnswered: hasAnswered,
-                    conn: conn
-                ) {
-                    Button(L.text("mobile.liveQuiz.play.submit")) {
-                        submitCurrentAnswer(type: qType, question: q)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .accessibilityIdentifier("liveQuiz.play.submit")
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func answerSurface(
-        type: LiveGameLogic.QuestionType,
-        question: LiveGameQuestion,
-        hasAnswered: Bool
-    ) -> some View {
-        switch type {
-        case .mcSingle, .trueFalse:
-            ForEach(Array(question.options.enumerated()), id: \.element.id) { index, opt in
-                Button {
-                    selectedOptionId = opt.id
-                } label: {
-                    HStack {
-                        Text(LiveGameLogic.answerShapeLabel(index: index))
-                        Text(opt.text)
-                        Spacer()
-                        if selectedOptionId == opt.id {
-                            Image(systemName: "checkmark.circle.fill")
-                        }
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(selectedOptionId == opt.id
-                                  ? Color.accentColor.opacity(0.15)
-                                  : LexturesTheme.cardBackground(for: colorScheme))
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(hasAnswered)
-                .accessibilityLabel("\(LiveGameLogic.answerShapeName(index: index)), \(opt.text)")
-            }
-        case .mcMultiple, .poll:
-            ForEach(Array(question.options.enumerated()), id: \.element.id) { index, opt in
-                Button {
-                    if selectedOptionIds.contains(opt.id) {
-                        selectedOptionIds.remove(opt.id)
-                    } else {
-                        selectedOptionIds.insert(opt.id)
-                    }
-                } label: {
-                    HStack {
-                        Text(LiveGameLogic.answerShapeLabel(index: index))
-                        Text(opt.text)
-                        Spacer()
-                        Image(systemName: selectedOptionIds.contains(opt.id) ? "checkmark.square.fill" : "square")
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(LexturesTheme.cardBackground(for: colorScheme))
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(hasAnswered)
-            }
-        case .typeAnswer, .wordCloud:
-            TextField(L.text("mobile.liveQuiz.play.typeAnswer"), text: $answerText)
-                .textFieldStyle(.roundedBorder)
-                .disabled(hasAnswered)
-        case .numeric:
-            TextField(L.text("mobile.liveQuiz.play.numeric"), text: $answerNumeric)
-                .keyboardType(.decimalPad)
-                .textFieldStyle(.roundedBorder)
-                .disabled(hasAnswered)
-        case .ordering:
-            ForEach(orderIds.isEmpty ? question.options.map(\.id) : orderIds, id: \.self) { id in
-                let text = question.options.first(where: { $0.id == id })?.text ?? id
-                Text(text)
-                    .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(RoundedRectangle(cornerRadius: 8).fill(LexturesTheme.cardBackground(for: colorScheme)))
-                    .onAppear {
-                        if orderIds.isEmpty { orderIds = question.options.map(\.id) }
-                    }
-            }
-        }
-    }
-
-    private func resultCard(_ ack: LiveGameAnswerAck) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if ack.ok {
-                Text(ack.isCorrect == true
-                     ? L.text("mobile.liveQuiz.play.correct")
-                     : L.text("mobile.liveQuiz.play.incorrect"))
-                    .font(.subheadline.weight(.semibold))
-                if let points = ack.points {
-                    Text(L.format("mobile.liveQuiz.play.points", points))
-                        .font(.caption)
-                }
-            } else if let err = ack.error {
-                Text(err).font(.caption).foregroundStyle(.red)
-            }
-        }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 8).fill(LexturesTheme.cardBackground(for: colorScheme)))
-    }
-
-    private var leaderboardView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(L.text("mobile.liveQuiz.play.leaderboard"))
-                .font(.headline)
-            if let you = gameState?.you {
-                Text(L.format("mobile.liveQuiz.play.yourRank", you.rank, you.totalScore))
-                    .font(.subheadline)
-            }
-            ForEach(gameState?.leaderboard ?? gameState?.podium ?? [], id: \.playerId) { entry in
-                HStack {
-                    Text("#\(entry.rank)")
-                        .font(.caption.monospacedDigit())
-                    Text(entry.nickname)
-                    Spacer()
-                    Text("\(entry.totalScore)")
-                        .font(.caption.monospacedDigit())
-                }
-            }
-        }
-    }
-
-    private var endedView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(L.text("mobile.liveQuiz.play.ended"))
-                .font(.title3.weight(.semibold))
-            if let myResults {
-                Text(L.format("mobile.liveQuiz.results.summary", myResults.rank, myResults.totalScore, myResults.correct, myResults.answered))
-                    .font(.subheadline)
-            } else {
-                Button(L.text("mobile.liveQuiz.results.load")) {
-                    Task { await loadResults() }
-                }
-                .buttonStyle(.borderedProminent)
-            }
-            leaderboardView
         }
     }
 
@@ -420,7 +240,7 @@ struct LiveQuizPlayView: View {
 
     private func startSocket(session: LiveQuizPlayerSession) {
         socket?.disconnect()
-        let s = LiveGameSocket(
+        let gameSocket = LiveGameSocket(
             courseCode: session.courseCode,
             gameId: session.gameId,
             role: .player,
@@ -467,8 +287,8 @@ struct LiveQuizPlayView: View {
             },
             onConn: { conn = $0 }
         )
-        socket = s
-        s.connect()
+        socket = gameSocket
+        gameSocket.connect()
     }
 
     private func submitCurrentAnswer(type: LiveGameLogic.QuestionType, question: LiveGameQuestion) {

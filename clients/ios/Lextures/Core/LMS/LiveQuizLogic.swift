@@ -3,9 +3,13 @@ import Foundation
 /// Pure helpers for interactive live quizzes (MOB.5 Phase 1 — student play).
 enum LiveQuizLogic {
     static let nicknameMaxLength = 24
-    private static let nicknameAllowed = try! NSRegularExpression(
-        pattern: #"^[\p{L}\p{N} _.\-'!]+$"#
-    )
+    private static let nicknameAllowed: NSRegularExpression = {
+        do {
+            return try NSRegularExpression(pattern: #"^[\p{L}\p{N} _.\-'!]+$"#)
+        } catch {
+            preconditionFailure("Invalid nickname regex: \(error)")
+        }
+    }()
 
     enum JoinStep: String, Equatable {
         case code

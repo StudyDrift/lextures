@@ -235,14 +235,14 @@ struct LiveQuizJoinLookup: Codable, Equatable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        gameId = try c.decode(String.self, forKey: .gameId)
-        courseCode = try c.decodeIfPresent(String.self, forKey: .courseCode) ?? ""
-        kitTitle = try c.decodeIfPresent(String.self, forKey: .kitTitle) ?? ""
-        requiresAuth = try c.decodeIfPresent(Bool.self, forKey: .requiresAuth) ?? true
-        allowsGuests = try c.decodeIfPresent(Bool.self, forKey: .allowsGuests) ?? false
-        phase = try c.decodeIfPresent(String.self, forKey: .phase) ?? ""
-        status = try c.decodeIfPresent(String.self, forKey: .status) ?? ""
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        gameId = try container.decode(String.self, forKey: .gameId)
+        courseCode = try container.decodeIfPresent(String.self, forKey: .courseCode) ?? ""
+        kitTitle = try container.decodeIfPresent(String.self, forKey: .kitTitle) ?? ""
+        requiresAuth = try container.decodeIfPresent(Bool.self, forKey: .requiresAuth) ?? true
+        allowsGuests = try container.decodeIfPresent(Bool.self, forKey: .allowsGuests) ?? false
+        phase = try container.decodeIfPresent(String.self, forKey: .phase) ?? ""
+        status = try container.decodeIfPresent(String.self, forKey: .status) ?? ""
     }
 
     init(
