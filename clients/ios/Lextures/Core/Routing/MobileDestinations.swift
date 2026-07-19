@@ -424,6 +424,7 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileAdminConsole = false
     var ffMobileEnrollmentAdd = false
     var ffMobileLiveQuiz = false
+    var ffMobileWhiteboardEdit = false
     var ffEnrollmentStateMachine = false
     var adminConsoleEnabled = false
     var adminAuditLogEnabled = true
@@ -505,6 +506,7 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileAdminConsole: features?.ffMobileAdminConsole == true,
             ffMobileEnrollmentAdd: features?.ffMobileEnrollmentAdd == true,
             ffMobileLiveQuiz: features?.ffMobileLiveQuiz == true,
+            ffMobileWhiteboardEdit: features?.ffMobileWhiteboardEdit == true,
             ffEnrollmentStateMachine: features?.ffEnrollmentStateMachine == true,
             adminConsoleEnabled: features?.adminConsoleEnabled == true,
             adminAuditLogEnabled: features?.adminAuditLogEnabled != false,

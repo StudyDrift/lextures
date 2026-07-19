@@ -65,6 +65,7 @@ export type PlatformFeatures = {
   ffMobileAdminConsole: boolean
   ffMobileEnrollmentAdd: boolean
   ffMobileLiveQuiz: boolean
+  ffMobileWhiteboardEdit: boolean
   ffLibrary: boolean
   ffBroadcasts: boolean
   ffClassroomSignals: boolean
@@ -203,6 +204,7 @@ const defaultFeatures: PlatformFeatures = {
   ffMobileAdminConsole: false,
   ffMobileEnrollmentAdd: false,
   ffMobileLiveQuiz: false,
+  ffMobileWhiteboardEdit: false,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
@@ -339,6 +341,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffMobileAdminConsole: false,
     ffMobileEnrollmentAdd: false,
   ffMobileLiveQuiz: false,
+  ffMobileWhiteboardEdit: false,
     ffLibrary: false,
     ffBroadcasts: false,
     ffClassroomSignals: false,
@@ -482,6 +485,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMobileAdminConsole: data.ffMobileAdminConsole === true,
           ffMobileEnrollmentAdd: data.ffMobileEnrollmentAdd === true,
           ffMobileLiveQuiz: data.ffMobileLiveQuiz === true,
+          ffMobileWhiteboardEdit: data.ffMobileWhiteboardEdit === true,
           ffLibrary: data.ffLibrary === true,
           ffBroadcasts: data.ffBroadcasts === true,
           ffClassroomSignals: data.ffClassroomSignals === true,
@@ -582,6 +586,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMobileAdminConsole: next.ffMobileAdminConsole === true,
           ffMobileEnrollmentAdd: next.ffMobileEnrollmentAdd === true,
           ffMobileLiveQuiz: next.ffMobileLiveQuiz === true,
+          ffMobileWhiteboardEdit: next.ffMobileWhiteboardEdit === true,
           ffLibrary: next.ffLibrary === true,
           ffBroadcasts: next.ffBroadcasts === true,
           ffClassroomSignals: next.ffClassroomSignals === true,

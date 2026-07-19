@@ -1,6 +1,7 @@
 package com.lextures.android.core.navigation
 
 import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.lms.PlatformFeatures
 import com.lextures.android.core.routing.CourseDeepLinkSection
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -103,6 +104,15 @@ class MobileDestinationsTest {
             CourseWorkspaceSection.LiveQuizzes,
             CourseWorkspaceSection.from(CourseDeepLinkSection.LiveQuizzes),
         )
+    }
+
+    @Test
+    fun platformFeaturesMapsMobileWhiteboardEdit() {
+        val on = PlatformFeatures(ffMobileWhiteboardEdit = true)
+        val off = PlatformFeatures(ffMobileWhiteboardEdit = false)
+        assertTrue(MobilePlatformFeatures.from(on).ffMobileWhiteboardEdit)
+        assertFalse(MobilePlatformFeatures.from(off).ffMobileWhiteboardEdit)
+        assertFalse(MobilePlatformFeatures.from(null).ffMobileWhiteboardEdit)
     }
 
     @Test

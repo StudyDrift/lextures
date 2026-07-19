@@ -624,6 +624,9 @@
 		E50671AE122545679D87B70A /* WalletLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577FC72A410A4CE784A07E2C /* WalletLogicTests.swift */; };
 		9D6AB97FB54B4179B2C8B9F1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDA4E9440EF24A29829CE9CB /* Assets.xcassets */; };
 		E0D6C2B7A5064A348900C474 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 16EB80F4A1424C6FB23B4787 /* Localizable.xcstrings */; };
+		M760W01C2D3E4F5061728394 /* WhiteboardLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = M760W01D3E4F5061728394A5 /* WhiteboardLogic.swift */; };
+		M760W02C2D3E4F5061728394 /* LMSAPIWhiteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = M760W02D3E4F5061728394A5 /* LMSAPIWhiteboard.swift */; };
+		M760W03C2D3E4F5061728394 /* WhiteboardLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M760W03D3E4F5061728394A5 /* WhiteboardLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1248,6 +1251,9 @@
 		16EB80F4A1424C6FB23B4787 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		E260A9AD256E4DDCA0289A3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		05770680D0E44B7BA95868FD /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
+		M760W01D3E4F5061728394A5 /* WhiteboardLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardLogic.swift; sourceTree = "<group>"; };
+		M760W02D3E4F5061728394A5 /* LMSAPIWhiteboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIWhiteboard.swift; sourceTree = "<group>"; };
+		M760W03D3E4F5061728394A5 /* WhiteboardLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1275,6 +1281,7 @@
 		98D67F731BF5451A9402BAA2 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				M760W03D3E4F5061728394A5 /* WhiteboardLogicTests.swift */,
 								B03C1A11C4A5A51B00A7200F /* SettingsMenuLogicTests.swift */,
 								B03C1A11C4A5A51B00A72011 /* AuditLogAdminLogicTests.swift */,
 				B02C1A11C4A5A51B00A71606 /* CanvasImportLogicTests.swift */,
@@ -1526,6 +1533,8 @@
 		B62295116F7F4935A884363D /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				M760W02D3E4F5061728394A5 /* LMSAPIWhiteboard.swift */,
+				M760W01D3E4F5061728394A5 /* WhiteboardLogic.swift */,
 				B02C1A11C4A5A51B00A71404 /* CanvasImportObservability.swift */,
 				B02C1A11C4A5A51B00A71303 /* LMSAPICanvasImport.swift */,
 				B02C1A11C4A5A51B00A71202 /* LMSFeatureModelsCanvasImport.swift */,
@@ -2603,6 +2612,10 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				M760W02C2D3E4F5061728394 /* LMSAPIWhiteboard.swift in Sources */,
+
+				M760W01C2D3E4F5061728394 /* WhiteboardLogic.swift in Sources */,
+
 				B03C1A11C4A5A51B00A7200E /* SettingsAdminHubEntryCard.swift in Sources */,
 				B03C1A11C4A5A51B00A7200C /* AuditLogAdminView.swift in Sources */,
 				B03C1A11C4A5A51B00A7200A /* SettingsAdminHubView.swift in Sources */,
@@ -3146,6 +3159,8 @@
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
+				M760W03C2D3E4F5061728394 /* WhiteboardLogicTests.swift in Sources */,
+
 				B03C1A11C4A5A51B00A72010 /* SettingsMenuLogicTests.swift in Sources */,
 				B03C1A11C4A5A51B00A72012 /* AuditLogAdminLogicTests.swift in Sources */,
 				B02C1A11C4A5A51B00A70606 /* CanvasImportLogicTests.swift in Sources */,

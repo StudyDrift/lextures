@@ -68,21 +68,21 @@ struct WhiteboardElement: Codable, Hashable {
     var type: String
     var color: String
     var width: Double
-    var pts: [[Double]]?
-    var rectX: Double?
-    var rectY: Double?
-    var rectWidth: Double?
-    var rectHeight: Double?
-    var centerX: Double?
-    var centerY: Double?
-    var radiusX: Double?
-    var radiusY: Double?
-    var point1X: Double?
-    var point1Y: Double?
-    var point2X: Double?
-    var point2Y: Double?
-    var point3X: Double?
-    var point3Y: Double?
+    var pts: [[Double]]? = nil
+    var rectX: Double? = nil
+    var rectY: Double? = nil
+    var rectWidth: Double? = nil
+    var rectHeight: Double? = nil
+    var centerX: Double? = nil
+    var centerY: Double? = nil
+    var radiusX: Double? = nil
+    var radiusY: Double? = nil
+    var point1X: Double? = nil
+    var point1Y: Double? = nil
+    var point2X: Double? = nil
+    var point2Y: Double? = nil
+    var point3X: Double? = nil
+    var point3Y: Double? = nil
 
     enum CodingKeys: String, CodingKey {
         case type, color, width, pts

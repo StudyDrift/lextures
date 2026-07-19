@@ -342,6 +342,8 @@ type Config struct {
 	FFMobileEnrollmentAdd bool
 	// FFMobileLiveQuiz enables interactive live quizzes on iOS and Android (MOB.5). Default OFF.
 	FFMobileLiveQuiz bool
+	// FFMobileWhiteboardEdit enables course whiteboard authoring on iOS and Android (MOB.6). Default OFF.
+	FFMobileWhiteboardEdit bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).

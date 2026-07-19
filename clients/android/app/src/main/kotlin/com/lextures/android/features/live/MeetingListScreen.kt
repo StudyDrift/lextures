@@ -2,16 +2,11 @@ package com.lextures.android.features.live
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -27,16 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,17 +36,16 @@ import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.OfflineBanner
 import com.lextures.android.core.design.StalenessChip
 import com.lextures.android.core.design.accentColor
-import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
+import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.CourseWhiteboard
 import com.lextures.android.core.lms.LiveMeetingsLogic
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.MeetingAttendanceRecord
 import com.lextures.android.core.lms.VirtualMeeting
-import com.lextures.android.core.lms.WhiteboardRenderer
-
+import com.lextures.android.core.lms.WhiteboardLogic
 import com.lextures.android.core.navigation.MobilePlatformFeatures
 import com.lextures.android.core.offline.OfflineCacheKey
 import com.lextures.android.core.offline.OfflineService
@@ -78,13 +68,14 @@ fun CourseLiveSection(
         CourseDestinationPlaceholder(section = com.lextures.android.core.navigation.CourseWorkspaceSection.Live)
         return
     }
-    MeetingListScreen(session = session, course = course)
+    MeetingListScreen(session = session, course = course, platformFeatures = platformFeatures)
 }
 
 @Composable
 fun MeetingListScreen(
     session: AuthSession,
     course: CourseSummary,
+    platformFeatures: MobilePlatformFeatures = MobilePlatformFeatures(),
 ) {
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
@@ -180,6 +171,7 @@ fun MeetingListScreen(
             session = session,
             course = course,
             meeting = meeting,
+            platformFeatures = platformFeatures,
             onDismiss = { selectedMeeting = null },
             onUpdated = { updated ->
                 meetings = meetings.map { if (it.id == updated.id) updated else it }
@@ -198,7 +190,9 @@ fun MeetingListScreen(
             session = session,
             course = course,
             board = board,
+            canEdit = WhiteboardLogic.canEdit(course.viewerIsStaff, platformFeatures),
             onDismiss = { openWhiteboard = null },
+            onDeleted = { openWhiteboard = null },
         )
     }
 }
@@ -263,6 +257,7 @@ private fun MeetingDetailDialog(
     session: AuthSession,
     course: CourseSummary,
     meeting: VirtualMeeting,
+    platformFeatures: MobilePlatformFeatures,
     onDismiss: () -> Unit,
     onUpdated: (VirtualMeeting) -> Unit,
     onOpenWhiteboard: (CourseWhiteboard) -> Unit,
@@ -275,6 +270,8 @@ private fun MeetingDetailDialog(
     var whiteboards by remember { mutableStateOf<List<CourseWhiteboard>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var updating by remember { mutableStateOf(false) }
+    var creatingWhiteboard by remember { mutableStateOf(false) }
+    val canEditWhiteboard = WhiteboardLogic.canEdit(course.viewerIsStaff, platformFeatures)
 
     LaunchedEffect(accessToken, current.id) {
         val token = accessToken ?: return@LaunchedEffect
@@ -331,60 +328,40 @@ private fun MeetingDetailDialog(
                         }
                     }
                     Text(liveAttendanceCount(attendance.size), fontSize = 12.sp, color = textSecondary())
+                    Text(liveWhiteboardTitle(), fontWeight = FontWeight.SemiBold, color = textPrimary())
+                    if (canEditWhiteboard) {
+                        OutlinedButton(
+                            enabled = !creatingWhiteboard,
+                            onClick = {
+                                scope.launch {
+                                    val token = accessToken ?: return@launch
+                                    creatingWhiteboard = true
+                                    runCatching {
+                                        LmsApi.createCourseWhiteboard(
+                                            course.courseCode,
+                                            WhiteboardLogic.defaultTitle(whiteboards.size),
+                                            emptyList(),
+                                            token,
+                                        )
+                                    }.onSuccess { created ->
+                                        whiteboards = listOf(created) + whiteboards
+                                        onOpenWhiteboard(created)
+                                    }.onFailure {
+                                        errorMessage = context.getString(R.string.mobile_whiteboard_error_create)
+                                    }
+                                    creatingWhiteboard = false
+                                }
+                            },
+                        ) { Text(L.text(R.string.mobile_whiteboard_create)) }
+                    }
                     whiteboards.forEach { board ->
                         OutlinedButton(onClick = { onOpenWhiteboard(board) }) {
                             Text(board.title)
                         }
                     }
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(liveClose()) } },
-    )
-}
-
-@Composable
-fun WhiteboardDialog(
-    session: AuthSession,
-    course: CourseSummary,
-    board: CourseWhiteboard,
-    onDismiss: () -> Unit,
-) {
-    val accessToken by session.accessToken.collectAsState()
-    var loaded by remember(board.id) { mutableStateOf(board) }
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    val isDark = isDarkTheme()
-
-    LaunchedEffect(accessToken, board.id) {
-        val token = accessToken ?: return@LaunchedEffect
-        loaded = runCatching { LmsApi.fetchCourseWhiteboard(course.courseCode, board.id, token) }.getOrDefault(board)
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(loaded.title) },
-        text = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(320.dp)
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        translationX = offset.x
-                        translationY = offset.y
+                    if (!canEditWhiteboard) {
+                        Text(liveWhiteboardWebHint(), fontSize = 11.sp, color = textSecondary())
                     }
-                    .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, zoom, _ ->
-                            scale = (scale * zoom).coerceIn(0.5f, 4f)
-                            offset += pan
-                        }
-                    },
-            ) {
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    WhiteboardRenderer.drawGrid(this, isDark)
-                    loaded.canvasData.orEmpty().forEach { WhiteboardRenderer.drawElement(this, it) }
                 }
             }
         },

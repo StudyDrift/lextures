@@ -415,3 +415,16 @@ func TestMerge_FFMobileLiveQuizDefaultOff(t *testing.T) {
 		t.Fatal("expected FFMobileLiveQuiz true when DB set")
 	}
 }
+
+// MOB.6: FFMobileWhiteboardEdit default OFF when unset.
+func TestMerge_FFMobileWhiteboardEditDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.FFMobileWhiteboardEdit {
+		t.Fatal("expected FFMobileWhiteboardEdit false when DB unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMobileWhiteboardEdit: &on})
+	if !got.FFMobileWhiteboardEdit {
+		t.Fatal("expected FFMobileWhiteboardEdit true when DB set")
+	}
+}

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MeetingDetailView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
@@ -16,7 +17,15 @@ struct MeetingDetailView: View {
     @State private var loadingAttendance = false
     @State private var loadingWhiteboards = false
     @State private var updatingStatus = false
+    @State private var creatingWhiteboard = false
     @State private var errorMessage: String?
+
+    private var canEditWhiteboard: Bool {
+        WhiteboardLogic.canEdit(
+            viewerIsStaff: course.viewerIsStaff,
+            features: shell.platformFeatures
+        )
+    }
 
     init(
         course: CourseSummary,
@@ -157,8 +166,24 @@ struct MeetingDetailView: View {
     @ViewBuilder
     private var whiteboardSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(L.text("mobile.live.whiteboard.title"))
-                .font(.subheadline.weight(.semibold))
+            HStack {
+                Text(L.text("mobile.live.whiteboard.title"))
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                if canEditWhiteboard {
+                    Button {
+                        Task { await createWhiteboard() }
+                    } label: {
+                        if creatingWhiteboard {
+                            ProgressView()
+                        } else {
+                            Label(L.text("mobile.whiteboard.create"), systemImage: "plus")
+                        }
+                    }
+                    .disabled(creatingWhiteboard)
+                    .accessibilityLabel(L.text("mobile.whiteboard.create"))
+                }
+            }
             if loadingWhiteboards {
                 ProgressView()
             } else if whiteboards.isEmpty {
@@ -179,9 +204,29 @@ struct MeetingDetailView: View {
                     .buttonStyle(.bordered)
                 }
             }
-            Text(L.text("mobile.live.whiteboard.webHint"))
-                .font(.caption2)
-                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            if !canEditWhiteboard {
+                Text(L.text("mobile.live.whiteboard.webHint"))
+                    .font(.caption2)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            }
+        }
+    }
+
+    private func createWhiteboard() async {
+        guard canEditWhiteboard, let token = session.accessToken else { return }
+        creatingWhiteboard = true
+        defer { creatingWhiteboard = false }
+        do {
+            let created = try await LMSAPI.createCourseWhiteboard(
+                courseCode: course.courseCode,
+                title: WhiteboardLogic.defaultTitle(existingCount: whiteboards.count),
+                canvasData: [],
+                accessToken: token
+            )
+            whiteboards.insert(created, at: 0)
+            onOpenWhiteboard(created)
+        } catch {
+            errorMessage = L.text("mobile.whiteboard.error.create")
         }
     }
 

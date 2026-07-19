@@ -2357,6 +2357,63 @@ object LmsApi {
         decode(body)
     }
 
+    suspend fun createCourseWhiteboard(
+        courseCode: String,
+        title: String,
+        canvasData: List<WhiteboardElement>,
+        accessToken: String,
+    ): CourseWhiteboard = withContext(Dispatchers.IO) {
+        val payload = WhiteboardUpsertRequest(
+            title = WhiteboardLogic.normalizeTitle(title),
+            canvasData = canvasData,
+        )
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/whiteboards",
+            method = "POST",
+            body = client.encodeBody(payload, WhiteboardUpsertRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        WhiteboardObservability.record("whiteboard_created")
+        decode(body)
+    }
+
+    suspend fun updateCourseWhiteboard(
+        courseCode: String,
+        boardId: String,
+        title: String,
+        canvasData: List<WhiteboardElement>,
+        accessToken: String,
+    ): CourseWhiteboard = withContext(Dispatchers.IO) {
+        val payload = WhiteboardUpsertRequest(
+            title = WhiteboardLogic.normalizeTitle(title),
+            canvasData = canvasData,
+        )
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/whiteboards/${encodePath(boardId)}",
+            method = "PUT",
+            body = client.encodeBody(payload, WhiteboardUpsertRequest.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        WhiteboardObservability.record("whiteboard_saved")
+        decode(body)
+    }
+
+    suspend fun deleteCourseWhiteboard(
+        courseCode: String,
+        boardId: String,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/whiteboards/${encodePath(boardId)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        WhiteboardObservability.record("whiteboard_deleted")
+    }
+
     suspend fun fetchSearchIndex(accessToken: String): SearchIndexResponse = withContext(Dispatchers.IO) {
         val (body, code) = client.requestRaw("/api/v1/search", accessToken = accessToken)
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))

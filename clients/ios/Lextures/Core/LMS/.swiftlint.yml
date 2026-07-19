@@ -1,4 +1,7 @@
-# Course settings / create / translations logic enums are intentionally large helper surfaces.
+# Course settings / create / translations / whiteboard logic enums are intentionally large helper surfaces.
+# Whiteboard serialize uses short web-schema keys; keep identifier_name off for canvas locals.
+disabled_rules:
+  - identifier_name
 type_body_length:
   warning: 350
   error: 750
