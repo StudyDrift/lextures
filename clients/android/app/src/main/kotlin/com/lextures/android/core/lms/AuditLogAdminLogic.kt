@@ -21,12 +21,12 @@ object AuditLogAdminLogic {
     }
 
     fun targetLabel(type: String?, id: String?): String {
-        val t = type?.trim().orEmpty()
-        val i = id?.trim().orEmpty()
-        if (t.isEmpty() && i.isEmpty()) return "—"
-        if (i.isEmpty()) return t
-        if (t.isEmpty()) return i
-        return "$t / $i"
+        val targetType = type?.trim().orEmpty()
+        val targetId = id?.trim().orEmpty()
+        if (targetType.isEmpty() && targetId.isEmpty()) return "—"
+        if (targetId.isEmpty()) return targetType
+        if (targetType.isEmpty()) return targetId
+        return "$targetType / $targetId"
     }
 
     fun webPath(): String = "/org-admin/audit-log"
