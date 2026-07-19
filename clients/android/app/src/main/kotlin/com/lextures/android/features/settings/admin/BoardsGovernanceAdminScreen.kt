@@ -141,7 +141,7 @@ fun BoardsGovernanceAdminScreen(
             } else {
                 overview?.let { ov ->
                     LmsCard {
-                        Column(Modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text(L.text(R.string.mobile_boards_admin_overviewTitle), color = textPrimary())
                             Text("${L.text(R.string.mobile_boards_admin_boardCount)}: ${ov.boardCount}")
                             Text("${L.text(R.string.mobile_boards_admin_activeBoards)}: ${ov.activeBoardCount}")

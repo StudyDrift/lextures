@@ -101,9 +101,9 @@ fun BoardTemplatePickerSheet(
         }
     }
 
-    Column(Modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Text(L.text(R.string.mobile_boards_templates_title), style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
@@ -200,7 +200,7 @@ fun BoardSaveAsTemplateSheet(
     val scopeIo = rememberCoroutineScope()
     val saveError = L.text(R.string.mobile_boards_templates_saveError)
 
-    Column(Modifier = Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState())) {
+    Column(modifier = Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState())) {
         Text(L.text(R.string.mobile_boards_templates_saveAction), style = MaterialTheme.typography.titleLarge)
         OutlinedTextField(
             value = title,
@@ -393,7 +393,7 @@ fun BoardPresentModeScreen(
                     }
                 },
         ) {
-            Row(Modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(boardTitle, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 TextButton(onClick = { overview = !overview }) {
                     Text(
@@ -403,7 +403,7 @@ fun BoardPresentModeScreen(
                 }
                 TextButton(onClick = onClose) { Text(L.text(R.string.mobile_boards_present_close)) }
             }
-            Spacer(Modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             if (overview) {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     itemsIndexed(ordered, key = { _, p -> p.id }) { idx, post ->
@@ -426,7 +426,7 @@ fun BoardPresentModeScreen(
                 Text(L.text(R.string.mobile_boards_present_empty), color = textSecondary())
             } else {
                 val post = ordered[index.coerceIn(0, ordered.lastIndex)]
-                Column(Modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                     if (post.title.isNotBlank()) {
                         Text(post.title, style = MaterialTheme.typography.headlineMedium, color = textPrimary())
                     }
@@ -484,7 +484,7 @@ fun BoardAnalyticsSheet(
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState())) {
         Text(L.text(R.string.mobile_boards_analytics_title), style = MaterialTheme.typography.titleLarge)
         Text(L.text(R.string.mobile_boards_analytics_subtitle), color = textSecondary())
-        Spacer(Modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         when {
             loading && summary == null -> CircularProgressIndicator()
             error != null && summary == null -> LmsErrorBanner(error!!)
