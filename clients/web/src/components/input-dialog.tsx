@@ -1,5 +1,8 @@
-import { useEffect, useId, useRef, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type CSSProperties, type FormEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePlatformFeatures } from '../context/platform-features-context'
+import { overlayClassNames } from '../lib/overlay-motion'
+import { useOverlayPresence } from '../lib/use-overlay-presence'
 
 export type InputDialogProps = {
   open: boolean
@@ -35,15 +38,27 @@ export function InputDialog({
   const descId = useId()
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
+  const { ffMotionOverlays } = usePlatformFeatures()
+  const presence = useOverlayPresence({
+    open,
+    kind: 'dialog',
+    enabled: ffMotionOverlays !== false,
+  })
+  const classes = overlayClassNames({
+    kind: 'dialog',
+    phase: presence.phase,
+    enabled: presence.enabled,
+    reduceMotion: presence.reducedMotion,
+  })
 
   useEffect(() => {
-    if (!open) return
+    if (!presence.entered) return
     const timer = window.setTimeout(() => inputRef.current?.focus(), 0)
     return () => window.clearTimeout(timer)
-  }, [open])
+  }, [presence.entered])
 
   useEffect(() => {
-    if (!open) return
+    if (!presence.mounted) return
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape' && !busy) {
         e.preventDefault()
@@ -52,9 +67,9 @@ export function InputDialog({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open, busy, onClose])
+  }, [presence.mounted, busy, onClose])
 
-  if (!open) return null
+  if (!presence.mounted) return null
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -62,13 +77,22 @@ export function InputDialog({
     onConfirm(value)
   }
 
+  const durationStyle = {
+    '--lx-overlay-duration': `${classes.durationMs}ms`,
+  } as CSSProperties
+
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4" role="presentation">
+    <div
+      className="fixed inset-0 z-[400] flex items-center justify-center p-4"
+      role="presentation"
+      style={durationStyle}
+      data-overlay-phase={presence.phase}
+    >
       <button
         type="button"
         aria-label={t('dialogs.close')}
         disabled={busy}
-        className="lex-btn-static absolute inset-0 cursor-default border-0 bg-black/45 p-0 disabled:cursor-not-allowed"
+        className={`lex-btn-static absolute inset-0 cursor-default border-0 bg-black/45 p-0 disabled:cursor-not-allowed ${classes.scrim}`}
         onClick={() => {
           if (!busy) onClose()
         }}
@@ -78,7 +102,7 @@ export function InputDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
-        className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className={`relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900 ${classes.panel}`}
         onSubmit={handleSubmit}
       >
         <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
@@ -127,4 +151,3 @@ export function InputDialog({
     </div>
   )
 }
-

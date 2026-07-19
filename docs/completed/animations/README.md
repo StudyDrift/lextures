@@ -9,3 +9,4 @@ Completed implementation plans for the cross-platform motion language. Active pl
 | AN.2 | [App launch & navigation transitions](AN.2-launch-navigation-transitions.md) |
 | AN.3 | [Load choreography: skeleton → content](AN.3-load-choreography.md) |
 | AN.4 | [Lists, grids & collection motion](AN.4-lists-collections-motion.md) |
+| AN.5 | [Overlays & surfaces](AN.5-overlays-surfaces.md) |

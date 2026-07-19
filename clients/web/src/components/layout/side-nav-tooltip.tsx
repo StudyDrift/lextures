@@ -79,7 +79,7 @@ export function SideNavTooltip({
         createPortal(
           <div
             style={{ top: pos.top, left: pos.left }}
-            className="tooltip-in fixed z-[100] -translate-y-1/2 whitespace-nowrap rounded-lg bg-slate-950 px-2.5 py-1.5 text-xs font-semibold text-white shadow-xl ring-1 ring-white/10 dark:bg-neutral-800"
+            className="tooltip-in lx-overlay-tooltip-in fixed z-[100] -translate-y-1/2 whitespace-nowrap rounded-lg bg-slate-950 px-2.5 py-1.5 text-xs font-semibold text-white shadow-xl ring-1 ring-white/10 dark:bg-neutral-800"
           >
             {content}
             <div className="absolute -start-1 top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 bg-slate-950 dark:bg-neutral-800" />

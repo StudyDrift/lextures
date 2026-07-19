@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -44,6 +44,8 @@ import {
 } from '../../lib/search-api'
 import { mergeCoursesWithNavFeatures } from '../../lib/search-course-features'
 import { LiveRegion } from '../a11y/live-region'
+import { overlayClassNames } from '../../lib/overlay-motion'
+import type { OverlayPresence } from '../../lib/use-overlay-presence'
 import { useCommandPalette } from './use-command-palette'
 
 const GROUP_ICONS: Record<SearchGroup, typeof BookOpen> = {
@@ -70,13 +72,29 @@ function currentCourseCodeFromPath(pathname: string): string | null {
   }
 }
 
-export function CommandPaletteDialog() {
+export function CommandPaletteDialog({
+  open,
+  presence,
+}: {
+  open: boolean
+  presence: OverlayPresence
+}) {
   const { close } = useCommandPalette()
   const navigate = useNavigate()
   const location = useLocation()
   const { allows } = usePermissions()
   const canManageRbac = allows(PERM_RBAC_MANAGE)
   const { ragNotebookEnabled } = usePlatformFeatures()
+  const motion = overlayClassNames({
+    kind: 'menu',
+    phase: presence.phase,
+    enabled: presence.enabled,
+    reduceMotion: presence.reducedMotion,
+  })
+  const durationStyle = {
+    '--lx-overlay-duration': `${motion.durationMs}ms`,
+    '--lx-overlay-origin': 'top center',
+  } as CSSProperties
   const { scimEnabled } = usePlatformScimEnabled(canManageRbac)
   const globalSearchOptions = useMemo(
     () => ({
@@ -108,14 +126,19 @@ export function CommandPaletteDialog() {
   )
 
   useEffect(() => {
+    if (!presence.mounted) return
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = prevOverflow
     }
-  }, [])
+  }, [presence.mounted])
 
   useEffect(() => {
+    if (!open) return
+    setQuery('')
+    setCursor(0)
+    setLoadState('loading')
     void fetchSearchIndex()
       .then((data) => {
         setCourses(Array.isArray(data.courses) ? data.courses : [])
@@ -125,14 +148,16 @@ export function CommandPaletteDialog() {
         setLoadState('error')
         setCourses([])
       })
-  }, [])
+  }, [open])
 
   useEffect(() => {
+    if (!presence.entered) return
     const t = window.setTimeout(() => inputRef.current?.focus(), 0)
     return () => window.clearTimeout(t)
-  }, [])
+  }, [presence.entered])
 
   useEffect(() => {
+    if (!presence.mounted) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
@@ -164,7 +189,7 @@ export function CommandPaletteDialog() {
     }
     window.addEventListener('keydown', onKey, true)
     return () => window.removeEventListener('keydown', onKey, true)
-  }, [close])
+  }, [close, presence.mounted])
 
   const parsed = useMemo(() => parseSearchQuery(query), [query])
   const coursePicker = useMemo(() => parseCoursePickerState(query), [query])
@@ -368,6 +393,8 @@ export function CommandPaletteDialog() {
           : `${filtered.length} ${filtered.length === 1 ? 'result' : 'results'}`
       : ''
 
+  if (!presence.mounted) return null
+
   const palette = (
     <div
       className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-12 pb-[env(safe-area-inset-bottom)] sm:px-4 sm:pt-[min(12vh,8rem)]"
@@ -375,15 +402,17 @@ export function CommandPaletteDialog() {
       aria-modal="true"
       aria-label="Command Palette"
       ref={dialogRef}
+      style={durationStyle}
+      data-overlay-phase={presence.phase}
     >
       <button
         type="button"
-        className="absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md dark:bg-neutral-950/75"
+        className={`absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md dark:bg-neutral-950/75 ${motion.scrim}`}
         aria-label="Close search"
         tabIndex={-1}
         onClick={() => close()}
       />
-      <div className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/20 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/50">
+      <div className={`relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/20 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/50 ${motion.panel}`}>
         <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
           <Search className="h-5 w-5 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
           <input

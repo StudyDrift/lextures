@@ -391,3 +391,81 @@ fun Modifier.lxListDragLift(isDragging: Boolean, enabled: Boolean = true): Modif
         scaleY = scale
     }
 }
+
+// MARK: AN.5 — Overlay / surface motion
+
+/** Drag past this fraction of sheet height dismisses (FR-2 / AC-2). */
+const val OVERLAY_SHEET_DISMISS_THRESHOLD = 0.28f
+
+fun shouldDismissSheetDrag(
+    offsetPx: Float,
+    sheetHeightPx: Float,
+    velocityPxPerMs: Float = 0f,
+): Boolean {
+    if (sheetHeightPx <= 0f) return false
+    if (velocityPxPerMs > 0.8f) return true
+    return offsetPx / sheetHeightPx >= OVERLAY_SHEET_DISMISS_THRESHOLD
+}
+
+/** Dialog enter/exit animation spec (bubble enter, exit curve on dismiss). */
+fun overlayDialogSpec(reduceMotion: Boolean, enabled: Boolean, exiting: Boolean = false): AnimationSpec<Float> {
+    if (!enabled) return tween(durationMillis = 0)
+    if (reduceMotion) return tween(durationMillis = LexturesMotion.InstantMs)
+    return if (exiting) LexturesMotion.exit else LexturesMotion.bubble
+}
+
+/** Sheet/drawer slide animation spec. */
+fun overlaySheetSpec(reduceMotion: Boolean, enabled: Boolean, exiting: Boolean = false): AnimationSpec<Float> {
+    if (!enabled) return tween(durationMillis = 0)
+    if (reduceMotion) return tween(durationMillis = LexturesMotion.InstantMs)
+    return if (exiting) LexturesMotion.exit else LexturesMotion.bubble
+}
+
+/**
+ * AN.5 — dialog scale+fade enter (center origin).
+ * Reduced motion → opacity only; kill-switch → identity.
+ */
+@Composable
+fun Modifier.lxDialog(appeared: Boolean = true, enabled: Boolean = true): Modifier {
+    val reduceMotion = LocalReduceMotion.current
+    val progress by animateFloatAsState(
+        targetValue = if (appeared) 1f else 0f,
+        animationSpec = overlayDialogSpec(reduceMotion, enabled, exiting = !appeared),
+        label = "lxDialog",
+    )
+    if (!enabled) return this
+    return if (reduceMotion) {
+        this.alpha(progress)
+    } else {
+        val scale = LexturesMotion.EnterScaleFrom + (1f - LexturesMotion.EnterScaleFrom) * progress
+        this.graphicsLayer {
+            alpha = progress
+            scaleX = scale
+            scaleY = scale
+        }
+    }
+}
+
+/**
+ * AN.5 — bottom sheet slide+fade; interactive dismiss uses [shouldDismissSheetDrag].
+ */
+@Composable
+fun Modifier.lxSheet(appeared: Boolean = true, enabled: Boolean = true): Modifier {
+    val reduceMotion = LocalReduceMotion.current
+    val progress by animateFloatAsState(
+        targetValue = if (appeared) 1f else 0f,
+        animationSpec = overlaySheetSpec(reduceMotion, enabled, exiting = !appeared),
+        label = "lxSheet",
+    )
+    if (!enabled) return this
+    return if (reduceMotion) {
+        this.alpha(progress)
+    } else {
+        val density = LocalDensity.current
+        val translatePx = with(density) { 48.dp.toPx() }
+        this.graphicsLayer {
+            alpha = progress
+            translationY = translatePx * (1f - progress)
+        }
+    }
+}

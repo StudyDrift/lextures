@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.lextures.android.core.design.lxSheet
 import com.lextures.android.core.lms.ReadingPreferencesPatch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,6 +24,8 @@ fun ReadingPreferencesSheet(
     store: ReadingPreferencesStore,
     accessToken: String?,
     onDismiss: () -> Unit,
+    /** AN.5 kill-switch (`ffMotionOverlays`); default on. */
+    motionEnabled: Boolean = true,
 ) {
     if (!visible) return
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -32,7 +35,10 @@ fun ReadingPreferencesSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .lxSheet(appeared = true, enabled = motionEnabled),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text("Reading preferences")

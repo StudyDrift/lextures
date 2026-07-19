@@ -66,4 +66,15 @@ final class LexturesMotionTests: XCTestCase {
         XCTAssertFalse(LXListMotion.shouldAnimate(index: 0, reduceMotion: false, enabled: false))
         XCTAssertTrue(LXListMotion.shouldAnimate(index: 99, reduceMotion: true, enabled: true))
     }
+
+    /// AN.5: sheet drag dismiss threshold and kill-switch animations.
+    func testOverlaySheetDismissThresholdAndAnimations() {
+        XCTAssertEqual(LXOverlayMotion.sheetDismissThreshold, 0.28, accuracy: 0.0001)
+        XCTAssertFalse(LXOverlayMotion.shouldDismissSheetDrag(offset: 100, sheetHeight: 400))
+        XCTAssertTrue(LXOverlayMotion.shouldDismissSheetDrag(offset: 120, sheetHeight: 400))
+        XCTAssertTrue(LXOverlayMotion.shouldDismissSheetDrag(offset: 10, sheetHeight: 400, velocity: 900))
+        XCTAssertNil(LXOverlayMotion.dialogAnimation(reduceMotion: false, enabled: false))
+        XCTAssertNotNil(LXOverlayMotion.dialogAnimation(reduceMotion: true, enabled: true))
+        XCTAssertNotNil(LXOverlayMotion.sheetAnimation(reduceMotion: false, enabled: true, exiting: true))
+    }
 }

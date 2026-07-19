@@ -24,15 +24,16 @@ import {
 import { markAllInboxMessagesRead, patchMailbox } from '../../lib/communication-api'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { durations, easings, usePrefersReducedMotion } from '../../lib/motion'
+import { overlayDurationMs } from '../../lib/overlay-motion'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
 import { useInboxUnreadCount, useMailboxRevision, useRefreshInboxUnread } from '../../context/use-inbox-unread'
 import { useInboxNotifications } from '../../context/use-push-notifications'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { AnimatedList } from '../ui/animated-list'
 
-/** Drawer open/close uses shared motion tokens (AN.1). */
-const NOTIF_DRAWER_EASE = easings.standard
-const NOTIF_DRAWER_MS = durations.slow
+/** Drawer open/close uses AN.5 overlay tokens (bubble enter / exit dismiss). */
+const NOTIF_DRAWER_ENTER_EASE = easings.bubble
+const NOTIF_DRAWER_EXIT_EASE = easings.exit
 
 const FILTER_OPTIONS = [
   { id: 'all', label: 'All notifications', icon: LayoutGrid },
@@ -96,7 +97,20 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
   const titleId = useId()
   const descId = useId()
   const reducedMotion = usePrefersReducedMotion()
-  const { ffMotionLists } = usePlatformFeatures()
+  const { ffMotionLists, ffMotionOverlays } = usePlatformFeatures()
+  const overlayMotionOn = ffMotionOverlays !== false
+  const drawerEnterMs = overlayDurationMs({
+    kind: 'drawer',
+    exiting: false,
+    enabled: overlayMotionOn,
+    reduceMotion: reducedMotion,
+  })
+  const drawerExitMs = overlayDurationMs({
+    kind: 'drawer',
+    exiting: true,
+    enabled: overlayMotionOn,
+    reduceMotion: reducedMotion,
+  })
   const [portalVisible, setPortalVisible] = useState(open)
   const [entered, setEntered] = useState(false)
   const [filter, setFilter] = useState<NotificationFilter>('all')
@@ -178,7 +192,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
   useLayoutEffect(() => {
     if (open) {
       setPortalVisible(true)
-      if (reducedMotion) {
+      if (reducedMotion || !overlayMotionOn || drawerEnterMs <= 0) {
         setEntered(true)
         return
       }
@@ -199,13 +213,13 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
       }
     }
     setEntered(false)
-    if (reducedMotion) {
+    if (reducedMotion || !overlayMotionOn || drawerExitMs <= 0) {
       setPortalVisible(false)
       return
     }
-    const t = window.setTimeout(() => setPortalVisible(false), NOTIF_DRAWER_MS)
+    const t = window.setTimeout(() => setPortalVisible(false), drawerExitMs)
     return () => window.clearTimeout(t)
-  }, [open, reducedMotion])
+  }, [open, reducedMotion, overlayMotionOn, drawerEnterMs, drawerExitMs])
 
   useEffect(() => {
     if (!portalVisible) return
@@ -293,17 +307,25 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
 
   if (!open && !portalVisible) return null
 
-  const transitionStyle = { transitionTimingFunction: NOTIF_DRAWER_EASE } as const
+  const activeMs = open ? drawerEnterMs : drawerExitMs
+  const activeEase = open ? NOTIF_DRAWER_ENTER_EASE : NOTIF_DRAWER_EXIT_EASE
+  const transitionStyle = {
+    transitionTimingFunction: overlayMotionOn && !reducedMotion ? activeEase : 'linear',
+  } as const
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex justify-end">
+    <div
+      className="fixed inset-0 z-[60] flex justify-end"
+      data-overlay-phase={entered ? (open ? 'open' : 'closing') : open ? 'opening' : 'closed'}
+    >
       <button
         type="button"
         aria-label="Close notifications"
         style={{
           ...transitionStyle,
           transitionProperty: 'opacity',
-          transitionDuration: reducedMotion ? '0.01ms' : `${Math.round(NOTIF_DRAWER_MS * 0.85)}ms`,
+          transitionDuration:
+            !overlayMotionOn || reducedMotion ? '0.01ms' : `${Math.max(durations.instant, Math.round(activeMs * 0.85))}ms`,
         }}
         className={`lex-btn-static absolute inset-0 bg-slate-900/45 backdrop-blur-[1px] ${
           entered ? 'opacity-100' : 'opacity-0'
@@ -318,10 +340,12 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
         style={{
           ...transitionStyle,
           transitionProperty: 'transform',
-          transitionDuration: reducedMotion ? '0.01ms' : `${NOTIF_DRAWER_MS}ms`,
+          transitionDuration: !overlayMotionOn || reducedMotion ? '0.01ms' : `${activeMs}ms`,
         }}
         className={`relative flex h-dvh w-[min(100%,22rem)] flex-col border-s border-slate-200 bg-white shadow-2xl shadow-slate-900/20 will-change-transform dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/50 sm:w-[26rem] ${
-          entered ? 'translate-x-0' : 'translate-x-full'
+          entered
+            ? 'translate-x-0 rtl:-translate-x-0'
+            : 'translate-x-full rtl:-translate-x-full'
         }`}
       >
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
