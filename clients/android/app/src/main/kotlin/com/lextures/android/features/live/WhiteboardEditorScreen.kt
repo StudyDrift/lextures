@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -195,6 +196,26 @@ private fun WhiteboardEditorDialog(
     val accessToken by session.accessToken.collectAsState()
     val scope = rememberCoroutineScope()
     val isDark = isDarkTheme()
+    val context = LocalContext.current
+    val saveErrorText = L.text(R.string.mobile_whiteboard_error_save)
+    val deleteErrorText = L.text(R.string.mobile_whiteboard_error_delete)
+    val deleteLabel = L.text(R.string.mobile_whiteboard_delete)
+    val canvasLabel = L.text(R.string.mobile_whiteboard_canvas)
+    val statusIdle = L.text(R.string.mobile_whiteboard_status_idle)
+    val statusSaving = L.text(R.string.mobile_whiteboard_status_saving)
+    val statusSaved = L.text(R.string.mobile_whiteboard_status_saved)
+    val statusFailed = L.text(R.string.mobile_whiteboard_status_failed)
+    val undoLabel = L.text(R.string.mobile_whiteboard_undo)
+    val redoLabel = L.text(R.string.mobile_whiteboard_redo)
+    val toolLabels = mapOf(
+        WhiteboardTool.SELECT to L.text(R.string.mobile_whiteboard_tool_select),
+        WhiteboardTool.PEN to L.text(R.string.mobile_whiteboard_tool_pen),
+        WhiteboardTool.LINE to L.text(R.string.mobile_whiteboard_tool_line),
+        WhiteboardTool.RECT to L.text(R.string.mobile_whiteboard_tool_rect),
+        WhiteboardTool.CIRCLE to L.text(R.string.mobile_whiteboard_tool_circle),
+        WhiteboardTool.TRIANGLE to L.text(R.string.mobile_whiteboard_tool_triangle),
+        WhiteboardTool.ERASER to L.text(R.string.mobile_whiteboard_tool_eraser),
+    )
 
     var title by remember(board.id) { mutableStateOf(board.title) }
     var elements by remember(board.id) { mutableStateOf(board.canvasData.orEmpty()) }
@@ -228,7 +249,7 @@ private fun WhiteboardEditorDialog(
                 saveState = SaveState.Saved
             }.onFailure {
                 saveState = SaveState.Failed
-                errorMessage = L.text(R.string.mobile_whiteboard_error_save)
+                errorMessage = saveErrorText
             }
         }
     }
@@ -262,21 +283,21 @@ private fun WhiteboardEditorDialog(
                                 onDeleted?.invoke()
                                 onDismiss()
                             }.onFailure {
-                                errorMessage = L.text(R.string.mobile_whiteboard_error_delete)
+                                errorMessage = deleteErrorText
                             }
                         }
                     },
                 ) {
-                    Icon(Icons.Default.Delete, contentDescription = L.text(R.string.mobile_whiteboard_delete))
+                    Icon(Icons.Default.Delete, contentDescription = deleteLabel)
                 }
             }
 
             Text(
                 text = when (saveState) {
-                    SaveState.Idle -> L.text(R.string.mobile_whiteboard_status_idle)
-                    SaveState.Saving -> L.text(R.string.mobile_whiteboard_status_saving)
-                    SaveState.Saved -> L.text(R.string.mobile_whiteboard_status_saved)
-                    SaveState.Failed -> L.text(R.string.mobile_whiteboard_status_failed)
+                    SaveState.Idle -> statusIdle
+                    SaveState.Saving -> statusSaving
+                    SaveState.Saved -> statusSaved
+                    SaveState.Failed -> statusFailed
                 },
                 fontSize = 12.sp,
                 color = textSecondary(),
@@ -293,7 +314,7 @@ private fun WhiteboardEditorDialog(
                     .padding(12.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(if (isDark) Color(0xFF171717) else Color.White)
-                    .semantics { contentDescription = L.text(R.string.mobile_whiteboard_canvas) }
+                    .semantics { contentDescription = canvasLabel }
                     .pointerInput(tool, color, strokeWidth, eraserSize, elements) {
                         var anchor: Offset? = null
                         detectDragGestures(
@@ -454,17 +475,7 @@ private fun WhiteboardEditorDialog(
                                 .background(if (selected) accentColor() else Color.Transparent)
                                 .clickable { tool = item }
                                 .semantics {
-                                    contentDescription = L.text(
-                                        when (item) {
-                                            WhiteboardTool.SELECT -> R.string.mobile_whiteboard_tool_select
-                                            WhiteboardTool.PEN -> R.string.mobile_whiteboard_tool_pen
-                                            WhiteboardTool.LINE -> R.string.mobile_whiteboard_tool_line
-                                            WhiteboardTool.RECT -> R.string.mobile_whiteboard_tool_rect
-                                            WhiteboardTool.CIRCLE -> R.string.mobile_whiteboard_tool_circle
-                                            WhiteboardTool.TRIANGLE -> R.string.mobile_whiteboard_tool_triangle
-                                            WhiteboardTool.ERASER -> R.string.mobile_whiteboard_tool_eraser
-                                        },
-                                    )
+                                    contentDescription = toolLabels[item].orEmpty()
                                 },
                             contentAlignment = Alignment.Center,
                         ) {
@@ -487,7 +498,7 @@ private fun WhiteboardEditorDialog(
                         },
                         enabled = history.canUndo,
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = L.text(R.string.mobile_whiteboard_undo))
+                        Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = undoLabel)
                     }
                     IconButton(
                         onClick = {
@@ -500,7 +511,7 @@ private fun WhiteboardEditorDialog(
                         },
                         enabled = history.canRedo,
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = L.text(R.string.mobile_whiteboard_redo))
+                        Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = redoLabel)
                     }
                 }
 

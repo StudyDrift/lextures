@@ -36,7 +36,7 @@ final class WhiteboardLogicTests: XCTestCase {
         XCTAssertEqual(parsed[0].type, "stroke")
         XCTAssertEqual(parsed[0].color, "#ef4444")
         XCTAssertEqual(parsed[0].pts?.count, 2)
-        XCTAssertEqual(parsed[0].pts?[0][0], 1, accuracy: 0.001)
+        XCTAssertEqual(parsed[0].pts![0][0], 1, accuracy: 0.001)
     }
 
     func testSerializeShapeBuildersMatchWebKeys() {
@@ -81,8 +81,8 @@ final class WhiteboardLogicTests: XCTestCase {
     func testTranslateAndPick() {
         let rect = WhiteboardLogic.rect(color: "#000", width: 2, from: CGPoint(x: 0, y: 0), to: CGPoint(x: 20, y: 20))
         let moved = WhiteboardLogic.translate(rect, dx: 5, dy: 10)
-        XCTAssertEqual(moved.rectX, 5, accuracy: 0.001)
-        XCTAssertEqual(moved.rectY, 10, accuracy: 0.001)
+        XCTAssertEqual(moved.rectX!, 5, accuracy: 0.001)
+        XCTAssertEqual(moved.rectY!, 10, accuracy: 0.001)
         XCTAssertEqual(WhiteboardLogic.pickElement([moved], at: CGPoint(x: 5, y: 10)), 0)
         XCTAssertNil(WhiteboardLogic.pickElement([moved], at: CGPoint(x: 200, y: 200)))
     }
