@@ -17,7 +17,8 @@
  *   [x] Platform settings: PUT ffAcademicCalendar toggles the feature flag
  */
 import { test, expect } from '@playwright/test'
-import { apiSignup } from '../fixtures/api.js'
+import { apiSignup, apiWaitForPlatformFeature } from '../fixtures/api.js'
+import { withPlatformSettingsLock } from '../lib/platform-feature-matrix-helpers.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
@@ -62,6 +63,7 @@ async function getAdminOrgId(token: string): Promise<string | null> {
   return data.organizations?.[0]?.id ?? null
 }
 
+/** Caller must hold withPlatformSettingsLock when the result is asserted. */
 async function setAcademicCalendarFeature(token: string, enabled: boolean): Promise<void> {
   const res = await fetch(`${API_BASE}/api/v1/settings/platform`, {
     method: 'PUT',
@@ -69,8 +71,11 @@ async function setAcademicCalendarFeature(token: string, enabled: boolean): Prom
     body: JSON.stringify({ ffAcademicCalendar: enabled, updateMask: ['ffAcademicCalendar'] }),
   })
   if (!res.ok) throw new Error(`setAcademicCalendarFeature failed (${res.status})`)
+  await apiWaitForPlatformFeature(token, 'ffAcademicCalendar', enabled)
 }
 
+// Serialize: these tests mutate the global ffAcademicCalendar platform flag.
+test.describe.serial('Academic calendar', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 // Auth guards
 // ─────────────────────────────────────────────────────────────────────────────
@@ -102,32 +107,36 @@ test('AC: POST admin events unauthenticated returns 401', async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test('AC: GET events returns 501 when feature disabled', async () => {
-  const adminToken = await getAdminToken()
-  await setAcademicCalendarFeature(adminToken, false)
+  await withPlatformSettingsLock(async () => {
+    const adminToken = await getAdminToken()
+    await setAcademicCalendarFeature(adminToken, false)
 
-  const orgId = await getAdminOrgId(adminToken)
-  if (!orgId) { test.skip(true, 'no org'); return }
+    const orgId = await getAdminOrgId(adminToken)
+    if (!orgId) { test.skip(true, 'no org'); return }
 
-  const user = await apiSignup({ email: `${uid('u501')}@test.invalid`, password: 'E2eTestPass1!' })
-  const res = await fetch(`${API_BASE}/api/v1/orgs/${orgId}/calendar/events`, {
-    headers: authHeaders(user.access_token),
+    const user = await apiSignup({ email: `${uid('u501')}@test.invalid`, password: 'E2eTestPass1!' })
+    const res = await fetch(`${API_BASE}/api/v1/orgs/${orgId}/calendar/events`, {
+      headers: authHeaders(user.access_token),
+    })
+    expect(res.status).toBe(501)
   })
-  expect(res.status).toBe(501)
 })
 
 test('AC: POST admin events returns 501 when feature disabled', async () => {
-  const adminToken = await getAdminToken()
-  await setAcademicCalendarFeature(adminToken, false)
+  await withPlatformSettingsLock(async () => {
+    const adminToken = await getAdminToken()
+    await setAcademicCalendarFeature(adminToken, false)
 
-  const orgId = await getAdminOrgId(adminToken)
-  if (!orgId) { test.skip(true, 'no org'); return }
+    const orgId = await getAdminOrgId(adminToken)
+    if (!orgId) { test.skip(true, 'no org'); return }
 
-  const res = await fetch(`${API_BASE}/api/v1/admin/orgs/${orgId}/calendar/events`, {
-    method: 'POST',
-    headers: authHeaders(adminToken),
-    body: JSON.stringify({ eventType: 'holiday', eventName: 'Test', startDate: '2027-01-01' }),
+    const res = await fetch(`${API_BASE}/api/v1/admin/orgs/${orgId}/calendar/events`, {
+      method: 'POST',
+      headers: authHeaders(adminToken),
+      body: JSON.stringify({ eventType: 'holiday', eventName: 'Test', startDate: '2027-01-01' }),
+    })
+    expect(res.status).toBe(501)
   })
-  expect(res.status).toBe(501)
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -135,6 +144,7 @@ test('AC: POST admin events returns 501 when feature disabled', async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test('AC: create, list, patch, delete event', async () => {
+  await withPlatformSettingsLock(async () => {
   const adminToken = await getAdminToken()
   await setAcademicCalendarFeature(adminToken, true)
 
@@ -196,9 +206,11 @@ test('AC: create, list, patch, delete event', async () => {
   expect(listAfterRes.status).toBe(200)
   const { events: eventsAfter } = (await listAfterRes.json()) as { events: Array<{ id: string }> }
   expect(eventsAfter.find((e) => e.id === eventId)).toBeUndefined()
+  })
 })
 
 test('AC: iCal feed returns text/calendar with VEVENT', async () => {
+  await withPlatformSettingsLock(async () => {
   const adminToken = await getAdminToken()
   await setAcademicCalendarFeature(adminToken, true)
 
@@ -245,6 +257,7 @@ test('AC: iCal feed returns text/calendar with VEVENT', async () => {
   expect(body).toContain('Spring Break Day 1')
   expect(body).toContain('END:VEVENT')
   expect(body).toContain('END:VCALENDAR')
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -252,6 +265,7 @@ test('AC: iCal feed returns text/calendar with VEVENT', async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test('AC: non-admin cannot create events (403)', async () => {
+  await withPlatformSettingsLock(async () => {
   const adminToken = await getAdminToken()
   await setAcademicCalendarFeature(adminToken, true)
 
@@ -265,6 +279,7 @@ test('AC: non-admin cannot create events (403)', async () => {
     body: JSON.stringify({ eventType: 'holiday', eventName: 'Test', startDate: '2027-07-04' }),
   })
   expect(res.status).toBe(403)
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -272,6 +287,7 @@ test('AC: non-admin cannot create events (403)', async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test('AC: invalid eventType returns 400', async () => {
+  await withPlatformSettingsLock(async () => {
   const adminToken = await getAdminToken()
   await setAcademicCalendarFeature(adminToken, true)
 
@@ -284,9 +300,11 @@ test('AC: invalid eventType returns 400', async () => {
     body: JSON.stringify({ eventType: 'INVALID_TYPE', eventName: 'Test', startDate: '2027-01-01' }),
   })
   expect(res.status).toBe(400)
+  })
 })
 
 test('AC: invalid startDate format returns 400', async () => {
+  await withPlatformSettingsLock(async () => {
   const adminToken = await getAdminToken()
   await setAcademicCalendarFeature(adminToken, true)
 
@@ -299,6 +317,7 @@ test('AC: invalid startDate format returns 400', async () => {
     body: JSON.stringify({ eventType: 'holiday', eventName: 'Test', startDate: '01-01-2027' }),
   })
   expect(res.status).toBe(400)
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -306,6 +325,7 @@ test('AC: invalid startDate format returns 400', async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 test('AC: platform settings toggle enables and disables the feature', async () => {
+  await withPlatformSettingsLock(async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
@@ -325,4 +345,6 @@ test('AC: platform settings toggle enables and disables the feature', async () =
     headers: authHeaders(user.access_token),
   })
   expect(enabledRes.status).toBe(200)
+  })
+})
 })
