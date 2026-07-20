@@ -77,4 +77,22 @@ final class LexturesMotionTests: XCTestCase {
         XCTAssertNotNil(LXOverlayMotion.dialogAnimation(reduceMotion: true, enabled: true))
         XCTAssertNotNil(LXOverlayMotion.sheetAnimation(reduceMotion: false, enabled: true, exiting: true))
     }
+
+    /// AN.6: press/shake/indicator helpers and haptics mapping.
+    func testControlMotionAndHapticsMapping() {
+        XCTAssertTrue(LXControlMotion.shouldPressScale(reduceMotion: false, enabled: true))
+        XCTAssertFalse(LXControlMotion.shouldPressScale(reduceMotion: true, enabled: true))
+        XCTAssertFalse(LXControlMotion.shouldPressScale(reduceMotion: false, enabled: false))
+        XCTAssertFalse(LXControlMotion.shouldValidationShake(reduceMotion: true, enabled: true))
+        XCTAssertFalse(LXControlMotion.shouldSlideIndicator(reduceMotion: true, enabled: true))
+        XCTAssertEqual(
+            LXControlMotion.indicatorOffset(index: 1, optionWidths: [40, 50, 60], gap: 4),
+            44,
+            accuracy: 0.0001
+        )
+        XCTAssertEqual(Haptics.systemName(for: .tap), "lightImpact")
+        XCTAssertEqual(Haptics.systemName(for: .selection), "selection")
+        XCTAssertEqual(Haptics.systemName(for: .success), "notificationSuccess")
+        XCTAssertEqual(Haptics.systemName(for: .error), "notificationError")
+    }
 }

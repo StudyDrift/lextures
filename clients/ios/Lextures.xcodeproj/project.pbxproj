@@ -42,6 +42,7 @@
 		DAF6590EDB7A491EB56A6E31 /* AuthFieldRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3734CE4441894888940E801D /* AuthFieldRepresentable.swift */; };
 		CB0A429DECA04FED9E74D804 /* BrandLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01C481EB9B74BAE8948C904 /* BrandLogoView.swift */; };
 		3734AA68784246FE96146BE9 /* LexturesMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0925DD18731040A5A6FE6AD0 /* LexturesMotion.swift */; };
+		EC8A4CC7A0034ECA8923A5B0 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC209B059B9C41F78EF72DD6 /* Haptics.swift */; };
 		7BB99DF2CB3542AEA70D4767 /* LexturesTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFBD25A055AC449AA3085948 /* LexturesTheme.swift */; };
 		F72DEA17AAD44381B1CA4347 /* LexturesType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A48B12B378B24722938E2E00 /* LexturesType.swift */; };
 		2C504534A715436A86A91209 /* ProfileAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B4FB0154F3424F89D1CD14 /* ProfileAvatarView.swift */; };
@@ -681,6 +682,7 @@
 		3734CE4441894888940E801D /* AuthFieldRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFieldRepresentable.swift; sourceTree = "<group>"; };
 		F01C481EB9B74BAE8948C904 /* BrandLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandLogoView.swift; sourceTree = "<group>"; };
 		0925DD18731040A5A6FE6AD0 /* LexturesMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexturesMotion.swift; sourceTree = "<group>"; };
+		BC209B059B9C41F78EF72DD6 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		FFBD25A055AC449AA3085948 /* LexturesTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexturesTheme.swift; sourceTree = "<group>"; };
 		A48B12B378B24722938E2E00 /* LexturesType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexturesType.swift; sourceTree = "<group>"; };
 		17B4FB0154F3424F89D1CD14 /* ProfileAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatarView.swift; sourceTree = "<group>"; };
@@ -1536,6 +1538,7 @@
 			children = (
 				3734CE4441894888940E801D /* AuthFieldRepresentable.swift */,
 				F01C481EB9B74BAE8948C904 /* BrandLogoView.swift */,
+				BC209B059B9C41F78EF72DD6 /* Haptics.swift */,
 				0925DD18731040A5A6FE6AD0 /* LexturesMotion.swift */,
 				FFBD25A055AC449AA3085948 /* LexturesTheme.swift */,
 				A48B12B378B24722938E2E00 /* LexturesType.swift */,
@@ -2716,6 +2719,7 @@
 				03DD38CEEBFD405D803A0A62 /* SchoolCodeLogic.swift in Sources */,
 				DAF6590EDB7A491EB56A6E31 /* AuthFieldRepresentable.swift in Sources */,
 				CB0A429DECA04FED9E74D804 /* BrandLogoView.swift in Sources */,
+				EC8A4CC7A0034ECA8923A5B0 /* Haptics.swift in Sources */,
 				3734AA68784246FE96146BE9 /* LexturesMotion.swift in Sources */,
 				7BB99DF2CB3542AEA70D4767 /* LexturesTheme.swift in Sources */,
 				F72DEA17AAD44381B1CA4347 /* LexturesType.swift in Sources */,

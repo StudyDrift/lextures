@@ -110,6 +110,7 @@ export type PlatformSettingsPayload = {
   ffMotionReveal: boolean
   ffMotionLists: boolean
   ffMotionOverlays: boolean
+  ffMotionControls: boolean
   ffMobileCreateCourse: boolean
   ffMobileCourseCreateV2: boolean
   ffMobileCanvasImport: boolean

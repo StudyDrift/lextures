@@ -114,6 +114,7 @@ type Row struct {
 	FFMotionReveal                     *bool
 	FFMotionLists                      *bool
 	FFMotionOverlays                   *bool
+	FFMotionControls                   *bool
 	FFMobileCreateCourse               *bool
 	FFMobileCourseCreateV2             *bool
 	FFMobileCanvasImport               *bool
@@ -333,6 +334,7 @@ type Write struct {
 	FFMotionReveal                     *bool
 	FFMotionLists                      *bool
 	FFMotionOverlays                   *bool
+	FFMotionControls                   *bool
 	FFMobileCreateCourse               *bool
 	FFMobileCourseCreateV2             *bool
 	FFMobileCanvasImport               *bool
@@ -549,6 +551,7 @@ SELECT
 	ff_motion_reveal,
 	ff_motion_lists,
 	ff_motion_overlays,
+	ff_motion_controls,
 	ff_mobile_create_course,
 	ff_mobile_course_create_v2,
 	ff_mobile_canvas_import,
@@ -757,6 +760,7 @@ WHERE id = 1
 		&r.FFMotionReveal,
 		&r.FFMotionLists,
 		&r.FFMotionOverlays,
+		&r.FFMotionControls,
 		&r.FFMobileCreateCourse,
 		&r.FFMobileCourseCreateV2,
 		&r.FFMobileCanvasImport,
@@ -1016,6 +1020,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_motion_reveal,
 	ff_motion_lists,
 	ff_motion_overlays,
+	ff_motion_controls,
 	ff_mobile_create_course,
 	ff_mobile_course_create_v2,
 	ff_mobile_canvas_import,
@@ -1217,6 +1222,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_motion_reveal = COALESCE(EXCLUDED.ff_motion_reveal, settings.platform_app_settings.ff_motion_reveal),
 	ff_motion_lists = COALESCE(EXCLUDED.ff_motion_lists, settings.platform_app_settings.ff_motion_lists),
 	ff_motion_overlays = COALESCE(EXCLUDED.ff_motion_overlays, settings.platform_app_settings.ff_motion_overlays),
+	ff_motion_controls = COALESCE(EXCLUDED.ff_motion_controls, settings.platform_app_settings.ff_motion_controls),
 	ff_mobile_create_course = COALESCE(EXCLUDED.ff_mobile_create_course, settings.platform_app_settings.ff_mobile_create_course),
 	ff_mobile_course_create_v2 = COALESCE(EXCLUDED.ff_mobile_course_create_v2, settings.platform_app_settings.ff_mobile_course_create_v2),
 	ff_mobile_canvas_import = COALESCE(EXCLUDED.ff_mobile_canvas_import, settings.platform_app_settings.ff_mobile_canvas_import),
@@ -1407,6 +1413,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFMotionReveal,
 		w.FFMotionLists,
 		w.FFMotionOverlays,
+		w.FFMotionControls,
 		w.FFMobileCreateCourse,
 		w.FFMobileCourseCreateV2,
 		w.FFMobileCanvasImport,

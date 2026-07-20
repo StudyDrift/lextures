@@ -383,6 +383,63 @@ extension View {
     func lxSheet(enabled: Bool = true) -> some View {
         modifier(LXSheetMotionModifier(enabled: enabled))
     }
+
+    /// AN.6 — press scale for tappable cards/rows (FR-1); reduced → opacity.
+    func lxPressable(isPressed: Bool, enabled: Bool = true) -> some View {
+        modifier(LXPressableModifier(isPressed: isPressed, enabled: enabled))
+    }
+}
+
+// MARK: AN.6 — Control micro-interactions
+
+enum LXControlMotion {
+    static let validationShakePx: CGFloat = 6
+
+    static func shouldPressScale(reduceMotion: Bool, enabled: Bool) -> Bool {
+        enabled && !reduceMotion
+    }
+
+    static func shouldValidationShake(reduceMotion: Bool, enabled: Bool) -> Bool {
+        enabled && !reduceMotion
+    }
+
+    static func shouldSlideIndicator(reduceMotion: Bool, enabled: Bool) -> Bool {
+        enabled && !reduceMotion
+    }
+
+    static func indicatorOffset(index: Int, optionWidths: [CGFloat], gap: CGFloat = 0) -> CGFloat {
+        guard !optionWidths.isEmpty else { return 0 }
+        let clamped = min(max(0, index), optionWidths.count - 1)
+        var offset: CGFloat = 0
+        if clamped > 0 {
+            for i in 0..<clamped {
+                offset += optionWidths[i] + gap
+            }
+        }
+        return offset
+    }
+}
+
+private struct LXPressableModifier: ViewModifier {
+    @Environment(\.lxReduceMotion) private var reduceMotion
+    let isPressed: Bool
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(isPressed && enabled && reduceMotion ? 0.85 : 1)
+            .scaleEffect(
+                isPressed && LXControlMotion.shouldPressScale(reduceMotion: reduceMotion, enabled: enabled)
+                    ? LexturesMotion.pressScale
+                    : 1
+            )
+            .animation(
+                enabled
+                    ? LexturesMotion.resolve(LexturesMotion.bubble, reduceMotion: reduceMotion)
+                    : nil,
+                value: isPressed
+            )
+    }
 }
 
 // MARK: AN.5 — Overlay / surface motion

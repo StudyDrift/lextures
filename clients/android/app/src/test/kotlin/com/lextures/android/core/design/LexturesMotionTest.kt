@@ -73,4 +73,22 @@ class LexturesMotionTest {
         assertTrue(shouldDismissSheetDrag(10f, 400f, velocityPxPerMs = 0.9f))
         assertFalse(shouldDismissSheetDrag(10f, 0f))
     }
+
+    /** AN.6: press/shake/indicator helpers and haptics mapping. */
+    @Test
+    fun controlMotionAndHapticsMapping() {
+        assertTrue(shouldPressScale(reduceMotion = false, enabled = true))
+        assertFalse(shouldPressScale(reduceMotion = true, enabled = true))
+        assertFalse(shouldPressScale(reduceMotion = false, enabled = false))
+        assertFalse(shouldValidationShake(reduceMotion = true, enabled = true))
+        assertFalse(shouldSlideIndicator(reduceMotion = true, enabled = true))
+        assertEquals(44f, indicatorOffsetPx(1, listOf(40f, 50f, 60f), gapPx = 4f))
+        assertEquals("CONTEXT_CLICK", Haptics.systemName(Haptics.Kind.Tap))
+        assertEquals("CLOCK_TICK", Haptics.systemName(Haptics.Kind.Selection))
+        assertEquals("CONFIRM", Haptics.systemName(Haptics.Kind.Success))
+        assertEquals("REJECT", Haptics.systemName(Haptics.Kind.Error))
+        assertTrue(Haptics.shouldFire(enabled = true))
+        assertFalse(Haptics.shouldFire(enabled = false))
+        assertFalse(Haptics.shouldFire(enabled = true, systemHapticsOff = true))
+    }
 }

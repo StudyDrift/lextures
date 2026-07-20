@@ -469,3 +469,61 @@ fun Modifier.lxSheet(appeared: Boolean = true, enabled: Boolean = true): Modifie
         }
     }
 }
+
+// MARK: AN.6 — Control micro-interactions
+
+/** Validation shake travel (px). */
+const val CONTROL_VALIDATION_SHAKE_PX = 6f
+
+fun shouldPressScale(reduceMotion: Boolean, enabled: Boolean): Boolean =
+    enabled && !reduceMotion
+
+fun shouldValidationShake(reduceMotion: Boolean, enabled: Boolean): Boolean =
+    enabled && !reduceMotion
+
+fun shouldSlideIndicator(reduceMotion: Boolean, enabled: Boolean): Boolean =
+    enabled && !reduceMotion
+
+fun indicatorOffsetPx(index: Int, optionWidths: List<Float>, gapPx: Float = 0f): Float {
+    if (optionWidths.isEmpty()) return 0f
+    val clamped = index.coerceIn(0, optionWidths.lastIndex)
+    var offset = 0f
+    for (i in 0 until clamped) {
+        offset += optionWidths[i] + gapPx
+    }
+    return offset
+}
+
+/**
+ * AN.6 — press scale for tappable controls (FR-1).
+ * Reduced motion → opacity dip; kill-switch → identity.
+ */
+@Composable
+fun Modifier.lxPressable(pressed: Boolean, enabled: Boolean = true): Modifier {
+    val reduceMotion = LocalReduceMotion.current
+    val targetScale = if (pressed && shouldPressScale(reduceMotion, enabled)) {
+        LexturesMotion.PressScale
+    } else {
+        1f
+    }
+    val targetAlpha = if (pressed && enabled && reduceMotion) 0.85f else 1f
+    val scale by animateFloatAsState(
+        targetValue = targetScale,
+        animationSpec = when {
+            !enabled -> tween(durationMillis = 0)
+            reduceMotion -> tween(durationMillis = LexturesMotion.InstantMs)
+            else -> LexturesMotion.bubble
+        },
+        label = "lxPressableScale",
+    )
+    val alpha by animateFloatAsState(
+        targetValue = targetAlpha,
+        animationSpec = tween(durationMillis = LexturesMotion.InstantMs),
+        label = "lxPressableAlpha",
+    )
+    return this.graphicsLayer {
+        scaleX = scale
+        scaleY = scale
+        this.alpha = alpha
+    }
+}

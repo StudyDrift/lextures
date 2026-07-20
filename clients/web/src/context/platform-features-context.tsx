@@ -60,6 +60,7 @@ export type PlatformFeatures = {
   ffMotionReveal: boolean
   ffMotionLists: boolean
   ffMotionOverlays: boolean
+  ffMotionControls: boolean
   ffMobileCreateCourse: boolean
   ffMobileCourseCreateV2: boolean
   ffMobileCanvasImport: boolean
@@ -202,6 +203,7 @@ const defaultFeatures: PlatformFeatures = {
   ffMotionReveal: true,
   ffMotionLists: true,
   ffMotionOverlays: true,
+  ffMotionControls: true,
   ffMobileCreateCourse: false,
   ffMobileCourseCreateV2: false,
   ffMobileCanvasImport: false,
@@ -342,6 +344,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffMotionReveal: true,
     ffMotionLists: true,
     ffMotionOverlays: true,
+    ffMotionControls: true,
     ffMobileCreateCourse: false,
     ffMobileCourseCreateV2: false,
     ffMobileCanvasImport: false,
@@ -489,6 +492,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMotionReveal: data.ffMotionReveal !== false,
           ffMotionLists: data.ffMotionLists !== false,
           ffMotionOverlays: data.ffMotionOverlays !== false,
+          ffMotionControls: data.ffMotionControls !== false,
           ffMobileCreateCourse: data.ffMobileCreateCourse === true,
           ffMobileCourseCreateV2: data.ffMobileCourseCreateV2 === true,
           ffMobileCanvasImport: data.ffMobileCanvasImport === true,
@@ -593,6 +597,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMotionReveal: next.ffMotionReveal !== false,
           ffMotionLists: next.ffMotionLists !== false,
           ffMotionOverlays: next.ffMotionOverlays !== false,
+          ffMotionControls: next.ffMotionControls !== false,
           ffMobileCreateCourse: next.ffMobileCreateCourse === true,
           ffMobileCourseCreateV2: next.ffMobileCourseCreateV2 === true,
           ffMobileCanvasImport: next.ffMobileCanvasImport === true,
@@ -697,6 +702,15 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  // AN.6 — expose control-motion kill-switch to CSS (press/shake/toggle styles).
+  useEffect(() => {
+    const root = document.documentElement
+    root.dataset.motionControls = features.ffMotionControls !== false ? 'on' : 'off'
+    return () => {
+      delete root.dataset.motionControls
+    }
+  }, [features.ffMotionControls])
 
   const value = useMemo(
     () => ({

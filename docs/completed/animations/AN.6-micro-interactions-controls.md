@@ -1,6 +1,6 @@
 # AN.6 — Micro-interactions & Controls
 
-> Implementation plan. Source: [docs/plan/animations/README.md](README.md) (Motion & Animation Polish initiative).
+> Completed implementation plan. Source: [docs/plan/animations/README.md](../../plan/animations/README.md) (Motion & Animation Polish initiative).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Motion & Animation Polish |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL — iOS primary button has a press scale; most controls give no motion feedback; no mobile haptics standard |
+| **Status (today)** | DONE — web `control-motion` + press/toggle/segmented/validation/loading CSS, `Button`/`FeatureToggleRow`/`SegmentedControl` adoption, iOS `Haptics` + `LXPressableButtonStyle`/`LXControlMotion`, Android `Haptics` + `lxPressable`, `ff_motion_controls` kill-switch (collapsed into motion master) |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Design Systems / Frontend Platform + Mobile |
 | **Depends on** | AN.1 |
@@ -224,5 +224,5 @@ Not applicable.
   form/validation styles in [`index.css`](../../../clients/web/src/index.css).
 - Standards: WCAG 1.4.1 (Use of Color), 2.4.7 (Focus Visible), 4.1.3 (Status Messages), 2.3.1;
   Apple HIG "Feedback / Haptics"; Material 3 "State layers / Haptics".
-- Related plans: [AN.1](../../completed/animations/AN.1-motion-foundation-tokens.md), [AN.5](AN.5-overlays-surfaces.md),
-  [AN.7](AN.7-delight-progress-moments.md).
+- Related plans: [AN.1](AN.1-motion-foundation-tokens.md), [AN.5](AN.5-overlays-surfaces.md),
+  [AN.7](../../plan/animations/AN.7-delight-progress-moments.md).

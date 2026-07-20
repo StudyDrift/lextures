@@ -118,16 +118,23 @@
     text-wrap: pretty;
   }
 
-  /* Plan 22.1 — scale on press (rule 12): tactile feedback for interactive controls. */
-  .lms-scope button:not(:disabled):not(.lex-btn-static),
-  .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static) {
-    transition-property: transform;
-    transition-duration: var(--dur-fast);
-    transition-timing-function: var(--ease-standard);
+  /* AN.6 / Plan 22.1 — press scale with bubble settle (FR-1). Kill-switch via data-motion-controls. */
+  html:not([data-motion-controls='off']):not(.reduced-motion) .lms-scope button:not(:disabled):not(.lex-btn-static),
+  html:not([data-motion-controls='off']):not(.reduced-motion) .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static) {
+    transition-property: transform, opacity;
+    transition-duration: var(--dur-base);
+    transition-timing-function: var(--ease-bubble);
   }
-  .lms-scope button:not(:disabled):not(.lex-btn-static):active,
-  .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static):active {
+  html:not([data-motion-controls='off']):not(.reduced-motion) .lms-scope button:not(:disabled):not(.lex-btn-static):active,
+  html:not([data-motion-controls='off']):not(.reduced-motion) .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static):active {
     scale: var(--motion-press-scale);
+  }
+  /* Reduced motion: opacity pulse instead of scale (FR-7 / AC-5). */
+  html.reduced-motion .lms-scope button:not(:disabled):not(.lex-btn-static):active,
+  html.reduced-motion .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static):active,
+  html[data-motion-controls='off'] .lms-scope button:not(:disabled):not(.lex-btn-static):active,
+  html[data-motion-controls='off'] .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static):active {
+    opacity: 0.85;
   }
 }
 
@@ -1489,6 +1496,185 @@ body {
   }
   .lms-print-root tr {
     break-inside: avoid-page;
+  }
+}
+
+/*
+ * AN.6 — Control micro-interactions (press, toggle thumb, check-in, validation, loading).
+ * Gated by html[data-motion-controls] (set from ffMotionControls) + reduced-motion.
+ */
+@keyframes lx-control-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes lx-control-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgb(244 63 94 / 0.35);
+  }
+}
+
+@keyframes lx-control-check-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lx-control-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lx-control-press {
+  transition-property: transform, opacity;
+  transition-duration: var(--dur-base);
+  transition-timing-function: var(--ease-bubble);
+}
+html:not([data-motion-controls='off']):not(.reduced-motion) .lx-control-press:active:not(:disabled) {
+  transform: scale(var(--motion-press-scale));
+}
+
+.lx-control-press-reduced:active:not(:disabled) {
+  opacity: 0.85;
+  transition: opacity var(--dur-instant) linear;
+}
+
+/* Toggle track + thumb (FR-2). */
+.lx-control-switch {
+  transition-property: background-color, opacity, transform;
+  transition-duration: var(--dur-base);
+  transition-timing-function: var(--ease-standard);
+}
+.lx-control-switch-thumb {
+  transition-property: transform;
+  transition-duration: var(--dur-base);
+  transition-timing-function: var(--ease-bubble);
+}
+html.reduced-motion .lx-control-switch,
+html.reduced-motion .lx-control-switch-thumb,
+html[data-motion-controls='off'] .lx-control-switch,
+html[data-motion-controls='off'] .lx-control-switch-thumb {
+  transition-duration: var(--dur-instant);
+  transition-timing-function: linear;
+}
+
+/* Checkbox / radio check-in (FR-2). */
+html:not([data-motion-controls='off']):not(.reduced-motion) .lms-scope input[type='checkbox']:checked,
+html:not([data-motion-controls='off']):not(.reduced-motion) .lms-scope input[type='radio']:checked {
+  animation: lx-control-check-in var(--dur-fast) var(--ease-bubble) both;
+}
+
+/* Focus ring / border affordance on text inputs (FR-4). */
+.lms-scope input:not([type='checkbox']):not([type='radio']):not([type='range']),
+.lms-scope textarea,
+.lms-scope select {
+  transition-property: border-color, box-shadow, background-color;
+  transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease-standard);
+}
+html.reduced-motion .lms-scope input:not([type='checkbox']):not([type='radio']):not([type='range']),
+html.reduced-motion .lms-scope textarea,
+html.reduced-motion .lms-scope select {
+  transition-duration: var(--dur-instant);
+}
+
+/* Validation shake / pulse (FR-4 / AC-4 / AC-5). Fires once via animation. */
+.lx-control-shake,
+.lms-scope input[aria-invalid='true']:not([type='checkbox']):not([type='radio']),
+.lms-scope textarea[aria-invalid='true'] {
+  animation: lx-control-shake var(--dur-base) var(--ease-standard) 1;
+}
+html.reduced-motion .lx-control-shake,
+html.reduced-motion .lms-scope input[aria-invalid='true']:not([type='checkbox']):not([type='radio']),
+html.reduced-motion .lms-scope textarea[aria-invalid='true'],
+html[data-motion-controls='off'] .lx-control-shake,
+html[data-motion-controls='off'] .lms-scope input[aria-invalid='true']:not([type='checkbox']):not([type='radio']),
+html[data-motion-controls='off'] .lms-scope textarea[aria-invalid='true'] {
+  animation: lx-control-pulse var(--dur-base) linear 1;
+}
+
+.lx-control-pulse {
+  animation: lx-control-pulse var(--dur-base) linear 1;
+}
+
+/* Loading button: crossfade label ↔ spinner without width jump (FR-6 / AC-6). */
+.lx-control-loading {
+  position: relative;
+}
+.lx-control-btn-label {
+  transition: opacity var(--dur-fast) var(--ease-standard);
+}
+.lx-control-btn-label-exit {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+.lx-control-btn-label-enter {
+  opacity: 1;
+}
+.lx-control-btn-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.lx-control-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 9999px;
+  animation: lx-control-spinner 0.7s linear infinite;
+}
+html.reduced-motion .lx-control-btn-label,
+html[data-motion-controls='off'] .lx-control-btn-label {
+  transition: none;
+}
+html.reduced-motion .lx-control-spinner,
+html[data-motion-controls='off'] .lx-control-spinner {
+  animation: none;
+  border-right-color: currentColor;
+  opacity: 0.7;
+}
+
+/* Segmented / tab indicator (FR-3). */
+.lx-control-indicator {
+  will-change: transform, width;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.reduced-motion) .lx-control-shake,
+  html:not(.reduced-motion) .lms-scope input[aria-invalid='true']:not([type='checkbox']):not([type='radio']),
+  html:not(.reduced-motion) .lms-scope textarea[aria-invalid='true'] {
+    animation: lx-control-pulse var(--dur-base) linear 1;
+  }
+  html:not(.reduced-motion) .lms-scope input[type='checkbox']:checked,
+  html:not(.reduced-motion) .lms-scope input[type='radio']:checked {
+    animation: none;
   }
 }
 
