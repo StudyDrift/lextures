@@ -452,10 +452,10 @@ enum LXDelightMotion {
         return reduceMotion || seriousContext
     }
 
-    static func interpolateProgress(from: Double, to: Double, t: Double) -> Double {
-        let clamped = min(1, max(0, t))
+    static func interpolateProgress(from startValue: Double, to endValue: Double, progress: Double) -> Double {
+        let clamped = min(1, max(0, progress))
         let eased = 1 - pow(1 - clamped, 3)
-        return from + (to - from) * eased
+        return startValue + (endValue - startValue) * eased
     }
 
     static func particleCap(forWidth width: CGFloat, lowEnd: Bool = false) -> Int {
