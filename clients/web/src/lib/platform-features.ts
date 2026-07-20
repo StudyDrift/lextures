@@ -46,6 +46,7 @@ export type PlatformFeaturesSnapshot = {
   ffMotionReveal?: boolean
   ffMotionLists?: boolean
   ffMotionOverlays?: boolean
+  ffMotionControls?: boolean
   ffMobileCreateCourse?: boolean
   ffMobileCourseCreateV2?: boolean
   ffMobileCanvasImport?: boolean
@@ -180,6 +181,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffMotionReveal: true,
   ffMotionLists: true,
   ffMotionOverlays: true,
+  ffMotionControls: true,
   ffMobileCreateCourse: false,
   ffMobileCourseCreateV2: false,
   ffMobileCanvasImport: false,
@@ -465,4 +467,13 @@ export function motionOverlaysEnabled(s?: PlatformFeaturesSnapshot): boolean {
     return true
   }
   return snap.ffMotionOverlays !== false
+}
+
+/** AN.6: control micro-interactions (default on; kill-switch via Settings). */
+export function motionControlsEnabled(s?: PlatformFeaturesSnapshot): boolean {
+  const snap = s ?? snapshot
+  if (!s && !loaded) {
+    return true
+  }
+  return snap.ffMotionControls !== false
 }

@@ -332,6 +332,8 @@ type Config struct {
 	FFMotionLists bool
 	// FFMotionOverlays enables dialog/sheet/menu/toast/tooltip enter-exit motion (AN.5). Default ON; kill-switch.
 	FFMotionOverlays bool
+	// FFMotionControls enables control micro-interactions (press, toggle/tabs, validation, haptics) (AN.6). Default ON; kill-switch.
+	FFMotionControls bool
 	// FFMobileCreateCourse enables the mobile New course entry and basic create wizard (M11.5). Default OFF.
 	FFMobileCreateCourse bool
 	// FFMobileCourseCreateV2 enables mobile create-wizard parity: competency builder, Canvas entry, drafts (MOB.1). Default OFF.

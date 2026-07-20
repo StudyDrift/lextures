@@ -4422,6 +4422,24 @@
       "reviewed": true
     },
     {
+      "id": "AN.6",
+      "path": "docs/completed/animations/AN.6-micro-interactions-controls.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Playwright smoke for press CSS hooks, segmented indicator, aria-invalid validation, and reduced-motion pulse path.",
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/control-motion.spec.ts"
+        }
+      ],
+      "reviewed": true
+    },
+    {
       "id": "attendance",
       "path": "docs/completed/attendance.md",
       "markets": [
@@ -7425,7 +7443,7 @@
         "authorization": false,
         "dependency": false,
         "rollback": false,
-        "notes": "Flags are Settings → Global platform toggles (E2E.2 matrix). Mobile create journeys covered by native unit tests, not Playwright."
+        "notes": "Flags are Settings \u2192 Global platform toggles (E2E.2 matrix). Mobile create journeys covered by native unit tests, not Playwright."
       }
     },
     {
@@ -7448,7 +7466,7 @@
         "authorization": false,
         "dependency": false,
         "rollback": false,
-        "notes": "Flag is Settings → Global platform toggle (E2E.2 matrix). Mobile Canvas import journeys covered by native unit tests, not Playwright."
+        "notes": "Flag is Settings \u2192 Global platform toggle (E2E.2 matrix). Mobile Canvas import journeys covered by native unit tests, not Playwright."
       }
     },
     {
@@ -7477,7 +7495,7 @@
         "authorization": true,
         "dependency": false,
         "rollback": true,
-        "notes": "Flag ffMobileAdminConsole is Settings → Global platform toggle (E2E.2 matrix). Hub/menu UX covered by native unit tests; API contract covers audit-log 401/403 and admin list/filter."
+        "notes": "Flag ffMobileAdminConsole is Settings \u2192 Global platform toggle (E2E.2 matrix). Hub/menu UX covered by native unit tests; API contract covers audit-log 401/403 and admin list/filter."
       }
     },
     {
@@ -7506,7 +7524,7 @@
         "authorization": true,
         "dependency": false,
         "rollback": true,
-        "notes": "Flag ffMobileEnrollmentAdd is Settings → Global platform toggle (E2E.2 matrix). Add/state UX covered by native unit tests; API contract covers feature exposure and instructor vs student POST authz."
+        "notes": "Flag ffMobileEnrollmentAdd is Settings \u2192 Global platform toggle (E2E.2 matrix). Add/state UX covered by native unit tests; API contract covers feature exposure and instructor vs student POST authz."
       }
     },
     {
@@ -7535,7 +7553,7 @@
         "authorization": true,
         "dependency": true,
         "rollback": true,
-        "notes": "Flag ffMobileLiveQuiz is Settings → Global platform toggle (E2E.2 matrix) and depends on per-course interactiveQuizzesEnabled. Play UX covered by native unit tests; API contract covers feature exposure and unknown join-code 404/guest rejection."
+        "notes": "Flag ffMobileLiveQuiz is Settings \u2192 Global platform toggle (E2E.2 matrix) and depends on per-course interactiveQuizzesEnabled. Play UX covered by native unit tests; API contract covers feature exposure and unknown join-code 404/guest rejection."
       }
     },
     {
@@ -7564,7 +7582,7 @@
         "authorization": true,
         "dependency": false,
         "rollback": true,
-        "notes": "Flag ffMobileWhiteboardEdit is Settings → Global platform toggle (E2E.2 matrix). Authoring UX covered by native unit tests; API contract covers feature exposure and whiteboard CRUD with web schema elements. Realtime collaboration deferred (web is save-based LWW)."
+        "notes": "Flag ffMobileWhiteboardEdit is Settings \u2192 Global platform toggle (E2E.2 matrix). Authoring UX covered by native unit tests; API contract covers feature exposure and whiteboard CRUD with web schema elements. Realtime collaboration deferred (web is save-based LWW)."
       }
     },
     {
@@ -7577,7 +7595,7 @@
       "risk": "major",
       "client": "mobile",
       "coverage": "api-contract",
-      "rationale": "Mobile marketplace purchase loop: free claim, paid Stripe checkout handoff via PurchaseFlow, Purchased courses from /me/purchases, owned Open CTA. Native unit tests cover flag gating and CTA labels; Playwright API smoke covers ffMobileMarketplacePurchase, claim→purchases list, and checkout response shape.",
+      "rationale": "Mobile marketplace purchase loop: free claim, paid Stripe checkout handoff via PurchaseFlow, Purchased courses from /me/purchases, owned Open CTA. Native unit tests cover flag gating and CTA labels; Playwright API smoke covers ffMobileMarketplacePurchase, claim\u2192purchases list, and checkout response shape.",
       "owner": "Mobile",
       "reviewed": true,
       "specs": [
@@ -7592,7 +7610,7 @@
         "authorization": true,
         "dependency": true,
         "rollback": true,
-        "notes": "Flag ffMobileMarketplacePurchase is Settings → Global platform toggle (E2E.2 matrix). Paid path uses external Stripe checkout (not IAP). Rollback restores Buy on web."
+        "notes": "Flag ffMobileMarketplacePurchase is Settings \u2192 Global platform toggle (E2E.2 matrix). Paid path uses external Stripe checkout (not IAP). Rollback restores Buy on web."
       }
     },
     {
@@ -7621,7 +7639,7 @@
         "authorization": true,
         "dependency": true,
         "rollback": true,
-        "notes": "Flag ffMobileBoardsAdvanced is Settings → Global platform toggle (E2E.2 matrix). Requires per-course visual boards. Rollback leaves VC.M1–M7 intact."
+        "notes": "Flag ffMobileBoardsAdvanced is Settings \u2192 Global platform toggle (E2E.2 matrix). Requires per-course visual boards. Rollback leaves VC.M1\u2013M7 intact."
       }
     },
     {

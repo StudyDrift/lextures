@@ -1,4 +1,7 @@
 import type { ReactNode } from 'react'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { pressClassName, useHaptics } from '../../lib/control-motion'
+import { usePrefersReducedMotion } from '../../lib/motion'
 
 type Props = {
   label: string
@@ -25,6 +28,11 @@ export function FeatureToggleRow({
   deriveFrom,
 }: Props) {
   const descriptionId = disabledReason ? `${slug(label)}-disabled-reason` : undefined
+  const { ffMotionControls } = usePlatformFeatures()
+  const reduceMotion = usePrefersReducedMotion()
+  const { trigger } = useHaptics()
+  const motionEnabled = ffMotionControls !== false
+  const press = pressClassName({ enabled: motionEnabled && !disabled, reduceMotion })
 
   return (
     <div className="flex flex-wrap items-start justify-between gap-4 py-4">
@@ -66,17 +74,30 @@ export function FeatureToggleRow({
         role="switch"
         aria-checked={enabled}
         aria-describedby={descriptionId}
-        onClick={onToggle}
+        onClick={() => {
+          trigger('selection')
+          onToggle()
+        }}
         disabled={disabled}
         title={disabled && disabledReason ? disabledReason : undefined}
-        className={`relative mt-0.5 inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-          enabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-700'
-        }`}
+        data-motion-controls={motionEnabled ? 'on' : 'off'}
+        className={[
+          'lx-control-switch relative mt-0.5 inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+          press,
+          enabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-700',
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
         <span
-          className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition-transform ${
-            enabled ? 'translate-x-5' : 'translate-x-0.5'
-          }`}
+          className={[
+            'lx-control-switch-thumb pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0',
+            enabled ? 'translate-x-5' : 'translate-x-0.5',
+          ]
+            .filter(Boolean)
+            .join(' ')}
         />
       </button>
     </div>

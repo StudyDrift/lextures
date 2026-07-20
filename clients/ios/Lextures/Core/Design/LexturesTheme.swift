@@ -187,6 +187,10 @@ struct AuthCard<Content: View>: View {
 
 struct AuthPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.lxReduceMotion) private var reduceMotion
+
+    var motionEnabled: Bool = true
+    var fireHaptic: Bool = true
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -208,8 +212,48 @@ struct AuthPrimaryButtonStyle: ButtonStyle {
                 radius: configuration.isPressed ? 4 : 10,
                 y: configuration.isPressed ? 2 : 5
             )
-            .scaleEffect(configuration.isPressed ? LexturesMotion.pressScale : 1)
-            .animation(.easeOut(duration: LexturesMotion.fast), value: configuration.isPressed)
+            .opacity(pressOpacity(configuration.isPressed))
+            .scaleEffect(pressScale(configuration.isPressed))
+            .animation(
+                LexturesMotion.resolve(LexturesMotion.bubble, reduceMotion: reduceMotion || !motionEnabled),
+                value: configuration.isPressed
+            )
+            .onChange(of: configuration.isPressed) { _, pressed in
+                // FR-9: haptic runs alongside press; never gates the action.
+                guard pressed, fireHaptic, motionEnabled, !reduceMotion else { return }
+                Haptics.trigger(.tap, enabled: true)
+            }
+    }
+
+    private func pressScale(_ pressed: Bool) -> CGFloat {
+        guard pressed, motionEnabled, !reduceMotion else { return 1 }
+        return LexturesMotion.pressScale
+    }
+
+    private func pressOpacity(_ pressed: Bool) -> Double {
+        guard pressed, motionEnabled, reduceMotion else { return 1 }
+        return 0.85
+    }
+}
+
+/// AN.6 — Shared press scale for secondary / icon / card-like buttons (FR-1 / FR-8).
+struct LXPressableButtonStyle: ButtonStyle {
+    @Environment(\.lxReduceMotion) private var reduceMotion
+    var enabled: Bool = true
+    var haptic: Haptics.Kind? = .tap
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed && enabled && reduceMotion ? 0.85 : 1)
+            .scaleEffect(configuration.isPressed && enabled && !reduceMotion ? LexturesMotion.pressScale : 1)
+            .animation(
+                LexturesMotion.resolve(LexturesMotion.bubble, reduceMotion: reduceMotion || !enabled),
+                value: configuration.isPressed
+            )
+            .onChange(of: configuration.isPressed) { _, pressed in
+                guard pressed, enabled, !reduceMotion, let haptic else { return }
+                Haptics.trigger(haptic, enabled: true)
+            }
     }
 }
 
