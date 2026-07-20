@@ -4,6 +4,7 @@ import XCTest
 final class ArchivedCoursesAdminLogicTests: XCTestCase {
     func testAdminSettingsEnabledRequiresFlag() {
         var features = MobilePlatformFeatures()
+        features.ffMobileAdminConsole = false
         XCTAssertFalse(ArchivedCoursesAdminLogic.adminSettingsEnabled(features))
         features.ffMobileAdminSettings = true
         XCTAssertTrue(ArchivedCoursesAdminLogic.adminSettingsEnabled(features))
@@ -20,6 +21,7 @@ final class ArchivedCoursesAdminLogicTests: XCTestCase {
 
     func testShouldShowEntryRequiresFlagAndPermission() {
         var features = MobilePlatformFeatures()
+        features.ffMobileAdminConsole = false
         features.ffMobileAdminSettings = true
         XCTAssertFalse(
             ArchivedCoursesAdminLogic.shouldShowEntry(features: features, permissions: [])

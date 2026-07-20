@@ -9,9 +9,9 @@ import com.lextures.android.core.navigation.MobilePlatformFeatures
 class RolesPermissionsAdminLogicTest {
     @Test
     fun adminSettingsEnabledRequiresFlag() {
-        val off = MobilePlatformFeatures()
+        val off = MobilePlatformFeatures(ffMobileAdminConsole = false)
         assertFalse(RolesPermissionsAdminLogic.adminSettingsEnabled(off))
-        val on = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val on = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertTrue(RolesPermissionsAdminLogic.adminSettingsEnabled(on))
     }
 
@@ -27,7 +27,7 @@ class RolesPermissionsAdminLogicTest {
 
     @Test
     fun shouldShowEntryRequiresFlagAndPermission() {
-        val features = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val features = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertFalse(
             RolesPermissionsAdminLogic.shouldShowEntry(features, emptyList()),
         )

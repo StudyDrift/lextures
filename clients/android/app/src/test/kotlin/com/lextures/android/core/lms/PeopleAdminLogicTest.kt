@@ -10,9 +10,9 @@ import org.junit.Test
 class PeopleAdminLogicTest {
     @Test
     fun adminSettingsEnabledRequiresFlag() {
-        val off = MobilePlatformFeatures()
+        val off = MobilePlatformFeatures(ffMobileAdminConsole = false)
         assertFalse(PeopleAdminLogic.adminSettingsEnabled(off))
-        val on = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val on = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertTrue(PeopleAdminLogic.adminSettingsEnabled(on))
     }
 
@@ -26,7 +26,7 @@ class PeopleAdminLogicTest {
 
     @Test
     fun shouldShowEntryRequiresFlagAndPermission() {
-        val features = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val features = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertFalse(PeopleAdminLogic.shouldShowEntry(features, emptyList()))
         assertTrue(
             PeopleAdminLogic.shouldShowEntry(

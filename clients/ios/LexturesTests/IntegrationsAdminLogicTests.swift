@@ -3,12 +3,12 @@ import XCTest
 
 final class IntegrationsAdminLogicTests: XCTestCase {
     func testEntryRequiresFlagAndRbacPermission() {
-        let off = MobilePlatformFeatures(ffMobileAdminSettings: false)
+        let off = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: false)
         XCTAssertFalse(IntegrationsAdminLogic.shouldShowEntry(
             features: off,
             permissions: [IntegrationsAdminLogic.rbacManagePermission]
         ))
-        let on = MobilePlatformFeatures(ffMobileAdminSettings: true)
+        let on = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: true)
         XCTAssertFalse(IntegrationsAdminLogic.shouldShowEntry(features: on, permissions: []))
         XCTAssertTrue(IntegrationsAdminLogic.shouldShowEntry(
             features: on,
@@ -17,7 +17,7 @@ final class IntegrationsAdminLogicTests: XCTestCase {
     }
 
     func testSectionVisibilityByFlags() {
-        var features = MobilePlatformFeatures(ffMobileAdminSettings: true)
+        var features = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: true)
         features.oerLibraryEnabled = false
         features.xapiEmissionEnabled = false
 

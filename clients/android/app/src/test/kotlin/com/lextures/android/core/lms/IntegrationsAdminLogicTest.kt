@@ -12,14 +12,14 @@ class IntegrationsAdminLogicTest {
 
     @Test
     fun entryRequiresFlagAndRbacPermission() {
-        val off = MobilePlatformFeatures(ffMobileAdminSettings = false)
+        val off = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = false)
         assertFalse(
             IntegrationsAdminLogic.shouldShowEntry(
                 off,
                 listOf(IntegrationsAdminLogic.RBAC_MANAGE_PERMISSION),
             ),
         )
-        val on = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val on = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertFalse(IntegrationsAdminLogic.shouldShowEntry(on, emptyList()))
         assertTrue(
             IntegrationsAdminLogic.shouldShowEntry(
@@ -31,8 +31,7 @@ class IntegrationsAdminLogicTest {
 
     @Test
     fun sectionVisibilityByFlags() {
-        val base = MobilePlatformFeatures(
-            ffMobileAdminSettings = true,
+        val base = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true,
             oerLibraryEnabled = false,
             xapiEmissionEnabled = false,
         )

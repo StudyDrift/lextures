@@ -4,6 +4,7 @@ import XCTest
 final class OrgBrandingAdminLogicTests: XCTestCase {
     func testAdminSettingsFlag() {
         var features = MobilePlatformFeatures()
+        features.ffMobileAdminConsole = false
         XCTAssertFalse(OrgBrandingAdminLogic.adminSettingsEnabled(features))
         features.ffMobileAdminSettings = true
         XCTAssertTrue(OrgBrandingAdminLogic.adminSettingsEnabled(features))
@@ -24,7 +25,7 @@ final class OrgBrandingAdminLogicTests: XCTestCase {
     }
 
     func testShouldShowEntry() {
-        let features = MobilePlatformFeatures(ffMobileAdminSettings: true)
+        let features = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: true)
         XCTAssertFalse(
             OrgBrandingAdminLogic.shouldShowEntry(features: features, permissions: [])
         )

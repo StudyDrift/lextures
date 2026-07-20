@@ -12,14 +12,14 @@ import java.time.Instant
 class AiModelsAdminLogicTest {
     @Test
     fun entryRequiresFlagAndRbacPermission() {
-        val off = MobilePlatformFeatures(ffMobileAdminSettings = false)
+        val off = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = false)
         assertFalse(
             AiModelsAdminLogic.shouldShowEntry(
                 off,
                 listOf(AiModelsAdminLogic.RBAC_MANAGE_PERMISSION),
             ),
         )
-        val on = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val on = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertFalse(AiModelsAdminLogic.shouldShowEntry(on, emptyList()))
         assertTrue(
             AiModelsAdminLogic.shouldShowEntry(

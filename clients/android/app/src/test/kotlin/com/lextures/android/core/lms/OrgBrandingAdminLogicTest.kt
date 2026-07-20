@@ -10,8 +10,8 @@ import org.junit.Test
 class OrgBrandingAdminLogicTest {
     @Test
     fun adminSettingsFlag() {
-        val off = MobilePlatformFeatures()
-        val on = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val off = MobilePlatformFeatures(ffMobileAdminConsole = false)
+        val on = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertFalse(OrgBrandingAdminLogic.adminSettingsEnabled(off))
         assertTrue(OrgBrandingAdminLogic.adminSettingsEnabled(on))
     }
@@ -33,7 +33,7 @@ class OrgBrandingAdminLogicTest {
 
     @Test
     fun shouldShowEntry() {
-        val features = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val features = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertFalse(OrgBrandingAdminLogic.shouldShowEntry(features, emptyList()))
         assertTrue(
             OrgBrandingAdminLogic.shouldShowEntry(

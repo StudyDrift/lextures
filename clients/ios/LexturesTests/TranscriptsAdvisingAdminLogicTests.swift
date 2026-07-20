@@ -3,14 +3,14 @@ import XCTest
 
 final class TranscriptsAdvisingAdminLogicTests: XCTestCase {
     func testEntryRequiresFlagPermissionAndFeature() {
-        var offAdmin = MobilePlatformFeatures(ffMobileAdminSettings: false)
+        var offAdmin = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: false)
         offAdmin.ffTranscripts = true
         XCTAssertFalse(TranscriptsAdvisingAdminLogic.shouldShowEntry(
             features: offAdmin,
             permissions: [TranscriptsAdvisingAdminLogic.rbacManagePermission]
         ))
 
-        var on = MobilePlatformFeatures(ffMobileAdminSettings: true)
+        var on = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: true)
         on.ffTranscripts = false
         on.ffAdvisingIntegration = false
         XCTAssertFalse(TranscriptsAdvisingAdminLogic.shouldShowEntry(
@@ -27,7 +27,7 @@ final class TranscriptsAdvisingAdminLogicTests: XCTestCase {
     }
 
     func testSectionVisibilityByFlags() {
-        var features = MobilePlatformFeatures(ffMobileAdminSettings: true)
+        var features = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: true)
         features.ffTranscripts = false
         features.ffAdvisingIntegration = false
         XCTAssertTrue(TranscriptsAdvisingAdminLogic.visibleSections(features: features).isEmpty)
@@ -43,7 +43,7 @@ final class TranscriptsAdvisingAdminLogicTests: XCTestCase {
     }
 
     func testSubViewGating() {
-        var features = MobilePlatformFeatures(ffMobileAdminSettings: true)
+        var features = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: true)
         features.ffTranscripts = true
         features.ffAdvisingIntegration = false
         let perms = [TranscriptsAdvisingAdminLogic.rbacManagePermission]

@@ -4,6 +4,7 @@ import XCTest
 final class PeopleAdminLogicTests: XCTestCase {
     func testAdminSettingsEnabledRequiresFlag() {
         var features = MobilePlatformFeatures()
+        features.ffMobileAdminConsole = false
         XCTAssertFalse(PeopleAdminLogic.adminSettingsEnabled(features))
         features.ffMobileAdminSettings = true
         XCTAssertTrue(PeopleAdminLogic.adminSettingsEnabled(features))
@@ -20,6 +21,7 @@ final class PeopleAdminLogicTests: XCTestCase {
 
     func testShouldShowEntryRequiresFlagAndPermission() {
         var features = MobilePlatformFeatures()
+        features.ffMobileAdminConsole = false
         features.ffMobileAdminSettings = true
         XCTAssertFalse(
             PeopleAdminLogic.shouldShowEntry(features: features, permissions: [])

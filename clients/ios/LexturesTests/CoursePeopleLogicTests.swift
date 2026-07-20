@@ -97,6 +97,7 @@ final class CoursePeopleLogicTests: XCTestCase {
 
     func testCanAddEnrollmentsRequiresFlagPermissionAndOnline() {
         var features = MobilePlatformFeatures()
+        features.ffMobileEnrollmentAdd = false
         let perms = ["course:BIO101:enrollments:update"]
         XCTAssertFalse(
             CoursePeopleLogic.canAddEnrollments(
