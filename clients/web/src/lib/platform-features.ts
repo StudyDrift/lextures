@@ -130,6 +130,7 @@ export type PlatformFeaturesSnapshot = {
   ffFeedback?: boolean
   ffVisualBoards?: boolean
   ffInteractiveQuizzes?: boolean
+  screenShareEnabled?: boolean
   ffIqLiveHosting?: boolean
   ffIqTeamMode?: boolean
   ffIqStudentPaced?: boolean
@@ -184,15 +185,15 @@ const defaults: PlatformFeaturesSnapshot = {
   ffMotionOverlays: true,
   ffMotionControls: true,
   ffMotionDelight: true,
-  ffMobileCreateCourse: false,
-  ffMobileCourseCreateV2: false,
-  ffMobileCanvasImport: false,
-  ffMobileAdminConsole: false,
-  ffMobileEnrollmentAdd: false,
-  ffMobileLiveQuiz: false,
-  ffMobileWhiteboardEdit: false,
-  ffMobileMarketplacePurchase: false,
-  ffMobileBoardsAdvanced: false,
+  ffMobileCreateCourse: true,
+  ffMobileCourseCreateV2: true,
+  ffMobileCanvasImport: true,
+  ffMobileAdminConsole: true,
+  ffMobileEnrollmentAdd: true,
+  ffMobileLiveQuiz: true,
+  ffMobileWhiteboardEdit: true,
+  ffMobileMarketplacePurchase: true,
+  ffMobileBoardsAdvanced: true,
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
@@ -265,6 +266,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffFeedback: true,
   ffVisualBoards: true,
   ffInteractiveQuizzes: true,
+  screenShareEnabled: false,
   ffIqLiveHosting: true,
   ffIqTeamMode: true,
   ffIqStudentPaced: true,

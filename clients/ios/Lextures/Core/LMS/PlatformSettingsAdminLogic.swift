@@ -5,8 +5,8 @@ enum PlatformSettingsAdminLogic {
 
     /// Deliberate incident-safe allowlist. Infrastructure, identity, billing, and the
     /// mobile-admin flag itself remain web-only to avoid lockout and high-impact mistakes.
+    /// In-app feedback is always on (platform master removed) and is not toggled here.
     static let featureDefinitions: [PlatformFeatureDefinition] = [
-        definition("ffFeedback", "feedback"),
         definition("ffPublicCatalog", "publicCatalog"),
         definition("ffCourseMarketplace", "courseMarketplace"),
         definition("ffLearningPaths", "learningPaths"),
@@ -46,7 +46,6 @@ enum PlatformSettingsAdminLogic {
 
     static func value(for key: String, in settings: PlatformSettingsSnapshot) -> Bool {
         switch key {
-        case "ffFeedback": settings.ffFeedback
         case "ffPublicCatalog": settings.ffPublicCatalog
         case "ffCourseMarketplace": settings.ffCourseMarketplace
         case "ffLearningPaths": settings.ffLearningPaths
@@ -67,7 +66,6 @@ enum PlatformSettingsAdminLogic {
         to settings: PlatformSettingsSnapshot
     ) -> PlatformSettingsSnapshot {
         var result = settings
-        result.ffFeedback = features.ffFeedback ?? result.ffFeedback
         result.ffPublicCatalog = features.ffPublicCatalog ?? result.ffPublicCatalog
         result.ffCourseMarketplace = features.ffCourseMarketplace ?? result.ffCourseMarketplace
         result.ffLearningPaths = features.ffLearningPaths ?? result.ffLearningPaths

@@ -681,13 +681,6 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'marketplace',
   },
   {
-    key: 'ffFeedback',
-    label: 'In-app product feedback',
-    description:
-      'Let signed-in users submit product feedback from web and mobile clients. Admins triage submissions from the feedback queue.',
-    pack: 'core',
-  },
-  {
     key: 'ffIqPublicKitCatalog',
     label: 'Live quiz public kit catalog',
     description:
@@ -749,62 +742,6 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description:
       'Kill-switch for splash handoff, route/section transitions, load choreography, list insert/remove/reorder, overlay enter/exit, control micro-interactions, and delight/progress moments. Turn off to disable all platform motion instantly (AN.2–AN.7).',
     pack: 'accessibility',
-  },
-  {
-    key: 'ffMobileCreateCourse',
-    label: 'Mobile create course',
-    description:
-      'Show the New course entry and create wizard on iOS and Android, including competency authoring, Canvas import entry, and draft resume (M11.5, MOB.1).',
-    pack: 'core',
-  },
-  {
-    key: 'ffMobileCanvasImport',
-    label: 'Mobile Canvas import',
-    description:
-      'Import a Canvas course on iOS and Android with credentials, scope toggles, and live progress (MOB.2).',
-    pack: 'core',
-  },
-  {
-    key: 'ffMobileAdminConsole',
-    label: 'Mobile admin console',
-    description:
-      'Settings/Admin hub on iOS and Android with web-parity menu groups and audit log (MOB.3).',
-    pack: 'admin',
-  },
-  {
-    key: 'ffMobileEnrollmentAdd',
-    label: 'Mobile enrollment add',
-    description:
-      'Add people to a course roster from iOS and Android People, with role selection and state actions (MOB.4).',
-    pack: 'core',
-  },
-  {
-    key: 'ffMobileLiveQuiz',
-    label: 'Mobile live quiz',
-    description:
-      'Join and play interactive live quizzes from iOS and Android with join codes, answer surfaces, and leaderboards (MOB.5).',
-    pack: 'core',
-  },
-  {
-    key: 'ffMobileWhiteboardEdit',
-    label: 'Mobile whiteboard edit',
-    description:
-      'Create, draw, save, and delete course whiteboards on iOS and Android with web-compatible canvas data (MOB.6).',
-    pack: 'core',
-  },
-  {
-    key: 'ffMobileMarketplacePurchase',
-    label: 'Mobile marketplace purchases',
-    description:
-      'Claim free marketplace courses, buy paid courses via Stripe checkout handoff, and browse Purchased courses on iOS and Android (MOB.7).',
-    pack: 'marketplace',
-  },
-  {
-    key: 'ffMobileBoardsAdvanced',
-    label: 'Mobile boards advanced',
-    description:
-      'Board templates, duplication, export, present mode, analytics, and admin governance on iOS and Android (MOB.8).',
-    pack: 'core',
   },
   {
     key: 'ffReportCards',

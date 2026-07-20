@@ -1,8 +1,7 @@
 /**
  * MOB.5 — Mobile live quiz join API parity (Phase 1)
  *
- *   [x] Platform features exposes ffMobileLiveQuiz (default off)
- *   [x] Admin can enable ffMobileLiveQuiz via settings/platform
+ *   [x] Platform features exposes ffMobileLiveQuiz (always on)
  *   [x] Join code lookup returns 404 for unknown codes
  *   [x] Guest join is rate-limited / rejected for unknown codes
  */
@@ -46,18 +45,7 @@ async function bootstrapGlobalAdmin(email: string) {
   })
 }
 
-async function enableMobileLiveQuiz(token: string) {
-  const res = await fetch(`${API_BASE}/api/v1/settings/platform`, {
-    method: 'PUT',
-    headers: authHeaders(token),
-    body: JSON.stringify({ ffMobileLiveQuiz: true }),
-  })
-  if (!res.ok) {
-    test.skip(true, `could not enable mobile live quiz: ${await res.text()}`)
-  }
-}
-
-test('MOB.5 features: ffMobileLiveQuiz defaults off then enables', async () => {
+test('MOB.5 features: ffMobileLiveQuiz is always on', async () => {
   const email = uniqueEmail('mob5-admin')
   await apiSignup({ email, password: PASSWORD })
   try {
@@ -67,21 +55,12 @@ test('MOB.5 features: ffMobileLiveQuiz defaults off then enables', async () => {
   }
   const { access_token: token } = await apiLogin(email)
 
-  const beforeRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
+  const res = await fetch(`${API_BASE}/api/v1/platform/features`, {
     headers: authHeaders(token),
   })
-  expect(beforeRes.ok).toBeTruthy()
-  const before = (await beforeRes.json()) as { ffMobileLiveQuiz?: boolean }
-  expect(typeof before.ffMobileLiveQuiz === 'boolean').toBeTruthy()
-
-  await enableMobileLiveQuiz(token)
-
-  const afterRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
-    headers: authHeaders(token),
-  })
-  expect(afterRes.ok).toBeTruthy()
-  const after = (await afterRes.json()) as { ffMobileLiveQuiz?: boolean }
-  expect(after.ffMobileLiveQuiz).toBe(true)
+  expect(res.ok).toBeTruthy()
+  const features = (await res.json()) as { ffMobileLiveQuiz?: boolean }
+  expect(features.ffMobileLiveQuiz).toBe(true)
 })
 
 test('MOB.5 join: unknown code lookup returns 404', async () => {

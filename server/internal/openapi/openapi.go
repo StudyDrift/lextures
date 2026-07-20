@@ -3996,7 +3996,7 @@ const spec = `{
       "post": {
         "tags": ["me"],
         "summary": "Submit in-app product feedback (plan FB0)",
-        "description": "Creates one feedback.submissions row for the authenticated user. Requires ffFeedback enabled.",
+        "description": "Creates one feedback.submissions row for the authenticated user. Product feedback is always enabled at the platform level.",
         "security": [ { "bearerAuth": [] } ],
         "requestBody": {
           "required": true,

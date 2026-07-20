@@ -101,18 +101,18 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFMotionControls = motion
 	out.FFMotionDelight = motion
 
-	// COLLAPSE mobile create V1/V2: either column enables create; V2 wizard is the only path.
-	mobileCreate := mergeBool(db.FFMobileCreateCourse, false) || mergeBool(db.FFMobileCourseCreateV2, false)
-	out.FFMobileCreateCourse = mobileCreate
-	out.FFMobileCourseCreateV2 = mobileCreate
-
-	out.FFMobileCanvasImport = mergeBool(db.FFMobileCanvasImport, false)
-	out.FFMobileAdminConsole = mergeBool(db.FFMobileAdminConsole, false)
-	out.FFMobileEnrollmentAdd = mergeBool(db.FFMobileEnrollmentAdd, false)
-	out.FFMobileLiveQuiz = mergeBool(db.FFMobileLiveQuiz, false)
-	out.FFMobileWhiteboardEdit = mergeBool(db.FFMobileWhiteboardEdit, false)
-	out.FFMobileMarketplacePurchase = mergeBool(db.FFMobileMarketplacePurchase, false)
-	out.FFMobileBoardsAdvanced = mergeBool(db.FFMobileBoardsAdvanced, false)
+	// Mobile create / Canvas import / admin / enrollment / live quiz / whiteboard /
+	// marketplace / boards-advanced and in-app feedback are always on (platform master
+	// switches removed; JSON keys kept for API compatibility).
+	out.FFMobileCreateCourse = true
+	out.FFMobileCourseCreateV2 = true
+	out.FFMobileCanvasImport = true
+	out.FFMobileAdminConsole = true
+	out.FFMobileEnrollmentAdd = true
+	out.FFMobileLiveQuiz = true
+	out.FFMobileWhiteboardEdit = true
+	out.FFMobileMarketplacePurchase = true
+	out.FFMobileBoardsAdvanced = true
 
 	// COLLAPSE parent portal V2 into the parent (expanded sections always on with the portal).
 	parentPortal := mergeBool(db.FFParentPortal, false)
@@ -155,7 +155,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFPublicCatalog = mergeBool(db.FFPublicCatalog, false)
 	// Course marketplace defaults ON (exception to the usual default-off convention; plan MKT1).
 	out.FFCourseMarketplace = mergeBool(db.FFCourseMarketplace, true)
-	out.FFFeedback = mergeBool(db.FFFeedback, true)
+	out.FFFeedback = true
 	// Collaboration boards are course-scoped only; platform master switch removed.
 	out.FFVisualBoards = true
 	// Boards realtime defaults ON so multi-user boards sync live without a refresh.
@@ -163,6 +163,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFBoardsExternalSharing = mergeBool(db.FFBoardsExternalSharing, false)
 	// Live Quizzes are course-scoped only; platform master switch removed.
 	out.FFInteractiveQuizzes = true
+	out.ScreenShareEnabled = mergeBool(db.FFScreenShare, false)
 	// COLLAPSE IQ hosting/modes/gradebook into the per-course Live Quizzes flag (always on at platform).
 	out.FFIqLiveHosting = true
 	out.FFIqTeamMode = true

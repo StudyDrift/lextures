@@ -58,6 +58,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const reportCardsEnabled = course.reportCardsEnabled === true
   const visualBoardsEnabled = course.visualBoardsEnabled === true
   const interactiveQuizzesEnabled = course.interactiveQuizzesEnabled === true
+  const screenShareEnabled = course.screenShareEnabled === true
   const canvasGradeSyncEnabled = course.canvasGradeSyncEnabled === true
 
   const persistCanvasGradeSync = useCallback(
@@ -110,6 +111,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       reportCardsEnabled?: boolean
       visualBoardsEnabled?: boolean
       interactiveQuizzesEnabled?: boolean
+      screenShareEnabled?: boolean
     }) => {
       setSaving(true)
       setMessage(null)
@@ -142,6 +144,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           reportCardsEnabled: patch.reportCardsEnabled ?? reportCardsEnabled,
           visualBoardsEnabled: patch.visualBoardsEnabled ?? visualBoardsEnabled,
           interactiveQuizzesEnabled: patch.interactiveQuizzesEnabled ?? interactiveQuizzesEnabled,
+          screenShareEnabled: patch.screenShareEnabled ?? screenShareEnabled,
         }
         const updated = await patchCourseFeatures(courseCode, body)
         onCourseUpdated(updated)
@@ -175,6 +178,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       reportCardsEnabled,
       visualBoardsEnabled,
       interactiveQuizzesEnabled,
+      screenShareEnabled,
       calendarEnabled,
       courseCode,
       feedEnabled,
@@ -242,6 +246,13 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
             'Host live, game-based quizzes with join codes and leaderboards. Build reusable quiz kits for whole-class play.',
           enabled: interactiveQuizzesEnabled,
           onToggle: () => void persist({ interactiveQuizzesEnabled: !interactiveQuizzesEnabled }),
+        },
+        {
+          label: 'Screen sharing',
+          description:
+            'Share an entire screen to the classroom display and classmates without a cable. Instructor controls who may present.',
+          enabled: screenShareEnabled,
+          onToggle: () => void persist({ screenShareEnabled: !screenShareEnabled }),
         },
         {
           label: 'Collaborative documents',
@@ -400,6 +411,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       reportCardsEnabled,
       visualBoardsEnabled,
       interactiveQuizzesEnabled,
+      screenShareEnabled,
       persist,
       persistCanvasGradeSync,
     ],

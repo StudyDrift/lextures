@@ -336,23 +336,23 @@ type Config struct {
 	// FFMotionDelight enables delight & progress moments (progress fills, quiz feedback, achievement bursts) (AN.7). Default ON; kill-switch.
 	FFMotionDelight bool
 	FFMotionControls bool
-	// FFMobileCreateCourse enables the mobile New course entry and basic create wizard (M11.5). Default OFF.
+	// FFMobileCreateCourse is always on (platform master removed). Mobile New course / create wizard.
 	FFMobileCreateCourse bool
-	// FFMobileCourseCreateV2 enables mobile create-wizard parity: competency builder, Canvas entry, drafts (MOB.1). Default OFF.
+	// FFMobileCourseCreateV2 is always on (collapsed into create-course; platform master removed).
 	FFMobileCourseCreateV2 bool
-	// FFMobileCanvasImport enables the mobile Canvas course import wizard (MOB.2). Default OFF.
+	// FFMobileCanvasImport is always on (platform master removed). Mobile Canvas import wizard.
 	FFMobileCanvasImport bool
-	// FFMobileAdminConsole enables the mobile Settings/Admin hub (grouped menu + audit log) (MOB.3). Default OFF.
+	// FFMobileAdminConsole is always on (platform master removed). Mobile Settings/Admin hub.
 	FFMobileAdminConsole bool
-	// FFMobileEnrollmentAdd enables adding course enrollments from the mobile People roster (MOB.4). Default OFF.
+	// FFMobileEnrollmentAdd is always on (platform master removed). Mobile People roster add.
 	FFMobileEnrollmentAdd bool
-	// FFMobileLiveQuiz enables interactive live quizzes on iOS and Android (MOB.5). Default OFF.
+	// FFMobileLiveQuiz is always on (platform master removed). Interactive live quizzes on mobile.
 	FFMobileLiveQuiz bool
-	// FFMobileWhiteboardEdit enables course whiteboard authoring on iOS and Android (MOB.6). Default OFF.
+	// FFMobileWhiteboardEdit is always on (platform master removed). Course whiteboard authoring on mobile.
 	FFMobileWhiteboardEdit bool
-	// FFMobileMarketplacePurchase enables in-app marketplace claim/buy + Purchased courses (MOB.7). Default OFF.
+	// FFMobileMarketplacePurchase is always on (platform master removed). Mobile marketplace claim/buy.
 	FFMobileMarketplacePurchase bool
-	// FFMobileBoardsAdvanced enables board templates/export/present/governance on iOS and Android (MOB.8). Default OFF.
+	// FFMobileBoardsAdvanced is always on (platform master removed). Board templates/export/present/governance.
 	FFMobileBoardsAdvanced bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
@@ -515,8 +515,8 @@ type Config struct {
 	// Distinct from FFMarketplace (plugin/OAuth app marketplace, plan 16.9). Default ON.
 	// Managed in Settings → Global platform (not process env).
 	FFCourseMarketplace bool
-	// FFFeedback enables in-app product feedback submission (plan FB0). Default ON.
-	// Managed in Settings → Global platform (not process env).
+	// FFFeedback is always on (platform master removed). In-app product feedback (plan FB0).
+	// Retained for API compatibility with platform settings payloads.
 	FFFeedback bool
 	// FFVisualBoards is deprecated (always on). Collaboration boards are gated only by the
 	// per-course visual_boards_enabled flag. Retained for API compatibility with platform settings payloads.
@@ -529,6 +529,15 @@ type Config struct {
 	// FFInteractiveQuizzes is always treated as on; Live Quizzes are gated only by per-course
 	// interactive_quizzes_enabled (platform master switch removed). Kept for API compatibility.
 	FFInteractiveQuizzes bool
+	// ScreenShareEnabled is the platform master switch for cableless screen sharing (SS.1). Default OFF.
+	// Both this and the per-course screen_share_enabled flag must be on.
+	ScreenShareEnabled bool
+	// TURNSharedSecret is the coturn REST shared secret for ephemeral ICE credentials (SS.1 FR-11).
+	// Env: TURN_SHARED_SECRET. Session create is refused when empty (turn-not-ready).
+	TURNSharedSecret string
+	// TURNURLs are ICE server URLs (stun/turn/turns), comma-separated via TURN_URLS.
+	// Example: stun:localhost:3478,turn:localhost:3478?transport=udp,turn:localhost:443?transport=tcp
+	TURNURLs []string
 	// FFIqLiveHosting enables the live game hosting engine / WebSocket hub (plan IQ.3). Default ON.
 	// Requires per-course interactive_quizzes_enabled. Can still be turned off in platform settings.
 	FFIqLiveHosting bool
@@ -979,6 +988,9 @@ func Load() Config {
 		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
 
 		RedisURL:            firstNonEmptyTrimmed("REDIS_URL"),
+
+		TURNSharedSecret: firstNonEmptyTrimmed("TURN_SHARED_SECRET"),
+		TURNURLs:         commaSeparatedEnv("TURN_URLS"),
 		RedisPoolMin:        intEnvDefault("REDIS_POOL_MIN", redisclient.DefaultPoolMin),
 		RedisPoolMax:        intEnvDefault("REDIS_POOL_MAX", redisclient.DefaultPoolMax),
 		RateLimits:          rateLimitsFromEnv(),

@@ -40,6 +40,7 @@ struct GlobalDrawer: View {
                             }
                         }
                     }
+                    adminSection
                 }
                 .padding(.horizontal, 10)
                 .padding(.bottom, 24)
@@ -47,6 +48,45 @@ struct GlobalDrawer: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea())
+    }
+
+    /// Global admin actions that live outside the role-aware nav groups: create a
+    /// course and open the Settings/Admin hub. Each row inherits the same RBAC +
+    /// feature-flag gating used by its in-app entry point, so it only appears when
+    /// the signed-in user can actually reach it.
+    @ViewBuilder
+    private var adminSection: some View {
+        let showNewCourse = CourseCreateLogic.shouldShowNewCourseAction(
+            permissions: shell.permissions,
+            features: shell.platformFeatures,
+            isOnline: NetworkMonitor.shared.isOnline
+        )
+        let showHub = SettingsMenuLogic.shouldShowHubEntry(
+            features: shell.platformFeatures,
+            permissions: shell.permissions
+        )
+        if showNewCourse || showHub {
+            DrawerGroupHeader(title: L.text("mobile.drawer.group.manage"))
+            if showNewCourse {
+                DrawerRow(
+                    label: L.text("mobile.createCourse.title"),
+                    systemImage: "plus.circle",
+                    uiMode: uiMode
+                ) {
+                    shell.requestNewCourse()
+                }
+            }
+            if showHub {
+                DrawerRow(
+                    label: L.text("mobile.settings.menu.title"),
+                    systemImage: "slider.horizontal.3",
+                    uiMode: uiMode
+                ) {
+                    shell.closeDrawer()
+                    shell.openDeepLink(.settings(.adminHub))
+                }
+            }
+        }
     }
 
     @ViewBuilder

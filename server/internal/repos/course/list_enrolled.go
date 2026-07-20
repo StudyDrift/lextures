@@ -73,6 +73,7 @@ type CoursePublic struct {
 	ReportCardsEnabled            bool             `json:"reportCardsEnabled"`
 	VisualBoardsEnabled           bool             `json:"visualBoardsEnabled"`
 	InteractiveQuizzesEnabled     bool             `json:"interactiveQuizzesEnabled"`
+	ScreenShareEnabled            bool             `json:"screenShareEnabled"`
 	CanvasGradeSyncEnabled        bool             `json:"canvasGradeSyncEnabled"`
 	RequireCaptions               bool             `json:"requireCaptions"`
 	CourseType                    string           `json:"courseType"`
@@ -157,6 +158,7 @@ const coursePublicSelect = `
     c.report_cards_enabled,
     c.visual_boards_enabled,
     c.interactive_quizzes_enabled,
+    c.screen_share_enabled,
     c.canvas_grade_sync_enabled,
     c.require_captions,
     c.course_type,
@@ -256,6 +258,7 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 		&p.ReportCardsEnabled,
 		&p.VisualBoardsEnabled,
 		&p.InteractiveQuizzesEnabled,
+		&p.ScreenShareEnabled,
 		&p.CanvasGradeSyncEnabled,
 		&p.RequireCaptions,
 		&p.CourseType,

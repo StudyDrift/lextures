@@ -169,6 +169,7 @@ type platformSettingsJSON struct {
 	FFBoardsRealtime                   bool `json:"ffBoardsRealtime"`
 	FFBoardsExternalSharing            bool `json:"ffBoardsExternalSharing"`
 	FFInteractiveQuizzes               bool `json:"ffInteractiveQuizzes"`
+	ScreenShareEnabled                 bool `json:"screenShareEnabled"`
 	FFIqLiveHosting                    bool `json:"ffIqLiveHosting"`
 	FFIqTeamMode                       bool `json:"ffIqTeamMode"`
 	FFIqStudentPaced                   bool `json:"ffIqStudentPaced"`
@@ -442,6 +443,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFBoardsRealtime:                   merged.FFBoardsRealtime,
 			FFBoardsExternalSharing:            merged.FFBoardsExternalSharing,
 			FFInteractiveQuizzes:               merged.FFInteractiveQuizzes,
+			ScreenShareEnabled:                 merged.ScreenShareEnabled,
 			FFIqLiveHosting:                    merged.FFIqLiveHosting,
 			FFIqTeamMode:                       merged.FFIqTeamMode,
 			FFIqStudentPaced:                   merged.FFIqStudentPaced,
@@ -687,6 +689,7 @@ type putPlatformBody struct {
 	FFBoardsRealtime                   *bool `json:"ffBoardsRealtime"`
 	FFBoardsExternalSharing            *bool `json:"ffBoardsExternalSharing"`
 	FFInteractiveQuizzes               *bool `json:"ffInteractiveQuizzes"`
+	ScreenShareEnabled                 *bool `json:"screenShareEnabled"`
 	FFIqLiveHosting                    *bool `json:"ffIqLiveHosting"`
 	FFIqTeamMode                       *bool `json:"ffIqTeamMode"`
 	FFIqStudentPaced                   *bool `json:"ffIqStudentPaced"`
@@ -1136,9 +1139,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffselfpacedmode", body.FFSelfPacedMode, func(v bool) { wr.FFSelfPacedMode = &v })
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffcoursemarketplace", body.FFCourseMarketplace, func(v bool) { wr.FFCourseMarketplace = &v })
-		setBool("fffeedback", body.FFFeedback, func(v bool) { wr.FFFeedback = &v })
-		// ffVisualBoards / ffInteractiveQuizzes and collapsed IQ mode flags are always-on at
-		// platform level; ignore PUT writes (Merge hard-wires effective values).
+		// ffFeedback, mobile parity flags, ffVisualBoards / ffInteractiveQuizzes, and collapsed
+		// IQ mode flags are always-on at platform level; ignore PUT writes (Merge hard-wires).
 		setBool("ffboardsrealtime", body.FFBoardsRealtime, func(v bool) { wr.FFBoardsRealtime = &v })
 		setBool("ffboardsexternalsharing", body.FFBoardsExternalSharing, func(v bool) { wr.FFBoardsExternalSharing = &v })
 		setBool("ffiqpublickitcatalog", body.FFIqPublicKitCatalog, func(v bool) { wr.FFIqPublicKitCatalog = &v })
@@ -1188,20 +1190,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffmotionoverlays", body.FFMotionOverlays, setMotion)
 		setBool("ffmotioncontrols", body.FFMotionControls, setMotion)
 		setBool("ffmotiondelight", body.FFMotionDelight, setMotion)
-		setMobileCreate := func(v bool) {
-			wr.FFMobileCreateCourse = &v
-			wr.FFMobileCourseCreateV2 = &v
-		}
-		setBool("ffmobilecreatecourse", body.FFMobileCreateCourse, setMobileCreate)
-		setBool("ffmobilecoursecreatev2", body.FFMobileCourseCreateV2, setMobileCreate)
-		setBool("ffmobilecanvasimport", body.FFMobileCanvasImport, func(v bool) { wr.FFMobileCanvasImport = &v })
-		setBool("ffmobileadminconsole", body.FFMobileAdminConsole, func(v bool) { wr.FFMobileAdminConsole = &v })
-		setBool("ffmobileenrollmentadd", body.FFMobileEnrollmentAdd, func(v bool) { wr.FFMobileEnrollmentAdd = &v })
-		setBool("ffmobilelivequiz", body.FFMobileLiveQuiz, func(v bool) { wr.FFMobileLiveQuiz = &v })
-		setBool("ffmobilewhiteboardedit", body.FFMobileWhiteboardEdit, func(v bool) { wr.FFMobileWhiteboardEdit = &v })
-		setBool("ffmobilemarketplacepurchase", body.FFMobileMarketplacePurchase, func(v bool) { wr.FFMobileMarketplacePurchase = &v })
-		setBool("ffmobileboardsadvanced", body.FFMobileBoardsAdvanced, func(v bool) { wr.FFMobileBoardsAdvanced = &v })
 		setBool("ffclassroomsignals", body.FFClassroomSignals, func(v bool) { wr.FFClassroomSignals = &v })
+		setBool("screenshareenabled", body.ScreenShareEnabled, func(v bool) { wr.FFScreenShare = &v })
 		setBool("fflibraryintegration", body.FFLibraryIntegration, func(v bool) { wr.FFLibraryIntegration = &v })
 		setBool("diagnosticassessmentsenabled", body.DiagnosticAssessmentsEnabled, func(v bool) { wr.DiagnosticAssessmentsEnabled = &v })
 		setBool("srspracticeenabled", body.SRSPracticeEnabled, func(v bool) { wr.SRSPracticeEnabled = &v })
@@ -1388,6 +1378,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFBoardsRealtime:                   merged.FFBoardsRealtime,
 			FFBoardsExternalSharing:            merged.FFBoardsExternalSharing,
 			FFInteractiveQuizzes:               merged.FFInteractiveQuizzes,
+			ScreenShareEnabled:                 merged.ScreenShareEnabled,
 			FFIqLiveHosting:                    merged.FFIqLiveHosting,
 			FFIqTeamMode:                       merged.FFIqTeamMode,
 			FFIqStudentPaced:                   merged.FFIqStudentPaced,

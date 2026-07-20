@@ -114,25 +114,18 @@ final class MobileDestinationsTests: XCTestCase {
         XCTAssertEqual(CourseWorkspaceSection.from(deepLink: .liveQuizzes), .liveQuizzes)
     }
 
-    func testPlatformFeaturesMapsMobileWhiteboardEdit() {
+    func testPlatformFeaturesMapsMobileParityFlagsAlwaysOn() {
         var raw = PlatformFeatures()
-        raw.ffMobileWhiteboardEdit = true
-        XCTAssertTrue(MobilePlatformFeatures.from(raw).ffMobileWhiteboardEdit)
         raw.ffMobileWhiteboardEdit = false
-        XCTAssertFalse(MobilePlatformFeatures.from(raw).ffMobileWhiteboardEdit)
-        XCTAssertFalse(MobilePlatformFeatures.from(nil).ffMobileWhiteboardEdit)
-
-        raw.ffMobileMarketplacePurchase = true
-        XCTAssertTrue(MobilePlatformFeatures.from(raw).ffMobileMarketplacePurchase)
         raw.ffMobileMarketplacePurchase = false
-        XCTAssertFalse(MobilePlatformFeatures.from(raw).ffMobileMarketplacePurchase)
-        XCTAssertFalse(MobilePlatformFeatures.from(nil).ffMobileMarketplacePurchase)
-
-        raw.ffMobileBoardsAdvanced = true
-        XCTAssertTrue(MobilePlatformFeatures.from(raw).ffMobileBoardsAdvanced)
         raw.ffMobileBoardsAdvanced = false
-        XCTAssertFalse(MobilePlatformFeatures.from(raw).ffMobileBoardsAdvanced)
-        XCTAssertFalse(MobilePlatformFeatures.from(nil).ffMobileBoardsAdvanced)
+        let mapped = MobilePlatformFeatures.from(raw)
+        XCTAssertTrue(mapped.ffMobileWhiteboardEdit)
+        XCTAssertTrue(mapped.ffMobileMarketplacePurchase)
+        XCTAssertTrue(mapped.ffMobileBoardsAdvanced)
+        XCTAssertTrue(MobilePlatformFeatures.from(nil).ffMobileWhiteboardEdit)
+        XCTAssertTrue(MobilePlatformFeatures.from(nil).ffMobileMarketplacePurchase)
+        XCTAssertTrue(MobilePlatformFeatures.from(nil).ffMobileBoardsAdvanced)
     }
 
     func testCourseWorkspaceHidesDisabledFeatures() {

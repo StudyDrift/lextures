@@ -1,8 +1,7 @@
 /**
  * MOB.4 — Mobile enrollment add API parity
  *
- *   [x] Platform features exposes ffMobileEnrollmentAdd (default off)
- *   [x] Admin can enable ffMobileEnrollmentAdd via settings/platform
+ *   [x] Platform features exposes ffMobileEnrollmentAdd (always on)
  *   [x] Instructor with enrollments:update can POST enrollments when authorized
  *   [x] Student cannot add enrollments (403)
  */
@@ -46,18 +45,7 @@ async function bootstrapGlobalAdmin(email: string) {
   })
 }
 
-async function enableMobileEnrollmentAdd(token: string) {
-  const res = await fetch(`${API_BASE}/api/v1/settings/platform`, {
-    method: 'PUT',
-    headers: authHeaders(token),
-    body: JSON.stringify({ ffMobileEnrollmentAdd: true }),
-  })
-  if (!res.ok) {
-    test.skip(true, `could not enable mobile enrollment add: ${await res.text()}`)
-  }
-}
-
-test('MOB.4 features: ffMobileEnrollmentAdd defaults off then enables', async () => {
+test('MOB.4 features: ffMobileEnrollmentAdd is always on', async () => {
   const email = uniqueEmail('mob4-admin')
   await apiSignup({ email, password: PASSWORD })
   try {
@@ -67,22 +55,12 @@ test('MOB.4 features: ffMobileEnrollmentAdd defaults off then enables', async ()
   }
   const { access_token: token } = await apiLogin(email)
 
-  const beforeRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
+  const res = await fetch(`${API_BASE}/api/v1/platform/features`, {
     headers: authHeaders(token),
   })
-  expect(beforeRes.ok).toBeTruthy()
-  const before = (await beforeRes.json()) as { ffMobileEnrollmentAdd?: boolean }
-  // Flag may already be on in a shared e2e DB; just assert the field is present/boolean.
-  expect(typeof before.ffMobileEnrollmentAdd === 'boolean').toBeTruthy()
-
-  await enableMobileEnrollmentAdd(token)
-
-  const afterRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
-    headers: authHeaders(token),
-  })
-  expect(afterRes.ok).toBeTruthy()
-  const after = (await afterRes.json()) as { ffMobileEnrollmentAdd?: boolean }
-  expect(after.ffMobileEnrollmentAdd).toBe(true)
+  expect(res.ok).toBeTruthy()
+  const features = (await res.json()) as { ffMobileEnrollmentAdd?: boolean }
+  expect(features.ffMobileEnrollmentAdd).toBe(true)
 })
 
 test('MOB.4 enrollments: student cannot POST course enrollments', async () => {

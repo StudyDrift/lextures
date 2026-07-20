@@ -112,6 +112,8 @@ export default function App() {
               <Route path="live-quizzes" element={<Pages.LiveQuizKitsPage />} />
               <Route path="live-quizzes/library" element={<Pages.LiveQuizLibraryPage />} />
               <Route path="live-quizzes/games/:gameId/present" element={<Pages.LiveQuizPresentPage />} />
+              <Route path="screen-share" element={<Pages.ScreenSharePage />} />
+              <Route path="screen-share/:sessionId/present" element={<Pages.ScreenSharePresentPage />} />
               <Route path="live-quizzes/games/:gameId/report" element={<Pages.LiveQuizReportPage />} />
               <Route path="live-quizzes/games/:gameId/my-results" element={<Pages.LiveQuizMyResultsPage />} />
               <Route path="live-quizzes/games/:gameId" element={<Pages.LiveQuizHostPage />} />

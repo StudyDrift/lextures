@@ -613,7 +613,14 @@ export const FEATURE_LIFECYCLE_FAMILIES: readonly LifecycleFamily[] = [
     priority: 2,
     shard: 'priority2',
     linkedHappyPathSpecs: [],
-    masterFlags: [{ kind: 'platform', key: 'ffFeedback' }],
+    masterFlags: [
+      {
+        kind: 'platform',
+        key: 'ffFeedback',
+        alwaysOn: true,
+        notes: 'Platform master is always-on in merge; product feedback cannot be disabled via settings',
+      },
+    ],
     children: [],
     edges: [],
     probes: [
@@ -625,7 +632,14 @@ export const FEATURE_LIFECYCLE_FAMILIES: readonly LifecycleFamily[] = [
         authDisabledStatus: 404,
         unauthContract: 'feature-first',
         unauthDisabledStatus: 404,
-        gatedBy: [{ kind: 'platform', key: 'ffFeedback' }],
+        gatedBy: [
+          {
+            kind: 'platform',
+            key: 'ffFeedback',
+            alwaysOn: true,
+            notes: 'Always-on; disable assertions skipped',
+          },
+        ],
         requiresRole: 'any',
       },
     ],
@@ -827,7 +841,14 @@ export const FEATURE_LIFECYCLE_FAMILIES: readonly LifecycleFamily[] = [
     priority: 2,
     shard: 'priority2',
     linkedHappyPathSpecs: [],
-    masterFlags: [{ kind: 'platform', key: 'ffFeedback' }],
+    masterFlags: [
+      {
+        kind: 'platform',
+        key: 'ffFeedback',
+        alwaysOn: true,
+        notes: 'Representative probe reuses always-on feedback endpoint; course evaluations have a separate flag',
+      },
+    ],
     children: [],
     edges: [],
     probes: [
@@ -839,7 +860,14 @@ export const FEATURE_LIFECYCLE_FAMILIES: readonly LifecycleFamily[] = [
         authDisabledStatus: 404,
         unauthContract: 'feature-first',
         unauthDisabledStatus: 404,
-        gatedBy: [{ kind: 'platform', key: 'ffFeedback' }],
+        gatedBy: [
+          {
+            kind: 'platform',
+            key: 'ffFeedback',
+            alwaysOn: true,
+            notes: 'Always-on; disable assertions skipped',
+          },
+        ],
         requiresRole: 'any',
       },
     ],

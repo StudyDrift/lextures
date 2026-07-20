@@ -1,8 +1,7 @@
 /**
  * MOB.8 — Mobile collaboration boards advanced API parity
  *
- *   [x] Platform features exposes ffMobileBoardsAdvanced (default off)
- *   [x] Admin can enable ffMobileBoardsAdvanced via settings/platform
+ *   [x] Platform features exposes ffMobileBoardsAdvanced (always on)
  *   [x] Staff can list templates → create from template → save as template
  *   [x] Staff can export a board (job → content)
  *   [x] Admin boards policies/overview require authz
@@ -80,7 +79,7 @@ async function enableCourseVisualBoards(token: string, courseCode: string) {
   }
 }
 
-test('MOB.8 features: ffMobileBoardsAdvanced defaults off then enables', async () => {
+test('MOB.8 features: ffMobileBoardsAdvanced is always on', async () => {
   const email = uniqueEmail('mob8-admin')
   await apiSignup({ email, password: PASSWORD })
   try {
@@ -90,21 +89,12 @@ test('MOB.8 features: ffMobileBoardsAdvanced defaults off then enables', async (
   }
   const { access_token: token } = await apiLogin(email)
 
-  const beforeRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
+  const res = await fetch(`${API_BASE}/api/v1/platform/features`, {
     headers: authHeaders(token),
   })
-  expect(beforeRes.ok).toBeTruthy()
-  const before = (await beforeRes.json()) as { ffMobileBoardsAdvanced?: boolean }
-  expect(typeof before.ffMobileBoardsAdvanced === 'boolean').toBeTruthy()
-
-  await enableMobileBoardsAdvanced(token)
-
-  const afterRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
-    headers: authHeaders(token),
-  })
-  expect(afterRes.ok).toBeTruthy()
-  const after = (await afterRes.json()) as { ffMobileBoardsAdvanced?: boolean }
-  expect(after.ffMobileBoardsAdvanced).toBe(true)
+  expect(res.ok).toBeTruthy()
+  const features = (await res.json()) as { ffMobileBoardsAdvanced?: boolean }
+  expect(features.ffMobileBoardsAdvanced).toBe(true)
 })
 
 test('MOB.8 boards: templates create/save and export job', async () => {

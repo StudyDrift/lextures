@@ -41,6 +41,7 @@ type NavFeatureFlags = Pick<
   | 'reportCardsEnabled'
   | 'visualBoardsEnabled'
   | 'interactiveQuizzesEnabled'
+  | 'screenShareEnabled'
 >
 
 export function navFeaturesToSearchCourse(
@@ -68,6 +69,7 @@ export function navFeaturesToSearchCourse(
     reportCardsEnabled: nav.reportCardsEnabled,
     visualBoardsEnabled: nav.visualBoardsEnabled,
     interactiveQuizzesEnabled: nav.interactiveQuizzesEnabled,
+    screenShareEnabled: nav.screenShareEnabled,
   })
 }
 

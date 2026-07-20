@@ -118,6 +118,10 @@ struct CoursesListView: View {
                 )
             }
             .task { await load() }
+            .onAppear { presentPendingCourseCreateIfNeeded() }
+            .onChange(of: shell.pendingCourseCreate) { _, pending in
+                if pending { presentPendingCourseCreateIfNeeded() }
+            }
             .onChange(of: realtime.coursesRevision) { _, _ in
                 Task { await load(force: true) }
             }
@@ -134,6 +138,14 @@ struct CoursesListView: View {
                 }
             }
         }
+    }
+
+    /// Presents the create sheet when the global drawer requested a new course.
+    /// Guarded by `canCreateCourse` so a stale flag (e.g. went offline) is dropped.
+    private func presentPendingCourseCreateIfNeeded() {
+        guard shell.consumePendingCourseCreate() else { return }
+        guard canCreateCourse else { return }
+        showCreateCourse = true
     }
 
     private func mapSection(_ section: CourseDeepLinkSection?) -> CourseWorkspaceSection? {

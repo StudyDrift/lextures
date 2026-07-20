@@ -422,15 +422,15 @@ struct MobilePlatformFeatures: Equatable {
     var studentProgressEnabled = true
     var ffMobileInstructorInsights = true
     var ffMobileCourseSettings = false
-    var ffMobileCreateCourse = false
-    var ffMobileCourseCreateV2 = false
-    var ffMobileCanvasImport = false
-    var ffMobileAdminConsole = false
-    var ffMobileEnrollmentAdd = false
-    var ffMobileLiveQuiz = false
-    var ffMobileWhiteboardEdit = false
-    var ffMobileMarketplacePurchase = false
-    var ffMobileBoardsAdvanced = false
+    var ffMobileCreateCourse = true
+    var ffMobileCourseCreateV2 = true
+    var ffMobileCanvasImport = true
+    var ffMobileAdminConsole = true
+    var ffMobileEnrollmentAdd = true
+    var ffMobileLiveQuiz = true
+    var ffMobileWhiteboardEdit = true
+    var ffMobileMarketplacePurchase = true
+    var ffMobileBoardsAdvanced = true
     var ffEnrollmentStateMachine = false
     var adminConsoleEnabled = false
     var adminAuditLogEnabled = true
@@ -509,15 +509,15 @@ struct MobilePlatformFeatures: Equatable {
             studentProgressEnabled: features?.studentProgressEnabled != false,
             ffMobileInstructorInsights: features?.ffMobileInstructorInsights != false,
             ffMobileCourseSettings: features?.ffMobileCourseSettings == true,
-            ffMobileCreateCourse: features?.ffMobileCreateCourse == true,
-            ffMobileCourseCreateV2: features?.ffMobileCourseCreateV2 == true,
-            ffMobileCanvasImport: features?.ffMobileCanvasImport == true,
-            ffMobileAdminConsole: features?.ffMobileAdminConsole == true,
-            ffMobileEnrollmentAdd: features?.ffMobileEnrollmentAdd == true,
-            ffMobileLiveQuiz: features?.ffMobileLiveQuiz == true,
-            ffMobileWhiteboardEdit: features?.ffMobileWhiteboardEdit == true,
-            ffMobileMarketplacePurchase: features?.ffMobileMarketplacePurchase == true,
-            ffMobileBoardsAdvanced: features?.ffMobileBoardsAdvanced == true,
+            ffMobileCreateCourse: true,
+            ffMobileCourseCreateV2: true,
+            ffMobileCanvasImport: true,
+            ffMobileAdminConsole: true,
+            ffMobileEnrollmentAdd: true,
+            ffMobileLiveQuiz: true,
+            ffMobileWhiteboardEdit: true,
+            ffMobileMarketplacePurchase: true,
+            ffMobileBoardsAdvanced: true,
             ffEnrollmentStateMachine: features?.ffEnrollmentStateMachine == true,
             adminConsoleEnabled: features?.adminConsoleEnabled == true,
             adminAuditLogEnabled: features?.adminAuditLogEnabled != false,
@@ -532,7 +532,7 @@ struct MobilePlatformFeatures: Equatable {
             ffCalendarFeeds: features?.ffCalendarFeeds != false,
             ffMobileSettingsIntegrations: features?.ffMobileSettingsIntegrations == true,
             ffMobileAdminSettings: features?.ffMobileAdminSettings == true,
-            ffFeedback: features?.ffFeedback != false
+            ffFeedback: true
         )
     }
 

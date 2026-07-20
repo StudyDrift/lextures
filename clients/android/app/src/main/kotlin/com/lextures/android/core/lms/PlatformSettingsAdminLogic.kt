@@ -7,7 +7,6 @@ object PlatformSettingsAdminLogic {
 
     /** Incident-safe allowlist; identity, infrastructure, billing, and self-lockout flags stay web-only. */
     val FEATURE_DEFINITIONS = listOf(
-        definition("ffFeedback", "feedback"),
         definition("ffPublicCatalog", "publicCatalog"),
         definition("ffCourseMarketplace", "courseMarketplace"),
         definition("ffLearningPaths", "learningPaths"),
@@ -39,7 +38,6 @@ object PlatformSettingsAdminLogic {
         adminSettingsEnabled(features) && canManage(permissions)
 
     fun value(key: String, settings: PlatformSettingsSnapshot): Boolean = when (key) {
-        "ffFeedback" -> settings.ffFeedback
         "ffPublicCatalog" -> settings.ffPublicCatalog
         "ffCourseMarketplace" -> settings.ffCourseMarketplace
         "ffLearningPaths" -> settings.ffLearningPaths
@@ -58,7 +56,6 @@ object PlatformSettingsAdminLogic {
         features: PlatformFeatureStates,
         settings: PlatformSettingsSnapshot,
     ): PlatformSettingsSnapshot = settings.copy(
-        ffFeedback = features.ffFeedback,
         ffPublicCatalog = features.ffPublicCatalog,
         ffCourseMarketplace = features.ffCourseMarketplace,
         ffLearningPaths = features.ffLearningPaths,

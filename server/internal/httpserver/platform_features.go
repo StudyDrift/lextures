@@ -112,6 +112,7 @@ type platformFeaturesJSON struct {
 	FFBoardsRealtime                   bool `json:"ffBoardsRealtime"`
 	FFBoardsExternalSharing            bool `json:"ffBoardsExternalSharing"`
 	FFInteractiveQuizzes               bool `json:"ffInteractiveQuizzes"`
+	ScreenShareEnabled                 bool `json:"screenShareEnabled"`
 	FFIqLiveHosting                    bool `json:"ffIqLiveHosting"`
 	FFIqTeamMode                       bool `json:"ffIqTeamMode"`
 	FFIqStudentPaced                   bool `json:"ffIqStudentPaced"`
@@ -276,6 +277,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFBoardsRealtime:                   cfg.FFBoardsRealtime,
 		FFBoardsExternalSharing:            cfg.FFBoardsExternalSharing,
 		FFInteractiveQuizzes:               cfg.FFInteractiveQuizzes,
+		ScreenShareEnabled:                 cfg.ScreenShareEnabled,
 		FFIqLiveHosting:                    cfg.FFIqLiveHosting,
 		FFIqTeamMode:                       cfg.FFIqTeamMode,
 		FFIqStudentPaced:                   cfg.FFIqStudentPaced,

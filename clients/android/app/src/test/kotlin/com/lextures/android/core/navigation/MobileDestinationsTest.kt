@@ -107,24 +107,19 @@ class MobileDestinationsTest {
     }
 
     @Test
-    fun platformFeaturesMapsMobileWhiteboardEdit() {
-        val on = PlatformFeatures(ffMobileWhiteboardEdit = true)
-        val off = PlatformFeatures(ffMobileWhiteboardEdit = false)
-        assertTrue(MobilePlatformFeatures.from(on).ffMobileWhiteboardEdit)
-        assertFalse(MobilePlatformFeatures.from(off).ffMobileWhiteboardEdit)
-        assertFalse(MobilePlatformFeatures.from(null).ffMobileWhiteboardEdit)
-
-        val purchaseOn = PlatformFeatures(ffMobileMarketplacePurchase = true)
-        val purchaseOff = PlatformFeatures(ffMobileMarketplacePurchase = false)
-        assertTrue(MobilePlatformFeatures.from(purchaseOn).ffMobileMarketplacePurchase)
-        assertFalse(MobilePlatformFeatures.from(purchaseOff).ffMobileMarketplacePurchase)
-        assertFalse(MobilePlatformFeatures.from(null).ffMobileMarketplacePurchase)
-
-        val boardsOn = PlatformFeatures(ffMobileBoardsAdvanced = true)
-        val boardsOff = PlatformFeatures(ffMobileBoardsAdvanced = false)
-        assertTrue(MobilePlatformFeatures.from(boardsOn).ffMobileBoardsAdvanced)
-        assertFalse(MobilePlatformFeatures.from(boardsOff).ffMobileBoardsAdvanced)
-        assertFalse(MobilePlatformFeatures.from(null).ffMobileBoardsAdvanced)
+    fun platformFeaturesMapsMobileParityFlagsAlwaysOn() {
+        val off = PlatformFeatures(
+            ffMobileWhiteboardEdit = false,
+            ffMobileMarketplacePurchase = false,
+            ffMobileBoardsAdvanced = false,
+        )
+        val mapped = MobilePlatformFeatures.from(off)
+        assertTrue(mapped.ffMobileWhiteboardEdit)
+        assertTrue(mapped.ffMobileMarketplacePurchase)
+        assertTrue(mapped.ffMobileBoardsAdvanced)
+        assertTrue(MobilePlatformFeatures.from(null).ffMobileWhiteboardEdit)
+        assertTrue(MobilePlatformFeatures.from(null).ffMobileMarketplacePurchase)
+        assertTrue(MobilePlatformFeatures.from(null).ffMobileBoardsAdvanced)
     }
 
     @Test
