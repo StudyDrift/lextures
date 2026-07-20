@@ -373,4 +373,85 @@ extension View {
     func lxListDragLift(isDragging: Bool, enabled: Bool = true) -> some View {
         modifier(LXListDragLiftModifier(isDragging: isDragging, enabled: enabled))
     }
+
+    /// AN.5 — dialog enter (scale+fade bubble) / exit; reduced → fade only.
+    func lxDialog(enabled: Bool = true) -> some View {
+        modifier(LXDialogMotionModifier(enabled: enabled))
+    }
+
+    /// AN.5 — sheet/drawer presentation polish + interactive dismiss threshold helper.
+    func lxSheet(enabled: Bool = true) -> some View {
+        modifier(LXSheetMotionModifier(enabled: enabled))
+    }
+}
+
+// MARK: AN.5 — Overlay / surface motion
+
+enum LXOverlayMotion {
+    /// Drag past this fraction of sheet height dismisses (FR-2 / AC-2).
+    static let sheetDismissThreshold: CGFloat = 0.28
+
+    static func shouldDismissSheetDrag(
+        offset: CGFloat,
+        sheetHeight: CGFloat,
+        velocity: CGFloat = 0
+    ) -> Bool {
+        if sheetHeight <= 0 { return false }
+        if velocity > 800 { return true }
+        return offset / sheetHeight >= sheetDismissThreshold
+    }
+
+    static func dialogAnimation(reduceMotion: Bool, enabled: Bool) -> Animation? {
+        if !enabled { return nil }
+        if reduceMotion { return .easeOut(duration: LexturesMotion.instant) }
+        return LexturesMotion.bubble
+    }
+
+    static func sheetAnimation(reduceMotion: Bool, enabled: Bool, exiting: Bool = false) -> Animation? {
+        if !enabled { return nil }
+        if reduceMotion { return .easeOut(duration: LexturesMotion.instant) }
+        return exiting ? LexturesMotion.exit : LexturesMotion.bubble
+    }
+}
+
+private struct LXDialogMotionModifier: ViewModifier {
+    @Environment(\.lxReduceMotion) private var reduceMotion
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .transition(dialogTransition)
+            .animation(LXOverlayMotion.dialogAnimation(reduceMotion: reduceMotion, enabled: enabled), value: enabled)
+    }
+
+    private var dialogTransition: AnyTransition {
+        if !enabled { return .identity }
+        if reduceMotion { return .opacity }
+        return .asymmetric(
+            insertion: .opacity.combined(with: .scale(scale: LexturesMotion.enterScaleFrom)),
+            removal: .opacity.combined(with: .scale(scale: LexturesMotion.enterScaleFrom))
+        )
+    }
+}
+
+private struct LXSheetMotionModifier: ViewModifier {
+    @Environment(\.lxReduceMotion) private var reduceMotion
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .transition(sheetTransition)
+            .animation(LXOverlayMotion.sheetAnimation(reduceMotion: reduceMotion, enabled: enabled), value: enabled)
+            // Interactive dismiss remains platform-native; threshold documented for custom drags.
+            .presentationDragIndicator(enabled ? .visible : .automatic)
+    }
+
+    private var sheetTransition: AnyTransition {
+        if !enabled { return .identity }
+        if reduceMotion { return .opacity }
+        return .asymmetric(
+            insertion: .move(edge: .bottom).combined(with: .opacity),
+            removal: .move(edge: .bottom).combined(with: .opacity)
+        )
+    }
 }

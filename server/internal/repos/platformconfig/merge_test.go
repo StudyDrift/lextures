@@ -176,21 +176,21 @@ func TestMerge_VisualBoardsAlwaysOn(t *testing.T) {
 	}
 }
 
-// Motion kill-switches collapsed to FFMotionNavigation (Reveal/Lists follow).
+// Motion kill-switches collapsed to FFMotionNavigation (Reveal/Lists/Overlays follow).
 func TestMerge_FFMotionCollapsedKillSwitch(t *testing.T) {
 	got := Merge(config.Config{}, &Row{})
-	if !got.FFMotionNavigation || !got.FFMotionReveal || !got.FFMotionLists {
+	if !got.FFMotionNavigation || !got.FFMotionReveal || !got.FFMotionLists || !got.FFMotionOverlays {
 		t.Fatal("expected all motion flags true (default ON) when DB unset")
 	}
 	off := false
 	got = Merge(config.Config{}, &Row{FFMotionNavigation: &off})
-	if got.FFMotionNavigation || got.FFMotionReveal || got.FFMotionLists {
+	if got.FFMotionNavigation || got.FFMotionReveal || got.FFMotionLists || got.FFMotionOverlays {
 		t.Fatal("expected navigation kill-switch to disable all motion flags")
 	}
 	on := true
 	got = Merge(config.Config{}, &Row{FFMotionNavigation: &on, FFMotionReveal: &off})
-	if !got.FFMotionNavigation || !got.FFMotionReveal || !got.FFMotionLists {
-		t.Fatal("expected navigation master to fan out ON to reveal/lists")
+	if !got.FFMotionNavigation || !got.FFMotionReveal || !got.FFMotionLists || !got.FFMotionOverlays {
+		t.Fatal("expected navigation master to fan out ON to reveal/lists/overlays")
 	}
 }
 

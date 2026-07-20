@@ -72,6 +72,8 @@ struct IntroCompletionCelebrationSheet: View {
             .onAppear { IntroCourseObservability.recordCelebrationView() }
         }
         .presentationDetents([.medium, .large])
+        .lxSheet(enabled: shell.platformFeatures.ffMotionOverlays)
+        .lxDialog(enabled: shell.platformFeatures.ffMotionOverlays)
     }
 
     private var credentialAvailable: Bool {

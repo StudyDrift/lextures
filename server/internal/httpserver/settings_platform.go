@@ -211,6 +211,7 @@ type platformSettingsJSON struct {
 	FFMotionNavigation           bool    `json:"ffMotionNavigation"`
 	FFMotionReveal               bool    `json:"ffMotionReveal"`
 	FFMotionLists                bool    `json:"ffMotionLists"`
+	FFMotionOverlays             bool    `json:"ffMotionOverlays"`
 	FFMobileCreateCourse         bool    `json:"ffMobileCreateCourse"`
 	FFMobileCourseCreateV2       bool    `json:"ffMobileCourseCreateV2"`
 	FFMobileCanvasImport         bool    `json:"ffMobileCanvasImport"`
@@ -479,6 +480,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFMotionNavigation:                 merged.FFMotionNavigation,
 			FFMotionReveal:                     merged.FFMotionReveal,
 			FFMotionLists:                      merged.FFMotionLists,
+			FFMotionOverlays:                   merged.FFMotionOverlays,
 			FFMobileCreateCourse:               merged.FFMobileCreateCourse,
 			FFMobileCourseCreateV2:             merged.FFMobileCourseCreateV2,
 			FFMobileCanvasImport:               merged.FFMobileCanvasImport,
@@ -721,6 +723,7 @@ type putPlatformBody struct {
 	FFMotionNavigation           *bool    `json:"ffMotionNavigation"`
 	FFMotionReveal               *bool    `json:"ffMotionReveal"`
 	FFMotionLists                *bool    `json:"ffMotionLists"`
+	FFMotionOverlays             *bool    `json:"ffMotionOverlays"`
 	FFMobileCreateCourse         *bool    `json:"ffMobileCreateCourse"`
 	FFMobileCourseCreateV2       *bool    `json:"ffMobileCourseCreateV2"`
 	FFMobileCanvasImport         *bool    `json:"ffMobileCanvasImport"`
@@ -1166,10 +1169,12 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			wr.FFMotionNavigation = &v
 			wr.FFMotionReveal = &v
 			wr.FFMotionLists = &v
+			wr.FFMotionOverlays = &v
 		}
 		setBool("ffmotionnavigation", body.FFMotionNavigation, setMotion)
 		setBool("ffmotionreveal", body.FFMotionReveal, setMotion)
 		setBool("ffmotionlists", body.FFMotionLists, setMotion)
+		setBool("ffmotionoverlays", body.FFMotionOverlays, setMotion)
 		setMobileCreate := func(v bool) {
 			wr.FFMobileCreateCourse = &v
 			wr.FFMobileCourseCreateV2 = &v
@@ -1410,6 +1415,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFMotionNavigation:                 merged.FFMotionNavigation,
 			FFMotionReveal:                     merged.FFMotionReveal,
 			FFMotionLists:                      merged.FFMotionLists,
+			FFMotionOverlays:                   merged.FFMotionOverlays,
 			FFMobileCreateCourse:               merged.FFMobileCreateCourse,
 			FFMobileCourseCreateV2:             merged.FFMobileCourseCreateV2,
 			FFMobileCanvasImport:               merged.FFMobileCanvasImport,

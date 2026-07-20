@@ -747,7 +747,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffMotionNavigation',
     label: 'Motion / animation',
     description:
-      'Kill-switch for splash handoff, route/section transitions, load choreography, and list insert/remove/reorder motion. Turn off to disable all platform motion instantly (AN.2–AN.4).',
+      'Kill-switch for splash handoff, route/section transitions, load choreography, list insert/remove/reorder, and overlay enter/exit motion. Turn off to disable all platform motion instantly (AN.2–AN.5).',
     pack: 'accessibility',
   },
   {

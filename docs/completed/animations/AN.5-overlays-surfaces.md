@@ -1,6 +1,6 @@
 # AN.5 — Overlays & Surfaces (Modals, Sheets, Drawers, Toasts, Menus)
 
-> Implementation plan. Source: [docs/plan/animations/README.md](README.md) (Motion & Animation Polish initiative).
+> Completed implementation plan. Source: [docs/plan/animations/README.md](../../plan/animations/README.md) (Motion & Animation Polish initiative).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Motion & Animation Polish |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL — a few overlays animate (notifications drawer, tooltip keyframe); most modals/menus/toasts pop |
+| **Status (today)** | DONE — overlay state machine + `OverlaySurface` / `useOverlayPresence`, dialog/sheet/menu/toast/tooltip CSS, confirm + fullscreen shell + command palette + notifications drawer + sonner toaster adoption, iOS `.lxSheet`/`.lxDialog`, Android `lxSheet`/`lxDialog`, `ff_motion_overlays` kill-switch |
 | **Estimated effort** | S (1w)–M (2–4w) |
 | **Owner (proposed)** | Frontend Platform (web) + Mobile (iOS/Android) |
 | **Depends on** | AN.1 |
@@ -222,5 +222,5 @@ Not applicable.
   iOS `IntroCompletionCelebrationSheet` and `.sheet` sites, Android dialog/bottom-sheet sites.
 - Standards: WCAG 2.4.3 (Focus Order), 4.1.3 (Status Messages), 2.1.2 (No Keyboard Trap); Material 3
   "Dialogs / Bottom sheets"; Apple HIG "Sheets / Popovers / Alerts".
-- Related plans: [AN.1](../../completed/animations/AN.1-motion-foundation-tokens.md), [AN.2](../../completed/animations/AN.2-launch-navigation-transitions.md),
-  [AN.3](../../completed/animations/AN.3-load-choreography.md).
+- Related plans: [AN.1](AN.1-motion-foundation-tokens.md), [AN.2](AN.2-launch-navigation-transitions.md),
+  [AN.3](AN.3-load-choreography.md), [AN.4](AN.4-lists-collections-motion.md).

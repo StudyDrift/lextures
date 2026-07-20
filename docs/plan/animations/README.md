@@ -62,7 +62,7 @@ The full specification lives in **[AN.1](../../completed/animations/AN.1-motion-
 | **AN.2** | ~~App launch & navigation transitions~~ → [completed](../../completed/animations/AN.2-launch-navigation-transitions.md) | MAJOR | Splash, routes, screens, tabs | Done — splash handoff, route/section/tab transitions, `ff_motion_navigation` |
 | **AN.3** | ~~Load choreography: skeleton → content~~ → [completed](../../completed/animations/AN.3-load-choreography.md) | MAJOR | Every data-backed screen | Done — skeleton→content crossfade, staggered reveal, `ff_motion_reveal` |
 | **AN.4** | ~~Lists, grids & collection motion~~ → [completed](../../completed/animations/AN.4-lists-collections-motion.md) | MINOR | Every list/feed/board | Done — insert/remove/reorder, drag lift, `ff_motion_lists` |
-| **AN.5** | [Overlays & surfaces](AN.5-overlays-surfaces.md) | MINOR | Modals, sheets, drawers, toasts, menus | Spring-in/ease-out for dialogs, bottom sheets, drawers, toasts, popovers, tooltips, menus |
+| **AN.5** | ~~Overlays & surfaces~~ → [completed](../../completed/animations/AN.5-overlays-surfaces.md) | MINOR | Modals, sheets, drawers, toasts, menus | Done — dialog/sheet/menu/toast/tooltip enter-exit, `ff_motion_overlays` |
 | **AN.6** | [Micro-interactions & controls](AN.6-micro-interactions-controls.md) | MINOR | Every interactive control | Press/tap "bubble," toggle/checkbox/tab-indicator motion, input focus & validation, haptics |
 | **AN.7** | [Delight & progress moments](AN.7-delight-progress-moments.md) | MINOR | Gamification, quizzes, progress, mastery | Celebrations, streaks/badges/XP, quiz answer feedback, progress-ring & mastery fills |
 

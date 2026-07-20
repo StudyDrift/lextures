@@ -329,6 +329,7 @@ html.ui-mode-elementary {
   }
 }
 
+/* AN.5 — tooltip enter migrated to AN.1 tokens (FR-5). */
 @keyframes tooltip-in {
   from {
     opacity: 0;
@@ -341,7 +342,19 @@ html.ui-mode-elementary {
 }
 
 .tooltip-in {
-  animation: tooltip-in var(--dur-fast) var(--ease-standard) forwards;
+  animation: tooltip-in var(--dur-fast) var(--ease-standard) both;
+  animation-delay: var(--dur-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip-in {
+    animation: lx-motion-fade-in var(--dur-instant) linear both;
+    animation-delay: 0ms;
+  }
+}
+html.reduced-motion .tooltip-in {
+  animation: lx-motion-fade-in var(--dur-instant) linear both;
+  animation-delay: 0ms;
 }
 
 /* Helper classes for motion.enter / motion.bubbleIn (declarative). */
@@ -690,6 +703,336 @@ html.reduced-motion .lx-list-item-exit {
 }
 html.reduced-motion .lx-list-item-move {
   transition: none;
+}
+
+/*
+ * AN.5 — Overlay / surface motion (dialogs, sheets, drawers, menus, toasts, tooltips, scrim).
+ * Durations use --lx-overlay-duration when set by the presence hook; else AN.1 tokens.
+ */
+@keyframes lx-overlay-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(var(--motion-enter-scale));
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes lx-overlay-dialog-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(var(--motion-enter-scale));
+  }
+}
+@keyframes lx-overlay-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes lx-overlay-scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes lx-overlay-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(var(--motion-enter-scale));
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes lx-overlay-menu-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(var(--motion-enter-scale));
+  }
+}
+@keyframes lx-overlay-sheet-end-in {
+  from {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes lx-overlay-sheet-end-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+}
+@keyframes lx-overlay-sheet-start-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes lx-overlay-sheet-start-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes lx-overlay-sheet-bottom-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes lx-overlay-sheet-bottom-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes lx-overlay-sheet-top-in {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes lx-overlay-sheet-top-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+@keyframes lx-overlay-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes lx-overlay-toast-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes lx-overlay-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(calc(var(--motion-enter-translate) * -0.67));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+@keyframes lx-overlay-tooltip-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes lx-overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes lx-overlay-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.lx-overlay-fade-in {
+  animation: lx-overlay-fade-in var(--lx-overlay-duration, var(--dur-instant)) linear both;
+}
+.lx-overlay-fade-out {
+  animation: lx-overlay-fade-out var(--lx-overlay-duration, var(--dur-instant)) linear both;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.reduced-motion) .lx-overlay-dialog-in {
+    animation: lx-overlay-dialog-in var(--lx-overlay-duration, var(--dur-base)) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-dialog-out {
+    animation: lx-overlay-dialog-out var(--lx-overlay-duration, var(--dur-fast)) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-scrim-in {
+    animation: lx-overlay-scrim-in var(--lx-overlay-duration, var(--dur-base)) var(--ease-standard) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-scrim-out {
+    animation: lx-overlay-scrim-out var(--lx-overlay-duration, var(--dur-fast)) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-menu-in {
+    transform-origin: var(--lx-overlay-origin, top center);
+    animation: lx-overlay-menu-in var(--lx-overlay-duration, var(--dur-base)) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-menu-out {
+    transform-origin: var(--lx-overlay-origin, top center);
+    animation: lx-overlay-menu-out var(--lx-overlay-duration, var(--dur-fast)) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-sheet-end-in {
+    animation: lx-overlay-sheet-end-in var(--lx-overlay-duration, var(--dur-slow)) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-sheet-end-out {
+    animation: lx-overlay-sheet-end-out var(--lx-overlay-duration, var(--dur-fast)) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-sheet-start-in {
+    animation: lx-overlay-sheet-start-in var(--lx-overlay-duration, var(--dur-slow)) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-sheet-start-out {
+    animation: lx-overlay-sheet-start-out var(--lx-overlay-duration, var(--dur-fast)) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-sheet-bottom-in {
+    animation: lx-overlay-sheet-bottom-in var(--lx-overlay-duration, var(--dur-slow)) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-sheet-bottom-out {
+    animation: lx-overlay-sheet-bottom-out var(--lx-overlay-duration, var(--dur-fast)) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-sheet-top-in {
+    animation: lx-overlay-sheet-top-in var(--lx-overlay-duration, var(--dur-slow)) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-sheet-top-out {
+    animation: lx-overlay-sheet-top-out var(--lx-overlay-duration, var(--dur-fast)) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-toast-in {
+    animation: lx-overlay-toast-in var(--lx-overlay-duration, var(--dur-base)) var(--ease-bubble) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-toast-out {
+    animation: lx-overlay-toast-out var(--lx-overlay-duration, var(--dur-fast)) var(--ease-exit) both;
+  }
+  html:not(.reduced-motion) .lx-overlay-tooltip-in {
+    animation: lx-overlay-tooltip-in var(--lx-overlay-duration, var(--dur-fast)) var(--ease-standard) both;
+    animation-delay: var(--dur-fast);
+  }
+  html:not(.reduced-motion) .lx-overlay-tooltip-out {
+    animation: lx-overlay-tooltip-out var(--lx-overlay-duration, var(--dur-instant)) linear both;
+  }
+
+  html:not(.reduced-motion)[dir='rtl'] .lx-overlay-sheet-end-in {
+    animation-name: lx-overlay-sheet-start-in;
+  }
+  html:not(.reduced-motion)[dir='rtl'] .lx-overlay-sheet-end-out {
+    animation-name: lx-overlay-sheet-start-out;
+  }
+  html:not(.reduced-motion)[dir='rtl'] .lx-overlay-sheet-start-in {
+    animation-name: lx-overlay-sheet-end-in;
+  }
+  html:not(.reduced-motion)[dir='rtl'] .lx-overlay-sheet-start-out {
+    animation-name: lx-overlay-sheet-end-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-overlay-dialog-in,
+  .lx-overlay-sheet-end-in,
+  .lx-overlay-sheet-start-in,
+  .lx-overlay-sheet-bottom-in,
+  .lx-overlay-sheet-top-in,
+  .lx-overlay-menu-in,
+  .lx-overlay-toast-in,
+  .lx-overlay-tooltip-in,
+  .lx-overlay-scrim-in {
+    animation: lx-overlay-fade-in var(--dur-instant) linear both;
+  }
+  .lx-overlay-dialog-out,
+  .lx-overlay-sheet-end-out,
+  .lx-overlay-sheet-start-out,
+  .lx-overlay-sheet-bottom-out,
+  .lx-overlay-sheet-top-out,
+  .lx-overlay-menu-out,
+  .lx-overlay-toast-out,
+  .lx-overlay-tooltip-out,
+  .lx-overlay-scrim-out {
+    animation: lx-overlay-fade-out var(--dur-instant) linear both;
+  }
+}
+
+html.reduced-motion .lx-overlay-dialog-in,
+html.reduced-motion .lx-overlay-sheet-end-in,
+html.reduced-motion .lx-overlay-sheet-start-in,
+html.reduced-motion .lx-overlay-sheet-bottom-in,
+html.reduced-motion .lx-overlay-sheet-top-in,
+html.reduced-motion .lx-overlay-menu-in,
+html.reduced-motion .lx-overlay-toast-in,
+html.reduced-motion .lx-overlay-tooltip-in,
+html.reduced-motion .lx-overlay-scrim-in {
+  animation: lx-overlay-fade-in var(--dur-instant) linear both;
+}
+html.reduced-motion .lx-overlay-dialog-out,
+html.reduced-motion .lx-overlay-sheet-end-out,
+html.reduced-motion .lx-overlay-sheet-start-out,
+html.reduced-motion .lx-overlay-sheet-bottom-out,
+html.reduced-motion .lx-overlay-sheet-top-out,
+html.reduced-motion .lx-overlay-menu-out,
+html.reduced-motion .lx-overlay-toast-out,
+html.reduced-motion .lx-overlay-tooltip-out,
+html.reduced-motion .lx-overlay-scrim-out {
+  animation: lx-overlay-fade-out var(--dur-instant) linear both;
+}
+
+/* Sonner toaster tuned to AN.1 timing when motion overlays are enabled. */
+[data-sonner-toaster].lx-toaster-motion [data-sonner-toast] {
+  transition:
+    transform var(--dur-base) var(--ease-bubble),
+    opacity var(--dur-base) var(--ease-bubble),
+    height var(--dur-base) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toaster].lx-toaster-motion [data-sonner-toast] {
+    transition:
+      opacity var(--dur-instant) linear,
+      height var(--dur-instant) linear !important;
+  }
+}
+html.reduced-motion [data-sonner-toaster].lx-toaster-motion [data-sonner-toast] {
+  transition:
+    opacity var(--dur-instant) linear,
+    height var(--dur-instant) linear !important;
 }
 
 @supports (view-transition-name: none) {

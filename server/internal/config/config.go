@@ -330,6 +330,8 @@ type Config struct {
 	FFMotionReveal bool
 	// FFMotionLists enables list insert/remove/reorder and drag-lift motion (AN.4). Default ON; kill-switch.
 	FFMotionLists bool
+	// FFMotionOverlays enables dialog/sheet/menu/toast/tooltip enter-exit motion (AN.5). Default ON; kill-switch.
+	FFMotionOverlays bool
 	// FFMobileCreateCourse enables the mobile New course entry and basic create wizard (M11.5). Default OFF.
 	FFMobileCreateCourse bool
 	// FFMobileCourseCreateV2 enables mobile create-wizard parity: competency builder, Canvas entry, drafts (MOB.1). Default OFF.

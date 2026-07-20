@@ -45,6 +45,7 @@ export type PlatformFeaturesSnapshot = {
   ffMotionNavigation?: boolean
   ffMotionReveal?: boolean
   ffMotionLists?: boolean
+  ffMotionOverlays?: boolean
   ffMobileCreateCourse?: boolean
   ffMobileCourseCreateV2?: boolean
   ffMobileCanvasImport?: boolean
@@ -177,6 +178,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffMotionNavigation: true,
   ffMotionReveal: true,
   ffMotionLists: true,
+  ffMotionOverlays: true,
   ffMobileCreateCourse: false,
   ffMobileCourseCreateV2: false,
   ffMobileCanvasImport: false,
@@ -452,4 +454,13 @@ export function motionListsEnabled(s?: PlatformFeaturesSnapshot): boolean {
     return true
   }
   return snap.ffMotionLists !== false
+}
+
+/** AN.5: overlay/surface enter-exit motion (default on; kill-switch via Settings). */
+export function motionOverlaysEnabled(s?: PlatformFeaturesSnapshot): boolean {
+  const snap = s ?? snapshot
+  if (!s && !loaded) {
+    return true
+  }
+  return snap.ffMotionOverlays !== false
 }

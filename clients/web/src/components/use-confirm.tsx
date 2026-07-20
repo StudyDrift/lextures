@@ -19,35 +19,56 @@ type PendingConfirm = ConfirmOptions & {
 export function useConfirm() {
   const { t } = useTranslation('common')
   const [pending, setPending] = useState<PendingConfirm | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [typedPhrase, setTypedPhrase] = useState('')
   const [busy, setBusy] = useState(false)
   const triggerRef = useRef<HTMLElement | null>(null)
+  const resolvedRef = useRef(false)
+  const dialogOpenRef = useRef(false)
+  dialogOpenRef.current = dialogOpen
 
   const confirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
     triggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    resolvedRef.current = false
     return new Promise((resolve) => {
       setTypedPhrase('')
       setBusy(false)
       setPending({ ...options, resolve })
+      setDialogOpen(true)
     })
+  }, [])
+
+  const returnFocus = useCallback(() => {
+    const el = triggerRef.current
+    triggerRef.current = null
+    queueMicrotask(() => el?.focus())
   }, [])
 
   const close = useCallback(
     (result: boolean) => {
       if (busy) return
-      pending?.resolve(result)
-      setPending(null)
+      if (!resolvedRef.current) {
+        resolvedRef.current = true
+        pending?.resolve(result)
+      }
+      // Focus returns on exit-start (not exit-end) so a11y is not delayed by motion.
+      returnFocus()
+      setDialogOpen(false)
       setTypedPhrase('')
-      const el = triggerRef.current
-      triggerRef.current = null
-      queueMicrotask(() => el?.focus())
     },
-    [busy, pending],
+    [busy, pending, returnFocus],
   )
+
+  const handleExited = useCallback(() => {
+    // Ignore exit completion if a new confirm already re-opened (AC-6).
+    if (dialogOpenRef.current) return
+    setPending(null)
+    setBusy(false)
+  }, [])
 
   const ConfirmDialogHost = pending ? (
     <ConfirmDialog
-      open
+      open={dialogOpen}
       title={pending.title}
       description={pending.description}
       confirmLabel={pending.confirmLabel ?? t('dialogs.confirm')}
@@ -59,6 +80,7 @@ export function useConfirm() {
       busy={busy}
       onConfirm={() => close(true)}
       onClose={() => close(false)}
+      onExited={handleExited}
     />
   ) : null
 

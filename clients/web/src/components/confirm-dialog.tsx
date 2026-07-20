@@ -1,4 +1,7 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from 'react'
+import { usePlatformFeatures } from '../context/platform-features-context'
+import { overlayClassNames } from '../lib/overlay-motion'
+import { useOverlayPresence } from '../lib/use-overlay-presence'
 
 export type ConfirmDialogProps = {
   open: boolean
@@ -17,6 +20,8 @@ export type ConfirmDialogProps = {
   busy?: boolean
   onConfirm: () => void
   onClose: () => void
+  /** Fired when exit animation finishes and the dialog unmounts. */
+  onExited?: () => void
 }
 
 export function ConfirmDialog({
@@ -33,19 +38,36 @@ export function ConfirmDialog({
   busy,
   onConfirm,
   onClose,
+  onExited,
 }: ConfirmDialogProps) {
   const titleId = useId()
   const descId = useId()
   const cancelRef = useRef<HTMLButtonElement>(null)
+  const { ffMotionOverlays } = usePlatformFeatures()
+  const presence = useOverlayPresence({
+    open,
+    kind: 'dialog',
+    enabled: ffMotionOverlays !== false,
+    onExitStart: undefined,
+  })
+  const exitedRef = useRef(false)
 
   useEffect(() => {
-    if (!open) return
+    if (presence.phase === 'closed' && !open && !exitedRef.current) {
+      exitedRef.current = true
+      onExited?.()
+    }
+    if (open) exitedRef.current = false
+  }, [presence.phase, open, onExited])
+
+  useEffect(() => {
+    if (!presence.entered) return
     const t = window.setTimeout(() => cancelRef.current?.focus(), 0)
     return () => window.clearTimeout(t)
-  }, [open])
+  }, [presence.entered])
 
   useEffect(() => {
-    if (!open) return
+    if (!presence.mounted) return
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape' && !busy) {
         e.preventDefault()
@@ -54,21 +76,37 @@ export function ConfirmDialog({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open, busy, onClose])
+  }, [presence.mounted, busy, onClose])
 
-  if (!open) return null
+  if (!presence.mounted) return null
+
+  const classes = overlayClassNames({
+    kind: 'dialog',
+    phase: presence.phase,
+    enabled: presence.enabled,
+    reduceMotion: presence.reducedMotion,
+  })
+  const durationStyle = {
+    '--lx-overlay-duration': `${classes.durationMs}ms`,
+  } as CSSProperties
 
   const phraseOk =
     requireTypedPhrase == null || typedPhrase.trim() === requireTypedPhrase.trim()
   const disableConfirm = Boolean(busy || confirmDisabled || !phraseOk)
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4" role="presentation">
+    <div
+      className="fixed inset-0 z-[400] flex items-center justify-center p-4"
+      role="presentation"
+      style={durationStyle}
+      data-overlay-phase={presence.phase}
+      data-testid="confirm-dialog-root"
+    >
       <button
         type="button"
         aria-label="Close dialog"
         disabled={busy}
-        className="lex-btn-static absolute inset-0 cursor-default border-0 bg-black/45 p-0 disabled:cursor-not-allowed"
+        className={`lex-btn-static absolute inset-0 cursor-default border-0 bg-black/45 p-0 disabled:cursor-not-allowed ${classes.scrim}`}
         onClick={() => {
           if (!busy) onClose()
         }}
@@ -78,7 +116,7 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
-        className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className={`relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900 ${classes.panel}`}
       >
         <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
           {title}

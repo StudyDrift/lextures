@@ -456,6 +456,7 @@ data class PlatformFeatures(
     val ffMotionNavigation: Boolean? = null,
     val ffMotionReveal: Boolean? = null,
     val ffMotionLists: Boolean? = null,
+    val ffMotionOverlays: Boolean? = null,
     val oerLibraryEnabled: Boolean? = null,
     val xapiEmissionEnabled: Boolean? = null,
     val customFieldsEnabled: Boolean? = null,

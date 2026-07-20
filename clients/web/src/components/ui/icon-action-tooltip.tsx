@@ -65,7 +65,7 @@ export function IconActionTooltip({
                 transform:
                   placement === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
               }}
-              className="pointer-events-none fixed z-[200] whitespace-nowrap rounded-md bg-slate-950 px-2 py-1 text-xs font-medium text-white shadow-lg ring-1 ring-white/10 dark:bg-neutral-800"
+              className="lx-overlay-tooltip-in pointer-events-none fixed z-[200] whitespace-nowrap rounded-md bg-slate-950 px-2 py-1 text-xs font-medium text-white shadow-lg ring-1 ring-white/10 dark:bg-neutral-800"
             >
               {label}
             </div>,

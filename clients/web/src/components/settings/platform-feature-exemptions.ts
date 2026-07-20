@@ -22,6 +22,7 @@ export const PLATFORM_FEATURE_EXEMPT_KEYS = [
   // COLLAPSE: motion kill-switches merged into ffMotionNavigation.
   'ffMotionReveal',
   'ffMotionLists',
+  'ffMotionOverlays',
   // COLLAPSE: accommodations audit log always follows accommodationsEngineEnabled.
   'ffAccommodationsEngine',
   // COLLAPSE: mobile create-course V1/V2 merged into ffMobileCreateCourse.

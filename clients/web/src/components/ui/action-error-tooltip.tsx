@@ -66,7 +66,7 @@ export function ActionErrorTooltip({
                 transform:
                   placement === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
               }}
-              className="pointer-events-none fixed z-[560] max-w-xs rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800 shadow-lg dark:border-rose-900/60 dark:bg-rose-950/90 dark:text-rose-100"
+              className="lx-overlay-tooltip-in pointer-events-none fixed z-[560] max-w-xs rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800 shadow-lg dark:border-rose-900/60 dark:bg-rose-950/90 dark:text-rose-100"
             >
               {message}
             </div>,

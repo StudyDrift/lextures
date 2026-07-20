@@ -63,4 +63,14 @@ class LexturesMotionTest {
         assertFalse(shouldAnimateListItem(0, reduceMotion = false, enabled = false))
         assertTrue(shouldAnimateListItem(99, reduceMotion = true, enabled = true))
     }
+
+    /** AN.5: sheet drag dismiss threshold. */
+    @Test
+    fun overlaySheetDismissThreshold() {
+        assertEquals(0.28f, OVERLAY_SHEET_DISMISS_THRESHOLD)
+        assertFalse(shouldDismissSheetDrag(100f, 400f))
+        assertTrue(shouldDismissSheetDrag(120f, 400f))
+        assertTrue(shouldDismissSheetDrag(10f, 400f, velocityPxPerMs = 0.9f))
+        assertFalse(shouldDismissSheetDrag(10f, 0f))
+    }
 }
