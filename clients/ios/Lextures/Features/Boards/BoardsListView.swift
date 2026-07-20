@@ -14,6 +14,7 @@ struct BoardsListView: View {
     @State private var loading = true
     @State private var includeArchived = false
     @State private var showNewBoard = false
+    @State private var showTemplatePicker = false
     @State private var newTitle = ""
     @State private var newDescription = ""
     @State private var creating = false
@@ -22,9 +23,26 @@ struct BoardsListView: View {
     @State private var renameTarget: Board?
     @State private var renameTitle = ""
     @State private var archiveTarget: Board?
+    @State private var duplicateTarget: Board?
+    @State private var duplicating = false
 
     private var canCreate: Bool {
         BoardsLogic.canCreateBoards(courseCode: course.courseCode, permissions: shell.permissions)
+    }
+
+    private var advancedEnabled: Bool {
+        BoardsAdvancedLogic.isAdvancedEnabled(
+            courseEnabled: course.isVisualBoardsEnabled,
+            features: shell.platformFeatures
+        )
+    }
+
+    private var canUseTemplates: Bool {
+        BoardsAdvancedLogic.canUseTemplates(
+            courseEnabled: course.isVisualBoardsEnabled,
+            features: shell.platformFeatures,
+            canCreate: canCreate
+        )
     }
 
     private var visibleBoards: [Board] {
@@ -90,6 +108,32 @@ struct BoardsListView: View {
         } message: {
             Text(L.text("mobile.boards.archiveConfirmMessage"))
         }
+        .confirmationDialog(
+            L.text("mobile.boards.templates.duplicateTitle"),
+            isPresented: Binding(
+                get: { duplicateTarget != nil },
+                set: { if !$0 { duplicateTarget = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button(L.text("mobile.boards.templates.duplicateStructure")) {
+                Task { await duplicateBoard(mode: .structure) }
+            }
+            Button(L.text("mobile.boards.templates.duplicateFull")) {
+                Task { await duplicateBoard(mode: .full) }
+            }
+            Button(L.text("mobile.common.cancel"), role: .cancel) {
+                duplicateTarget = nil
+            }
+        } message: {
+            Text(L.text("mobile.boards.templates.duplicateMessage"))
+        }
+        .sheet(isPresented: $showTemplatePicker) {
+            BoardTemplatePickerView(courseCode: course.courseCode) { board in
+                boards.insert(board, at: 0)
+                openBoard = BoardRoute(boardId: board.id, title: board.title)
+            }
+        }
         .task {
             await load()
             if let initialBoardId, !initialBoardId.isEmpty,
@@ -129,8 +173,15 @@ struct BoardsListView: View {
                 }
                 Spacer()
                 if canCreate {
-                    Button {
-                        showNewBoard = true
+                    Menu {
+                        Button(L.text("mobile.boards.newBoard")) {
+                            showNewBoard = true
+                        }
+                        if canUseTemplates {
+                            Button(L.text("mobile.boards.templates.fromTemplate")) {
+                                showTemplatePicker = true
+                            }
+                        }
                     } label: {
                         Label(L.text("mobile.boards.newBoard"), systemImage: "plus")
                             .font(.subheadline.weight(.semibold))
@@ -161,6 +212,12 @@ struct BoardsListView: View {
                             Button(L.text("mobile.boards.rename")) {
                                 renameTarget = board
                                 renameTitle = board.title
+                            }
+                            if advancedEnabled {
+                                Button(L.text("mobile.boards.templates.duplicate")) {
+                                    duplicateTarget = board
+                                }
+                                .disabled(duplicating)
                             }
                             if !board.archived {
                                 Button(L.text("mobile.boards.archive"), role: .destructive) {
@@ -280,6 +337,49 @@ struct BoardsListView: View {
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.boards.renameError")
             renameTarget = nil
+        }
+    }
+
+    private func duplicateBoard(mode: BoardCopyMode) async {
+        guard let target = duplicateTarget, let token = session.accessToken else { return }
+        duplicating = true
+        defer {
+            duplicating = false
+            duplicateTarget = nil
+        }
+        do {
+            let result = try await LMSAPI.duplicateBoard(
+                targetCourseCode: course.courseCode,
+                sourceBoardId: target.id,
+                mode: mode,
+                title: target.title,
+                accessToken: token
+            )
+            switch result {
+            case let .board(board):
+                await load(force: true)
+                openBoard = BoardRoute(boardId: board.id, title: board.title)
+            case let .job(job):
+                var current = job
+                var attempt = 0
+                while !BoardsAdvancedLogic.isCopyTerminal(current.status) {
+                    let delay = BoardsAdvancedLogic.pollDelaySeconds(attempt: attempt)
+                    try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                    current = try await LMSAPI.fetchBoardCopyJob(
+                        courseCode: course.courseCode,
+                        jobId: current.id,
+                        accessToken: token
+                    )
+                    attempt += 1
+                    if attempt > 30 { break }
+                }
+                await load(force: true)
+                if let id = current.resultBoardId, !id.isEmpty {
+                    openBoard = BoardRoute(boardId: id, title: current.title)
+                }
+            }
+        } catch {
+            errorMessage = L.text("mobile.boards.templates.duplicateError")
         }
     }
 

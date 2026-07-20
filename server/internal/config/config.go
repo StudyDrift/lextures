@@ -348,6 +348,8 @@ type Config struct {
 	FFMobileWhiteboardEdit bool
 	// FFMobileMarketplacePurchase enables in-app marketplace claim/buy + Purchased courses (MOB.7). Default OFF.
 	FFMobileMarketplacePurchase bool
+	// FFMobileBoardsAdvanced enables board templates/export/present/governance on iOS and Android (MOB.8). Default OFF.
+	FFMobileBoardsAdvanced bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).

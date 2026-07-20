@@ -24923,6 +24923,1128 @@
         }
       }
     },
+    "mobile.boards.admin.accessDeniedMessage": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You need admin permission and the mobile boards advanced flag."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You need admin permission and the mobile boards advanced flag."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[You need admin permission and the mobile boards advanced flag.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You need admin permission and the mobile boards advanced flag."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You need admin permission and the mobile boards advanced flag."
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.accessDeniedTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access denied"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access denied"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Access denied]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access denied"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access denied"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.activeBoards": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active boards"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active boards"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Active boards]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active boards"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active boards"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.boardCap": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board cap per course"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board cap per course"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Board cap per course]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board cap per course"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board cap per course"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.boardCount": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boards"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boards"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Boards]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boards"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boards"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.clearCap": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear cap"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear cap"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Clear cap]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear cap"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear cap"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.coursesWithBoards": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Courses with boards"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Courses with boards"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Courses with boards]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Courses with boards"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Courses with boards"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.entry.subtitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Org board analytics, quotas, and policies"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Org board analytics, quotas, and policies"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Org board analytics, quotas, and policies]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Org board analytics, quotas, and policies"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Org board analytics, quotas, and policies"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.externalSharing": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow external sharing"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow external sharing"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Allow external sharing]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow external sharing"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow external sharing"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.lifecycleError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't update board lifecycle."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't update board lifecycle."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Couldn't update board lifecycle.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't update board lifecycle."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't update board lifecycle."
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.loadError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load boards governance."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load boards governance."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Couldn't load boards governance.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load boards governance."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load boards governance."
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.lockBoard": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock board"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock board"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Lock board]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock board"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock board"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.minorFloor": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minor moderation floor"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minor moderation floor"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Minor moderation floor]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minor moderation floor"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minor moderation floor"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.openOnWeb": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open on web"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open on web"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Open on web]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open on web"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open on web"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.overviewTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Overview]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.policiesTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Policies"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Policies"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Policies]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Policies"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Policies"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.saveError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save policies."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save policies."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Couldn't save policies.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save policies."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save policies."
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.saved": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Saved]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.storage": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Storage]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.subtitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview and policies for collaboration boards."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview and policies for collaboration boards."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Overview and policies for collaboration boards.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview and policies for collaboration boards."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview and policies for collaboration boards."
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boards governance"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boards governance"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Boards governance]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boards governance"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boards governance"
+          }
+        }
+      }
+    },
+    "mobile.boards.admin.unlockBoard": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock board"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock board"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Unlock board]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock board"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock board"
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.action": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analytics"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analytics"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Analytics]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analytics"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analytics"
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.cards": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Cards]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards"
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.comments": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comments"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comments"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Comments]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comments"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comments"
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.contributorList": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top contributors"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top contributors"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Top contributors]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top contributors"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top contributors"
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.contributors": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contributors"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contributors"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Contributors]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contributors"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contributors"
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.empty": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No analytics yet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No analytics yet."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[No analytics yet.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No analytics yet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No analytics yet."
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.loadError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load analytics."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load analytics."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Couldn't load analytics.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load analytics."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load analytics."
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.noContributors": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No contributors in this window."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No contributors in this window."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[No contributors in this window.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No contributors in this window."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No contributors in this window."
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.reactions": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reactions"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reactions"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Reactions]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reactions"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reactions"
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.subtitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engagement for this board."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engagement for this board."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Engagement for this board.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engagement for this board."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engagement for this board."
+          }
+        }
+      }
+    },
+    "mobile.boards.analytics.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board analytics"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board analytics"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Board analytics]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board analytics"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board analytics"
+          }
+        }
+      }
+    },
     "mobile.boards.archive": {
       "localizations": {
         "ar": {
@@ -27299,6 +28421,346 @@
           "stringUnit": {
             "state": "translated",
             "value": "No boards yet"
+          }
+        }
+      }
+    },
+    "mobile.boards.export.action": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Export]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        }
+      }
+    },
+    "mobile.boards.export.failed": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export failed."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export failed."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Export failed.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export failed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export failed."
+          }
+        }
+      }
+    },
+    "mobile.boards.export.formatCsv": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSV"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSV"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[CSV]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSV"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSV"
+          }
+        }
+      }
+    },
+    "mobile.boards.export.formatImage": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Image]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
+          }
+        }
+      }
+    },
+    "mobile.boards.export.formatPdf": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[PDF]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF"
+          }
+        }
+      }
+    },
+    "mobile.boards.export.includeModeration": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include moderation metadata"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include moderation metadata"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Include moderation metadata]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include moderation metadata"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include moderation metadata"
+          }
+        }
+      }
+    },
+    "mobile.boards.export.queued": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export queued…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export queued…"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Export queued…]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export queued…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export queued…"
+          }
+        }
+      }
+    },
+    "mobile.boards.export.ready": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export ready"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export ready"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Export ready]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export ready"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export ready"
+          }
+        }
+      }
+    },
+    "mobile.boards.export.running": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export running…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export running…"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Export running…]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export running…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export running…"
+          }
+        }
+      }
+    },
+    "mobile.boards.export.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export board"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export board"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Export board]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export board"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export board"
           }
         }
       }
@@ -30465,6 +31927,278 @@
         }
       }
     },
+    "mobile.boards.present.action": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Present"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Present"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Present]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Present"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Present"
+          }
+        }
+      }
+    },
+    "mobile.boards.present.close": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close present mode"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close present mode"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Close present mode]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close present mode"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close present mode"
+          }
+        }
+      }
+    },
+    "mobile.boards.present.empty": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No posts to present."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No posts to present."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[No posts to present.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No posts to present."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No posts to present."
+          }
+        }
+      }
+    },
+    "mobile.boards.present.next": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Next]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        }
+      }
+    },
+    "mobile.boards.present.overview": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Overview]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        }
+      }
+    },
+    "mobile.boards.present.position": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slide position"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slide position"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Slide position]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slide position"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slide position"
+          }
+        }
+      }
+    },
+    "mobile.boards.present.prev": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Previous]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous"
+          }
+        }
+      }
+    },
+    "mobile.boards.present.slideshow": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slideshow"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slideshow"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Slideshow]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slideshow"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slideshow"
+          }
+        }
+      }
+    },
     "mobile.boards.react.avgStars": {
       "localizations": {
         "ar": {
@@ -33589,6 +35323,856 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reconnecting…"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.createError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't create board from template."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't create board from template."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Couldn't create board from template.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't create board from template."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't create board from template."
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.duplicate": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Duplicate]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.duplicateError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't duplicate the board."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't duplicate the board."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Couldn't duplicate the board.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't duplicate the board."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't duplicate the board."
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.duplicateFull": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full copy"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full copy"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Full copy]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full copy"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full copy"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.duplicateMessage": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy structure only, or include posts."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy structure only, or include posts."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Copy structure only, or include posts.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy structure only, or include posts."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy structure only, or include posts."
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.duplicateStructure": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Structure only"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Structure only"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Structure only]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Structure only"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Structure only"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.duplicateTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate board?"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate board?"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Duplicate board?]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate board?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate board?"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.emptyMessage": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No board templates match your filters."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No board templates match your filters."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[No board templates match your filters.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No board templates match your filters."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No board templates match your filters."
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.emptyTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No templates"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No templates"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[No templates]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No templates"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No templates"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.fromTemplate": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From template"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From template"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[From template]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From template"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From template"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.includePosts": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include posts"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include posts"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Include posts]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include posts"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include posts"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.includePostsHint": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Including student posts may share student work. Structure-only is recommended."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Including student posts may share student work. Structure-only is recommended."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Including student posts may share student work. Structure-only is recommended.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Including student posts may share student work. Structure-only is recommended."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Including student posts may share student work. Structure-only is recommended."
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.loadError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load templates."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load templates."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Couldn't load templates.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load templates."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load templates."
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.saveAction": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as template"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as template"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Save as template]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as template"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as template"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.saveDescription": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Description]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.saveError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save template."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save template."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Couldn't save template.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save template."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save template."
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.saveTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Template title"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Template title"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Template title]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Template title"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Template title"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.scope": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scope"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scope"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Scope]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scope"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scope"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.scopeAll": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[All]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.scopeBuiltin": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Built-in"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Built-in"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Built-in]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Built-in"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Built-in"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.scopeCourse": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This course"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This course"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[This course]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This course"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This course"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.scopeOrg": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Organization"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Organization"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Organization]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Organization"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Organization"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.search": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search templates"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search templates"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Search templates]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search templates"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search templates"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board templates"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board templates"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Board templates]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board templates"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Board templates"
+          }
+        }
+      }
+    },
+    "mobile.boards.templates.useHint": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a board from this template"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a board from this template"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Create a board from this template]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a board from this template"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a board from this template"
           }
         }
       }

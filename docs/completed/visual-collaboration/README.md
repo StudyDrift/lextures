@@ -22,3 +22,4 @@ Completed implementation plans for collaboration boards. Active plans remain in
 | VC.M5 | [Mobile reactions, comments & assessment](VC.M5-mobile-reactions-comments-assessment.md) |
 | VC.M6 | [Mobile sharing, access control & attribution](VC.M6-mobile-sharing-access-attribution.md) |
 | VC.M7 | [Mobile moderation, safety & governance](VC.M7-mobile-moderation-safety.md) |
+| MOB.8 | [Mobile boards advanced (templates/export/present/governance)](../mobile/MOB.8-collaboration-boards-completion.md) |

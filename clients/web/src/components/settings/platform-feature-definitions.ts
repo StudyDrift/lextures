@@ -800,6 +800,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'marketplace',
   },
   {
+    key: 'ffMobileBoardsAdvanced',
+    label: 'Mobile boards advanced',
+    description:
+      'Board templates, duplication, export, present mode, analytics, and admin governance on iOS and Android (MOB.8).',
+    pack: 'core',
+  },
+  {
     key: 'ffReportCards',
     label: 'Report cards',
     description: 'Standards-based report card generation and distribution for K-12 terms.',

@@ -503,6 +503,7 @@ data class PlatformFeatures(
     val ffMobileLiveQuiz: Boolean? = null,
     val ffMobileWhiteboardEdit: Boolean? = null,
     val ffMobileMarketplacePurchase: Boolean? = null,
+    val ffMobileBoardsAdvanced: Boolean? = null,
     val ffEnrollmentStateMachine: Boolean? = null,
     val adminConsoleEnabled: Boolean? = null,
     val adminAuditLogEnabled: Boolean? = null,

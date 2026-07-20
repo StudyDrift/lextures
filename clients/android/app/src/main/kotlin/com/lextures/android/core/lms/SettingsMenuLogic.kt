@@ -35,11 +35,12 @@ object SettingsMenuLogic {
         TranscriptsAdvising,
         Integrations,
         AuditLog,
+        BoardsGovernance,
         ;
 
         val group: GroupId
             get() = when (this) {
-                PlatformSettings, OrgStructure, OrgBranding, RolesPermissions, People, ArchivedCourses, AiAdmin ->
+                PlatformSettings, OrgStructure, OrgBranding, RolesPermissions, People, ArchivedCourses, AiAdmin, BoardsGovernance ->
                     GroupId.Platform
                 TranscriptsAdvising -> GroupId.StudentRecords
                 Integrations -> GroupId.Integrations
@@ -58,6 +59,7 @@ object SettingsMenuLogic {
                 TranscriptsAdvising -> "mobile_admin_transcriptsAdvising_hub_title"
                 Integrations -> "mobile_admin_integrations_hub_title"
                 AuditLog -> "mobile_admin_auditLog_title"
+                BoardsGovernance -> "mobile_boards_admin_title"
             }
 
         val subtitleResName: String
@@ -72,6 +74,7 @@ object SettingsMenuLogic {
                 TranscriptsAdvising -> "mobile_admin_transcriptsAdvising_hub_entry_subtitle"
                 Integrations -> "mobile_admin_integrations_hub_entry_subtitle"
                 AuditLog -> "mobile_admin_auditLog_entry_subtitle"
+                BoardsGovernance -> "mobile_boards_admin_entry_subtitle"
             }
     }
 
@@ -118,6 +121,7 @@ object SettingsMenuLogic {
                     TranscriptsAdvisingAdminLogic.canViewAdvising(features, permissions)
             ItemId.Integrations -> IntegrationsAdminLogic.canView(features, permissions.toList())
             ItemId.AuditLog -> AuditLogAdminLogic.shouldShowInMenu(features, permissions)
+            ItemId.BoardsGovernance -> BoardsGovernanceAdminLogic.shouldShowInMenu(features, permissions)
         }
     }
 

@@ -35,12 +35,13 @@ enum SettingsMenuLogic {
         case transcriptsAdvising
         case integrations
         case auditLog
+        case boardsGovernance
 
         var id: String { rawValue }
 
         var group: GroupId {
             switch self {
-            case .platformSettings, .orgStructure, .orgBranding, .rolesPermissions, .people, .archivedCourses, .aiAdmin:
+            case .platformSettings, .orgStructure, .orgBranding, .rolesPermissions, .people, .archivedCourses, .aiAdmin, .boardsGovernance:
                 .platform
             case .transcriptsAdvising:
                 .studentRecords
@@ -63,6 +64,7 @@ enum SettingsMenuLogic {
             case .transcriptsAdvising: "mobile.admin.transcriptsAdvising.hub.title"
             case .integrations: "mobile.admin.integrations.hub.title"
             case .auditLog: "mobile.admin.auditLog.title"
+            case .boardsGovernance: "mobile.boards.admin.title"
             }
         }
 
@@ -78,6 +80,7 @@ enum SettingsMenuLogic {
             case .transcriptsAdvising: "mobile.admin.transcriptsAdvising.hub.entry.subtitle"
             case .integrations: "mobile.admin.integrations.hub.entry.subtitle"
             case .auditLog: "mobile.admin.auditLog.entry.subtitle"
+            case .boardsGovernance: "mobile.boards.admin.entry.subtitle"
             }
         }
 
@@ -93,6 +96,7 @@ enum SettingsMenuLogic {
             case .transcriptsAdvising: "doc.text"
             case .integrations: "puzzlepiece.extension"
             case .auditLog: "scroll"
+            case .boardsGovernance: "rectangle.3.group"
             }
         }
     }
@@ -154,6 +158,8 @@ enum SettingsMenuLogic {
             return IntegrationsAdminLogic.canView(features: features, permissions: permissions)
         case .auditLog:
             return AuditLogAdminLogic.shouldShowInMenu(features: features, permissions: permissions)
+        case .boardsGovernance:
+            return BoardsGovernanceAdminLogic.shouldShowInMenu(features: features, permissions: permissions)
         }
     }
 

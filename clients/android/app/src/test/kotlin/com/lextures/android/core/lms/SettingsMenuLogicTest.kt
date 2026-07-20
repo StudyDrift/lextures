@@ -68,6 +68,7 @@ class SettingsMenuLogicTest {
     fun phase1RegistryGroupsMatchInventory() {
         val labels = SettingsMenuLogic.phase1Registry.toMap()
         assertTrue(SettingsMenuLogic.ItemId.PlatformSettings in labels.getValue(SettingsMenuLogic.GroupId.Platform))
+        assertTrue(SettingsMenuLogic.ItemId.BoardsGovernance in labels.getValue(SettingsMenuLogic.GroupId.Platform))
         assertTrue(SettingsMenuLogic.ItemId.AuditLog in labels.getValue(SettingsMenuLogic.GroupId.Compliance))
         assertTrue(SettingsMenuLogic.ItemId.Integrations in labels.getValue(SettingsMenuLogic.GroupId.Integrations))
         assertTrue(
