@@ -99,6 +99,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFMotionLists = motion
 	out.FFMotionOverlays = motion
 	out.FFMotionControls = motion
+	out.FFMotionDelight = motion
 
 	// COLLAPSE mobile create V1/V2: either column enables create; V2 wizard is the only path.
 	mobileCreate := mergeBool(db.FFMobileCreateCourse, false) || mergeBool(db.FFMobileCourseCreateV2, false)

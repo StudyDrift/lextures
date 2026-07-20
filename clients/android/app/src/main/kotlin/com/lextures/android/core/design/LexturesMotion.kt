@@ -494,6 +494,49 @@ fun indicatorOffsetPx(index: Int, optionWidths: List<Float>, gapPx: Float = 0f):
     return offset
 }
 
+// MARK: AN.7 — Delight & progress moments
+
+/** Max particles in a burst (FR-5 / FR-9). */
+const val DELIGHT_PARTICLE_CAP = 24
+
+/** WCAG 2.3.1 flash budget. */
+const val DELIGHT_MAX_FLASH_HZ = 3
+
+fun shouldAnimateProgress(reduceMotion: Boolean, enabled: Boolean): Boolean =
+    enabled && !reduceMotion
+
+fun shouldCelebrate(
+    reduceMotion: Boolean,
+    enabled: Boolean,
+    seriousContext: Boolean = false,
+    gamificationEnabled: Boolean = true,
+): Boolean = enabled && !reduceMotion && !seriousContext && gamificationEnabled
+
+fun shouldShowStaticDelight(
+    reduceMotion: Boolean,
+    enabled: Boolean,
+    seriousContext: Boolean = false,
+    gamificationEnabled: Boolean = true,
+): Boolean {
+    if (!enabled || !gamificationEnabled) return false
+    return reduceMotion || seriousContext
+}
+
+fun interpolateProgress(from: Float, to: Float, t: Float): Float {
+    val clamped = t.coerceIn(0f, 1f)
+    val eased = 1f - (1f - clamped).let { it * it * it }
+    return from + (to - from) * eased
+}
+
+fun particleCapForViewport(widthPx: Float, lowEnd: Boolean = false): Int {
+    if (lowEnd) return minOf(12, DELIGHT_PARTICLE_CAP)
+    if (widthPx < 480f) return minOf(16, DELIGHT_PARTICLE_CAP)
+    return DELIGHT_PARTICLE_CAP
+}
+
+fun progressDurationMs(reduceMotion: Boolean, enabled: Boolean): Int =
+    if (shouldAnimateProgress(reduceMotion, enabled)) LexturesMotion.DeliberateMs else 0
+
 /**
  * AN.6 — press scale for tappable controls (FR-1).
  * Reduced motion → opacity dip; kill-switch → identity.

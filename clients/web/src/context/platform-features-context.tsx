@@ -61,6 +61,7 @@ export type PlatformFeatures = {
   ffMotionLists: boolean
   ffMotionOverlays: boolean
   ffMotionControls: boolean
+  ffMotionDelight: boolean
   ffMobileCreateCourse: boolean
   ffMobileCourseCreateV2: boolean
   ffMobileCanvasImport: boolean
@@ -204,6 +205,7 @@ const defaultFeatures: PlatformFeatures = {
   ffMotionLists: true,
   ffMotionOverlays: true,
   ffMotionControls: true,
+  ffMotionDelight: true,
   ffMobileCreateCourse: false,
   ffMobileCourseCreateV2: false,
   ffMobileCanvasImport: false,
@@ -345,6 +347,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffMotionLists: true,
     ffMotionOverlays: true,
     ffMotionControls: true,
+    ffMotionDelight: true,
     ffMobileCreateCourse: false,
     ffMobileCourseCreateV2: false,
     ffMobileCanvasImport: false,
@@ -493,6 +496,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMotionLists: data.ffMotionLists !== false,
           ffMotionOverlays: data.ffMotionOverlays !== false,
           ffMotionControls: data.ffMotionControls !== false,
+          ffMotionDelight: data.ffMotionDelight !== false,
           ffMobileCreateCourse: data.ffMobileCreateCourse === true,
           ffMobileCourseCreateV2: data.ffMobileCourseCreateV2 === true,
           ffMobileCanvasImport: data.ffMobileCanvasImport === true,
@@ -598,6 +602,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffMotionLists: next.ffMotionLists !== false,
           ffMotionOverlays: next.ffMotionOverlays !== false,
           ffMotionControls: next.ffMotionControls !== false,
+          ffMotionDelight: next.ffMotionDelight !== false,
           ffMobileCreateCourse: next.ffMobileCreateCourse === true,
           ffMobileCourseCreateV2: next.ffMobileCourseCreateV2 === true,
           ffMobileCanvasImport: next.ffMobileCanvasImport === true,
@@ -711,6 +716,15 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
       delete root.dataset.motionControls
     }
   }, [features.ffMotionControls])
+
+  // AN.7 — expose delight-motion kill-switch to CSS (progress/burst/quiz feedback).
+  useEffect(() => {
+    const root = document.documentElement
+    root.dataset.motionDelight = features.ffMotionDelight !== false ? 'on' : 'off'
+    return () => {
+      delete root.dataset.motionDelight
+    }
+  }, [features.ffMotionDelight])
 
   const value = useMemo(
     () => ({

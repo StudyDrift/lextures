@@ -91,4 +91,21 @@ class LexturesMotionTest {
         assertFalse(Haptics.shouldFire(enabled = false))
         assertFalse(Haptics.shouldFire(enabled = true, systemHapticsOff = true))
     }
+
+    /** AN.7: progress interpolate, celebrate gates, particle cap. */
+    @Test
+    fun delightMotionHelpers() {
+        assertEquals(24, DELIGHT_PARTICLE_CAP)
+        assertEquals(3, DELIGHT_MAX_FLASH_HZ)
+        assertTrue(shouldAnimateProgress(reduceMotion = false, enabled = true))
+        assertFalse(shouldAnimateProgress(reduceMotion = true, enabled = true))
+        assertFalse(shouldCelebrate(reduceMotion = true, enabled = true))
+        assertFalse(shouldCelebrate(reduceMotion = false, enabled = true, seriousContext = true))
+        assertFalse(shouldCelebrate(reduceMotion = false, enabled = true, gamificationEnabled = false))
+        assertTrue(shouldShowStaticDelight(reduceMotion = true, enabled = true))
+        assertEquals(0f, interpolateProgress(0f, 100f, 0f), 0.0001f)
+        assertEquals(100f, interpolateProgress(0f, 100f, 1f), 0.0001f)
+        assertTrue(particleCapForViewport(320f) <= 16)
+        assertEquals(0, progressDurationMs(reduceMotion = true, enabled = true))
+    }
 }

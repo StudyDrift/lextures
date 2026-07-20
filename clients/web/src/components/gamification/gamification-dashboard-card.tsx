@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Award, Flame, Sparkles, X } from 'lucide-react'
 import {
@@ -8,6 +8,9 @@ import {
   type GamificationProfile,
 } from '../../lib/gamification-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { AnimatedProgress } from '../ui/animated-progress'
+import { DelightMoment } from '../ui/delight-moment'
+import { useCountUp } from '../../lib/use-count-up'
 
 export function GamificationDashboardCard() {
   const { ffGamification, loading: featuresLoading } = usePlatformFeatures()
@@ -15,6 +18,9 @@ export function GamificationDashboardCard() {
   const [error, setError] = useState<string | null>(null)
   const [dismissedEnded, setDismissedEnded] = useState(false)
   const [freezing, setFreezing] = useState(false)
+  const [badgeDelight, setBadgeDelight] = useState(false)
+  const seenBadgesRef = useRef<Set<string>>(new Set())
+  const xpCount = useCountUp(profile?.xpTotal ?? 0)
 
   useEffect(() => {
     if (featuresLoading || !ffGamification) return
@@ -22,6 +28,21 @@ export function GamificationDashboardCard() {
     void fetchGamificationProfile()
       .then((p) => {
         if (!cancelled) {
+          if (seenBadgesRef.current.size === 0) {
+            // Seed seen set on first load without celebrating historical badges.
+            for (const b of p.recentBadges) {
+              seenBadgesRef.current.add(`${b.badgeType}-${b.awardedAt}`)
+            }
+          } else {
+            const newest = p.recentBadges[0]
+            if (newest) {
+              const key = `${newest.badgeType}-${newest.awardedAt}`
+              if (!seenBadgesRef.current.has(key)) {
+                seenBadgesRef.current.add(key)
+                setBadgeDelight(true)
+              }
+            }
+          }
           setProfile(p)
           setError(null)
         }
@@ -107,7 +128,7 @@ export function GamificationDashboardCard() {
             )}
             <p className="mt-2 text-xs text-slate-600 dark:text-neutral-400">
               Level <span className="lex-num">{profile.level}</span> ·{' '}
-              <span className="lex-num">{profile.xpTotal.toLocaleString()}</span> XP
+              <span className="lex-num">{xpCount.formatted}</span> XP
             </p>
           </div>
           <Link
@@ -119,19 +140,12 @@ export function GamificationDashboardCard() {
         </div>
 
         <div className="mt-4">
-          <div
-            className="h-2 overflow-hidden rounded-full bg-orange-200/80 dark:bg-orange-900/50"
-            role="progressbar"
-            aria-valuenow={profile.levelProgressPct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`XP progress toward level ${profile.level + 1}`}
-          >
-            <div
-              className="h-full rounded-full bg-orange-600 motion-safe:transition-[width] motion-safe:duration-300 dark:bg-orange-500"
-              style={{ width: `${profile.levelProgressPct}%` }}
-            />
-          </div>
+          <AnimatedProgress
+            value={profile.levelProgressPct}
+            label={`XP progress toward level ${profile.level + 1}`}
+            className="h-2 overflow-hidden rounded-full bg-orange-200/80 dark:bg-orange-900/50 lx-delight-progress"
+            fillClassName="h-full rounded-full bg-orange-600 dark:bg-orange-500"
+          />
           <p className="mt-2 text-xs text-slate-700 dark:text-neutral-300">
             <span className="lex-num">{profile.xpToNextLevel.toLocaleString()}</span> XP to level{' '}
             <span className="lex-num">{profile.level + 1}</span>
@@ -144,13 +158,20 @@ export function GamificationDashboardCard() {
               Recent badges
             </p>
             <ul className="mt-2 flex gap-2 overflow-x-auto pb-1">
-              {profile.recentBadges.map((b) => (
-                <li
-                  key={`${b.badgeType}-${b.awardedAt}`}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-orange-200 bg-white px-3 py-1 text-xs font-medium text-orange-900 dark:border-orange-800 dark:bg-neutral-900 dark:text-orange-100"
-                >
-                  <Award className="h-3.5 w-3.5" aria-hidden />
-                  <span>{badgeLabel(b.badgeType)}</span>
+              {profile.recentBadges.map((b, idx) => (
+                <li key={`${b.badgeType}-${b.awardedAt}`}>
+                  <DelightMoment
+                    active={badgeDelight && idx === 0}
+                    kind="badge"
+                    announcement={`Badge earned: ${badgeLabel(b.badgeType)}`}
+                    gamificationEnabled={ffGamification}
+                    onComplete={() => setBadgeDelight(false)}
+                  >
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-orange-200 bg-white px-3 py-1 text-xs font-medium text-orange-900 dark:border-orange-800 dark:bg-neutral-900 dark:text-orange-100">
+                      <Award className="h-3.5 w-3.5" aria-hidden />
+                      <span>{badgeLabel(b.badgeType)}</span>
+                    </span>
+                  </DelightMoment>
                 </li>
               ))}
             </ul>

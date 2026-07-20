@@ -4440,6 +4440,24 @@
       "reviewed": true
     },
     {
+      "id": "AN.7",
+      "path": "docs/completed/animations/AN.7-delight-progress-moments.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Playwright smoke for delight CSS hooks, data-motion-delight kill-switch, reduced-motion particle suppression, and animated progress fill.",
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/delight-motion.spec.ts"
+        }
+      ],
+      "reviewed": true
+    },
+    {
       "id": "attendance",
       "path": "docs/completed/attendance.md",
       "markets": [

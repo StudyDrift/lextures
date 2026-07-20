@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { AnimatedProgress } from '../ui/animated-progress'
 
 export function IntroCourseProgressBar({
   percent,
@@ -30,19 +31,11 @@ export function IntroCourseProgressBar({
         </span>
         <span className="tabular-nums">{clamped}%</span>
       </p>
-      <div
-        role="progressbar"
-        aria-valuenow={clamped}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={ariaLabel}
-        className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-neutral-700"
-      >
-        <div
-          className="h-full rounded-full bg-sky-500 motion-safe:transition-[width] motion-safe:duration-300"
-          style={{ width: `${clamped}%` }}
-        />
-      </div>
+      <AnimatedProgress
+        value={clamped}
+        label={ariaLabel}
+        fillClassName="h-full rounded-full bg-sky-500"
+      />
     </div>
   )
 }

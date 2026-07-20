@@ -201,6 +201,7 @@ data class MobilePlatformFeatures(
     val ffMotionOverlays: Boolean = true,
     /** AN.6 kill-switch; default on when unset. */
     val ffMotionControls: Boolean = true,
+    val ffMotionDelight: Boolean = true,
     val oerLibraryEnabled: Boolean = false,
     val xapiEmissionEnabled: Boolean = false,
     val customFieldsEnabled: Boolean = false,
@@ -304,6 +305,7 @@ data class MobilePlatformFeatures(
             ffMotionLists = features?.ffMotionLists != false,
             ffMotionOverlays = features?.ffMotionOverlays != false,
             ffMotionControls = features?.ffMotionControls != false,
+            ffMotionDelight = features?.ffMotionDelight != false,
             oerLibraryEnabled = features?.oerLibraryEnabled == true,
             xapiEmissionEnabled = features?.xapiEmissionEnabled == true,
             customFieldsEnabled = features?.customFieldsEnabled == true,

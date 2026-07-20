@@ -1,10 +1,16 @@
 import { render, screen } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { describe, expect, it } from 'vitest'
+import { PlatformFeaturesProvider } from '../../context/platform-features-context'
 import { SelfPacedProgressBar } from './self-paced-progress'
+
+function wrap(ui: ReactNode) {
+  return render(<PlatformFeaturesProvider>{ui}</PlatformFeaturesProvider>)
+}
 
 describe('SelfPacedProgressBar', () => {
   it('exposes an accessible progressbar with the percentage', () => {
-    render(<SelfPacedProgressBar percent={30} />)
+    wrap(<SelfPacedProgressBar percent={30} />)
     const bar = screen.getByRole('progressbar')
     expect(bar).toHaveAttribute('aria-valuenow', '30')
     expect(bar).toHaveAttribute('aria-valuemin', '0')
@@ -13,7 +19,7 @@ describe('SelfPacedProgressBar', () => {
   })
 
   it('clamps out-of-range values', () => {
-    render(<SelfPacedProgressBar percent={150} />)
+    wrap(<SelfPacedProgressBar percent={150} />)
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100')
   })
 })

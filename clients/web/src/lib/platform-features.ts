@@ -47,6 +47,7 @@ export type PlatformFeaturesSnapshot = {
   ffMotionLists?: boolean
   ffMotionOverlays?: boolean
   ffMotionControls?: boolean
+  ffMotionDelight?: boolean
   ffMobileCreateCourse?: boolean
   ffMobileCourseCreateV2?: boolean
   ffMobileCanvasImport?: boolean
@@ -182,6 +183,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffMotionLists: true,
   ffMotionOverlays: true,
   ffMotionControls: true,
+  ffMotionDelight: true,
   ffMobileCreateCourse: false,
   ffMobileCourseCreateV2: false,
   ffMobileCanvasImport: false,
@@ -476,4 +478,13 @@ export function motionControlsEnabled(s?: PlatformFeaturesSnapshot): boolean {
     return true
   }
   return snap.ffMotionControls !== false
+}
+
+/** AN.7: delight & progress moments (default on; kill-switch via Settings). */
+export function motionDelightEnabled(s?: PlatformFeaturesSnapshot): boolean {
+  const snap = s ?? snapshot
+  if (!s && !loaded) {
+    return true
+  }
+  return snap.ffMotionDelight !== false
 }

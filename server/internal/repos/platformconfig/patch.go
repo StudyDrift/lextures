@@ -150,6 +150,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_motion_lists", w.FFMotionLists)
 	addBool("ff_motion_overlays", w.FFMotionOverlays)
 	addBool("ff_motion_controls", w.FFMotionControls)
+	addBool("ff_motion_delight", w.FFMotionDelight)
 	addBool("ff_mobile_create_course", w.FFMobileCreateCourse)
 	addBool("ff_mobile_course_create_v2", w.FFMobileCourseCreateV2)
 	addBool("ff_mobile_canvas_import", w.FFMobileCanvasImport)
