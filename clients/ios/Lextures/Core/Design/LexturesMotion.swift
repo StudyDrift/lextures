@@ -412,8 +412,8 @@ enum LXControlMotion {
         let clamped = min(max(0, index), optionWidths.count - 1)
         var offset: CGFloat = 0
         if clamped > 0 {
-            for i in 0..<clamped {
-                offset += optionWidths[i] + gap
+            for optionIndex in 0..<clamped {
+                offset += optionWidths[optionIndex] + gap
             }
         }
         return offset
