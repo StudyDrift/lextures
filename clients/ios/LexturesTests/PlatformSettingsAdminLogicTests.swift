@@ -3,15 +3,16 @@ import XCTest
 
 final class PlatformSettingsAdminLogicTests: XCTestCase {
     func testEntryRequiresFlagAndRbacPermission() {
-        let off = MobilePlatformFeatures(ffMobileAdminSettings: false)
+        // Legacy settings entry only shows when admin console is off and admin settings is on.
+        let consoleOn = MobilePlatformFeatures(ffMobileAdminConsole: true, ffMobileAdminSettings: true)
         XCTAssertFalse(PlatformSettingsAdminLogic.shouldShowEntry(
-            features: off,
+            features: consoleOn,
             permissions: [PlatformSettingsAdminLogic.rbacManagePermission]
         ))
-        let on = MobilePlatformFeatures(ffMobileAdminSettings: true)
-        XCTAssertFalse(PlatformSettingsAdminLogic.shouldShowEntry(features: on, permissions: []))
+        let legacy = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: true)
+        XCTAssertFalse(PlatformSettingsAdminLogic.shouldShowEntry(features: legacy, permissions: []))
         XCTAssertTrue(PlatformSettingsAdminLogic.shouldShowEntry(
-            features: on,
+            features: legacy,
             permissions: [PlatformSettingsAdminLogic.rbacManagePermission]
         ))
     }
@@ -21,7 +22,8 @@ final class PlatformSettingsAdminLogicTests: XCTestCase {
         XCTAssertFalse(keys.contains("ffMobileAdminSettings"))
         XCTAssertFalse(keys.contains("samlSsoEnabled"))
         XCTAssertFalse(keys.contains("ffPaymentsEnabled"))
-        XCTAssertTrue(keys.contains("ffFeedback"))
+        XCTAssertFalse(keys.contains("ffFeedback"))
+        XCTAssertTrue(keys.contains("ffPublicCatalog"))
     }
 
     func testSecretFieldsAreIgnoredWhenDecodingSnapshot() throws {
@@ -38,13 +40,14 @@ final class PlatformSettingsAdminLogicTests: XCTestCase {
         """#.utf8)
         let snapshot = try JSONDecoder().decode(PlatformSettingsSnapshot.self, from: data)
         XCTAssertTrue(snapshot.ffFeedback)
-        XCTAssertTrue(PlatformSettingsAdminLogic.value(for: "ffFeedback", in: snapshot))
+        XCTAssertFalse(PlatformSettingsAdminLogic.value(for: "ffFeedback", in: snapshot))
+        XCTAssertFalse(PlatformSettingsAdminLogic.value(for: "ffPublicCatalog", in: snapshot))
 
         let effective = try JSONDecoder().decode(
             PlatformFeatureStates.self,
-            from: Data(#"{"ffFeedback":false}"#.utf8)
+            from: Data(#"{"ffPublicCatalog":true}"#.utf8)
         )
         let merged = PlatformSettingsAdminLogic.applyingEffectiveFeatures(effective, to: snapshot)
-        XCTAssertFalse(merged.ffFeedback)
+        XCTAssertTrue(merged.ffPublicCatalog)
     }
 }

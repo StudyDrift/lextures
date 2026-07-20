@@ -71,6 +71,7 @@ export const courseSchema = z
     reportCardsEnabled: z.boolean().optional(),
     visualBoardsEnabled: z.boolean().optional(),
     interactiveQuizzesEnabled: z.boolean().optional(),
+    screenShareEnabled: z.boolean().optional(),
     canvasGradeSyncEnabled: z.boolean().optional(),
     courseType: z.string().optional(),
     courseMode: z.string().optional(),

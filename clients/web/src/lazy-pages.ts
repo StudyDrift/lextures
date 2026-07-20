@@ -17,6 +17,8 @@ export const LiveQuizLibraryPage = lazy(() => import('./pages/lms/live-quiz-libr
 export const LiveQuizKitEditorPage = lazy(() => import('./pages/lms/live-quiz-kit-editor-page'))
 export const LiveQuizHostPage = lazy(() => import('./pages/lms/live-quiz-host-page'))
 export const LiveQuizPresentPage = lazy(() => import('./pages/lms/live-quiz-present-page'))
+export const ScreenSharePage = lazy(() => import('./pages/lms/screen-share-page'))
+export const ScreenSharePresentPage = lazy(() => import('./pages/lms/screen-share-present-page'))
 export const LiveQuizReportPage = lazy(() => import('./pages/lms/live-quiz-report-page'))
 export const LiveQuizMyResultsPage = lazy(() => import('./pages/lms/live-quiz-my-results-page'))
 export const LiveQuizPlayPage = lazy(() => import('./pages/live-quiz-play-page'))

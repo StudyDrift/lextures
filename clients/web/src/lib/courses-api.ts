@@ -158,6 +158,8 @@ export type CoursePublic = {
   /** VC.1 — visual collaboration boards (default off). */
   visualBoardsEnabled?: boolean
   interactiveQuizzesEnabled?: boolean
+  /** SS.1 — cableless entire-screen sharing (default off). */
+  screenShareEnabled?: boolean
   /** When true, saved grades are pushed back to the linked Canvas course (default off). */
   canvasGradeSyncEnabled?: boolean
   /** Plan 12.4 — block publishing video content without ready captions. */
@@ -821,6 +823,7 @@ export async function patchCourseFeatures(
     reportCardsEnabled?: boolean
     visualBoardsEnabled?: boolean
     interactiveQuizzesEnabled?: boolean
+    screenShareEnabled?: boolean
   },
 ): Promise<CoursePublic> {
   const res = await authorizedFetch(
@@ -854,6 +857,7 @@ export async function patchCourseFeatures(
         ...(body.interactiveQuizzesEnabled !== undefined
           ? { interactiveQuizzesEnabled: body.interactiveQuizzesEnabled }
           : {}),
+        ...(body.screenShareEnabled !== undefined ? { screenShareEnabled: body.screenShareEnabled } : {}),
         ...(body.sectionsEnabled !== undefined ? { sectionsEnabled: body.sectionsEnabled } : {}),
       }),
     },

@@ -150,16 +150,16 @@ func TestMerge_EmailSESDefaultOff(t *testing.T) {
 	}
 }
 
-// Plan FB0: FFFeedback defaults ON when platform settings row is unset.
-func TestMerge_FeedbackDefaultOnWhenDBUnset(t *testing.T) {
+// Plan FB0: FFFeedback is always on (platform master removed).
+func TestMerge_FeedbackAlwaysOn(t *testing.T) {
 	got := Merge(config.Config{}, nil)
 	if !got.FFFeedback {
-		t.Fatal("expected FFFeedback true (default ON) when DB unset")
+		t.Fatal("expected FFFeedback true (always on)")
 	}
 	off := false
 	got = Merge(config.Config{}, &Row{FFFeedback: &off})
-	if got.FFFeedback {
-		t.Fatal("expected DB false to disable feedback")
+	if !got.FFFeedback {
+		t.Fatal("expected FFFeedback true even when DB stores false")
 	}
 }
 
@@ -298,16 +298,34 @@ func TestMerge_IqAiGenerationDefaultOffWhenDBUnset(t *testing.T) {
 
 func ptr(s string) *string { return &s }
 
-// MOB.1: mobile create V1/V2 collapsed — either column enables both.
-func TestMerge_FFMobileCourseCreateFlagsDefaultOff(t *testing.T) {
+// Mobile parity flags are always on (platform masters removed).
+func TestMerge_MobileParityFlagsAlwaysOn(t *testing.T) {
 	got := Merge(config.Config{}, nil)
-	if got.FFMobileCreateCourse || got.FFMobileCourseCreateV2 {
-		t.Fatal("expected mobile create flags false when DB unset")
+	if !got.FFMobileCreateCourse || !got.FFMobileCourseCreateV2 ||
+		!got.FFMobileCanvasImport || !got.FFMobileAdminConsole ||
+		!got.FFMobileEnrollmentAdd || !got.FFMobileLiveQuiz ||
+		!got.FFMobileWhiteboardEdit || !got.FFMobileMarketplacePurchase ||
+		!got.FFMobileBoardsAdvanced {
+		t.Fatal("expected mobile parity flags always on when DB unset")
 	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMobileCourseCreateV2: &on})
-	if !got.FFMobileCreateCourse || !got.FFMobileCourseCreateV2 {
-		t.Fatal("expected V2 column alone to enable both mobile create flags")
+	off := false
+	got = Merge(config.Config{}, &Row{
+		FFMobileCreateCourse:        &off,
+		FFMobileCourseCreateV2:      &off,
+		FFMobileCanvasImport:        &off,
+		FFMobileAdminConsole:        &off,
+		FFMobileEnrollmentAdd:       &off,
+		FFMobileLiveQuiz:            &off,
+		FFMobileWhiteboardEdit:      &off,
+		FFMobileMarketplacePurchase: &off,
+		FFMobileBoardsAdvanced:      &off,
+	})
+	if !got.FFMobileCreateCourse || !got.FFMobileCourseCreateV2 ||
+		!got.FFMobileCanvasImport || !got.FFMobileAdminConsole ||
+		!got.FFMobileEnrollmentAdd || !got.FFMobileLiveQuiz ||
+		!got.FFMobileWhiteboardEdit || !got.FFMobileMarketplacePurchase ||
+		!got.FFMobileBoardsAdvanced {
+		t.Fatal("expected mobile parity flags on even when DB stores false")
 	}
 }
 
@@ -364,93 +382,3 @@ func TestMerge_LpAdaptCollapse(t *testing.T) {
 	}
 }
 
-// MOB.2: FFMobileCanvasImport default OFF when unset.
-func TestMerge_FFMobileCanvasImportDefaultOff(t *testing.T) {
-	got := Merge(config.Config{}, nil)
-	if got.FFMobileCanvasImport {
-		t.Fatal("expected FFMobileCanvasImport false when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMobileCanvasImport: &on})
-	if !got.FFMobileCanvasImport {
-		t.Fatal("expected FFMobileCanvasImport true when DB set")
-	}
-}
-
-// MOB.3: FFMobileAdminConsole default OFF when unset.
-func TestMerge_FFMobileAdminConsoleDefaultOff(t *testing.T) {
-	got := Merge(config.Config{}, nil)
-	if got.FFMobileAdminConsole {
-		t.Fatal("expected FFMobileAdminConsole false when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMobileAdminConsole: &on})
-	if !got.FFMobileAdminConsole {
-		t.Fatal("expected FFMobileAdminConsole true when DB set")
-	}
-}
-
-// MOB.4: FFMobileEnrollmentAdd default OFF when unset.
-func TestMerge_FFMobileEnrollmentAddDefaultOff(t *testing.T) {
-	got := Merge(config.Config{}, nil)
-	if got.FFMobileEnrollmentAdd {
-		t.Fatal("expected FFMobileEnrollmentAdd false when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMobileEnrollmentAdd: &on})
-	if !got.FFMobileEnrollmentAdd {
-		t.Fatal("expected FFMobileEnrollmentAdd true when DB set")
-	}
-}
-
-// MOB.5: FFMobileLiveQuiz default OFF when unset.
-func TestMerge_FFMobileLiveQuizDefaultOff(t *testing.T) {
-	got := Merge(config.Config{}, nil)
-	if got.FFMobileLiveQuiz {
-		t.Fatal("expected FFMobileLiveQuiz false when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMobileLiveQuiz: &on})
-	if !got.FFMobileLiveQuiz {
-		t.Fatal("expected FFMobileLiveQuiz true when DB set")
-	}
-}
-
-// MOB.6: FFMobileWhiteboardEdit default OFF when unset.
-func TestMerge_FFMobileWhiteboardEditDefaultOff(t *testing.T) {
-	got := Merge(config.Config{}, nil)
-	if got.FFMobileWhiteboardEdit {
-		t.Fatal("expected FFMobileWhiteboardEdit false when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMobileWhiteboardEdit: &on})
-	if !got.FFMobileWhiteboardEdit {
-		t.Fatal("expected FFMobileWhiteboardEdit true when DB set")
-	}
-}
-
-// MOB.7: FFMobileMarketplacePurchase default OFF when unset.
-func TestMerge_FFMobileMarketplacePurchaseDefaultOff(t *testing.T) {
-	got := Merge(config.Config{}, nil)
-	if got.FFMobileMarketplacePurchase {
-		t.Fatal("expected FFMobileMarketplacePurchase false when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMobileMarketplacePurchase: &on})
-	if !got.FFMobileMarketplacePurchase {
-		t.Fatal("expected FFMobileMarketplacePurchase true when DB set")
-	}
-}
-
-// MOB.8: FFMobileBoardsAdvanced default OFF when unset.
-func TestMerge_FFMobileBoardsAdvancedDefaultOff(t *testing.T) {
-	got := Merge(config.Config{}, nil)
-	if got.FFMobileBoardsAdvanced {
-		t.Fatal("expected FFMobileBoardsAdvanced false when DB unset")
-	}
-	on := true
-	got = Merge(config.Config{}, &Row{FFMobileBoardsAdvanced: &on})
-	if !got.FFMobileBoardsAdvanced {
-		t.Fatal("expected FFMobileBoardsAdvanced true when DB set")
-	}
-}

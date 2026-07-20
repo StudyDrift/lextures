@@ -105,6 +105,9 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 	go runEvery(ctx, 30*time.Second, func() {
 		sweepAbandonedQuizGames(context.Background(), pool)
 	})
+	go runEvery(ctx, time.Minute, func() {
+		sweepAbandonedScreenShareSessions(context.Background(), pool)
+	})
 	go runEvery(ctx, 15*time.Minute, func() {
 		sweepBoardCompaction(context.Background(), pool)
 	})

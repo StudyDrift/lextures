@@ -203,6 +203,13 @@ struct ProfileView: View {
                     billingNav = BillingRoute()
                 }
             }
+            // The profile pane is mounted permanently (toggled by opacity), so
+            // `onAppear` only fires once at launch. Deep links routed here in-session
+            // (e.g. the drawer's "System settings" → admin hub) set the pending route
+            // after that, so consume it reactively too.
+            .onChange(of: shell.pendingProfileSettingsRoute) { _, route in
+                if route != nil { openPendingProfileSettingsIfNeeded() }
+            }
         }
     }
 

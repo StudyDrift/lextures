@@ -12,6 +12,18 @@ export const PLATFORM_FEATURE_EXEMPT_KEYS = [
   'ffInteractiveQuizzes',
   // Collaboration boards platform master is always on (ignored); course toggle is the real gate.
   'ffVisualBoards',
+  // In-app product feedback is always on (platform master removed).
+  'ffFeedback',
+  // Mobile parity flags are always on (platform masters removed).
+  'ffMobileCreateCourse',
+  'ffMobileCourseCreateV2',
+  'ffMobileCanvasImport',
+  'ffMobileAdminConsole',
+  'ffMobileEnrollmentAdd',
+  'ffMobileLiveQuiz',
+  'ffMobileWhiteboardEdit',
+  'ffMobileMarketplacePurchase',
+  'ffMobileBoardsAdvanced',
   // COLLAPSE (docs/plan/flags.md): folded into ffIqLiveHosting's per-course merge; always-on, no
   // independent Global platform toggle.
   'ffIqLiveHosting',
@@ -27,8 +39,6 @@ export const PLATFORM_FEATURE_EXEMPT_KEYS = [
   'ffMotionDelight',
   // COLLAPSE: accommodations audit log always follows accommodationsEngineEnabled.
   'ffAccommodationsEngine',
-  // COLLAPSE: mobile create-course V1/V2 merged into ffMobileCreateCourse.
-  'ffMobileCourseCreateV2',
   // COLLAPSE: parent portal V2 sections merged into ffParentPortal.
   'ffParentPortalV2',
 ] as const satisfies readonly PlatformBooleanFeatureKey[]

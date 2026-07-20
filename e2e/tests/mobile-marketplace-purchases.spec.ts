@@ -1,8 +1,7 @@
 /**
  * MOB.7 — Mobile marketplace purchases API parity
  *
- *   [x] Platform features exposes ffMobileMarketplacePurchase (default off)
- *   [x] Admin can enable ffMobileMarketplacePurchase via settings/platform
+ *   [x] Platform features exposes ffMobileMarketplacePurchase (always on)
  *   [x] Free claim → owned + listed under /me/purchases
  *   [x] Paid checkout (when billing configured) returns session or alreadyOwned shape
  */
@@ -94,7 +93,7 @@ async function publishAndList(
   expect(listing.ok).toBeTruthy()
 }
 
-test('MOB.7 features: ffMobileMarketplacePurchase defaults off then enables', async () => {
+test('MOB.7 features: ffMobileMarketplacePurchase is always on', async () => {
   const email = uniqueEmail('mob7-admin')
   await apiSignup({ email, password: PASSWORD })
   try {
@@ -104,21 +103,12 @@ test('MOB.7 features: ffMobileMarketplacePurchase defaults off then enables', as
   }
   const { access_token: token } = await apiLogin(email)
 
-  const beforeRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
+  const res = await fetch(`${API_BASE}/api/v1/platform/features`, {
     headers: authHeaders(token),
   })
-  expect(beforeRes.ok).toBeTruthy()
-  const before = (await beforeRes.json()) as { ffMobileMarketplacePurchase?: boolean }
-  expect(typeof before.ffMobileMarketplacePurchase === 'boolean').toBeTruthy()
-
-  await enableMobileMarketplacePurchase(token)
-
-  const afterRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
-    headers: authHeaders(token),
-  })
-  expect(afterRes.ok).toBeTruthy()
-  const after = (await afterRes.json()) as { ffMobileMarketplacePurchase?: boolean }
-  expect(after.ffMobileMarketplacePurchase).toBe(true)
+  expect(res.ok).toBeTruthy()
+  const features = (await res.json()) as { ffMobileMarketplacePurchase?: boolean }
+  expect(features.ffMobileMarketplacePurchase).toBe(true)
 })
 
 test('MOB.7 claim free course and list under /me/purchases', async () => {

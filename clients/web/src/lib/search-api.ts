@@ -22,6 +22,7 @@ export type SearchCourseItem = {
   reportCardsEnabled?: boolean
   visualBoardsEnabled?: boolean
   interactiveQuizzesEnabled?: boolean
+  screenShareEnabled?: boolean
   questionBankEnabled?: boolean
   standardsAlignmentEnabled?: boolean
 }

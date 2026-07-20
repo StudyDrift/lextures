@@ -48,6 +48,31 @@ services:
       retries: 5
       start_period: 20s
 
+  # SS.1 — coturn STUN/TURN for WebRTC screen sharing (REST time-limited credentials).
+  coturn:
+    image: coturn/coturn:4.6
+    command:
+      - "-n"
+      - "--log-file=stdout"
+      - "--listening-port=3478"
+      - "--tls-listening-port=5349"
+      - "--fingerprint"
+      - "--lt-cred-mech"
+      - "--use-auth-secret"
+      - "--static-auth-secret=${TURN_SHARED_SECRET:-lextures-dev-turn-secret}"
+      - "--realm=lextures.local"
+      - "--no-multicast-peers"
+      - "--no-cli"
+      - "--listening-ip=0.0.0.0"
+      - "--relay-ip=0.0.0.0"
+    ports:
+      - "3478:3478"
+      - "3478:3478/udp"
+      - "5349:5349"
+      - "5349:5349/udp"
+    # Browsers on the host use localhost; set TURN_URLS accordingly for native API.
+    # Production should set --external-ip and prefer turns:443 via TLS terminator.
+
   server:
     build:
       context: ./server
@@ -64,6 +89,9 @@ services:
       COURSE_FILES_ROOT: /var/course-files
       PORT: "8080"
       RABBITMQ_URL: amqp://studydrift:studydrift@rabbitmq:5672/
+      # SS.1 screen sharing TURN (coturn REST shared secret).
+      TURN_SHARED_SECRET: ${TURN_SHARED_SECRET:-lextures-dev-turn-secret}
+      TURN_URLS: ${TURN_URLS:-stun:localhost:3478,turn:localhost:3478?transport=udp,turn:localhost:3478?transport=tcp}
     ports:
       - "8080:8080"
     volumes:

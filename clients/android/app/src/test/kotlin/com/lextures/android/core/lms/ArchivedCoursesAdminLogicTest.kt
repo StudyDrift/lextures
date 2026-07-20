@@ -9,9 +9,9 @@ import org.junit.Test
 class ArchivedCoursesAdminLogicTest {
     @Test
     fun adminSettingsEnabledRequiresFlag() {
-        val off = MobilePlatformFeatures()
+        val off = MobilePlatformFeatures(ffMobileAdminConsole = false)
         assertFalse(ArchivedCoursesAdminLogic.adminSettingsEnabled(off))
-        val on = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val on = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertTrue(ArchivedCoursesAdminLogic.adminSettingsEnabled(on))
     }
 
@@ -27,7 +27,7 @@ class ArchivedCoursesAdminLogicTest {
 
     @Test
     fun shouldShowEntryRequiresFlagAndPermission() {
-        val features = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val features = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertFalse(
             ArchivedCoursesAdminLogic.shouldShowEntry(features, emptyList()),
         )

@@ -3,12 +3,12 @@ import XCTest
 
 final class AiModelsAdminLogicTests: XCTestCase {
     func testEntryRequiresFlagAndRbacPermission() {
-        let off = MobilePlatformFeatures(ffMobileAdminSettings: false)
+        let off = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: false)
         XCTAssertFalse(AiModelsAdminLogic.shouldShowEntry(
             features: off,
             permissions: [AiModelsAdminLogic.rbacManagePermission]
         ))
-        let on = MobilePlatformFeatures(ffMobileAdminSettings: true)
+        let on = MobilePlatformFeatures(ffMobileAdminConsole: false, ffMobileAdminSettings: true)
         XCTAssertFalse(AiModelsAdminLogic.shouldShowEntry(features: on, permissions: []))
         XCTAssertTrue(AiModelsAdminLogic.shouldShowEntry(
             features: on,

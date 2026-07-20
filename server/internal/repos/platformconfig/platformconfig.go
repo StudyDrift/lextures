@@ -168,6 +168,7 @@ type Row struct {
 	FFBoardsRealtime                   *bool
 	FFBoardsExternalSharing            *bool
 	FFInteractiveQuizzes               *bool
+	FFScreenShare                      *bool
 	FFIqLiveHosting                    *bool
 	FFIqTeamMode                       *bool
 	FFIqStudentPaced                   *bool
@@ -389,6 +390,7 @@ type Write struct {
 	FFBoardsRealtime                   *bool
 	FFBoardsExternalSharing            *bool
 	FFInteractiveQuizzes               *bool
+	FFScreenShare                      *bool
 	FFIqLiveHosting                    *bool
 	FFIqTeamMode                       *bool
 	FFIqStudentPaced                   *bool
@@ -606,6 +608,7 @@ SELECT
 	ff_boards_realtime,
 	ff_boards_external_sharing,
 	ff_interactive_quizzes,
+	ff_screen_share,
 	ff_iq_live_hosting,
 	ff_iq_team_mode,
 	ff_iq_student_paced,
@@ -816,6 +819,7 @@ WHERE id = 1
 		&r.FFBoardsRealtime,
 		&r.FFBoardsExternalSharing,
 		&r.FFInteractiveQuizzes,
+		&r.FFScreenShare,
 		&r.FFIqLiveHosting,
 		&r.FFIqTeamMode,
 		&r.FFIqStudentPaced,

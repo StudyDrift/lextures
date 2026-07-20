@@ -15,7 +15,7 @@ class TranscriptsAdvisingAdminLogicTest {
 
     @Test
     fun entryRequiresFlagPermissionAndFeature() {
-        val offAdmin = MobilePlatformFeatures(ffMobileAdminSettings = false, ffTranscripts = true)
+        val offAdmin = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = false, ffTranscripts = true)
         assertFalse(
             TranscriptsAdvisingAdminLogic.shouldShowEntry(
                 offAdmin,
@@ -23,7 +23,7 @@ class TranscriptsAdvisingAdminLogicTest {
             ),
         )
 
-        var on = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        var on = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertFalse(
             TranscriptsAdvisingAdminLogic.shouldShowEntry(
                 on,
@@ -43,7 +43,7 @@ class TranscriptsAdvisingAdminLogicTest {
 
     @Test
     fun sectionVisibilityByFlags() {
-        var features = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        var features = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertTrue(TranscriptsAdvisingAdminLogic.visibleSections(features).isEmpty())
 
         features = features.copy(ffTranscripts = true)
@@ -62,16 +62,14 @@ class TranscriptsAdvisingAdminLogicTest {
     @Test
     fun subViewGating() {
         val perms = listOf(TranscriptsAdvisingAdminLogic.RBAC_MANAGE_PERMISSION)
-        val transcriptsOnly = MobilePlatformFeatures(
-            ffMobileAdminSettings = true,
+        val transcriptsOnly = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true,
             ffTranscripts = true,
             ffAdvisingIntegration = false,
         )
         assertTrue(TranscriptsAdvisingAdminLogic.canViewTranscripts(transcriptsOnly, perms))
         assertFalse(TranscriptsAdvisingAdminLogic.canViewAdvising(transcriptsOnly, perms))
 
-        val advisingOnly = MobilePlatformFeatures(
-            ffMobileAdminSettings = true,
+        val advisingOnly = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true,
             ffTranscripts = false,
             ffAdvisingIntegration = true,
         )

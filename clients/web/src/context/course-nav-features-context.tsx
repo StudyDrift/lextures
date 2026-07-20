@@ -44,6 +44,8 @@ export type CourseNavFeatures = {
   visualBoardsEnabled: boolean
   /** IQ.1 — live game-based quizzes (default off). */
   interactiveQuizzesEnabled: boolean
+  /** SS.1 — cableless entire-screen sharing (default off). */
+  screenShareEnabled: boolean
   /** True while loading or re-fetching flags for the active course. */
   loading: boolean
   /** Re-load feature flags from the server (e.g. after saving settings). */
@@ -70,6 +72,7 @@ const defaultFeatures: CourseNavFeatures = {
   reportCardsEnabled: false,
   visualBoardsEnabled: false,
   interactiveQuizzesEnabled: false,
+  screenShareEnabled: false,
   loading: false,
   refresh: async () => {},
 }
@@ -101,6 +104,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
   const [reportCardsEnabled, setReportCardsEnabled] = useState(false)
   const [visualBoardsEnabled, setVisualBoardsEnabled] = useState(false)
   const [interactiveQuizzesEnabled, setInteractiveQuizzesEnabled] = useState(false)
+  const [screenShareEnabled, setScreenShareEnabled] = useState(false)
   const [loading, setLoading] = useState(!!courseCode)
 
   useEffect(() => {
@@ -128,6 +132,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setReportCardsEnabled(false)
       setVisualBoardsEnabled(false)
       setInteractiveQuizzesEnabled(false)
+      setScreenShareEnabled(false)
       setLoading(false)
       return
     }
@@ -153,6 +158,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setReportCardsEnabled(c.reportCardsEnabled === true)
       setVisualBoardsEnabled(c.visualBoardsEnabled === true)
       setInteractiveQuizzesEnabled(c.interactiveQuizzesEnabled === true)
+      setScreenShareEnabled(c.screenShareEnabled === true)
     } catch {
       setNotebookEnabled(true)
       setFeedEnabled(true)
@@ -173,6 +179,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setReportCardsEnabled(false)
       setVisualBoardsEnabled(false)
       setInteractiveQuizzesEnabled(false)
+      setScreenShareEnabled(false)
     } finally {
       setLoading(false)
     }
@@ -203,6 +210,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       reportCardsEnabled,
       visualBoardsEnabled,
       interactiveQuizzesEnabled,
+      screenShareEnabled,
       loading,
       refresh,
     }),
@@ -226,6 +234,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       reportCardsEnabled,
       visualBoardsEnabled,
       interactiveQuizzesEnabled,
+      screenShareEnabled,
       loading,
       refresh,
     ],

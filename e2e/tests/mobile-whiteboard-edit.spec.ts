@@ -1,8 +1,7 @@
 /**
  * MOB.6 — Mobile whiteboard authoring API parity
  *
- *   [x] Platform features exposes ffMobileWhiteboardEdit (default off)
- *   [x] Admin can enable ffMobileWhiteboardEdit via settings/platform
+ *   [x] Platform features exposes ffMobileWhiteboardEdit (always on)
  *   [x] Staff can create → update canvasData → delete a course whiteboard
  */
 import { execSync } from 'node:child_process'
@@ -56,7 +55,7 @@ async function enableMobileWhiteboardEdit(token: string) {
   }
 }
 
-test('MOB.6 features: ffMobileWhiteboardEdit defaults off then enables', async () => {
+test('MOB.6 features: ffMobileWhiteboardEdit is always on', async () => {
   const email = uniqueEmail('mob6-admin')
   await apiSignup({ email, password: PASSWORD })
   try {
@@ -66,21 +65,12 @@ test('MOB.6 features: ffMobileWhiteboardEdit defaults off then enables', async (
   }
   const { access_token: token } = await apiLogin(email)
 
-  const beforeRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
+  const res = await fetch(`${API_BASE}/api/v1/platform/features`, {
     headers: authHeaders(token),
   })
-  expect(beforeRes.ok).toBeTruthy()
-  const before = (await beforeRes.json()) as { ffMobileWhiteboardEdit?: boolean }
-  expect(typeof before.ffMobileWhiteboardEdit === 'boolean').toBeTruthy()
-
-  await enableMobileWhiteboardEdit(token)
-
-  const afterRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
-    headers: authHeaders(token),
-  })
-  expect(afterRes.ok).toBeTruthy()
-  const after = (await afterRes.json()) as { ffMobileWhiteboardEdit?: boolean }
-  expect(after.ffMobileWhiteboardEdit).toBe(true)
+  expect(res.ok).toBeTruthy()
+  const features = (await res.json()) as { ffMobileWhiteboardEdit?: boolean }
+  expect(features.ffMobileWhiteboardEdit).toBe(true)
 })
 
 test('MOB.6 whiteboard: create edit delete with web-compatible canvasData', async () => {

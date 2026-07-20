@@ -10,9 +10,9 @@ import java.util.Date
 class OrgStructureAdminLogicTest {
     @Test
     fun adminSettingsEnabled() {
-        val off = MobilePlatformFeatures()
+        val off = MobilePlatformFeatures(ffMobileAdminConsole = false)
         assertFalse(OrgStructureAdminLogic.adminSettingsEnabled(off))
-        val on = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val on = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertTrue(OrgStructureAdminLogic.adminSettingsEnabled(on))
     }
 
@@ -38,7 +38,7 @@ class OrgStructureAdminLogicTest {
 
     @Test
     fun shouldShowEntry() {
-        val features = MobilePlatformFeatures(ffMobileAdminSettings = true)
+        val features = MobilePlatformFeatures(ffMobileAdminConsole = false, ffMobileAdminSettings = true)
         assertFalse(OrgStructureAdminLogic.shouldShowEntry(features, emptyList()))
         assertTrue(
             OrgStructureAdminLogic.shouldShowEntry(

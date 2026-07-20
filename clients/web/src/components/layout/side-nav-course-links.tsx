@@ -81,6 +81,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     reportCardsEnabled,
     visualBoardsEnabled,
     interactiveQuizzesEnabled,
+    screenShareEnabled,
   } = useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
   const {
@@ -107,6 +108,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
 
   const boardsNavVisible = visualBoardsEnabled
   const liveQuizzesNavVisible = interactiveQuizzesEnabled
+  const screenShareNavVisible = screenShareEnabled
   const showCollaboration =
     feedEnabled ||
     discussionsEnabled ||
@@ -124,7 +126,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     canViewGradebook || (standardsAlignmentEnabled && canManageCourse)
 
   const showAssessmentTools =
-    (canManageQuestionBank && questionBankEnabled) || liveQuizzesNavVisible
+    (canManageQuestionBank && questionBankEnabled) || liveQuizzesNavVisible || screenShareNavVisible
 
   return (
     <>
@@ -226,6 +228,11 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
           {liveQuizzesNavVisible ? (
             <SideNavLink to={`${base}/live-quizzes`} icon={<Gamepad2 className="h-5 w-5" />}>
               Live Quizzes
+            </SideNavLink>
+          ) : null}
+          {screenShareNavVisible ? (
+            <SideNavLink to={`${base}/screen-share`} icon={<Video className="h-5 w-5" />}>
+              Screen share
             </SideNavLink>
           ) : null}
           {canManageQuestionBank && questionBankEnabled ? (

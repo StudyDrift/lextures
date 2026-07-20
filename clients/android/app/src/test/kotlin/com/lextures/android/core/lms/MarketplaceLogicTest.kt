@@ -87,7 +87,7 @@ class MarketplaceLogicTest {
     fun purchaseEnabledRequiresBothFlags() {
         assertFalse(MarketplaceLogic.purchaseEnabled(MobilePlatformFeatures()))
         assertFalse(
-            MarketplaceLogic.purchaseEnabled(MobilePlatformFeatures(ffCourseMarketplace = true)),
+            MarketplaceLogic.purchaseEnabled(MobilePlatformFeatures(ffCourseMarketplace = true, ffMobileMarketplacePurchase = false)),
         )
         assertTrue(
             MarketplaceLogic.purchaseEnabled(

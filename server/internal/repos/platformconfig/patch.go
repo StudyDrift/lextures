@@ -202,6 +202,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_boards_realtime", w.FFBoardsRealtime)
 	addBool("ff_boards_external_sharing", w.FFBoardsExternalSharing)
 	addBool("ff_interactive_quizzes", w.FFInteractiveQuizzes)
+	addBool("ff_screen_share", w.FFScreenShare)
 	addBool("ff_iq_live_hosting", w.FFIqLiveHosting)
 	addBool("ff_iq_team_mode", w.FFIqTeamMode)
 	addBool("ff_iq_student_paced", w.FFIqStudentPaced)

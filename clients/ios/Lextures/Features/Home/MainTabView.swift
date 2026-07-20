@@ -182,6 +182,7 @@ final class AppShellModel {
     var pendingSettingsAdminPage: SettingsMenuLogic.ItemId?
     var pendingParentStudentId: String?
     var pendingParentRoute: ParentRoute?
+    var pendingCourseCreate = false
 
     func consumePendingParentNavigation() -> (studentId: String?, route: ParentRoute?)? {
         defer {
@@ -286,6 +287,18 @@ final class AppShellModel {
     func consumePendingSettingsAdminPage() -> SettingsMenuLogic.ItemId? {
         defer { pendingSettingsAdminPage = nil }
         return pendingSettingsAdminPage
+    }
+
+    /// Requests the New Course flow from the global drawer: switch to the Courses
+    /// pane and flag the create sheet for `CoursesListView` to present.
+    func requestNewCourse() {
+        pendingCourseCreate = true
+        selectShellTab(.courses)
+    }
+
+    func consumePendingCourseCreate() -> Bool {
+        defer { pendingCourseCreate = false }
+        return pendingCourseCreate
     }
 
     func selectShellTab(_ tab: ShellTab) {

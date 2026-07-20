@@ -4,6 +4,7 @@ import XCTest
 final class RolesPermissionsAdminLogicTests: XCTestCase {
     func testAdminSettingsEnabledRequiresFlag() {
         var features = MobilePlatformFeatures()
+        features.ffMobileAdminConsole = false
         XCTAssertFalse(RolesPermissionsAdminLogic.adminSettingsEnabled(features))
         features.ffMobileAdminSettings = true
         XCTAssertTrue(RolesPermissionsAdminLogic.adminSettingsEnabled(features))
@@ -20,6 +21,7 @@ final class RolesPermissionsAdminLogicTests: XCTestCase {
 
     func testShouldShowEntryRequiresFlagAndPermission() {
         var features = MobilePlatformFeatures()
+        features.ffMobileAdminConsole = false
         features.ffMobileAdminSettings = true
         XCTAssertFalse(
             RolesPermissionsAdminLogic.shouldShowEntry(features: features, permissions: [])

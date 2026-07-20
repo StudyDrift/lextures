@@ -89,6 +89,7 @@ final class MarketplaceLogicTests: XCTestCase {
 
     func testPurchaseEnabledRequiresBothFlags() {
         var features = MobilePlatformFeatures()
+        features.ffMobileMarketplacePurchase = false
         XCTAssertFalse(MarketplaceLogic.purchaseEnabled(features))
         features.ffCourseMarketplace = true
         XCTAssertFalse(MarketplaceLogic.purchaseEnabled(features))
