@@ -106,8 +106,8 @@ final class LexturesMotionTests: XCTestCase {
         XCTAssertFalse(LXDelightMotion.shouldCelebrate(reduceMotion: false, enabled: true, seriousContext: true))
         XCTAssertFalse(LXDelightMotion.shouldCelebrate(reduceMotion: false, enabled: true, gamificationEnabled: false))
         XCTAssertTrue(LXDelightMotion.shouldShowStaticDelight(reduceMotion: true, enabled: true))
-        XCTAssertEqual(LXDelightMotion.interpolateProgress(from: 0, to: 100, t: 0), 0, accuracy: 0.0001)
-        XCTAssertEqual(LXDelightMotion.interpolateProgress(from: 0, to: 100, t: 1), 100, accuracy: 0.0001)
+        XCTAssertEqual(LXDelightMotion.interpolateProgress(from: 0, to: 100, progress: 0), 0, accuracy: 0.0001)
+        XCTAssertEqual(LXDelightMotion.interpolateProgress(from: 0, to: 100, progress: 1), 100, accuracy: 0.0001)
         XCTAssertLessThanOrEqual(LXDelightMotion.particleCap(forWidth: 320), 16)
         XCTAssertEqual(LXDelightMotion.progressDuration(reduceMotion: true, enabled: true), 0, accuracy: 0.0001)
     }
