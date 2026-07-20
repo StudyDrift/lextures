@@ -1,5 +1,7 @@
 import { render, screen } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
+import { PlatformFeaturesProvider } from '../../../../context/platform-features-context'
 import { ResultCard } from '../result-card'
 import type { AnswerAck } from '../../../../lib/live-quiz-realtime'
 
@@ -19,6 +21,10 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
+function wrap(ui: ReactNode) {
+  return render(<PlatformFeaturesProvider>{ui}</PlatformFeaturesProvider>)
+}
+
 describe('ResultCard', () => {
   it('renders explainable points breakdown', () => {
     const ack: AnswerAck = {
@@ -37,9 +43,22 @@ describe('ResultCard', () => {
         total: 1740,
       },
     }
-    render(<ResultCard ack={ack} />)
+    wrap(<ResultCard ack={ack} />)
     expect(screen.getByText('Correct!')).toBeTruthy()
     expect(screen.getByText('+1740')).toBeTruthy()
     expect(screen.getByText('+1000 base +640 speed +100 streak = 1740')).toBeTruthy()
+    expect(screen.getByTestId('quiz-answer-feedback')).toHaveAttribute('data-feedback', 'correct')
+  })
+
+  it('applies incorrect feedback without blocking (FR-3 / AC-2)', () => {
+    const ack: AnswerAck = {
+      type: 'answer_ack',
+      ok: true,
+      isCorrect: false,
+      points: 0,
+      pointsBreakdown: { base: 0, speedBonus: 0, streakBonus: 0, styleMultiplier: 1, powerUpFactor: 1, total: 0 },
+    }
+    wrap(<ResultCard ack={ack} />)
+    expect(screen.getByTestId('quiz-answer-feedback')).toHaveAttribute('data-feedback', 'incorrect')
   })
 })

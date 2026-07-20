@@ -420,6 +420,55 @@ enum LXControlMotion {
     }
 }
 
+// MARK: AN.7 — Delight & progress moments
+
+enum LXDelightMotion {
+    static let particleCap = 24
+    static let burstDuration = LexturesMotion.deliberate
+    static let maxFlashHz = 3
+
+    static func shouldAnimateProgress(reduceMotion: Bool, enabled: Bool) -> Bool {
+        enabled && !reduceMotion
+    }
+
+    static func shouldCelebrate(
+        reduceMotion: Bool,
+        enabled: Bool,
+        seriousContext: Bool = false,
+        gamificationEnabled: Bool = true
+    ) -> Bool {
+        guard enabled, !reduceMotion, !seriousContext, gamificationEnabled else { return false }
+        return true
+    }
+
+    static func shouldShowStaticDelight(
+        reduceMotion: Bool,
+        enabled: Bool,
+        seriousContext: Bool = false,
+        gamificationEnabled: Bool = true
+    ) -> Bool {
+        guard enabled else { return false }
+        if !gamificationEnabled { return false }
+        return reduceMotion || seriousContext
+    }
+
+    static func interpolateProgress(from startValue: Double, to endValue: Double, progress: Double) -> Double {
+        let clamped = min(1, max(0, progress))
+        let eased = 1 - pow(1 - clamped, 3)
+        return startValue + (endValue - startValue) * eased
+    }
+
+    static func particleCap(forWidth width: CGFloat, lowEnd: Bool = false) -> Int {
+        if lowEnd { return min(12, particleCap) }
+        if width < 480 { return min(16, particleCap) }
+        return particleCap
+    }
+
+    static func progressDuration(reduceMotion: Bool, enabled: Bool) -> TimeInterval {
+        shouldAnimateProgress(reduceMotion: reduceMotion, enabled: enabled) ? burstDuration : 0
+    }
+}
+
 private struct LXPressableModifier: ViewModifier {
     @Environment(\.lxReduceMotion) private var reduceMotion
     let isPressed: Bool

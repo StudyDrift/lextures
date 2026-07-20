@@ -680,6 +680,11 @@ export const FEATURE_LIFECYCLE_FAMILIES: readonly LifecycleFamily[] = [
         key: 'ffMotionControls',
         notes: 'COLLAPSE (docs/plan/flags.md): merged into ffMotionNavigation, the single motion kill-switch',
       },
+      {
+        kind: 'platform',
+        key: 'ffMotionDelight',
+        notes: 'COLLAPSE (docs/plan/flags.md): merged into ffMotionNavigation, the single motion kill-switch',
+      },
     ],
     edges: [
       {
@@ -700,6 +705,11 @@ export const FEATURE_LIFECYCLE_FAMILIES: readonly LifecycleFamily[] = [
       {
         parent: { kind: 'platform', key: 'ffMotionNavigation' },
         child: { kind: 'platform', key: 'ffMotionControls' },
+        parentAuthoritative: true,
+      },
+      {
+        parent: { kind: 'platform', key: 'ffMotionNavigation' },
+        child: { kind: 'platform', key: 'ffMotionDelight' },
         parentAuthoritative: true,
       },
     ],

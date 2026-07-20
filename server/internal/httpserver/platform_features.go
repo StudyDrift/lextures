@@ -59,6 +59,7 @@ type platformFeaturesJSON struct {
 	FFMotionLists                      bool `json:"ffMotionLists"`
 	FFMotionOverlays                   bool `json:"ffMotionOverlays"`
 	FFMotionControls                   bool `json:"ffMotionControls"`
+	FFMotionDelight                    bool `json:"ffMotionDelight"`
 	FFMobileCreateCourse               bool `json:"ffMobileCreateCourse"`
 	FFMobileCourseCreateV2             bool `json:"ffMobileCourseCreateV2"`
 	FFMobileCanvasImport               bool `json:"ffMobileCanvasImport"`
@@ -222,6 +223,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFMotionLists:                      cfg.FFMotionLists,
 		FFMotionOverlays:                   cfg.FFMotionOverlays,
 		FFMotionControls:                   cfg.FFMotionControls,
+		FFMotionDelight:                    cfg.FFMotionDelight,
 		FFMobileCreateCourse:               cfg.FFMobileCreateCourse,
 		FFMobileCourseCreateV2:             cfg.FFMobileCourseCreateV2,
 		FFMobileCanvasImport:               cfg.FFMobileCanvasImport,

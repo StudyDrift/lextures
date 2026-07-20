@@ -11,3 +11,4 @@ Completed implementation plans for the cross-platform motion language. Active pl
 | AN.4 | [Lists, grids & collection motion](AN.4-lists-collections-motion.md) |
 | AN.5 | [Overlays & surfaces](AN.5-overlays-surfaces.md) |
 | AN.6 | [Micro-interactions & controls](AN.6-micro-interactions-controls.md) |
+| AN.7 | [Delight & progress moments](AN.7-delight-progress-moments.md) |

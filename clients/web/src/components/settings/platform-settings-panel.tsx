@@ -172,6 +172,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffMotionLists: true,
     ffMotionOverlays: true,
     ffMotionControls: true,
+    ffMotionDelight: true,
     ffMobileCreateCourse: false,
     ffMobileCourseCreateV2: false,
     ffMobileCanvasImport: false,

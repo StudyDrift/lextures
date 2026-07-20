@@ -1,6 +1,6 @@
 # AN.7 — Delight & Progress Moments
 
-> Implementation plan. Source: [docs/plan/animations/README.md](README.md) (Motion & Animation Polish initiative).
+> Implementation plan (completed). Source: [docs/plan/animations/README.md](../../plan/animations/README.md) (Motion & Animation Polish initiative).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Motion & Animation Polish |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | PARTIAL — intro-completion celebration exists and is reduced-motion aware; most progress/gamification/quiz feedback is static |
+| **Status (today)** | DONE — web `delight-motion` + `AnimatedProgress`/`DelightMoment`/`useCountUp`, quiz answer feedback, leaderboard count-up, gamification/progress adoption, iOS/Android `LXDelightMotion` helpers, `ff_motion_delight` kill-switch (collapsed into motion master) |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Frontend Platform (web) + Mobile + Learning/Gamification |
 | **Depends on** | AN.1, AN.6 |
@@ -231,5 +231,5 @@ follow existing AI-content policies — out of scope here.
   iOS `Features/Gamification` & `Features/Mastery`, Android `features/gamification` & `features/quiz`.
 - Standards: WCAG 2.3.1 (Three Flashes), 1.4.1 (Use of Color), 2.2.2 (Pause/Stop/Hide), 4.1.3;
   Apple HIG "Feedback"; Material 3 motion.
-- Related plans: [AN.1](../../completed/animations/AN.1-motion-foundation-tokens.md), [AN.4](../../completed/animations/AN.4-lists-collections-motion.md),
+- Related plans: [AN.1](AN.1-motion-foundation-tokens.md), [AN.4](AN.4-lists-collections-motion.md),
   [AN.6](AN.6-micro-interactions-controls.md).

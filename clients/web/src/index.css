@@ -1678,6 +1678,130 @@ html[data-motion-controls='off'] .lx-control-spinner {
   }
 }
 
+/*
+ * AN.7 — Delight & progress moments (progress fills, quiz feedback, capped bursts).
+ * Gated by html[data-motion-delight] (set from ffMotionDelight) + reduced-motion.
+ */
+@keyframes lx-delight-correct-pop {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.85;
+  }
+  60% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes lx-delight-incorrect-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes lx-delight-badge-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lx-delight-particle {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx, 0), var(--dy, -40px)) scale(0.4);
+  }
+}
+
+.lx-delight-progress > [data-testid='animated-progress-fill'],
+.lx-delight-progress > div {
+  transition-property: width;
+  transition-duration: var(--dur-deliberate);
+  transition-timing-function: var(--ease-standard);
+}
+html.reduced-motion .lx-delight-progress > [data-testid='animated-progress-fill'],
+html.reduced-motion .lx-delight-progress > div,
+html[data-motion-delight='off'] .lx-delight-progress > [data-testid='animated-progress-fill'],
+html[data-motion-delight='off'] .lx-delight-progress > div {
+  transition-duration: 0ms;
+}
+
+.lx-delight-correct-pop {
+  animation: lx-delight-correct-pop var(--dur-base) var(--ease-bubble) 1;
+}
+.lx-delight-incorrect-shake {
+  animation: lx-delight-incorrect-shake var(--dur-base) var(--ease-standard) 1;
+}
+.lx-delight-correct-static,
+.lx-delight-incorrect-static {
+  /* Color/icon only — no motion (FR-6 / AC-5). */
+  transition: none;
+}
+.lx-delight-badge-in {
+  animation: lx-delight-badge-in var(--dur-deliberate) var(--ease-bubble) both;
+}
+html.reduced-motion .lx-delight-badge-in,
+html[data-motion-delight='off'] .lx-delight-badge-in {
+  animation: none;
+}
+html.reduced-motion .lx-delight-correct-pop,
+html.reduced-motion .lx-delight-incorrect-shake,
+html[data-motion-delight='off'] .lx-delight-correct-pop,
+html[data-motion-delight='off'] .lx-delight-incorrect-shake {
+  animation: none;
+}
+
+.lx-delight-burst {
+  z-index: 1;
+}
+.lx-delight-particle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px;
+  border-radius: 9999px;
+  background: hsl(var(--hue, 140) 70% 55%);
+  animation: lx-delight-particle var(--dur-deliberate) var(--ease-exit, var(--ease-standard)) forwards;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+html.reduced-motion .lx-delight-particle,
+html[data-motion-delight='off'] .lx-delight-particle {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.reduced-motion) .lx-delight-correct-pop,
+  html:not(.reduced-motion) .lx-delight-incorrect-shake,
+  html:not(.reduced-motion) .lx-delight-badge-in {
+    animation: none;
+  }
+  html:not(.reduced-motion) .lx-delight-particle {
+    display: none;
+  }
+}
+
 /* Study Flashcard 3D flip effect styles */
 .perspective-1000 {
   perspective: 1000px;

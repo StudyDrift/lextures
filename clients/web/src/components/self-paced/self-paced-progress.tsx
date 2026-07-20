@@ -10,6 +10,8 @@ import {
   formatProgressLabel,
   type SelfPacedProgress,
 } from '../../lib/self-paced-api'
+import { AnimatedProgress } from '../ui/animated-progress'
+import { DelightMoment } from '../ui/delight-moment'
 
 /** Accessible WCAG 2.1 AA progress bar with a visible text percentage. */
 export function SelfPacedProgressBar({
@@ -23,19 +25,12 @@ export function SelfPacedProgressBar({
   const text = formatProgressLabel(clamped)
   return (
     <div className="flex items-center gap-3">
-      <div
-        role="progressbar"
-        aria-valuenow={clamped}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={label ?? text}
-        className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
-      >
-        <div
-          className="h-full rounded-full bg-emerald-500 motion-safe:transition-[width] motion-safe:duration-300"
-          style={{ width: `${clamped}%` }}
-        />
-      </div>
+      <AnimatedProgress
+        value={clamped}
+        label={label ?? text}
+        className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 lx-delight-progress"
+        fillClassName="h-full rounded-full bg-emerald-500"
+      />
       <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200">
         {text}
       </span>
@@ -58,6 +53,12 @@ export function CompletionCelebration({
       aria-label="Course complete"
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4"
     >
+      <DelightMoment
+        active
+        kind="completion"
+        announcement="Course complete"
+        className="w-full max-w-md"
+      >
       <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl dark:bg-slate-800">
         <PartyPopper className="mx-auto h-12 w-12 text-emerald-500" aria-hidden />
         <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-white">
@@ -81,6 +82,7 @@ export function CompletionCelebration({
           </button>
         </div>
       </div>
+      </DelightMoment>
     </div>
   )
 }

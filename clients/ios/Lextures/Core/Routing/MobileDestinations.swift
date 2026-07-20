@@ -383,6 +383,7 @@ struct MobilePlatformFeatures: Equatable {
     /// AN.5 kill-switch; default on when unset.
     var ffMotionOverlays = true
     var ffMotionControls = true
+    var ffMotionDelight = true
     var oerLibraryEnabled = false
     var xapiEmissionEnabled = false
     var customFieldsEnabled = false
@@ -469,6 +470,7 @@ struct MobilePlatformFeatures: Equatable {
             ffMotionLists: features?.ffMotionLists != false,
             ffMotionOverlays: features?.ffMotionOverlays != false,
             ffMotionControls: features?.ffMotionControls != false,
+            ffMotionDelight: features?.ffMotionDelight != false,
             oerLibraryEnabled: features?.oerLibraryEnabled == true,
             xapiEmissionEnabled: features?.xapiEmissionEnabled == true,
             customFieldsEnabled: features?.customFieldsEnabled == true,

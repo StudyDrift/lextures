@@ -27,6 +27,7 @@ struct PlatformFeatures: Decodable {
     var ffMotionLists: Bool?
     var ffMotionOverlays: Bool?
     var ffMotionControls: Bool?
+    var ffMotionDelight: Bool?
     var oerLibraryEnabled: Bool?
     var xapiEmissionEnabled: Bool?
     var customFieldsEnabled: Bool?

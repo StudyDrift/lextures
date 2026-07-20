@@ -64,7 +64,7 @@ The full specification lives in **[AN.1](../../completed/animations/AN.1-motion-
 | **AN.4** | ~~Lists, grids & collection motion~~ → [completed](../../completed/animations/AN.4-lists-collections-motion.md) | MINOR | Every list/feed/board | Done — insert/remove/reorder, drag lift, `ff_motion_lists` |
 | **AN.5** | ~~Overlays & surfaces~~ → [completed](../../completed/animations/AN.5-overlays-surfaces.md) | MINOR | Modals, sheets, drawers, toasts, menus | Done — dialog/sheet/menu/toast/tooltip enter-exit, `ff_motion_overlays` |
 | **AN.6** | ~~Micro-interactions & controls~~ → [completed](../../completed/animations/AN.6-micro-interactions-controls.md) | MINOR | Every interactive control | Done — press/toggle/tab/validation/loading + haptics, `ff_motion_controls` |
-| **AN.7** | [Delight & progress moments](AN.7-delight-progress-moments.md) | MINOR | Gamification, quizzes, progress, mastery | Celebrations, streaks/badges/XP, quiz answer feedback, progress-ring & mastery fills |
+| **AN.7** | ~~Delight & progress moments~~ → [completed](../../completed/animations/AN.7-delight-progress-moments.md) | MINOR | Gamification, quizzes, progress, mastery | Done — progress fills, `DelightMoment`, quiz feedback, leaderboard count-up, `ff_motion_delight` |
 
 ## Sequencing
 
