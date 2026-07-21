@@ -1,56 +1,51 @@
 /**
  * PP.1 — Staff assign parent / guardian (API contract)
  *
- *   [x] GET parent-assign/students unauthenticated → 401
- *   [x] Regular user without assign permission → 403 on student search
+ *   [x] With ffParentPortal off → parent-assign returns 404 (feature-first)
+ *   [x] With flag on, unauthenticated search → 401
+ *   [x] With flag on, regular user without assign permission → 403
  *   [x] parent-invite/consume invalid token → 400
  *   [x] Org admin can search students via parent-assign API
  */
-import { test, expect } from '../fixtures/test.js'
+import { execSync } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { test, expect, uniqueEmail } from '../fixtures/test.js'
 import { apiSignup } from '../fixtures/api.js'
+import { setPlatformFlag } from '../lib/feature-lifecycle-helpers.js'
 
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? 'E2eTestPass1!'
-
-function uid(prefix = 'pp1') {
-  return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`
-}
-
-function uniqueEmail(prefix = 'pp1') {
-  return `${uid(prefix)}@test.invalid`
-}
 
 function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
 }
 
-async function getAdminToken(): Promise<string> {
-  const adminEmail = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
-  const loginRes = await fetch(`${API_BASE}/api/v1/auth/login`, {
+function databaseUrl(): string {
+  return (
+    process.env.DATABASE_URL ??
+    process.env.E2E_DATABASE_URL ??
+    'postgres://studydrift:studydrift@localhost:5432/studydrift?sslmode=disable'
+  )
+}
+
+async function apiLogin(email: string) {
+  const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: adminEmail, password: PASSWORD }),
+    body: JSON.stringify({ email, password: PASSWORD }),
   })
-  if (!loginRes.ok) {
-    await fetch(`${API_BASE}/api/v1/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: adminEmail,
-        password: PASSWORD,
-        display_name: 'E2E Admin',
-      }),
-    })
-    const retry = await fetch(`${API_BASE}/api/v1/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: adminEmail, password: PASSWORD }),
-    })
-    const { access_token } = (await retry.json()) as { access_token: string }
-    return access_token
-  }
-  const { access_token } = (await loginRes.json()) as { access_token: string }
-  return access_token
+  if (!res.ok) throw new Error(`login failed: ${await res.text()}`)
+  return (await res.json()) as { access_token: string }
+}
+
+function bootstrapGlobalAdmin(email: string) {
+  execSync(`go run ./cmd/bootstrap-admin -email=${email}`, {
+    cwd: path.join(repoRoot, 'server'),
+    env: { ...process.env, DATABASE_URL: databaseUrl() },
+    stdio: 'pipe',
+  })
 }
 
 function orgIdFromToken(token: string): string | null {
@@ -77,76 +72,109 @@ async function getMyOrgId(token: string): Promise<string | null> {
   return me.orgId ?? me.org_id ?? null
 }
 
-test('PP.1: parent-assign student search unauthenticated returns 401', async () => {
-  const res = await fetch(
-    `${API_BASE}/api/v1/orgs/00000000-0000-0000-0000-000000000001/parent-assign/students?q=a`,
-  )
-  expect(res.status).toBe(401)
-})
-
-test('PP.1: parent-invite consume invalid token returns 400', async () => {
-  const res = await fetch(`${API_BASE}/api/v1/auth/parent-invite/consume`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: 'not-a-real-invite-token', password: PASSWORD }),
-  })
-  expect(res.status).toBe(400)
-})
-
-test('PP.1: regular user without assign permission gets 403 on search', async () => {
-  const { access_token } = await apiSignup({
-    email: uniqueEmail('noperm'),
-    password: PASSWORD,
-  })
-  const orgId = await getMyOrgId(access_token)
-  if (!orgId) {
-    test.skip(true, 'could not determine org id')
-    return
+async function ensureGlobalAdmin(): Promise<string> {
+  const email = uniqueEmail('pp1-ga')
+  await apiSignup({ email, password: PASSWORD, displayName: 'PP.1 GA' })
+  try {
+    bootstrapGlobalAdmin(email)
+  } catch (err) {
+    test.skip(true, `bootstrap unavailable: ${err}`)
   }
-  const res = await fetch(
-    `${API_BASE}/api/v1/orgs/${orgId}/parent-assign/students?q=test`,
-    { headers: authHeaders(access_token) },
-  )
-  expect([403, 404]).toContain(res.status)
-})
+  return (await apiLogin(email)).access_token
+}
 
-test('PP.1: org admin can search students via parent-assign API', async () => {
-  const adminToken = await getAdminToken()
-  const orgId = await getMyOrgId(adminToken)
-  if (!orgId) {
-    test.skip(true, 'could not determine org id')
-    return
-  }
+test.describe('PP.1 parent-assign API', () => {
+  test('feature off returns 404 on parent-assign and invite consume', async () => {
+    const gaToken = await ensureGlobalAdmin()
+    await setPlatformFlag(gaToken, 'ffParentPortal', false)
 
-  const meRes = await fetch(`${API_BASE}/api/v1/me`, {
-    headers: authHeaders(adminToken),
-  })
-  if (!meRes.ok) {
-    test.skip(true, 'GET /me unavailable')
-    return
-  }
-  const meBody = (await meRes.json()) as { id?: string }
-  if (meBody.id) {
-    await fetch(`${API_BASE}/api/v1/orgs/${orgId}/role-grants`, {
+    const orgId = (await getMyOrgId(gaToken)) ?? '00000000-0000-0000-0000-000000000001'
+    const search = await fetch(
+      `${API_BASE}/api/v1/orgs/${orgId}/parent-assign/students?q=a`,
+      { headers: authHeaders(gaToken) },
+    )
+    expect(search.status).toBe(404)
+
+    const consume = await fetch(`${API_BASE}/api/v1/auth/parent-invite/consume`, {
       method: 'POST',
-      headers: authHeaders(adminToken),
-      body: JSON.stringify({ userId: meBody.id, role: 'org_admin' }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: 'not-a-real-invite-token', password: PASSWORD }),
     })
-  }
+    expect(consume.status).toBe(404)
+  })
 
-  const studentEmail = uniqueEmail('child')
-  await apiSignup({ email: studentEmail, password: PASSWORD })
+  test('feature on: unauthenticated search is 401; invalid invite is 400', async () => {
+    const gaToken = await ensureGlobalAdmin()
+    await setPlatformFlag(gaToken, 'ffParentPortal', true)
 
-  const res = await fetch(
-    `${API_BASE}/api/v1/orgs/${orgId}/parent-assign/students?q=${encodeURIComponent(studentEmail)}`,
-    { headers: authHeaders(adminToken) },
-  )
-  // Org admin may access via elevated path; 403 if permission not yet granted in this env.
-  if (res.status === 403) {
-    test.skip(true, 'admin lacks parent-links assign permission in this environment')
-    return
-  }
-  expect(res.ok).toBeTruthy()
-  const body = (await res.json()) as { students?: Array<{ email?: string }> }
-  expect(Array.isArray(body.students)).toBeTruthy()
+    const search = await fetch(
+      `${API_BASE}/api/v1/orgs/00000000-0000-0000-0000-000000000001/parent-assign/students?q=a`,
+    )
+    expect(search.status).toBe(401)
+
+    const consume = await fetch(`${API_BASE}/api/v1/auth/parent-invite/consume`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: 'not-a-real-invite-token', password: PASSWORD }),
+    })
+    expect(consume.status).toBe(400)
+  })
+
+  test('feature on: regular user without assign permission gets 403', async () => {
+    const gaToken = await ensureGlobalAdmin()
+    await setPlatformFlag(gaToken, 'ffParentPortal', true)
+
+    const { access_token } = await apiSignup({
+      email: uniqueEmail('pp1-noperm'),
+      password: PASSWORD,
+    })
+    const orgId = await getMyOrgId(access_token)
+    if (!orgId) {
+      test.skip(true, 'could not determine org id')
+      return
+    }
+    const res = await fetch(
+      `${API_BASE}/api/v1/orgs/${orgId}/parent-assign/students?q=test`,
+      { headers: authHeaders(access_token) },
+    )
+    expect([403, 404]).toContain(res.status)
+  })
+
+  test('feature on: org admin can search students', async () => {
+    const gaToken = await ensureGlobalAdmin()
+    await setPlatformFlag(gaToken, 'ffParentPortal', true)
+
+    const orgId = await getMyOrgId(gaToken)
+    if (!orgId) {
+      test.skip(true, 'could not determine org id')
+      return
+    }
+
+    const meRes = await fetch(`${API_BASE}/api/v1/me`, {
+      headers: authHeaders(gaToken),
+    })
+    if (!meRes.ok) {
+      test.skip(true, 'GET /me unavailable')
+      return
+    }
+    const meBody = (await meRes.json()) as { id?: string }
+    if (meBody.id) {
+      await fetch(`${API_BASE}/api/v1/orgs/${orgId}/role-grants`, {
+        method: 'POST',
+        headers: authHeaders(gaToken),
+        body: JSON.stringify({ userId: meBody.id, role: 'org_admin' }),
+      })
+    }
+
+    const studentEmail = uniqueEmail('pp1-child')
+    await apiSignup({ email: studentEmail, password: PASSWORD })
+
+    const res = await fetch(
+      `${API_BASE}/api/v1/orgs/${orgId}/parent-assign/students?q=${encodeURIComponent(studentEmail)}`,
+      { headers: authHeaders(gaToken) },
+    )
+    expect(res.ok, await res.text()).toBeTruthy()
+    const body = (await res.json()) as { students?: Array<{ email?: string }> }
+    expect(Array.isArray(body.students)).toBeTruthy()
+  })
 })

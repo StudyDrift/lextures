@@ -41,7 +41,8 @@ CREATE INDEX IF NOT EXISTS idx_parent_link_invites_email
 COMMENT ON TABLE "user".parent_link_invites IS
   'PP.1: One-time activate tokens for pending parent/guardian link invites.';
 
-INSERT INTO settings.email_template_slots (id, description, merge_fields, default_html, default_text)
+INSERT INTO settings.email_template_slots
+    (id, description, merge_fields, default_html, default_text, default_markdown)
 VALUES (
     'parent_guardian_invite',
     'Invite a parent/guardian to activate their account and view a linked student',
@@ -52,6 +53,13 @@ VALUES (
 {{org.name}} invited you to connect as a parent/guardian of {{student.name}}.
 
 Activate your account: {{link}}
+
+This link expires {{expires_at}}. Grades and other records are not included in this email.',
+    'Hi {{user.first_name}},
+
+{{org.name}} invited you to connect as a parent/guardian of **{{student.name}}**.
+
+[Activate your account]({{link}}) to set a password and open the Family dashboard.
 
 This link expires {{expires_at}}. Grades and other records are not included in this email.'
 )
