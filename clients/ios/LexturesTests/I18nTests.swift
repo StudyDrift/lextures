@@ -15,7 +15,7 @@ final class I18nTests: XCTestCase {
         XCTAssertEqual(LocalePreferences.resolveResourceLanguage("es"), "es")
         XCTAssertEqual(LocalePreferences.resolveResourceLanguage("fr-CA"), "fr")
         XCTAssertEqual(LocalePreferences.resolveResourceLanguage("ar"), "ar")
-        XCTAssertEqual(LocalePreferences.resolveResourceLanguage("en-XA"), "en-XA")
+        XCTAssertEqual(LocalePreferences.resolveResourceLanguage("en-XA"), "en")
         XCTAssertEqual(LocalePreferences.resolveResourceLanguage("de"), "en")
     }
 

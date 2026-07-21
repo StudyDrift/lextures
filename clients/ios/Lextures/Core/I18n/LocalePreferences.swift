@@ -16,7 +16,6 @@ final class LocalePreferences {
         ("es", "Español"),
         ("fr", "Français"),
         ("ar", "العربية"),
-        ("en-XA", "Pseudo (en-XA)"),
     ]
 
     private static let rtlLocales: Set<String> = ["ar", "he", "fa", "ur", "ps"]
@@ -77,13 +76,12 @@ final class LocalePreferences {
         Locale(identifier: acceptLanguageHeaderValue())
     }
 
-    /// Maps a tag to a bundled translation language (en/es/fr); RTL tags keep their layout tag.
+    /// Maps a tag to a bundled translation language (en/es/fr/ar).
     nonisolated static func resolveResourceLanguage(_ tag: String) -> String {
         let primary = tag.split(separator: "-").first?.lowercased() ?? "en"
         if primary == "es" || primary == "fr" || primary == "ar" {
             return String(primary)
         }
-        if tag == "en-XA" { return "en-XA" }
         return "en"
     }
 
