@@ -42,6 +42,7 @@ export default function App() {
         <Route path="/signup" element={<Pages.Signup />} />
         <Route path="/forgot-password" element={<Pages.ForgotPassword />} />
         <Route path="/reset-password" element={<Pages.ResetPassword />} />
+        <Route path="/activate-parent" element={<Pages.ActivateParent />} />
         <Route path="/ai-disclosure" element={<Pages.AiDisclosurePage />} />
         <Route path="/trust" element={<Pages.TrustCenterPage />} />
         <Route path="/type" element={<Pages.TypefacePage />} />
@@ -175,6 +176,7 @@ export default function App() {
             <Route path="/calendar" element={<Pages.Calendar />} />
             <Route path="/todos" element={<Pages.TodosPage />} />
             <Route path="/admin/accommodations" element={<Pages.AdminAccommodationsPage />} />
+            <Route path="/assign-parents" element={<Pages.AssignParentsPage />} />
             <Route path="/org-admin" element={<Pages.AdminLayout />}>
               <Route index element={<Pages.AdminOverview />} />
               <Route path="users" element={<Pages.AdminUsers />} />

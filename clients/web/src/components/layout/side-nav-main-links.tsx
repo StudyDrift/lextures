@@ -22,6 +22,7 @@ import {
   Sparkles,
   Store,
   ShoppingBag,
+  UserPlus,
   UsersRound,
 } from 'lucide-react'
 import { useInboxUnreadCount } from '../../context/use-inbox-unread'
@@ -30,6 +31,8 @@ import { usePermissions } from '../../context/use-permissions'
 import {
   PERM_ACCOMMODATIONS_MANAGE,
   PERM_PARENT_DASHBOARD,
+  PERM_PARENT_LINKS_MANAGE,
+  PERM_RBAC_MANAGE,
   PERM_REPORTS_VIEW,
 } from '../../lib/rbac-api'
 import { SideNavLink } from './side-nav-link'
@@ -59,11 +62,16 @@ export function SideNavMainLinks() {
     ffLibrary,
     ffConferenceScheduling,
     ragNotebookEnabled,
+    ffParentPortal,
   } = usePlatformFeatures()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
   const canManageAccommodations = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
   const isParent = !permLoading && allows(PERM_PARENT_DASHBOARD)
+  const canAssignParents =
+    !permLoading &&
+    ffParentPortal &&
+    (allows(PERM_PARENT_LINKS_MANAGE) || allows(PERM_RBAC_MANAGE))
 
   const unreadBadge = unreadInboxCount > 0 && (
     <span
@@ -229,9 +237,14 @@ export function SideNavMainLinks() {
         </>
       ) : null}
 
-      {(canViewReports || canManageAccommodations) ? (
+      {(canViewReports || canManageAccommodations || canAssignParents) ? (
         <>
           <SideNavSectionLabel>Administration</SideNavSectionLabel>
+          {canAssignParents ? (
+            <SideNavLink to="/assign-parents" icon={<UserPlus className="h-5 w-5" />}>
+              Assign parents
+            </SideNavLink>
+          ) : null}
           {canManageAccommodations && accommodationsEngineEnabled ? (
             <SideNavLink to="/admin/accommodations/audit" icon={<Accessibility className="h-5 w-5" />}>
               Accommodation audit

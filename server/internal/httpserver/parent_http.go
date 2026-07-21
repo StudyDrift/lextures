@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/parentlinks"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/repos/attendance"
+	"github.com/lextures/lextures/server/internal/service/parentassign"
 )
 
 func (d Deps) forbidParentViewerCourseWork(w http.ResponseWriter, r *http.Request, viewer uuid.UUID) bool {
@@ -327,7 +328,7 @@ func (d Deps) handleOrgParentLinksCollection() http.HandlerFunc {
 		}
 		switch r.Method {
 		case http.MethodGet:
-			if _, ok := d.orgRoleAccess(w, r, orgID, true); !ok {
+			if _, ok := d.parentLinksManageAccess(w, r, orgID); !ok {
 				return
 			}
 			list, err := parentlinks.ListByOrg(r.Context(), d.Pool, orgID, 200)
@@ -338,7 +339,7 @@ func (d Deps) handleOrgParentLinksCollection() http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			_ = json.NewEncoder(w).Encode(map[string]any{"links": list})
 		case http.MethodPost:
-			actor, ok := d.orgRoleAccess(w, r, orgID, true)
+			actor, ok := d.parentLinksManageAccess(w, r, orgID)
 			if !ok {
 				return
 			}
@@ -416,7 +417,7 @@ func (d Deps) handleOrgParentLinksBulk() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid organization id.")
 			return
 		}
-		actor, ok := d.orgRoleAccess(w, r, orgID, true)
+		actor, ok := d.parentLinksManageAccess(w, r, orgID)
 		if !ok {
 			return
 		}
@@ -445,28 +446,53 @@ func (d Deps) handleOrgParentLinksBulk() http.HandlerFunc {
 				if a == "" || b == "" {
 					continue
 				}
-				pu, err := user.FindByEmail(r.Context(), d.Pool, user.NormalizeEmail(a))
-				if err != nil || pu == nil {
-					continue
-				}
 				su, err := user.FindByEmail(r.Context(), d.Pool, user.NormalizeEmail(b))
 				if err != nil || su == nil {
 					continue
 				}
-				parentID, e1 := uuid.Parse(pu.ID)
 				studentID, e2 := uuid.Parse(su.ID)
-				if e1 != nil || e2 != nil || parentID == studentID {
+				if e2 != nil {
 					continue
 				}
-				if !d.assertSameOrgUsers(r.Context(), w, orgID, parentID, studentID) {
-					return
+				pu, err := user.FindByEmail(r.Context(), d.Pool, user.NormalizeEmail(a))
+				if err != nil {
+					continue
 				}
-				if _, err := parentlinks.UpsertActive(r.Context(), d.Pool, orgID, parentID, studentID, "parent", &actor); err != nil {
-					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to import row.")
-					return
+				if pu != nil {
+					parentID, e1 := uuid.Parse(pu.ID)
+					if e1 != nil || parentID == studentID {
+						continue
+					}
+					if !d.assertSameOrgUsers(r.Context(), w, orgID, parentID, studentID) {
+						return
+					}
+					if _, err := parentlinks.UpsertActive(r.Context(), d.Pool, orgID, parentID, studentID, "parent", &actor); err != nil {
+						apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to import row.")
+						return
+					}
+					_ = d.markUserAsParentAccount(r.Context(), parentID)
+					created++
+					continue
 				}
-				_ = d.markUserAsParentAccount(r.Context(), parentID)
-				created++
+				// Invite when the parent account is missing (PP.1).
+				name := a
+				if at := strings.Index(a, "@"); at > 0 {
+					name = a[:at]
+				}
+				ip := adminConsoleClientIP(r)
+				ua := r.UserAgent()
+				results, aerr := d.parentAssignService().AssignGuardians(r.Context(), orgID, studentID, actor, []parentassign.GuardianInput{{
+					Name:  name,
+					Email: a,
+				}}, &ip, &ua)
+				if aerr != nil {
+					continue
+				}
+				for _, res := range results {
+					if res.Status == parentassign.StatusLinked || res.Status == parentassign.StatusInvited {
+						created++
+					}
+				}
 			}
 		default:
 			var body struct {
@@ -525,7 +551,7 @@ func (d Deps) handleOrgParentLinkDelete() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid organization id.")
 			return
 		}
-		if _, ok := d.orgRoleAccess(w, r, orgID, true); !ok {
+		if _, ok := d.parentLinksManageAccess(w, r, orgID); !ok {
 			return
 		}
 		lid, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "lid")))

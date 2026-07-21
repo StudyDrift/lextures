@@ -477,6 +477,11 @@ func subjectForSlot(slot *emailtemplatesrepo.Slot, vars map[string]string) strin
 		return "Your StudyDrift sign-in link"
 	case "password_reset":
 		return "Reset your StudyDrift password"
+	case "parent_guardian_invite":
+		if name := strings.TrimSpace(vars["student.name"]); name != "" {
+			return fmt.Sprintf("Activate your parent account for %s", name)
+		}
+		return "Activate your parent account"
 	case "coppa_consent":
 		if name := strings.TrimSpace(vars["student.name"]); name != "" {
 			return fmt.Sprintf("Action required: Review privacy notice for %s", name)

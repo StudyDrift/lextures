@@ -671,6 +671,7 @@ func (d Deps) registerAuthRoutes(r chi.Router) {
 	r.Get("/api/v1/auth/cli/poll", d.handleCLIAuthPoll())
 	r.Post("/api/v1/auth/cli/approve", d.handleCLIAuthApprove())
 	r.Post("/api/v1/auth/reset-password", d.handleResetPassword())
+	r.Post("/api/v1/auth/parent-invite/consume", d.handleParentInviteConsume())
 	r.Post("/api/v1/auth/refresh", d.handleAuthRefresh())
 	r.Post("/api/v1/auth/logout", d.handleAuthLogout())
 	r.Post("/api/v1/auth/logout-all", d.handleAuthLogoutAll())
