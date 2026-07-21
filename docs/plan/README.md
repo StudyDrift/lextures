@@ -44,6 +44,7 @@ One plan per feature gap identified in `[docs/MISSING_FEATURES.md](../MISSING_FE
 - [VC — Visual Collaboration Boards](visual-collaboration/) · [completed](../completed/visual-collaboration/) — in-house real-time collaboration board behind a per-course feature flag (like the Whiteboard app); posts, layouts, presence, moderation, sharing, templates, export (VC.1–VC.10)
 - [IQ — Interactive Quizzes](interactive-quizzes/) · [completed](../completed/interactive-quizzes/) — in-house, game-based live quizzing behind a per-course feature flag; author quiz kits, host live games with join codes + leaderboards, plus team/student-paced/async-homework modes, reports/gradebook, sharing, moderation & accessibility, and AI generation (IQ.1–IQ.11)
 - [AN — Motion & Animation Polish](animations/) · [completed](../completed/animations/) — one cross-platform motion language (web/desktop/iOS/Android): the signature "bubble" spring, shared tokens, launch→landing & navigation transitions, skeleton→content load choreography, list/overlay/control motion, and delight moments — all reduced-motion & performance-budgeted (AN.1–AN.7)
+- [PP — Parent Portal (staff workflows)](../completed/parent-portal/) — permission-gated assign parents/guardians, invite-when-missing-account, activate-link pairing (PP.1+) on top of shipped 13.1 / W02
 
 ## Standards & Legal Hardening (2026-07-06)
 

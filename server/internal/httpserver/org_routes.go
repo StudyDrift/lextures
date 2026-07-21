@@ -11,6 +11,7 @@ func (d Deps) registerOrgRoutes(r chi.Router) {
 	r.Post("/api/v1/orgs/{orgId}/parent-links", d.handleOrgParentLinksCollection())
 	r.Post("/api/v1/orgs/{orgId}/parent-links/bulk", d.handleOrgParentLinksBulk())
 	r.Delete("/api/v1/orgs/{orgId}/parent-links/{lid}", d.handleOrgParentLinkDelete())
+	d.registerParentAssignRoutes(r)
 	r.Get("/api/v1/orgs/{orgId}/terms", d.handleOrgTermsRead())
 	r.Post("/api/v1/orgs/{orgId}/terms", d.handleOrgTermsPost())
 	r.Patch("/api/v1/orgs/{orgId}/terms/{tid}", d.handleOrgTermPatch())

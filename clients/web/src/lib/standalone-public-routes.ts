@@ -3,6 +3,7 @@ const STANDALONE_PUBLIC_ROUTE_PREFIXES = [
   '/signup',
   '/forgot-password',
   '/reset-password',
+  '/activate-parent',
   '/saml-callback',
   '/sso-error',
   '/ai-disclosure',

@@ -26,6 +26,7 @@ import {
   PERM_ACCOMMODATIONS_MANAGE,
   PERM_COURSE_CREATE,
   PERM_PARENT_DASHBOARD,
+  PERM_PARENT_LINKS_MANAGE,
   PERM_RBAC_MANAGE,
   PERM_REPORTS_VIEW,
   PERM_TENANT_ORG_ROLES_MANAGE,
@@ -395,6 +396,18 @@ export function buildGlobalSearchItems(
         hint: 'accommodation audit accessibility records history compliance',
       })
     }
+  }
+
+  if (
+    getPlatformFeatures().ffParentPortal === true &&
+    (allows(PERM_PARENT_LINKS_MANAGE) || allows(PERM_RBAC_MANAGE))
+  ) {
+    pushSearchPage(items, {
+      title: 'Assign parents',
+      subtitle: 'Link guardians to students',
+      path: '/assign-parents',
+      hint: 'assign parents guardians family link invite',
+    })
   }
 
   if (allows(PERM_COURSE_CREATE)) {

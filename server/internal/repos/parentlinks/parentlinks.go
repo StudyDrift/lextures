@@ -173,6 +173,88 @@ WHERE su.id = $1 AND pu.id = $2
 	return &l, nil
 }
 
+// UpsertPending creates or reactivates a pending link (invite path).
+func UpsertPending(ctx context.Context, pool *pgxpool.Pool, orgID, parentID, studentID uuid.UUID, relationship string, linkedBy *uuid.UUID) (*Link, error) {
+	if relationship == "" {
+		relationship = "parent"
+	}
+	var l Link
+	var linkedByOut *uuid.UUID
+	err := pool.QueryRow(ctx, `
+INSERT INTO "user".parent_student_links (org_id, parent_user_id, student_user_id, relationship, status, linked_by)
+VALUES ($1, $2, $3, $4, 'pending', $5)
+ON CONFLICT (parent_user_id, student_user_id) DO UPDATE SET
+  org_id = EXCLUDED.org_id,
+  relationship = EXCLUDED.relationship,
+  status = CASE
+    WHEN "user".parent_student_links.status = 'active' THEN 'active'
+    ELSE 'pending'
+  END,
+  linked_by = EXCLUDED.linked_by,
+  linked_at = now()
+RETURNING id, org_id, parent_user_id, student_user_id, relationship, status, linked_by, linked_at
+`, orgID, parentID, studentID, relationship, linkedBy).Scan(
+		&l.ID, &l.OrgID, &l.ParentUserID, &l.StudentUserID, &l.Relationship, &l.Status, &linkedByOut, &l.LinkedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	l.LinkedBy = linkedByOut
+	var sdn, pdn sql.NullString
+	err = pool.QueryRow(ctx, `
+SELECT su.email, su.display_name, pu.email, pu.display_name
+FROM "user".users su, "user".users pu
+WHERE su.id = $1 AND pu.id = $2
+`, studentID, parentID).Scan(&l.StudentEmail, &sdn, &l.ParentEmail, &pdn)
+	if err != nil {
+		return nil, err
+	}
+	l.StudentDisplay = strPtr(sdn)
+	l.ParentDisplay = strPtr(pdn)
+	return &l, nil
+}
+
+// ActivatePendingForParent flips pending links for a parent to active.
+func ActivatePendingForParent(ctx context.Context, pool *pgxpool.Pool, parentID uuid.UUID) (int64, error) {
+	tag, err := pool.Exec(ctx, `
+UPDATE "user".parent_student_links
+SET status = 'active', linked_at = now()
+WHERE parent_user_id = $1 AND status = 'pending'
+`, parentID)
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
+}
+
+// GetByID returns a link in an org or nil.
+func GetByID(ctx context.Context, pool *pgxpool.Pool, orgID, linkID uuid.UUID) (*Link, error) {
+	var l Link
+	var linkedBy *uuid.UUID
+	var sdn, pdn sql.NullString
+	err := pool.QueryRow(ctx, `
+SELECT l.id, l.org_id, l.parent_user_id, l.student_user_id, l.relationship, l.status, l.linked_by, l.linked_at,
+       su.email, su.display_name, pu.email, pu.display_name
+FROM "user".parent_student_links l
+INNER JOIN "user".users su ON su.id = l.student_user_id
+INNER JOIN "user".users pu ON pu.id = l.parent_user_id
+WHERE l.id = $1 AND l.org_id = $2
+`, linkID, orgID).Scan(
+		&l.ID, &l.OrgID, &l.ParentUserID, &l.StudentUserID, &l.Relationship, &l.Status, &linkedBy, &l.LinkedAt,
+		&l.StudentEmail, &sdn, &l.ParentEmail, &pdn,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	l.LinkedBy = linkedBy
+	l.StudentDisplay = strPtr(sdn)
+	l.ParentDisplay = strPtr(pdn)
+	return &l, nil
+}
+
 // Revoke sets status to revoked for a link in org.
 func Revoke(ctx context.Context, pool *pgxpool.Pool, orgID, linkID uuid.UUID) (bool, error) {
 	tag, err := pool.Exec(ctx, `

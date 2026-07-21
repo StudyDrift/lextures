@@ -17,6 +17,7 @@ var authSensitivePaths = map[string]bool{
 	"/api/v1/auth/signup":             true,
 	"/api/v1/auth/forgot-password":    true,
 	"/api/v1/auth/reset-password":     true,
+	"/api/v1/auth/parent-invite/consume": true,
 	"/api/v1/auth/magic-link/request": true,
 }
 

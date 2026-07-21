@@ -32,6 +32,9 @@ export const PERM_REPORTS_VIEW = 'global:app:reports:view' as const
 /** Student accommodation records (accessibility coordinators / Global Admin). */
 export const PERM_ACCOMMODATIONS_MANAGE = 'global:user:accommodations:manage' as const
 
+/** Assign parent/guardian links for students in the user's organization (PP.1). */
+export const PERM_PARENT_LINKS_MANAGE = 'org:parent-links:assign:manage' as const
+
 /** Re-export: per-course item create (`course:<courseCode>:item:create`), merged into `/me/permissions` via course grants. */
 export { courseItemCreatePermission as permCourseItemCreate } from './courses-api'
 

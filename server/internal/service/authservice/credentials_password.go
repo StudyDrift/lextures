@@ -25,6 +25,11 @@ func (e *PasswordPolicyViolationError) Error() string {
 	return e.Detail
 }
 
+// EnforceNewPassword validates local policy + optional HIBP for set-password flows (PP.1 activate).
+func EnforceNewPassword(ctx context.Context, pool *pgxpool.Pool, institutionID *uuid.UUID, password string, checker apw.Checker) (apw.Result, error) {
+	return enforceNewPassword(ctx, pool, institutionID, password, checker)
+}
+
 func enforceNewPassword(ctx context.Context, pool *pgxpool.Pool, institutionID *uuid.UUID, password string, checker apw.Checker) (apw.Result, error) {
 	row, err := pwdrepo.LoadEffective(ctx, pool, institutionID)
 	if err != nil {
