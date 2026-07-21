@@ -173,8 +173,9 @@ test.describe('PP.1 parent-assign API', () => {
       `${API_BASE}/api/v1/orgs/${orgId}/parent-assign/students?q=${encodeURIComponent(studentEmail)}`,
       { headers: authHeaders(gaToken) },
     )
-    expect(res.ok, await res.text()).toBeTruthy()
-    const body = (await res.json()) as { students?: Array<{ email?: string }> }
+    const text = await res.text()
+    expect(res.status, text).toBe(200)
+    const body = JSON.parse(text) as { students?: Array<{ email?: string }> }
     expect(Array.isArray(body.students)).toBeTruthy()
   })
 })
