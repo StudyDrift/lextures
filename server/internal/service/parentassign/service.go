@@ -464,8 +464,7 @@ func (d Deps) sendInvite(
 		firstName = parts[0]
 	}
 
-	var opts *mailpkg.ParentGuardianInviteOpts
-	opts = &mailpkg.ParentGuardianInviteOpts{
+	opts := &mailpkg.ParentGuardianInviteOpts{
 		OrgID:   &orgID,
 		Context: ctx,
 	}
