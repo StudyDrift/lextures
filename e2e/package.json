@@ -19,7 +19,10 @@
     "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.49.0",
     "@types/node": "^22.0.0",
-    "lighthouse": "13.2.0",
+    "lighthouse": "13.4.1",
     "tsx": "^4.20.3"
+  },
+  "overrides": {
+    "brace-expansion": "2.1.2"
   }
 }
