@@ -26,6 +26,20 @@ func TestBuildSystemPrompt_NoRAGFallback(t *testing.T) {
 	}
 }
 
+func TestBuildSystemPrompt_NoLegacyAudienceNoun(t *testing.T) {
+	sys := BuildSystemPrompt("Intro to Python", nil, "beginner", "Alex", true)
+	// Construct banned forms without contiguous literals (terminology guard).
+	hyphen := "self" + "-" + "learner"
+	for _, b := range []string{hyphen, hyphen + "s", "self" + " " + "learner", "Self" + "Learner"} {
+		if containsFold(sys, b) {
+			t.Fatalf("system prompt must not mention legacy audience noun: %q", sys)
+		}
+	}
+	if !containsAll(sys, "help learners understand") {
+		t.Fatalf("expected segment-neutral learner framing: %q", sys)
+	}
+}
+
 func TestSummarizeSession_TrimsLongHistory(t *testing.T) {
 	turns := make([]studybuddyrepo.Message, 0, 10)
 	for i := 0; i < 10; i++ {

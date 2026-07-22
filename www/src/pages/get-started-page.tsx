@@ -1,4 +1,4 @@
-import { ArrowLeft, BrainCircuit, GraduationCap, KeyRound } from 'lucide-react'
+import { ArrowLeft, GraduationCap, House, KeyRound } from 'lucide-react'
 import { useState } from 'react'
 import { WindLines } from '../components/home/wind-lines'
 import { MarketingPageShell } from '../components/marketing-page-shell'
@@ -36,15 +36,19 @@ function trackOnboarding(program: string, schoolCode?: string) {
   }
 }
 
-type Path = 'self-learner' | 'school'
+type Path = 'homeschool' | 'school'
 type Step = 'choose' | 'school-code'
+
+// Homeschool marketing segment for /get-started beacons (HS.2 FR-11 / HS.5).
+// The API still accepts the pre-rebrand program value during the dual-read window.
+const ONBOARDING_PROGRAM_HOMESCHOOL = 'homeschool'
 
 const PATHS = [
   {
-    id: 'self-learner' as Path,
-    icon: BrainCircuit,
-    title: 'Self-learner',
-    description: "I'm studying independently, for a certification, or on my own schedule.",
+    id: 'homeschool' as Path,
+    icon: House,
+    title: 'Homeschool',
+    description: "I'm homeschooling, studying for a certification, or learning on my own schedule.",
   },
   {
     id: 'school' as Path,
@@ -235,9 +239,9 @@ export function GetStartedPage() {
   const [step, setStep] = useState<Step>('choose')
 
   function handleChoose(path: Path) {
-    if (path === 'self-learner') {
-      trackOnboarding('self-learner')
-      window.location.href = SITE_LINKS.selfLearner
+    if (path === 'homeschool') {
+      trackOnboarding(ONBOARDING_PROGRAM_HOMESCHOOL)
+      window.location.href = SITE_LINKS.homeschool
       return
     }
     setStep('school-code')

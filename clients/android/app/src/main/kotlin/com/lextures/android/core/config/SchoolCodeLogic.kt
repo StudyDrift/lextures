@@ -5,7 +5,7 @@ package com.lextures.android.core.config
  * Special case: `local` routes the mobile app to the local API for development.
  */
 object SchoolCodeLogic {
-    const val SELF_LEARNER_API_BASE = "https://self.lextures.com"
+    const val HOMESCHOOL_API_BASE = "https://self.lextures.com"
     const val LOCAL_API_BASE = "http://127.0.0.1:8080"
     const val TENANT_HOST_SUFFIX = "lextures.com"
 

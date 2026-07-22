@@ -239,7 +239,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
   },
   {
     key: 'ffStripeBilling',
-    label: 'Stripe billing (self-learner)',
+    label: 'Stripe billing (homeschool)',
     description:
       'Stripe Checkout for course purchases and subscriptions, entitlement gating, and learner billing portal.',
     pack: 'marketplace',
@@ -485,7 +485,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
   },
   {
     key: 'ffOnboardingFlow',
-    label: 'Self-learner onboarding',
+    label: 'Homeschool onboarding',
     description:
       'Multi-step onboarding wizard with goal capture, optional diagnostic placement, and Start Here recommendations.',
     pack: 'marketplace',
@@ -494,7 +494,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     key: 'ffAiStudyBuddy',
     label: 'AI study buddy',
     description:
-      'Persistent self-learner AI companion with course-grounded answers, memory, and proactive study prompts.',
+      'Persistent homeschool AI companion with course-grounded answers, memory, and proactive study prompts.',
     pack: 'ai',
   },
   {

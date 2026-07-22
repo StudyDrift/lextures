@@ -7,7 +7,8 @@ enum MobileRoleKind: String, CaseIterable, Equatable {
     case student
     case instructor
     case parent
-    case selfLearner
+    /// No server/disk decoder reads this raw value (confirmed HS.4); rename is free.
+    case homeschool
 }
 
 /// Persisted active context for multi-role users (Learning vs Teaching vs Parent).

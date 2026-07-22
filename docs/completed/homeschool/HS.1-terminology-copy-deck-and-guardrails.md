@@ -6,6 +6,9 @@
 > [HS.6](HS.6-docs-compliance-and-e2e-metadata.md).
 > Code references: `www/src/lib/site-links.ts`, `clients/mobile/locales/*.json`,
 > `clients/web/src/components/settings/platform-feature-definitions.ts`, `scripts/`.
+>
+> **Shipped:** terminology deck, allowlist, CI warn-mode guard. See
+> [`docs/brand/homeschool-terminology.md`](../../brand/homeschool-terminology.md).
 
 ## Metadata
 
@@ -15,7 +18,7 @@
 | **Section** | Brand & terminology |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING — "self-learner" is used inconsistently across 40+ files with no canonical definition, no glossary, and no lint guard |
+| **Status (today)** | **DONE** — deck at `docs/brand/homeschool-terminology.md`; guard `scripts/check-homeschool-terminology.sh` in CI `--warn` until HS.6 |
 | **Estimated effort** | XS (≤1d) |
 | **Owner (proposed)** | Product/Brand + Platform |
 | **Depends on** | — |
@@ -279,5 +282,6 @@ eval checklist, not to a blanket find-and-replace here.
   `server/internal/**`, `server/migrations/142_onboarding_events.sql`, `e2e/lib/**`,
   `docs/isms/scope-statement.md`.
 - Related plans: [HS.2](HS.2-www-marketing-site-rebrand.md), [HS.3](HS.3-web-client-rebrand.md),
-  [HS.4](HS.4-mobile-clients-rebrand.md), [HS.5](HS.5-server-copy-and-onboarding-program.md),
+  [HS.4](HS.4-mobile-clients-rebrand.md),
+  [HS.5](HS.5-server-copy-and-onboarding-program.md),
   [HS.6](HS.6-docs-compliance-and-e2e-metadata.md).

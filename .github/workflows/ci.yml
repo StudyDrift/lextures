@@ -54,6 +54,11 @@ jobs:
         working-directory: .
         run: bash scripts/check-openrouter-coupling.sh
 
+      # HS.6 — terminology guard is required (fail on banned self-learner forms).
+      - name: Terminology guard
+        working-directory: .
+        run: bash scripts/check-homeschool-terminology.sh
+
       - name: Marketplace courses content validate (MC0)
         run: go run ./cmd/marketplace-courses-validate
 

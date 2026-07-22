@@ -66,7 +66,7 @@ export function ParentsPage() {
       <AudienceCta
         title="Ask your school if Lextures is in use"
         body="Parents access Lextures through their district or school — not a separate consumer signup. If your school runs Lextures, they can provision your parent account and link it to your children."
-        primaryHref={SITE_LINKS.selfLearner}
+        primaryHref={SITE_LINKS.homeschool}
         primaryLabel="See a sample parent view"
         secondaryHref="/docs"
         secondaryLabel="Read the docs"

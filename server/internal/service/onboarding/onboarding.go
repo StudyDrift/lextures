@@ -1,4 +1,4 @@
-// Package onboarding implements self-learner onboarding placement and recommendations (plan 15.11).
+// Package onboarding implements homeschool onboarding placement and recommendations (plan 15.11).
 package onboarding
 
 import (

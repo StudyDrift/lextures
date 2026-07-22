@@ -20,7 +20,8 @@ enum class MobileRoleKind {
     Student,
     Instructor,
     Parent,
-    SelfLearner,
+    /** No server/disk decoder reads this (confirmed HS.4); rename is free. */
+    Homeschool,
 }
 
 /** Persisted active context for multi-role users. */

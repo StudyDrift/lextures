@@ -34,6 +34,19 @@ func TestAssembleDisclosure_UsesOpenRouterNames(t *testing.T) {
 	if len(doc.Features) != len(disclosureFeatures) {
 		t.Fatalf("features=%d", len(doc.Features))
 	}
+	foundBuddy := false
+	for _, f := range doc.Features {
+		if f.Key != "ai_study_buddy" {
+			continue
+		}
+		foundBuddy = true
+		if f.Description != "Standalone study companion for homeschoolers." {
+			t.Fatalf("ai_study_buddy description=%q", f.Description)
+		}
+	}
+	if !foundBuddy {
+		t.Fatal("expected ai_study_buddy feature")
+	}
 }
 
 func TestAssembleDisclosure_FallsBackToModelID(t *testing.T) {

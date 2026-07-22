@@ -99,7 +99,7 @@ export function HigherEdPage() {
       <AudienceCta
         title="Walk the flows on the live app"
         body="The hosted app at self.lextures.com includes instructor and student views — gradebook, adaptive quizzes, blueprint sync, and LTI configuration — so your team can evaluate before deploying on your own infrastructure."
-        primaryHref={SITE_LINKS.selfLearner}
+        primaryHref={SITE_LINKS.homeschool}
         primaryLabel="Open self.lextures.com"
         secondaryHref="/pricing"
         secondaryLabel="Hosted vs self-host pricing"

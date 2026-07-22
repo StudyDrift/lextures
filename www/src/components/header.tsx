@@ -12,7 +12,7 @@ const AUDIENCE_LINKS = [
   { label: 'Higher education', href: '/higher-ed' },
   { label: 'K–12', href: '/k-12' },
   { label: 'Parents', href: '/parents' },
-  { label: 'Self-learners', href: '/self-learner' },
+  { label: 'Homeschool', href: '/homeschool' },
 ] as const
 
 function Logo() {

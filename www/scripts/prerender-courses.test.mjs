@@ -3,6 +3,7 @@ import { describe, it } from 'node:test'
 import {
   buildHeadTags,
   buildRobots,
+  buildLegacyAudienceRedirectHtml,
   buildSitemap,
   escapeHtml,
   injectHead,
@@ -86,6 +87,30 @@ describe('buildSitemap', () => {
     assert.match(xml, /https:\/\/lextures.com\/pricing/)
     // slug is path-encoded
     assert.match(xml, /evil%3Cscript%3E/)
+  })
+
+  it('includes /homeschool and excludes self-learner (HS.2)', () => {
+    const xml = buildSitemap([])
+    assert.match(xml, /<loc>https:\/\/lextures.com\/homeschool<\/loc>/)
+    assert.doesNotMatch(xml, /self-learner/)
+  })
+})
+
+describe('buildLegacyAudienceRedirectHtml', () => {
+  it('emits meta refresh, canonical, and fallback link', () => {
+    const html = buildLegacyAudienceRedirectHtml('https://lextures.com')
+    assert.match(html, /http-equiv="refresh" content="0; url=\/homeschool"/)
+    assert.match(html, /rel="canonical" href="https:\/\/lextures.com\/homeschool"/)
+    assert.match(html, /<a href="\/homeschool">Homeschool<\/a>/)
+  })
+
+  it('escapes the site origin in the canonical href', () => {
+    const html = buildLegacyAudienceRedirectHtml('https://evil.com/"onclick="alert(1)')
+    assert.match(
+      html,
+      /rel="canonical" href="https:\/\/evil.com\/&quot;onclick=&quot;alert\(1\)\/homeschool"/,
+    )
+    assert.doesNotMatch(html, /onclick="alert/)
   })
 })
 

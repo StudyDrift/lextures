@@ -33,7 +33,7 @@ export type CoverageLevel = (typeof COVERAGE_LEVELS)[number]
 export const CLIENTS = ['web', 'mobile', 'cli', 'ops', 'docs', 'multi'] as const
 export type ClientKind = (typeof CLIENTS)[number]
 
-export const MARKETS = ['K12', 'HE', 'SL', 'ALL'] as const
+export const MARKETS = ['K12', 'HE', 'HS', 'ALL'] as const
 export type Market = (typeof MARKETS)[number]
 
 export const RISK_LEVELS = ['critical', 'major', 'minor', 'none'] as const

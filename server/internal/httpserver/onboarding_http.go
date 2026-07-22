@@ -1,15 +1,25 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/onboardingevent"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
+
+// onboardingInsert writes a funnel event. Overridable in tests (HS.5 AC-5).
+// Keep allowed program values in sync with migration 433_onboarding_program_homeschool.sql.
+var onboardingInsert = func(ctx context.Context, db *pgxpool.Pool, e onboardingevent.Event) error {
+	return onboardingevent.Insert(ctx, db, e)
+}
 
 // ---------------------------------------------------------------------------
 // IP-based fixed-window rate limiter (onboarding endpoint only)
@@ -93,8 +103,11 @@ func (d Deps) handlePublicOnboardingTrack() http.HandlerFunc {
 			return
 		}
 
+		// Allowed set must stay in sync with onboarding_events_program_check
+		// (migration 433_onboarding_program_homeschool.sql). 'self-learner' remains
+		// accepted for pre-HS.2 clients during the dual-read window (HS.5 FR-3).
 		switch req.Program {
-		case "k-12", "higher-ed", "self-learner", "school":
+		case "k-12", "higher-ed", "self-learner", "homeschool", "school":
 		default:
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid program value")
 			return
@@ -125,9 +138,13 @@ func (d Deps) handlePublicOnboardingTrack() http.HandlerFunc {
 			evt.ScreenHeight = &req.ScreenHeight
 		}
 
-		// Silently swallow DB errors: clients must not be able to infer
-		// internal state from this unauthenticated endpoint.
-		_ = onboardingevent.Insert(r.Context(), d.Pool, evt)
+		// Swallow DB errors from the client's point of view (unauthenticated
+		// endpoint must not leak internal state), but log + metric so enum
+		// drift is visible (HS.5 FR-4 / FR-5). Log only the validated program.
+		if err := onboardingInsert(r.Context(), d.Pool, evt); err != nil {
+			slog.Warn("onboarding event insert failed", "program", req.Program)
+			telemetry.RecordOnboardingEventInsertFailed(req.Program)
+		}
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

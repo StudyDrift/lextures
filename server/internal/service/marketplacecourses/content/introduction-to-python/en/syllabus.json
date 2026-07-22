@@ -4,7 +4,7 @@
     {
       "id": "overview",
       "heading": "Course overview",
-      "markdown": "**Introduction to Python** is a free, self-paced, hands-on course for absolute beginners. You will go from \"what is a program?\" to writing a small working program of your own.\n\n- **Estimated time:** about 8–12 hours\n- **Format:** 8 modules with runnable examples, knowledge checks, four coding assignments, and a capstone\n- **Price:** Free — claim it from the marketplace\n- **Who it's for:** complete beginners, career switchers, students (HE / grades 8+), and self-learners\n\nEvery module includes code you can run. Assessments mix predict-the-output quizzes with write-the-code assignments. Syntax and semantics follow the [official Python 3 tutorial](https://docs.python.org/3/tutorial/index.html); style guidance follows [PEP 8](https://peps.python.org/pep-0008/)."
+      "markdown": "**Introduction to Python** is a free, self-paced, hands-on course for absolute beginners. You will go from \"what is a program?\" to writing a small working program of your own.\n\n- **Estimated time:** about 8–12 hours\n- **Format:** 8 modules with runnable examples, knowledge checks, four coding assignments, and a capstone\n- **Price:** Free — claim it from the marketplace\n- **Who it's for:** complete beginners, career switchers, students (HE / grades 8+), and homeschoolers\n\nEvery module includes code you can run. Assessments mix predict-the-output quizzes with write-the-code assignments. Syntax and semantics follow the [official Python 3 tutorial](https://docs.python.org/3/tutorial/index.html); style guidance follows [PEP 8](https://peps.python.org/pep-0008/)."
     },
     {
       "id": "outcomes",

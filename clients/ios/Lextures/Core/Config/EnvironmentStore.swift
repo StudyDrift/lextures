@@ -14,7 +14,8 @@ final class EnvironmentStore {
     }
 
     enum Kind: String {
-        case selfLearner
+        // DO NOT RENAME — persisted in UserDefaults as "selfLearner"; pin keeps upgrades in place.
+        case homeschool = "selfLearner"
         case school
     }
 
@@ -43,8 +44,8 @@ final class EnvironmentStore {
         schoolCode = defaults.string(forKey: Keys.schoolCode)
     }
 
-    func selectSelfLearner() {
-        persist(kind: .selfLearner, schoolCode: nil, apiBaseURL: SchoolCodeLogic.selfLearnerAPIBase)
+    func selectHomeschool() {
+        persist(kind: .homeschool, schoolCode: nil, apiBaseURL: SchoolCodeLogic.homeschoolAPIBase)
     }
 
     func selectSchool(code: String) {

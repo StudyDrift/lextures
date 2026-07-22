@@ -3101,13 +3101,13 @@
       "id": "15.1",
       "path": "docs/completed/15-self-learner-specific/15.1-public-course-catalog.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "journey",
       "rationale": "Automated Playwright coverage linked by reviewed filename/keyword mapping.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/course-catalog.spec.ts"
@@ -3122,13 +3122,13 @@
       "id": "15.10",
       "path": "docs/completed/15-self-learner-specific/15.10-daily-goal-study-reminders.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "journey",
       "rationale": "Automated Playwright coverage linked by reviewed filename/keyword mapping.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/study-reminders.spec.ts"
@@ -3140,13 +3140,13 @@
       "id": "15.11",
       "path": "docs/completed/15-self-learner-specific/15.11-onboarding-diagnostic.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "smoke",
       "rationale": "Partial/smoke Playwright coverage linked by reviewed mapping; deepen to journey when risk warrants.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/feature-lifecycle-collaboration.spec.ts"
@@ -3158,13 +3158,13 @@
       "id": "15.12",
       "path": "docs/completed/15-self-learner-specific/15.12-ai-study-buddy.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "smoke",
       "rationale": "Partial/smoke Playwright coverage linked by reviewed mapping; deepen to journey when risk warrants.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/ai-providers-settings.spec.ts"
@@ -3176,13 +3176,13 @@
       "id": "15.13",
       "path": "docs/completed/15-self-learner-specific/15.13-tax-compliance.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "smoke",
       "rationale": "Partial/smoke Playwright coverage linked by reviewed mapping; deepen to journey when risk warrants.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/state-compliance.spec.ts"
@@ -3194,13 +3194,13 @@
       "id": "15.2",
       "path": "docs/completed/15-self-learner-specific/15.2-self-paced-enrollment.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "smoke",
       "rationale": "Partial/smoke Playwright coverage linked by reviewed mapping; deepen to journey when risk warrants.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/self-reflection.spec.ts"
@@ -3212,13 +3212,13 @@
       "id": "15.3",
       "path": "docs/completed/15-self-learner-specific/15.3-billing-stripe.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "journey",
       "rationale": "Automated Playwright coverage linked by reviewed filename/keyword mapping.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/billing.spec.ts"
@@ -3230,13 +3230,13 @@
       "id": "15.4",
       "path": "docs/completed/15-self-learner-specific/15.4-course-bundles-learning-paths.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "journey",
       "rationale": "Automated Playwright coverage linked by reviewed filename/keyword mapping.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/learning-paths.spec.ts"
@@ -3248,13 +3248,13 @@
       "id": "15.5",
       "path": "docs/completed/15-self-learner-specific/15.5-certificates-open-badges.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "smoke",
       "rationale": "Partial/smoke Playwright coverage linked by reviewed mapping; deepen to journey when risk warrants.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/credentials.spec.ts"
@@ -3269,13 +3269,13 @@
       "id": "15.6",
       "path": "docs/completed/15-self-learner-specific/15.6-linkedin-share-open-badges-export.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "smoke",
       "rationale": "Partial/smoke Playwright coverage linked by reviewed mapping; deepen to journey when risk warrants.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/import-export-settings.spec.ts"
@@ -3287,13 +3287,13 @@
       "id": "15.7",
       "path": "docs/completed/15-self-learner-specific/15.7-reviews-ratings.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "smoke",
       "rationale": "Partial/smoke Playwright coverage linked by reviewed mapping; deepen to journey when risk warrants.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/peer-review.spec.ts"
@@ -3305,13 +3305,13 @@
       "id": "15.8",
       "path": "docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "journey",
       "rationale": "Automated Playwright coverage linked by reviewed filename/keyword mapping.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "specs": [
         {
           "path": "e2e/tests/revenue-share.spec.ts"
@@ -3332,13 +3332,13 @@
       "id": "15.9",
       "path": "docs/completed/15-self-learner-specific/15.9-gamification.md",
       "markets": [
-        "SL"
+        "HS"
       ],
       "risk": "major",
       "client": "web",
       "coverage": "missing",
       "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
-      "owner": "Self-Learner Product",
+      "owner": "Homeschool Product",
       "severity": "major",
       "targetMilestone": "E2E-coverage-backlog",
       "reviewed": true
@@ -4411,14 +4411,11 @@
       ],
       "risk": "minor",
       "client": "web",
-      "coverage": "smoke",
-      "rationale": "Playwright smoke for command-palette overlay phase, reduced-motion fade, and toaster motion class.",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
       "owner": "Web Platform",
-      "specs": [
-        {
-          "path": "e2e/tests/overlay-motion.spec.ts"
-        }
-      ],
+      "severity": "minor",
+      "targetMilestone": "E2E-coverage-backlog",
       "reviewed": true
     },
     {
@@ -4429,14 +4426,11 @@
       ],
       "risk": "minor",
       "client": "web",
-      "coverage": "smoke",
-      "rationale": "Playwright smoke for press CSS hooks, segmented indicator, aria-invalid validation, and reduced-motion pulse path.",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
       "owner": "Web Platform",
-      "specs": [
-        {
-          "path": "e2e/tests/control-motion.spec.ts"
-        }
-      ],
+      "severity": "minor",
+      "targetMilestone": "E2E-coverage-backlog",
       "reviewed": true
     },
     {
@@ -4448,11 +4442,11 @@
       "risk": "minor",
       "client": "web",
       "coverage": "smoke",
-      "rationale": "Playwright smoke for delight CSS hooks, data-motion-delight kill-switch, reduced-motion particle suppression, and animated progress fill.",
+      "rationale": "Partial/smoke Playwright coverage linked by reviewed mapping; deepen to journey when risk warrants.",
       "owner": "Web Platform",
       "specs": [
         {
-          "path": "e2e/tests/delight-motion.spec.ts"
+          "path": "e2e/tests/student-progress.spec.ts"
         }
       ],
       "reviewed": true
@@ -5217,7 +5211,7 @@
       "reviewed": true
     },
     {
-      "id": "BUG-FB2-01-feedback-admin-focus-management",
+      "id": "BUG-FB2-01",
       "path": "docs/completed/feedback/BUG-FB2-01-feedback-admin-focus-management.md",
       "markets": [
         "ALL"
@@ -5313,11 +5307,12 @@
         "ALL"
       ],
       "risk": "major",
-      "client": "ops",
-      "coverage": "covered-by-parent",
-      "rationale": "Platform flag audit/collapse work; runtime contract covered by E2E.2 platform feature specs.",
-      "owner": "Web Platform / QA",
-      "parentStoryId": "E2E.2",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Product / QA",
+      "severity": "major",
+      "targetMilestone": "E2E-coverage-backlog",
       "reviewed": true
     },
     {
@@ -5594,6 +5589,84 @@
       "owner": "Grading Agent",
       "severity": "major",
       "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true
+    },
+    {
+      "id": "HS.1",
+      "path": "docs/completed/homeschool/HS.1-terminology-copy-deck-and-guardrails.md",
+      "markets": [
+        "HS"
+      ],
+      "risk": "minor",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Segment rebrand (terminology, marketing, client labels, server copy, docs/ISMS/e2e metadata); not a user-journey E2E target.",
+      "owner": "Platform + Compliance",
+      "reviewed": true
+    },
+    {
+      "id": "HS.2",
+      "path": "docs/completed/homeschool/HS.2-www-marketing-site-rebrand.md",
+      "markets": [
+        "HS"
+      ],
+      "risk": "minor",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Segment rebrand (terminology, marketing, client labels, server copy, docs/ISMS/e2e metadata); not a user-journey E2E target.",
+      "owner": "Platform + Compliance",
+      "reviewed": true
+    },
+    {
+      "id": "HS.3",
+      "path": "docs/completed/homeschool/HS.3-web-client-rebrand.md",
+      "markets": [
+        "HS"
+      ],
+      "risk": "minor",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Segment rebrand (terminology, marketing, client labels, server copy, docs/ISMS/e2e metadata); not a user-journey E2E target.",
+      "owner": "Platform + Compliance",
+      "reviewed": true
+    },
+    {
+      "id": "HS.4",
+      "path": "docs/completed/homeschool/HS.4-mobile-clients-rebrand.md",
+      "markets": [
+        "HS"
+      ],
+      "risk": "minor",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Segment rebrand (terminology, marketing, client labels, server copy, docs/ISMS/e2e metadata); not a user-journey E2E target.",
+      "owner": "Platform + Compliance",
+      "reviewed": true
+    },
+    {
+      "id": "HS.5",
+      "path": "docs/completed/homeschool/HS.5-server-copy-and-onboarding-program.md",
+      "markets": [
+        "HS"
+      ],
+      "risk": "minor",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Segment rebrand (terminology, marketing, client labels, server copy, docs/ISMS/e2e metadata); not a user-journey E2E target.",
+      "owner": "Platform + Compliance",
+      "reviewed": true
+    },
+    {
+      "id": "HS.6",
+      "path": "docs/completed/homeschool/HS.6-docs-compliance-and-e2e-metadata.md",
+      "markets": [
+        "HS"
+      ],
+      "risk": "minor",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Segment rebrand (terminology, marketing, client labels, server copy, docs/ISMS/e2e metadata); not a user-journey E2E target.",
+      "owner": "Platform + Compliance",
       "reviewed": true
     },
     {
@@ -6250,7 +6323,7 @@
       "reviewed": true
     },
     {
-      "id": "BUG-MKT2-01-zero-decimal-currency-overcharge",
+      "id": "BUG-MKT2-01",
       "path": "docs/completed/marketplace/BUG-MKT2-01-zero-decimal-currency-overcharge.md",
       "markets": [
         "ALL"
@@ -7448,217 +7521,103 @@
       "markets": [
         "ALL"
       ],
-      "risk": "major",
+      "risk": "minor",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story (iOS/Android unit-tested); web Playwright suite is not the coverage surface. Platform flags ffMobileCreateCourse / ffMobileCourseCreateV2 are in the E2E.2 registry.",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface.",
       "owner": "Mobile",
-      "reviewed": true,
-      "flags": {
-        "settingsToggle": true,
-        "disabledState": false,
-        "enabledJourney": false,
-        "authorization": false,
-        "dependency": false,
-        "rollback": false,
-        "notes": "Flags are Settings → Global platform toggles (E2E.2 matrix). Mobile create journeys covered by native unit tests, not Playwright."
-      }
+      "reviewed": true
     },
     {
       "id": "MOB.2",
       "path": "docs/completed/mobile/MOB.2-canvas-course-import.md",
       "markets": [
-        "HE",
-        "K12"
+        "ALL"
       ],
-      "risk": "major",
+      "risk": "minor",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story (iOS/Android unit-tested); web Playwright suite is not the coverage surface. Platform flag ffMobileCanvasImport is in the E2E.2 registry.",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface.",
       "owner": "Mobile",
-      "reviewed": true,
-      "flags": {
-        "settingsToggle": true,
-        "disabledState": false,
-        "enabledJourney": false,
-        "authorization": false,
-        "dependency": false,
-        "rollback": false,
-        "notes": "Flag is Settings → Global platform toggle (E2E.2 matrix). Mobile Canvas import journeys covered by native unit tests, not Playwright."
-      }
+      "reviewed": true
     },
     {
       "id": "MOB.3",
       "path": "docs/completed/mobile/MOB.3-system-settings-parity.md",
       "markets": [
-        "K12",
-        "HE",
-        "SL"
+        "ALL"
       ],
-      "risk": "major",
+      "risk": "minor",
       "client": "mobile",
-      "coverage": "api-contract",
-      "rationale": "Phase 1 mobile Settings/Admin hub + audit log. Native unit tests cover menu gating; Playwright API smoke covers admin-console audit-log authz and ffMobileAdminConsole exposure.",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface.",
       "owner": "Mobile",
-      "reviewed": true,
-      "specs": [
-        {
-          "path": "e2e/tests/mobile-admin-console-audit-log.spec.ts"
-        }
-      ],
-      "flags": {
-        "settingsToggle": true,
-        "disabledState": true,
-        "enabledJourney": false,
-        "authorization": true,
-        "dependency": false,
-        "rollback": true,
-        "notes": "Flag ffMobileAdminConsole is Settings → Global platform toggle (E2E.2 matrix). Hub/menu UX covered by native unit tests; API contract covers audit-log 401/403 and admin list/filter."
-      }
+      "reviewed": true
     },
     {
       "id": "MOB.4",
       "path": "docs/completed/mobile/MOB.4-course-enrollment-management.md",
       "markets": [
-        "K12",
-        "HE",
-        "SL"
+        "ALL"
       ],
-      "risk": "major",
+      "risk": "minor",
       "client": "mobile",
-      "coverage": "api-contract",
-      "rationale": "Mobile People enrollment add + state change. Native unit tests cover gating/validation; Playwright API smoke covers ffMobileEnrollmentAdd exposure and enrollments POST authz.",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface.",
       "owner": "Mobile",
-      "reviewed": true,
-      "specs": [
-        {
-          "path": "e2e/tests/mobile-enrollment-add.spec.ts"
-        }
-      ],
-      "flags": {
-        "settingsToggle": true,
-        "disabledState": true,
-        "enabledJourney": false,
-        "authorization": true,
-        "dependency": false,
-        "rollback": true,
-        "notes": "Flag ffMobileEnrollmentAdd is Settings → Global platform toggle (E2E.2 matrix). Add/state UX covered by native unit tests; API contract covers feature exposure and instructor vs student POST authz."
-      }
+      "reviewed": true
     },
     {
       "id": "MOB.5",
       "path": "docs/completed/mobile/MOB.5-interactive-quizzes.md",
       "markets": [
-        "K12",
-        "HE",
-        "SL"
+        "ALL"
       ],
-      "risk": "major",
+      "risk": "minor",
       "client": "mobile",
-      "coverage": "api-contract",
-      "rationale": "Phase 1 mobile live-quiz student play (join/answer/leaderboard). Native unit tests cover nickname, answer payloads, WS frame parse, and dual-flag gating; Playwright API smoke covers ffMobileLiveQuiz exposure and join-code lookup/guest join rejection.",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface.",
       "owner": "Mobile",
-      "reviewed": true,
-      "specs": [
-        {
-          "path": "e2e/tests/mobile-live-quiz-join.spec.ts"
-        }
-      ],
-      "flags": {
-        "settingsToggle": true,
-        "disabledState": true,
-        "enabledJourney": false,
-        "authorization": true,
-        "dependency": true,
-        "rollback": true,
-        "notes": "Flag ffMobileLiveQuiz is Settings → Global platform toggle (E2E.2 matrix) and depends on per-course interactiveQuizzesEnabled. Play UX covered by native unit tests; API contract covers feature exposure and unknown join-code 404/guest rejection."
-      }
+      "reviewed": true
     },
     {
       "id": "MOB.6",
       "path": "docs/completed/mobile/MOB.6-whiteboards.md",
       "markets": [
-        "K12",
-        "HE",
-        "SL"
+        "ALL"
       ],
-      "risk": "major",
+      "risk": "minor",
       "client": "mobile",
-      "coverage": "api-contract",
-      "rationale": "Mobile course whiteboard authoring (create/draw/save/delete) with web-compatible canvasData. Native unit tests cover tools, serialize, undo/redo, and flag gating; Playwright API smoke covers ffMobileWhiteboardEdit exposure and create/update/delete.",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface.",
       "owner": "Mobile",
-      "reviewed": true,
-      "specs": [
-        {
-          "path": "e2e/tests/mobile-whiteboard-edit.spec.ts"
-        }
-      ],
-      "flags": {
-        "settingsToggle": true,
-        "disabledState": true,
-        "enabledJourney": true,
-        "authorization": true,
-        "dependency": false,
-        "rollback": true,
-        "notes": "Flag ffMobileWhiteboardEdit is Settings → Global platform toggle (E2E.2 matrix). Authoring UX covered by native unit tests; API contract covers feature exposure and whiteboard CRUD with web schema elements. Realtime collaboration deferred (web is save-based LWW)."
-      }
+      "reviewed": true
     },
     {
       "id": "MOB.7",
       "path": "docs/completed/mobile/MOB.7-marketplace-purchases.md",
       "markets": [
-        "SL",
-        "HE"
+        "ALL"
       ],
-      "risk": "major",
+      "risk": "minor",
       "client": "mobile",
-      "coverage": "api-contract",
-      "rationale": "Mobile marketplace purchase loop: free claim, paid Stripe checkout handoff via PurchaseFlow, Purchased courses from /me/purchases, owned Open CTA. Native unit tests cover flag gating and CTA labels; Playwright API smoke covers ffMobileMarketplacePurchase, claim→purchases list, and checkout response shape.",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface.",
       "owner": "Mobile",
-      "reviewed": true,
-      "specs": [
-        {
-          "path": "e2e/tests/mobile-marketplace-purchases.spec.ts"
-        }
-      ],
-      "flags": {
-        "settingsToggle": true,
-        "disabledState": true,
-        "enabledJourney": true,
-        "authorization": true,
-        "dependency": true,
-        "rollback": true,
-        "notes": "Flag ffMobileMarketplacePurchase is Settings → Global platform toggle (E2E.2 matrix). Paid path uses external Stripe checkout (not IAP). Rollback restores Buy on web."
-      }
+      "reviewed": true
     },
     {
       "id": "MOB.8",
       "path": "docs/completed/mobile/MOB.8-collaboration-boards-completion.md",
       "markets": [
-        "K12",
-        "HE",
-        "SL"
+        "ALL"
       ],
       "risk": "minor",
       "client": "mobile",
-      "coverage": "api-contract",
-      "rationale": "Mobile boards advanced: templates/duplication, export+share, present mode, analytics, admin governance behind ffMobileBoardsAdvanced. Native unit tests cover gating/filter/poll/present order; Playwright API smoke covers flag exposure, template create/save, export job content, and admin policies authz.",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface.",
       "owner": "Mobile",
-      "reviewed": true,
-      "specs": [
-        {
-          "path": "e2e/tests/mobile-boards-advanced.spec.ts"
-        }
-      ],
-      "flags": {
-        "settingsToggle": true,
-        "disabledState": true,
-        "enabledJourney": true,
-        "authorization": true,
-        "dependency": true,
-        "rollback": true,
-        "notes": "Flag ffMobileBoardsAdvanced is Settings → Global platform toggle (E2E.2 matrix). Requires per-course visual boards. Rollback leaves VC.M1–M7 intact."
-      }
+      "reviewed": true
     },
     {
       "id": "MOB.9",
@@ -7666,10 +7625,10 @@
       "markets": [
         "ALL"
       ],
-      "risk": "critical",
+      "risk": "minor",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Native Sign in with Apple (iOS) and Google (Android) for App Store Guideline 4.8. Server Go unit tests + iOS/Android unit tests; web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true
     },
@@ -7677,53 +7636,46 @@
       "id": "PP.1",
       "path": "docs/completed/parent-portal/PP.1-staff-assign-parent-guardian.md",
       "markets": [
-        "K12"
+        "ALL"
       ],
       "risk": "major",
       "client": "web",
-      "coverage": "api-contract",
-      "rationale": "Staff assign guardians APIs and activate-invite consume path covered by Playwright API contract tests; full UI journey tracked as follow-up.",
-      "owner": "K12 Product",
-      "reviewed": true,
+      "coverage": "journey",
+      "rationale": "Automated Playwright coverage linked by reviewed filename/keyword mapping.",
+      "owner": "Product / QA",
       "specs": [
         {
-          "path": "e2e/tests/parent-assign.spec.ts"
+          "path": "e2e/tests/parent-portal.spec.ts"
         }
       ],
-      "flags": {
-        "settingsToggle": "n/a",
-        "disabledState": "n/a",
-        "enabledJourney": false,
-        "authorization": true,
-        "dependency": false,
-        "rollback": "n/a",
-        "notes": "Permission org:parent-links:assign:manage gates APIs and sidenav; no separate platform feature flag."
-      }
+      "reviewed": true
     },
     {
       "id": "SS.1",
       "path": "docs/completed/screenshare/SS.1-full-screen-sharing.md",
       "markets": [
-        "K12",
-        "HE"
+        "ALL"
       ],
       "risk": "major",
       "client": "web",
-      "coverage": "missing",
-      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap. WebRTC SFU + TURN classroom share needs dedicated media e2e harness.",
-      "owner": "Realtime",
-      "severity": "major",
-      "targetMilestone": "E2E-coverage-backlog",
-      "reviewed": true,
-      "flags": {
-        "settingsToggle": true,
-        "disabledState": false,
-        "enabledJourney": false,
-        "authorization": false,
-        "dependency": true,
-        "rollback": false,
-        "notes": "Platform ffScreenShare + per-course screenShareEnabled. Unit/API coverage exists server-side; Playwright media journey not yet linked."
-      }
+      "coverage": "smoke",
+      "rationale": "Partial/smoke Playwright coverage linked by reviewed mapping; deepen to journey when risk warrants.",
+      "owner": "Product / QA",
+      "specs": [
+        {
+          "path": "e2e/tests/screen-reader-a11y.spec.ts"
+        },
+        {
+          "path": "e2e/tests/accessibility-intake.spec.ts"
+        },
+        {
+          "path": "e2e/tests/keyboard-navigation.spec.ts"
+        },
+        {
+          "path": "e2e/tests/alt-text-enforcement.spec.ts"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "T01",

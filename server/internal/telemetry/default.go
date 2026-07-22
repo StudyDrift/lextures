@@ -12,6 +12,9 @@ var defaultMetrics atomic.Pointer[Metrics]
 // setDefault installs m as the process-wide metrics instance (called by Init).
 func setDefault(m *Metrics) { defaultMetrics.Store(m) }
 
+// SetDefaultForTest installs or clears the process-wide metrics instance for tests.
+func SetDefaultForTest(m *Metrics) { setDefault(m) }
+
 // Default returns the process-wide Metrics, or nil if telemetry is not started.
 func Default() *Metrics { return defaultMetrics.Load() }
 
@@ -127,6 +130,13 @@ func RecordFeedbackSubmitError() {
 func ObserveFeedbackAdminList(seconds float64) {
 	if m := defaultMetrics.Load(); m != nil {
 		m.ObserveFeedbackAdminList(seconds)
+	}
+}
+
+// RecordOnboardingEventInsertFailed records a failed onboarding_events insert (plan HS.5).
+func RecordOnboardingEventInsertFailed(program string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordOnboardingEventInsertFailed(program)
 	}
 }
 

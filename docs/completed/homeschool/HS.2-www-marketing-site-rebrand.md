@@ -1,8 +1,9 @@
 # HS.2 — www marketing site rebrand (self-learner → Homeschool)
 
-> Implementation plan. Source: product rebrand of the **self-learner** segment to **Homeschool**.
-> Terminology and copy are fixed by [HS.1](HS.1-terminology-copy-deck-and-guardrails.md).
-> Code references: `www/src/app.tsx`, `www/src/pages/self-learner-page.tsx`,
+> Implementation plan. **Status: DONE** (moved from `docs/plan/homeschool/`). Source: product
+> rebrand of the **self-learner** segment to **Homeschool**. Terminology and copy are fixed by
+> [HS.1](HS.1-terminology-copy-deck-and-guardrails.md).
+> Code references: `www/src/app.tsx`, `www/src/pages/homeschool-page.tsx`,
 > `www/src/components/{header,site-footer}.tsx`, `www/src/lib/{site-links,api-base}.ts`,
 > `www/src/pages/{pricing,get-started,k12,higher-ed,parents}-page.tsx`,
 > `www/scripts/prerender-courses.mjs`, `.github/workflows/pages-www.yml`.
@@ -13,7 +14,7 @@
 |---|---|
 | **Feature ID** | HS.2 |
 | **Section** | Marketing site (www) |
-| **Status (today)** | PARTIAL — every audience surface names the segment "Self-learner"; the route is `/self-learner` and is indexed via `sitemap.xml` |
+| **Status (today)** | DONE — `/homeschool` audience page, nav/footer/pricing/get-started copy, `/self-learner` static redirect stub + SPA replace, sitemap updated |
 | **Severity** | MAJOR — public, indexed surface; a bad route change loses the segment's organic entry point |
 | **Markets** | K12 / HE / HS |
 | **Estimated effort** | S (1w) |
@@ -307,4 +308,4 @@ Not AI-touching.
   (Timing Adjustable) for the meta-refresh fallback link.
 - Related plans: [HS.1](HS.1-terminology-copy-deck-and-guardrails.md),
   [HS.5](HS.5-server-copy-and-onboarding-program.md),
-  [MKT10 — www marketplace SEO](../../completed/marketplace/MKT10-www-marketplace-seo.md).
+  [MKT10 — www marketplace SEO](../marketplace/MKT10-www-marketplace-seo.md).

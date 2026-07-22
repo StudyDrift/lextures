@@ -1,37 +1,37 @@
 # Completed feature E2E coverage report
 
-Total stories: **483**
+Total stories: **498**
 
 ## Coverage levels
 
 | Level | Count |
 |---|---:|
-| journey | 81 |
-| smoke | 170 |
-| api-contract | 4 |
-| covered-by-parent | 12 |
+| journey | 82 |
+| smoke | 172 |
+| api-contract | 1 |
+| covered-by-parent | 11 |
 | manual | 8 |
-| not-applicable | 152 |
-| missing | 56 |
+| not-applicable | 165 |
+| missing | 59 |
 
 ## By client
 
 | Client | Count |
 |---|---:|
 | cli | 48 |
-| docs | 7 |
-| mobile | 88 |
-| ops | 16 |
-| web | 324 |
+| docs | 13 |
+| mobile | 92 |
+| ops | 15 |
+| web | 330 |
 
 ## By market tag
 
 | Market | Count |
 |---|---:|
-| ALL | 438 |
-| HE | 19 |
-| K12 | 17 |
-| SL | 16 |
+| ALL | 451 |
+| HE | 15 |
+| HS | 19 |
+| K12 | 13 |
 
 ## Missing journeys (severity / owner / milestone)
 
@@ -68,14 +68,17 @@ Total stories: **483**
 | 14.12 | major | HE Product | E2E-coverage-backlog | [docs/completed/14-higher-ed-specific/14.12-eportfolio-capstone.md](../../docs/completed/14-higher-ed-specific/14.12-eportfolio-capstone.md) |
 | 14.3 | major | HE Product | E2E-coverage-backlog | [docs/completed/14-higher-ed-specific/14.3-drop-add-withdrawal-lifecycle.md](../../docs/completed/14-higher-ed-specific/14.3-drop-add-withdrawal-lifecycle.md) |
 | 14.9 | major | HE Product | E2E-coverage-backlog | [docs/completed/14-higher-ed-specific/14.9-proctoring-integration.md](../../docs/completed/14-higher-ed-specific/14.9-proctoring-integration.md) |
-| 15.9 | major | Self-Learner Product | E2E-coverage-backlog | [docs/completed/15-self-learner-specific/15.9-gamification.md](../../docs/completed/15-self-learner-specific/15.9-gamification.md) |
+| 15.9 | major | Homeschool Product | E2E-coverage-backlog | [docs/completed/15-self-learner-specific/15.9-gamification.md](../../docs/completed/15-self-learner-specific/15.9-gamification.md) |
 | 18.4 | major | Admin Experience | E2E-coverage-backlog | [docs/completed/18-admin-experience/18.4-org-wide-search.md](../../docs/completed/18-admin-experience/18.4-org-wide-search.md) |
 | node-code-test-runner | major | Grading Agent | E2E-coverage-backlog | [docs/completed/agent-grader/node-code-test-runner.md](../../docs/completed/agent-grader/node-code-test-runner.md) |
 | node-reference-material | major | Grading Agent | E2E-coverage-backlog | [docs/completed/agent-grader/node-reference-material.md](../../docs/completed/agent-grader/node-reference-material.md) |
 | node-score-aggregator | major | Grading Agent | E2E-coverage-backlog | [docs/completed/agent-grader/node-score-aggregator.md](../../docs/completed/agent-grader/node-score-aggregator.md) |
 | AP.9 | major | AI Providers | E2E-coverage-backlog | [docs/completed/ai-providers/AP.9-test-rollout-deprecation.md](../../docs/completed/ai-providers/AP.9-test-rollout-deprecation.md) |
 | AN.3 | minor | Web Platform | E2E-coverage-backlog | [docs/completed/animations/AN.3-load-choreography.md](../../docs/completed/animations/AN.3-load-choreography.md) |
+| AN.5 | minor | Web Platform | E2E-coverage-backlog | [docs/completed/animations/AN.5-overlays-surfaces.md](../../docs/completed/animations/AN.5-overlays-surfaces.md) |
+| AN.6 | minor | Web Platform | E2E-coverage-backlog | [docs/completed/animations/AN.6-micro-interactions-controls.md](../../docs/completed/animations/AN.6-micro-interactions-controls.md) |
 | B1 | major | Gamification | E2E-coverage-backlog | [docs/completed/badges/B1-competency-micro-badges.md](../../docs/completed/badges/B1-competency-micro-badges.md) |
+| flags | major | Product / QA | E2E-coverage-backlog | [docs/completed/flags.md](../../docs/completed/flags.md) |
 | bug-1-queue-overflow-and-stuck-runs | major | Grading Agent | E2E-coverage-backlog | [docs/completed/grading-agent/bug-1-queue-overflow-and-stuck-runs.md](../../docs/completed/grading-agent/bug-1-queue-overflow-and-stuck-runs.md) |
 | bug-2-requeue-double-grading | major | Grading Agent | E2E-coverage-backlog | [docs/completed/grading-agent/bug-2-requeue-double-grading.md](../../docs/completed/grading-agent/bug-2-requeue-double-grading.md) |
 | bug-3-auto-post-dead-code | major | Grading Agent | E2E-coverage-backlog | [docs/completed/grading-agent/bug-3-auto-post-dead-code.md](../../docs/completed/grading-agent/bug-3-auto-post-dead-code.md) |
@@ -103,11 +106,6 @@ Total stories: **483**
 | 09 | disabledState, authorization, dependency, rollback | [docs/completed/09-platform-feature-flags-without-admin-toggle.md](../../docs/completed/09-platform-feature-flags-without-admin-toggle.md) |
 | 15.8 | disabledState, authorization, dependency, rollback | [docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md](../../docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md) |
 | IQ.1 | disabledState, authorization, dependency, rollback | [docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md](../../docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md) |
-| MOB.1 | disabledState, enabledJourney, authorization, dependency, rollback | [docs/completed/mobile/MOB.1-course-creation-wizard.md](../../docs/completed/mobile/MOB.1-course-creation-wizard.md) |
-| MOB.2 | disabledState, enabledJourney, authorization, dependency, rollback | [docs/completed/mobile/MOB.2-canvas-course-import.md](../../docs/completed/mobile/MOB.2-canvas-course-import.md) |
-| MOB.3 | enabledJourney, dependency | [docs/completed/mobile/MOB.3-system-settings-parity.md](../../docs/completed/mobile/MOB.3-system-settings-parity.md) |
-| MOB.4 | enabledJourney, dependency | [docs/completed/mobile/MOB.4-course-enrollment-management.md](../../docs/completed/mobile/MOB.4-course-enrollment-management.md) |
-| MOB.5 | enabledJourney | [docs/completed/mobile/MOB.5-interactive-quizzes.md](../../docs/completed/mobile/MOB.5-interactive-quizzes.md) |
 | T01 | disabledState, authorization, dependency, rollback | [docs/completed/transcripts/T01-official-transcript-generation.md](../../docs/completed/transcripts/T01-official-transcript-generation.md) |
 | VC.1 | disabledState, authorization, dependency, rollback | [docs/completed/visual-collaboration/VC.1-foundation-and-feature-flag.md](../../docs/completed/visual-collaboration/VC.1-foundation-and-feature-flag.md) |
 
@@ -136,23 +134,26 @@ Total stories: **483**
 | 19-ai-capabilities | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | 20-docs-trust | 0 | 0 | 0 | 0 | 2 | 0 | 0 |
 | 21-cli | 0 | 0 | 0 | 0 | 0 | 8 | 0 |
-| _root | 6 | 5 | 0 | 1 | 0 | 5 | 0 |
+| _root | 6 | 5 | 0 | 0 | 0 | 5 | 1 |
 | agent-grader | 0 | 6 | 0 | 0 | 0 | 0 | 3 |
 | ai-providers | 0 | 8 | 0 | 0 | 0 | 0 | 1 |
-| animations | 0 | 3 | 0 | 0 | 0 | 0 | 1 |
+| animations | 0 | 4 | 0 | 0 | 0 | 0 | 3 |
 | badges | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | cli | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
 | e2e | 3 | 0 | 1 | 0 | 0 | 0 | 0 |
 | emails | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 | feedback | 0 | 5 | 0 | 0 | 0 | 0 | 0 |
 | grading-agent | 0 | 6 | 0 | 0 | 0 | 0 | 10 |
+| homeschool | 0 | 0 | 0 | 0 | 0 | 6 | 0 |
 | interactive-quizzes | 0 | 9 | 0 | 2 | 0 | 0 | 0 |
 | intro-course | 0 | 6 | 0 | 0 | 0 | 0 | 2 |
 | learner-profile | 0 | 6 | 0 | 0 | 0 | 0 | 4 |
 | lighthouse | 0 | 3 | 0 | 0 | 0 | 0 | 0 |
 | marketplace | 1 | 9 | 0 | 1 | 0 | 0 | 0 |
 | marketplace-courses | 0 | 2 | 0 | 2 | 0 | 0 | 0 |
-| mobile | 0 | 0 | 3 | 0 | 0 | 77 | 0 |
+| mobile | 0 | 0 | 0 | 0 | 0 | 84 | 0 |
+| parent-portal | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| screenshare | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | transcripts | 2 | 7 | 0 | 3 | 0 | 0 | 0 |
 | visual-collaboration | 0 | 7 | 0 | 3 | 0 | 7 | 0 |
 | web | 4 | 2 | 0 | 0 | 0 | 0 | 1 |

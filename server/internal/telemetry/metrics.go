@@ -54,6 +54,7 @@ type Metrics struct {
 	feedbackSubmittedTotal       *prometheus.CounterVec
 	feedbackSubmitErrorsTotal    *prometheus.CounterVec
 	feedbackAdminListLatency     prometheus.Histogram
+	onboardingEventInsertFailed  *prometheus.CounterVec
 }
 
 // NewMetrics builds a self-contained registry (not the global default, so tests
@@ -200,6 +201,11 @@ func NewMetrics(deployColor ...string) *Metrics {
 			Help:      "Admin feedback list query latency in seconds (plan FB0).",
 			Buckets:   durationBuckets,
 		}),
+		onboardingEventInsertFailed: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "onboarding_event_insert_failed_total",
+			Help:      "Failed inserts into onboarding_events by validated program value (plan HS.5).",
+		}, []string{"program"}),
 	}
 
 	reg.MustRegister(
@@ -228,6 +234,7 @@ func NewMetrics(deployColor ...string) *Metrics {
 		m.feedbackSubmittedTotal,
 		m.feedbackSubmitErrorsTotal,
 		m.feedbackAdminListLatency,
+		m.onboardingEventInsertFailed,
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
@@ -459,6 +466,18 @@ func (m *Metrics) ObserveFeedbackAdminList(seconds float64) {
 		return
 	}
 	m.feedbackAdminListLatency.Observe(seconds)
+}
+
+// RecordOnboardingEventInsertFailed increments onboarding_event_insert_failed_total (plan HS.5).
+// program must already be validated to the closed set in onboarding_http.go.
+func (m *Metrics) RecordOnboardingEventInsertFailed(program string) {
+	if m == nil || m.onboardingEventInsertFailed == nil {
+		return
+	}
+	if program == "" {
+		program = "unknown"
+	}
+	m.onboardingEventInsertFailed.WithLabelValues(program).Inc()
 }
 
 func boolLabel(v bool) string {

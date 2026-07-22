@@ -31,7 +31,7 @@ One plan per feature gap identified in `[docs/MISSING_FEATURES.md](../MISSING_FE
 - [12 — Accessibility (WCAG 2.1 AA)](../completed/12-accessibility/) (completed plans)
 - [13 — K-12 Specific](../completed/13-k12-specific/) (completed plans)
 - [14 — Higher-Education Specific](../completed/14-higher-ed-specific/) (completed plans)
-- [15 — Self-Learner Specific](15-self-learner-specific/) · [completed](../completed/15-self-learner-specific/)
+- [15 — Homeschool Specific (formerly Self-Learner)](../completed/15-self-learner-specific/) · [archive](../completed/15-self-learner-specific/)
 - [16 — Integrations & Extensibility](16-integrations-extensibility/)
 - [17 — Platform, Performance & Operability](17-platform-performance-operability/)
 - [18 — Admin Experience](18-admin-experience/)
@@ -45,6 +45,7 @@ One plan per feature gap identified in `[docs/MISSING_FEATURES.md](../MISSING_FE
 - [IQ — Interactive Quizzes](interactive-quizzes/) · [completed](../completed/interactive-quizzes/) — in-house, game-based live quizzing behind a per-course feature flag; author quiz kits, host live games with join codes + leaderboards, plus team/student-paced/async-homework modes, reports/gradebook, sharing, moderation & accessibility, and AI generation (IQ.1–IQ.11)
 - [AN — Motion & Animation Polish](animations/) · [completed](../completed/animations/) — one cross-platform motion language (web/desktop/iOS/Android): the signature "bubble" spring, shared tokens, launch→landing & navigation transitions, skeleton→content load choreography, list/overlay/control motion, and delight moments — all reduced-motion & performance-budgeted (AN.1–AN.7)
 - [PP — Parent Portal (staff workflows)](../completed/parent-portal/) — permission-gated assign parents/guardians, invite-when-missing-account, activate-link pairing (PP.1+) on top of shipped 13.1 / W02
+- [HS — Homeschool rebrand](homeschool/) · [completed](../completed/homeschool/) — product segment rebrand to Homeschool across marketing, clients, server, docs & e2e metadata (HS.1–HS.6)
 
 ## Standards & Legal Hardening (2026-07-06)
 
@@ -52,14 +53,14 @@ A dedicated [`standards/`](standards/) folder hardens the shipped compliance lay
 
 ## Newly identified gaps — adoption-blocker scan (2026-06-19)
 
-Gaps found by scanning `docs/completed`, `docs/plan`, and the codebase (handlers, repos, migrations) for features absent from **both** the completed set and existing plans, scoped to what blocks adoption by Higher-Ed, K-12, and Self-Learners. Each was verified to have **no** implementation in `server/internal/httpserver`, `server/internal/repos`, or `server/migrations`.
+Gaps found by scanning `docs/completed`, `docs/plan`, and the codebase (handlers, repos, migrations) for features absent from **both** the completed set and existing plans, scoped to what blocks adoption by Higher-Ed, K-12, and Homeschool. Each was verified to have **no** implementation in `server/internal/httpserver`, `server/internal/repos`, or `server/migrations`.
 
 | ID | Plan | Severity | Markets | Why it blocks adoption |
 |---|---|---|---|---|
-| 3.15 | ~~Peer review & peer assessment~~ → [completed](../completed/03-submissions-grading-integrity/3.15-peer-review-assessment.md) | BLOCKER (HE) / MAJOR | HE · K12 · SL | Done |
+| 3.15 | ~~Peer review & peer assessment~~ → [completed](../completed/03-submissions-grading-integrity/3.15-peer-review-assessment.md) | BLOCKER (HE) / MAJOR | HE · K12 · HS | Done |
 | 2.15 | ~~Differentiated assignments (assign-to / multiple due dates)~~ → [completed](../completed/02-assessment-and-authoring/2.15-differentiated-assignments.md) | MAJOR | K12 · HE | Done |
-| 3.16 | ~~What-if grades (student projection)~~ → [completed](../completed/03-submissions-grading-integrity/3.16-what-if-grades.md) | MAJOR | HE · K12 · SL | Done |
-| 3.17 | ~~Grade curving & scaling~~ → [completed](../completed/03-submissions-grading-integrity/3.17-grade-curving-scaling.md) | MAJOR (HE) | HE · K12 · SL | Done |
-| 15.13 | [Tax compliance (Stripe Tax / VAT / GST)](15-self-learner-specific/15.13-tax-compliance.md) | BLOCKER (global) | SL · HE (CE) | Deferred to "phase 2" in 15.3/16.8; legally required to sell paid courses in EU/UK and US-nexus states |
+| 3.16 | ~~What-if grades (student projection)~~ → [completed](../completed/03-submissions-grading-integrity/3.16-what-if-grades.md) | MAJOR | HE · K12 · HS | Done |
+| 3.17 | ~~Grade curving & scaling~~ → [completed](../completed/03-submissions-grading-integrity/3.17-grade-curving-scaling.md) | MAJOR (HE) | HE · K12 · HS | Done |
+| 15.13 | [Tax compliance (Stripe Tax / VAT / GST)](../completed/15-self-learner-specific/15.13-tax-compliance.md) | BLOCKER (global) | HS · HE (CE) | Deferred to "phase 2" in 15.3/16.8; legally required to sell paid courses in EU/UK and US-nexus states |
 
 **Reviewed and judged already-covered / out-of-scope:** IEP/504 *document* management (correctly delegated to special-ed software; enforcement settings exist in [12.10](../completed/12-accessibility/12.10-accommodations-engine.md)), native calendar (built), waitlists ([5.4](../completed/05-multi-tenancy-org-roles/5.4-sections.md)/[14.2](../completed/14-higher-ed-specific/14.2-course-catalog-registration.md)), coupons/subscriptions/refunds ([15.3](../completed/15-self-learner-specific/15.3-billing-stripe.md)), group assignments ([6.6](../completed/06-communication-collaboration/6.6-group-spaces.md)).

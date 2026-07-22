@@ -1,0 +1,6 @@
+These phrases must NOT be flagged by the terminology guard (FR-3 / AC-4):
+self-hosting
+self-paced enrollment
+self-service portal
+https://self.lextures.com
+self.lextures.com

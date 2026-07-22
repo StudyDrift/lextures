@@ -9,7 +9,7 @@
 | **Feature ID** | {e.g. 1.1} |
 | **Section** | {e.g. Adaptive Learning Core} |
 | **Severity** | BLOCKER \| MAJOR \| MINOR |
-| **Markets** | K12 / HE / SL |
+| **Markets** | K12 / HE / HS |
 | **Status (today)** | MISSING \| PARTIAL \| THIN |
 | **Estimated effort** | XS (≤1d) \| S (1w) \| M (2–4w) \| L (1–2mo) \| XL (>2mo) |
 | **Owner (proposed)** | {team / individual} |
@@ -33,7 +33,7 @@
 ## 4. Personas & User Stories
 
 - **As a {role}**, I want to {action} so that {value}.
-- Cover student, instructor, admin, parent (where relevant), and self-learner perspectives.
+- Cover student, instructor, admin, parent (where relevant), and homeschool perspectives.
 
 ## 5. Functional Requirements
 

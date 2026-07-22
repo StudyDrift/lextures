@@ -31,7 +31,7 @@ const PLATFORM_FEATURE_PACK_LABELS: Record<PlatformFeaturePack, string> = {
   accessibility: 'Accessibility',
   ai: 'AI',
   integrations: 'Integrations & infrastructure',
-  marketplace: 'Marketplace & self-learner',
+  marketplace: 'Marketplace & homeschool',
   higherEd: 'Higher education',
   k12: 'K-12',
   compliance: 'Compliance & legal',
