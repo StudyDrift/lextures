@@ -1,0 +1,73 @@
+# Homeschool terminology allowlist (HS.1 / HS.6)
+# Format: one path-glob OR path:line-substring per line.
+# Every non-empty, non-comment line MUST have a preceding # comment explaining why.
+# Globs use shell-style matching (** matches across path segments when the entry ends with /**).
+
+# --- Guard infrastructure (must mention banned terms to enforce them) ---
+
+# Terminology deck defines banned terms and the full copy matrix.
+docs/brand/homeschool-terminology.md
+
+# This allowlist file documents path patterns that may contain banned terms.
+scripts/homeschool-terminology-allow.txt
+
+# The guard script embeds the banned-term pattern and usage examples.
+scripts/check-homeschool-terminology.sh
+
+# Positive fixture intentionally contains banned symbols for the self-test.
+scripts/__fixtures__/terminology/**
+
+# --- Permanent freezes (HS.6 FR-11) ---
+
+# Shipped plan archive + all completed plan prose (historical records; not rewritten).
+# Includes docs/completed/15-self-learner-specific/ (folder name frozen — see its README).
+docs/completed/**
+
+# Applied SQL migrations are immutable once shipped (includes 142 / 433 program values).
+server/migrations/**
+
+# Generated e2e coverage artefacts still path-reference 15-self-learner-specific.
+e2e/coverage/**
+
+# Bootstrap map key is derived from the frozen on-disk section folder name (FR-7).
+e2e/scripts/bootstrap-completed-coverage-manifest.ts:15-self-learner-specific
+
+# Plan index keeps hrefs into the frozen 15-self-learner-specific archive + "formerly Self-Learner" label (FR-3).
+docs/plan/README.md:15-self-learner-specific
+docs/plan/README.md:Self-Learner
+
+# --- DO NOT RENAME: persisted client storage raw value "selfLearner" ---
+
+# iOS UserDefaults Kind raw value — must stay "selfLearner" after enum case rename (HS.4).
+clients/ios/Lextures/Core/Config/EnvironmentStore.swift:selfLearner
+
+# Android SharedPreferences Kind.storageValue — must stay "selfLearner" (HS.4).
+clients/android/app/src/main/kotlin/com/lextures/android/core/config/EnvironmentStore.kt:selfLearner
+
+# Unit tests that assert the pinned raw storage value and upgrade-in-place reads (HS.4).
+clients/ios/LexturesTests/SchoolCodeLogicTests.swift
+clients/android/app/src/test/kotlin/com/lextures/android/core/config/SchoolCodeLogicTest.kt
+clients/android/app/src/test/kotlin/com/lextures/android/core/config/EnvironmentStoreTest.kt
+
+# --- DO NOT RENAME: historical onboarding program wire value ---
+
+# HTTP handler still accepts historical 'self-learner' during dual-read (HS.5 / FR-11).
+server/internal/httpserver/onboarding_http.go:self-learner
+
+# Handler tests assert the dual-read accept list still includes the legacy value.
+server/internal/httpserver/onboarding_nodb_test.go:self-learner
+
+# OpenAPI marks 'self-learner' deprecated but still lists it in the program enum (HS.5).
+server/internal/openapi/openapi.go:self-learner
+
+# --- DO NOT RENAME: permanent /self-learner redirect stub (HS.2) ---
+# Note: www/dist/** is always skipped by the guard scanner; source that emits the stub is allowlisted.
+
+# SPA keeps /self-learner as a client redirect target forever (GitHub Pages cannot 301).
+www/src/app.tsx:self-learner
+
+# Prerender writes dist/self-learner/index.html (meta-refresh stub); path and comments name the old slug.
+www/scripts/prerender-courses.mjs:self-learner
+
+# Unit tests assert sitemap excludes the old slug and stub builder targets /homeschool.
+www/scripts/prerender-courses.test.mjs:self-learner

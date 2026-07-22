@@ -13,6 +13,8 @@ describe('Signup', () => {
   it('renders create account heading', () => {
     renderWithRouter(<Signup />, { route: '/signup', path: '/signup' })
     expect(screen.getByRole('heading', { name: /create your account/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/^email$/i)).not.toHaveAttribute('placeholder', 'you@school.edu')
+    expect(screen.getByLabelText(/parent or guardian/i)).toBeInTheDocument()
   })
 
   it('submits email and password and navigates to the dashboard', async () => {

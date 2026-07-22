@@ -1387,6 +1387,42 @@ const spec = `{
         }
       }
     },
+    "/api/v1/public/onboarding/track": {
+      "post": {
+        "tags": ["public"],
+        "summary": "Track marketing get-started path choice",
+        "description": "Anonymous funnel beacon from lextures.com/get-started. Unauthenticated; IP rate-limited (5 / 10 min). Insert failures return 204 and increment onboarding_event_insert_failed_total. Keep program enum in sync with migration 433 and onboarding_http.go (HS.5).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["program"],
+                "properties": {
+                  "program": {
+                    "type": "string",
+                    "enum": ["k-12", "higher-ed", "homeschool", "school", "self-learner"],
+                    "description": "Marketing segment chosen on /get-started. 'self-learner' is deprecated (pre-Homeschool rebrand) but still accepted during the dual-read window; prefer 'homeschool'."
+                  },
+                  "school_name": { "type": "string" },
+                  "language": { "type": "string" },
+                  "timezone": { "type": "string" },
+                  "screen_width": { "type": "integer" },
+                  "screen_height": { "type": "integer" },
+                  "referrer": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "description": "Accepted (also returned when the insert fails internally)" },
+          "400": { "description": "Invalid program or body" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
     "/api/v1/public/marketplace/courses": {
       "get": {
         "tags": ["public-marketplace"],

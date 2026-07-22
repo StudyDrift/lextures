@@ -7,7 +7,7 @@ const NAV_COLUMNS = [
       { label: 'Features', href: '/#features' },
       { label: 'Pricing', href: '/pricing' },
       { label: 'Documentation', href: '/docs' },
-      { label: 'Start studying', href: SITE_LINKS.selfLearner },
+      { label: 'Start studying', href: SITE_LINKS.homeschool },
     ],
   },
   {
@@ -16,7 +16,7 @@ const NAV_COLUMNS = [
       { label: 'Higher education', href: '/higher-ed' },
       { label: 'K–12', href: '/k-12' },
       { label: 'Parents', href: '/parents' },
-      { label: 'Self-learners', href: '/self-learner' },
+      { label: 'Homeschool', href: '/homeschool' },
     ],
   },
   {

@@ -1,6 +1,6 @@
 # HS.6 — Docs, ISMS scope & e2e coverage metadata
 
-> Implementation plan. Source: product rebrand of the **self-learner** segment to **Homeschool**.
+> Implementation plan. Source: product rebrand of the product segment to **Homeschool**.
 > Closing plan for the HS series — it updates the remaining non-product references and flips the
 > [HS.1](HS.1-terminology-copy-deck-and-guardrails.md) terminology guard from warn to fail.
 > Code references: `docs/plan/{README.md,_TEMPLATE.md}`, `docs/isms/scope-statement.md`,
@@ -14,7 +14,7 @@
 | **Section** | Documentation, compliance & test metadata |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | PARTIAL — the planning template, the plan index, the ISMS scope statement, and the e2e coverage owner/market metadata all still use "Self-Learner" and the `SL` market token |
+| **Status (today)** | **DONE** — plan template, plan index, ISMS scope label, e2e coverage owner/market metadata, freeze README, and fail-mode terminology guard |
 | **Estimated effort** | XS (≤1d) |
 | **Owner (proposed)** | Platform + Compliance |
 | **Depends on** | HS.1, HS.2, HS.3, HS.4, HS.5 (all must land first, or the guard flip breaks `main`) |

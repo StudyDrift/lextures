@@ -1,5 +1,5 @@
 // Package coursereviews implements learner course ratings and reviews for the
-// self-learner catalog (plan 15.7).
+// homeschool catalog (plan 15.7).
 package coursereviews
 
 import (

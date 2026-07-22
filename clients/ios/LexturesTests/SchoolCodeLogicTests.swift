@@ -26,8 +26,13 @@ final class SchoolCodeLogicTests: XCTestCase {
         XCTAssertEqual(SchoolCodeLogic.normalize("Example"), "example")
     }
 
-    func testSelfLearnerBase() {
-        XCTAssertEqual(SchoolCodeLogic.selfLearnerAPIBase, "https://self.lextures.com")
+    func testHomeschoolBase() {
+        XCTAssertEqual(SchoolCodeLogic.homeschoolAPIBase, "https://self.lextures.com")
+    }
+
+    func testHomeschoolKindRawValuePinned() {
+        // DO NOT RENAME — installed devices persist "selfLearner" in UserDefaults.
+        XCTAssertEqual(EnvironmentStore.Kind.homeschool.rawValue, "selfLearner")
     }
 
     func testSchoolAPIBase() {
@@ -61,14 +66,16 @@ final class EnvironmentStoreTests: XCTestCase {
         super.tearDown()
     }
 
-    func testSelectSelfLearner() {
+    func testSelectHomeschool() {
         let store = EnvironmentStore(defaults: defaults)
         XCTAssertFalse(store.hasSelection)
-        store.selectSelfLearner()
+        store.selectHomeschool()
         XCTAssertTrue(store.hasSelection)
-        XCTAssertEqual(store.kind, .selfLearner)
+        XCTAssertEqual(store.kind, .homeschool)
         XCTAssertEqual(store.apiBaseURLString, "https://self.lextures.com")
         XCTAssertNil(store.schoolCode)
+        // Persisted raw value must remain the pre-rebrand token.
+        XCTAssertEqual(defaults.string(forKey: "lextures.environment.kind"), "selfLearner")
     }
 
     func testSelectSchoolAndLocal() {
@@ -85,11 +92,23 @@ final class EnvironmentStoreTests: XCTestCase {
 
     func testClearSelection() {
         let store = EnvironmentStore(defaults: defaults)
-        store.selectSelfLearner()
+        store.selectHomeschool()
         store.clearSelection()
         XCTAssertFalse(store.hasSelection)
         XCTAssertNil(store.apiBaseURLString)
         XCTAssertNil(store.kind)
         XCTAssertNil(store.schoolCode)
+    }
+
+    /// Upgrade-in-place: a pre-rename install that stored "selfLearner" must map to homeschool.
+    func testLegacySelfLearnerRawValueReadsAsHomeschool() {
+        defaults.set("selfLearner", forKey: "lextures.environment.kind")
+        defaults.set("https://self.lextures.com", forKey: "lextures.environment.apiBaseURL")
+
+        let store = EnvironmentStore(defaults: defaults)
+        XCTAssertTrue(store.hasSelection)
+        XCTAssertEqual(store.kind, .homeschool)
+        XCTAssertEqual(store.apiBaseURLString, "https://self.lextures.com")
+        XCTAssertEqual(SchoolCodeLogic.homeschoolAPIBase, store.apiBaseURLString)
     }
 }

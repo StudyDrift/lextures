@@ -3,8 +3,10 @@
     <string name="app_name">Lextures</string>
     <string name="app_tagline">من StudyDrift</string>
     <string name="auth_getStarted_back">رجوع</string>
-    <string name="auth_getStarted_changeEnvironment">تغيير المدرسة أو مسار التعلم</string>
+    <string name="auth_getStarted_changeEnvironment">تغيير المدرسة أو حساب التعليم المنزلي</string>
     <string name="auth_getStarted_continue">متابعة</string>
+    <string name="auth_getStarted_homeschoolDescription">أدرس في المنزل، للحصول على شهادة، أو وفق جدولي الخاص.</string>
+    <string name="auth_getStarted_homeschoolTitle">التعليم المنزلي</string>
     <string name="auth_getStarted_schoolCodeErrorEmpty">أدخل رمز مدرستك.</string>
     <string name="auth_getStarted_schoolCodeErrorFormat">استخدم أحرفًا صغيرة وأرقامًا وشرطات فقط.</string>
     <string name="auth_getStarted_schoolCodeErrorLengthMax">رموز المدارس 32 حرفًا كحد أقصى.</string>
@@ -18,8 +20,6 @@
     <string name="auth_getStarted_schoolCodeTitle">أدخل رمز مدرستك</string>
     <string name="auth_getStarted_schoolDescription">أنا طالب أو معلم في مدرسة تستخدم Lextures.</string>
     <string name="auth_getStarted_schoolTitle">مدرسة</string>
-    <string name="auth_getStarted_selfLearnerDescription">أتعلم بشكل مستقل، للحصول على شهادة، أو وفق جدولي الخاص.</string>
-    <string name="auth_getStarted_selfLearnerTitle">متعلم ذاتي</string>
     <string name="auth_getStarted_subtitle">اختر الخيار الذي يناسب طريقة تسجيل دخولك.</string>
     <string name="auth_getStarted_title">كيف تستخدم Lextures؟</string>
     <string name="auth_login_createAccount">إنشاء حساب</string>

@@ -82,6 +82,13 @@ Bad migration applied?
 | Rollback command | 2 min |
 | Smoke test | 5 min |
 
+### Special case — migration 433 (onboarding program CHECK)
+
+`433_onboarding_program_homeschool.down.sql` restores a narrower CHECK. It **fails
+loudly** if any `onboarding_events` rows still use `'homeschool'` or `'school'`.
+Purge or remap those rows first (see the down-file header). Prefer leaving 433
+applied: a widened CHECK is harmless to older binaries.
+
 ## Path B — Corrective forward migration
 
 **When:** The bad migration altered or deleted data, renamed columns, or the

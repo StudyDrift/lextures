@@ -47,6 +47,7 @@ Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run de
 | Lighthouse (dashboard, dark) | `npm run lighthouse:dashboard:dark` | `clients/web/` or `e2e/` (stack must be running) |
 | E2E suite | `make e2e` | repo root |
 | E2E (stack already up) | `make e2e-run` | repo root |
+| Terminology guard | `bash scripts/check-homeschool-terminology.sh` (required CI; fails on non-allowlisted banned terms) | repo root |
 
 ### Lighthouse harness (LH.1)
 

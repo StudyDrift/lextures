@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// First auth screen: choose self-learner vs school (parity with lextures.com/get-started).
+/// First auth screen: choose homeschool vs school (parity with lextures.com/get-started).
 struct GetStartedView: View {
     var onComplete: () -> Void
 
@@ -59,11 +59,11 @@ struct GetStartedView: View {
 
             VStack(spacing: 12) {
                 pathCard(
-                    systemImage: "brain.head.profile",
-                    title: L.text("auth.getStarted.selfLearnerTitle"),
-                    description: L.text("auth.getStarted.selfLearnerDescription")
+                    systemImage: "house.fill",
+                    title: L.text("auth.getStarted.homeschoolTitle"),
+                    description: L.text("auth.getStarted.homeschoolDescription")
                 ) {
-                    EnvironmentStore.shared.selectSelfLearner()
+                    EnvironmentStore.shared.selectHomeschool()
                     onComplete()
                 }
 

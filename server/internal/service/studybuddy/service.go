@@ -1,4 +1,4 @@
-// Package studybuddy implements the self-learner AI study buddy (plan 15.12).
+// Package studybuddy implements the homeschool AI study buddy (plan 15.12).
 package studybuddy
 
 import (

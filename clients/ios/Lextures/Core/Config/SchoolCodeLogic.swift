@@ -3,7 +3,7 @@ import Foundation
 /// Validates school codes the same way as the marketing site (`www/src/lib/school-code.ts`).
 /// Special case: `local` routes the mobile app to the local API for development.
 enum SchoolCodeLogic {
-    static let selfLearnerAPIBase = "https://self.lextures.com"
+    static let homeschoolAPIBase = "https://self.lextures.com"
     static let localAPIBase = "http://127.0.0.1:8080"
     static let tenantHostSuffix = "lextures.com"
 

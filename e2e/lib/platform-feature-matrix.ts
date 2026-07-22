@@ -735,7 +735,7 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
   },
   {
     key: 'ffOnboardingFlow',
-    label: 'Self-learner onboarding',
+    label: 'Homeschool onboarding',
     category: 'learner',
     ownershipSource: 'database',
     sourceKey: null,
@@ -927,7 +927,7 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
   },
   {
     key: 'ffStripeBilling',
-    label: 'Stripe billing (self-learner)',
+    label: 'Stripe billing (homeschool)',
     category: 'learner',
     ownershipSource: 'database',
     sourceKey: null,

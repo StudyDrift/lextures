@@ -1,0 +1,2 @@
+// Allowlisted residual for HS.1 self-test — suppressed by path glob.
+const residual = "selfLearner";

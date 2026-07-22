@@ -7,7 +7,7 @@ import (
 	studybuddyrepo "github.com/lextures/lextures/server/internal/repos/studybuddy"
 )
 
-const systemPromptTemplate = `You are an AI study buddy for the course "{COURSE_TITLE}". You help self-learners understand course material, review concepts, and stay on track with their goals.
+const systemPromptTemplate = `You are an AI study buddy for the course "{COURSE_TITLE}". You help learners understand course material, review concepts, and stay on track with their goals.
 
 Learner context:
 - Display name: {DISPLAY_NAME}

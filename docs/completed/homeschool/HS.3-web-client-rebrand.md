@@ -1,6 +1,7 @@
 # HS.3 — Web client: auth screens, onboarding & admin labels
 
-> Implementation plan. Source: product rebrand of the **self-learner** segment to **Homeschool**.
+> Implementation plan. **Status: DONE** (moved from `docs/plan/homeschool/`). Source: product
+> rebrand of the **self-learner** segment to **Homeschool**.
 > Terminology and copy are fixed by [HS.1](HS.1-terminology-copy-deck-and-guardrails.md).
 > Code references: `clients/web/src/pages/{login,signup}.tsx`,
 > `clients/web/public/locales/{en,es,fr,ar}/auth.json`,
@@ -15,7 +16,7 @@
 | **Section** | Web client (`clients/web`) |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | THIN — the auth screens never name the segment at all: every string assumes the visitor belongs to a school (`"the email your course or school uses"`, placeholder `you@school.edu`), even on `self.lextures.com` where no org is resolved. Admin surfaces still say "self-learner" in four places. |
+| **Status (today)** | DONE — school-neutral auth copy (en/es/fr/ar), marketplace pack + flag labels use Homeschool, e2e matrix labels updated, zero `self-learn*` in `clients/web/` |
 | **Estimated effort** | XS (≤1d) |
 | **Owner (proposed)** | Web team |
 | **Depends on** | HS.1 (copy deck) |
@@ -253,4 +254,4 @@ label, not a prompt. The model-visible prompt lives in
 - External standards: WCAG 2.1 AA (SC 1.3.1, 3.3.2), RFC 2119.
 - Related plans: [HS.1](HS.1-terminology-copy-deck-and-guardrails.md),
   [HS.5](HS.5-server-copy-and-onboarding-program.md),
-  [W01 — i18n application coverage](../../completed/web/W01-i18n-application-coverage.md).
+  [W01 — i18n application coverage](../web/W01-i18n-application-coverage.md).

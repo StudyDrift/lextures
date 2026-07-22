@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 /**
- * Build-time prerender for www marketplace SEO (plan MKT10).
+ * Build-time prerender for www marketplace SEO (plan MKT10) and the
+ * /self-learner → /homeschool redirect stub (plan HS.2).
  *
  * After `vite build`, fetches the public marketplace catalog and writes:
  *   - dist/courses/index.html
  *   - dist/courses/<slug>/index.html  (with per-course meta + JSON-LD)
+ *   - dist/self-learner/index.html    (static meta-refresh + canonical redirect)
  *   - dist/sitemap.xml
  *   - dist/robots.txt
  *
  * Env:
  *   API_BASE / VITE_API_BASE_URL — API origin (default https://self.lextures.com)
  *   SITE_ORIGIN — public site origin (default https://lextures.com)
- *   SKIP_COURSE_PRERENDER=1 — skip course pages; still write /courses + sitemap shell
+ *   SKIP_COURSE_PRERENDER=1 — skip course pages; still write /courses + sitemap shell + redirect stub
  */
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
@@ -32,7 +34,7 @@ const SKIP = process.env.SKIP_COURSE_PRERENDER === '1'
 const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/assets/lextures-mark.svg`
 const CONCURRENCY = 6
 
-/** Turn API-relative asset paths into absolute URLs on the self-learner origin. */
+/** Turn API-relative asset paths into absolute URLs on the homeschool app origin. */
 function resolveApiAssetUrl(url, apiBase = API_BASE) {
   if (!url) return null
   const trimmed = String(url).trim()
@@ -53,7 +55,7 @@ const STATIC_ROUTES = [
   { loc: '/higher-ed', priority: '0.6' },
   { loc: '/k-12', priority: '0.6' },
   { loc: '/parents', priority: '0.6' },
-  { loc: '/self-learner', priority: '0.6' },
+  { loc: '/homeschool', priority: '0.6' },
   { loc: '/privacy', priority: '0.3' },
   { loc: '/terms', priority: '0.3' },
   { loc: '/security', priority: '0.3' },
@@ -77,6 +79,28 @@ function truncateMeta(text, maxLen = 160) {
   const cut = cleaned.slice(0, maxLen - 1)
   const lastSpace = cut.lastIndexOf(' ')
   return `${(lastSpace > 40 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`
+}
+
+/**
+ * Static HTML for /self-learner — GitHub Pages cannot issue a 301, so crawlers and
+ * no-JS clients follow via meta refresh + canonical + visible fallback link (HS.2 FR-3).
+ */
+function buildLegacyAudienceRedirectHtml(siteOrigin = SITE_ORIGIN) {
+  const canonical = `${String(siteOrigin).replace(/\/$/, '')}/homeschool`
+  const escapedCanonical = escapeHtml(canonical)
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=/homeschool" />
+  <link rel="canonical" href="${escapedCanonical}" />
+  <title>Moved to Homeschool — Lextures</title>
+</head>
+<body>
+  <p>This page has moved to <a href="/homeschool">Homeschool</a>.</p>
+</body>
+</html>
+`
 }
 
 function buildHeadTags({ title, description, canonical, image, jsonLd }) {
@@ -278,11 +302,19 @@ async function main() {
     })
   }
 
+  // /self-learner → /homeschool redirect stub (must survive indefinitely; HS.2 FR-3)
+  await mkdir(path.join(DIST, 'self-learner'), { recursive: true })
+  await writeFile(
+    path.join(DIST, 'self-learner', 'index.html'),
+    buildLegacyAudienceRedirectHtml(SITE_ORIGIN),
+    'utf8',
+  )
+
   await writeFile(path.join(DIST, 'sitemap.xml'), buildSitemap(sitemapCourses), 'utf8')
   await writeFile(path.join(DIST, 'robots.txt'), buildRobots(), 'utf8')
 
   console.log(
-    `[prerender] Done: ${prerendered} HTML page(s), ${sitemapCourses.length} course URL(s) in sitemap (${SITE_ORIGIN})`,
+    `[prerender] Done: ${prerendered} HTML page(s), ${sitemapCourses.length} course URL(s) in sitemap, /self-learner redirect stub (${SITE_ORIGIN})`,
   )
 }
 
@@ -294,6 +326,7 @@ export {
   injectHead,
   buildSitemap,
   buildRobots,
+  buildLegacyAudienceRedirectHtml,
   resolveApiAssetUrl,
 }
 

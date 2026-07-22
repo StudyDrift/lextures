@@ -1,6 +1,7 @@
 # HS.5 — Server: copy, flag descriptions, course content & the onboarding `program` value
 
-> Implementation plan. Source: product rebrand of the **self-learner** segment to **Homeschool**.
+> Implementation plan. **Status: DONE** (moved from `docs/plan/homeschool/`). Source: product
+> rebrand of the **self-learner** segment to **Homeschool**.
 > Terminology and copy are fixed by [HS.1](HS.1-terminology-copy-deck-and-guardrails.md).
 > Code references: `server/internal/httpserver/onboarding_http.go`,
 > `server/migrations/142_onboarding_events.sql`, `server/internal/aidisclosure/disclosure.go`,
@@ -15,7 +16,7 @@
 | **Section** | Go API (`server/`) |
 | **Severity** | MINOR (copy) / MAJOR (the `program` enum, which today silently drops events) |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | PARTIAL — user-visible server strings and one LLM system prompt still say "self-learners"; `onboarding_events.program` has no `homeschool` value, and its CHECK constraint already rejects `'school'`, which the handler accepts |
+| **Status (today)** | DONE — `program` accepts `homeschool`+`school`, insert failures are logged/metered, AI disclosure + study-buddy prompt + syllabus audience lines use Homeschool terms, content versions bumped, www beacon flipped |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Backend |
 | **Depends on** | HS.1 (copy deck) |
@@ -230,7 +231,7 @@ No empty/loading/error state changes. Copy comes from the
 ## 11. AI / ML Considerations
 
 - **Model(s)** — whatever the tenant's configured provider is (BYOK; see
-  [AP.2](../../completed/ai-providers/AP.2-credential-store-and-byok.md)). No model change.
+  [AP.2](../ai-providers/AP.2-credential-store-and-byok.md)). No model change.
 - **Prompt** — `studybuddy/prompt.go` `systemPromptTemplate` is edited (FR-8). This is model-visible
   context on every turn, so it is a behavioural change, not a copy change.
 - **Eval** — before/after comparison on the existing study-buddy prompt fixtures: run the same set of
@@ -340,7 +341,7 @@ No empty/loading/error state changes. Copy comes from the
 - External standards: RFC 2119; PostgreSQL `ALTER TABLE … VALIDATE CONSTRAINT` locking semantics.
 - Related plans: [HS.1](HS.1-terminology-copy-deck-and-guardrails.md),
   [HS.2](HS.2-www-marketing-site-rebrand.md), [HS.3](HS.3-web-client-rebrand.md),
-  [15.11 onboarding & diagnostic](../../completed/15-self-learner-specific/15.11-onboarding-diagnostic.md),
-  [15.12 AI study buddy](../../completed/15-self-learner-specific/15.12-ai-study-buddy.md),
-  [17.7 observability](../../completed/17-platform-performance-operability/) (metric registration
+  [15.11 onboarding & diagnostic](../15-self-learner-specific/15.11-onboarding-diagnostic.md),
+  [15.12 AI study buddy](../15-self-learner-specific/15.12-ai-study-buddy.md),
+  [17.7 observability](../17-platform-performance-operability/) (metric registration
   pattern in `server/internal/telemetry`).

@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -72,8 +72,8 @@ fun GetStartedScreen(
     AuthScreenContainer(modifier = modifier) {
         when (step) {
             GetStartedStep.Choose -> ChooseStep(
-                onSelfLearner = {
-                    store.selectSelfLearner()
+                onHomeschool = {
+                    store.selectHomeschool()
                     AppConfiguration.bindEnvironment(store)
                     onComplete()
                 },
@@ -99,7 +99,7 @@ fun GetStartedScreen(
 
 @Composable
 private fun ChooseStep(
-    onSelfLearner: () -> Unit,
+    onHomeschool: () -> Unit,
     onSchool: () -> Unit,
 ) {
     BrandLogo(maxHeight = 56)
@@ -126,10 +126,10 @@ private fun ChooseStep(
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         PathCard(
-            icon = Icons.Default.Psychology,
-            title = L.text(R.string.auth_getStarted_selfLearnerTitle),
-            description = L.text(R.string.auth_getStarted_selfLearnerDescription),
-            onClick = onSelfLearner,
+            icon = Icons.Default.Home,
+            title = L.text(R.string.auth_getStarted_homeschoolTitle),
+            description = L.text(R.string.auth_getStarted_homeschoolDescription),
+            onClick = onHomeschool,
         )
         PathCard(
             icon = Icons.Default.School,

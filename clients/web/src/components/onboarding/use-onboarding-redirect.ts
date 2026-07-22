@@ -4,7 +4,7 @@ import { getAccountType } from '../../lib/auth'
 import { fetchOnboardingStatus } from '../../lib/onboarding-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
-/** Redirects new self-learners to onboarding when the feature flag is on and flow is incomplete. */
+/** Redirects new homeschool learners to onboarding when the feature flag is on and flow is incomplete. */
 export function useOnboardingRedirect(): { checking: boolean; shouldRedirect: boolean } {
   const { ffOnboardingFlow, loading: featuresLoading } = usePlatformFeatures()
   const location = useLocation()

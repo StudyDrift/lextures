@@ -71,6 +71,16 @@ flag rollback (`AI_PROVIDER_ABSTRACTION_ENABLED=0`) per
 [ai-provider-rollback.md](ai-provider-rollback.md). Disable the failing
 provider credential if another peer provider can serve traffic.
 
+### OnboardingEventInsertFailed
+*`lextures_onboarding_event_insert_failed_total` rising (HS.5).* The public
+`POST /api/v1/public/onboarding/track` beacon still returns 204 to clients, but
+the insert into `onboarding_events` failed. Check the `program` label — a new
+value that is accepted by `onboarding_http.go` but rejected by the SQL CHECK
+(or the reverse) is the usual cause. Keep the Go switch and
+`onboarding_events_program_check` (migration 433) in sync. Reporting queries
+should treat the pre-rebrand program value and `'homeschool'` as the same
+segment across the Homeschool cutover.
+
 ## Sentry triage
 
 1. Triage by Sentry environment (production vs staging) and severity.

@@ -270,6 +270,16 @@ const SECTION_POLICY: Record<string, SectionPolicy> = {
     markets: ['ALL'],
     risk: 'none',
   },
+  // Homeschool rebrand series (HS.1–HS.6): copy/docs/metadata; not web Playwright journeys.
+  homeschool: {
+    client: 'docs',
+    owner: 'Platform + Compliance',
+    defaultCoverage: 'not-applicable',
+    defaultRationale:
+      'Segment rebrand (terminology, marketing, client labels, server copy, docs/ISMS/e2e metadata); not a user-journey E2E target.',
+    markets: ['HS'],
+    risk: 'minor',
+  },
   e2e: {
     client: 'web',
     owner: 'QA / Developer Experience',
@@ -288,10 +298,11 @@ const SECTION_POLICY: Record<string, SectionPolicy> = {
     markets: ['HE'],
     risk: 'major',
   },
+  // Map key matches the frozen on-disk folder docs/completed/15-self-learner-specific/ (HS.6).
   '15-self-learner-specific': {
     client: 'web',
-    owner: 'Self-Learner Product',
-    markets: ['SL'],
+    owner: 'Homeschool Product',
+    markets: ['HS'],
     risk: 'major',
   },
 }

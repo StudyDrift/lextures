@@ -37,9 +37,20 @@ class SchoolCodeLogicTest {
 
     @Test
     fun apiBaseUrls() {
-        assertEquals("https://self.lextures.com", SchoolCodeLogic.SELF_LEARNER_API_BASE)
+        assertEquals("https://self.lextures.com", SchoolCodeLogic.HOMESCHOOL_API_BASE)
         assertEquals("https://example.lextures.com", SchoolCodeLogic.apiBaseUrl("example"))
         assertEquals("http://127.0.0.1:8080", SchoolCodeLogic.apiBaseUrl("Local"))
+    }
+
+    @Test
+    fun homeschoolStorageValuePinned() {
+        // DO NOT RENAME — installed devices persist "selfLearner" in SharedPreferences.
+        assertEquals("selfLearner", EnvironmentStore.Kind.Homeschool.storageValue)
+    }
+
+    @Test
+    fun legacySelfLearnerStorageValueMapsToHomeschool() {
+        assertEquals(EnvironmentStore.Kind.Homeschool, EnvironmentStore.Kind.fromStorage("selfLearner"))
     }
 
     @Test

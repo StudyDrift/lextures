@@ -1,4 +1,4 @@
-// Package learnergoals stores self-learner onboarding goals and placement results (plan 15.11).
+// Package learnergoals stores homeschool onboarding goals and placement results (plan 15.11).
 package learnergoals
 
 import (

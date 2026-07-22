@@ -3,8 +3,10 @@
     <string name="app_name">Lextures</string>
     <string name="app_tagline">de StudyDrift</string>
     <string name="auth_getStarted_back">Atrás</string>
-    <string name="auth_getStarted_changeEnvironment">Cambiar escuela o ruta de aprendizaje</string>
+    <string name="auth_getStarted_changeEnvironment">Cambiar de escuela o de cuenta de educación en casa</string>
     <string name="auth_getStarted_continue">Continuar</string>
+    <string name="auth_getStarted_homeschoolDescription">Estudio en casa, para una certificación o a mi propio ritmo.</string>
+    <string name="auth_getStarted_homeschoolTitle">Educación en casa</string>
     <string name="auth_getStarted_schoolCodeErrorEmpty">Ingresa el código de tu escuela.</string>
     <string name="auth_getStarted_schoolCodeErrorFormat">Usa solo letras minúsculas, números y guiones.</string>
     <string name="auth_getStarted_schoolCodeErrorLengthMax">Los códigos de escuela tienen como máximo 32 caracteres.</string>
@@ -18,8 +20,6 @@
     <string name="auth_getStarted_schoolCodeTitle">Ingresa el código de tu escuela</string>
     <string name="auth_getStarted_schoolDescription">Soy estudiante o educador en una escuela que usa Lextures.</string>
     <string name="auth_getStarted_schoolTitle">Escuela</string>
-    <string name="auth_getStarted_selfLearnerDescription">Estudio de forma independiente, para una certificación o a mi propio ritmo.</string>
-    <string name="auth_getStarted_selfLearnerTitle">Autoaprendizaje</string>
     <string name="auth_getStarted_subtitle">Elige la opción que coincida con cómo inicias sesión.</string>
     <string name="auth_getStarted_title">¿Cómo usas Lextures?</string>
     <string name="auth_login_createAccount">Crear una cuenta</string>

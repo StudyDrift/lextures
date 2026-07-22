@@ -24,8 +24,8 @@ class EnvironmentStore private constructor(context: Context) {
     val hasSelection: Boolean
         get() = !apiBaseUrl.isNullOrBlank()
 
-    fun selectSelfLearner() {
-        persist(Kind.SelfLearner, schoolCode = null, apiBaseUrl = SchoolCodeLogic.SELF_LEARNER_API_BASE)
+    fun selectHomeschool() {
+        persist(Kind.Homeschool, schoolCode = null, apiBaseUrl = SchoolCodeLogic.HOMESCHOOL_API_BASE)
     }
 
     fun selectSchool(code: String) {
@@ -65,7 +65,8 @@ class EnvironmentStore private constructor(context: Context) {
     }
 
     enum class Kind(val storageValue: String) {
-        SelfLearner("selfLearner"),
+        // DO NOT RENAME storage value — persisted in SharedPreferences; pin keeps upgrades in place.
+        Homeschool("selfLearner"),
         School("school"),
         ;
 
@@ -88,5 +89,10 @@ class EnvironmentStore private constructor(context: Context) {
             instance ?: synchronized(this) {
                 instance ?: EnvironmentStore(context.applicationContext).also { instance = it }
             }
+
+        /** Clears the process-wide singleton. Unit tests only. */
+        internal fun clearInstanceForTests() {
+            instance = null
+        }
     }
 }

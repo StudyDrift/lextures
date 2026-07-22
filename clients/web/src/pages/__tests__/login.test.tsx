@@ -14,6 +14,7 @@ describe('Login', () => {
     renderWithRouter(<Login />, { route: '/login', path: '/login' })
     expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /lextures/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/^email$/i)).not.toHaveAttribute('placeholder', 'you@school.edu')
   })
 
   it('submits credentials and navigates to the LMS dashboard', async () => {

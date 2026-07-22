@@ -108,31 +108,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تغيير المدرسة أو مسار التعلم"
+            "value": "تغيير المدرسة أو حساب التعليم المنزلي"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Change school or learning path"
+            "value": "Change school or homeschool account"
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "[Change school or learning path]"
+            "value": "[Change school or homeschool account]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cambiar escuela o ruta de aprendizaje"
+            "value": "Cambiar de escuela o de cuenta de educación en casa"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Changer d’école ou de parcours"
+            "value": "Changer d'école ou de compte école à la maison"
           }
         }
       }
@@ -167,6 +167,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Continuer"
+          }
+        }
+      }
+    },
+    "auth.getStarted.homeschoolDescription": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أدرس في المنزل، للحصول على شهادة، أو وفق جدولي الخاص."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I'm homeschooling, studying for a certification, or learning on my own schedule."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[I'm homeschooling, studying for a certification, or learning on my own schedule.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estudio en casa, para una certificación o a mi propio ritmo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "J'étudie à la maison, pour une certification ou à mon rythme."
+          }
+        }
+      }
+    },
+    "auth.getStarted.homeschoolTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التعليم المنزلي"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homeschool"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Homeschool]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Educación en casa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "École à la maison"
           }
         }
       }
@@ -609,74 +677,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Établissement"
-          }
-        }
-      }
-    },
-    "auth.getStarted.selfLearnerDescription": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أتعلم بشكل مستقل، للحصول على شهادة، أو وفق جدولي الخاص."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I'm studying independently, for a certification, or on my own schedule."
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "[I'm studying independently, for a certification, or on my own schedule.]"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estudio de forma independiente, para una certificación o a mi propio ritmo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "J’apprends de façon autonome, pour une certification ou à mon rythme."
-          }
-        }
-      }
-    },
-    "auth.getStarted.selfLearnerTitle": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "متعلم ذاتي"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Self-learner"
-          }
-        },
-        "en-XA": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "[Self-learner]"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Autoaprendizaje"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apprenant autonome"
           }
         }
       }

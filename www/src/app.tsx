@@ -19,7 +19,7 @@ import { K12Page } from './pages/k12-page'
 import { PricingCalculatorPage } from './pages/pricing-calculator-page'
 import { PricingPage } from './pages/pricing-page'
 import { RequestInformationPage } from './pages/request-information-page'
-import { SelfLearnerPage } from './pages/self-learner-page'
+import { HomeschoolPage } from './pages/homeschool-page'
 import {
   PrivacyPolicyHistoryPage,
   PrivacyPolicyPage,
@@ -30,6 +30,14 @@ import { SecurityPage } from './pages/security-page'
 import { AccessibilityConformancePage } from './pages/accessibility-conformance-page'
 import { CaliforniaPrivacyRightsPage } from './pages/california-privacy-rights-page'
 import { VpatPage } from './pages/vpat-page'
+
+/** Legacy /self-learner path — permanent client redirect to /homeschool (HS.2 FR-2). */
+function RedirectToHomeschool() {
+  useEffect(() => {
+    window.location.replace('/homeschool')
+  }, [])
+  return null
+}
 
 function useHashRoute() {
   const [hash, setHash] = useState(() => window.location.hash)
@@ -105,7 +113,8 @@ export default function App() {
   if (route === '/parents') return <ParentsPage />
   if (route === '/higher-ed') return <HigherEdPage />
   if (route === '/k-12') return <K12Page />
-  if (route === '/self-learner') return <SelfLearnerPage />
+  if (route === '/homeschool') return <HomeschoolPage />
+  if (route === '/self-learner') return <RedirectToHomeschool />
   if (route === '/pricing') return <PricingPage />
   if (route === '/pricing/calculator') return <PricingCalculatorPage />
   if (route === '/courses') return <CoursesPage />

@@ -511,7 +511,7 @@ type Config struct {
 	// FFConsortiumSharing enables multi-campus consortium course sharing and cross-institutional enrollment (plan 14.18).
 	// Managed in Settings → Global platform (not process env).
 	FFConsortiumSharing bool
-	// FFSelfPacedMode enables self-paced enrollment with no instructor for self-learner courses (plan 15.2).
+	// FFSelfPacedMode enables self-paced enrollment with no instructor for homeschool courses (plan 15.2).
 	// Managed in Settings → Global platform (not process env).
 	FFSelfPacedMode bool
 	// FFPublicCatalog enables the public, unauthenticated course catalog and search (plan 15.1).
@@ -569,7 +569,7 @@ type Config struct {
 	FFPublicAPI bool
 	// EnableAPIDocs serves Swagger UI and ReDoc at /api/v1/docs and /api/v1/redoc (plan 16.1).
 	EnableAPIDocs bool
-	// FFLearningPaths enables learning paths / course bundles for self-learners (plan 15.4).
+	// FFLearningPaths enables learning paths / course bundles for homeschool (plan 15.4).
 	// Managed in Settings → Global platform (not process env).
 	FFLearningPaths bool
 	// FFConditionalRelease enables rule-based module requirements and conditional release (plan 1.11).
@@ -584,7 +584,7 @@ type Config struct {
 	// FFCourseReviews enables learner star ratings and text reviews on catalog and course pages (plan 15.7).
 	// Managed in Settings → Global platform (not process env).
 	FFCourseReviews bool
-	// FFGamification enables streaks, XP, leaderboards, and badges for self-learner courses (plan 15.9).
+	// FFGamification enables streaks, XP, leaderboards, and badges for homeschool courses (plan 15.9).
 	// Managed in Settings → Global platform (not process env).
 	FFGamification bool
 	// FFCompetencyBadges enables outcome micro-badges, public backpack, and verify (plan B1).
@@ -593,13 +593,13 @@ type Config struct {
 	// BadgesDefaultPublic is the tenant default for new award is_public (plan B1).
 	// Managed in Settings → Global platform (not process env).
 	BadgesDefaultPublic bool
-	// FFOnboardingFlow enables the self-learner onboarding wizard with goal capture and diagnostic placement (plan 15.11).
+	// FFOnboardingFlow enables the homeschool onboarding wizard with goal capture and diagnostic placement (plan 15.11).
 	// Managed in Settings → Global platform (not process env).
 	FFOnboardingFlow bool
 	// FFStudyReminders enables daily study goal reminders and weekly progress summaries (plan 15.10).
 	// Managed in Settings → Global platform (not process env).
 	FFStudyReminders bool
-	// FFAIStudyBuddy enables the self-learner AI study buddy with persistent memory (plan 15.12).
+	// FFAIStudyBuddy enables the homeschool AI study buddy with persistent memory (plan 15.12).
 	// Managed in Settings → Global platform (not process env).
 	FFAIStudyBuddy bool
 	// FFLessonGenerator enables the AI lesson generator wizard for instructors (plan 19.2).

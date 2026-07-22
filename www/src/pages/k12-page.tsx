@@ -88,7 +88,7 @@ export function K12Page() {
       <AudienceCta
         title="See the teacher and parent views"
         body="The hosted app walks through standards alignment, adaptive quizzes, accommodation profiles, and how a district enables the parent portal for linked families."
-        primaryHref={SITE_LINKS.selfLearner}
+        primaryHref={SITE_LINKS.homeschool}
         primaryLabel="Open self.lextures.com"
         secondaryHref="/docs"
         secondaryLabel="Read the docs"

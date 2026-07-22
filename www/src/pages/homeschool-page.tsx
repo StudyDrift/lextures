@@ -5,6 +5,9 @@ import {
   MarketingPageShell,
 } from '../components/marketing-page-shell'
 import { SITE_LINKS } from '../lib/site-links'
+import { useDocumentHead } from '../lib/use-document-head'
+
+const SITE_ORIGIN = 'https://lextures.com'
 
 const FEATURES = [
   {
@@ -35,19 +38,26 @@ const USE_CASES = [
     body: 'Vocabulary and grammar fade without structured retrieval practice. The review scheduler applies evidence-backed spacing automatically.',
   },
   {
-    title: 'Independent study',
+    title: 'Homeschool and independent study',
     body: 'Working through a textbook or online curriculum on your own timeline — with a gradebook and progress dashboard instead of a reading list alone.',
   },
 ]
 
-export function SelfLearnerPage() {
+export function HomeschoolPage() {
+  useDocumentHead({
+    title: 'Homeschool — Lextures',
+    description:
+      'Create or enroll in courses, practice with IRT-routed quizzes, and clear spaced-repetition reviews from your phone. Self-host for free, or sign up at self.lextures.com.',
+    canonical: `${SITE_ORIGIN}/homeschool`,
+  })
+
   return (
     <MarketingPageShell>
       <AudienceHero
-        eyebrow="Self-learner"
+        eyebrow="Homeschool"
         title="An adaptive study system that runs without a classroom"
         lead="Create or enroll in courses, practice with IRT-routed quizzes, and clear spaced-repetition reviews from your phone. Self-host the full stack for free, or sign up at self.lextures.com with optional paid tiers."
-        primaryHref={SITE_LINKS.selfLearner}
+        primaryHref={SITE_LINKS.homeschool}
         primaryLabel="Start studying"
         secondaryHref="/pricing"
         secondaryLabel="Hosted pricing"
@@ -86,7 +96,7 @@ export function SelfLearnerPage() {
       <AudienceCta
         title="Try it on self.lextures.com or your own server"
         body="Sign up on self.lextures.com to start immediately, or follow the self-hosting guide to run Lextures on your hardware with full control."
-        primaryHref={SITE_LINKS.selfLearner}
+        primaryHref={SITE_LINKS.homeschool}
         primaryLabel="Open self.lextures.com"
         secondaryHref={SITE_LINKS.github}
         secondaryLabel="View on GitHub"

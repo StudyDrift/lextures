@@ -74,7 +74,7 @@ var disclosureFeatures = []FeatureCard{
 	{Key: "vibe_generation", Label: "Interactive activity generation", Description: "Drafts self-contained HTML learning activities."},
 	{Key: "grader_agent", Label: "Grading agent", Description: "Suggests scores and feedback on student submissions."},
 	{Key: "lesson_generation", Label: "Lesson generator", Description: "Generates lesson plans, activities, and formative assessments from learning objectives."},
-	{Key: "ai_study_buddy", Label: "AI study buddy", Description: "Standalone study companion for self-learners."},
+	{Key: "ai_study_buddy", Label: "AI study buddy", Description: "Standalone study companion for homeschoolers."},
 	{Key: "alt_text_suggestion", Label: "Alt-text suggestions", Description: "Suggests accessible image descriptions for course media."},
 }
 

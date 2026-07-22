@@ -1,6 +1,6 @@
 # ISMS Scope Statement
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Effective:** 2026-05-01  
 **Owner:** CTO / Compliance Lead
 
@@ -15,7 +15,7 @@ The Information Security Management System (ISMS) covers the **Lextures Learning
 | Relational database | PostgreSQL (customer data) |
 | Object storage | Course files and media |
 | Production infrastructure | `iac/self-aws/`, `iac/modules/aws/` |
-| Hosted self-learner app | `self.lextures.com` |
+| Hosted homeschool app | `self.lextures.com` |
 
 ## Out of scope (v1)
 
@@ -26,3 +26,10 @@ The Information Security Management System (ISMS) covers the **Lextures Learning
 ## Boundaries
 
 Data flows from end users and institutional SSO IdPs into the Lextures API, persisted in PostgreSQL and object storage within AWS **us-east-1**, fronted by Cloudflare for edge security.
+
+## Document control history
+
+| Version | Date | Author | Change |
+|---------|------|--------|--------|
+| 1.0 | 2026-05-01 | CTO / Compliance Lead | Initial scope statement |
+| 1.1 | 2026-07-22 | Platform + Compliance | Editorial: row label → "Hosted homeschool app" (segment rename); **no scope boundary change** — host cell remains `self.lextures.com` (HS.6) |

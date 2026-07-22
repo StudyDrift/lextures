@@ -13,7 +13,7 @@ const SELF_HOST_FEATURES = [
   'You choose which platform features to enable',
 ]
 
-const SELF_LEARNER_FEATURES = [
+const HOMESCHOOL_FEATURES = [
   'Adaptive quizzes and spaced-repetition review',
   'Self-paced courses with progress and what-if grades',
   'Create your own courses or enroll in shared catalogs',
@@ -52,14 +52,14 @@ const FAQS = [
   },
   {
     q: 'Do all features work out of the box when I self-host?',
-    a: 'The codebase includes K–12, higher-ed, and self-learner capabilities. Some surfaces (parent portal, public catalog, Stripe billing) are controlled by platform feature flags your admin enables in Settings → Global platform.',
+    a: 'The codebase includes K–12, higher-ed, and homeschool capabilities. Some surfaces (parent portal, public catalog, Stripe billing) are controlled by platform feature flags your admin enables in Settings → Global platform.',
   },
   {
     q: 'How do university and district accounts work?',
     a: 'Institutions receive a dedicated environment — hosted by us or on infrastructure you control — with SSO, provisioning, and support scoped to your rollout. Hosted pricing is per student with bulk discounts; open the pricing calculator from this page to estimate cost, then request information when you are ready to talk.',
   },
   {
-    q: 'How do self-learner accounts work?',
+    q: 'How do homeschool accounts work?',
     a: 'Sign up at self.lextures.com for a free hosted individual account with adaptive practice and spaced-repetition review. You can also self-host the stack for free or use an institution account if your school provides access.',
   },
   {
@@ -149,8 +149,8 @@ export function PricingPage() {
           </h1>
           <p className="mx-auto mt-5 max-w-[680px] text-[18px] leading-relaxed" style={{ color: '#4a5b5d' }}>
             Lextures is AGPL-3.0 open source. Run it yourself on Postgres, open a university or
-            district account for production hosting and support, or sign up as an independent
-            learner at self.lextures.com.
+            district account for production hosting and support, or sign up for a homeschool
+            account at self.lextures.com.
           </p>
         </div>
         <div
@@ -184,7 +184,7 @@ export function PricingPage() {
             />
 
             <PricingCard
-              label="Self-learner"
+              label="Homeschool"
               price={
                 <div className="flex items-baseline gap-2">
                   <span className="font-display text-5xl font-semibold" style={{ color: 'var(--ink)' }}>
@@ -195,10 +195,10 @@ export function PricingPage() {
                   </span>
                 </div>
               }
-              description="For certification prep, language study, and independent learners who want adaptive practice without running their own server."
-              features={SELF_LEARNER_FEATURES}
+              description="For homeschool families, certification prep, and language study — adaptive practice without running your own server."
+              features={HOMESCHOOL_FEATURES}
               cta={
-                <a href={SITE_LINKS.selfLearner} className="btn-primary w-full justify-center">
+                <a href={SITE_LINKS.homeschool} className="btn-primary w-full justify-center">
                   Sign up
                 </a>
               }
