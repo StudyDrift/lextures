@@ -55,11 +55,46 @@ enum PlatformCoursesAdminLogic {
     }
 
     static let metricDefinitions: [MetricDefinition] = [
-        MetricDefinition(filter: .created7d, titleKey: "mobile.admin.courses.metric.created7d", hintKey: "mobile.admin.courses.metric.created7d.hint", tableTitleKey: "mobile.admin.courses.metric.created7d.tableTitle", tableDescriptionKey: "mobile.admin.courses.metric.created7d.tableDescription", systemImage: "book.closed.fill"),
-        MetricDefinition(filter: .active, titleKey: "mobile.admin.courses.metric.active", hintKey: "mobile.admin.courses.metric.active.hint", tableTitleKey: "mobile.admin.courses.metric.active.tableTitle", tableDescriptionKey: "mobile.admin.courses.metric.active.tableDescription", systemImage: "book.fill"),
-        MetricDefinition(filter: .draft, titleKey: "mobile.admin.courses.metric.draft", hintKey: "mobile.admin.courses.metric.draft.hint", tableTitleKey: "mobile.admin.courses.metric.draft.tableTitle", tableDescriptionKey: "mobile.admin.courses.metric.draft.tableDescription", systemImage: "doc.badge.ellipsis"),
-        MetricDefinition(filter: .total, titleKey: "mobile.admin.courses.metric.total", hintKey: nil, tableTitleKey: "mobile.admin.courses.metric.total.tableTitle", tableDescriptionKey: "mobile.admin.courses.metric.total.tableDescription", systemImage: "books.vertical.fill"),
-        MetricDefinition(filter: .archived, titleKey: "mobile.admin.courses.metric.archived", hintKey: "mobile.admin.courses.metric.archived.hint", tableTitleKey: "mobile.admin.courses.metric.archived.tableTitle", tableDescriptionKey: "mobile.admin.courses.metric.archived.tableDescription", systemImage: "archivebox.fill"),
+        MetricDefinition(
+            filter: .created7d,
+            titleKey: "mobile.admin.courses.metric.created7d",
+            hintKey: "mobile.admin.courses.metric.created7d.hint",
+            tableTitleKey: "mobile.admin.courses.metric.created7d.tableTitle",
+            tableDescriptionKey: "mobile.admin.courses.metric.created7d.tableDescription",
+            systemImage: "book.closed.fill"
+        ),
+        MetricDefinition(
+            filter: .active,
+            titleKey: "mobile.admin.courses.metric.active",
+            hintKey: "mobile.admin.courses.metric.active.hint",
+            tableTitleKey: "mobile.admin.courses.metric.active.tableTitle",
+            tableDescriptionKey: "mobile.admin.courses.metric.active.tableDescription",
+            systemImage: "book.fill"
+        ),
+        MetricDefinition(
+            filter: .draft,
+            titleKey: "mobile.admin.courses.metric.draft",
+            hintKey: "mobile.admin.courses.metric.draft.hint",
+            tableTitleKey: "mobile.admin.courses.metric.draft.tableTitle",
+            tableDescriptionKey: "mobile.admin.courses.metric.draft.tableDescription",
+            systemImage: "doc.badge.ellipsis"
+        ),
+        MetricDefinition(
+            filter: .total,
+            titleKey: "mobile.admin.courses.metric.total",
+            hintKey: nil,
+            tableTitleKey: "mobile.admin.courses.metric.total.tableTitle",
+            tableDescriptionKey: "mobile.admin.courses.metric.total.tableDescription",
+            systemImage: "books.vertical.fill"
+        ),
+        MetricDefinition(
+            filter: .archived,
+            titleKey: "mobile.admin.courses.metric.archived",
+            hintKey: "mobile.admin.courses.metric.archived.hint",
+            tableTitleKey: "mobile.admin.courses.metric.archived.tableTitle",
+            tableDescriptionKey: "mobile.admin.courses.metric.archived.tableDescription",
+            systemImage: "archivebox.fill"
+        ),
     ]
 
     static func value(for filter: CoursesListFilter, in stats: CoursesDashboardStats) -> Int64 {

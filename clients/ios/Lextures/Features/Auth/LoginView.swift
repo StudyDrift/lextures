@@ -85,7 +85,11 @@ struct LoginView: View {
             oidcStatus = await oidc
         }
     }
+}
 
+// MARK: - Sections & actions (split for type_body_length)
+
+extension LoginView {
     @ViewBuilder
     private var passwordForm: some View {
         AuthTextField(

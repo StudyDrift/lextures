@@ -4,20 +4,20 @@ import XCTest
 final class AppleSignInLogicTests: XCTestCase {
     func testNonceHashIsStableHexSha256() {
         let raw = "test-nonce-value-123"
-        let h1 = AppleSignInController.sha256Hex(raw)
-        let h2 = AppleSignInController.sha256Hex(raw)
-        XCTAssertEqual(h1, h2)
-        XCTAssertEqual(h1.count, 64)
-        XCTAssertTrue(h1.allSatisfy { $0.isHexDigit })
-        XCTAssertNotEqual(h1, AppleSignInController.sha256Hex("other"))
+        let hashOne = AppleSignInController.sha256Hex(raw)
+        let hashTwo = AppleSignInController.sha256Hex(raw)
+        XCTAssertEqual(hashOne, hashTwo)
+        XCTAssertEqual(hashOne.count, 64)
+        XCTAssertTrue(hashOne.allSatisfy { $0.isHexDigit })
+        XCTAssertNotEqual(hashOne, AppleSignInController.sha256Hex("other"))
     }
 
     func testRandomNonceLengthAndCharset() {
-        let a = AppleSignInController.randomNonceString(length: 32)
-        let b = AppleSignInController.randomNonceString(length: 32)
-        XCTAssertEqual(a.count, 32)
-        XCTAssertEqual(b.count, 32)
-        XCTAssertNotEqual(a, b)
+        let firstNonce = AppleSignInController.randomNonceString(length: 32)
+        let secondNonce = AppleSignInController.randomNonceString(length: 32)
+        XCTAssertEqual(firstNonce.count, 32)
+        XCTAssertEqual(secondNonce.count, 32)
+        XCTAssertNotEqual(firstNonce, secondNonce)
     }
 
     func testOidcStatusShowsAppleNative() {
