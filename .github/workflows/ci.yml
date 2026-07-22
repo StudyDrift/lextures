@@ -50,6 +50,11 @@ jobs:
       - name: Migration lint (plan 17.10)
         run: go run ./cmd/migrate-lint
 
+      # scripts/check-*-*.sh require rg; ubuntu-latest images do not ship ripgrep.
+      - name: Install ripgrep
+        working-directory: .
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ripgrep
+
       - name: OpenRouter coupling allowlist (AP.9)
         working-directory: .
         run: bash scripts/check-openrouter-coupling.sh
