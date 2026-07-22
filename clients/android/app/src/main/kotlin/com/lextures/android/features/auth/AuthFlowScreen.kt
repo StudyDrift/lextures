@@ -87,6 +87,7 @@ fun AuthFlowScreen(
                 AuthScreen.Signup -> SignupScreen(
                     session = session,
                     onSignIn = { screen = AuthScreen.Login },
+                    onMfaRequired = { screen = AuthScreen.Mfa },
                 )
                 AuthScreen.Mfa -> MfaChallengeScreen(
                     session = session,

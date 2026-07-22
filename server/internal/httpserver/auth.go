@@ -141,8 +141,8 @@ func (d Deps) handleForgotPassword() http.HandlerFunc {
 }
 
 type magicLinkRequestBody struct {
-	Email       string  `json:"email"`
-	RedirectTo  *string `json:"redirect_to"`
+	Email      string  `json:"email"`
+	RedirectTo *string `json:"redirect_to"`
 }
 
 func (d Deps) handleMagicLinkRequest() http.HandlerFunc {
@@ -401,8 +401,23 @@ func (d Deps) handleOIDCStatus() http.HandlerFunc {
 		oidcOn := cfg.OIDCSSOEnabled
 		cleverOn := cfg.CleverSSOEnabled && cfg.CleverConfigured()
 		classOn := cfg.ClassLinkSSOEnabled && cfg.ClassLinkOIDCConfigured()
-		if !oidcOn && !cleverOn && !classOn {
-			_, _ = w.Write([]byte(`{"enabled":false,"cleverEnabled":false,"classlinkEnabled":false,"providers":[],"custom":[]}`))
+		appleNative := cfg.OIDCAppleNativeAvailable()
+		googleNative := cfg.OIDCGoogleNativeAvailable()
+		// Native social (MOB.9) is independent of tenant OIDC enablement; always surface status fields.
+		if !oidcOn && !cleverOn && !classOn && !appleNative && !googleNative {
+			_ = json.NewEncoder(w).Encode(struct {
+				Enabled          bool  `json:"enabled"`
+				CleverEnabled    bool  `json:"cleverEnabled"`
+				ClassLinkEnabled bool  `json:"classlinkEnabled"`
+				AppleNative      bool  `json:"appleNative"`
+				GoogleNative     bool  `json:"googleNative"`
+				Providers        []any `json:"providers"`
+				Custom           []any `json:"custom"`
+			}{
+				Enabled: false, CleverEnabled: false, ClassLinkEnabled: false,
+				AppleNative: false, GoogleNative: false,
+				Providers: []any{}, Custom: []any{},
+			})
 			return
 		}
 		if d.Pool == nil && cfg.OIDCSSOEnabled {
@@ -437,9 +452,11 @@ func (d Deps) handleOIDCStatus() http.HandlerFunc {
 			Google           bool         `json:"google"`
 			Microsoft        bool         `json:"microsoft"`
 			Apple            bool         `json:"apple"`
+			AppleNative      bool         `json:"appleNative"`
+			GoogleNative     bool         `json:"googleNative"`
 			Custom           []customInfo `json:"custom"`
 		}{
-			Enabled:          oidcOn || cleverOn || classOn,
+			Enabled:          oidcOn || cleverOn || classOn || appleNative || googleNative,
 			CleverEnabled:    cleverOn,
 			ClassLinkEnabled: classOn,
 			Clever:           cleverOn,
@@ -448,6 +465,8 @@ func (d Deps) handleOIDCStatus() http.HandlerFunc {
 			Google:           oidcOn && cfg.OIDCGoogleConfigured(),
 			Microsoft:        oidcOn && cfg.OIDCMicrosoftConfigured(),
 			Apple:            oidcOn && cfg.OIDCAppleConfigured(),
+			AppleNative:      appleNative,
+			GoogleNative:     googleNative,
 			Custom:           custom,
 		})
 	}
@@ -679,4 +698,6 @@ func (d Deps) registerAuthRoutes(r chi.Router) {
 	r.Get("/api/v1/auth/saml/status", d.handleSAMLStatus())
 	r.Get("/api/v1/auth/oidc/status", d.handleOIDCStatus())
 	r.Post("/api/v1/auth/oidc/link", d.handleOIDCLink())
+	r.Post("/api/v1/auth/oidc/apple/native", d.handleOIDCAppleNative())
+	r.Post("/api/v1/auth/oidc/google/native", d.handleOIDCGoogleNative())
 }

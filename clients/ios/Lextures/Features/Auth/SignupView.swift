@@ -1,3 +1,4 @@
+import AuthenticationServices
 import SwiftUI
 
 struct SignupView: View {
@@ -5,6 +6,7 @@ struct SignupView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var onSignIn: () -> Void
+    var onMfaRequired: () -> Void = {}
 
     @State private var displayName = ""
     @State private var email = ""
@@ -12,10 +14,17 @@ struct SignupView: View {
     @State private var registerAsParent = false
     @State private var policy: PasswordPolicy = .fallback
     @State private var isLoading = false
+    @State private var appleLoading = false
+    @State private var appleRawNonce: String = ""
     @State private var errorMessage: String?
+    @State private var oidcStatus: OidcStatusResponse?
 
     private var timezone: String {
         TimeZone.current.identifier
+    }
+
+    private var showNativeApple: Bool {
+        oidcStatus?.showsAppleNative == true
     }
 
     var body: some View {
@@ -28,6 +37,34 @@ struct SignupView: View {
 
                 AuthCard {
                     VStack(spacing: 20) {
+                        if showNativeApple {
+                            SignInWithAppleButton(.signUp) { request in
+                                let raw = AppleSignInController.randomNonceString()
+                                appleRawNonce = raw
+                                request.requestedScopes = [.fullName, .email]
+                                request.nonce = AppleSignInController.sha256Hex(raw)
+                            } onCompletion: { result in
+                                Task { await handleAppleAuthorization(result) }
+                            }
+                            .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                            .frame(height: 48)
+                            .frame(maxWidth: .infinity)
+                            .disabled(appleLoading || isLoading)
+                            .accessibilityIdentifier("auth.signup.signInWithApple")
+
+                            HStack {
+                                Rectangle()
+                                    .fill(LexturesTheme.fieldBorder(for: colorScheme))
+                                    .frame(height: 1)
+                                Text(L.text("auth.login.orDivider"))
+                                    .font(.caption)
+                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                                Rectangle()
+                                    .fill(LexturesTheme.fieldBorder(for: colorScheme))
+                                    .frame(height: 1)
+                            }
+                        }
+
                         AuthTextField(
                             title: "Display name (optional)",
                             text: $displayName,
@@ -85,7 +122,7 @@ struct SignupView: View {
                             Task { await submit() }
                         }
                         .buttonStyle(AuthPrimaryButtonStyle())
-                        .disabled(isLoading || email.isEmpty || password.count < policy.minLength)
+                        .disabled(isLoading || appleLoading || email.isEmpty || password.count < policy.minLength)
 
                         HStack(spacing: 4) {
                             Text("Already have an account?")
@@ -105,7 +142,10 @@ struct SignupView: View {
         }
         .scrollDismissesKeyboard(.automatic)
         .task {
-            policy = await AuthAPI.fetchPasswordPolicy()
+            async let pol = AuthAPI.fetchPasswordPolicy()
+            async let oidc = AuthAPI.fetchOidcStatus()
+            policy = await pol
+            oidcStatus = await oidc
         }
     }
 
@@ -193,6 +233,59 @@ struct SignupView: View {
             }
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    @MainActor
+    private func handleAppleAuthorization(_ result: Result<ASAuthorization, Error>) async {
+        appleLoading = true
+        errorMessage = nil
+        defer { appleLoading = false }
+
+        switch result {
+        case .failure(let error):
+            if let authError = error as? ASAuthorizationError, authError.code == .canceled {
+                return
+            }
+            errorMessage = L.text("auth.social.appleFailed")
+        case .success(let authorization):
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                  let tokenData = credential.identityToken,
+                  let idToken = String(data: tokenData, encoding: .utf8),
+                  !idToken.isEmpty
+            else {
+                errorMessage = L.text("auth.social.appleFailed")
+                return
+            }
+            var authCode: String?
+            if let codeData = credential.authorizationCode {
+                authCode = String(data: codeData, encoding: .utf8)
+            }
+            var fullName: String?
+            if let name = credential.fullName {
+                let parts = [name.givenName, name.familyName].compactMap { $0 }.filter { !$0.isEmpty }
+                if !parts.isEmpty { fullName = parts.joined(separator: " ") }
+            }
+            do {
+                let response = try await AuthAPI.nativeAppleSignIn(
+                    idToken: idToken,
+                    rawNonce: appleRawNonce,
+                    authorizationCode: authCode,
+                    fullName: fullName,
+                    email: credential.email
+                )
+                try session.applyTokenResponse(response)
+            } catch AuthSession.AuthSessionError.mfaRequired {
+                onMfaRequired()
+            } catch let error as APIError {
+                if case .transport = error {
+                    errorMessage = session.serverUnreachableMessage()
+                } else {
+                    errorMessage = error.localizedDescription
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 }

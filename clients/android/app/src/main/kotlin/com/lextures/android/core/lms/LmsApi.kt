@@ -4434,22 +4434,74 @@ object LmsApi {
 
     // People admin (M14.3)
 
+    suspend fun fetchPeopleStats(accessToken: String): PeopleDashboardStats =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/people/stats",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
     suspend fun searchPeople(
-        query: String,
+        query: String = "",
+        filter: PeopleListFilter? = null,
         page: Int,
         perPage: Int,
         accessToken: String,
     ): PaginatedPeople = withContext(Dispatchers.IO) {
-        val trimmed = query.trim()
         val path = buildString {
-            append("/api/v1/admin/people?q=${encodeQuery(trimmed)}")
-            append("&page=$page")
-            append("&per_page=$perPage")
+            append("/api/v1/admin/people?page=$page&per_page=$perPage")
+            val trimmed = query.trim()
+            if (trimmed.isNotEmpty()) append("&q=${encodeQuery(trimmed)}")
+            if (filter != null) append("&filter=${encodeQuery(filter.apiValue)}")
         }
         val (body, code) = client.request(path = path, accessToken = accessToken)
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
         decode(body)
     }
+
+    // Platform courses admin
+
+    suspend fun fetchCoursesStats(accessToken: String): CoursesDashboardStats =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/courses/stats",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun searchPlatformCourses(
+        query: String = "",
+        filter: CoursesListFilter? = null,
+        page: Int,
+        perPage: Int,
+        accessToken: String,
+    ): PaginatedPlatformCourses = withContext(Dispatchers.IO) {
+        val path = buildString {
+            append("/api/v1/admin/courses?page=$page&per_page=$perPage")
+            val trimmed = query.trim()
+            if (trimmed.isNotEmpty()) append("&q=${encodeQuery(trimmed)}")
+            if (filter != null) append("&filter=${encodeQuery(filter.apiValue)}")
+        }
+        val (body, code) = client.request(path = path, accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun ensurePlatformCourseAdminAccess(courseId: String, accessToken: String): PlatformCourseReport =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/admin/courses/${encodePath(courseId)}/access",
+                method = "POST",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
 
     suspend fun fetchPersonReport(userId: String, accessToken: String): PersonReport =
         withContext(Dispatchers.IO) {

@@ -127,6 +127,10 @@ struct OidcStatusResponse: Decodable {
     var google: Bool?
     var microsoft: Bool?
     var apple: Bool?
+    /// MOB.9 — native Sign in with Apple (AuthenticationServices), independent of tenant OIDC.
+    var appleNative: Bool?
+    /// MOB.9 — native Google Sign-In (Android Credential Manager); informational on iOS.
+    var googleNative: Bool?
     var custom: [OidcCustomProvider]?
 
     struct OidcCustomProvider: Decodable {
@@ -136,6 +140,33 @@ struct OidcStatusResponse: Decodable {
 
     var showsClever: Bool { cleverEnabled == true || clever == true }
     var showsClassLink: Bool { classlinkEnabled == true || classlink == true }
+    var showsAppleNative: Bool { appleNative == true }
+}
+
+struct NativeAppleSignInRequest: Encodable {
+    var idToken: String
+    var rawNonce: String
+    var authorizationCode: String?
+    var fullName: String?
+    var email: String?
+
+    enum CodingKeys: String, CodingKey {
+        case idToken = "id_token"
+        case rawNonce = "raw_nonce"
+        case authorizationCode = "authorization_code"
+        case fullName = "full_name"
+        case email
+    }
+}
+
+struct NativeGoogleSignInRequest: Encodable {
+    var idToken: String
+    var rawNonce: String?
+
+    enum CodingKeys: String, CodingKey {
+        case idToken = "id_token"
+        case rawNonce = "raw_nonce"
+    }
 }
 
 struct MagicLinkRequest: Encodable {
@@ -277,10 +308,64 @@ enum AuthAPI {
         do {
             let (data, _) = try await client.request(path: "/api/v1/auth/oidc/status")
             return (try? JSONDecoder().decode(OidcStatusResponse.self, from: data))
-                ?? OidcStatusResponse(enabled: false, cleverEnabled: false, classlinkEnabled: false, clever: false, classlink: false, google: false, microsoft: false, apple: false, custom: [])
+                ?? OidcStatusResponse(
+                    enabled: false,
+                    cleverEnabled: false,
+                    classlinkEnabled: false,
+                    clever: false,
+                    classlink: false,
+                    google: false,
+                    microsoft: false,
+                    apple: false,
+                    appleNative: false,
+                    googleNative: false,
+                    custom: []
+                )
         } catch {
-            return OidcStatusResponse(enabled: false, cleverEnabled: false, classlinkEnabled: false, clever: false, classlink: false, google: false, microsoft: false, apple: false, custom: [])
+            return OidcStatusResponse(
+                enabled: false,
+                cleverEnabled: false,
+                classlinkEnabled: false,
+                clever: false,
+                classlink: false,
+                google: false,
+                microsoft: false,
+                apple: false,
+                appleNative: false,
+                googleNative: false,
+                custom: []
+            )
         }
+    }
+
+    static func nativeAppleSignIn(
+        idToken: String,
+        rawNonce: String,
+        authorizationCode: String?,
+        fullName: String?,
+        email: String?
+    ) async throws -> AuthTokenResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/auth/oidc/apple/native",
+            method: "POST",
+            body: NativeAppleSignInRequest(
+                idToken: idToken,
+                rawNonce: rawNonce,
+                authorizationCode: authorizationCode,
+                fullName: fullName,
+                email: email
+            )
+        )
+        return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
+    }
+
+    static func nativeGoogleSignIn(idToken: String, rawNonce: String?) async throws -> AuthTokenResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/auth/oidc/google/native",
+            method: "POST",
+            body: NativeGoogleSignInRequest(idToken: idToken, rawNonce: rawNonce)
+        )
+        return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
     }
 
     static func requestMagicLink(email: String) async throws -> MagicLinkRequestResponse {

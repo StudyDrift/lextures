@@ -125,4 +125,79 @@ enum PeopleAdminLogic {
         }
         return L.text("mobile.admin.people.error")
     }
+
+    struct MetricDefinition: Identifiable, Equatable {
+        var id: PeopleListFilter { filter }
+        let filter: PeopleListFilter
+        let titleKey: String.LocalizationValue
+        let hintKey: String.LocalizationValue?
+        let tableTitleKey: String.LocalizationValue
+        let tableDescriptionKey: String.LocalizationValue
+        let systemImage: String
+    }
+
+    static let metricDefinitions: [MetricDefinition] = [
+        MetricDefinition(
+            filter: .signups7d,
+            titleKey: "mobile.admin.people.metric.signups7d",
+            hintKey: "mobile.admin.people.metric.signups7d.hint",
+            tableTitleKey: "mobile.admin.people.metric.signups7d.tableTitle",
+            tableDescriptionKey: "mobile.admin.people.metric.signups7d.tableDescription",
+            systemImage: "person.badge.plus"
+        ),
+        MetricDefinition(
+            filter: .active,
+            titleKey: "mobile.admin.people.metric.active",
+            hintKey: "mobile.admin.people.metric.active.hint",
+            tableTitleKey: "mobile.admin.people.metric.active.tableTitle",
+            tableDescriptionKey: "mobile.admin.people.metric.active.tableDescription",
+            systemImage: "person.crop.circle.badge.checkmark"
+        ),
+        MetricDefinition(
+            filter: .recent30d,
+            titleKey: "mobile.admin.people.metric.recent30d",
+            hintKey: "mobile.admin.people.metric.recent30d.hint",
+            tableTitleKey: "mobile.admin.people.metric.recent30d.tableTitle",
+            tableDescriptionKey: "mobile.admin.people.metric.recent30d.tableDescription",
+            systemImage: "chart.line.uptrend.xyaxis"
+        ),
+        MetricDefinition(
+            filter: .total,
+            titleKey: "mobile.admin.people.metric.total",
+            hintKey: nil,
+            tableTitleKey: "mobile.admin.people.metric.total.tableTitle",
+            tableDescriptionKey: "mobile.admin.people.metric.total.tableDescription",
+            systemImage: "person.3"
+        ),
+        MetricDefinition(
+            filter: .suspended,
+            titleKey: "mobile.admin.people.metric.suspended",
+            hintKey: "mobile.admin.people.metric.suspended.hint",
+            tableTitleKey: "mobile.admin.people.metric.suspended.tableTitle",
+            tableDescriptionKey: "mobile.admin.people.metric.suspended.tableDescription",
+            systemImage: "person.crop.circle.badge.xmark"
+        ),
+    ]
+
+    static func value(for filter: PeopleListFilter, in stats: PeopleDashboardStats) -> Int64 {
+        switch filter {
+        case .signups7d: stats.signupsLast7Days
+        case .active: stats.activeAccounts
+        case .recent30d: stats.recentlyActive30Days
+        case .total: stats.totalAccounts
+        case .suspended: stats.suspendedAccounts
+        }
+    }
+
+    static func toggleFilter(current: PeopleListFilter?, tapped: PeopleListFilter) -> PeopleListFilter? {
+        current == tapped ? nil : tapped
+    }
+
+    static func metric(for filter: PeopleListFilter) -> MetricDefinition? {
+        metricDefinitions.first { $0.filter == filter }
+    }
+
+    static func formatCount(_ value: Int64) -> String {
+        NumberFormatter.localizedString(from: NSNumber(value: value), number: .decimal)
+    }
 }

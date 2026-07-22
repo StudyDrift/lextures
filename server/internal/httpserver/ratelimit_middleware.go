@@ -19,6 +19,8 @@ var authSensitivePaths = map[string]bool{
 	"/api/v1/auth/reset-password":     true,
 	"/api/v1/auth/parent-invite/consume": true,
 	"/api/v1/auth/magic-link/request": true,
+	"/api/v1/auth/oidc/apple/native":  true,
+	"/api/v1/auth/oidc/google/native": true,
 }
 
 // buildRateLimiter constructs the request limiter from config + Redis. IPs are

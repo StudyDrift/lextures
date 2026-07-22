@@ -124,9 +124,36 @@ struct ProfileLegalCard: View {
     }
 }
 
-/// Chevron row that pushes a value-based navigation destination.
-struct SettingsNavigationRow<Route: Hashable>: View {
+struct SettingsNavRowLabel: View {
     @Environment(\.colorScheme) private var colorScheme
+    let systemImage: String
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: systemImage)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                .frame(width: 40, height: 40)
+                .background(LexturesTheme.brandTeal.opacity(colorScheme == .dark ? 0.18 : 0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.body.weight(.semibold)).foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                Text(subtitle).font(.subheadline).foregroundStyle(LexturesTheme.textSecondary(for: colorScheme)).fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme).opacity(0.6))
+                .flipsForRightToLeftLayoutDirection(true)
+        }
+        .frame(minHeight: 52, alignment: .center)
+        .contentShape(Rectangle())
+    }
+}
+
+struct SettingsNavigationRow<Route: Hashable>: View {
     let route: Route
     let systemImage: String
     let title: String
@@ -134,28 +161,21 @@ struct SettingsNavigationRow<Route: Hashable>: View {
 
     var body: some View {
         NavigationLink(value: route) {
-            HStack(spacing: 12) {
-                Image(systemName: systemImage)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-                    .frame(width: 32, height: 32)
-                    .background(LexturesTheme.brandTeal.opacity(colorScheme == .dark ? 0.18 : 0.14))
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme).opacity(0.6))
-                    .flipsForRightToLeftLayoutDirection(true)
-            }
-            .contentShape(Rectangle())
+            SettingsNavRowLabel(systemImage: systemImage, title: title, subtitle: subtitle)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct SettingsDestinationRow<Destination: View>: View {
+    let systemImage: String
+    let title: String
+    let subtitle: String
+    @ViewBuilder var destination: () -> Destination
+
+    var body: some View {
+        NavigationLink { destination() } label: {
+            SettingsNavRowLabel(systemImage: systemImage, title: title, subtitle: subtitle)
         }
         .buttonStyle(.plain)
     }

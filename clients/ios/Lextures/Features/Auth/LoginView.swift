@@ -1,3 +1,4 @@
+import AuthenticationServices
 import SwiftUI
 
 struct LoginView: View {
@@ -13,6 +14,8 @@ struct LoginView: View {
     @State private var password = ""
     @State private var isLoading = false
     @State private var ssoLoading = false
+    @State private var appleLoading = false
+    @State private var appleRawNonce: String = ""
     @State private var magicLinkStatus: MagicLinkStatus = .idle
     @State private var errorMessage: String?
     @State private var samlStatus: SamlStatusResponse?
@@ -47,8 +50,8 @@ struct LoginView: View {
                                 .accessibilityLabel(bannerMessage)
                         }
 
-                        if let providers = ssoProviders, !providers.isEmpty {
-                            ssoButtons(providers)
+                        if showNativeApple || (ssoProviders?.isEmpty == false) {
+                            socialSection
                         }
 
                         if forceSaml {
@@ -59,6 +62,9 @@ struct LoginView: View {
                         }
 
                         if !forceSaml {
+                            if showNativeApple || (ssoProviders?.isEmpty == false) {
+                                socialDivider
+                            }
                             passwordForm
                             magicLinkSection
                             footerLink
@@ -79,7 +85,11 @@ struct LoginView: View {
             oidcStatus = await oidc
         }
     }
+}
 
+// MARK: - Sections & actions (split for type_body_length)
+
+extension LoginView {
     @ViewBuilder
     private var passwordForm: some View {
         AuthTextField(
@@ -109,7 +119,7 @@ struct LoginView: View {
             Task { await submitPassword() }
         }
         .buttonStyle(AuthPrimaryButtonStyle())
-        .disabled(isLoading || ssoLoading || email.isEmpty || password.isEmpty)
+        .disabled(isLoading || ssoLoading || appleLoading || email.isEmpty || password.isEmpty)
 
         HStack {
             Spacer()
@@ -179,6 +189,22 @@ struct LoginView: View {
             .padding(.top, 4)
     }
 
+    private var showNativeApple: Bool {
+        // Always offer native Apple on the default path when the server flags it (or when
+        // any other social button is visible — Guideline 4.8 parity).
+        oidcStatus?.showsAppleNative == true || (ssoProviders?.isEmpty == false && hasOtherSocial)
+    }
+
+    private var hasOtherSocial: Bool {
+        guard let providers = ssoProviders else { return false }
+        return providers.contains { provider in
+            if case let .oidc(_, label) = provider {
+                return label == "Google" || label == "Microsoft" || label == "Apple"
+            }
+            return false
+        }
+    }
+
     private var ssoProviders: [SSOProvider]? {
         var items: [SSOProvider] = []
         if let idp = samlStatus?.enabled == true ? samlStatus?.idp : nil {
@@ -198,7 +224,8 @@ struct LoginView: View {
                 if oidc.microsoft == true {
                     items.append(.oidc(path: "/auth/oidc/microsoft/login", label: "Microsoft"))
                 }
-                if oidc.apple == true {
+                // Prefer native Apple when available; skip web-redirect Apple to avoid duplicates.
+                if oidc.apple == true && oidc.showsAppleNative != true {
                     items.append(.oidc(path: "/auth/oidc/apple/login", label: "Apple"))
                 }
                 if let custom = oidc.custom {
@@ -215,15 +242,48 @@ struct LoginView: View {
     }
 
     @ViewBuilder
-    private func ssoButtons(_ providers: [SSOProvider]) -> some View {
+    private var socialSection: some View {
         VStack(spacing: 10) {
-            ForEach(Array(providers.enumerated()), id: \.offset) { _, provider in
-                Button(ssoLabel(for: provider)) {
-                    Task { await startSSO(provider) }
+            if showNativeApple {
+                SignInWithAppleButton(.signIn) { request in
+                    let raw = AppleSignInController.randomNonceString()
+                    appleRawNonce = raw
+                    request.requestedScopes = [.fullName, .email]
+                    request.nonce = AppleSignInController.sha256Hex(raw)
+                } onCompletion: { result in
+                    Task { await handleAppleAuthorization(result) }
                 }
-                .buttonStyle(AuthOutlineButtonStyle())
-                .disabled(ssoLoading || isLoading)
+                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                .frame(height: 48)
+                .frame(maxWidth: .infinity)
+                .disabled(appleLoading || ssoLoading || isLoading)
+                .accessibilityIdentifier("auth.login.signInWithApple")
             }
+
+            if let providers = ssoProviders {
+                ForEach(Array(providers.enumerated()), id: \.offset) { pair in
+                    let provider = pair.element
+                    Button(ssoLabel(for: provider)) {
+                        Task { await startSSO(provider) }
+                    }
+                    .buttonStyle(AuthOutlineButtonStyle())
+                    .disabled(ssoLoading || isLoading || appleLoading)
+                }
+            }
+        }
+    }
+
+    private var socialDivider: some View {
+        HStack {
+            Rectangle()
+                .fill(LexturesTheme.fieldBorder(for: colorScheme))
+                .frame(height: 1)
+            Text(L.text("auth.login.orDivider"))
+                .font(.caption)
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            Rectangle()
+                .fill(LexturesTheme.fieldBorder(for: colorScheme))
+                .frame(height: 1)
         }
     }
 
@@ -275,6 +335,7 @@ struct LoginView: View {
             onMfaRequired()
         } catch let error as SSOAuthError {
             if case .cancelled = error {
+                // Silent return per FR-10 for cancel; keep legacy message for non-native web cancel.
                 errorMessage = error.localizedDescription
             } else {
                 errorMessage = error.localizedDescription
@@ -283,6 +344,60 @@ struct LoginView: View {
             errorMessage = error.localizedDescription
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    @MainActor
+    private func handleAppleAuthorization(_ result: Result<ASAuthorization, Error>) async {
+        appleLoading = true
+        errorMessage = nil
+        defer { appleLoading = false }
+
+        switch result {
+        case .failure(let error):
+            if let authError = error as? ASAuthorizationError, authError.code == .canceled {
+                return
+            }
+            errorMessage = L.text("auth.social.appleFailed")
+        case .success(let authorization):
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                  let tokenData = credential.identityToken,
+                  let idToken = String(data: tokenData, encoding: .utf8),
+                  !idToken.isEmpty
+            else {
+                errorMessage = L.text("auth.social.appleFailed")
+                return
+            }
+            var authCode: String?
+            if let codeData = credential.authorizationCode {
+                authCode = String(data: codeData, encoding: .utf8)
+            }
+            var fullName: String?
+            if let name = credential.fullName {
+                let parts = [name.givenName, name.familyName].compactMap { $0 }.filter { !$0.isEmpty }
+                if !parts.isEmpty { fullName = parts.joined(separator: " ") }
+            }
+            let rawNonce = appleRawNonce
+            do {
+                let response = try await AuthAPI.nativeAppleSignIn(
+                    idToken: idToken,
+                    rawNonce: rawNonce,
+                    authorizationCode: authCode,
+                    fullName: fullName,
+                    email: credential.email
+                )
+                try session.applyTokenResponse(response)
+            } catch AuthSession.AuthSessionError.mfaRequired {
+                onMfaRequired()
+            } catch let error as APIError {
+                if case .transport = error {
+                    errorMessage = session.serverUnreachableMessage()
+                } else {
+                    errorMessage = error.localizedDescription
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 

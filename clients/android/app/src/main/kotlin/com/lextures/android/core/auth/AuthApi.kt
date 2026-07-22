@@ -169,6 +169,44 @@ object AuthApi {
         return json.decodeFromString(response)
     }
 
+    suspend fun nativeAppleSignIn(
+        idToken: String,
+        rawNonce: String,
+        authorizationCode: String? = null,
+        fullName: String? = null,
+        email: String? = null,
+    ): AuthTokenResponse {
+        val body = client.encodeBody(
+            NativeAppleSignInRequest(
+                idToken = idToken,
+                rawNonce = rawNonce,
+                authorizationCode = authorizationCode,
+                fullName = fullName,
+                email = email,
+            ),
+            NativeAppleSignInRequest.serializer(),
+        )
+        val (response, _) = client.request(
+            path = "/api/v1/auth/oidc/apple/native",
+            method = "POST",
+            body = body,
+        )
+        return json.decodeFromString(response)
+    }
+
+    suspend fun nativeGoogleSignIn(idToken: String, rawNonce: String? = null): AuthTokenResponse {
+        val body = client.encodeBody(
+            NativeGoogleSignInRequest(idToken = idToken, rawNonce = rawNonce),
+            NativeGoogleSignInRequest.serializer(),
+        )
+        val (response, _) = client.request(
+            path = "/api/v1/auth/oidc/google/native",
+            method = "POST",
+            body = body,
+        )
+        return json.decodeFromString(response)
+    }
+
     suspend fun signup(
         email: String,
         password: String,

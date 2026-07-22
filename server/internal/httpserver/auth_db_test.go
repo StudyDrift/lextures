@@ -90,8 +90,16 @@ func TestAuthRoutes_Pg(t *testing.T) {
 	if err := json.NewDecoder(rr.Body).Decode(&oidcSt); err != nil {
 		t.Fatal(err)
 	}
-	if oidcSt["enabled"] != false {
-		t.Fatalf("oidc status enabled: %v", oidcSt["enabled"])
+	// appleNative is on by default (com.lextures.ios audience), so enabled is true even
+	// without tenant OIDC providers. googleNative stays false without a client ID.
+	if oidcSt["enabled"] != true {
+		t.Fatalf("oidc status enabled: %v (want true because appleNative defaults on)", oidcSt["enabled"])
+	}
+	if oidcSt["appleNative"] != true {
+		t.Fatalf("appleNative: %v want true", oidcSt["appleNative"])
+	}
+	if oidcSt["googleNative"] != false {
+		t.Fatalf("googleNative: %v want false without client id", oidcSt["googleNative"])
 	}
 	rr = httptest.NewRecorder()
 	r = httptest.NewRequest(http.MethodGet, "/api/v1/auth/saml/status", nil)
