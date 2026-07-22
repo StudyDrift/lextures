@@ -26,6 +26,23 @@ data class PaginatedPeople(
 )
 
 @Serializable
+data class PeopleDashboardStats(
+    val signupsLast7Days: Long = 0,
+    val activeAccounts: Long = 0,
+    val totalAccounts: Long = 0,
+    val recentlyActive30Days: Long = 0,
+    val suspendedAccounts: Long = 0,
+)
+
+enum class PeopleListFilter(val apiValue: String) {
+    Signups7d("signups_7d"),
+    Active("active"),
+    Recent30d("recent_30d"),
+    Total("total"),
+    Suspended("suspended"),
+}
+
+@Serializable
 data class PersonEnrollment(
     val courseId: String,
     val courseCode: String,

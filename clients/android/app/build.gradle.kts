@@ -22,6 +22,15 @@ val apiBaseUrl: String = sequenceOf(
     .firstOrNull()
     .orEmpty()
 
+// Web/server OAuth client ID used as Credential Manager serverClientId (MOB.9).
+val googleServerClientId: String = sequenceOf(
+    localProperties.getProperty("GOOGLE_SERVER_CLIENT_ID"),
+    project.findProperty("GOOGLE_SERVER_CLIENT_ID") as String?,
+)
+    .mapNotNull { value -> value?.trim()?.takeIf { it.isNotEmpty() } }
+    .firstOrNull()
+    .orEmpty()
+
 android {
     namespace = "com.lextures.android"
     compileSdk = 35
@@ -35,6 +44,7 @@ android {
 
         val resolvedApiBase = apiBaseUrl.ifEmpty { "http://10.0.2.2:8080" }
         buildConfigField("String", "API_BASE_URL", "\"$resolvedApiBase\"")
+        buildConfigField("String", "GOOGLE_SERVER_CLIENT_ID", "\"$googleServerClientId\"")
     }
 
     buildTypes {
@@ -80,6 +90,9 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.google.id)
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
     implementation(libs.androidx.media3.exoplayer)

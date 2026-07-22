@@ -63,6 +63,7 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var googleLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var magicLinkStatus by remember { mutableStateOf(MagicLinkStatus.Idle) }
     var samlStatus by remember { mutableStateOf(com.lextures.android.core.auth.SamlStatusResponse()) }
@@ -77,6 +78,8 @@ fun LoginScreen(
 
     val forceSaml = samlStatus.idp?.forceSaml == true
     val ssoProviders = remember(samlStatus, oidcStatus) { buildSsoProviders(samlStatus, oidcStatus) }
+    val showGoogleNative = oidcStatus.showsGoogleNative && GoogleSignIn.isConfigured()
+    val showSocial = showGoogleNative || ssoProviders.isNotEmpty()
 
     AuthScreenContainer(modifier = modifier) {
         AuthHeader(
@@ -95,12 +98,44 @@ fun LoginScreen(
                     )
                 }
 
-                if (ssoProviders.isNotEmpty()) {
+                if (showSocial) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        if (showGoogleNative) {
+                            AuthOutlineButton(
+                                text = L.text(R.string.auth_social_googleContinue),
+                                enabled = !isLoading && !googleLoading,
+                                onClick = {
+                                    scope.launch {
+                                        googleLoading = true
+                                        errorMessage = null
+                                        try {
+                                            val result = GoogleSignIn.signIn(context)
+                                            val response = withContext(Dispatchers.IO) {
+                                                AuthApi.nativeGoogleSignIn(result.idToken, result.rawNonce)
+                                            }
+                                            session.applyTokenResponse(response)
+                                        } catch (_: GoogleSignInError.Cancelled) {
+                                            // FR-10: silent return on cancel
+                                        } catch (e: AuthSession.AuthSessionError.MfaRequired) {
+                                            onMfaRequired()
+                                        } catch (e: Exception) {
+                                            errorMessage = when (e) {
+                                                is GoogleSignInError.NotConfigured,
+                                                is GoogleSignInError.Failed,
+                                                -> context.getString(R.string.auth_social_googleFailed)
+                                                else -> session.mapError(e)
+                                            }
+                                        } finally {
+                                            googleLoading = false
+                                        }
+                                    }
+                                },
+                            )
+                        }
                         ssoProviders.forEach { provider ->
                             AuthOutlineButton(
                                 text = ssoLabel(context, provider, samlStatus),
-                                enabled = !isLoading,
+                                enabled = !isLoading && !googleLoading,
                                 onClick = { SsoAuth.start(context, provider) },
                             )
                         }
@@ -116,6 +151,21 @@ fun LoginScreen(
                 }
 
                 if (!forceSaml) {
+                    if (showSocial) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            HorizontalDivider(modifier = Modifier.weight(1f))
+                            Text(
+                                text = L.text(R.string.auth_login_orDivider),
+                                color = textSecondary(),
+                                fontSize = 12.sp,
+                            )
+                            HorizontalDivider(modifier = Modifier.weight(1f))
+                        }
+                    }
                     AuthTextField(
                         title = L.text(R.string.auth_login_email),
                         value = email,
@@ -146,7 +196,7 @@ fun LoginScreen(
                         } else {
                             L.text(R.string.auth_login_submit)
                         },
-                        enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
+                        enabled = !isLoading && !googleLoading && email.isNotBlank() && password.isNotBlank(),
                         onClick = {
                             scope.launch {
                                 isLoading = true
@@ -255,7 +305,10 @@ private fun buildSsoProviders(
     if (oidcStatus.showsClever) items += SsoProvider.Oidc("/auth/clever/login", "Clever")
     if (oidcStatus.showsClassLink) items += SsoProvider.Oidc("/auth/oidc/classlink/login", "ClassLink")
     if (oidcStatus.enabled) {
-        if (oidcStatus.google == true) items += SsoProvider.Oidc("/auth/oidc/google/login", "Google")
+        // Prefer native Google when available; keep web-redirect only as fallback.
+        if (oidcStatus.google == true && !oidcStatus.showsGoogleNative) {
+            items += SsoProvider.Oidc("/auth/oidc/google/login", "Google")
+        }
         if (oidcStatus.microsoft == true) items += SsoProvider.Oidc("/auth/oidc/microsoft/login", "Microsoft")
         if (oidcStatus.apple == true) items += SsoProvider.Oidc("/auth/oidc/apple/login", "Apple")
         oidcStatus.custom.orEmpty().forEach { provider ->

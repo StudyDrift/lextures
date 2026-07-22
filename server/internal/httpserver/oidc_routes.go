@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -146,5 +147,103 @@ func (d Deps) handleOIDCCallback() http.HandlerFunc {
 <body><script>location.replace("` + public + `/saml-callback#` + frag + nextQ + `");</script>
 <p>Redirecting to the app…</p></body></html>`
 		_, _ = w.Write([]byte(html))
+	}
+}
+
+type nativeAppleBody struct {
+	IDToken           string  `json:"id_token"`
+	RawNonce          string  `json:"raw_nonce"`
+	AuthorizationCode *string `json:"authorization_code"`
+	FullName          *string `json:"full_name"`
+	Email             *string `json:"email"`
+}
+
+type nativeGoogleBody struct {
+	IDToken  string  `json:"id_token"`
+	RawNonce *string `json:"raw_nonce"`
+}
+
+// handleOIDCAppleNative is POST /api/v1/auth/oidc/apple/native — verifies an AuthenticationServices ID token.
+func (d Deps) handleOIDCAppleNative() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		if d.Pool == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database is not configured.")
+			return
+		}
+		if d.JWTSigner == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "JWT is not configured.")
+			return
+		}
+		if d.OIDC == nil {
+			d.OIDC = oidcauth.NewService(d.effectiveConfig())
+		}
+		var b nativeAppleBody
+		if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		req := oidcauth.NativeAppleLoginRequest{
+			IDToken:  b.IDToken,
+			RawNonce: b.RawNonce,
+		}
+		if b.AuthorizationCode != nil {
+			req.AuthorizationCode = strings.TrimSpace(*b.AuthorizationCode)
+		}
+		if b.FullName != nil {
+			req.FullName = strings.TrimSpace(*b.FullName)
+		}
+		if b.Email != nil {
+			req.Email = strings.TrimSpace(*b.Email)
+		}
+		res, err := d.OIDC.CompleteNativeAppleLogin(r.Context(), d.Pool, d.JWTSigner, req, authservice.ClientMetaFromRequest(r))
+		if err != nil {
+			writeAuthErr(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(res)
+	}
+}
+
+// handleOIDCGoogleNative is POST /api/v1/auth/oidc/google/native — verifies a Credential Manager Google ID token.
+func (d Deps) handleOIDCGoogleNative() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		if d.Pool == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database is not configured.")
+			return
+		}
+		if d.JWTSigner == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "JWT is not configured.")
+			return
+		}
+		if d.OIDC == nil {
+			d.OIDC = oidcauth.NewService(d.effectiveConfig())
+		}
+		var b nativeGoogleBody
+		if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		req := oidcauth.NativeGoogleLoginRequest{IDToken: b.IDToken}
+		if b.RawNonce != nil {
+			req.RawNonce = strings.TrimSpace(*b.RawNonce)
+		}
+		res, err := d.OIDC.CompleteNativeGoogleLogin(r.Context(), d.Pool, d.JWTSigner, req, authservice.ClientMetaFromRequest(r))
+		if err != nil {
+			writeAuthErr(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(res)
 	}
 }

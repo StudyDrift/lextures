@@ -22,6 +22,16 @@ enum SettingsMenuLogic {
             case .compliance: "mobile.settings.menu.group.compliance"
             }
         }
+
+        var systemImage: String {
+            switch self {
+            case .platform: "gearshape.2"
+            case .schoolOperations: "building.columns"
+            case .studentRecords: "person.text.rectangle"
+            case .integrations: "puzzlepiece.extension"
+            case .compliance: "checkmark.shield"
+            }
+        }
     }
 
     enum ItemId: String, CaseIterable, Identifiable, Hashable {
@@ -30,6 +40,7 @@ enum SettingsMenuLogic {
         case orgBranding
         case rolesPermissions
         case people
+        case courses
         case archivedCourses
         case aiAdmin
         case transcriptsAdvising
@@ -41,7 +52,7 @@ enum SettingsMenuLogic {
 
         var group: GroupId {
             switch self {
-            case .platformSettings, .orgStructure, .orgBranding, .rolesPermissions, .people, .archivedCourses, .aiAdmin, .boardsGovernance:
+            case .platformSettings, .orgStructure, .orgBranding, .rolesPermissions, .people, .courses, .archivedCourses, .aiAdmin, .boardsGovernance:
                 .platform
             case .transcriptsAdvising:
                 .studentRecords
@@ -59,6 +70,7 @@ enum SettingsMenuLogic {
             case .orgBranding: "mobile.admin.orgBranding.title"
             case .rolesPermissions: "mobile.admin.roles.title"
             case .people: "mobile.admin.people.title"
+            case .courses: "mobile.admin.courses.title"
             case .archivedCourses: "mobile.admin.archivedCourses.title"
             case .aiAdmin: "mobile.admin.ai.hub.title"
             case .transcriptsAdvising: "mobile.admin.transcriptsAdvising.hub.title"
@@ -75,6 +87,7 @@ enum SettingsMenuLogic {
             case .orgBranding: "mobile.admin.orgBranding.entry.subtitle"
             case .rolesPermissions: "mobile.admin.roles.entry.subtitle"
             case .people: "mobile.admin.people.entry.subtitle"
+            case .courses: "mobile.admin.courses.entry.subtitle"
             case .archivedCourses: "mobile.admin.archivedCourses.entry.subtitle"
             case .aiAdmin: "mobile.admin.ai.hub.entry.subtitle"
             case .transcriptsAdvising: "mobile.admin.transcriptsAdvising.hub.entry.subtitle"
@@ -91,6 +104,7 @@ enum SettingsMenuLogic {
             case .orgBranding: "paintpalette"
             case .rolesPermissions: "person.badge.key"
             case .people: "person.3"
+            case .courses: "books.vertical"
             case .archivedCourses: "archivebox"
             case .aiAdmin: "sparkles"
             case .transcriptsAdvising: "doc.text"
@@ -147,6 +161,8 @@ enum SettingsMenuLogic {
             return RolesPermissionsAdminLogic.canView(features: features, permissions: permissions)
         case .people:
             return PeopleAdminLogic.canView(features: features, permissions: permissions)
+        case .courses:
+            return PlatformCoursesAdminLogic.canView(features: features, permissions: permissions)
         case .archivedCourses:
             return ArchivedCoursesAdminLogic.canView(features: features, permissions: permissions)
         case .aiAdmin:

@@ -23,6 +23,23 @@ struct PaginatedPeople: Decodable {
     var totalPages: Int
 }
 
+struct PeopleDashboardStats: Decodable, Equatable {
+    var signupsLast7Days: Int64
+    var activeAccounts: Int64
+    var totalAccounts: Int64
+    var recentlyActive30Days: Int64
+    var suspendedAccounts: Int64
+}
+
+enum PeopleListFilter: String, CaseIterable, Identifiable, Hashable {
+    case signups7d = "signups_7d"
+    case active
+    case recent30d = "recent_30d"
+    case total
+    case suspended
+    var id: String { rawValue }
+}
+
 struct PersonEnrollment: Decodable, Identifiable, Hashable {
     var courseId: String
     var courseCode: String

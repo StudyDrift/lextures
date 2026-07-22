@@ -5,3 +5,7 @@
 #
 # Or set the API URL manually (10.0.2.2 is the emulator alias for the host machine's localhost):
 # API_BASE_URL=http://10.0.2.2:8080
+#
+# MOB.9 — Google Sign-In (Credential Manager). Use the same OAuth 2.0 Web client ID
+# configured as OIDC_GOOGLE_CLIENT_ID / OIDC_GOOGLE_NATIVE_AUDIENCE on the API:
+# GOOGLE_SERVER_CLIENT_ID=1234567890-xxxx.apps.googleusercontent.com

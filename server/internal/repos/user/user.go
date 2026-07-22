@@ -189,6 +189,22 @@ func NormalizeEmail(s string) string {
 	return strings.ToLower(strings.TrimSpace(s))
 }
 
+// SetDisplayNameIfEmpty sets display_name only when it is currently null/blank.
+// Used for first-authorization Apple full_name (MOB.9) so we never overwrite a chosen name.
+func SetDisplayNameIfEmpty(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, displayName string) error {
+	name := strings.TrimSpace(displayName)
+	if name == "" {
+		return nil
+	}
+	const q = `
+UPDATE "user".users
+SET display_name = $2
+WHERE id = $1::uuid
+  AND (display_name IS NULL OR TRIM(display_name) = '')`
+	_, err := pool.Exec(ctx, q, userID.String(), name)
+	return err
+}
+
 // FindByEmailCI finds a user by case-insensitive email or nil.
 func FindByEmailCI(ctx context.Context, pool *pgxpool.Pool, email string) (*Row, error) {
 	em := NormalizeEmail(email)

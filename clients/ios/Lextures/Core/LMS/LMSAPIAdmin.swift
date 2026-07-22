@@ -157,15 +157,35 @@ extension LMSAPI {
 
     // MARK: - People admin (M14.3)
 
+    static func fetchPeopleStats(accessToken: String) async throws -> PeopleDashboardStats {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/people/stats",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(PeopleDashboardStats.self, from: data)
+    }
+
     static func searchPeople(
-        query: String,
+        query: String = "",
+        filter: PeopleListFilter? = nil,
         page: Int,
         perPage: Int,
         accessToken: String
     ) async throws -> PaginatedPeople {
+        var parts: [String] = ["page=\(page)", "per_page=\(perPage)"]
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        let encoded = trimmed.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? trimmed
-        let path = "/api/v1/admin/people?q=\(encoded)&page=\(page)&per_page=\(perPage)"
+        if !trimmed.isEmpty {
+            let encoded = trimmed.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? trimmed
+            parts.append("q=\(encoded)")
+        }
+        if let filter {
+            parts.append("filter=\(filter.rawValue)")
+        }
+        let path = "/api/v1/admin/people?\(parts.joined(separator: "&"))"
         let (data, response) = try await client.request(
             path: path,
             authorized: true,
@@ -175,6 +195,62 @@ extension LMSAPI {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
         return try decode(PaginatedPeople.self, from: data)
+    }
+
+    // MARK: - Platform courses admin
+
+    static func fetchCoursesStats(accessToken: String) async throws -> CoursesDashboardStats {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/courses/stats",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(CoursesDashboardStats.self, from: data)
+    }
+
+    static func searchPlatformCourses(
+        query: String = "",
+        filter: CoursesListFilter? = nil,
+        page: Int,
+        perPage: Int,
+        accessToken: String
+    ) async throws -> PaginatedPlatformCourses {
+        var parts: [String] = ["page=\(page)", "per_page=\(perPage)"]
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            let encoded = trimmed.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? trimmed
+            parts.append("q=\(encoded)")
+        }
+        if let filter {
+            parts.append("filter=\(filter.rawValue)")
+        }
+        let path = "/api/v1/admin/courses?\(parts.joined(separator: "&"))"
+        let (data, response) = try await client.request(
+            path: path,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(PaginatedPlatformCourses.self, from: data)
+    }
+
+    @discardableResult
+    static func ensurePlatformCourseAdminAccess(courseId: String, accessToken: String) async throws -> PlatformCourseReport {
+        let (data, response) = try await client.request(
+            path: "/api/v1/admin/courses/\(encodePath(courseId))/access",
+            method: "POST",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(PlatformCourseReport.self, from: data)
     }
 
     static func fetchPersonReport(userId: String, accessToken: String) async throws -> PersonReport {

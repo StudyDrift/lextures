@@ -31,11 +31,16 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.platform.LocalContext
+import com.lextures.android.R
 import com.lextures.android.core.auth.AuthApi
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.auth.OidcStatusResponse
 import com.lextures.android.core.auth.PasswordPolicy
 import com.lextures.android.core.design.AuthCard
 import com.lextures.android.core.design.AuthFooterLink
+import com.lextures.android.core.design.AuthOutlineButton
 import com.lextures.android.core.design.AuthPrimaryButton
 import com.lextures.android.core.design.AuthScreenContainer
 import com.lextures.android.core.design.AuthTextField
@@ -44,6 +49,7 @@ import com.lextures.android.core.design.fieldBorder
 import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
+import com.lextures.android.core.i18n.L
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -53,6 +59,7 @@ import java.util.TimeZone
 fun SignupScreen(
     session: AuthSession,
     onSignIn: () -> Unit,
+    onMfaRequired: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var displayName by remember { mutableStateOf("") }
@@ -61,12 +68,17 @@ fun SignupScreen(
     var registerAsParent by remember { mutableStateOf(false) }
     var policy by remember { mutableStateOf(PasswordPolicy.fallback) }
     var isLoading by remember { mutableStateOf(false) }
+    var googleLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var oidcStatus by remember { mutableStateOf(OidcStatusResponse()) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val timezone = remember { TimeZone.getDefault().id }
+    val showGoogleNative = oidcStatus.showsGoogleNative && GoogleSignIn.isConfigured()
 
     LaunchedEffect(Unit) {
         policy = withContext(Dispatchers.IO) { AuthApi.fetchPasswordPolicy() }
+        oidcStatus = withContext(Dispatchers.IO) { AuthApi.fetchOidcStatus() }
     }
 
     AuthScreenContainer(modifier = modifier) {
@@ -77,6 +89,52 @@ fun SignupScreen(
 
         AuthCard {
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                if (showGoogleNative) {
+                    AuthOutlineButton(
+                        text = L.text(R.string.auth_social_googleContinue),
+                        enabled = !isLoading && !googleLoading,
+                        onClick = {
+                            scope.launch {
+                                googleLoading = true
+                                errorMessage = null
+                                try {
+                                    val result = GoogleSignIn.signIn(context)
+                                    val response = withContext(Dispatchers.IO) {
+                                        AuthApi.nativeGoogleSignIn(result.idToken, result.rawNonce)
+                                    }
+                                    session.applyTokenResponse(response)
+                                } catch (_: GoogleSignInError.Cancelled) {
+                                    // silent
+                                } catch (e: AuthSession.AuthSessionError.MfaRequired) {
+                                    onMfaRequired()
+                                } catch (e: Exception) {
+                                    errorMessage = when (e) {
+                                        is GoogleSignInError.NotConfigured,
+                                        is GoogleSignInError.Failed,
+                                        -> context.getString(R.string.auth_social_googleFailed)
+                                        else -> session.mapError(e)
+                                    }
+                                } finally {
+                                    googleLoading = false
+                                }
+                            }
+                        },
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        HorizontalDivider(modifier = Modifier.weight(1f))
+                        Text(
+                            text = L.text(R.string.auth_login_orDivider),
+                            color = textSecondary(),
+                            fontSize = 12.sp,
+                        )
+                        HorizontalDivider(modifier = Modifier.weight(1f))
+                    }
+                }
+
                 AuthTextField(
                     title = "Display name (optional)",
                     value = displayName,
@@ -117,7 +175,7 @@ fun SignupScreen(
 
                 AuthPrimaryButton(
                     text = if (isLoading) "Creating account…" else "Create account",
-                    enabled = !isLoading && email.isNotBlank() && password.length >= policy.minLength,
+                    enabled = !isLoading && !googleLoading && email.isNotBlank() && password.length >= policy.minLength,
                     onClick = {
                         scope.launch {
                             isLoading = true
@@ -133,6 +191,8 @@ fun SignupScreen(
                                     )
                                 }
                                 session.applyTokenResponse(response)
+                            } catch (e: AuthSession.AuthSessionError.MfaRequired) {
+                                onMfaRequired()
                             } catch (e: Exception) {
                                 errorMessage = session.mapError(e)
                             } finally {

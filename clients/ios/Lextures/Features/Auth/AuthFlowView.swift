@@ -47,11 +47,18 @@ struct AuthFlowView: View {
                     )
                     .transition(.move(edge: .trailing).combined(with: .opacity))
                 case .signup:
-                    SignupView {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            screen = .login
+                    SignupView(
+                        onSignIn: {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                screen = .login
+                            }
+                        },
+                        onMfaRequired: {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                screen = .mfa
+                            }
                         }
-                    }
+                    )
                     .transition(.move(edge: .leading).combined(with: .opacity))
                 case .mfa:
                     MFAChallengeView {

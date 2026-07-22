@@ -1155,8 +1155,65 @@ const spec = `{
     "/api/v1/auth/oidc/status": {
       "get": {
         "tags": ["auth"],
-        "summary": "Which OIDC IdPs are configured (env + custom DB providers)",
-        "responses": { "200": { "description": "enabled, apiBase, provider flags, custom" } }
+        "summary": "Which OIDC IdPs are configured (env + custom DB providers); includes appleNative/googleNative for MOB.9",
+        "responses": { "200": { "description": "enabled, apiBase, provider flags, appleNative, googleNative, custom" } }
+      }
+    },
+    "/api/v1/auth/oidc/apple/native": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Native Sign in with Apple (AuthenticationServices identity token → Lextures tokens)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id_token", "raw_nonce"],
+                "properties": {
+                  "id_token": { "type": "string" },
+                  "raw_nonce": { "type": "string" },
+                  "authorization_code": { "type": "string" },
+                  "full_name": { "type": "string" },
+                  "email": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "AuthTokenResponse (access_token, refresh_token, requires_mfa, user)" },
+          "400": { "description": "Invalid input or token claims" },
+          "401": { "description": "Invalid/expired identity token" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/api/v1/auth/oidc/google/native": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Native Google Sign-In (Credential Manager ID token → Lextures tokens)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id_token"],
+                "properties": {
+                  "id_token": { "type": "string" },
+                  "raw_nonce": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "AuthTokenResponse" },
+          "400": { "description": "Invalid input or token claims" },
+          "401": { "description": "Invalid/expired identity token" },
+          "429": { "description": "Rate limited" }
+        }
       }
     },
     "/api/v1/auth/oidc/link": {

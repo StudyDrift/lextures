@@ -59,6 +59,7 @@ func TestSAMLStatus_Disabled(t *testing.T) {
 }
 
 func TestOIDCStatus_DisabledShape(t *testing.T) {
+	// Empty config still exposes appleNative (default audience com.lextures.ios); google stays off.
 	d := Deps{Config: config.Config{}}
 	h := NewHandler(d)
 	rr := httptest.NewRecorder()
@@ -71,16 +72,60 @@ func TestOIDCStatus_DisabledShape(t *testing.T) {
 	if err := json.NewDecoder(rr.Body).Decode(&m); err != nil {
 		t.Fatal(err)
 	}
-	if m["enabled"] != false {
-		t.Fatalf("enabled: %v", m["enabled"])
+	// Native Apple is on by default (bundle ID audience), so enabled is true even without tenant OIDC.
+	if m["enabled"] != true {
+		t.Fatalf("enabled: %v (want true because appleNative defaults on)", m["enabled"])
 	}
-	prov, _ := m["providers"].([]any)
-	if prov == nil || len(prov) != 0 {
-		t.Fatalf("providers: %v", m["providers"])
+	if m["appleNative"] != true {
+		t.Fatalf("appleNative: %v want true", m["appleNative"])
 	}
-	custom, _ := m["custom"].([]any)
-	if custom == nil || len(custom) != 0 {
-		t.Fatalf("custom: %v", m["custom"])
+	if m["googleNative"] != false {
+		t.Fatalf("googleNative: %v want false without client id", m["googleNative"])
+	}
+}
+
+func TestOIDCStatus_NativeFlags(t *testing.T) {
+	d := Deps{Config: config.Config{
+		OIDCAppleNativeAudience: "com.lextures.ios",
+		OIDCGoogleClientID:      "google-server-client",
+	}}
+	h := NewHandler(d)
+	rr := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/api/v1/auth/oidc/status", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code != 200 {
+		t.Fatalf("code: %d %s", rr.Code, rr.Body.String())
+	}
+	var m map[string]any
+	if err := json.NewDecoder(rr.Body).Decode(&m); err != nil {
+		t.Fatal(err)
+	}
+	if m["enabled"] != true {
+		t.Fatalf("enabled with native: %v", m["enabled"])
+	}
+	if m["appleNative"] != true || m["googleNative"] != true {
+		t.Fatalf("native: apple=%v google=%v", m["appleNative"], m["googleNative"])
+	}
+}
+
+func TestOIDCNative_MissingFields(t *testing.T) {
+	d := Deps{
+		Pool:      nil,
+		JWTSigner: auth.NewJWTSigner("01234567890123456789012345678901"),
+		Config: config.Config{
+			OIDCAppleNativeAudience: "com.lextures.ios",
+			OIDCGoogleClientID:      "g",
+		},
+	}
+	h := NewHandler(d)
+	for _, path := range []string{"/api/v1/auth/oidc/apple/native", "/api/v1/auth/oidc/google/native"} {
+		rr := httptest.NewRecorder()
+		r := httptest.NewRequest(http.MethodPost, path, bytes.NewReader([]byte(`{}`)))
+		h.ServeHTTP(rr, r)
+		// No DB → 503 before body validation is fine; with nil pool we expect 503.
+		if rr.Code != http.StatusServiceUnavailable && rr.Code != 400 {
+			t.Fatalf("%s: code %d body %s", path, rr.Code, rr.Body.String())
+		}
 	}
 }
 

@@ -111,6 +111,12 @@ type Config struct {
 	OIDCAppleTeamID           string
 	OIDCAppleKeyID            string
 	OIDCApplePrivateKeyPEM    string
+	// OIDCAppleNativeAudience is the comma-separated allow-list of audiences accepted
+	// by POST /api/v1/auth/oidc/apple/native (iOS bundle IDs). Default: com.lextures.ios.
+	OIDCAppleNativeAudience string
+	// OIDCGoogleNativeAudience is the audience (OAuth web/server client ID) accepted by
+	// POST /api/v1/auth/oidc/google/native. When empty, OIDCGoogleClientID is used.
+	OIDCGoogleNativeAudience string
 
 	CleverSSOEnabled   bool
 	CleverClientID     string
@@ -334,7 +340,7 @@ type Config struct {
 	FFMotionOverlays bool
 	// FFMotionControls enables control micro-interactions (press, toggle/tabs, validation, haptics) (AN.6). Default ON; kill-switch.
 	// FFMotionDelight enables delight & progress moments (progress fills, quiz feedback, achievement bursts) (AN.7). Default ON; kill-switch.
-	FFMotionDelight bool
+	FFMotionDelight  bool
 	FFMotionControls bool
 	// FFMobileCreateCourse is always on (platform master removed). Mobile New course / create wizard.
 	FFMobileCreateCourse bool
@@ -888,6 +894,11 @@ func Load() Config {
 		OIDCAppleTeamID:           firstNonEmptyTrimmed("OIDC_APPLE_TEAM_ID"),
 		OIDCAppleKeyID:            firstNonEmptyTrimmed("OIDC_APPLE_KEY_ID"),
 		OIDCApplePrivateKeyPEM:    firstNonEmptyTrimmedOrFile("OIDC_APPLE_PRIVATE_KEY_PEM", "OIDC_APPLE_PRIVATE_KEY_PATH"),
+		OIDCAppleNativeAudience: stringDefault(
+			firstNonEmptyTrimmed("OIDC_APPLE_NATIVE_AUDIENCE"),
+			"com.lextures.ios",
+		),
+		OIDCGoogleNativeAudience: firstNonEmptyTrimmed("OIDC_GOOGLE_NATIVE_AUDIENCE"),
 
 		CleverSSOEnabled:   false,
 		CleverClientID:     firstNonEmptyTrimmed("CLEVER_CLIENT_ID", "CLEVER_OIDC_CLIENT_ID"),
@@ -987,10 +998,10 @@ func Load() Config {
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
 		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
 
-		RedisURL:            firstNonEmptyTrimmed("REDIS_URL"),
+		RedisURL: firstNonEmptyTrimmed("REDIS_URL"),
 
-		TURNSharedSecret: firstNonEmptyTrimmed("TURN_SHARED_SECRET"),
-		TURNURLs:         commaSeparatedEnv("TURN_URLS"),
+		TURNSharedSecret:    firstNonEmptyTrimmed("TURN_SHARED_SECRET"),
+		TURNURLs:            commaSeparatedEnv("TURN_URLS"),
 		RedisPoolMin:        intEnvDefault("REDIS_POOL_MIN", redisclient.DefaultPoolMin),
 		RedisPoolMax:        intEnvDefault("REDIS_POOL_MAX", redisclient.DefaultPoolMax),
 		RateLimits:          rateLimitsFromEnv(),
@@ -1081,6 +1092,43 @@ func (c Config) OIDCAppleConfigured() bool {
 		strings.TrimSpace(c.OIDCAppleTeamID) != "" &&
 		strings.TrimSpace(c.OIDCAppleKeyID) != "" &&
 		strings.TrimSpace(c.OIDCApplePrivateKeyPEM) != ""
+}
+
+// OIDCAppleNativeAudiences returns the allow-list of audiences for native Apple ID tokens.
+func (c Config) OIDCAppleNativeAudiences() []string {
+	raw := strings.TrimSpace(c.OIDCAppleNativeAudience)
+	if raw == "" {
+		raw = "com.lextures.ios"
+	}
+	parts := strings.Split(raw, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// OIDCGoogleNativeAudienceResolved is the audience used to verify native Google ID tokens.
+// Prefers OIDC_GOOGLE_NATIVE_AUDIENCE; falls back to the web OIDC Google client ID.
+func (c Config) OIDCGoogleNativeAudienceResolved() string {
+	if v := strings.TrimSpace(c.OIDCGoogleNativeAudience); v != "" {
+		return v
+	}
+	return strings.TrimSpace(c.OIDCGoogleClientID)
+}
+
+// OIDCAppleNativeAvailable is true when native Sign in with Apple has at least one audience
+// (default com.lextures.ios). Always on when config loads; no feature flag (MOB.9).
+func (c Config) OIDCAppleNativeAvailable() bool {
+	return len(c.OIDCAppleNativeAudiences()) > 0
+}
+
+// OIDCGoogleNativeAvailable is true when a Google server client ID / native audience is configured.
+func (c Config) OIDCGoogleNativeAvailable() bool {
+	return c.OIDCGoogleNativeAudienceResolved() != ""
 }
 
 // CleverConfigured is true when Clever OAuth client credentials are present.

@@ -361,6 +361,21 @@ func TestOIDCProviderConfiguredHelpers(t *testing.T) {
 	if (Config{OIDCAppleClientID: "a"}).OIDCAppleConfigured() != false {
 		t.Fatal("expected apple false")
 	}
+	if got := (Config{}).OIDCAppleNativeAudiences(); len(got) != 1 || got[0] != "com.lextures.ios" {
+		t.Fatalf("default apple native audience: %#v", got)
+	}
+	if (Config{OIDCAppleNativeAudience: "com.lextures.ios"}).OIDCAppleNativeAvailable() != true {
+		t.Fatal("expected apple native available")
+	}
+	if (Config{}).OIDCAppleNativeAvailable() != true {
+		t.Fatal("expected apple native available with default audience")
+	}
+	if (Config{OIDCGoogleClientID: "g"}).OIDCGoogleNativeAvailable() != true {
+		t.Fatal("expected google native available")
+	}
+	if (Config{}).OIDCGoogleNativeAvailable() != false {
+		t.Fatal("expected google native unavailable without client id")
+	}
 	if (Config{CleverClientID: "a", CleverClientSecret: "b"}).CleverOIDCConfigured() != true {
 		t.Fatal("expected clever true")
 	}

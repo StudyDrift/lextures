@@ -469,88 +469,152 @@ func (s *Service) CompleteLogin(
 		return s.completeClassLinkLogin(ctx, pool, jwt, subj, emailIn, flow, meta)
 	}
 
-	ident, err := oidcrepo.FindIdentityByProviderAndSub(ctx, pool, pv, subj)
-	if err != nil {
-		return authservice.AuthResponse{}, nil, err
-	}
-	if ident != nil {
-		u, err := user.FindByID(ctx, pool, ident.UserID)
-		if err != nil {
-			return authservice.AuthResponse{}, nil, err
-		}
-		if u == nil {
-			return authservice.AuthResponse{}, nil, authservice.FieldError{Message: "User not found."}
-		}
-		res, err := authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, u, meta, "oidc")
-		if err != nil {
-			return authservice.AuthResponse{}, nil, err
-		}
-		return res, flow.NextPath, nil
-	}
-	if flow.ForUserID != nil {
-		u, err := user.FindByID(ctx, pool, *flow.ForUserID)
-		if err != nil {
-			return authservice.AuthResponse{}, nil, err
-		}
-		if u == nil {
-			return authservice.AuthResponse{}, nil, authservice.FieldError{Message: "User not found."}
-		}
-		if user.NormalizeEmail(u.Email) != emailIn {
-			return authservice.AuthResponse{}, nil, authservice.FieldError{Message: "The signed-in account email does not match the account you are connecting."}
-		}
-		uid, err := uuid.Parse(u.ID)
-		if err != nil {
-			return authservice.AuthResponse{}, nil, err
-		}
-		if _, err := oidcrepo.TryInsertIdentity(ctx, pool, uid, pv, subj, &emailIn); err != nil {
-			return authservice.AuthResponse{}, nil, err
-		}
-		res, err := authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, u, meta, "oidc")
-		if err != nil {
-			return authservice.AuthResponse{}, nil, err
-		}
-		return res, flow.NextPath, nil
-	}
-	if u, err := user.FindByEmail(ctx, pool, emailIn); err != nil {
-		return authservice.AuthResponse{}, nil, err
-	} else if u != nil {
-		uid, err := uuid.Parse(u.ID)
-		if err != nil {
-			return authservice.AuthResponse{}, nil, err
-		}
-		if _, err := oidcrepo.TryInsertIdentity(ctx, pool, uid, pv, subj, &emailIn); err != nil {
-			return authservice.AuthResponse{}, nil, err
-		}
-		res, err := authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, u, meta, "oidc")
-		if err != nil {
-			return authservice.AuthResponse{}, nil, err
-		}
-		return res, flow.NextPath, nil
-	}
-	ph, err := authservice.PlaceholderPasswordHash()
-	if err != nil {
-		return authservice.AuthResponse{}, nil, err
-	}
-	nu, err := user.InsertUser(ctx, pool, emailIn, ph, nil)
-	if err != nil {
-		return authservice.AuthResponse{}, nil, err
-	}
-	uid, err := uuid.Parse(nu.ID)
-	if err != nil {
-		return authservice.AuthResponse{}, nil, err
-	}
-	if err := rbac.AssignUserRoleByName(ctx, pool, uid, "Student"); err != nil {
-		return authservice.AuthResponse{}, nil, err
-	}
-	if _, err := oidcrepo.TryInsertIdentity(ctx, pool, uid, pv, subj, &emailIn); err != nil {
-		return authservice.AuthResponse{}, nil, err
-	}
-	introcourse.EnsureEnrollmentBestEffort(ctx, pool, s.Cfg, pool, uid, introcourse.PathSSO)
-	res, err := authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, nu, meta, "oidc")
+	res, err := s.finishProviderIdentityLogin(ctx, pool, jwt, finishIdentityInput{
+		Provider:  pv,
+		Subject:   subj,
+		Email:     emailIn,
+		ForUserID: flow.ForUserID,
+		Meta:      meta,
+	})
 	if err != nil {
 		return authservice.AuthResponse{}, nil, err
 	}
 	return res, flow.NextPath, nil
+}
+
+// finishIdentityInput is the shared account-resolution payload for web OIDC CompleteLogin
+// and native Apple/Google token endpoints (MOB.9).
+type finishIdentityInput struct {
+	Provider  string
+	Subject   string
+	Email     string // normalized; may be empty only when an identity already exists for Subject
+	FullName  string // optional; applied only when the user has no display name
+	ForUserID *uuid.UUID
+	Meta      *authservice.ClientMeta
+	// RequireEmailOnCreate when true (default) rejects create/link when Email is empty.
+	// Native Apple repeat sign-ins resolve by sub only.
+	AllowEmptyEmail bool
+}
+
+// finishProviderIdentityLogin finds or creates a Lextures user for a verified IdP identity
+// and issues app tokens. Shared by browser OIDC CompleteLogin and native social endpoints.
+func (s *Service) finishProviderIdentityLogin(
+	ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSigner,
+	in finishIdentityInput,
+) (authservice.AuthResponse, error) {
+	pv := strings.ToLower(strings.TrimSpace(in.Provider))
+	subj := strings.TrimSpace(in.Subject)
+	if pv == "" || subj == "" {
+		return authservice.AuthResponse{}, authservice.FieldError{Message: "The identity provider did not return a subject."}
+	}
+	emailIn := user.NormalizeEmail(in.Email)
+
+	ident, err := oidcrepo.FindIdentityByProviderAndSub(ctx, pool, pv, subj)
+	if err != nil {
+		return authservice.AuthResponse{}, err
+	}
+	if ident != nil {
+		u, err := user.FindByID(ctx, pool, ident.UserID)
+		if err != nil {
+			return authservice.AuthResponse{}, err
+		}
+		if u == nil {
+			return authservice.AuthResponse{}, authservice.FieldError{Message: "User not found."}
+		}
+		if err := user.SetDisplayNameIfEmpty(ctx, pool, ident.UserID, in.FullName); err != nil {
+			return authservice.AuthResponse{}, err
+		}
+		if in.FullName != "" {
+			if refreshed, err := user.FindByID(ctx, pool, ident.UserID); err == nil && refreshed != nil {
+				u = refreshed
+			}
+		}
+		return authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, u, in.Meta, "oidc")
+	}
+
+	if emailIn == "" || !strings.Contains(emailIn, "@") {
+		if in.AllowEmptyEmail {
+			return authservice.AuthResponse{}, authservice.FieldError{
+				Message: "No existing account is linked to this identity, and no email was provided to create or link one.",
+			}
+		}
+		return authservice.AuthResponse{}, authservice.FieldError{Message: "The identity provider did not return a usable email address."}
+	}
+
+	if in.ForUserID != nil {
+		u, err := user.FindByID(ctx, pool, *in.ForUserID)
+		if err != nil {
+			return authservice.AuthResponse{}, err
+		}
+		if u == nil {
+			return authservice.AuthResponse{}, authservice.FieldError{Message: "User not found."}
+		}
+		if user.NormalizeEmail(u.Email) != emailIn {
+			return authservice.AuthResponse{}, authservice.FieldError{Message: "The signed-in account email does not match the account you are connecting."}
+		}
+		uid, err := uuid.Parse(u.ID)
+		if err != nil {
+			return authservice.AuthResponse{}, err
+		}
+		if _, err := oidcrepo.TryInsertIdentity(ctx, pool, uid, pv, subj, &emailIn); err != nil {
+			return authservice.AuthResponse{}, err
+		}
+		if err := user.SetDisplayNameIfEmpty(ctx, pool, uid, in.FullName); err != nil {
+			return authservice.AuthResponse{}, err
+		}
+		if in.FullName != "" {
+			if refreshed, err := user.FindByID(ctx, pool, uid); err == nil && refreshed != nil {
+				u = refreshed
+			}
+		}
+		return authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, u, in.Meta, "oidc")
+	}
+
+	if u, err := user.FindByEmail(ctx, pool, emailIn); err != nil {
+		return authservice.AuthResponse{}, err
+	} else if u != nil {
+		uid, err := uuid.Parse(u.ID)
+		if err != nil {
+			return authservice.AuthResponse{}, err
+		}
+		if _, err := oidcrepo.TryInsertIdentity(ctx, pool, uid, pv, subj, &emailIn); err != nil {
+			return authservice.AuthResponse{}, err
+		}
+		if err := user.SetDisplayNameIfEmpty(ctx, pool, uid, in.FullName); err != nil {
+			return authservice.AuthResponse{}, err
+		}
+		if in.FullName != "" {
+			if refreshed, err := user.FindByID(ctx, pool, uid); err == nil && refreshed != nil {
+				u = refreshed
+			}
+		}
+		return authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, u, in.Meta, "oidc")
+	}
+
+	ph, err := authservice.PlaceholderPasswordHash()
+	if err != nil {
+		return authservice.AuthResponse{}, err
+	}
+	var displayName *string
+	if n := strings.TrimSpace(in.FullName); n != "" {
+		displayName = &n
+	}
+	nu, err := user.InsertUser(ctx, pool, emailIn, ph, displayName)
+	if err != nil {
+		return authservice.AuthResponse{}, err
+	}
+	uid, err := uuid.Parse(nu.ID)
+	if err != nil {
+		return authservice.AuthResponse{}, err
+	}
+	if err := rbac.AssignUserRoleByName(ctx, pool, uid, "Student"); err != nil {
+		return authservice.AuthResponse{}, err
+	}
+	if _, err := oidcrepo.TryInsertIdentity(ctx, pool, uid, pv, subj, &emailIn); err != nil {
+		return authservice.AuthResponse{}, err
+	}
+	introcourse.EnsureEnrollmentBestEffort(ctx, pool, s.Cfg, pool, uid, introcourse.PathSSO)
+	return authservice.AuthResponseForUser(ctx, pool, jwt, s.Cfg, nu, in.Meta, "oidc")
 }
 
 func checkHostedDomain(pathProvider string, cfg config.Config, custom *oidcrepo.CustomProviderRow, emailIn string) error {

@@ -51,6 +51,7 @@ import com.lextures.android.features.settings.admin.BoardsGovernanceAdminScreen
 import com.lextures.android.features.settings.admin.IntegrationsAdminScreen
 import com.lextures.android.features.settings.admin.OrgBrandingAdminScreen
 import com.lextures.android.features.settings.admin.OrgStructureAdminScreen
+import com.lextures.android.features.settings.admin.CoursesAdminScreen
 import com.lextures.android.features.settings.admin.PeopleAdminScreen
 import com.lextures.android.features.settings.admin.PlatformSettingsScreen
 import com.lextures.android.features.settings.admin.RolesPermissionsAdminScreen
@@ -103,6 +104,10 @@ fun SettingsAdminHubScreen(
         }
         SettingsMenuLogic.ItemId.People -> {
             PeopleAdminScreen(session, shell, localePrefs, onBack = { openPage = null }, modifier)
+            return
+        }
+        SettingsMenuLogic.ItemId.Courses -> {
+            CoursesAdminScreen(session, shell, localePrefs, onBack = { openPage = null }, modifier)
             return
         }
         SettingsMenuLogic.ItemId.ArchivedCourses -> {

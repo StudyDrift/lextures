@@ -30,6 +30,7 @@ object SettingsMenuLogic {
         OrgBranding,
         RolesPermissions,
         People,
+        Courses,
         ArchivedCourses,
         AiAdmin,
         TranscriptsAdvising,
@@ -40,7 +41,7 @@ object SettingsMenuLogic {
 
         val group: GroupId
             get() = when (this) {
-                PlatformSettings, OrgStructure, OrgBranding, RolesPermissions, People, ArchivedCourses, AiAdmin, BoardsGovernance ->
+                PlatformSettings, OrgStructure, OrgBranding, RolesPermissions, People, Courses, ArchivedCourses, AiAdmin, BoardsGovernance ->
                     GroupId.Platform
                 TranscriptsAdvising -> GroupId.StudentRecords
                 Integrations -> GroupId.Integrations
@@ -54,6 +55,7 @@ object SettingsMenuLogic {
                 OrgBranding -> "mobile_admin_orgBranding_title"
                 RolesPermissions -> "mobile_admin_roles_title"
                 People -> "mobile_admin_people_title"
+                Courses -> "mobile_admin_courses_title"
                 ArchivedCourses -> "mobile_admin_archivedCourses_title"
                 AiAdmin -> "mobile_admin_ai_hub_title"
                 TranscriptsAdvising -> "mobile_admin_transcriptsAdvising_hub_title"
@@ -69,6 +71,7 @@ object SettingsMenuLogic {
                 OrgBranding -> "mobile_admin_orgBranding_entry_subtitle"
                 RolesPermissions -> "mobile_admin_roles_entry_subtitle"
                 People -> "mobile_admin_people_entry_subtitle"
+                Courses -> "mobile_admin_courses_entry_subtitle"
                 ArchivedCourses -> "mobile_admin_archivedCourses_entry_subtitle"
                 AiAdmin -> "mobile_admin_ai_hub_entry_subtitle"
                 TranscriptsAdvising -> "mobile_admin_transcriptsAdvising_hub_entry_subtitle"
@@ -114,6 +117,7 @@ object SettingsMenuLogic {
             ItemId.OrgBranding -> OrgBrandingAdminLogic.canView(features, permissions.toList())
             ItemId.RolesPermissions -> RolesPermissionsAdminLogic.canView(features, permissions.toList())
             ItemId.People -> PeopleAdminLogic.canView(features, permissions.toList())
+            ItemId.Courses -> PlatformCoursesAdminLogic.canView(features, permissions.toList())
             ItemId.ArchivedCourses -> ArchivedCoursesAdminLogic.canView(features, permissions.toList())
             ItemId.AiAdmin -> AiModelsAdminLogic.canView(features, permissions)
             ItemId.TranscriptsAdvising ->

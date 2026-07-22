@@ -89,4 +89,66 @@ object PeopleAdminLogic {
 
     fun userFacingError(error: Throwable, genericMessage: String): String =
         (error as? ApiError.HttpStatus)?.message?.takeIf { it.isNotEmpty() } ?: genericMessage
+
+    data class MetricDefinition(
+        val filter: PeopleListFilter,
+        val titleResName: String,
+        val hintResName: String?,
+        val tableTitleResName: String,
+        val tableDescriptionResName: String,
+    )
+
+    val METRIC_DEFINITIONS: List<MetricDefinition> = listOf(
+        MetricDefinition(
+            PeopleListFilter.Signups7d,
+            "mobile_admin_people_metric_signups7d",
+            "mobile_admin_people_metric_signups7d_hint",
+            "mobile_admin_people_metric_signups7d_tableTitle",
+            "mobile_admin_people_metric_signups7d_tableDescription",
+        ),
+        MetricDefinition(
+            PeopleListFilter.Active,
+            "mobile_admin_people_metric_active",
+            "mobile_admin_people_metric_active_hint",
+            "mobile_admin_people_metric_active_tableTitle",
+            "mobile_admin_people_metric_active_tableDescription",
+        ),
+        MetricDefinition(
+            PeopleListFilter.Recent30d,
+            "mobile_admin_people_metric_recent30d",
+            "mobile_admin_people_metric_recent30d_hint",
+            "mobile_admin_people_metric_recent30d_tableTitle",
+            "mobile_admin_people_metric_recent30d_tableDescription",
+        ),
+        MetricDefinition(
+            PeopleListFilter.Total,
+            "mobile_admin_people_metric_total",
+            null,
+            "mobile_admin_people_metric_total_tableTitle",
+            "mobile_admin_people_metric_total_tableDescription",
+        ),
+        MetricDefinition(
+            PeopleListFilter.Suspended,
+            "mobile_admin_people_metric_suspended",
+            "mobile_admin_people_metric_suspended_hint",
+            "mobile_admin_people_metric_suspended_tableTitle",
+            "mobile_admin_people_metric_suspended_tableDescription",
+        ),
+    )
+
+    fun value(filter: PeopleListFilter, stats: PeopleDashboardStats): Long = when (filter) {
+        PeopleListFilter.Signups7d -> stats.signupsLast7Days
+        PeopleListFilter.Active -> stats.activeAccounts
+        PeopleListFilter.Recent30d -> stats.recentlyActive30Days
+        PeopleListFilter.Total -> stats.totalAccounts
+        PeopleListFilter.Suspended -> stats.suspendedAccounts
+    }
+
+    fun toggleFilter(current: PeopleListFilter?, tapped: PeopleListFilter): PeopleListFilter? =
+        if (current == tapped) null else tapped
+
+    fun metric(filter: PeopleListFilter): MetricDefinition? =
+        METRIC_DEFINITIONS.firstOrNull { it.filter == filter }
+
+    fun formatCount(value: Long): String = "%,d".format(value)
 }

@@ -79,6 +79,10 @@ data class OidcStatusResponse(
     val google: Boolean? = null,
     val microsoft: Boolean? = null,
     val apple: Boolean? = null,
+    /** MOB.9 — native Sign in with Apple (iOS); informational on Android. */
+    @SerialName("appleNative") val appleNative: Boolean? = null,
+    /** MOB.9 — native Google Sign-In via Credential Manager. */
+    @SerialName("googleNative") val googleNative: Boolean? = null,
     val custom: List<OidcCustomProvider>? = null,
 ) {
     @Serializable
@@ -89,7 +93,23 @@ data class OidcStatusResponse(
 
     val showsClever: Boolean get() = cleverEnabled == true || clever == true
     val showsClassLink: Boolean get() = classlinkEnabled == true || classlink == true
+    val showsGoogleNative: Boolean get() = googleNative == true
 }
+
+@Serializable
+data class NativeAppleSignInRequest(
+    @SerialName("id_token") val idToken: String,
+    @SerialName("raw_nonce") val rawNonce: String,
+    @SerialName("authorization_code") val authorizationCode: String? = null,
+    @SerialName("full_name") val fullName: String? = null,
+    val email: String? = null,
+)
+
+@Serializable
+data class NativeGoogleSignInRequest(
+    @SerialName("id_token") val idToken: String,
+    @SerialName("raw_nonce") val rawNonce: String? = null,
+)
 
 @Serializable
 data class MagicLinkRequest(
