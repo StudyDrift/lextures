@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FeatureToggleRow } from '../../components/settings/feature-toggle-row'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
-import { usePlatformFeatures } from '../../context/platform-features-context'
 import { fetchCourseCanvasLink, patchCourseCanvasGradeSync, patchCourseFeatures } from '../../lib/courses-api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import type { CoursePublic } from '../../lib/courses-api'
@@ -23,7 +22,6 @@ type CourseFeatureRow = {
 
 export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: Props) {
   const { refresh } = useCourseNavFeatures()
-  const { aiConfigured } = usePlatformFeatures()
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -229,13 +227,8 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         {
           label: 'Modules AI assistant',
           description:
-            'Chat on the Modules page to propose outline changes (new modules, items, renames, publish). Requires a configured AI provider.',
+            'Chat on the Modules page to propose outline changes (new modules, items, renames, publish). Requires a configured AI provider to use.',
           enabled: modulesAiAssistantEnabled,
-          disabled: !aiConfigured && !modulesAiAssistantEnabled,
-          disabledReason:
-            !aiConfigured && !modulesAiAssistantEnabled
-              ? 'Configure an AI provider in platform settings before enabling this.'
-              : undefined,
           onToggle: () => {
             void persist({ modulesAiAssistantEnabled: !modulesAiAssistantEnabled })
           },
@@ -421,7 +414,6 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
     return rows
   }, [
       adaptivePathsEnabled,
-      aiConfigured,
       aiTutorEnabled,
       modulesAiAssistantEnabled,
       attendanceEnabled,

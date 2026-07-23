@@ -441,14 +441,14 @@ export function validateCourseFeatureMatrix(): string[] {
     }
   }
 
-  const expectedCount = 25
+  const expectedCount = 26
   if (COURSE_FEATURE_MATRIX.length !== expectedCount) {
     errors.push(`expected ${expectedCount} matrix rows, got ${COURSE_FEATURE_MATRIX.length}`)
   }
 
   const uiCount = UI_COURSE_FEATURE_ENTRIES.length
-  if (uiCount !== 24) {
-    errors.push(`expected 24 UI-exposed flags, got ${uiCount}`)
+  if (uiCount !== 25) {
+    errors.push(`expected 25 UI-exposed flags, got ${uiCount}`)
   }
 
   return errors
