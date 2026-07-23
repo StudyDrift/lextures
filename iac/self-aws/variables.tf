@@ -99,6 +99,19 @@ variable "jwt_secret" {
   }
 }
 
+variable "platform_secrets_key" {
+  description = "Base64-encoded 32-byte AES-256 key for PLATFORM_SECRETS_KEY (encrypts SMTP passwords and BYOK credentials stored via Settings). Empty generates one into Secrets Manager. Keep stable: rotating invalidates previously encrypted DB secrets."
+  type        = string
+  default     = ""
+  sensitive   = true
+
+  validation {
+    # openssl rand -base64 32 → 44 chars, standard base64 with one '=' pad (32 bytes).
+    condition     = var.platform_secrets_key == "" || can(regex("^[A-Za-z0-9+/]{43}=$", var.platform_secrets_key))
+    error_message = "platform_secrets_key must be empty or standard base64 of exactly 32 bytes (e.g. openssl rand -base64 32)."
+  }
+}
+
 variable "public_web_origin" {
   description = "Public origin for the web app (CORS / PUBLIC_WEB_ORIGIN), e.g. https://app.example.com. Empty uses the CloudFront domain (or ALB if static site is disabled)."
   type        = string

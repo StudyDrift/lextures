@@ -172,10 +172,13 @@ Secrets Manager secret `${project}-${environment}/app` is a JSON object. ECS inj
 | `DATABASE_URL` | RDS (`sslmode=require`) |
 | `REDIS_URL` | ElastiCache (`rediss://` TLS + auth) |
 | `JWT_SECRET` | Auth signing |
+| `PLATFORM_SECRETS_KEY` | AES-256 key (base64 32 bytes) for encrypting SMTP passwords and BYOK credentials stored via Settings → Global platform |
 | `QUEUE_BACKEND` | `sqs` |
 | `SQS_*_URL` | Per-queue SQS URLs |
 | `STORAGE_BACKEND` | `s3` |
 | `STORAGE_BUCKET` / `STORAGE_REGION` | Course files |
+
+`PLATFORM_SECRETS_KEY` is auto-generated (`random_id`, 32 bytes → base64) unless you set Terraform variable `platform_secrets_key` (e.g. `openssl rand -base64 32`). Keep it stable: rotating the key makes previously encrypted DB secrets undecryptable until they are re-entered.
 
 Plain environment variables (not secrets) when SES is enabled: `EMAIL_PROVIDER`, `SES_REGION`, `SES_FROM`, `SES_CONFIGURATION_SET`.
 

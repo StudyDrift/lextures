@@ -32,6 +32,8 @@ aws_region   = "us-east-1"
 
 # public_web_origin = "https://app.example.com"  # optional override; default = CloudFront URL
 # jwt_secret        = ""  # empty = auto-generate into Secrets Manager
+# platform_secrets_key = ""  # empty = auto-generate (base64 32-byte AES key for SMTP/BYOK at rest)
+# # Or pin explicitly: platform_secrets_key = "..."  # openssl rand -base64 32 — keep stable across applies
 # First password signup with this email gets Global Admin (only when no human users yet):
 # bootstrap_admin_email = "you@example.com"
 
