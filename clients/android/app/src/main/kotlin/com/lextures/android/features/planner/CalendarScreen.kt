@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.design.LexturesColors
@@ -52,6 +50,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
+private val WEEKDAY_LABELS = listOf("M", "T", "W", "T", "F", "S", "S")
+
 @Composable
 fun CalendarScreen(
     events: List<PlannerCalendarEvent>,
@@ -68,6 +68,7 @@ fun CalendarScreen(
         events.filter { it.courseCode == null || it.courseCode == code }
     } ?: events
     val counts = PlannerLogic.eventCountsByDay(filtered, zone)
+    // Always 42 cells (6 weeks × 7 days) — small enough for a non-lazy grid.
     val cells = PlannerLogic.monthGridCells(month.atDay(1), zone)
     val dayEvents = PlannerLogic.eventsOnDay(selectedDay, filtered, zone)
 
@@ -104,47 +105,15 @@ fun CalendarScreen(
             }
         }
         item {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(7),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(cardBackground())
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                items(listOf("M", "T", "W", "T", "F", "S", "S")) { label ->
-                    Text(label, fontSize = 11.sp, color = textSecondary(), modifier = Modifier.fillMaxWidth())
-                }
-                items(cells) { day ->
-                    val inMonth = day.month == month.month
-                    val selected = day == selectedDay
-                    val count = counts[PlannerLogic.dateKeyLocal(day)] ?: 0
-                    Column(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (selected) accentColor() else cardBackground())
-                            .clickable { selectedDay = day }
-                            .padding(vertical = 6.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(
-                            text = "${day.dayOfMonth}",
-                            fontSize = 14.sp,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                            color = if (selected) LexturesColors.PrimaryDeep
-                            else if (inMonth) textPrimary() else textSecondary(),
-                        )
-                        Box(
-                            modifier = Modifier
-                                .size(5.dp)
-                                .clip(CircleShape)
-                                .background(if (count > 0) LexturesColors.Coral else cardBackground()),
-                        )
-                    }
-                }
-            }
+            // Non-lazy month grid: LazyVerticalGrid inside LazyColumn is illegal
+            // (infinite max height on the nested scrollable).
+            MonthGrid(
+                month = month,
+                cells = cells,
+                selectedDay = selectedDay,
+                counts = counts,
+                onSelectDay = { selectedDay = it },
+            )
         }
         item {
             LmsSectionHeader(
@@ -167,6 +136,78 @@ fun CalendarScreen(
                         }
                         Text(calendarKindLabel(event.kind), fontSize = 11.sp, color = textSecondary())
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MonthGrid(
+    month: YearMonth,
+    cells: List<LocalDate>,
+    selectedDay: LocalDate,
+    counts: Map<String, Int>,
+    onSelectDay: (LocalDate) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(cardBackground())
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            WEEKDAY_LABELS.forEach { label ->
+                Text(
+                    text = label,
+                    fontSize = 11.sp,
+                    color = textSecondary(),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+        cells.chunked(7).forEach { week ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                week.forEach { day ->
+                    val inMonth = day.month == month.month
+                    val selected = day == selectedDay
+                    val count = counts[PlannerLogic.dateKeyLocal(day)] ?: 0
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(if (selected) accentColor() else cardBackground())
+                            .clickable { onSelectDay(day) }
+                            .padding(vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = "${day.dayOfMonth}",
+                            fontSize = 14.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (selected) LexturesColors.PrimaryDeep
+                            else if (inMonth) textPrimary() else textSecondary(),
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(5.dp)
+                                .clip(CircleShape)
+                                .background(if (count > 0) LexturesColors.Coral else cardBackground()),
+                        )
+                    }
+                }
+                // Pad incomplete trailing weeks (shouldn't happen with 42 cells).
+                repeat(7 - week.size) {
+                    Box(modifier = Modifier.weight(1f))
                 }
             }
         }

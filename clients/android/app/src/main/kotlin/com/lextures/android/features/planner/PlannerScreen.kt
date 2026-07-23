@@ -53,6 +53,7 @@ import com.lextures.android.core.lms.StudentTodoItem
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.courses.CourseDetailScreen
 import com.lextures.android.features.courses.ItemDetailScreen
+import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsErrorBanner
 import kotlinx.coroutines.launch
@@ -67,6 +68,7 @@ fun PlannerScreen(
     isOnline: Boolean,
     initialTab: PlannerTab = PlannerTab.Todos,
     onBack: (() -> Unit)? = null,
+    shell: HomeShellState? = null,
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
@@ -118,7 +120,12 @@ fun PlannerScreen(
             return
         }
         course?.let {
-            CourseDetailScreen(session = session, course = it, onBack = { openTodo = null })
+            CourseDetailScreen(
+                session = session,
+                course = it,
+                onBack = { openTodo = null },
+                shell = shell,
+            )
             return
         }
         openTodo = null
@@ -168,6 +175,7 @@ fun PlannerScreen(
                 onShowCompletedChange = { showCompleted = it },
                 onOpenItem = { item, course -> openTodo = item to course },
                 courses = courses,
+                modifier = Modifier.weight(1f),
             )
             else -> CalendarScreen(
                 events = events,
@@ -175,6 +183,7 @@ fun PlannerScreen(
                 selectedCourseCode = selectedCourseCode,
                 onCourseSelected = { selectedCourseCode = it },
                 onEventSelected = { event -> addEventToDeviceCalendar(context, event) },
+                modifier = Modifier.weight(1f),
             )
         }
         OutlinedButton(

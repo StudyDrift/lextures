@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -210,6 +211,7 @@ class HomeShellState {
     }
 
     fun openGlobalDrawer() { drawerState = DrawerState.Global }
+    fun openCourseDrawer() { drawerState = DrawerState.Course }
     fun closeDrawer() { drawerState = DrawerState.None }
 
     private fun sharesRootPane(lhs: RootDestination, rhs: RootDestination): Boolean {
@@ -523,12 +525,13 @@ fun HomeScreen(
             onDrawerProgress = { drawerOpenProgress = it },
             globalPanel = { com.lextures.android.features.navigation.GlobalDrawer(shell, accessToken) },
             coursePanel = { com.lextures.android.features.navigation.CourseDrawer(shell) },
+            // Edge-to-edge: keep chrome clear of status/nav bars and display cutouts.
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding(),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .navigationBarsPadding(),
-            ) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 RootContent(
                     destination = shell.rootDestination,
                     drawerOpenProgress = drawerOpenProgress,
@@ -727,6 +730,7 @@ private fun RootPane(
             isOnline = isOnline,
             initialTab = PlannerTab.Calendar,
             onBack = { shell.select(RootDestination.Dashboard) },
+            shell = shell,
             modifier = modifier,
         )
         RootDestination.Todos -> PlannerScreen(
@@ -735,6 +739,7 @@ private fun RootPane(
             isOnline = isOnline,
             initialTab = PlannerTab.Todos,
             onBack = { shell.select(RootDestination.Dashboard) },
+            shell = shell,
             modifier = modifier,
         )
         RootDestination.Review -> com.lextures.android.features.review.ReviewHomeScreen(

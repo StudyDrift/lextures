@@ -634,6 +634,7 @@ fun ProfileTab(
                             session = session,
                             course = openPathCourse!!,
                             onBack = { openPathCourse = null },
+                            shell = shell,
                             modifier = Modifier.fillMaxSize(),
                         )
                         openPathLandingSlug != null -> com.lextures.android.features.paths.PathLandingScreen(
