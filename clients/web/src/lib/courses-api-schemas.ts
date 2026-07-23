@@ -524,7 +524,10 @@ export const quizQuestionSchema = z.object({
     'video_response',
   ]),
   choices: quizQuestionChoicesSchema,
-  typeConfig: z.record(z.string(), z.unknown()).optional(),
+  typeConfig: z.preprocess(
+    (v) => (v == null ? undefined : v),
+    z.record(z.string(), z.unknown()).optional(),
+  ),
   correctChoiceIndex: z.number().nullable(),
   multipleAnswer: z.boolean(),
   answerWithImage: z.boolean(),
