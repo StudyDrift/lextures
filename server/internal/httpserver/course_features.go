@@ -126,14 +126,6 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 		if req.ModulesAiAssistantEnabled != nil {
 			modulesAiAssistant = *req.ModulesAiAssistantEnabled
 		}
-		if modulesAiAssistant && !existing.ModulesAiAssistantEnabled {
-			orgID := d.orgIDPtrForUser(r.Context(), viewer)
-			if !d.aiConfigured(r.Context(), orgID) {
-				apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured,
-					"Configure an AI provider before enabling the Modules AI assistant.")
-				return
-			}
-		}
 		multilingualMessaging := existing.MultilingualMessagingEnabled
 		if req.MultilingualMessagingEnabled != nil {
 			multilingualMessaging = *req.MultilingualMessagingEnabled
