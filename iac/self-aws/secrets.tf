@@ -4,8 +4,17 @@ resource "random_password" "jwt_secret" {
   special = false
 }
 
+# 32 random bytes → StdEncoding base64 (matches server platformSecretsKeyFromEnv).
+resource "random_id" "platform_secrets_key" {
+  count       = var.platform_secrets_key == "" ? 1 : 0
+  byte_length = 32
+}
+
 locals {
   jwt_secret_value = var.jwt_secret != "" ? var.jwt_secret : random_password.jwt_secret[0].result
+  platform_secrets_key_value = (
+    var.platform_secrets_key != "" ? var.platform_secrets_key : random_id.platform_secrets_key[0].b64_std
+  )
 
   database_url = format(
     "postgres://%s:%s@%s:%d/%s?sslmode=require",
@@ -39,6 +48,7 @@ resource "aws_secretsmanager_secret_version" "app" {
     DATABASE_URL                   = local.database_url
     REDIS_URL                      = local.redis_url
     JWT_SECRET                     = local.jwt_secret_value
+    PLATFORM_SECRETS_KEY           = local.platform_secrets_key_value
     QUEUE_BACKEND                  = "sqs"
     SQS_CANVAS_IMPORT_URL          = aws_sqs_queue.main["canvas_import"].url
     SQS_CANVAS_SUBMISSION_SYNC_URL = aws_sqs_queue.main["canvas_submission_sync"].url
