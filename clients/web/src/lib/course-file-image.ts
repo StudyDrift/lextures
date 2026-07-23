@@ -1,4 +1,5 @@
 import { apiUrl, authorizedFetch } from './api'
+import { getBearerToken } from './auth'
 
 /** Parse `#w=…&h=…` display size appended to image URLs in Markdown (TipTap round-trip). */
 export function stripImageDisplayFragment(src: string): {
@@ -57,15 +58,26 @@ export function resolveAuthorizedFetchPath(src: string): string {
 /**
  * Load a course-file image blob. Storefront/catalog hero images are readable without
  * a session; enrolled-only files fall back to `authorizedFetch` after a 401.
+ *
+ * When a bearer token is already present, skip the unauthenticated probe (avoids a
+ * noisy 401 for private course heroes). Prefer `return=representation` so the API
+ * proxies bytes instead of 302-redirecting to S3 (which browsers block via CORS).
  */
 export async function fetchCourseFileImageBlob(src: string): Promise<Blob> {
   const path = resolveAuthorizedFetchPath(src)
-  const publicRes = await fetch(apiUrl(path))
-  if (publicRes.ok) return publicRes.blob()
-  if (publicRes.status !== 401) {
-    throw new Error(String(publicRes.status))
+  const inlineInit: RequestInit = {
+    headers: { Prefer: 'return=representation' },
   }
-  const authedRes = await authorizedFetch(path)
+
+  if (!getBearerToken()) {
+    const publicRes = await fetch(apiUrl(path), inlineInit)
+    if (publicRes.ok) return publicRes.blob()
+    if (publicRes.status !== 401) {
+      throw new Error(String(publicRes.status))
+    }
+  }
+
+  const authedRes = await authorizedFetch(path, inlineInit)
   if (!authedRes.ok) throw new Error(String(authedRes.status))
   return authedRes.blob()
 }
