@@ -2,13 +2,16 @@ package httpserver
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"regexp"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/l10n"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	auditservice "github.com/lextures/lextures/server/internal/service/adminaudit"
 )
 
 var phoneNumberPattern = regexp.MustCompile(`^[\d\s().+-]+$`)
@@ -242,5 +245,43 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			Timezone:                   row.Timezone,
 			PhoneNumber:                row.PhoneNumber,
 		})
+	}
+}
+
+// handleDeleteSettingsAccount is DELETE /api/v1/settings/account — self-service account deletion.
+// Permanently anonymizes the signed-in user (same erasure path as admin people delete).
+func (d Deps) handleDeleteSettingsAccount() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			w.Header().Set("Allow", http.MethodDelete)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		ctx := r.Context()
+		result, err := d.eraseUserAccount(ctx, userID, false)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "User not found.")
+				return
+			}
+			if errors.Is(err, errAccountAlreadyErased) {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "This account has already been deleted.")
+				return
+			}
+			if errors.Is(err, errAccountSystemProtected) {
+				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "System accounts cannot be deleted.")
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete account.")
+			return
+		}
+
+		orgID := result.OrgID
+		d.recordPlatformPeopleAudit(r, userID, &orgID, auditservice.EventUserDeactivate, userID, nil)
+		writeJSON(w, http.StatusOK, map[string]any{"ok": true, "id": userID.String()})
 	}
 }

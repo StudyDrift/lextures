@@ -3245,6 +3245,12 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_profile_clearCacheConfirm">مسح التخزين دون اتصال؟</string>
     <string name="mobile_profile_clearCacheMessage">يزيل القراءات والتنزيلات المخزّنة مؤقتًا من هذا الجهاز. تبقى التغييرات في قائمة الانتظار حتى تتم مزامنتها.</string>
     <string name="mobile_profile_clearCachedData">مسح البيانات المخزّنة</string>
+    <string name="mobile_profile_deleteAccount">حذف الحساب</string>
+    <string name="mobile_profile_deleteAccountAction">حذف الحساب</string>
+    <string name="mobile_profile_deleteAccountBusy">جارٍ الحذف…</string>
+    <string name="mobile_profile_deleteAccountConfirm">هل تريد حذف حسابك نهائياً؟</string>
+    <string name="mobile_profile_deleteAccountError">تعذّر حذف الحساب. حاول مرة أخرى.</string>
+    <string name="mobile_profile_deleteAccountMessage">سيتم إخفاء هويتك من بياناتك الشخصية وتسجيل خروجك من جميع الأجهزة. لا يمكن التراجع عن هذا الإجراء.</string>
     <string name="mobile_profile_displayName">اسم العرض</string>
     <string name="mobile_profile_dyslexiaFriendly">عرض مناسب لعسر القراءة</string>
     <string name="mobile_profile_dyslexiaFriendlyDescription">خط مستدير وتباعد إضافي وارتفاع سطر مريح في التطبيق بالكامل.</string>

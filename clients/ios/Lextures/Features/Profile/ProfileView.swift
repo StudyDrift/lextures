@@ -8,6 +8,7 @@ struct ProfileView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityPreferences) private var accessibilityPreferences
     @State private var confirmingSignOut = false
+    @State private var confirmingDeleteAccount = false
     @State private var confirmingClearCache = false
     @State private var confirmingClearSearchHistory = false
     @State private var navigatedMoreDestination: MoreDestination?
@@ -74,6 +75,7 @@ struct ProfileView: View {
                         ProfileLegalCard()
                         ProfileAboutCard()
                         ProfileSignOutButton(confirmingSignOut: $confirmingSignOut)
+                        ProfileDeleteAccountButton(confirmingDeleteAccount: $confirmingDeleteAccount)
                     }
                     .padding(16)
                 }

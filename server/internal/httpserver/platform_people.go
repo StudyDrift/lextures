@@ -15,16 +15,13 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/communication"
-	"github.com/lextures/lextures/server/internal/repos/gdpr"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	platformpeople "github.com/lextures/lextures/server/internal/repos/platformpeople"
-	pfrepo "github.com/lextures/lextures/server/internal/repos/productfeedback"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	userrepo "github.com/lextures/lextures/server/internal/repos/user"
 	auditservice "github.com/lextures/lextures/server/internal/service/adminaudit"
 	"github.com/lextures/lextures/server/internal/service/authservice"
 	"github.com/lextures/lextures/server/internal/service/introcourse"
-	"github.com/lextures/lextures/server/internal/service/coursereviews"
 	"github.com/lextures/lextures/server/internal/service/licensesvc"
 )
 
@@ -367,37 +364,21 @@ func (d Deps) handleAdminPeopleDelete() http.HandlerFunc {
 			return
 		}
 		ctx := r.Context()
-		var orgID uuid.UUID
-		var email string
-		err = d.Pool.QueryRow(ctx, `SELECT org_id, email FROM "user".users WHERE id = $1`, targetID).Scan(&orgID, &email)
+		result, err := d.eraseUserAccount(ctx, targetID, true)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "User not found.")
 				return
 			}
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load user.")
-			return
-		}
-		if platformpeople.IsErased(email) {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "This account has already been deleted.")
-			return
-		}
-
-		_ = authservice.RevokeAllSessionsForUser(ctx, d.Pool, targetID)
-		if err := platformpeople.SetActive(ctx, d.Pool, targetID, false); err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to deactivate user.")
-			return
-		}
-		if d.LearnerProfileService != nil {
-			_ = d.LearnerProfileService.Erase(ctx, targetID)
-		}
-		_ = pfrepo.DeleteByUser(ctx, d.Pool, targetID)
-		if err := gdpr.AnonymiseUser(ctx, d.Pool, targetID); err != nil {
+			if errors.Is(err, errAccountAlreadyErased) {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "This account has already been deleted.")
+				return
+			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete user account.")
 			return
 		}
-		_ = coursereviews.AnonymizeReviewerReviews(ctx, d.Pool, targetID)
 
+		orgID := result.OrgID
 		d.recordPlatformPeopleAudit(r, actor, &orgID, auditservice.EventUserDeactivate, targetID, nil)
 		writeJSON(w, http.StatusOK, map[string]any{"ok": true, "id": targetID.String()})
 	}

@@ -3245,6 +3245,12 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_profile_clearCacheConfirm">[Çľëäŕ öƒƒľîñë šţöŕäġë?]</string>
     <string name="mobile_profile_clearCacheMessage">[Ŕëɱöṽëš çäçĥëđ ŕëäđš äñđ đöẅñľöäđš.]</string>
     <string name="mobile_profile_clearCachedData">[Çľëäŕ çäçĥëđ đäţä]</string>
+    <string name="mobile_profile_deleteAccount">[Ðëľëţë äççöüñţ]</string>
+    <string name="mobile_profile_deleteAccountAction">[Ðëľëţë äççöüñţ]</string>
+    <string name="mobile_profile_deleteAccountBusy">[Ðëľëţîñġ…]</string>
+    <string name="mobile_profile_deleteAccountConfirm">[Þëŕɱäñëñţľÿ đëľëţë ÿöûŕ äççöüñţ?]</string>
+    <string name="mobile_profile_deleteAccountError">[Çöûľđ ñöţ đëľëţë äççöüñţ.]</string>
+    <string name="mobile_profile_deleteAccountMessage">[Ýöûŕ þëŕšöñäľ đäţä ẅîľľ ɓë äñöñÿɱîžëđ.]</string>
     <string name="mobile_profile_displayName">[Ðîšþľäÿ ñäɱë]</string>
     <string name="mobile_profile_dyslexiaFriendly">[Ðÿšľëẍîä-ƒŕîëñđļÿ đîšþľäÿ]</string>
     <string name="mobile_profile_dyslexiaFriendlyDescription">[Ŕöüñđëđ ţÿþë, ëẋţŕä šþäçîñġ.]</string>

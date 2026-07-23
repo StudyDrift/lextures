@@ -23,6 +23,20 @@ func TestSettingsAccountGet_RouteRegistered(t *testing.T) {
 	}
 }
 
+func TestSettingsAccountDelete_RouteRegistered(t *testing.T) {
+	d := Deps{JWTSigner: auth.NewJWTSigner("01234567890123456789012345678901"), Config: config.Config{}}
+	h := NewHandler(d)
+	rr := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodDelete, "/api/v1/settings/account", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code == http.StatusNotFound {
+		t.Fatalf("expected DELETE /api/v1/settings/account to be registered, got 404")
+	}
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected unauthorized without bearer token, got %d", rr.Code)
+	}
+}
+
 func TestNormalizeTheme_RejectsInvalid(t *testing.T) {
 	invalid := "solarized"
 	if _, err := normalizeTheme(&invalid); err == nil {
