@@ -72,6 +72,7 @@ export function aiReportsUtcRange(preset: AIReportsPreset): { from: string; to: 
 
 export const AI_FEATURE_LABELS: Record<string, string> = {
   ai_tutor: 'AI Tutor',
+  modules_ai_assistant: 'Modules AI assistant',
   rag_notebook: 'Notebook AI',
   syllabus_generation: 'Syllabus generation',
   translation: 'Translation',

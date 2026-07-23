@@ -3,11 +3,13 @@ package httpserver
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/aiprovidercreds"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	tenantaisettings "github.com/lextures/lextures/server/internal/repos/tenantaisettings"
@@ -102,6 +104,22 @@ func legacyTenantBYOKProvider(ctx context.Context, pool *pgxpool.Pool, orgID uui
 		return ""
 	}
 	return strings.TrimSpace(row.Provider)
+}
+
+const aiGenerationFailedClientMsgMax = 800
+
+// writeAIGenerationFailed responds with 503 AI_GENERATION_FAILED and records err for access logs.
+// Prefer 503 over 502: Cloudflare Error Pages replace origin 502 bodies with HTML, which hides
+// the JSON error from API clients (and the browser Network tab).
+func writeAIGenerationFailed(w http.ResponseWriter, r *http.Request, message string, err error) {
+	msg := strings.TrimSpace(message)
+	if msg == "" {
+		msg = "AI generation failed."
+	}
+	if len(msg) > aiGenerationFailedClientMsgMax {
+		msg = msg[:aiGenerationFailedClientMsgMax]
+	}
+	apierr.WriteJSONWithErr(w, r, http.StatusServiceUnavailable, apierr.CodeAiGenerationFailed, msg, err)
 }
 
 // completeStreamOrBuffered streams when the provider supports it; otherwise completes

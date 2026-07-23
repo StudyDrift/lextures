@@ -349,7 +349,7 @@ func (d Deps) handlePostCourseTranslationAIDraft() http.HandlerFunc {
 		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 		translated, _, callMeta, err := callLLMTranslation(r.Context(), bound, text, req.TargetLocale)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI draft translation failed.")
+			writeAIGenerationFailed(w, r, "AI draft translation failed.", err)
 			return
 		}
 		var tTitle *string

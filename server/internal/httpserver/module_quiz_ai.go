@@ -113,7 +113,7 @@ func (d Deps) handleGenerateModuleQuizQuestions() http.HandlerFunc {
 		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 		questions, callMeta, err := quizgenerationai.GenerateFromPrompt(r.Context(), bound, model, sys, prompt, int(body.QuestionCount))
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI generation failed: "+err.Error())
+			writeAIGenerationFailed(w, r, "AI generation failed: "+err.Error(), err)
 			return
 		}
 		d.logAIInferenceAllowedWithProvider(r, viewer, aigateway.FeatureQuizGeneration, model, string(callMeta.Provider), prompt, gwDec)
@@ -176,7 +176,7 @@ func (d Deps) handleImportModuleQuizQuestionsMarkdown() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, msg)
 				return
 			}
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI import failed: "+msg)
+			writeAIGenerationFailed(w, r, "AI import failed: "+msg, err)
 			return
 		}
 		if len(questions) == 0 {

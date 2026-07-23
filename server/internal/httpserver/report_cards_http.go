@@ -540,7 +540,7 @@ func (d Deps) handleAIReportCardComment() http.HandlerFunc {
 		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 		suggestion, callMeta, err := bound.Complete(r.Context(), model, msgs)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "AI comment generation failed.")
+			writeAIGenerationFailed(w, r, "AI comment generation failed.", err)
 			return
 		}
 		d.logAIInferenceAllowedWithProvider(r, actorID, aigateway.FeatureReportCardComment, model, string(callMeta.Provider), prompt, gwDec)

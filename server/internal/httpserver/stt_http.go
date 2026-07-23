@@ -95,7 +95,7 @@ func (d Deps) handlePostSTTTranscribe() http.HandlerFunc {
 
 		transcript, err := transcribeAudioWhisper(r.Context(), cfg.OpenAIAPIKey, file, header.Filename)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "Transcription failed.")
+			writeAIGenerationFailed(w, r, "Transcription failed.", err)
 			return
 		}
 

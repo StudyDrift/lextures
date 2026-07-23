@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FeatureToggleRow } from '../../components/settings/feature-toggle-row'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { fetchCourseCanvasLink, patchCourseCanvasGradeSync, patchCourseFeatures } from '../../lib/courses-api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import type { CoursePublic } from '../../lib/courses-api'
@@ -11,8 +12,18 @@ type Props = {
   onCourseUpdated: (c: CoursePublic) => void
 }
 
+type CourseFeatureRow = {
+  label: string
+  description: string
+  enabled: boolean
+  disabled?: boolean
+  disabledReason?: string
+  onToggle: () => void
+}
+
 export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: Props) {
   const { refresh } = useCourseNavFeatures()
+  const { aiConfigured } = usePlatformFeatures()
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -51,6 +62,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const liveSessionsEnabled = course.liveSessionsEnabled === true
   const officeHoursEnabled = course.officeHoursEnabled === true
   const aiTutorEnabled = course.aiTutorEnabled === true
+  const modulesAiAssistantEnabled = course.modulesAiAssistantEnabled === true
   const multilingualMessagingEnabled = course.multilingualMessagingEnabled === true
   const filesEnabled = course.filesEnabled !== false
   const attendanceEnabled = course.attendanceEnabled === true
@@ -104,6 +116,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       liveSessionsEnabled?: boolean
       officeHoursEnabled?: boolean
       aiTutorEnabled?: boolean
+      modulesAiAssistantEnabled?: boolean
       multilingualMessagingEnabled?: boolean
       filesEnabled?: boolean
       attendanceEnabled?: boolean
@@ -137,6 +150,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           liveSessionsEnabled: patch.liveSessionsEnabled ?? liveSessionsEnabled,
           officeHoursEnabled: patch.officeHoursEnabled ?? officeHoursEnabled,
           aiTutorEnabled: patch.aiTutorEnabled ?? aiTutorEnabled,
+          modulesAiAssistantEnabled: patch.modulesAiAssistantEnabled ?? modulesAiAssistantEnabled,
           multilingualMessagingEnabled: patch.multilingualMessagingEnabled ?? multilingualMessagingEnabled,
           filesEnabled: patch.filesEnabled ?? filesEnabled,
           attendanceEnabled: patch.attendanceEnabled ?? attendanceEnabled,
@@ -171,6 +185,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       liveSessionsEnabled,
       officeHoursEnabled,
       aiTutorEnabled,
+      modulesAiAssistantEnabled,
       multilingualMessagingEnabled,
       filesEnabled,
       attendanceEnabled,
@@ -191,22 +206,39 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
     ],
   )
 
-  const allFeatures = useMemo(
-    () =>
-      [
+  const allFeatures = useMemo((): CourseFeatureRow[] => {
+    const rows: CourseFeatureRow[] = [
         {
           label: 'Adaptive learning paths',
           description:
             'Allow mastery-based branching between modules (requires learner model on the server). Instructors configure rules on each module in the course outline.',
           enabled: adaptivePathsEnabled,
-          onToggle: () => void persist({ adaptivePathsEnabled: !adaptivePathsEnabled }),
+          onToggle: () => {
+            void persist({ adaptivePathsEnabled: !adaptivePathsEnabled })
+          },
         },
         {
           label: 'AI Tutor',
           description:
             'Conversational AI tutor side-panel available on all course pages — students can ask questions grounded in course context with a per-student monthly token budget.',
           enabled: aiTutorEnabled,
-          onToggle: () => void persist({ aiTutorEnabled: !aiTutorEnabled }),
+          onToggle: () => {
+            void persist({ aiTutorEnabled: !aiTutorEnabled })
+          },
+        },
+        {
+          label: 'Modules AI assistant',
+          description:
+            'Chat on the Modules page to propose outline changes (new modules, items, renames, publish). Requires a configured AI provider.',
+          enabled: modulesAiAssistantEnabled,
+          disabled: !aiConfigured && !modulesAiAssistantEnabled,
+          disabledReason:
+            !aiConfigured && !modulesAiAssistantEnabled
+              ? 'Configure an AI provider in platform settings before enabling this.'
+              : undefined,
+          onToggle: () => {
+            void persist({ modulesAiAssistantEnabled: !modulesAiAssistantEnabled })
+          },
         },
         {
           label: 'Attendance',
@@ -223,15 +255,17 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           onToggle: () => void persist({ calendarEnabled: !calendarEnabled }),
         },
         ...(canvasLinked
-          ? [
+          ? ([
               {
                 label: 'Canvas grade sync',
                 description:
                   'When enabled, saving a grade in Lextures automatically pushes it back to the linked Canvas course. Requires a Canvas access token with grade-update permission saved in this browser (from Import settings).',
                 enabled: canvasGradeSyncEnabled,
-                onToggle: () => void persistCanvasGradeSync(!canvasGradeSyncEnabled),
+                onToggle: () => {
+                  void persistCanvasGradeSync(!canvasGradeSyncEnabled)
+                },
               },
-            ]
+            ] satisfies CourseFeatureRow[])
           : []),
         {
           label: 'Collaboration boards',
@@ -383,10 +417,13 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           enabled: whiteboardEnabled,
           onToggle: () => void persist({ whiteboardEnabled: !whiteboardEnabled }),
         },
-      ] as const,
-    [
+      ]
+    return rows
+  }, [
       adaptivePathsEnabled,
+      aiConfigured,
       aiTutorEnabled,
+      modulesAiAssistantEnabled,
       attendanceEnabled,
       calendarEnabled,
       canvasGradeSyncEnabled,
@@ -414,8 +451,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       screenShareEnabled,
       persist,
       persistCanvasGradeSync,
-    ],
-  )
+  ])
 
   const visibleFeatures = useMemo(() => {
     if (!query.trim()) return allFeatures
@@ -455,7 +491,8 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
               label={f.label}
               description={f.description}
               enabled={f.enabled}
-              disabled={saving}
+              disabled={saving || Boolean(f.disabled)}
+              disabledReason={f.disabledReason}
               onToggle={f.onToggle}
             />
           ))

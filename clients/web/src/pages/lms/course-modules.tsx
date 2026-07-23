@@ -47,6 +47,7 @@ import {
   Lock,
   MoreVertical,
   Settings,
+  Bot,
   Sparkles,
   X,
 } from 'lucide-react'
@@ -125,7 +126,9 @@ import {
   type ModulesProgressSnapshot,
 } from '../../lib/conditional-release-api'
 import { ModuleRequirementsPanel } from '../../components/modules/module-requirements-panel'
+import { ModulesAiPanel } from '../../components/modules/modules-ai-panel'
 import { ConditionalReleaseLockBadge } from '../../components/modules/conditional-release-lock-badge'
+import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 
 const MODULE_SORT_ID = 'sortable-modules'
 
@@ -1656,6 +1659,9 @@ export default function CourseModules() {
   const moduleDeleteDialogTitleId = useId()
   const { allows, loading: permissionsLoading, error: permissionsError } = usePermissions()
   const viewerEnrollmentRoles = useViewerEnrollmentRoles(courseCode)
+  const { modulesAiAssistantEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
+  const { aiConfigured, ffConditionalRelease } = usePlatformFeatures()
+  const [modulesAiOpen, setModulesAiOpen] = useState(false)
   const [items, setItems] = useState<CourseStructureItem[]>([])
   const [studentGradeContext, setStudentGradeContext] = useState<{
     columns: CourseGradebookGridColumn[]
@@ -1752,7 +1758,6 @@ export default function CourseModules() {
   const [dragHandlesVisible, setDragHandlesVisible] = useState(false)
   const [courseMeta, setCourseMeta] = useState<CoursePublic | null>(null)
   const [gatingProgress, setGatingProgress] = useState<ModulesProgressSnapshot | null>(null)
-  const { ffConditionalRelease } = usePlatformFeatures()
 
   const toggleModuleCollapsed = useCallback((moduleId: string) => {
     setCollapsedModuleIds((prev) => {
@@ -2639,6 +2644,23 @@ export default function CourseModules() {
         courseCode && canEditModules ? (
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
             <FeatureHelpTrigger topic="modules" />
+            {!courseFeaturesLoading && modulesAiAssistantEnabled && aiConfigured ? (
+              <button
+                type="button"
+                aria-label="Open Modules AI"
+                aria-expanded={modulesAiOpen}
+                aria-haspopup="dialog"
+                onClick={() => setModulesAiOpen((o) => !o)}
+                className={`inline-flex h-11 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-[background-color,color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${
+                  modulesAiOpen
+                    ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
+                }`}
+              >
+                <Bot className="h-5 w-5" aria-hidden />
+                <span className="hidden sm:inline">AI</span>
+              </button>
+            ) : null}
             <AddCourseItemMenu
               onAdd={openAddModule}
               disabled={anyModalBusy}
@@ -2654,6 +2676,15 @@ export default function CourseModules() {
         ) : null
       }
     >
+      {courseCode && canEditModules && modulesAiAssistantEnabled && aiConfigured ? (
+        <ModulesAiPanel
+          courseCode={courseCode}
+          structureItems={items}
+          open={modulesAiOpen}
+          onOpenChange={setModulesAiOpen}
+          onStructureChanged={() => load({ silent: true })}
+        />
+      ) : null}
       {courseMeta ? <CourseHeroBanner course={courseMeta} /> : null}
       {courseCode ? (
         <div className="mt-6">

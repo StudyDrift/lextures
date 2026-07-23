@@ -24,6 +24,7 @@ export type CourseFeatureKey =
   | 'groupSpacesEnabled'
   | 'officeHoursEnabled'
   | 'aiTutorEnabled'
+  | 'modulesAiAssistantEnabled'
   | 'multilingualMessagingEnabled'
   | 'filesEnabled'
   | 'attendanceEnabled'
@@ -110,6 +111,12 @@ export const COURSE_FEATURE_MATRIX: readonly CourseFeatureMatrixEntry[] = [
       audience: 'either',
       offBehavior: 'top-bar',
     },
+  },
+  {
+    key: 'modulesAiAssistantEnabled',
+    uiLabel: 'Modules AI assistant',
+    uiDefaultOn: false,
+    uiShard: 'a',
   },
   {
     key: 'attendanceEnabled',

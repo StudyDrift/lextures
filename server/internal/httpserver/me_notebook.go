@@ -82,11 +82,7 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 				return
 			}
 			if notebookrag.IsGenerationError(err) {
-				msg := err.Error()
-				if len(msg) > 800 {
-					msg = msg[:800]
-				}
-				apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeAiGenerationFailed, msg)
+				writeAIGenerationFailed(w, r, err.Error(), err)
 				return
 			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not complete notebook query.")
@@ -163,7 +159,7 @@ func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 		completion, callMeta, err := bound.Complete(r.Context(), model, messages)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeAiGenerationFailed, fmt.Sprintf("AI model failed to respond: %v", err))
+			writeAIGenerationFailed(w, r, fmt.Sprintf("AI model failed to respond: %v", err), err)
 			return
 		}
 
@@ -191,7 +187,7 @@ func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 		cleanCompletion = strings.TrimSpace(cleanCompletion)
 
 		if err := json.Unmarshal([]byte(cleanCompletion), &parsed); err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeAiGenerationFailed, fmt.Sprintf("AI did not return valid JSON: %v. Raw response: %s", err, completion.Text))
+			writeAIGenerationFailed(w, r, fmt.Sprintf("AI did not return valid JSON: %v. Raw response: %s", err, completion.Text), err)
 			return
 		}
 

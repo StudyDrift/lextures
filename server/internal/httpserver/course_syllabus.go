@@ -242,7 +242,7 @@ func (d Deps) handleGenerateSyllabusSection() http.HandlerFunc {
 			{Role: "user", Content: userMsg.String()},
 		})
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI generation failed: "+err.Error())
+			writeAIGenerationFailed(w, r, "AI generation failed: "+err.Error(), err)
 			return
 		}
 		d.logAIInferenceAllowedWithProvider(r, viewer, aigateway.FeatureSyllabusGeneration, model, string(callMeta.Provider), promptMaterial, gwDec)

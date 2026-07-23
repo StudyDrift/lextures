@@ -145,6 +145,8 @@ export type CoursePublic = {
   officeHoursEnabled?: boolean
   /** Plan 6.9 — conversational AI tutor side-panel (default off when omitted). */
   aiTutorEnabled?: boolean
+  /** Instructor Modules AI assistant chat pane (default off when omitted). */
+  modulesAiAssistantEnabled?: boolean
   /** Plan 6.10 — Translate button on feed/discussion/inbox messages (default off when omitted). */
   multilingualMessagingEnabled?: boolean
   /** Course Files space — Drive-like file manager (default true when omitted). */
@@ -816,6 +818,7 @@ export async function patchCourseFeatures(
     liveSessionsEnabled?: boolean
     officeHoursEnabled?: boolean
     aiTutorEnabled?: boolean
+    modulesAiAssistantEnabled?: boolean
     multilingualMessagingEnabled?: boolean
     filesEnabled?: boolean
     attendanceEnabled?: boolean
@@ -848,6 +851,9 @@ export async function patchCourseFeatures(
         ...(body.liveSessionsEnabled !== undefined ? { liveSessionsEnabled: body.liveSessionsEnabled } : {}),
         ...(body.officeHoursEnabled !== undefined ? { officeHoursEnabled: body.officeHoursEnabled } : {}),
         ...(body.aiTutorEnabled !== undefined ? { aiTutorEnabled: body.aiTutorEnabled } : {}),
+        ...(body.modulesAiAssistantEnabled !== undefined
+          ? { modulesAiAssistantEnabled: body.modulesAiAssistantEnabled }
+          : {}),
         ...(body.multilingualMessagingEnabled !== undefined ? { multilingualMessagingEnabled: body.multilingualMessagingEnabled } : {}),
         ...(body.filesEnabled !== undefined ? { filesEnabled: body.filesEnabled } : {}),
         ...(body.attendanceEnabled !== undefined ? { attendanceEnabled: body.attendanceEnabled } : {}),
@@ -8178,5 +8184,93 @@ export async function configureInclusiveAccess(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as InclusiveAccessStatus
+}
+
+/** Modules AI assistant — structured outline change proposals. */
+export type ModulesAiChildCreateOp =
+  | 'create_content_page'
+  | 'create_assignment'
+  | 'create_quiz'
+  | 'create_heading'
+
+export type ModulesAiProposal =
+  | { op: 'create_module'; title: string }
+  | { op: 'rename'; itemId: string; title: string }
+  | { op: 'set_published'; itemId: string; published: boolean }
+  | {
+      op: ModulesAiChildCreateOp
+      title: string
+      moduleId?: string
+      moduleTitle?: string
+    }
+
+export type ModulesAiChatResponse = {
+  reply: string
+  proposals: ModulesAiProposal[]
+}
+
+function normalizeModulesAiProposal(raw: unknown): ModulesAiProposal | null {
+  if (!raw || typeof raw !== 'object') return null
+  const p = raw as Record<string, unknown>
+  const op = typeof p.op === 'string' ? p.op : ''
+  const title = typeof p.title === 'string' ? p.title.trim() : ''
+  const itemId = typeof p.itemId === 'string' ? p.itemId.trim() : ''
+  const moduleId = typeof p.moduleId === 'string' ? p.moduleId.trim() : ''
+  const moduleTitle = typeof p.moduleTitle === 'string' ? p.moduleTitle.trim() : ''
+  switch (op) {
+    case 'create_module':
+      return title ? { op, title } : null
+    case 'rename':
+      return title && itemId ? { op, itemId, title } : null
+    case 'set_published':
+      return itemId && typeof p.published === 'boolean'
+        ? { op, itemId, published: p.published }
+        : null
+    case 'create_content_page':
+    case 'create_assignment':
+    case 'create_quiz':
+    case 'create_heading':
+      if (!title || (!moduleId && !moduleTitle)) return null
+      return {
+        op,
+        title,
+        ...(moduleId ? { moduleId } : {}),
+        ...(moduleTitle ? { moduleTitle } : {}),
+      }
+    default:
+      return null
+  }
+}
+
+export async function postModulesAiChat(
+  courseCode: string,
+  body: {
+    message: string
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>
+  },
+): Promise<ModulesAiChatResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/modules-ai/chat`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: body.message,
+        history: body.history ?? [],
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const data = raw as { reply?: unknown; proposals?: unknown }
+  const proposals = Array.isArray(data.proposals)
+    ? data.proposals
+        .map((p) => normalizeModulesAiProposal(p))
+        .filter((p): p is ModulesAiProposal => p !== null)
+    : []
+  return {
+    reply: typeof data.reply === 'string' ? data.reply : '',
+    proposals,
+  }
 }
 
