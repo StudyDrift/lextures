@@ -60,7 +60,7 @@ const FAQS = [
   },
   {
     q: 'How do homeschool accounts work?',
-    a: 'Sign up at self.lextures.com for a free hosted individual account with adaptive practice and spaced-repetition review. You can also self-host the stack for free or use an institution account if your school provides access.',
+    a: 'Sign up at self.lextures.com for a hosted individual account — $20/month for full platform access, or pay per course when you only need specific marketplace enrollments. You can also self-host the stack for free or use an institution account if your school provides access.',
   },
   {
     q: 'Does AI cost extra?',
@@ -186,13 +186,18 @@ export function PricingPage() {
             <PricingCard
               label="Homeschool"
               price={
-                <div className="flex items-baseline gap-2">
-                  <span className="font-display text-5xl font-semibold" style={{ color: 'var(--ink)' }}>
-                    $0
-                  </span>
-                  <span className="text-[15px]" style={{ color: 'var(--text-soft)' }}>
-                    per account
-                  </span>
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-display text-5xl font-semibold" style={{ color: 'var(--ink)' }}>
+                      $20
+                    </span>
+                    <span className="text-[15px]" style={{ color: 'var(--text-soft)' }}>
+                      /month
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[15px]" style={{ color: 'var(--text-soft)' }}>
+                    or pay per course
+                  </p>
                 </div>
               }
               description="For homeschool families, certification prep, and language study — adaptive practice without running your own server."
