@@ -8,8 +8,9 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ImageIcon, Monitor, Save, Upload, X } from 'lucide-react'
+import { ImageIcon, Monitor, Save, Trash2, Upload, X } from 'lucide-react'
 import { useConfirm } from '../use-confirm'
 import { OidcConnectedAccountsPanel } from '../oidc-connected-accounts-panel'
 import { BotConnectedAccountsPanel } from '../bot-connected-accounts-panel'
@@ -25,6 +26,7 @@ import { apiUrl, authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { passwordStrengthEnglish, passwordStrengthKey, type PasswordStrengthKey } from '../../lib/password-strength'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { clearSessionTokens, getRefreshToken } from '../../lib/session-tokens'
 import { applyUiTheme, parseUiTheme, type UiTheme } from '../../lib/ui-theme'
 import { useUiDensityControls } from '../../context/ui-density-context'
 import { useLocaleFormatContext } from '../../context/locale-format-context'
@@ -94,6 +96,7 @@ const disabledInputClass =
 
 export function AccountSettingsView() {
   const { t } = useTranslation('common')
+  const navigate = useNavigate()
   const { confirm, ConfirmDialogHost } = useConfirm()
   const accountFormId = useId()
   const { density, setDensity } = useUiDensityControls()
@@ -103,6 +106,7 @@ export function AccountSettingsView() {
 
   const [accountLoading, setAccountLoading] = useState(false)
   const [accountSaving, setAccountSaving] = useState(false)
+  const [deleteAccountBusy, setDeleteAccountBusy] = useState(false)
   const [accountMessage, setAccountMessage] = useState<string | null>(null)
   const [accountError, setAccountError] = useState<string | null>(null)
   const [email, setEmail] = useState('')
@@ -477,6 +481,45 @@ export function AccountSettingsView() {
     } catch {
       setSessionsError('Could not revoke session.')
       toastMutationError('Could not revoke session.')
+    }
+  }
+
+  async function onDeleteAccount() {
+    const ok = await confirm({
+      title: t('account.delete.title'),
+      description: t('account.delete.description'),
+      confirmLabel: t('account.delete.confirm'),
+      variant: 'danger',
+      requireTypedPhrase: t('account.delete.phrase'),
+    })
+    if (!ok) return
+    setDeleteAccountBusy(true)
+    try {
+      const res = await authorizedFetch('/api/v1/settings/account', { method: 'DELETE' })
+      const raw: unknown = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toastMutationError(readApiErrorMessage(raw) || t('account.delete.error'))
+        return
+      }
+      const rt = getRefreshToken()
+      if (rt) {
+        try {
+          await fetch(apiUrl('/api/v1/auth/logout'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: rt }),
+          })
+        } catch {
+          /* ignore — local session is cleared below */
+        }
+      }
+      clearSessionTokens()
+      applyUiTheme('light')
+      navigate('/login', { replace: true })
+    } catch {
+      toastMutationError(t('account.delete.error'))
+    } finally {
+      setDeleteAccountBusy(false)
     }
   }
 
@@ -1012,6 +1055,25 @@ export function AccountSettingsView() {
 
       <StudyRemindersSettingsPanel embedded />
       <BadgeProfileSettingsPanel />
+
+      <SettingsSection
+        id="danger-zone"
+        title={t('account.delete.sectionTitle')}
+        description={t('account.delete.sectionDescription')}
+      >
+        <div className="rounded-xl border border-red-200 bg-red-50/60 p-4 dark:border-red-900/50 dark:bg-red-950/30">
+          <p className="text-sm text-slate-700 dark:text-neutral-200">{t('account.delete.warning')}</p>
+          <button
+            type="button"
+            disabled={deleteAccountBusy || accountLoading}
+            onClick={() => void onDeleteAccount()}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition-[background-color,color,border-color] hover:border-red-400 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-800 dark:bg-neutral-900 dark:text-red-300 dark:hover:bg-red-950/50"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden />
+            {deleteAccountBusy ? t('account.delete.deleting') : t('account.delete.button')}
+          </button>
+        </div>
+      </SettingsSection>
 
       {avatarModalOpen ? (
         <div

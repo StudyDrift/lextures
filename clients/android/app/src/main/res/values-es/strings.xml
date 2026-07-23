@@ -3245,6 +3245,12 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_profile_clearCacheConfirm">¿Borrar almacenamiento sin conexión?</string>
     <string name="mobile_profile_clearCacheMessage">Elimina lecturas y descargas en caché de este dispositivo. Los cambios en cola se conservan hasta sincronizarse.</string>
     <string name="mobile_profile_clearCachedData">Borrar datos en caché</string>
+    <string name="mobile_profile_deleteAccount">Eliminar cuenta</string>
+    <string name="mobile_profile_deleteAccountAction">Eliminar cuenta</string>
+    <string name="mobile_profile_deleteAccountBusy">Eliminando…</string>
+    <string name="mobile_profile_deleteAccountConfirm">¿Eliminar permanentemente tu cuenta?</string>
+    <string name="mobile_profile_deleteAccountError">No se pudo eliminar la cuenta. Inténtalo de nuevo.</string>
+    <string name="mobile_profile_deleteAccountMessage">Tus datos personales se anonimizarán y se cerrará la sesión en todos los dispositivos. Esta acción no se puede deshacer.</string>
     <string name="mobile_profile_displayName">Nombre para mostrar</string>
     <string name="mobile_profile_dyslexiaFriendly">Visualización para dislexia</string>
     <string name="mobile_profile_dyslexiaFriendlyDescription">Tipografía redondeada, espaciado extra y altura de línea relajada en toda la app.</string>

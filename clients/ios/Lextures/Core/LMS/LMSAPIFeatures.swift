@@ -40,6 +40,16 @@ extension LMSAPI {
         return try decode(AccountProfile.self, from: data)
     }
 
+    /// Permanently delete the signed-in account (self-service erasure).
+    static func deleteAccount(accessToken: String) async throws {
+        _ = try await client.request(
+            path: "/api/v1/settings/account",
+            method: "DELETE",
+            authorized: true,
+            accessToken: accessToken
+        )
+    }
+
     // MARK: - My accommodations
 
     static func fetchMyAccommodations(accessToken: String) async throws -> [MyAccommodation] {

@@ -1029,6 +1029,15 @@ object LmsApi {
             decode<AccountProfile>(body)
         }
 
+    /** Permanently delete the signed-in account (self-service erasure). */
+    suspend fun deleteAccount(accessToken: String) = withContext(Dispatchers.IO) {
+        client.request(
+            path = "/api/v1/settings/account",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+    }
+
     // My accommodations
 
     suspend fun fetchMyAccommodations(accessToken: String): List<MyAccommodation> = withContext(Dispatchers.IO) {

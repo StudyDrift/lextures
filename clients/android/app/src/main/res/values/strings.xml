@@ -3245,6 +3245,12 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_profile_clearCacheConfirm">Clear offline storage?</string>
     <string name="mobile_profile_clearCacheMessage">Removes cached reads and downloads from this device. Queued changes are kept until they sync.</string>
     <string name="mobile_profile_clearCachedData">Clear cached data</string>
+    <string name="mobile_profile_deleteAccount">Delete account</string>
+    <string name="mobile_profile_deleteAccountAction">Delete account</string>
+    <string name="mobile_profile_deleteAccountBusy">Deleting…</string>
+    <string name="mobile_profile_deleteAccountConfirm">Permanently delete your account?</string>
+    <string name="mobile_profile_deleteAccountError">Could not delete account. Try again.</string>
+    <string name="mobile_profile_deleteAccountMessage">Your personal data will be anonymized and you will be signed out on all devices. This cannot be undone.</string>
     <string name="mobile_profile_displayName">Display name</string>
     <string name="mobile_profile_dyslexiaFriendly">Dyslexia-friendly display</string>
     <string name="mobile_profile_dyslexiaFriendlyDescription">Rounded type, extra spacing, and relaxed line height app-wide.</string>

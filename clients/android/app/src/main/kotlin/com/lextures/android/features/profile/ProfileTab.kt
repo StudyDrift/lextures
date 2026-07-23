@@ -114,6 +114,9 @@ fun ProfileTab(
     modifier: Modifier = Modifier,
 ) {
     var confirmingSignOut by remember { mutableStateOf(false) }
+    var confirmingDeleteAccount by remember { mutableStateOf(false) }
+    var deleteAccountBusy by remember { mutableStateOf(false) }
+    var deleteAccountError by remember { mutableStateOf<String?>(null) }
     var confirmingClearCache by remember { mutableStateOf(false) }
     var showNotifications by remember { mutableStateOf(false) }
     var showNotificationPreferences by remember { mutableStateOf(false) }
@@ -1600,10 +1603,47 @@ fun ProfileTab(
             )
             Box(modifier = Modifier.width(8.dp))
             Text(
-                text = "Sign out",
+                text = L.text(context, localePreferences, R.string.mobile_profile_signOut),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = LexturesColors.Error,
+            )
+        }
+
+        // Delete account
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(LexturesColors.Error.copy(alpha = 0.09f))
+                .clickable(enabled = !deleteAccountBusy) { confirmingDeleteAccount = true }
+                .padding(vertical = 14.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.Default.Delete,
+                contentDescription = null,
+                tint = LexturesColors.Error,
+                modifier = Modifier.size(17.dp),
+            )
+            Box(modifier = Modifier.width(8.dp))
+            Text(
+                text = if (deleteAccountBusy) {
+                    L.text(context, localePreferences, R.string.mobile_profile_deleteAccountBusy)
+                } else {
+                    L.text(context, localePreferences, R.string.mobile_profile_deleteAccount)
+                },
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = LexturesColors.Error,
+            )
+        }
+        deleteAccountError?.let { err ->
+            Text(
+                text = err,
+                color = LexturesColors.Error,
+                fontSize = 13.sp,
             )
         }
     }
@@ -1673,17 +1713,63 @@ fun ProfileTab(
     if (confirmingSignOut) {
         AlertDialog(
             onDismissRequest = { confirmingSignOut = false },
-            title = { Text("Sign out of Lextures?") },
+            title = { Text(L.text(context, localePreferences, R.string.mobile_profile_signOutConfirm)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmingSignOut = false
                     session.signOut()
                 }) {
-                    Text("Sign out", color = LexturesColors.Error)
+                    Text(L.text(context, localePreferences, R.string.mobile_profile_signOut), color = LexturesColors.Error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmingSignOut = false }) { Text("Cancel") }
+            },
+        )
+    }
+
+    if (confirmingDeleteAccount) {
+        AlertDialog(
+            onDismissRequest = { if (!deleteAccountBusy) confirmingDeleteAccount = false },
+            title = { Text(L.text(context, localePreferences, R.string.mobile_profile_deleteAccountConfirm)) },
+            text = { Text(L.text(context, localePreferences, R.string.mobile_profile_deleteAccountMessage)) },
+            confirmButton = {
+                TextButton(
+                    enabled = !deleteAccountBusy,
+                    onClick = {
+                        val token = accessToken
+                        if (token.isNullOrBlank()) {
+                            deleteAccountError = L.text(context, localePreferences, R.string.mobile_profile_deleteAccountError)
+                            confirmingDeleteAccount = false
+                            return@TextButton
+                        }
+                        deleteAccountBusy = true
+                        deleteAccountError = null
+                        scope.launch {
+                            try {
+                                LmsApi.deleteAccount(token)
+                                confirmingDeleteAccount = false
+                                session.signOut()
+                            } catch (_: Exception) {
+                                deleteAccountError = L.text(context, localePreferences, R.string.mobile_profile_deleteAccountError)
+                                confirmingDeleteAccount = false
+                            } finally {
+                                deleteAccountBusy = false
+                            }
+                        }
+                    },
+                ) {
+                    Text(
+                        L.text(context, localePreferences, R.string.mobile_profile_deleteAccountAction),
+                        color = LexturesColors.Error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !deleteAccountBusy,
+                    onClick = { confirmingDeleteAccount = false },
+                ) { Text("Cancel") }
             },
         )
     }
