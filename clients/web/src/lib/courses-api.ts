@@ -3309,6 +3309,24 @@ export async function generateModuleQuizQuestions(
   return parseApiResponse('generateModuleQuizQuestions', generateQuizQuestionsResponseSchema, raw)
 }
 
+export async function importModuleQuizQuestionsFromMarkdown(
+  courseCode: string,
+  itemId: string,
+  body: { markdown: string },
+): Promise<{ questions: QuizQuestion[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/import-questions-markdown`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ markdown: body.markdown }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('importModuleQuizQuestionsFromMarkdown', generateQuizQuestionsResponseSchema, raw)
+}
+
 export type AdaptiveQuizHistoryTurn = {
   questionId?: string
   prompt: string

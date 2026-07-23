@@ -140,6 +140,9 @@ type GenerateModuleQuizQuestionsRequest struct {
 type GenerateModuleQuizQuestionsResponse struct {
 	Questions []QuizQuestion `json:"questions"`
 }
+type ImportModuleQuizQuestionsMarkdownRequest struct {
+	Markdown string `json:"markdown"`
+}
 type AdaptiveQuizNextRequest struct {
 	AttemptID *uuid.UUID                `json:"attemptId"`
 	History   []AdaptiveQuizHistoryTurn `json:"history"`

@@ -28,9 +28,9 @@ var classroomSignalsRoutes = []struct {
 	{http.MethodPost, "/api/v1/sections/00000000-0000-0000-0000-000000000001/hall-passes"},
 	{http.MethodGet, "/api/v1/sections/00000000-0000-0000-0000-000000000001/hall-passes/active"},
 	{http.MethodPatch, "/api/v1/hall-passes/00000000-0000-0000-0000-000000000002"},
-	{http.MethodPost, "/api/v1/courses/00000000-0000-0000-0000-000000000003/questions"},
-	{http.MethodGet, "/api/v1/courses/00000000-0000-0000-0000-000000000003/questions"},
-	{http.MethodPatch, "/api/v1/courses/00000000-0000-0000-0000-000000000003/questions/00000000-0000-0000-0000-000000000004"},
+	{http.MethodPost, "/api/v1/courses/00000000-0000-0000-0000-000000000003/classroom-signals/questions"},
+	{http.MethodGet, "/api/v1/courses/00000000-0000-0000-0000-000000000003/classroom-signals/questions"},
+	{http.MethodPatch, "/api/v1/courses/00000000-0000-0000-0000-000000000003/classroom-signals/questions/00000000-0000-0000-0000-000000000004"},
 }
 
 func TestClassroomSignalsRoutes_NotFound404(t *testing.T) {
@@ -105,8 +105,8 @@ func TestClassroomSignalsRoutes_InvalidUUIDs_Returns400(t *testing.T) {
 		{http.MethodPost, "/api/v1/sections/not-a-uuid/hall-passes", `{"destination":"bathroom"}`},
 		{http.MethodGet, "/api/v1/sections/not-a-uuid/hall-passes/active", ""},
 		{http.MethodPatch, "/api/v1/hall-passes/not-a-uuid", `{"status":"approved"}`},
-		{http.MethodPost, "/api/v1/courses/not-a-uuid/questions", `{"question":"hi"}`},
-		{http.MethodGet, "/api/v1/courses/not-a-uuid/questions", ""},
+		{http.MethodPost, "/api/v1/courses/not-a-uuid/classroom-signals/questions", `{"question":"hi"}`},
+		{http.MethodGet, "/api/v1/courses/not-a-uuid/classroom-signals/questions", ""},
 	}
 
 	for _, c := range cases {

@@ -222,7 +222,7 @@ func (d Deps) handlePatchHallPass() http.HandlerFunc {
 	}
 }
 
-// handlePostCourseQuestion — POST /api/v1/courses/{courseId}/questions
+// handlePostCourseQuestion — POST /api/v1/courses/{courseId}/classroom-signals/questions
 //
 // Student submits an anonymous question. Author is stored for teacher
 // moderation but never echoed back to peers.
@@ -282,7 +282,7 @@ func (d Deps) handlePostCourseQuestion() http.HandlerFunc {
 	}
 }
 
-// handleGetCourseQuestions — GET /api/v1/courses/{courseId}/questions
+// handleGetCourseQuestions — GET /api/v1/courses/{courseId}/classroom-signals/questions
 //
 // Teacher (staff) views the question queue. Author IDs are included for
 // moderation/abuse review and are NOT included in the student-facing route.
@@ -328,7 +328,7 @@ func (d Deps) handleGetCourseQuestions() http.HandlerFunc {
 	}
 }
 
-// handlePatchCourseQuestion — PATCH /api/v1/courses/{courseId}/questions/{questionId}
+// handlePatchCourseQuestion — PATCH /api/v1/courses/{courseId}/classroom-signals/questions/{questionId}
 //
 // Teacher marks a question as addressed.
 func (d Deps) handlePatchCourseQuestion() http.HandlerFunc {
@@ -441,7 +441,7 @@ func (d Deps) registerClassroomSignalsRoutes(r chi.Router) {
 	r.Method(http.MethodPost, "/api/v1/sections/{sectionId}/hall-passes", d.handlePostSectionHallPass())
 	r.Method(http.MethodGet, "/api/v1/sections/{sectionId}/hall-passes/active", d.handleGetSectionActiveHallPasses())
 	r.Method(http.MethodPatch, "/api/v1/hall-passes/{passId}", d.handlePatchHallPass())
-	r.Method(http.MethodPost, "/api/v1/courses/{courseId}/questions", d.handlePostCourseQuestion())
-	r.Method(http.MethodGet, "/api/v1/courses/{courseId}/questions", d.handleGetCourseQuestions())
-	r.Method(http.MethodPatch, "/api/v1/courses/{courseId}/questions/{questionId}", d.handlePatchCourseQuestion())
+	r.Method(http.MethodPost, "/api/v1/courses/{courseId}/classroom-signals/questions", d.handlePostCourseQuestion())
+	r.Method(http.MethodGet, "/api/v1/courses/{courseId}/classroom-signals/questions", d.handleGetCourseQuestions())
+	r.Method(http.MethodPatch, "/api/v1/courses/{courseId}/classroom-signals/questions/{questionId}", d.handlePatchCourseQuestion())
 }

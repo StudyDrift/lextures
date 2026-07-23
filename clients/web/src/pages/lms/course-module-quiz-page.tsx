@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
 import { formatDateTime } from '../../lib/format'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Check, CheckCircle, ChevronDown, Download, Eye, Loader2, BarChart3, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
+import { Check, CheckCircle, ChevronDown, Download, Eye, FileText, Library, Loader2, BarChart3, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
 import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useOnlineStatus } from '../../hooks/use-online-status'
 import { useOfflineContent } from '../../hooks/use-offline-content'
@@ -24,6 +24,7 @@ import {
   fetchQuizFocusLossEvents,
   fetchReaderMarkups,
   generateModuleQuizQuestions,
+  importModuleQuizQuestionsFromMarkdown,
   courseModuleQuizAttemptHref,
   patchCourseStructureItemAssignmentGroup,
   patchModuleQuiz,
@@ -247,6 +248,90 @@ function QuizEditorMoreMenu({
   )
 }
 
+function ImportQuestionsMenu({
+  disabled,
+  buttonRef,
+  onMarkdown,
+  onQuestionBank,
+}: {
+  disabled?: boolean
+  buttonRef?: RefObject<HTMLButtonElement | null>
+  onMarkdown: () => void
+  onQuestionBank: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const menuId = useId()
+
+  useEffect(() => {
+    if (!open) return
+    function onDoc(e: MouseEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        ref={buttonRef}
+        type="button"
+        disabled={disabled}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <Plus className="h-4 w-4" aria-hidden />
+        Import Questions
+        <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
+      </button>
+      {open && (
+        <div
+          id={menuId}
+          role="menu"
+          aria-label="Import questions"
+          className="absolute start-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onMarkdown()
+              setOpen(false)
+            }}
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          >
+            <FileText className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            Markdown
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onQuestionBank()
+              setOpen(false)
+            }}
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          >
+            <Library className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            Question Bank
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function CourseModuleQuizPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const navigate = useNavigate()
@@ -322,6 +407,10 @@ export default function CourseModuleQuizPage() {
   const [importPopoverPos, setImportPopoverPos] = useState<{ top: number; left: number; width: number } | null>(
     null,
   )
+  const [importMarkdownOpen, setImportMarkdownOpen] = useState(false)
+  const [importMarkdownText, setImportMarkdownText] = useState('')
+  const [importMarkdownBusy, setImportMarkdownBusy] = useState(false)
+  const [importMarkdownError, setImportMarkdownError] = useState<string | null>(null)
   const [structureItems, setStructureItems] = useState<CourseStructureItem[]>([])
   const [qeAdaptiveOn, setQeAdaptiveOn] = useState(false)
   const [qeAdaptivePrompt, setQeAdaptivePrompt] = useState('')
@@ -797,14 +886,42 @@ export default function CourseModuleQuizPage() {
     }
   }
 
-  function openImportQuestions() {
+  function openImportFromBank() {
     if (!courseCode) return
+    setImportMarkdownOpen(false)
     setImportQuestionsError(null)
-    setImportQuestionsOpen((prev) => {
-      const next = !prev
-      if (next) void loadBankQuestionsForImport(importQuestionsQuery)
-      return next
-    })
+    setImportQuestionsOpen(true)
+    void loadBankQuestionsForImport(importQuestionsQuery)
+  }
+
+  function openImportFromMarkdown() {
+    setImportQuestionsOpen(false)
+    setImportMarkdownError(null)
+    setImportMarkdownText('')
+    setImportMarkdownOpen(true)
+  }
+
+  async function runImportFromMarkdown() {
+    if (!courseCode || !itemId || !canEditQuizItems) return
+    const markdown = importMarkdownText.trim()
+    if (!markdown) {
+      setImportMarkdownError('Paste markdown that contains quiz questions.')
+      return
+    }
+    setImportMarkdownError(null)
+    setImportMarkdownBusy(true)
+    try {
+      const { questions: imported } = await importModuleQuizQuestionsFromMarkdown(courseCode, itemId, {
+        markdown,
+      })
+      setQuestionsDraft((prev) => [...prev, ...imported])
+      setImportMarkdownOpen(false)
+      setImportMarkdownText('')
+    } catch (e) {
+      setImportMarkdownError(e instanceof Error ? e.message : 'Could not import questions from markdown.')
+    } finally {
+      setImportMarkdownBusy(false)
+    }
   }
 
   async function importQuestionFromBank(questionId: string) {
@@ -1591,6 +1708,81 @@ export default function CourseModuleQuizPage() {
                 className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
               >
                 {generateBusy ? 'Generating…' : 'Generate'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {importMarkdownOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/40 p-4 sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="quiz-import-markdown-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !importMarkdownBusy) setImportMarkdownOpen(false)
+          }}
+        >
+          <div className="w-full max-w-2xl overflow-visible rounded-2xl border border-slate-200 bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+              <h3 id="quiz-import-markdown-title" className="text-sm font-semibold text-slate-900">
+                Import from Markdown
+              </h3>
+              <button
+                type="button"
+                onClick={() => setImportMarkdownOpen(false)}
+                disabled={importMarkdownBusy}
+                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4 p-4">
+              <p className="text-sm text-slate-600">
+                Paste quiz questions written in Markdown. AI converts them into Lextures question types
+                (multiple choice, true/false, short answer, and more) so you can review before saving.
+              </p>
+              <div>
+                <label
+                  className="mb-1 block text-xs font-medium text-slate-600"
+                  htmlFor="quiz-import-markdown"
+                >
+                  Markdown
+                </label>
+                <textarea
+                  id="quiz-import-markdown"
+                  value={importMarkdownText}
+                  onChange={(e) => setImportMarkdownText(e.target.value)}
+                  disabled={importMarkdownBusy}
+                  autoFocus
+                  rows={14}
+                  placeholder={`## Question 1\nWhat is photosynthesis?\n- A) A chemical reaction in animals\n- B) How plants make food from light\n- C) A type of cell division\n\nCorrect: B`}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                />
+              </div>
+              {importMarkdownError && (
+                <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                  {importMarkdownError}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50/80 px-4 py-3">
+              <button
+                type="button"
+                onClick={() => setImportMarkdownOpen(false)}
+                disabled={importMarkdownBusy}
+                className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void runImportFromMarkdown()}
+                disabled={importMarkdownBusy}
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
+              >
+                {importMarkdownBusy ? 'Importing…' : 'Import'}
               </button>
             </div>
           </div>
@@ -2764,17 +2956,11 @@ export default function CourseModuleQuizPage() {
                       <Plus className="h-4 w-4" />
                       Add question
                     </button>
-                    <button
-                      ref={importButtonRef}
-                      type="button"
-                      onClick={openImportQuestions}
-                      aria-expanded={importQuestionsOpen}
-                      aria-haspopup="dialog"
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Import Questions
-                    </button>
+                    <ImportQuestionsMenu
+                      buttonRef={importButtonRef}
+                      onMarkdown={openImportFromMarkdown}
+                      onQuestionBank={openImportFromBank}
+                    />
                   </div>
                 </>
               ) : null}

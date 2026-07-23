@@ -1,3 +1,2 @@
-// Package quizgenerationai is a placeholder for a port of server/src/services/quizgenerationai/.
-// Types and query helpers are added as handlers are implemented.
+// Package quizgenerationai converts instructor prompts and markdown into module quiz questions via the AI provider.
 package quizgenerationai

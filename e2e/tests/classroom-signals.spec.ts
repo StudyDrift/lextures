@@ -53,7 +53,7 @@ test('ClassroomSignals: PATCH hall-pass unauthenticated returns 401', async () =
 
 test('ClassroomSignals: POST course question unauthenticated returns 401', async () => {
   const res = await fetch(
-    `${API_BASE}/api/v1/courses/00000000-0000-0000-0000-000000000001/questions`,
+    `${API_BASE}/api/v1/courses/00000000-0000-0000-0000-000000000001/classroom-signals/questions`,
     { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' },
   )
   expect(res.status).toBe(401)
@@ -61,7 +61,7 @@ test('ClassroomSignals: POST course question unauthenticated returns 401', async
 
 test('ClassroomSignals: GET course questions unauthenticated returns 401', async () => {
   const res = await fetch(
-    `${API_BASE}/api/v1/courses/00000000-0000-0000-0000-000000000001/questions`,
+    `${API_BASE}/api/v1/courses/00000000-0000-0000-0000-000000000001/classroom-signals/questions`,
   )
   expect(res.status).toBe(401)
 })
@@ -105,7 +105,7 @@ test('ClassroomSignals: empty question returns 400', async () => {
     password: PASSWORD,
   })
   const res = await fetch(
-    `${API_BASE}/api/v1/courses/00000000-0000-0000-0000-000000000099/questions`,
+    `${API_BASE}/api/v1/courses/00000000-0000-0000-0000-000000000099/classroom-signals/questions`,
     {
       method: 'POST',
       headers: authHeaders(token),
@@ -316,7 +316,7 @@ test('ClassroomSignals: student submission response strips authorId (AC-3)', asy
     test.skip(true, 'could not seed')
     return
   }
-  const res = await fetch(`${API_BASE}/api/v1/courses/${seed.courseId}/questions`, {
+  const res = await fetch(`${API_BASE}/api/v1/courses/${seed.courseId}/classroom-signals/questions`, {
     method: 'POST',
     headers: authHeaders(seed.studentToken),
     body: JSON.stringify({ question: 'Can you re-explain question 3?' }),
@@ -333,12 +333,12 @@ test('ClassroomSignals: teacher sees questions including authorId (moderation)',
     test.skip(true, 'could not seed')
     return
   }
-  await fetch(`${API_BASE}/api/v1/courses/${seed.courseId}/questions`, {
+  await fetch(`${API_BASE}/api/v1/courses/${seed.courseId}/classroom-signals/questions`, {
     method: 'POST',
     headers: authHeaders(seed.studentToken),
     body: JSON.stringify({ question: 'Mod-test question' }),
   })
-  const listRes = await fetch(`${API_BASE}/api/v1/courses/${seed.courseId}/questions`, {
+  const listRes = await fetch(`${API_BASE}/api/v1/courses/${seed.courseId}/classroom-signals/questions`, {
     headers: authHeaders(seed.teacherToken),
   })
   expect(listRes.status).toBe(200)
@@ -354,7 +354,7 @@ test('ClassroomSignals: non-staff cannot read course question queue (403)', asyn
     test.skip(true, 'could not seed')
     return
   }
-  const res = await fetch(`${API_BASE}/api/v1/courses/${seed.courseId}/questions`, {
+  const res = await fetch(`${API_BASE}/api/v1/courses/${seed.courseId}/classroom-signals/questions`, {
     headers: authHeaders(seed.studentToken),
   })
   expect(res.status).toBe(403)
