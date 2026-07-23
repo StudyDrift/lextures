@@ -20,12 +20,14 @@ export function CourseHeroBanner({
 
   return (
     <div
-      className={`relative h-44 w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm sm:h-56 dark:border-neutral-700 ${className}`}
+      // Fixed aspect ratio (not fixed height) so object-cover keeps the same crop as the
+      // banner width changes — otherwise widening the window re-crops the hero image.
+      className={`relative aspect-[4/1] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm dark:border-neutral-700 ${className}`}
     >
       <CourseHeroImage
         src={course.heroImageUrl}
         alt=""
-        className="h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover"
         style={heroImageObjectStyle(course.heroImageObjectPosition)}
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
