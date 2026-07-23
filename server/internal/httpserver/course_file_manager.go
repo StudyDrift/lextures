@@ -671,19 +671,22 @@ func (d Deps) handleGetCourseFileItemContent() http.HandlerFunc {
 		}
 		cfg := d.effectiveConfig()
 		if d.Storage != nil {
-			ttl := time.Duration(cfg.StoragePresignTTL) * time.Second
-			if ttl <= 0 {
-				ttl = time.Hour
-			}
-			presignURL, presignErr := d.Storage.GetPresignedURL(r.Context(), item.StorageKey, ttl)
-			if presignErr != nil && !errors.Is(presignErr, filestorage.ErrNoPresignedURL) {
-				log.Printf("course-file-item-content: presign key=%q err=%v", item.StorageKey, presignErr)
-				apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "File temporarily unavailable — try again in a moment.")
-				return
-			}
-			if presignURL != "" {
-				http.Redirect(w, r, presignURL, http.StatusFound)
-				return
+			// See wantsSameOriginFileBody: CORS fetch cannot follow S3 redirects.
+			if !wantsSameOriginFileBody(r) {
+				ttl := time.Duration(cfg.StoragePresignTTL) * time.Second
+				if ttl <= 0 {
+					ttl = time.Hour
+				}
+				presignURL, presignErr := d.Storage.GetPresignedURL(r.Context(), item.StorageKey, ttl)
+				if presignErr != nil && !errors.Is(presignErr, filestorage.ErrNoPresignedURL) {
+					log.Printf("course-file-item-content: presign key=%q err=%v", item.StorageKey, presignErr)
+					apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "File temporarily unavailable — try again in a moment.")
+					return
+				}
+				if presignURL != "" {
+					http.Redirect(w, r, presignURL, http.StatusFound)
+					return
+				}
 			}
 			rc, getErr := d.Storage.GetObject(r.Context(), item.StorageKey)
 			if getErr == nil {

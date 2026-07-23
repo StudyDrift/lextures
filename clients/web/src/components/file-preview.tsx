@@ -42,7 +42,10 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
 
     async function load() {
       try {
-        const res = await authorizedFetch(filePath)
+        // Prefer same-origin body: S3 presign redirects break fetch().blob() via CORS.
+        const res = await authorizedFetch(filePath, {
+          headers: { Prefer: 'return=representation' },
+        })
         if (!res.ok) throw new Error('Failed to load image.')
         const blob = await res.blob()
         if (cancelled) return
@@ -224,7 +227,10 @@ function VideoFileViewer({ filePath, filename }: { filePath: string; filename: s
     let cancelled = false
     void (async () => {
       try {
-        const res = await authorizedFetch(filePath)
+        // Prefer same-origin body: following S3 redirects fails CORS for blob().
+        const res = await authorizedFetch(filePath, {
+          headers: { Prefer: 'return=representation' },
+        })
         if (!res.ok) throw new Error('Failed to load video.')
         const blob = await res.blob()
         if (cancelled) return
@@ -280,14 +286,11 @@ function AudioViewer({ filePath, filename }: { filePath: string; filename: strin
     let cancelled = false
     void (async () => {
       try {
-        const res = await authorizedFetch(filePath)
+        // Prefer same-origin body: following S3 redirects fails CORS for blob().
+        const res = await authorizedFetch(filePath, {
+          headers: { Prefer: 'return=representation' },
+        })
         if (!res.ok) throw new Error('Failed to load audio.')
-        const apiOrigin = new URL(apiUrl(filePath)).origin
-        if (new URL(res.url).origin !== apiOrigin) {
-          // S3 presigned URL — use directly so the browser can stream
-          if (!cancelled) setSrc(res.url)
-          return
-        }
         const blob = await res.blob()
         if (cancelled) return
         const url = URL.createObjectURL(blob)

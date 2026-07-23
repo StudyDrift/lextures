@@ -74,8 +74,11 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 		resizeOpts := parseCourseFileImageResizeOpts(r)
 		cfg := d.effectiveConfig()
 
-		// S3-backed: generate presigned URL and redirect (skip when serving a resized thumbnail)
-		if d.Storage != nil && resizeOpts.MaxWidth <= 0 && resizeOpts.MaxHeight <= 0 {
+		// S3-backed: generate presigned URL and redirect for navigations/downloads.
+		// Skip redirect when the client is a CORS fetch/XHR that needs the response body
+		// same-origin (browser fetch cannot read cross-origin S3 redirects — no CORS on the bucket).
+		// Also skip when serving a resized thumbnail (must proxy through imageproxy).
+		if d.Storage != nil && resizeOpts.MaxWidth <= 0 && resizeOpts.MaxHeight <= 0 && !wantsSameOriginFileBody(r) {
 			ttl := time.Duration(cfg.StoragePresignTTL) * time.Second
 			if ttl <= 0 {
 				ttl = time.Hour
@@ -193,4 +196,28 @@ func clampCourseFileImageResizeDim(raw string) int {
 		return courseFileImageResizeMaxDim
 	}
 	return n
+}
+
+// wantsSameOriginFileBody reports whether the client needs the file bytes on this
+// origin rather than a redirect to object storage.
+//
+// Browser fetch() that follows a 302 to a presigned S3 URL fails with a CORS error
+// when the SPA tries to read the response body (bucket has no Access-Control-Allow-Origin
+// for the app origin). Clients that need a same-origin body (hero images, image
+// lightbox, markdown embeds) send Prefer: return=representation or ?inline=1.
+//
+// Navigations, <img src>, and media elements that use a presigned URL as src still
+// get the redirect (efficient for large files) and do not need this header.
+func wantsSameOriginFileBody(r *http.Request) bool {
+	if r == nil {
+		return false
+	}
+	prefer := strings.ToLower(r.Header.Get("Prefer"))
+	if strings.Contains(prefer, "return=representation") {
+		return true
+	}
+	if strings.EqualFold(strings.TrimSpace(r.URL.Query().Get("inline")), "1") {
+		return true
+	}
+	return false
 }
