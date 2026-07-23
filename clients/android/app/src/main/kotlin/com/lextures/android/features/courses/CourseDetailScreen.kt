@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -388,14 +387,12 @@ fun CourseDetailScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, end = 16.dp),
+                .padding(start = 4.dp, top = 8.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
-            }
+            // System / gesture back is handled by BackHandler — no in-app back arrow.
             if (shell != null) {
-                IconButton(onClick = { shell.drawerState = com.lextures.android.core.navigation.DrawerState.Course }) {
+                IconButton(onClick = { shell.openCourseDrawer() }) {
                     Icon(Icons.Default.Menu, contentDescription = L.text(R.string.mobile_drawer_courseMenu), tint = textPrimary())
                 }
             }
@@ -750,12 +747,10 @@ private fun CourseInvitationScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, end = 16.dp),
+                .padding(start = 16.dp, top = 8.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
-            }
+            // System / gesture back is handled by BackHandler — no in-app back arrow.
             Text(
                 text = course.displayTitle,
                 fontSize = 18.sp,

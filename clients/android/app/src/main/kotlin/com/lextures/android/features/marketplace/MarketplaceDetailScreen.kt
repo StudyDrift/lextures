@@ -106,6 +106,7 @@ fun MarketplaceDetailScreen(
                 openCourse = null
                 onBack()
             },
+            shell = shell,
             modifier = modifier.fillMaxSize(),
         )
         return

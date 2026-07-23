@@ -63,6 +63,7 @@ fun TeachHubScreen(
             session = session,
             course = course,
             onBack = { openCourse = null },
+            shell = shell,
             modifier = modifier,
         )
         return

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.AssignmentTurnedIn
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -65,6 +66,7 @@ import com.lextures.android.core.design.lxListMotion
 import com.lextures.android.core.design.lxReveal
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
+import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.Broadcast
 import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
@@ -274,6 +276,7 @@ fun DashboardTab(
             session = session,
             course = course,
             onBack = { openPathCourse = null },
+            shell = shell,
             modifier = modifier,
         )
         return
@@ -356,6 +359,7 @@ fun DashboardTab(
             session = session,
             course = course,
             onBack = { openCourse = null },
+            shell = shell,
             modifier = modifier,
         )
         return
@@ -435,6 +439,7 @@ fun DashboardTab(
             isOnline = isOnline,
             initialTab = PlannerTab.Todos,
             onBack = { showPlanner = false },
+            shell = shell,
             modifier = modifier,
         )
         return
@@ -457,6 +462,7 @@ fun DashboardTab(
                 avatarInitials = shell.accountProfile?.resolvedInitials()
                     ?: shell.profile?.initials ?: "··",
                 avatarUrl = shell.accountProfile?.avatarUrl,
+                onOpenMenu = { shell.openGlobalDrawer() },
                 onOpenNotifications = { showNotifications = true },
                 onOpenProfile = onOpenProfile,
                 showSearch = shell.iaRedesignEnabled && shell.universalSearchEnabled,
@@ -779,7 +785,7 @@ fun DashboardTab(
     }
 }
 
-/** Deep-teal gradient greeting panel with bell + avatar — the brand statement. */
+/** Deep-teal gradient greeting panel with drawer, search, bell + avatar — the brand statement. */
 @Composable
 private fun HeroPanel(
     greeting: String,
@@ -789,6 +795,7 @@ private fun HeroPanel(
     unreadNotifications: Int,
     avatarInitials: String,
     avatarUrl: String? = null,
+    onOpenMenu: () -> Unit,
     onOpenNotifications: () -> Unit,
     onOpenProfile: () -> Unit,
     showSearch: Boolean = false,
@@ -822,7 +829,27 @@ private fun HeroPanel(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Row(verticalAlignment = Alignment.Top) {
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                // iOS-parity hamburger — opens the app-wide navigation drawer.
+                Box(
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.16f))
+                        .clickable(onClick = onOpenMenu),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Default.Menu,
+                        contentDescription = L.text(R.string.mobile_drawer_menu),
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         text = "$greeting,",

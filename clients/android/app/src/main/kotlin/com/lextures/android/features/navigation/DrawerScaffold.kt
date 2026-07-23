@@ -64,9 +64,10 @@ fun DrawerScaffold(
     onDrawerProgress: (Float) -> Unit = {},
     globalPanel: @Composable () -> Unit,
     coursePanel: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier.fillMaxSize()) {
         val density = LocalDensity.current
         val panelW = min(maxWidth.value * 0.82f, 360f).dp
         val panelPx = with(density) { panelW.toPx() }
@@ -134,11 +135,14 @@ fun DrawerScaffold(
             }
 
             // Leading-edge catcher: opens (closed) or escalates (course menu open).
+            // Transparent + explicit size so the zone still receives hits (system gesture
+            // nav competes for the same edge; course chrome also exposes a menu button).
             if (state == DrawerState.None || state == DrawerState.Course) {
                 Box(
                     Modifier
+                        .align(Alignment.CenterStart)
                         .fillMaxHeight()
-                        .width(24.dp)
+                        .width(28.dp)
                         .pointerInput(state, courseAvailable) {
                             var acc = 0f
                             detectHorizontalDragGestures(
