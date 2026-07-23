@@ -2,15 +2,26 @@
 # The API uses EMAIL_PROVIDER=ses and the default AWS credential chain (ECS task role).
 
 locals {
-  ses_enabled     = var.enable_ses && var.ses_domain != ""
-  ses_from_email  = var.ses_from_email != "" ? var.ses_from_email : (local.ses_enabled ? "no-reply@${var.ses_domain}" : "")
-  ses_config_name = var.ses_configuration_set_name != "" ? var.ses_configuration_set_name : "${local.name_prefix}-default"
+  # HCP / Terraform Cloud often marks workspace variables sensitive. SES domain and
+  # From address are operational (DNS, IAM), not secrets — strip marks so count/for_each
+  # and root outputs (ses_dns_records) work. Same nonsensitive(sensitive(...)) pattern
+  # as use_api_container in locals.tf.
+  ses_enabled = nonsensitive(sensitive(var.enable_ses && var.ses_domain != ""))
+  ses_domain  = nonsensitive(sensitive(var.ses_domain))
+  ses_from_email = nonsensitive(sensitive(
+    var.ses_from_email != "" ? var.ses_from_email : (local.ses_enabled ? "no-reply@${local.ses_domain}" : "")
+  ))
+  ses_config_name = nonsensitive(sensitive(
+    var.ses_configuration_set_name != "" ? var.ses_configuration_set_name : "${local.name_prefix}-default"
+  ))
+  ses_mail_from_subdomain = nonsensitive(sensitive(var.ses_mail_from_subdomain))
+  ses_verify_from_email   = nonsensitive(sensitive(var.ses_verify_from_email))
 }
 
 resource "aws_sesv2_email_identity" "domain" {
   count = local.ses_enabled ? 1 : 0
 
-  email_identity = var.ses_domain
+  email_identity = local.ses_domain
 
   tags = {
     Name = "${local.name_prefix}-ses-domain"
@@ -19,10 +30,10 @@ resource "aws_sesv2_email_identity" "domain" {
 
 # Easy DKIM (RSA 2048) — publish the three CNAME records from outputs.
 resource "aws_sesv2_email_identity_mail_from_attributes" "domain" {
-  count = local.ses_enabled && var.ses_mail_from_subdomain != "" ? 1 : 0
+  count = local.ses_enabled && local.ses_mail_from_subdomain != "" ? 1 : 0
 
   email_identity         = aws_sesv2_email_identity.domain[0].email_identity
-  mail_from_domain       = "${var.ses_mail_from_subdomain}.${var.ses_domain}"
+  mail_from_domain       = "${local.ses_mail_from_subdomain}.${local.ses_domain}"
   behavior_on_mx_failure = "USE_DEFAULT_VALUE"
 }
 
@@ -38,7 +49,7 @@ resource "aws_sesv2_configuration_set" "main" {
 
 # Optional: verify a specific From address (useful while domain DKIM is pending).
 resource "aws_sesv2_email_identity" "from_address" {
-  count = local.ses_enabled && var.ses_verify_from_email && local.ses_from_email != "" ? 1 : 0
+  count = local.ses_enabled && local.ses_verify_from_email && local.ses_from_email != "" ? 1 : 0
 
   email_identity = local.ses_from_email
 

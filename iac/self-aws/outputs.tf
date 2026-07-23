@@ -122,7 +122,7 @@ output "ses_enabled" {
 
 output "ses_domain" {
   description = "SES domain identity (null when SES is disabled)."
-  value       = local.ses_enabled ? var.ses_domain : null
+  value       = local.ses_enabled ? local.ses_domain : null
 }
 
 output "ses_from_email" {
@@ -151,7 +151,7 @@ output "ses_dkim_tokens" {
 
 output "ses_mail_from_domain" {
   description = "Custom MAIL FROM domain when ses_mail_from_subdomain is set (null otherwise)."
-  value       = local.ses_enabled && var.ses_mail_from_subdomain != "" ? "${var.ses_mail_from_subdomain}.${var.ses_domain}" : null
+  value       = local.ses_enabled && local.ses_mail_from_subdomain != "" ? "${local.ses_mail_from_subdomain}.${local.ses_domain}" : null
 }
 
 output "ses_dns_records" {
@@ -164,21 +164,21 @@ output "ses_dns_records" {
       for token in try(aws_sesv2_email_identity.domain[0].dkim_signing_attributes[0].tokens, []) : {
         purpose = "dkim"
         type    = "CNAME"
-        name    = "${token}._domainkey.${var.ses_domain}"
+        name    = "${token}._domainkey.${local.ses_domain}"
         value   = "${token}.dkim.amazonses.com"
       }
     ],
-    var.ses_mail_from_subdomain != "" ? [
+    local.ses_mail_from_subdomain != "" ? [
       {
         purpose = "mail_from_mx"
         type    = "MX"
-        name    = "${var.ses_mail_from_subdomain}.${var.ses_domain}"
+        name    = "${local.ses_mail_from_subdomain}.${local.ses_domain}"
         value   = "10 feedback-smtp.${data.aws_region.current.name}.amazonses.com"
       },
       {
         purpose = "mail_from_spf"
         type    = "TXT"
-        name    = "${var.ses_mail_from_subdomain}.${var.ses_domain}"
+        name    = "${local.ses_mail_from_subdomain}.${local.ses_domain}"
         value   = "v=spf1 include:amazonses.com ~all"
       },
     ] : [],

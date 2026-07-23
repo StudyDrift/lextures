@@ -130,8 +130,8 @@ resource "aws_iam_role_policy" "ecs_task_ses" {
         Effect = "Allow"
         Action = ["ses:SendEmail", "ses:SendRawEmail"]
         Resource = [
-          "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.ses_domain}",
-          "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/*@${var.ses_domain}",
+          "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${local.ses_domain}",
+          "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/*@${local.ses_domain}",
           "arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:configuration-set/${local.ses_config_name}",
         ]
       },
