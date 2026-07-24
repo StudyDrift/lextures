@@ -37,6 +37,7 @@ const (
 	FeatureBadgesExtraction           = "badges_extraction"
 	FeatureTranslation                = "translation"
 	FeatureQuizGeneration             = "quiz_generation"
+	FeatureAssignmentRubricGeneration = "assignment_rubric_generation"
 	FeatureLiveQuizKitGeneration      = "live_quiz_kit_generation"
 	FeatureReadingLevelSimplification = "reading_level_simplification"
 	FeatureContentTranslation         = "content_translation"

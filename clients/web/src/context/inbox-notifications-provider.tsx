@@ -104,25 +104,24 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
     void refresh()
   }, [refresh, location.pathname])
 
+  // Long-lived socket: stay connected across navigations. Reconnect only on
+  // unexpected close or auth token change (not on every pathname change).
   useEffect(() => {
-    const token = getAccessToken()
-    if (!token) {
+    let cancelled = false
+
+    const clearReconnectTimer = () => {
       if (wsReconnectTimerRef.current) {
         clearTimeout(wsReconnectTimerRef.current)
         wsReconnectTimerRef.current = null
       }
+    }
+
+    const disconnect = () => {
+      clearReconnectTimer()
       closeWebSocket(wsRef.current)
       wsRef.current = null
       wsTokenRef.current = null
-      return
     }
-
-    const url = notificationsWebSocketUrl()
-    if (!url) {
-      return
-    }
-
-    let cancelled = false
 
     const scheduleReconnect = () => {
       if (cancelled || wsReconnectTimerRef.current) return
@@ -135,7 +134,13 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
     const connect = () => {
       if (cancelled) return
       const authToken = getAccessToken()
-      if (!authToken) return
+      if (!authToken) {
+        disconnect()
+        return
+      }
+
+      const url = notificationsWebSocketUrl()
+      if (!url) return
 
       if (wsRef.current && wsTokenRef.current === authToken) {
         return
@@ -166,27 +171,34 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
       ws.onclose = () => {
         if (wsRef.current === ws) {
           wsRef.current = null
+          wsTokenRef.current = null
         }
+        // Browser already closed the socket; do not call close() again.
         scheduleReconnect()
       }
 
-      ws.onerror = () => {
-        closeWebSocket(ws)
+      // Errors are followed by onclose — avoid close() here (double-close noise).
+      ws.onerror = null
+    }
+
+    const onAuthToken = () => {
+      if (cancelled) return
+      if (!getAccessToken()) {
+        disconnect()
+        return
       }
+      connect()
     }
 
     connect()
+    window.addEventListener('studydrift-auth-token', onAuthToken)
 
     return () => {
       cancelled = true
-      if (wsReconnectTimerRef.current) {
-        clearTimeout(wsReconnectTimerRef.current)
-        wsReconnectTimerRef.current = null
-      }
-      closeWebSocket(wsRef.current)
-      wsRef.current = null
+      window.removeEventListener('studydrift-auth-token', onAuthToken)
+      disconnect()
     }
-  }, [location.pathname, refresh])
+  }, [refresh])
 
   const value = { notifications, unreadCount, loading, refresh, markRead, markAllRead }
 

@@ -1,3 +1,2 @@
-// Package assignmentrubricai is a placeholder for a port of server/src/services/assignmentrubricai/.
-// Types and query helpers are added as handlers are implemented.
+// Package assignmentrubricai generates draft assignment rubrics via the AI provider.
 package assignmentrubricai
