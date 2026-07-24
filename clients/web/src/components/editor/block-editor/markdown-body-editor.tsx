@@ -1,5 +1,6 @@
 import { getMarkRange } from '@tiptap/core'
 import { Markdown } from '@tiptap/markdown'
+import { TableKit } from '@tiptap/extension-table'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
@@ -20,6 +21,8 @@ import {
   slashCommandsForEditor,
   type SlashCommand,
 } from './markdown-body-slash'
+import { shouldPasteClipboardAsMarkdown } from './markdown-clipboard-paste'
+import { stripPastedHtmlColors } from './strip-pasted-html-colors'
 import { CourseAwareTipTapImage } from './course-aware-tip-tap-image'
 import { MarkdownImageUploadModal } from './markdown-image-upload-modal'
 import { MathBlock, MathInline } from '../extensions/math-tip-tap'
@@ -60,6 +63,13 @@ const editorShellClass = [
   '[&_pre]:mt-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-slate-900 [&_pre]:p-3 [&_pre]:font-mono [&_pre]:text-[13px] [&_pre]:text-slate-100',
   '[&_blockquote]:mt-3 [&_blockquote]:border-s-4 [&_blockquote]:border-slate-300 [&_blockquote]:ps-4 [&_blockquote]:italic [&_blockquote]:text-slate-600',
   '[&_blockquote]:dark:border-neutral-600 [&_blockquote]:dark:text-neutral-400',
+  '[&_.tableWrapper]:mt-3 [&_.tableWrapper]:overflow-x-auto [&_.tableWrapper]:rounded-lg [&_.tableWrapper]:border [&_.tableWrapper]:border-slate-200',
+  'dark:[&_.tableWrapper]:border-neutral-600',
+  '[&_table]:w-full [&_table]:min-w-[20rem] [&_table]:border-collapse [&_table]:text-start [&_table]:text-sm',
+  '[&_th]:border-b [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:px-3 [&_th]:py-2 [&_th]:text-start [&_th]:text-xs [&_th]:font-semibold [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-slate-900',
+  'dark:[&_th]:border-neutral-600 dark:[&_th]:bg-neutral-800 dark:[&_th]:text-neutral-100',
+  '[&_td]:border-b [&_td]:border-slate-100 [&_td]:px-3 [&_td]:py-2 [&_td]:align-top [&_td]:text-slate-700',
+  'dark:[&_td]:border-neutral-700 dark:[&_td]:text-neutral-300',
   '[&_figure]:my-3',
   '[&_.katex]:text-inherit',
   '[&_.lex-math-block-root]:my-2 [&_.lex-math-block-root]:w-full',
@@ -209,6 +219,9 @@ export function MarkdownBodyEditor({
 
   const editorPasteDropProps = useMemo(
     () => ({
+      transformPastedHTML(html: string) {
+        return stripPastedHtmlColors(html)
+      },
       handleDOMEvents: {
         dragover: (_view: EditorView, e: Event) => {
           const ev = e as DragEvent
@@ -222,42 +235,60 @@ export function MarkdownBodyEditor({
       },
       handlePaste(view: EditorView, event: ClipboardEvent) {
         if (disabledRef.current) return false
+
         const upload = uploadCourseImageRef.current
-        if (!upload) return false
         const items = event.clipboardData?.items
-        if (!items?.length) return false
-        const files: File[] = []
-        for (let i = 0; i < items.length; i++) {
-          const it = items[i]
-          if (it?.kind === 'file' && it.type.startsWith('image/')) {
-            const f = it.getAsFile()
-            if (f) files.push(f)
-          }
-        }
-        if (!files.length) return false
-        event.preventDefault()
-        const ed = editorRefForImages.current
-        if (!ed) return true
-        const from = view.state.selection.from
-        void (async () => {
-          let pos = from
-          for (const file of files) {
-            try {
-              const path = await upload(file)
-              ed.chain()
-                .focus()
-                .insertContentAt(pos, {
-                  type: 'image',
-                  attrs: imageInsertAttrs(path, file.name),
-                })
-                .run()
-              pos = ed.state.selection.to
-            } catch {
-              /* ignore failed upload */
+        if (upload && items?.length) {
+          const files: File[] = []
+          for (let i = 0; i < items.length; i++) {
+            const it = items[i]
+            if (it?.kind === 'file' && it.type.startsWith('image/')) {
+              const f = it.getAsFile()
+              if (f) files.push(f)
             }
           }
-        })()
-        return true
+          if (files.length) {
+            event.preventDefault()
+            const ed = editorRefForImages.current
+            if (!ed) return true
+            const from = view.state.selection.from
+            void (async () => {
+              let pos = from
+              for (const file of files) {
+                try {
+                  const path = await upload(file)
+                  ed.chain()
+                    .focus()
+                    .insertContentAt(pos, {
+                      type: 'image',
+                      attrs: imageInsertAttrs(path, file.name),
+                    })
+                    .run()
+                  pos = ed.state.selection.to
+                } catch {
+                  /* ignore failed upload */
+                }
+              }
+            })()
+            return true
+          }
+        }
+
+        const text = event.clipboardData?.getData('text/plain') ?? ''
+        const html = event.clipboardData?.getData('text/html') ?? ''
+        if (shouldPasteClipboardAsMarkdown(text, html)) {
+          const ed = editorRefForImages.current
+          if (!ed) return false
+          event.preventDefault()
+          const { from, to } = view.state.selection
+          ed.chain()
+            .focus()
+            .insertContentAt({ from, to }, text, { contentType: 'markdown' })
+            .run()
+          return true
+        }
+
+        return false
       },
       handleDrop(view: EditorView, event: DragEvent) {
         if (disabledRef.current) return false
@@ -421,6 +452,12 @@ export function MarkdownBodyEditor({
         WhiteboardBlock,
         BoardBlock,
         NotebookTask.configure({ notebookTaskContext }),
+        TableKit.configure({
+          table: {
+            resizable: false,
+            renderWrapper: true,
+          },
+        }),
         Markdown.configure({ markedOptions: { gfm: true } }),
         Link.configure({
           openOnClick: false,

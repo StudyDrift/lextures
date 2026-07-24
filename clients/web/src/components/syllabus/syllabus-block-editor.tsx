@@ -11,6 +11,8 @@ import {
 } from '../../lib/courses-api'
 import { sectionsToMarkdown, markdownToSectionsForEditor } from './syllabus-section-markdown'
 import TurndownService from 'turndown'
+import { gfm } from 'turndown-plugin-gfm'
+import { stripPastedHtmlColors } from '../editor/block-editor/strip-pasted-html-colors'
 import {
   BlockCanvas,
   BlockEditorProvider,
@@ -125,13 +127,14 @@ function SyllabusDocumentPanel({
       for (const item of items) {
         if (item.types.includes('text/html')) {
           const blob = await item.getType('text/html')
-          const html = await blob.text()
+          const html = stripPastedHtmlColors(await blob.text())
           const turndownService = new TurndownService({
             headingStyle: 'atx',
             hr: '---',
             bulletListMarker: '-',
             codeBlockStyle: 'fenced',
           })
+          turndownService.use(gfm)
           markdown = turndownService.turndown(html)
           break
         } else if (item.types.includes('text/plain')) {
