@@ -17,7 +17,6 @@ import {
   BlockEditorShell,
   BlockFloatingToolbar,
   BlockFrame,
-  CaretAnchoredToolbarPortal,
   EditorSidebar,
   MarkdownBodyEditor,
   MarkdownFormatToolbar,
@@ -43,6 +42,7 @@ import {
 import { summarizeSectionsAltText } from '../../lib/image-alt-validation'
 import { toastMutationError } from '../../lib/lms-toast'
 import { InputDialog } from '../input-dialog'
+import { useConfirm } from '../use-confirm'
 
 function newLocalId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -269,10 +269,12 @@ function SyllabusDocumentPanel({
 function SyllabusBlockPanel({
   section,
   index,
+  total,
   updateAt,
 }: {
   section: SyllabusSection
   index: number
+  total: number
   updateAt: (index: number, patch: Partial<SyllabusSection>) => void
 }) {
   const { disabled } = useBlockEditor()
@@ -287,8 +289,12 @@ function SyllabusBlockPanel({
           <FileText className="h-4 w-4" aria-hidden />
         </span>
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Section</h3>
-          <p className="text-xs text-slate-500 dark:text-neutral-400">Optional heading plus Markdown content.</p>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+            Section {index + 1} of {total}
+          </h3>
+          <p className="truncate text-xs text-slate-500 dark:text-neutral-400">
+            {section.heading.trim() || 'Untitled section'}
+          </p>
         </div>
       </div>
       <SidebarSection title="Content" defaultOpen>
@@ -366,38 +372,52 @@ function SyllabusSidebar({
           <SyllabusBlockPanel
             section={section}
             index={index}
+            total={sections.length}
             updateAt={updateAt}
           />
         ) : null
       }
       blockDisabled={!section}
-      blockDisabledMessage="Click a section in the editor to change its settings here."
+      blockDisabledMessage="Click any section to edit its settings here."
     />
+  )
+}
+
+/** Slim gap between two cards. Keeps its height so revealing the button never reflows. */
+function SectionDivider({ onAdd, disabled }: { onAdd: () => void; disabled?: boolean }) {
+  return (
+    <div
+      className="group/divider relative flex h-8 items-center justify-center"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <span
+        className="absolute inset-x-0 top-1/2 h-px bg-slate-200 opacity-0 motion-safe:transition-opacity group-hover/divider:opacity-100 group-focus-within/divider:opacity-100 dark:bg-neutral-700"
+        aria-hidden
+      />
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onAdd}
+        className="pointer-events-none relative z-10 flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 opacity-0 shadow-sm hover:text-slate-900 disabled:cursor-not-allowed motion-safe:transition-opacity group-hover/divider:pointer-events-auto group-hover/divider:opacity-100 group-focus-within/divider:pointer-events-auto group-focus-within/divider:opacity-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-50"
+      >
+        <Plus className="h-3.5 w-3.5" aria-hidden />
+        Add section here
+      </button>
+    </div>
   )
 }
 
 function BlockInsertionRow({ onAdd, disabled }: { onAdd: () => void; disabled?: boolean }) {
   return (
-    <div className="relative py-6" onClick={(e) => e.stopPropagation()}>
-      <div className="relative flex items-center justify-center">
-        <div className="absolute inset-x-0 top-1/2 h-px bg-slate-300/80 dark:bg-neutral-600" aria-hidden />
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={onAdd}
-          className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-[#f0f0f0] text-slate-600 shadow-sm transition-[background-color,color,border-color] hover:border-slate-400 hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-50"
-          aria-label="Add section"
-        >
-          <Plus className="h-5 w-5" strokeWidth={2} aria-hidden />
-        </button>
-      </div>
+    <div className="pt-2" onClick={(e) => e.stopPropagation()}>
       <button
         type="button"
         disabled={disabled}
         onClick={onAdd}
-        className="mt-4 w-full border-0 bg-transparent py-1 text-start text-[13px] text-slate-400 transition-[background-color,color,border-color] hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 px-4 py-4 text-sm font-medium text-slate-600 motion-safe:transition-[background-color,color,border-color] hover:border-indigo-400 hover:bg-white hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-indigo-500 dark:hover:bg-neutral-900 dark:hover:text-indigo-400"
       >
-        Type / to add a section
+        <Plus className="h-4 w-4" aria-hidden />
+        Add a section
       </button>
     </div>
   )
@@ -417,6 +437,7 @@ function SyllabusBlockEditorInner({
 }: SyllabusBlockEditorInnerProps) {
   const { t } = useTranslation('common')
   const { selectedId, setSelectedId } = useBlockEditor()
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const equationEditor = useEquationEditor()
   const [activeField, setActiveField] = useState<ActiveField | null>(null)
   const editorRefs = useRef<Record<string, Editor | null>>({})
@@ -454,10 +475,8 @@ function SyllabusBlockEditorInner({
     [altTextOn],
   )
 
-  const [editorVersion, setEditorVersion] = useState(0)
   const handleEditorChange = useCallback((sectionId: string, editor: Editor | null) => {
     editorRefs.current[sectionId] = editor
-    setEditorVersion((v) => v + 1)
   }, [])
 
   const insertImagesIntoSection = useCallback(
@@ -522,9 +541,25 @@ function SyllabusBlockEditorInner({
     onChange(next)
   }
 
-  function removeAt(index: number) {
-    if (sections.length <= 1) return
+  async function removeAt(index: number) {
+    const section = sections[index]
+    if (!section || sections.length <= 1) return
+
+    // Only interrupt when there is written work to lose.
+    const hasContent = Boolean(section.heading.trim() || section.markdown.trim())
+    if (hasContent) {
+      const name = section.heading.trim()
+      const ok = await confirm({
+        title: name ? `Delete “${name}”?` : `Delete section ${index + 1}?`,
+        description: 'This removes the heading and everything written in this section.',
+        confirmLabel: 'Delete section',
+        variant: 'danger',
+      })
+      if (!ok) return
+    }
+
     onChange(sections.filter((_, i) => i !== index))
+    setSelectedId(null)
   }
 
   function move(index: number, dir: -1 | 1) {
@@ -537,8 +572,13 @@ function SyllabusBlockEditorInner({
     onChange(next)
   }
 
-  function addSection() {
-    onChange([...sections, { id: newLocalId(), heading: '', markdown: '' }])
+  /** Inserts at `index`; pass `sections.length` to append. */
+  function addSectionAt(index: number) {
+    const section: SyllabusSection = { id: newLocalId(), heading: '', markdown: '' }
+    const next = [...sections]
+    next.splice(index, 0, section)
+    onChange(next)
+    setSelectedId(section.id)
   }
 
   function applyMarkdownForSection(sectionId: string, kind: MarkdownEditKind) {
@@ -612,30 +652,13 @@ function SyllabusBlockEditorInner({
     }
   }
 
-  const caretAnchoredSectionIndex = useMemo(() => {
-    if (!showMarkdownToolbar || !selectedId) return -1
-    return sections.findIndex((s) => s.id === selectedId)
-  }, [showMarkdownToolbar, selectedId, sections])
-
-  const caretAnchoredEditor = useMemo(() => {
-    if (caretAnchoredSectionIndex < 0 || !selectedId) return null
-    void editorVersion
-    return editorRefs.current[selectedId] ?? null
-  }, [caretAnchoredSectionIndex, selectedId, editorVersion])
-
-  function renderGeneratePanel(
-    section: SyllabusSection,
-    index: number,
-    placement: 'inline' | 'anchored' = 'inline',
-  ) {
+  function renderGeneratePanel(section: SyllabusSection, index: number) {
     if (!courseCode) return null
 
     const inputClassName = [
       'w-full py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none disabled:opacity-60 dark:text-neutral-100 dark:placeholder:text-neutral-500',
-      placement === 'anchored'
-        ? 'border-0 bg-transparent px-2 focus:ring-0'
-        : 'rounded-md border border-slate-200 bg-white px-2.5 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 dark:border-neutral-600 dark:bg-neutral-950 dark:focus:border-indigo-500 dark:focus:ring-indigo-500',
-      generateSubmittingId === section.id ? (placement === 'anchored' ? 'ps-2 pe-14' : 'ps-2.5 pe-14') : placement === 'anchored' ? 'px-2' : 'px-2.5',
+      'rounded-md border border-slate-200 bg-white px-2.5 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 dark:border-neutral-600 dark:bg-neutral-950 dark:focus:border-indigo-500 dark:focus:ring-indigo-500',
+      generateSubmittingId === section.id ? 'ps-2.5 pe-14' : 'px-2.5',
     ].join(' ')
 
     const panel = (
@@ -688,25 +711,10 @@ function SyllabusBlockEditorInner({
           ) : null}
         </div>
         {generateError ? (
-          <p className={`text-xs text-rose-600 dark:text-rose-400 ${placement === 'anchored' ? 'px-2 pb-1.5 pt-0.5' : 'mt-1.5'}`}>
-            {generateError}
-          </p>
+          <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{generateError}</p>
         ) : null}
       </>
     )
-
-    if (placement === 'anchored') {
-      return (
-        <div
-          id={`section-generate-${section.id}`}
-          data-generate-anchor
-          className="border-t border-slate-200 py-1 dark:border-neutral-600"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {panel}
-        </div>
-      )
-    }
 
     return (
       <div
@@ -720,110 +728,93 @@ function SyllabusBlockEditorInner({
     )
   }
 
-  function renderToolbar(section: SyllabusSection, index: number, embedded = false) {
-    const showMarkdownTools = showMarkdownToolbar && selectedId === section.id
-    const label = showMarkdownTools ? 'Markdown' : 'Section'
+  function renderFormatToolbar(section: SyllabusSection, embedded = false) {
     const genBusy = generateSubmittingId === section.id
 
     return (
-      <BlockFloatingToolbar
-        embedded={embedded}
-        icon={<FileText className="h-4 w-4" />}
-        label={label}
-        onMoveUp={() => move(index, -1)}
-        onMoveDown={() => move(index, 1)}
-        moveUpDisabled={index === 0}
-        moveDownDisabled={index === sections.length - 1}
-        onRemove={() => removeAt(index)}
-        removeLabel="Remove section"
-        disabled={disabled}
-      >
-        {showMarkdownTools && (
+      <BlockFloatingToolbar embedded={embedded}>
+        <MarkdownFormatToolbar
+          disabled={disabled || genBusy}
+          onApply={(kind) => applyMarkdownForSection(section.id, kind)}
+          mathInsert={
+            equationEditorEnabled && equationEditor
+              ? {
+                  onOpen: () => {
+                    setSelectedId(section.id)
+                    setActiveField({ blockId: section.id, field: 'markdown' })
+                    const ed = editorRefs.current[section.id]
+                    ed?.chain().focus().run()
+                    if (ed) equationEditor.openInsert(ed)
+                  },
+                  registerMathAnchor: (node) => {
+                    mathToolbarAnchorRef.current = node
+                  },
+                }
+              : undefined
+          }
+          courseImage={
+            courseCode
+              ? {
+                  onPickClick: () => {
+                    pendingToolbarImageSectionRef.current = section.id
+                    setSelectedId(section.id)
+                    setActiveField({ blockId: section.id, field: 'markdown' })
+                    editorRefs.current[section.id]?.chain().focus().run()
+                    requestAnimationFrame(() => toolbarImageInputRef.current?.click())
+                  },
+                  onFiles: (files) => {
+                    setSelectedId(section.id)
+                    setActiveField({ blockId: section.id, field: 'markdown' })
+                    editorRefs.current[section.id]?.chain().focus().run()
+                    insertImagesIntoSection(section.id, files)
+                  },
+                }
+              : undefined
+          }
+          dictation={
+            sttAvailability.enabled
+              ? {
+                  language: sttAvailability.language,
+                  accommodationTooltip: sttAvailability.accommodationTooltip,
+                  onInterimResult: (text) => {
+                    const editor = editorRefs.current[section.id]
+                    if (!editor) return
+                    dictationInterimRef.current[section.id] = insertTipTapDictationInterim(
+                      editor,
+                      text,
+                      dictationInterimRef.current[section.id] ?? null,
+                    )
+                  },
+                  onFinalResult: (text) => {
+                    const editor = editorRefs.current[section.id]
+                    if (!editor) return
+                    commitTipTapDictationFinal(
+                      editor,
+                      text,
+                      dictationInterimRef.current[section.id] ?? null,
+                    )
+                    dictationInterimRef.current[section.id] = null
+                  },
+                }
+              : undefined
+          }
+        />
+        {courseCode ? (
           <>
-            <MarkdownFormatToolbar
+            <span className="mx-0.5 h-5 w-px shrink-0 bg-slate-200 dark:bg-neutral-600" aria-hidden />
+            <button
+              type="button"
               disabled={disabled || genBusy}
-              onApply={(kind) => applyMarkdownForSection(section.id, kind)}
-              mathInsert={
-                equationEditorEnabled && equationEditor
-                  ? {
-                      onOpen: () => {
-                        setSelectedId(section.id)
-                        setActiveField({ blockId: section.id, field: 'markdown' })
-                        const ed = editorRefs.current[section.id]
-                        ed?.chain().focus().run()
-                        if (ed) equationEditor.openInsert(ed)
-                      },
-                      registerMathAnchor: (node) => {
-                        mathToolbarAnchorRef.current = node
-                      },
-                    }
-                  : undefined
-              }
-              courseImage={
-                courseCode
-                  ? {
-                      onPickClick: () => {
-                        pendingToolbarImageSectionRef.current = section.id
-                        setSelectedId(section.id)
-                        setActiveField({ blockId: section.id, field: 'markdown' })
-                        editorRefs.current[section.id]?.chain().focus().run()
-                        requestAnimationFrame(() => toolbarImageInputRef.current?.click())
-                      },
-                      onFiles: (files) => {
-                        setSelectedId(section.id)
-                        setActiveField({ blockId: section.id, field: 'markdown' })
-                        editorRefs.current[section.id]?.chain().focus().run()
-                        insertImagesIntoSection(section.id, files)
-                      },
-                    }
-                  : undefined
-              }
-              dictation={
-                sttAvailability.enabled
-                  ? {
-                      language: sttAvailability.language,
-                      accommodationTooltip: sttAvailability.accommodationTooltip,
-                      onInterimResult: (text) => {
-                        const editor = editorRefs.current[section.id]
-                        if (!editor) return
-                        dictationInterimRef.current[section.id] = insertTipTapDictationInterim(
-                          editor,
-                          text,
-                          dictationInterimRef.current[section.id] ?? null,
-                        )
-                      },
-                      onFinalResult: (text) => {
-                        const editor = editorRefs.current[section.id]
-                        if (!editor) return
-                        commitTipTapDictationFinal(
-                          editor,
-                          text,
-                          dictationInterimRef.current[section.id] ?? null,
-                        )
-                        dictationInterimRef.current[section.id] = null
-                      },
-                    }
-                  : undefined
-              }
-            />
-            {courseCode ? (
-              <>
-                <span className="mx-0.5 h-5 w-px shrink-0 bg-slate-200 dark:bg-neutral-600" aria-hidden />
-                <button
-                  type="button"
-                  disabled={disabled || genBusy}
-                  aria-expanded={generateSectionId === section.id}
-                  aria-controls={`section-generate-${section.id}`}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => toggleGeneratePanel(section.id)}
-                  className="shrink-0 rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-200 dark:hover:bg-neutral-700"
-                >
-                  Generate
-                </button>
-              </>
-            ) : null}
+              aria-expanded={generateSectionId === section.id}
+              aria-controls={`section-generate-${section.id}`}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => toggleGeneratePanel(section.id)}
+              className="shrink-0 rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            >
+              Generate
+            </button>
           </>
-        )}
+        ) : null}
       </BlockFloatingToolbar>
     )
   }
@@ -873,7 +864,7 @@ function SyllabusBlockEditorInner({
         />
       }
     >
-      <BlockCanvas className="pt-10">
+      <BlockCanvas>
         <input
           ref={toolbarImageInputRef}
           type="file"
@@ -894,33 +885,26 @@ function SyllabusBlockEditorInner({
         {altTextOn ? (
           <AltTextWarningBanner coverage={altCoverage} hardBlock={altTextHardBlock} />
         ) : null}
-        {caretAnchoredSectionIndex >= 0 ? (
-          <CaretAnchoredToolbarPortal editor={caretAnchoredEditor} enabled>
-            {generateSectionId === selectedId ? (
-              <div className="flex w-max max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40">
-                {renderToolbar(sections[caretAnchoredSectionIndex]!, caretAnchoredSectionIndex, true)}
-                {renderGeneratePanel(
-                  sections[caretAnchoredSectionIndex]!,
-                  caretAnchoredSectionIndex,
-                  'anchored',
-                )}
-              </div>
-            ) : (
-              renderToolbar(sections[caretAnchoredSectionIndex]!, caretAnchoredSectionIndex)
-            )}
-          </CaretAnchoredToolbarPortal>
-        ) : null}
         {sections.map((section, index) => {
-          const caretAnchored = caretAnchoredSectionIndex === index
+          const writing = showMarkdownToolbar && selectedId === section.id
           return (
-          <BlockFrame
-            key={section.id}
-            blockId={section.id}
-            toolbar={caretAnchored ? undefined : renderToolbar(section, index)}
-            inlineToolbar={!caretAnchored}
-          >
-            <div className="pb-8 pt-0.5">
-              {generateSectionId === section.id && courseCode && !caretAnchored
+          <div key={section.id}>
+            {index > 0 && <SectionDivider onAdd={() => addSectionAt(index)} disabled={disabled} />}
+            <BlockFrame
+              blockId={section.id}
+              positionLabel={`Section ${index + 1} of ${sections.length}`}
+              onMoveUp={() => move(index, -1)}
+              onMoveDown={() => move(index, 1)}
+              moveUpDisabled={index === 0}
+              moveDownDisabled={index === sections.length - 1}
+              onRemove={() => void removeAt(index)}
+              removeDisabledReason={
+                sections.length <= 1 ? 'You need at least one section' : undefined
+              }
+              toolbar={writing ? renderFormatToolbar(section, true) : undefined}
+            >
+            <div>
+              {generateSectionId === section.id && courseCode
                 ? renderGeneratePanel(section, index)
                 : null}
               <label className="sr-only" htmlFor={`canvas-heading-${section.id}`}>
@@ -985,13 +969,15 @@ function SyllabusBlockEditorInner({
                 />
               </div>
             </div>
-          </BlockFrame>
+            </BlockFrame>
+          </div>
           )
         })}
 
-        <BlockInsertionRow onAdd={addSection} disabled={disabled} />
+        <BlockInsertionRow onAdd={() => addSectionAt(sections.length)} disabled={disabled} />
       </BlockCanvas>
     </BlockEditorShell>
+    {ConfirmDialogHost}
     </AltTextEnforcementProvider>
   )
 }

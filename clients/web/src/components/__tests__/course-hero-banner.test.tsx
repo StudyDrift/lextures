@@ -44,7 +44,7 @@ describe('CourseHeroBanner', () => {
       />,
     )
     const frame = container.firstElementChild
-    expect(frame).toHaveClass('aspect-[4/1]')
+    expect(frame).toHaveClass('aspect-[5/1]')
     expect(frame).not.toHaveClass('h-44', 'h-56', 'sm:h-56')
     const img = container.querySelector('img')
     expect(img).toHaveClass('absolute', 'inset-0', 'object-cover')

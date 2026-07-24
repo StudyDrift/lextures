@@ -22,7 +22,7 @@ export function CourseHeroBanner({
     <div
       // Fixed aspect ratio (not fixed height) so object-cover keeps the same crop as the
       // banner width changes — otherwise widening the window re-crops the hero image.
-      className={`relative aspect-[4/1] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm dark:border-neutral-700 ${className}`}
+      className={`relative aspect-[5/1] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm dark:border-neutral-700 ${className}`}
     >
       <CourseHeroImage
         src={course.heroImageUrl}
