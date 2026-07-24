@@ -10,6 +10,7 @@ describe('settingsViewFromPathname', () => {
     expect(settingsViewFromPathname('/settings/ai/models')).toBe('ai-models')
     expect(settingsViewFromPathname('/settings/ai/system-prompts')).toBe('ai-prompts')
     expect(settingsViewFromPathname('/settings/ai/reports')).toBe('ai-reports')
+    expect(settingsViewFromPathname('/settings/ai/governance')).toBe('ai-governance')
   })
 
   it('maps top-level settings tabs', () => {

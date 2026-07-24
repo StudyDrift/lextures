@@ -290,6 +290,12 @@ export function buildGlobalSearchItems(
         hint: 'ai providers byok',
       },
       {
+        title: 'Governance',
+        subtitle: 'Intelligence',
+        path: '/settings/ai/governance',
+        hint: 'ai governance features allowed models org policy intelligence',
+      },
+      {
         title: 'System prompts',
         subtitle: 'System settings',
         path: '/settings/ai/system-prompts',

@@ -84,10 +84,10 @@ export function AiGovernancePanel() {
   }
 
   return (
-    <section className="mt-8" aria-labelledby="ai-governance-heading">
-      <h3 id="ai-governance-heading" className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+    <section aria-labelledby="ai-governance-heading">
+      <h2 id="ai-governance-heading" className="text-base font-semibold text-slate-900 dark:text-neutral-100">
         {aiDisclosureI18n.adminTitle}
-      </h3>
+      </h2>
       <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{aiDisclosureI18n.adminIntro}</p>
       <ul className="mt-4 space-y-2">
         {FEATURE_KEYS.map((f) => (

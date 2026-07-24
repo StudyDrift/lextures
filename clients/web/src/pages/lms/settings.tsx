@@ -519,7 +519,9 @@ export default function Settings() {
                 ? 'max-w-3xl'
                 : activeView === 'ai-prompts'
                   ? 'max-w-3xl'
-                  : activeView === 'ai-models' || activeView === 'ai-reports'
+                  : activeView === 'ai-models' ||
+                      activeView === 'ai-reports' ||
+                      activeView === 'ai-governance'
                     ? 'max-w-4xl'
                     : activeView === 'account'
                       ? 'max-w-3xl'
@@ -807,6 +809,20 @@ export default function Settings() {
           </RequirePermission>
         )}
 
+        {activeView === 'ai-governance' && (
+          <RequirePermission
+            permission={PERM_RBAC_MANAGE}
+            fallback={
+              <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                You need permission to manage AI governance (
+                <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+              </p>
+            }
+          >
+            <AiGovernancePanel />
+          </RequirePermission>
+        )}
+
         {activeView === 'account' && <AccountSettingsView />}
 
         {activeView === 'notifications' && (
@@ -1029,7 +1045,6 @@ export default function Settings() {
               Logo, colors, optional custom domain, and email sender display name.
             </p>
             <OrgBranding />
-            <AiGovernancePanel />
             <AiProviderSettingsPanel />
           </div>
         )}
