@@ -1861,6 +1861,7 @@ Bring a photo ID</string>
     <string name="mobile_createCourse_action_continue">Continue</string>
     <string name="mobile_createCourse_action_createCompetencies">Create competencies &amp; open</string>
     <string name="mobile_createCourse_action_createOpen">Create &amp; open</string>
+    <string name="mobile_createCourse_action_openCourse">Open course</string>
     <string name="mobile_createCourse_cancel_confirm">Leave course setup?</string>
     <string name="mobile_createCourse_cancel_leave">Leave</string>
     <string name="mobile_createCourse_cancel_message">The course was already created and will stay in your Courses list.</string>
@@ -1892,6 +1893,7 @@ Bring a photo ID</string>
     <string name="mobile_createCourse_error_moduleFailed">Could not finish setup. Try again.</string>
     <string name="mobile_createCourse_error_syllabusFailed">Could not apply the syllabus template. Try again.</string>
     <string name="mobile_createCourse_error_titleRequired">Enter a course title.</string>
+    <string name="mobile_createCourse_features_intro">Turn tools on or off for this course. You can change these later in course settings.</string>
     <string name="mobile_createCourse_field_description">Description</string>
     <string name="mobile_createCourse_field_descriptionPlaceholder">What is this course about?</string>
     <string name="mobile_createCourse_field_gradeLevel">Grade level</string>
@@ -1916,12 +1918,10 @@ Bring a photo ID</string>
     <string name="mobile_createCourse_source_scratch_title">Start from scratch</string>
     <string name="mobile_createCourse_step_basics">Basics</string>
     <string name="mobile_createCourse_step_competencies">Competencies</string>
+    <string name="mobile_createCourse_step_features">Features</string>
     <string name="mobile_createCourse_step_module">Module</string>
     <string name="mobile_createCourse_step_source">Source</string>
     <string name="mobile_createCourse_step_syllabus">Syllabus</string>
-    <string name="mobile_createCourse_step_features">Features</string>
-    <string name="mobile_createCourse_features_intro">Turn tools on or off for this course. You can change these later in course settings.</string>
-    <string name="mobile_createCourse_action_openCourse">Open course</string>
     <string name="mobile_createCourse_stepOf">Step %1$d of %2$d</string>
     <string name="mobile_createCourse_syllabus_intro">Choose a starter syllabus template or start blank.</string>
     <string name="mobile_createCourse_template_blank">Blank</string>

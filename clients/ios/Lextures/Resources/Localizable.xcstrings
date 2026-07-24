@@ -63207,6 +63207,40 @@
         }
       }
     },
+    "mobile.createCourse.action.openCourse": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open course"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open course"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Open course]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open course"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open course"
+          }
+        }
+      }
+    },
     "mobile.createCourse.cancel.confirm": {
       "localizations": {
         "ar": {
@@ -64261,6 +64295,40 @@
         }
       }
     },
+    "mobile.createCourse.features.intro": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn tools on or off for this course. You can change these later in course settings."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn tools on or off for this course. You can change these later in course settings."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Turn tools on or off for this course. You can change these later in course settings.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn tools on or off for this course. You can change these later in course settings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn tools on or off for this course. You can change these later in course settings."
+          }
+        }
+      }
+    },
     "mobile.createCourse.field.description": {
       "localizations": {
         "ar": {
@@ -65073,6 +65141,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Competencies"
+          }
+        }
+      }
+    },
+    "mobile.createCourse.step.features": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Features"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Features"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Features]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Features"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Features"
           }
         }
       }
