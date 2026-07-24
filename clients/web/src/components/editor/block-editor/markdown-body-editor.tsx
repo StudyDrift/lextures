@@ -24,7 +24,10 @@ import {
 import { shouldPasteClipboardAsMarkdown } from './markdown-clipboard-paste'
 import { stripPastedHtmlColors } from './strip-pasted-html-colors'
 import { CourseAwareTipTapImage } from './course-aware-tip-tap-image'
-import { MarkdownImageUploadModal } from './markdown-image-upload-modal'
+import {
+  MarkdownImageUploadModal,
+  type CourseFileInsertItem,
+} from './markdown-image-upload-modal'
 import { MathBlock, MathInline } from '../extensions/math-tip-tap'
 import { setNotebookTaskContext } from '../../../lib/notebook-task-context'
 import { NotebookTask, type NotebookTaskContext } from '../extensions/notebook-task-tip-tap'
@@ -164,7 +167,6 @@ export function MarkdownBodyEditor({
   const onEditorChangeRef = useRef(onEditorChange)
   const uploadCourseImageRef = useRef(uploadCourseImage)
   const courseCodeRef = useRef(courseCode)
-  const imageInputRef = useRef<HTMLInputElement>(null)
   const editorRefForImages = useRef<Editor | null>(null)
   const disabledRef = useRef(!!disabled)
   const onEquationSlashRef = useRef(onEquationSlash)
@@ -182,7 +184,13 @@ export function MarkdownBodyEditor({
   const [slashUi, setSlashUi] = useState<SlashUi | null>(null)
   const [slashActiveIndex, setSlashActiveIndex] = useState(0)
   const [imageUploadOpen, setImageUploadOpen] = useState(false)
+  const [imageUploadInitialFiles, setImageUploadInitialFiles] = useState<File[]>([])
   const [linkPopover, setLinkPopover] = useState<LinkPopoverState | null>(null)
+
+  const openImageModal = useCallback((files?: File[]) => {
+    setImageUploadInitialFiles(files ?? [])
+    setImageUploadOpen(true)
+  }, [])
 
   const mentionCtxRef = useRef({
     mentionUi: null as MentionUi | null,
@@ -386,7 +394,8 @@ export function MarkdownBodyEditor({
     [structure, mentionUi],
   )
 
-  const imageSlashEnabled = Boolean(uploadCourseImage) || Boolean(showImagePickerRow)
+  const imageSlashEnabled =
+    Boolean(uploadCourseImage) || Boolean(showImagePickerRow) || Boolean(courseCode)
 
   const boardSlashEnabled = Boolean(courseCode) && visualBoardsEnabled
 
@@ -625,7 +634,7 @@ export function MarkdownBodyEditor({
       if (!su) return
       applySlashCommand(editor, command, { from: su.from, to: su.to }, {
         onEquation: onEquationSlashRef.current,
-        onImage: () => setImageUploadOpen(true),
+        onImage: () => openImageModal(),
         onBoard: () => {
           boardInsertPosRef.current = su.from
           setBoardPickerOpen(true)
@@ -633,7 +642,7 @@ export function MarkdownBodyEditor({
       })
       setSlashUi(null)
     },
-    [editor],
+    [editor, openImageModal],
   )
 
   const insertPickedBoard = useCallback(
@@ -833,46 +842,44 @@ export function MarkdownBodyEditor({
   const slashListOpen = Boolean(slashUi && !disabled)
   const canCourseImageUpload = Boolean(uploadCourseImage)
 
-  const insertImagesAt = useCallback(
-    async (from: number, files: File[]) => {
-      if (!editor || !uploadCourseImage) return
+  const insertCourseFileItemsAt = useCallback(
+    (from: number, items: CourseFileInsertItem[]) => {
+      if (!editor) return
       let pos = from
-      for (const file of files) {
-        if (!file.type.startsWith('image/')) continue
-        const path = await uploadCourseImage(file)
-        editor
-          .chain()
-          .focus()
-          .insertContentAt(pos, {
-            type: 'image',
-            attrs: imageInsertAttrs(path, file.name),
-          })
-          .run()
+      for (const item of items) {
+        if (item.mimeType.toLowerCase().startsWith('image/')) {
+          editor
+            .chain()
+            .focus()
+            .insertContentAt(pos, {
+              type: 'image',
+              attrs: imageInsertAttrs(item.contentPath, item.displayName),
+            })
+            .run()
+        } else {
+          const label = item.displayName.replace(/[[\]]/g, '') || 'File'
+          editor
+            .chain()
+            .focus()
+            .insertContentAt(pos, {
+              type: 'text',
+              text: label,
+              marks: [{ type: 'link', attrs: { href: item.contentPath } }],
+            })
+            .run()
+        }
         pos = editor.state.selection.to
       }
     },
-    [editor, uploadCourseImage],
+    [editor],
   )
 
-  const onImageInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files
-      e.target.value = ''
-      if (!files?.length || !editor || !uploadCourseImage) return
-      const from = editor.state.selection.from
-      void insertImagesAt(from, [...files]).catch(() => {
-        /* ignore failed upload */
-      })
-    },
-    [editor, uploadCourseImage, insertImagesAt],
-  )
-
-  const handleImageModalUpload = useCallback(
-    async (files: File[]) => {
+  const handleImageModalInsert = useCallback(
+    async (items: CourseFileInsertItem[]) => {
       if (!editor) throw new Error('Editor is not ready.')
-      await insertImagesAt(editor.state.selection.from, files)
+      insertCourseFileItemsAt(editor.state.selection.from, items)
     },
-    [editor, insertImagesAt],
+    [editor, insertCourseFileItemsAt],
   )
 
   if (!editor) {
@@ -889,20 +896,11 @@ export function MarkdownBodyEditor({
     <>
       {showImagePickerRow && canCourseImageUpload ? (
         <div className="mb-2 flex flex-wrap items-center gap-2">
-          <input
-            ref={imageInputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-            className="sr-only"
-            aria-hidden
-            tabIndex={-1}
-            onChange={onImageInputChange}
-          />
           <button
             type="button"
             disabled={disabled}
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => imageInputRef.current?.click()}
+            onClick={() => openImageModal()}
             onDragOver={(e) => {
               if (disabled) return
               e.preventDefault()
@@ -911,12 +909,9 @@ export function MarkdownBodyEditor({
             onDrop={(e) => {
               if (disabled) return
               e.preventDefault()
-              const files = [...e.dataTransfer.files].filter((f) => f.type.startsWith('image/'))
-              if (!files.length || !editor || !uploadCourseImage) return
-              const from = editor.state.selection.from
-              void insertImagesAt(from, files).catch(() => {
-                /* ignore failed upload */
-              })
+              const files = [...e.dataTransfer.files]
+              if (!files.length) return
+              openImageModal(files)
             }}
             className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
           >
@@ -924,7 +919,7 @@ export function MarkdownBodyEditor({
             Image
           </button>
           <span className="text-xs text-slate-500 dark:text-neutral-400">
-            Drop or paste images in the editor, or pick a file here.
+            Drop or paste images in the editor, or open the insert dialog.
           </span>
         </div>
       ) : null}
@@ -1129,11 +1124,17 @@ export function MarkdownBodyEditor({
             document.body,
           )
         : null}
-      {canCourseImageUpload ? (
+      {canCourseImageUpload || courseCode ? (
         <MarkdownImageUploadModal
           open={imageUploadOpen}
-          onClose={() => setImageUploadOpen(false)}
-          onUpload={handleImageModalUpload}
+          onClose={() => {
+            setImageUploadOpen(false)
+            setImageUploadInitialFiles([])
+          }}
+          courseCode={courseCode}
+          uploadFile={uploadCourseImage}
+          initialFiles={imageUploadInitialFiles}
+          onInsert={handleImageModalInsert}
         />
       ) : null}
       {courseCode && boardSlashEnabled ? (

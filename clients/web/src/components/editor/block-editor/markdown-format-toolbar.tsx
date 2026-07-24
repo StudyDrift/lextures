@@ -18,7 +18,7 @@ export type MarkdownFormatToolbarProps = {
   onApply: (kind: MarkdownEditKind) => void
   /** Speech-to-text dictation (plan 12.9). */
   dictation?: Omit<DictationButtonProps, 'disabled'>
-  /** Insert course image: file picker and drag-and-drop onto the button. */
+  /** Insert course file/image: opens picker modal; drop stages files for the modal. */
   courseImage?: {
     onPickClick: () => void
     onFiles: (files: File[]) => void
@@ -151,12 +151,12 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
             onDrop={(e) => {
               if (disabled) return
               e.preventDefault()
-              const files = [...e.dataTransfer.files].filter((f) => f.type.startsWith('image/'))
+              const files = [...e.dataTransfer.files]
               if (files.length) courseImage.onFiles(files)
             }}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
             aria-label="Insert image"
-            title="Insert image (drop file here or click)"
+            title="Insert file or image"
           >
             <ImageIcon className="h-4 w-4" />
           </button>
