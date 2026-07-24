@@ -55,6 +55,8 @@ var demoChecksumRepairMigrations = []struct {
 	{363, "363_lp_adaptivity_flags.sql"},
 	// Idempotent CREATE TABLE/INDEX IF NOT EXISTS; parallel CI migrates may race before the version row lands.
 	{367, "367_user_course_catalog_hidden.sql"},
+	// Idempotent INSERT ON CONFLICT DO NOTHING + CREATE TABLE IF NOT EXISTS; default_markdown seeded after first apply (PP.1).
+	{431, "431_parent_link_assign.sql"},
 }
 
 // repairMigration289RenumberCollision fixes dev/demo DBs that applied grading_agent as v289

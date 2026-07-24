@@ -78,7 +78,7 @@ func credentialPublicJSON(c aiprovidercreds.Credential, apiKeyConfigured bool) m
 	return out
 }
 
-func writeAIProviderTestError(w http.ResponseWriter, err error) {
+func writeAIProviderTestError(w http.ResponseWriter, r *http.Request, err error) {
 	errType := aiprovider.ClassifyError(err)
 	msg := "Provider test failed: " + err.Error()
 	switch errType {
@@ -89,7 +89,8 @@ func writeAIProviderTestError(w http.ResponseWriter, err error) {
 	case aiprovider.ErrorTypeQuota:
 		apierr.WriteJSON(w, http.StatusTooManyRequests, apierr.CodeRateLimited, msg)
 	default:
-		apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, msg)
+		// 503 (not 502): Cloudflare Error Pages replace origin 502 bodies with HTML.
+		apierr.WriteJSONWithErr(w, r, http.StatusServiceUnavailable, apierr.CodeInternal, msg, err)
 	}
 }
 

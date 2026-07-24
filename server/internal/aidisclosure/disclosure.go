@@ -64,6 +64,7 @@ type modelBinding struct {
 
 var disclosureFeatures = []FeatureCard{
 	{Key: "ai_tutor", Label: "AI Tutor", Description: "Conversational tutoring within enrolled courses."},
+	{Key: "modules_ai_assistant", Label: "Modules AI assistant", Description: "Instructor chat to propose course outline changes on the Modules page."},
 	{Key: "rag_notebook", Label: "Notebook AI", Description: "Answers questions using your course notebook content."},
 	{Key: "syllabus_generation", Label: "Syllabus generation", Description: "Instructor tool to draft syllabus sections."},
 	{Key: "translation", Label: "Translation", Description: "Translates user-selected text via an AI model."},
@@ -85,7 +86,7 @@ var platformModelBindings = []modelBinding{
 		modelID: user.DefaultCourseSetupModelID,
 		alias:   aiprovider.AliasCourseSetup,
 		purposes: []string{
-			"ai_tutor", "rag_notebook", "syllabus_generation", "quiz_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy",
+			"ai_tutor", "modules_ai_assistant", "rag_notebook", "syllabus_generation", "quiz_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy",
 		},
 		dataSent: "Course context, prompts, and user questions necessary for the feature; PII is redacted where configured.",
 	},

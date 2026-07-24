@@ -942,7 +942,7 @@ func (d Deps) handleGenerateVibeActivityHTML() http.HandlerFunc {
 		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 		generated, callMeta, err := bound.Complete(r.Context(), model, msgs)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI generation failed: "+err.Error())
+			writeAIGenerationFailed(w, r, "AI generation failed: "+err.Error(), err)
 			return
 		}
 		d.logAIInferenceAllowedWithProvider(r, viewer, aigateway.FeatureVibeGeneration, model, string(callMeta.Provider), prompt, gwDec)

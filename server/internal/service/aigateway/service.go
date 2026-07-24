@@ -28,6 +28,7 @@ const (
 	ReadPermission      = "compliance:ai:read:*"
 
 	FeatureAITutor                    = "ai_tutor"
+	FeatureModulesAIAssistant         = "modules_ai_assistant"
 	FeatureRAGNotebook                = "rag_notebook"
 	FeatureSyllabusGeneration         = "syllabus_generation"
 	FeatureTranslation                = "translation"

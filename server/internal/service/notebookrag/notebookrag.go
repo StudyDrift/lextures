@@ -85,12 +85,12 @@ func IsValidationError(err error) bool {
 	return err != nil && errors.As(err, &v)
 }
 
-// GenerationError is a failed or empty model response (502).
+// GenerationError is a failed or empty model response (503 AI_GENERATION_FAILED).
 type GenerationError struct{ Message string }
 
 func (e *GenerationError) Error() string { return e.Message }
 
-// IsGenerationError reports whether err should map to 502 AI_GENERATION_FAILED.
+// IsGenerationError reports whether err should map to 503 AI_GENERATION_FAILED.
 func IsGenerationError(err error) bool {
 	var g *GenerationError
 	return err != nil && errors.As(err, &g)

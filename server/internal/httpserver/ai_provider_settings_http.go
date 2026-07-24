@@ -338,7 +338,7 @@ func (d Deps) handlePostAdminAISettingsTest() http.HandlerFunc {
 			{Role: "user", Content: "Hello"},
 		})
 		if err != nil {
-			writeAIProviderTestError(w, err)
+			writeAIProviderTestError(w, r, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

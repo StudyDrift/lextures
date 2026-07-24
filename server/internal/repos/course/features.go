@@ -28,6 +28,7 @@ func PatchFeatures(
 	groupSpacesEnabled bool,
 	officeHoursEnabled bool,
 	aiTutorEnabled bool,
+	modulesAiAssistantEnabled bool,
 	multilingualMessagingEnabled bool,
 	filesEnabled bool,
 	attendanceEnabled bool,
@@ -57,16 +58,17 @@ func PatchFeatures(
 			group_spaces_enabled = $15,
 			office_hours_enabled = $16,
 			ai_tutor_enabled = $17,
-			multilingual_messaging_enabled = $18,
-			files_enabled = $19,
-			attendance_enabled = $20,
-			whiteboard_enabled = $21,
-			report_cards_enabled = $22,
-			visual_boards_enabled = $23,
-			interactive_quizzes_enabled = $24,
-			screen_share_enabled = $25,
+			modules_ai_assistant_enabled = $18,
+			multilingual_messaging_enabled = $19,
+			files_enabled = $20,
+			attendance_enabled = $21,
+			whiteboard_enabled = $22,
+			report_cards_enabled = $23,
+			visual_boards_enabled = $24,
+			interactive_quizzes_enabled = $25,
+			screen_share_enabled = $26,
 			updated_at = NOW()
-		WHERE course_code = $26
+		WHERE course_code = $27
 	`
 
 	tag, err := pool.Exec(ctx, q,
@@ -74,7 +76,7 @@ func PatchFeatures(
 		lockdownModeEnabled, standardsAlignmentEnabled, adaptivePathsEnabled, srsEnabled,
 		diagnosticAssessmentsEnabled, hintScaffoldingEnabled, misconceptionDetectionEnabled,
 		discussionsEnabled, collabDocsEnabled, liveSessionsEnabled, groupSpacesEnabled,
-		officeHoursEnabled, aiTutorEnabled, multilingualMessagingEnabled, filesEnabled,
+		officeHoursEnabled, aiTutorEnabled, modulesAiAssistantEnabled, multilingualMessagingEnabled, filesEnabled,
 		attendanceEnabled, whiteboardEnabled, reportCardsEnabled, visualBoardsEnabled,
 		interactiveQuizzesEnabled, screenShareEnabled,
 		courseCode,

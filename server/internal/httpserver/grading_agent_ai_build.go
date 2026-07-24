@@ -124,11 +124,12 @@ func (d Deps) handlePostGraderAgentAIBuild() http.HandlerFunc {
 				return
 			}
 			if isTimeoutError(genErr) {
-				apierr.WriteJSON(w, http.StatusGatewayTimeout, apierr.CodeInternal,
-					"The AI model took too long to respond. Try again, simplify the instruction, or select a faster grading model in Settings.")
+				writeAIGenerationFailed(w, r,
+					"The AI model took too long to respond. Try again, simplify the instruction, or select a faster grading model in Settings.",
+					genErr)
 				return
 			}
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI workflow generation failed: "+genErr.Error())
+			writeAIGenerationFailed(w, r, "AI workflow generation failed: "+genErr.Error(), genErr)
 			return
 		}
 

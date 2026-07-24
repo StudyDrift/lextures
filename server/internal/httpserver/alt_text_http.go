@@ -141,7 +141,7 @@ func (d Deps) handlePostAltTextSuggest() http.HandlerFunc {
 		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 		suggestion, confidence, callMeta, err := alttextai.Suggest(r.Context(), bound, altTextSuggestModel, imageURL, req.Language)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "Alt-text suggestion failed.")
+			writeAIGenerationFailed(w, r, "Alt-text suggestion failed.", err)
 			return
 		}
 		dec := aigateway.Decision{OptInConfirmed: true}

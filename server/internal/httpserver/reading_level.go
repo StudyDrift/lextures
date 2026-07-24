@@ -255,7 +255,7 @@ func (d Deps) handlePostItemSimplify() http.HandlerFunc {
 		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 		simplified, callMeta, err := contentsimplificationai.Simplify(r.Context(), bound, readingLevelSimplifyModel, plain, req.TargetFKGL)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "Simplification failed.")
+			writeAIGenerationFailed(w, r, "Simplification failed.", err)
 			return
 		}
 		sc := readingsvc.Analyze(simplified)

@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/lextures/lextures/server/internal/apierr"
-	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/repos/course"
 )
 
 type patchCourseFeaturesBody struct {
@@ -28,6 +28,7 @@ type patchCourseFeaturesBody struct {
 	GroupSpacesEnabled            *bool `json:"groupSpacesEnabled"`
 	OfficeHoursEnabled            *bool `json:"officeHoursEnabled"`
 	AiTutorEnabled                *bool `json:"aiTutorEnabled"`
+	ModulesAiAssistantEnabled     *bool `json:"modulesAiAssistantEnabled"`
 	MultilingualMessagingEnabled  *bool `json:"multilingualMessagingEnabled"`
 	FilesEnabled                  *bool `json:"filesEnabled"`
 	AttendanceEnabled             *bool `json:"attendanceEnabled"`
@@ -121,6 +122,10 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 		if req.AiTutorEnabled != nil {
 			aiTutor = *req.AiTutorEnabled
 		}
+		modulesAiAssistant := existing.ModulesAiAssistantEnabled
+		if req.ModulesAiAssistantEnabled != nil {
+			modulesAiAssistant = *req.ModulesAiAssistantEnabled
+		}
 		multilingualMessaging := existing.MultilingualMessagingEnabled
 		if req.MultilingualMessagingEnabled != nil {
 			multilingualMessaging = *req.MultilingualMessagingEnabled
@@ -159,7 +164,7 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 			req.NotebookEnabled, req.FeedEnabled, req.CalendarEnabled, req.QuestionBankEnabled,
 			req.LockdownModeEnabled, standards, adaptivePaths, srs, diagnostic, hint, misconception,
 			req.DiscussionsEnabled, collabDocs, liveSessions, groupSpaces, officeHours, aiTutor,
-			multilingualMessaging, filesEnabled, attendanceEnabled, whiteboardEnabled, reportCardsEnabled,
+			modulesAiAssistant, multilingualMessaging, filesEnabled, attendanceEnabled, whiteboardEnabled, reportCardsEnabled,
 			visualBoardsEnabled, interactiveQuizzesEnabled, screenShareEnabled,
 		)
 		if err != nil {

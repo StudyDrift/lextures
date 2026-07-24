@@ -1806,8 +1806,7 @@ const spec = `{
           "200": { "description": "answerMarkdown, sources" },
           "400": { "description": "Invalid input" },
           "401": { "description": "Not signed in" },
-          "502": { "description": "Model / OpenRouter error" },
-          "503": { "description": "AI not configured" }
+          "503": { "description": "AI not configured, or model / provider generation failed (AI_GENERATION_FAILED)" }
         }
       }
     },

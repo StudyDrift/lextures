@@ -30,6 +30,8 @@ export type CourseNavFeatures = {
   officeHoursEnabled: boolean
   /** Plan 6.9 — conversational AI tutor side-panel. */
   aiTutorEnabled: boolean
+  /** Instructor Modules AI assistant chat pane. */
+  modulesAiAssistantEnabled: boolean
   /** Plan 5.4 — section-scoped rosters and gradebook filtering. */
   sectionsEnabled: boolean
   /** Course Files space — Drive-like file manager (default true). */
@@ -65,6 +67,7 @@ const defaultFeatures: CourseNavFeatures = {
   groupSpacesEnabled: false,
   officeHoursEnabled: false,
   aiTutorEnabled: false,
+  modulesAiAssistantEnabled: false,
   sectionsEnabled: false,
   filesEnabled: true,
   attendanceEnabled: false,
@@ -97,6 +100,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
   const [groupSpacesEnabled, setGroupSpacesEnabled] = useState(false)
   const [officeHoursEnabled, setOfficeHoursEnabled] = useState(false)
   const [aiTutorEnabled, setAiTutorEnabled] = useState(false)
+  const [modulesAiAssistantEnabled, setModulesAiAssistantEnabled] = useState(false)
   const [sectionsEnabled, setSectionsEnabled] = useState(false)
   const [filesEnabled, setFilesEnabled] = useState(true)
   const [attendanceEnabled, setAttendanceEnabled] = useState(false)
@@ -125,6 +129,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setGroupSpacesEnabled(false)
       setOfficeHoursEnabled(false)
       setAiTutorEnabled(false)
+      setModulesAiAssistantEnabled(false)
       setSectionsEnabled(false)
       setFilesEnabled(true)
       setAttendanceEnabled(false)
@@ -151,6 +156,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setGroupSpacesEnabled(c.groupSpacesEnabled === true)
       setOfficeHoursEnabled(c.officeHoursEnabled === true)
       setAiTutorEnabled(c.aiTutorEnabled === true)
+      setModulesAiAssistantEnabled(c.modulesAiAssistantEnabled === true)
       setSectionsEnabled(c.sectionsEnabled === true)
       setFilesEnabled(c.filesEnabled !== false)
       setAttendanceEnabled(c.attendanceEnabled === true)
@@ -172,6 +178,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setGroupSpacesEnabled(false)
       setOfficeHoursEnabled(false)
       setAiTutorEnabled(false)
+      setModulesAiAssistantEnabled(false)
       setSectionsEnabled(false)
       setFilesEnabled(true)
       setAttendanceEnabled(false)
@@ -203,6 +210,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       groupSpacesEnabled,
       officeHoursEnabled,
       aiTutorEnabled,
+      modulesAiAssistantEnabled,
       sectionsEnabled,
       filesEnabled,
       attendanceEnabled,
@@ -227,6 +235,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       groupSpacesEnabled,
       officeHoursEnabled,
       aiTutorEnabled,
+      modulesAiAssistantEnabled,
       sectionsEnabled,
       filesEnabled,
       attendanceEnabled,

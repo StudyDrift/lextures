@@ -34,6 +34,7 @@ type courseFeatures struct {
 	GroupSpacesEnabled            *bool `json:"groupSpacesEnabled,omitempty"`
 	OfficeHoursEnabled            *bool `json:"officeHoursEnabled,omitempty"`
 	AiTutorEnabled                *bool `json:"aiTutorEnabled,omitempty"`
+	ModulesAiAssistantEnabled     *bool `json:"modulesAiAssistantEnabled,omitempty"`
 	MultilingualMessagingEnabled  *bool `json:"multilingualMessagingEnabled,omitempty"`
 	FilesEnabled                  *bool `json:"filesEnabled,omitempty"`
 	AttendanceEnabled             *bool `json:"attendanceEnabled,omitempty"`
