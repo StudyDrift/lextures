@@ -1497,7 +1497,25 @@
     },
     {
       "id": "8.13",
-      "path": "docs/completed/08-content-media-files/8.13-editor-course-file-insert-modal.md",
+      "path": "docs/completed/08-content-media-files/8.13-editor-table-insert-and-controls.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright journey covers toolbar insert, in-table column controls, save/reload render, and healing blank-line pipe tables in the reader.",
+      "owner": "Content / Media",
+      "specs": [
+        {
+          "path": "e2e/tests/editor-tables.spec.ts"
+        }
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "8.14",
+      "path": "docs/completed/08-content-media-files/8.14-editor-course-file-insert-modal.md",
       "markets": [
         "ALL"
       ],

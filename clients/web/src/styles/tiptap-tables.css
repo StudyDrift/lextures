@@ -1,0 +1,52 @@
+/* Column resize handles for TipTap TableKit (from prosemirror-tables, themed). */
+.tiptap .tableWrapper {
+  overflow-x: auto;
+}
+
+.tiptap table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+.tiptap td,
+.tiptap th {
+  position: relative;
+  box-sizing: border-box;
+  vertical-align: top;
+}
+
+.tiptap td:not([data-colwidth]):not(.column-resize-dragging),
+.tiptap th:not([data-colwidth]):not(.column-resize-dragging) {
+  min-width: var(--default-cell-min-width, 80px);
+}
+
+.tiptap .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: 0;
+  z-index: 20;
+  width: 4px;
+  pointer-events: none;
+  background-color: rgb(99 102 241); /* indigo-500 */
+}
+
+.tiptap.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
+}
+
+.tiptap .selectedCell::after {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  content: '';
+  background: rgb(199 210 254 / 0.45); /* indigo-200 */
+}
+
+.dark .tiptap .selectedCell::after {
+  background: rgb(99 102 241 / 0.28);
+}

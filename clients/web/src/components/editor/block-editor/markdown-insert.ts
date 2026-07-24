@@ -8,6 +8,16 @@ export type MarkdownEditKind =
   | 'bulletList'
   | 'orderedList'
   | 'link'
+  | 'table'
+
+const DEFAULT_MARKDOWN_TABLE = [
+  '',
+  '| Column 1 | Column 2 | Column 3 |',
+  '| -------- | -------- | -------- |',
+  '|          |          |          |',
+  '|          |          |          |',
+  '',
+].join('\n')
 
 export function applyMarkdownEdit(
   markdown: string,
@@ -34,9 +44,26 @@ export function applyMarkdownEdit(
       return orderedList(markdown, start, end)
     case 'link':
       return insertLink(markdown, start, end, linkUrl)
-    default:
+    case 'table':
+      return insertTableMarkdown(markdown, start, end)
+    default: {
+      const _exhaustive: never = kind
+      void _exhaustive
       return { value: markdown, selStart: start, selEnd: end }
+    }
   }
+}
+
+function insertTableMarkdown(
+  text: string,
+  start: number,
+  end: number,
+): { value: string; selStart: number; selEnd: number } {
+  const insertion = text.slice(0, start) + DEFAULT_MARKDOWN_TABLE + text.slice(end)
+  // Place caret in the first body cell.
+  const cellOffset = DEFAULT_MARKDOWN_TABLE.indexOf('|          |')
+  const caret = start + (cellOffset >= 0 ? cellOffset + 2 : DEFAULT_MARKDOWN_TABLE.length)
+  return { value: insertion, selStart: caret, selEnd: caret }
 }
 
 function wrap(

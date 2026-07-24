@@ -23,6 +23,8 @@ import {
 } from './markdown-body-slash'
 import { shouldPasteClipboardAsMarkdown } from './markdown-clipboard-paste'
 import { stripPastedHtmlColors } from './strip-pasted-html-colors'
+import { MarkdownTableControls } from './markdown-table-controls'
+import { normalizeMarkdownTables } from '../../syllabus/normalize-markdown-tables'
 import { CourseAwareTipTapImage } from './course-aware-tip-tap-image'
 import {
   MarkdownImageUploadModal,
@@ -291,7 +293,9 @@ export function MarkdownBodyEditor({
           const { from, to } = view.state.selection
           ed.chain()
             .focus()
-            .insertContentAt({ from, to }, text, { contentType: 'markdown' })
+            .insertContentAt({ from, to }, normalizeMarkdownTables(text), {
+              contentType: 'markdown',
+            })
             .run()
           return true
         }
@@ -463,8 +467,10 @@ export function MarkdownBodyEditor({
         NotebookTask.configure({ notebookTaskContext }),
         TableKit.configure({
           table: {
-            resizable: false,
+            resizable: true,
             renderWrapper: true,
+            lastColumnResizable: true,
+            cellMinWidth: 80,
           },
         }),
         Markdown.configure({ markedOptions: { gfm: true } }),
@@ -485,7 +491,7 @@ export function MarkdownBodyEditor({
           emptyEditorClass: 'is-editor-empty',
         }),
       ],
-      content: value ?? '',
+      content: normalizeMarkdownTables(value ?? ''),
       contentType: 'markdown',
       editable: !disabled,
       editorProps: {
@@ -824,10 +830,11 @@ export function MarkdownBodyEditor({
 
   useEffect(() => {
     if (!editor) return
+    const normalized = normalizeMarkdownTables(value ?? '')
     const cur = editor.getMarkdown()
-    if (cur === value) return
+    if (cur === normalized || cur === value) return
     skipEmit.current = true
-    editor.commands.setContent(value, { contentType: 'markdown' })
+    editor.commands.setContent(normalized, { contentType: 'markdown' })
   }, [value, editor])
 
   useEffect(() => {
@@ -925,6 +932,7 @@ export function MarkdownBodyEditor({
       ) : null}
       <div className="w-full [&_.ProseMirror]:min-h-[100px]">
         <EditorContent editor={editor} className="w-full" />
+        {!disabled ? <MarkdownTableControls editor={editor} disabled={disabled} /> : null}
       </div>
       {slashListOpen && slashUi
         ? createPortal(

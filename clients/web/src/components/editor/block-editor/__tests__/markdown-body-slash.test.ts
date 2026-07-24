@@ -76,6 +76,12 @@ describe('filterSlashCommands', () => {
     expect(commands.some((c) => c.id === 'board')).toBe(false)
   })
 
+  it('filters table by grid keyword', () => {
+    const commands = slashCommandsForEditor()
+    expect(filterSlashCommands(commands, 'table').map((c) => c.id)).toEqual(['table'])
+    expect(filterSlashCommands(commands, 'grid').map((c) => c.id)).toEqual(['table'])
+  })
+
   it('filters task by todo keyword', () => {
     const commands = slashCommandsForEditor({ equation: false })
     expect(filterSlashCommands(commands, 'todo').map((c) => c.id)).toEqual(['task'])

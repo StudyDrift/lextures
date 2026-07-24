@@ -644,8 +644,14 @@ function SyllabusBlockEditorInner({
         setLinkDialogOpen(true)
         break
       }
-      default:
+      case 'table':
+        chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
         break
+      default: {
+        const _exhaustive: never = kind
+        void _exhaustive
+        break
+      }
     }
   }
 
