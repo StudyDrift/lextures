@@ -1,15 +1,16 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
-import type {
-  AdaptiveDifficulty,
-  AdaptiveStopRule,
-  GradeAttemptPolicy,
-  LateSubmissionPolicy,
-  LockdownMode,
-  QuizAdvancedSettings,
-  ReviewVisibility,
-  ReviewWhen,
-  ShowScoreTiming,
+import {
+  fetchCourseOutcomes,
+  type AdaptiveDifficulty,
+  type AdaptiveStopRule,
+  type GradeAttemptPolicy,
+  type LateSubmissionPolicy,
+  type LockdownMode,
+  type QuizAdvancedSettings,
+  type ReviewVisibility,
+  type ReviewWhen,
+  type ShowScoreTiming,
 } from '../../lib/courses-api'
 import { ModuleItemOutcomesMappingAccordion } from '../outcomes/module-item-outcomes-mapping-accordion'
 import { AssignToEditor } from '../assignment/assign-to-editor'
@@ -57,13 +58,28 @@ export type QuizPageSettingsPanelProps = {
 const inputClass =
   'w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
 
-function SettingsAccordion({ title, children }: { title: string; children: ReactNode }) {
+function SettingsAccordion({
+  title,
+  badge,
+  children,
+}: {
+  title: string
+  badge?: number
+  children: ReactNode
+}) {
   return (
     <details className="group border-b border-slate-100 last:border-b-0 dark:border-neutral-800/80">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[13px] font-medium text-slate-600 outline-none transition-colors hover:bg-slate-50/80 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800/30 dark:hover:text-neutral-200 [&::-webkit-details-marker]:hidden">
-        <span>{title}</span>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[13px] font-medium text-slate-600 outline-none motion-safe:transition-colors hover:bg-slate-50/80 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800/30 dark:hover:text-neutral-200 [&::-webkit-details-marker]:hidden">
+        <span className="inline-flex min-w-0 items-center gap-2">
+          <span className="truncate">{title}</span>
+          {badge != null && badge > 0 ? (
+            <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-indigo-50 px-1.5 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+              {badge}
+            </span>
+          ) : null}
+        </span>
         <ChevronDown
-          className="h-3.5 w-3.5 shrink-0 text-slate-400/80 transition-transform duration-200 group-open:rotate-180 dark:text-neutral-500"
+          className="h-3.5 w-3.5 shrink-0 text-slate-400/80 motion-safe:transition-transform motion-safe:duration-200 group-open:rotate-180 dark:text-neutral-500"
           aria-hidden
         />
       </summary>
@@ -180,6 +196,28 @@ export function QuizPageSettingsPanel({
   replaceWithFinal = false,
   onReplaceWithFinalChange,
 }: QuizPageSettingsPanelProps) {
+  const [outcomesLinkCount, setOutcomesLinkCount] = useState(0)
+  const [hasCourseOutcomes, setHasCourseOutcomes] = useState(false)
+
+  useEffect(() => {
+    if (!courseCode) {
+      setHasCourseOutcomes(false)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const data = await fetchCourseOutcomes(courseCode)
+        if (!cancelled) setHasCourseOutcomes(data.outcomes.length > 0)
+      } catch {
+        if (!cancelled) setHasCourseOutcomes(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
+
   function patch(p: Partial<QuizAdvancedSettings>) {
     onAdvancedChange({ ...advanced, ...p })
   }
@@ -632,14 +670,15 @@ export function QuizPageSettingsPanel({
           </div>
         </SettingsAccordion>
 
-        {courseCode && quizItemId ? (
-          <SettingsAccordion title="Outcomes mapping">
+        {courseCode && quizItemId && hasCourseOutcomes ? (
+          <SettingsAccordion title="Outcomes" badge={outcomesLinkCount}>
             <ModuleItemOutcomesMappingAccordion
               courseCode={courseCode}
               itemId={quizItemId}
               mode="quiz"
               disabled={disabled}
               quizQuestions={quizOutcomesQuestions ?? []}
+              onLinkCountChange={setOutcomesLinkCount}
             />
           </SettingsAccordion>
         ) : null}

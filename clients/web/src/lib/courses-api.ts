@@ -16,6 +16,8 @@ import {
   courseOutcomeSubOutcomeSchema,
   courseOutcomesListResponseSchema,
   extractCourseOutcomesFromSyllabusResponseSchema,
+  buildContentPageWithAiResponseSchema,
+  suggestQuizOutcomeLinksResponseSchema,
   adaptivePathPreviewResponseSchema,
   courseSchema,
   courseScopedRolesResponseSchema,
@@ -5213,6 +5215,55 @@ export async function generateSyllabusSectionMarkdown(
   return parseApiResponse('generateSyllabusSectionMarkdown', generatedSyllabusSectionMarkdownSchema, raw)
 }
 
+export type DraftContentPageSection = {
+  heading: string
+  markdown: string
+}
+
+/** POST `/content-pages/{itemId}/build-with-ai` — AI draft sections (not persisted). */
+export async function buildContentPageWithAi(
+  courseCode: string,
+  itemId: string,
+  body: { prompt: string; existingMarkdown?: string },
+): Promise<{ sections: DraftContentPageSection[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-pages/${encodeURIComponent(itemId)}/build-with-ai`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: body.prompt,
+        existingMarkdown: body.existingMarkdown ?? '',
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('buildContentPageWithAi', buildContentPageWithAiResponseSchema, raw)
+}
+
+/** POST `/quizzes/{itemId}/build-intro-with-ai` — AI draft quiz intro sections (not persisted). */
+export async function buildQuizIntroWithAi(
+  courseCode: string,
+  itemId: string,
+  body: { prompt: string; existingMarkdown?: string },
+): Promise<{ sections: DraftContentPageSection[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/build-intro-with-ai`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: body.prompt,
+        existingMarkdown: body.existingMarkdown ?? '',
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('buildQuizIntroWithAi', buildContentPageWithAiResponseSchema, raw)
+}
+
 /** Plan 19.2 — AI lesson generator input. */
 export type LessonGeneratorInput = {
   learningObjective: string
@@ -5598,6 +5649,38 @@ export async function extractCourseOutcomesFromSyllabus(
   return parseApiResponse(
     'extractCourseOutcomesFromSyllabus',
     extractCourseOutcomesFromSyllabusResponseSchema,
+    raw,
+  )
+}
+
+export type QuizOutcomeLinkSuggestion = {
+  targetKind: 'quiz' | 'quiz_question'
+  quizQuestionId: string
+  outcomeId: string
+  measurementLevel: string
+  intensityLevel: string
+  rationale: string
+}
+
+/** POST `/quizzes/{itemId}/suggest-outcome-links` — AI draft mappings (not persisted). */
+export async function suggestQuizOutcomeLinks(
+  courseCode: string,
+  itemId: string,
+  body?: { questions?: { id: string; prompt: string }[] },
+): Promise<{ suggestions: QuizOutcomeLinkSuggestion[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/suggest-outcome-links`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse(
+    'suggestQuizOutcomeLinks',
+    suggestQuizOutcomeLinksResponseSchema,
     raw,
   )
 }

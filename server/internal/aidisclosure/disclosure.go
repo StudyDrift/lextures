@@ -67,7 +67,9 @@ var disclosureFeatures = []FeatureCard{
 	{Key: "modules_ai_assistant", Label: "Modules AI assistant", Description: "Instructor chat to propose course outline changes on the Modules page."},
 	{Key: "rag_notebook", Label: "Notebook AI", Description: "Answers questions using your course notebook content."},
 	{Key: "syllabus_generation", Label: "Syllabus generation", Description: "Instructor tool to draft syllabus sections."},
+	{Key: "content_page_generation", Label: "Content page generation", Description: "Instructor tool to draft module content-page sections from a topic description."},
 	{Key: "outcomes_extraction", Label: "Learning outcomes extraction", Description: "Instructor tool to draft learning outcomes from the course syllabus."},
+	{Key: "quiz_outcome_mapping", Label: "Quiz outcome mapping", Description: "Instructor tool to suggest linking a quiz and its questions to course learning outcomes."},
 	{Key: "badges_extraction", Label: "Badge extraction", Description: "Instructor tool to draft competency badges from learning outcomes or the syllabus."},
 	{Key: "translation", Label: "Translation", Description: "Translates user-selected text via an AI model."},
 	{Key: "content_translation", Label: "Course content translation", Description: "Translates course materials for multilingual learners."},
@@ -88,7 +90,7 @@ var platformModelBindings = []modelBinding{
 		modelID: user.DefaultCourseSetupModelID,
 		alias:   aiprovider.AliasCourseSetup,
 		purposes: []string{
-			"ai_tutor", "modules_ai_assistant", "rag_notebook", "syllabus_generation", "outcomes_extraction", "badges_extraction", "quiz_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy",
+			"ai_tutor", "modules_ai_assistant", "rag_notebook", "syllabus_generation", "content_page_generation", "outcomes_extraction", "quiz_outcome_mapping", "badges_extraction", "quiz_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy",
 		},
 		dataSent: "Course context, prompts, and user questions necessary for the feature; PII is redacted where configured.",
 	},

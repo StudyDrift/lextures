@@ -6,6 +6,7 @@ import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useOnlineStatus } from '../../hooks/use-online-status'
 import { useOfflineContent } from '../../hooks/use-offline-content'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
+import { BuildContentPageWithAiModal } from '../../components/content-page/build-content-page-with-ai-modal'
 import { ReadAloudControls } from '../../components/a11y/read-aloud-controls'
 import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
 import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
@@ -19,24 +20,32 @@ import {
   fetchCourseEnrollmentsList,
   fetchCourseGradingSettings,
   fetchCourseStructure,
+  fetchCourseOutcomes,
   fetchModuleQuiz,
   fetchQuizAttemptsList,
   fetchQuizFocusLossEvents,
   fetchReaderMarkups,
+  buildQuizIntroWithAi,
   generateModuleQuizQuestions,
   importModuleQuizQuestionsFromMarkdown,
   courseModuleQuizAttemptHref,
   patchCourseStructureItemAssignmentGroup,
   patchModuleQuiz,
   quizAdvancedSettingsFromPayload,
+  suggestQuizOutcomeLinks,
   type ContentPageMarkup,
+  type CourseOutcome,
   type CourseStructureItem,
   type BankQuestionRow,
+  type DraftContentPageSection,
   type LockdownMode,
   type QuizAdvancedSettings,
+  type QuizOutcomeLinkSuggestion,
   type QuizQuestion,
   type SyllabusSection,
 } from '../../lib/courses-api'
+import { OutcomeLinksEditor } from '../../components/outcomes/outcome-links-editor'
+import { SuggestQuizOutcomeLinksModal } from '../../components/outcomes/suggest-quiz-outcome-links-modal'
 import { type ResolvedMarkdownTheme, resolveMarkdownTheme } from '../../lib/markdown-theme'
 import { permCourseItemCreate, permCourseItemsCreate } from '../../lib/rbac-api'
 import { CourseItemPromptEditor } from '../../components/course-item-prompt-editor'
@@ -359,6 +368,7 @@ export default function CourseModuleQuizPage() {
   const [markups, setMarkups] = useState<ContentPageMarkup[]>([])
   const [editingContent, setEditingContent] = useState(false)
   const [draft, setDraft] = useState<SyllabusSection[]>([])
+  const [buildAiOpen, setBuildAiOpen] = useState(false)
   const [draftTitle, setDraftTitle] = useState('')
   const quizTitleFieldId = useId()
   const [draftDueLocal, setDraftDueLocal] = useState('')
@@ -396,6 +406,15 @@ export default function CourseModuleQuizPage() {
   const [questionsDraft, setQuestionsDraft] = useState<QuizQuestion[]>([])
   const [questionsSaving, setQuestionsSaving] = useState(false)
   const [questionsError, setQuestionsError] = useState<string | null>(null)
+  const [qeOutcomes, setQeOutcomes] = useState<CourseOutcome[]>([])
+  const [qeOutcomesLoading, setQeOutcomesLoading] = useState(false)
+  const [qeOutcomesError, setQeOutcomesError] = useState<string | null>(null)
+  const [qeSuggestOutcomesBusy, setQeSuggestOutcomesBusy] = useState(false)
+  const [qeSuggestOutcomesError, setQeSuggestOutcomesError] = useState<string | null>(null)
+  const [qeSuggestOutcomesOpen, setQeSuggestOutcomesOpen] = useState(false)
+  const [qeSuggestOutcomesDrafts, setQeSuggestOutcomesDrafts] = useState<QuizOutcomeLinkSuggestion[]>(
+    [],
+  )
   const [importQuestionsOpen, setImportQuestionsOpen] = useState(false)
   const [importQuestionsLoading, setImportQuestionsLoading] = useState(false)
   const [importQuestionsError, setImportQuestionsError] = useState<string | null>(null)
@@ -436,7 +455,7 @@ export default function CourseModuleQuizPage() {
   const [studentQuizBanner, setStudentQuizBanner] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
   const [proctoringConfig, setProctoringConfig] = useState<ProctoringConfig | null | undefined>(undefined)
   const [proctoringChecklistOpen, setProctoringChecklistOpen] = useState(false)
-  const { ffProctoringIntegration } = usePlatformFeatures()
+  const { ffProctoringIntegration, aiConfigured } = usePlatformFeatures()
   const [mdTheme, setMdTheme] = useState<ResolvedMarkdownTheme>(() =>
     resolveMarkdownTheme('classic', null),
   )
@@ -626,6 +645,59 @@ export default function CourseModuleQuizPage() {
     }
   }, [questionsOpen, courseCode])
 
+  const reloadQeOutcomes = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!courseCode) return
+    if (!opts?.silent) {
+      setQeOutcomesLoading(true)
+      setQeOutcomesError(null)
+    }
+    try {
+      const data = await fetchCourseOutcomes(courseCode)
+      setQeOutcomes(data.outcomes)
+      setQeOutcomesError(null)
+    } catch (e) {
+      setQeOutcomesError(e instanceof Error ? e.message : 'Could not load outcomes.')
+    } finally {
+      if (!opts?.silent) setQeOutcomesLoading(false)
+    }
+  }, [courseCode])
+
+  useEffect(() => {
+    if (!questionsOpen || !courseCode) return
+    void reloadQeOutcomes()
+  }, [questionsOpen, courseCode, reloadQeOutcomes])
+
+  const savedQuestionIds = useMemo(() => new Set(questions.map((q) => q.id)), [questions])
+
+  async function onSuggestOutcomeLinks() {
+    if (!courseCode || !itemId || !aiConfigured || qeSuggestOutcomesBusy) return
+    if (qeOutcomes.length === 0) return
+    setQeSuggestOutcomesBusy(true)
+    setQeSuggestOutcomesError(null)
+    try {
+      const questionsPayload = qeAdaptiveOn
+        ? []
+        : questionsDraft.map((q) => ({ id: q.id, prompt: q.prompt }))
+      const { suggestions } = await suggestQuizOutcomeLinks(courseCode, itemId, {
+        questions: questionsPayload,
+      })
+      if (suggestions.length === 0) {
+        setQeSuggestOutcomesError(
+          'No new outcome mappings were suggested. Try refining questions or outcomes, then try again.',
+        )
+        return
+      }
+      setQeSuggestOutcomesDrafts(suggestions)
+      setQeSuggestOutcomesOpen(true)
+    } catch (e) {
+      setQeSuggestOutcomesError(
+        e instanceof Error ? e.message : 'Could not suggest outcome mappings.',
+      )
+    } finally {
+      setQeSuggestOutcomesBusy(false)
+    }
+  }
+
   useEffect(() => {
     if (!generateModalOpen) return
     function onKey(e: KeyboardEvent) {
@@ -708,6 +780,7 @@ export default function CourseModuleQuizPage() {
   function cancelEditContent() {
     setSaveError(null)
     setAssignmentGroupPatchError(null)
+    setBuildAiOpen(false)
     setEditingContent(false)
     setDraft([])
     setDraftTitle(title)
@@ -1171,6 +1244,17 @@ export default function CourseModuleQuizPage() {
         editingContent ? (
           <div className="flex flex-wrap items-center gap-2">
             {canEdit ? <FeatureHelpTrigger topic="quiz-authoring" /> : null}
+            {canEdit && aiConfigured ? (
+              <button
+                type="button"
+                onClick={() => setBuildAiOpen(true)}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+              >
+                <Sparkles className="h-4 w-4" aria-hidden />
+                Build with AI
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={cancelEditContent}
@@ -1625,6 +1709,33 @@ export default function CourseModuleQuizPage() {
         </div>
       )}
 
+      {courseCode && itemId ? (
+        <BuildContentPageWithAiModal
+          open={buildAiOpen}
+          existingMarkdown={sectionsToMarkdown(draft)}
+          description="Describe what this quiz intro should cover. The draft replaces the current editor content; nothing is saved until you click Save."
+          placeholder="e.g. Intro for a midterm on cell division: overview, time limit note, and what students should review…"
+          onClose={() => setBuildAiOpen(false)}
+          onBuild={async ({ prompt, existingMarkdown }) => {
+            const { sections } = await buildQuizIntroWithAi(courseCode, itemId, {
+              prompt,
+              existingMarkdown: existingMarkdown || undefined,
+            })
+            return sections
+          }}
+          onBuilt={(sections: DraftContentPageSection[]) => {
+            setDraft(
+              sections.map((s) => ({
+                id: newLocalId(),
+                heading: s.heading,
+                markdown: s.markdown,
+              })),
+            )
+            setBuildAiOpen(false)
+          }}
+        />
+      ) : null}
+
       {generateModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center"
@@ -1850,34 +1961,87 @@ export default function CourseModuleQuizPage() {
           }}
         >
           <div
-            className={`w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl ${
+            className={`w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900 ${
               qeAdaptiveOn
                 ? 'max-h-[min(36rem,92vh)] max-w-xl'
                 : 'h-[88vh] max-w-6xl'
             }`}
           >
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-              <h3 className="text-sm font-semibold text-slate-900">Edit questions</h3>
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Edit questions</h3>
               <button
                 type="button"
                 onClick={() => setQuestionsOpen(false)}
                 disabled={questionsSaving}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div
-              className={`overflow-y-auto bg-slate-50/60 p-4 ${
+              className={`overflow-y-auto bg-slate-50/60 p-4 dark:bg-neutral-950/40 ${
                 qeAdaptiveOn ? 'max-h-[calc(min(36rem,92vh)-7.5rem)]' : 'h-[calc(88vh-7.5rem)]'
               }`}
             >
               <div className="space-y-3">
-                <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/[0.03]">
+                {courseCode && itemId && qeOutcomes.length > 0 ? (
+                  <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/[0.03] dark:border-neutral-700 dark:bg-neutral-900">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                          Quiz outcomes
+                        </p>
+                        <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                          Tie this quiz and its questions to course learning outcomes.
+                        </p>
+                      </div>
+                      {aiConfigured ? (
+                        <button
+                          type="button"
+                          onClick={() => void onSuggestOutcomeLinks()}
+                          disabled={qeSuggestOutcomesBusy || questionsSaving}
+                          className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-sm font-semibold text-indigo-700 shadow-sm motion-safe:transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+                        >
+                          {qeSuggestOutcomesBusy ? (
+                            <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
+                          ) : (
+                            <Sparkles className="h-4 w-4" aria-hidden />
+                          )}
+                          {qeSuggestOutcomesBusy ? 'Suggesting…' : 'Suggest with AI'}
+                        </button>
+                      ) : null}
+                    </div>
+                    {qeSuggestOutcomesError ? (
+                      <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200">
+                        {qeSuggestOutcomesError}
+                      </p>
+                    ) : null}
+                    <div className="mt-3 border-t border-slate-100 pt-3 dark:border-neutral-800">
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                        Whole quiz
+                      </p>
+                      <OutcomeLinksEditor
+                        courseCode={courseCode}
+                        itemId={itemId}
+                        targetKind="quiz"
+                        disabled={questionsSaving}
+                        variant="compact"
+                        outcomes={qeOutcomes}
+                        outcomesLoading={qeOutcomesLoading}
+                        outcomesError={qeOutcomesError}
+                        onOutcomesChange={() => reloadQeOutcomes({ silent: true })}
+                        hideHeaderHint
+                        emptyLabel="No whole-quiz outcome links yet."
+                      />
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/[0.03] dark:border-neutral-700 dark:bg-neutral-900">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900">Is adaptive</p>
-                      <p className="mt-1 text-xs text-slate-600">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Is adaptive</p>
+                      <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
                         When on, the quiz does not use a fixed question list. The model reads your selected course
                         items and system prompt, then serves one question at a time and adapts from how the learner
                         answered (including per-option weights you do not show in the UI).
@@ -1897,12 +2061,12 @@ export default function CourseModuleQuizPage() {
                           setQuestionsDraft(questions.map((q) => ({ ...q, choices: [...q.choices] })))
                         }
                       }}
-                      className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
-                        qeAdaptiveOn ? 'bg-indigo-500' : 'bg-slate-300'
+                      className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full motion-safe:transition-colors disabled:opacity-50 ${
+                        qeAdaptiveOn ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-neutral-600'
                       }`}
                     >
                       <span
-                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-colors ${
+                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow motion-safe:transition-colors ${
                           qeAdaptiveOn ? 'start-5' : 'start-0.5'
                         }`}
                       />
@@ -2941,6 +3105,37 @@ export default function CourseModuleQuizPage() {
                         Required
                       </label>
                     </div>
+                    {courseCode && itemId && qeOutcomes.length > 0 ? (
+                      <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 dark:border-neutral-800">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                            Outcomes
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
+                            Link this question to one or more learning outcomes.
+                          </p>
+                        </div>
+                        <OutcomeLinksEditor
+                          courseCode={courseCode}
+                          itemId={itemId}
+                          targetKind="quiz_question"
+                          quizQuestionId={q.id}
+                          disabled={questionsSaving}
+                          variant="compact"
+                          outcomes={qeOutcomes}
+                          outcomesLoading={qeOutcomesLoading}
+                          outcomesError={qeOutcomesError}
+                          onOutcomesChange={() => reloadQeOutcomes({ silent: true })}
+                          hideHeaderHint
+                          linkDisabledReason={
+                            savedQuestionIds.has(q.id)
+                              ? null
+                              : 'Save questions to link outcomes.'
+                          }
+                          emptyLabel="No outcomes linked to this question."
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 ))
                 : null}
@@ -2971,12 +3166,12 @@ export default function CourseModuleQuizPage() {
               )}
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-white px-4 py-3">
+            <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
               <button
                 type="button"
                 onClick={() => setQuestionsOpen(false)}
                 disabled={questionsSaving}
-                className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
               >
                 Cancel
               </button>
@@ -2992,6 +3187,28 @@ export default function CourseModuleQuizPage() {
           </div>
         </div>
       )}
+      {courseCode && itemId ? (
+        <SuggestQuizOutcomeLinksModal
+          open={qeSuggestOutcomesOpen}
+          courseCode={courseCode}
+          itemId={itemId}
+          suggestions={qeSuggestOutcomesDrafts}
+          outcomes={qeOutcomes}
+          questions={
+            qeAdaptiveOn
+              ? []
+              : questionsDraft.map((q) => ({ id: q.id, prompt: q.prompt }))
+          }
+          savedQuestionIds={savedQuestionIds}
+          onClose={() => {
+            setQeSuggestOutcomesOpen(false)
+            setQeSuggestOutcomesDrafts([])
+          }}
+          onApplied={async () => {
+            await reloadQeOutcomes({ silent: true })
+          }}
+        />
+      ) : null}
       {questionsOpen && !qeAdaptiveOn && importQuestionsOpen && importPopoverPos && (
         <div
           ref={importDropdownRef}
