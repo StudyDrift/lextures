@@ -35,9 +35,10 @@ func (d Deps) buildRateLimiter() *ratelimit.Limiter {
 }
 
 // rateLimitMiddleware enforces per-IP auth and global limits (plan 17.6 FR-1,
-// FR-3). It must run before chi's RealIP so it sees the genuine TCP peer and can
-// reject forged X-Forwarded-For headers from untrusted clients (NFR security).
-// Per-token API limits are enforced separately in publicAPIMiddleware (FR-2).
+// FR-3). It must run before clientIPMiddleware so it sees the genuine TCP peer
+// and can reject forged X-Forwarded-For headers from untrusted clients (NFR
+// security). Per-token API limits are enforced separately in publicAPIMiddleware
+// (FR-2).
 func (d Deps) rateLimitMiddleware(limiter *ratelimit.Limiter) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

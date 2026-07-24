@@ -141,10 +141,12 @@ func NewHandler(d Deps) http.Handler {
 			r.Use(mw)
 		}
 	}
-	// Rate limiting runs before RealIP so it sees the genuine TCP peer and can
-	// reject forged X-Forwarded-For headers from untrusted clients (plan 17.6).
+	// Rate limiting runs before client-IP rewrite so it sees the genuine TCP
+	// peer and can reject forged X-Forwarded-For headers from untrusted clients
+	// (plan 17.6). clientIPMiddleware then rewrites RemoteAddr only when the
+	// peer is in RATE_LIMIT_TRUSTED_PROXIES (chi's RealIP is deprecated/spoofable).
 	r.Use(d.rateLimitMiddleware(d.buildRateLimiter()))
-	r.Use(middleware.RealIP)
+	r.Use(d.clientIPMiddleware())
 	r.Use(middleware.Recoverer)
 	// Sentry panic capture sits just inside chi's Recoverer so it reports the
 	// panic (with PII scrubbed) before Recoverer converts it to a 500
