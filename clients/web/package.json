@@ -76,8 +76,7 @@
   },
   "overrides": {
     "@babel/core": "^7.29.6",
-    "brace-expansion@2": "2.1.2",
-    "brace-expansion@5": "5.0.7",
+    "brace-expansion": "5.0.8",
     "js-yaml": "4.3.0",
     "markdown-it": "^14.2.0",
     "postcss": "8.5.23"
