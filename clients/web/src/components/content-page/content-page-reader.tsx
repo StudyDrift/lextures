@@ -7,6 +7,7 @@ import { deleteReaderMarkup, postReaderMarkup } from '../../lib/courses-api'
 import { sortedChildren, type CourseNotebookPage } from '../../lib/course-notebook-tree'
 import { appendContentQuoteToNotebookPage, loadCourseNotebook } from '../../lib/student-notebook-storage'
 import type { ResolvedMarkdownTheme } from '../../lib/markdown-theme'
+import { plainTextFromRange } from './selection-plain-text'
 
 type SelectionOverlayRect = { left: number; top: number; width: number; height: number }
 
@@ -185,7 +186,7 @@ function snapRangeToWordBoundaries(range: Range, root: HTMLElement): Range {
     out.setStart(startP.text, ws)
     out.setEnd(endP.text, we)
     normalizeRangeEndpoints(out)
-    if (out.collapsed || !out.toString().trim()) {
+    if (out.collapsed || !plainTextFromRange(out)) {
       return range.cloneRange()
     }
   } catch {
@@ -238,6 +239,8 @@ export function ContentPageReader({
   const articleRef = useRef<HTMLDivElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
   const pendingSelectionRangeRef = useRef<Range | null>(null)
+  /** Captured at selection time — do not re-read from the live Range after React remounts markdown. */
+  const pendingSelectionTextRef = useRef<string>('')
   const dragHandleRef = useRef<'start' | 'end' | null>(null)
   const [selectionOverlay, setSelectionOverlay] = useState<SelectionOverlaySnapshot | null>(null)
   const [popover, setPopover] = useState<ReaderToolbar | null>(null)
@@ -283,6 +286,7 @@ export function ContentPageReader({
 
   const clearPendingSelectionVisual = useCallback(() => {
     pendingSelectionRangeRef.current = null
+    pendingSelectionTextRef.current = ''
     setSelectionOverlay(null)
   }, [])
 
@@ -336,9 +340,10 @@ export function ContentPageReader({
       normalizeRangeEndpoints(next)
       if (next.collapsed) return
       const snapped = snapRangeToWordBoundaries(next, root)
-      const selected = snapped.toString().trim()
+      const selected = plainTextFromRange(snapped)
       if (selected.length < 2) return
       pendingSelectionRangeRef.current = snapped
+      pendingSelectionTextRef.current = selected
       const snap = buildSelectionOverlaySnapshot(snapped, root)
       if (!snap) return
       setSelectionOverlay(snap)
@@ -364,10 +369,12 @@ export function ContentPageReader({
       }
       if (!popover) return
       // Selection is cleared after mouseup so the browser has nothing to copy; handle ⌘/Ctrl+C explicitly.
+      // Use the text captured at selection time — a live Range can shrink to the first paragraph after
+      // React remounts markdown nodes (Chrome adjusts detached range boundaries).
       if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.code === 'KeyC') {
         const text =
           popover.kind === 'selection'
-            ? pendingSelectionRangeRef.current?.toString().trim() || popover.text
+            ? pendingSelectionTextRef.current || popover.text
             : popover.quoteText
         if (!text) return
         e.preventDefault()
@@ -433,9 +440,11 @@ export function ContentPageReader({
       const range = sel.getRangeAt(0)
       const clone = range.cloneRange()
       const snapped = snapRangeToWordBoundaries(clone, root)
+      // Capture plain text while the Range still points at live markdown nodes.
+      const textSnapped = plainTextFromRange(snapped)
       pendingSelectionRangeRef.current = snapped
+      pendingSelectionTextRef.current = textSnapped
       window.getSelection()?.removeAllRanges()
-      const textSnapped = snapped.toString().trim()
       if (textSnapped.length < 2) {
         closePopover()
         return
@@ -507,8 +516,7 @@ export function ContentPageReader({
     setBusy(true)
     setError(null)
     try {
-      const quoteText =
-        pendingSelectionRangeRef.current?.toString().trim() || popover.text
+      const quoteText = pendingSelectionTextRef.current || popover.text
       await postReaderMarkup(courseCode, markupTarget, {
         kind: 'highlight',
         quoteText,
@@ -539,7 +547,7 @@ export function ContentPageReader({
 
   const openNoteModal = useCallback(() => {
     if (!popover || popover.kind !== 'selection') return
-    const quote = pendingSelectionRangeRef.current?.toString().trim() || popover.text
+    const quote = pendingSelectionTextRef.current || popover.text
     openNoteWithQuote(quote)
   }, [popover, openNoteWithQuote])
 
