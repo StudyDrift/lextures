@@ -21,10 +21,14 @@ import {
   CANVAS_IMPORT_CANCELLED_MESSAGE,
   CANVAS_IMPORT_INCLUDE_ALL,
   createCourse,
+  ensureOrgTerm,
   fetchCanvasCourses,
+  fetchOrgTerms,
   postCourseImportCanvas,
   type CanvasCourseListItem,
 } from '../lib/courses-api'
+import { decodeJwtPayload } from '../lib/jwt-payload'
+import { getAccessToken } from '../lib/auth'
 import { BookLoader } from '../components/quiz/book-loader'
 import {
   CanvasImportCoursesPanel,
@@ -350,15 +354,50 @@ export function CanvasImportProvider({ children }: { children: ReactNode }) {
     const base = canvasBaseUrl.trim()
     const token = canvasToken.trim()
     const toImport = coursesToImport
+    const orgId = decodeJwtPayload(getAccessToken())?.org_id ?? ''
+    const termIdByName = new Map<string, string>()
+    if (orgId) {
+      try {
+        const rows = await fetchOrgTerms(orgId)
+        for (const row of rows) {
+          const n = row.name.trim().toLowerCase()
+          if (n && !termIdByName.has(n)) termIdByName.set(n, row.id)
+        }
+      } catch {
+        /* ignore — term assignment is best-effort */
+      }
+      const seenEnsure = new Set<string>()
+      for (const canvasCourse of toImport) {
+        const termName = canvasCourse.termName?.trim()
+        if (!termName) continue
+        const key = termName.toLowerCase()
+        if (termIdByName.has(key) || seenEnsure.has(key)) continue
+        seenEnsure.add(key)
+        if (!canvasCourse.termStartDate || !canvasCourse.termEndDate) continue
+        try {
+          const term = await ensureOrgTerm(orgId, {
+            name: termName,
+            startDate: canvasCourse.termStartDate,
+            endDate: canvasCourse.termEndDate,
+          })
+          termIdByName.set(key, term.id)
+        } catch {
+          /* ignore */
+        }
+      }
+    }
 
     const results = await Promise.all(
       toImport.map(async (canvasCourse, i) => {
         if (importCancelledRef.current) return false
         appendImportLog(`Importing ${i + 1} of ${toImport.length}: ${canvasCourse.name}`)
         try {
+          const termKey = canvasCourse.termName?.trim().toLowerCase() ?? ''
+          const termId = termKey ? termIdByName.get(termKey) : undefined
           const created = await createCourse({
             title: canvasCourse.name,
             description: canvasCourse.courseCode?.trim() || canvasCourse.name,
+            ...(termId ? { termId } : {}),
           })
           bumpCoursesRevision()
           if (importCancelledRef.current) return false

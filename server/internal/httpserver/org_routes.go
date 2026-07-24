@@ -14,6 +14,7 @@ func (d Deps) registerOrgRoutes(r chi.Router) {
 	d.registerParentAssignRoutes(r)
 	r.Get("/api/v1/orgs/{orgId}/terms", d.handleOrgTermsRead())
 	r.Post("/api/v1/orgs/{orgId}/terms", d.handleOrgTermsPost())
+	r.Post("/api/v1/orgs/{orgId}/terms/ensure", d.handleOrgTermsEnsure())
 	r.Patch("/api/v1/orgs/{orgId}/terms/{tid}", d.handleOrgTermPatch())
 	r.Delete("/api/v1/orgs/{orgId}/terms/{tid}", d.handleOrgTermDelete())
 	r.Get("/api/v1/orgs/{orgId}/cross-list-groups", d.handleOrgCrossListGroupsGet())

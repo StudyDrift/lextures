@@ -15,6 +15,7 @@ import {
   courseOutcomeSchema,
   courseOutcomeSubOutcomeSchema,
   courseOutcomesListResponseSchema,
+  extractCourseOutcomesFromSyllabusResponseSchema,
   adaptivePathPreviewResponseSchema,
   courseSchema,
   courseScopedRolesResponseSchema,
@@ -259,6 +260,40 @@ export async function fetchOrgTerms(orgId: string): Promise<OrgTerm[]> {
   return data.terms ?? []
 }
 
+/** Collapse duplicate term names for pickers/filters (keeps first = newest start_date from API). */
+export function dedupeOrgTermsForPicker(terms: OrgTerm[]): OrgTerm[] {
+  const seen = new Set<string>()
+  const out: OrgTerm[] = []
+  for (const t of terms) {
+    const key = t.name.trim().toLowerCase()
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    out.push(t)
+  }
+  return out
+}
+
+/** Find-or-create an org term by name (idempotent). Used by Canvas import. */
+export async function ensureOrgTerm(
+  orgId: string,
+  body: { name: string; termType?: string; startDate: string; endDate: string; status?: string },
+): Promise<OrgTerm> {
+  const res = await authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/terms/ensure`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: body.name,
+      termType: body.termType ?? 'semester',
+      startDate: body.startDate,
+      endDate: body.endDate,
+      ...(body.status ? { status: body.status } : {}),
+    }),
+  })
+  const raw: unknown = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as OrgTerm
+}
+
 /** Plan 5.5 — cross-listed sections for merged roster / gradebook (same course). */
 export type CrossListMember = {
   sectionId: string
@@ -445,7 +480,7 @@ export function parseCourseGradingSettings(raw: unknown): CourseGradingSettings 
 
 function buildCourseGradingSettings(raw: unknown): CourseGradingSettings {
   if (!raw || typeof raw !== 'object') {
-    return { gradingScale: 'letter_standard', assignmentGroups: [] }
+    return { gradingScale: 'letter_plus_minus', assignmentGroups: [] }
   }
   const o = raw as Record<string, unknown>
   const gradingScale =
@@ -453,7 +488,7 @@ function buildCourseGradingSettings(raw: unknown): CourseGradingSettings {
       ? o.gradingScale
       : typeof o.grading_scale === 'string'
         ? o.grading_scale
-        : 'letter_standard'
+        : 'letter_plus_minus'
   const rawGroups = o.assignmentGroups ?? o.assignment_groups
   const assignmentGroups: AssignmentGroup[] = []
   if (Array.isArray(rawGroups)) {
@@ -5541,6 +5576,32 @@ export async function fetchCourseOutcomes(courseCode: string): Promise<CourseOut
   return parseApiResponse('fetchCourseOutcomes', courseOutcomesListResponseSchema, raw)
 }
 
+export type DraftCourseOutcome = {
+  title: string
+  description: string
+}
+
+/** POST `/outcomes/extract-from-syllabus` — AI draft outcomes from the course syllabus (not persisted). */
+export async function extractCourseOutcomesFromSyllabus(
+  courseCode: string,
+): Promise<{ outcomes: DraftCourseOutcome[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/outcomes/extract-from-syllabus`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse(
+    'extractCourseOutcomesFromSyllabus',
+    extractCourseOutcomesFromSyllabusResponseSchema,
+    raw,
+  )
+}
+
 export type CourseOutcomeSubOutcome = {
   id: string
   outcomeId: string
@@ -5742,6 +5803,8 @@ export type CanvasCourseListItem = {
   courseCode?: string
   workflowState?: string
   termName?: string
+  termStartDate?: string
+  termEndDate?: string
 }
 
 /** POST /api/v1/integrations/canvas/courses — list teacher courses from Canvas (token not stored). */

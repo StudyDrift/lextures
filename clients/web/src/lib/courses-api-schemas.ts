@@ -924,6 +924,15 @@ export const courseOutcomesListResponseSchema = z.object({
   outcomes: z.array(courseOutcomeSchema),
 })
 
+export const draftCourseOutcomeSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+})
+
+export const extractCourseOutcomesFromSyllabusResponseSchema = z.object({
+  outcomes: z.array(draftCourseOutcomeSchema),
+})
+
 export const courseScopedAppRoleSchema = z.object({
   id: z.string(),
   name: z.string(),

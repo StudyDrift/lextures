@@ -75,6 +75,8 @@ export const AI_FEATURE_LABELS: Record<string, string> = {
   modules_ai_assistant: 'Modules AI assistant',
   rag_notebook: 'Notebook AI',
   syllabus_generation: 'Syllabus generation',
+  outcomes_extraction: 'Learning outcomes extraction',
+  badges_extraction: 'Badge extraction',
   translation: 'Translation',
   quiz_generation: 'Quiz generation',
   reading_level_simplification: 'Reading level',

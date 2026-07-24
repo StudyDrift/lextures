@@ -60,6 +60,17 @@ class CourseCreateLogicTest {
         )
         assertEquals(CourseCreateLogic.WizardStep.Source, CourseCreateLogic.initialWizardStep(true))
         assertEquals(CourseCreateLogic.WizardStep.Basics, CourseCreateLogic.initialWizardStep(false))
+        assertEquals(
+            listOf(
+                CourseCreateLogic.WizardStep.Basics,
+                CourseCreateLogic.WizardStep.Syllabus,
+                CourseCreateLogic.WizardStep.Finish,
+                CourseCreateLogic.WizardStep.Features,
+            ),
+            CourseCreateLogic.WizardStep.progressSteps,
+        )
+        assertEquals(4, CourseCreateLogic.WizardStep.TOTAL_PROGRESS_STEPS)
+        assertEquals(CourseCreateLogic.WizardStep.Features, CourseCreateLogic.WizardStep.fromNumber(4))
     }
 
     @Test

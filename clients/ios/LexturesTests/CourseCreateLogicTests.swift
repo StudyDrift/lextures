@@ -36,6 +36,12 @@ final class CourseCreateLogicTests: XCTestCase {
         XCTAssertTrue(CourseCreateLogic.courseCreateV2Enabled(features))
         XCTAssertEqual(CourseCreateLogic.initialWizardStep(v2Enabled: true), .source)
         XCTAssertEqual(CourseCreateLogic.initialWizardStep(v2Enabled: false), .basics)
+        XCTAssertEqual(
+            CourseCreateLogic.WizardStep.progressSteps,
+            [.basics, .syllabus, .finish, .features]
+        )
+        XCTAssertEqual(CourseCreateLogic.WizardStep.totalProgressSteps, 4)
+        XCTAssertEqual(CourseCreateLogic.WizardStep(rawValue: 4), .features)
     }
 
     func testValidateCompetenciesParity() {

@@ -114,7 +114,7 @@ func FactoryResetCourse(ctx context.Context, pool *pgxpool.Pool, courseCode stri
 			hero_image_object_position = NULL,
 			markdown_theme_preset = 'classic',
 			markdown_theme_custom = NULL,
-			grading_scale = 'letter_standard',
+			grading_scale = 'letter_plus_minus',
 			notebook_enabled = true,
 			feed_enabled = true,
 			calendar_enabled = true,

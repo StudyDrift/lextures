@@ -63,7 +63,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
 
   const [loadError, setLoadError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [gradingScale, setGradingScale] = useState('letter_standard')
+  const [gradingScale, setGradingScale] = useState('letter_plus_minus')
   const [groups, setGroups] = useState<EditableGroup[]>([])
   const [structure, setStructure] = useState<CourseStructureItem[]>([])
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')

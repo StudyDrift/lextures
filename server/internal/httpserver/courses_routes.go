@@ -383,6 +383,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Patch("/api/v1/courses/{course_code}/archived", d.handlePatchCourseArchived())
 	r.Get("/api/v1/courses/{course_code}/outcomes", d.handleCourseOutcomesList())
 	r.Post("/api/v1/courses/{course_code}/outcomes", d.handleCourseOutcomesPost())
+	r.Post("/api/v1/courses/{course_code}/outcomes/extract-from-syllabus", d.handleExtractCourseOutcomesFromSyllabus())
 	r.Patch("/api/v1/courses/{course_code}/outcomes/{outcome_id}", d.handleCourseOutcomePatch())
 	r.Post("/api/v1/courses/{course_code}/outcomes/{outcome_id}/sub-outcomes", d.handleCourseOutcomeSubOutcomesPost())
 	r.Post("/api/v1/courses/{course_code}/outcomes/{outcome_id}/links", d.handleCourseOutcomeLinksPost())

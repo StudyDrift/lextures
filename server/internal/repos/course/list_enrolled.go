@@ -28,85 +28,86 @@ const enrolledUserOrgScope = `
     )
   )
 `
+
 type CoursePublic struct {
-	ID                            string           `json:"id"`
-	CourseCode                    string           `json:"courseCode"`
-	Title                         string           `json:"title"`
-	Description                   string           `json:"description"`
-	HeroImageURL                  *string          `json:"heroImageUrl"`
-	HeroImageObjectPosition       *string          `json:"heroImageObjectPosition"`
-	StartsAt                      *time.Time       `json:"startsAt"`
-	EndsAt                        *time.Time       `json:"endsAt"`
-	VisibleFrom                   *time.Time       `json:"visibleFrom"`
-	HiddenAt                      *time.Time       `json:"hiddenAt"`
-	ScheduleMode                  string           `json:"scheduleMode"`
-	RelativeEndAfter              *string          `json:"relativeEndAfter"`
-	RelativeHiddenAfter           *string          `json:"relativeHiddenAfter"`
-	RelativeScheduleAnchorAt      *time.Time       `json:"relativeScheduleAnchorAt"`
-	Published                     bool             `json:"published"`
-	MarkdownThemePreset           string           `json:"markdownThemePreset"`
-	MarkdownThemeCustom           *json.RawMessage `json:"markdownThemeCustom"`
-	GradingScale                  string           `json:"gradingScale"`
-	Archived                      bool             `json:"archived"`
-	NotebookEnabled               bool             `json:"notebookEnabled"`
-	FeedEnabled                   bool             `json:"feedEnabled"`
-	CalendarEnabled               bool             `json:"calendarEnabled"`
-	QuestionBankEnabled           bool             `json:"questionBankEnabled"`
-	LockdownModeEnabled           bool             `json:"lockdownModeEnabled"`
-	StandardsAlignmentEnabled     bool             `json:"standardsAlignmentEnabled"`
-	AdaptivePathsEnabled          bool             `json:"adaptivePathsEnabled"`
-	SRSEnabled                    bool             `json:"srsEnabled"`
-	DiagnosticAssessmentsEnabled  bool             `json:"diagnosticAssessmentsEnabled"`
-	HintScaffoldingEnabled        bool             `json:"hintScaffoldingEnabled"`
-	MisconceptionDetectionEnabled bool             `json:"misconceptionDetectionEnabled"`
-	SectionsEnabled               bool             `json:"sectionsEnabled"`
-	DiscussionsEnabled            bool             `json:"discussionsEnabled"`
-	CollabDocsEnabled             bool             `json:"collabDocsEnabled"`
-	LiveSessionsEnabled           bool             `json:"liveSessionsEnabled"`
-	GroupSpacesEnabled            bool             `json:"groupSpacesEnabled"`
-	OfficeHoursEnabled            bool             `json:"officeHoursEnabled"`
-	AiTutorEnabled                bool             `json:"aiTutorEnabled"`
-	ModulesAiAssistantEnabled     bool             `json:"modulesAiAssistantEnabled"`
-	MultilingualMessagingEnabled  bool             `json:"multilingualMessagingEnabled"`
-	FilesEnabled                  bool             `json:"filesEnabled"`
-	AttendanceEnabled             bool             `json:"attendanceEnabled"`
-	WhiteboardEnabled             bool             `json:"whiteboardEnabled"`
-	ReportCardsEnabled            bool             `json:"reportCardsEnabled"`
-	VisualBoardsEnabled           bool             `json:"visualBoardsEnabled"`
-	InteractiveQuizzesEnabled     bool             `json:"interactiveQuizzesEnabled"`
-	ScreenShareEnabled            bool             `json:"screenShareEnabled"`
-	CanvasGradeSyncEnabled        bool             `json:"canvasGradeSyncEnabled"`
-	RequireCaptions               bool             `json:"requireCaptions"`
-	CourseType                    string           `json:"courseType"`
-	CourseMode                    string           `json:"courseMode"`
-	OpenEnrollment                bool             `json:"openEnrollment"`
-	ModuleGatingEnabled           bool             `json:"moduleGatingEnabled"`
-	CreatedAt                     time.Time        `json:"createdAt"`
-	UpdatedAt                     time.Time        `json:"updatedAt"`
-	OrgID                         *string          `json:"orgId,omitempty"`
-	SbgEnabled                    bool             `json:"sbgEnabled"`
-	SbgProficiencyScaleJSON       *json.RawMessage `json:"sbgProficiencyScaleJson"`
-	SbgAggregationRule            string           `json:"sbgAggregationRule"`
-	OrgUnitID                     *string          `json:"orgUnitId,omitempty"`
-	TermID                        *string          `json:"termId,omitempty"`
-	Term                          *TermSummary     `json:"term,omitempty"`
-	IsBlueprint                   bool             `json:"isBlueprint"`
-	BlueprintParentID             *string          `json:"blueprintParentId,omitempty"`
-	BlueprintParentCourseCode     *string          `json:"blueprintParentCourseCode,omitempty"`
-	BlueprintLastSyncAt           *time.Time       `json:"blueprintLastSyncAt,omitempty"`
-	CourseHomeLanding             string           `json:"courseHomeLanding"`
-	CourseHomeContentItemID       *string          `json:"courseHomeContentItemId,omitempty"`
-	CourseTimezone                *string          `json:"courseTimezone,omitempty"`
-	GradeLevel                    *string          `json:"gradeLevel,omitempty"`
-	ViewerEnrollmentState              *string    `json:"viewerEnrollmentState,omitempty"`
-	ViewerEnrollmentStateChangedAt     *time.Time `json:"viewerEnrollmentStateChangedAt,omitempty"`
-	ViewerEnrollmentInvitationPending  bool       `json:"viewerEnrollmentInvitationPending,omitempty"`
-	ViewerPendingEnrollmentID          *string    `json:"viewerPendingEnrollmentId,omitempty"`
-	CatalogNickname               *string          `json:"catalogNickname,omitempty"`
-	CatalogPinned                 bool             `json:"catalogPinned,omitempty"`
-	CatalogHidden                 bool             `json:"catalogHidden,omitempty"`
-	KanbanColumnID                *string          `json:"kanbanColumnId,omitempty"`
-	KanbanSortOrder               *int             `json:"kanbanSortOrder,omitempty"`
+	ID                                string           `json:"id"`
+	CourseCode                        string           `json:"courseCode"`
+	Title                             string           `json:"title"`
+	Description                       string           `json:"description"`
+	HeroImageURL                      *string          `json:"heroImageUrl"`
+	HeroImageObjectPosition           *string          `json:"heroImageObjectPosition"`
+	StartsAt                          *time.Time       `json:"startsAt"`
+	EndsAt                            *time.Time       `json:"endsAt"`
+	VisibleFrom                       *time.Time       `json:"visibleFrom"`
+	HiddenAt                          *time.Time       `json:"hiddenAt"`
+	ScheduleMode                      string           `json:"scheduleMode"`
+	RelativeEndAfter                  *string          `json:"relativeEndAfter"`
+	RelativeHiddenAfter               *string          `json:"relativeHiddenAfter"`
+	RelativeScheduleAnchorAt          *time.Time       `json:"relativeScheduleAnchorAt"`
+	Published                         bool             `json:"published"`
+	MarkdownThemePreset               string           `json:"markdownThemePreset"`
+	MarkdownThemeCustom               *json.RawMessage `json:"markdownThemeCustom"`
+	GradingScale                      string           `json:"gradingScale"`
+	Archived                          bool             `json:"archived"`
+	NotebookEnabled                   bool             `json:"notebookEnabled"`
+	FeedEnabled                       bool             `json:"feedEnabled"`
+	CalendarEnabled                   bool             `json:"calendarEnabled"`
+	QuestionBankEnabled               bool             `json:"questionBankEnabled"`
+	LockdownModeEnabled               bool             `json:"lockdownModeEnabled"`
+	StandardsAlignmentEnabled         bool             `json:"standardsAlignmentEnabled"`
+	AdaptivePathsEnabled              bool             `json:"adaptivePathsEnabled"`
+	SRSEnabled                        bool             `json:"srsEnabled"`
+	DiagnosticAssessmentsEnabled      bool             `json:"diagnosticAssessmentsEnabled"`
+	HintScaffoldingEnabled            bool             `json:"hintScaffoldingEnabled"`
+	MisconceptionDetectionEnabled     bool             `json:"misconceptionDetectionEnabled"`
+	SectionsEnabled                   bool             `json:"sectionsEnabled"`
+	DiscussionsEnabled                bool             `json:"discussionsEnabled"`
+	CollabDocsEnabled                 bool             `json:"collabDocsEnabled"`
+	LiveSessionsEnabled               bool             `json:"liveSessionsEnabled"`
+	GroupSpacesEnabled                bool             `json:"groupSpacesEnabled"`
+	OfficeHoursEnabled                bool             `json:"officeHoursEnabled"`
+	AiTutorEnabled                    bool             `json:"aiTutorEnabled"`
+	ModulesAiAssistantEnabled         bool             `json:"modulesAiAssistantEnabled"`
+	MultilingualMessagingEnabled      bool             `json:"multilingualMessagingEnabled"`
+	FilesEnabled                      bool             `json:"filesEnabled"`
+	AttendanceEnabled                 bool             `json:"attendanceEnabled"`
+	WhiteboardEnabled                 bool             `json:"whiteboardEnabled"`
+	ReportCardsEnabled                bool             `json:"reportCardsEnabled"`
+	VisualBoardsEnabled               bool             `json:"visualBoardsEnabled"`
+	InteractiveQuizzesEnabled         bool             `json:"interactiveQuizzesEnabled"`
+	ScreenShareEnabled                bool             `json:"screenShareEnabled"`
+	CanvasGradeSyncEnabled            bool             `json:"canvasGradeSyncEnabled"`
+	RequireCaptions                   bool             `json:"requireCaptions"`
+	CourseType                        string           `json:"courseType"`
+	CourseMode                        string           `json:"courseMode"`
+	OpenEnrollment                    bool             `json:"openEnrollment"`
+	ModuleGatingEnabled               bool             `json:"moduleGatingEnabled"`
+	CreatedAt                         time.Time        `json:"createdAt"`
+	UpdatedAt                         time.Time        `json:"updatedAt"`
+	OrgID                             *string          `json:"orgId,omitempty"`
+	SbgEnabled                        bool             `json:"sbgEnabled"`
+	SbgProficiencyScaleJSON           *json.RawMessage `json:"sbgProficiencyScaleJson"`
+	SbgAggregationRule                string           `json:"sbgAggregationRule"`
+	OrgUnitID                         *string          `json:"orgUnitId,omitempty"`
+	TermID                            *string          `json:"termId,omitempty"`
+	Term                              *TermSummary     `json:"term,omitempty"`
+	IsBlueprint                       bool             `json:"isBlueprint"`
+	BlueprintParentID                 *string          `json:"blueprintParentId,omitempty"`
+	BlueprintParentCourseCode         *string          `json:"blueprintParentCourseCode,omitempty"`
+	BlueprintLastSyncAt               *time.Time       `json:"blueprintLastSyncAt,omitempty"`
+	CourseHomeLanding                 string           `json:"courseHomeLanding"`
+	CourseHomeContentItemID           *string          `json:"courseHomeContentItemId,omitempty"`
+	CourseTimezone                    *string          `json:"courseTimezone,omitempty"`
+	GradeLevel                        *string          `json:"gradeLevel,omitempty"`
+	ViewerEnrollmentState             *string          `json:"viewerEnrollmentState,omitempty"`
+	ViewerEnrollmentStateChangedAt    *time.Time       `json:"viewerEnrollmentStateChangedAt,omitempty"`
+	ViewerEnrollmentInvitationPending bool             `json:"viewerEnrollmentInvitationPending,omitempty"`
+	ViewerPendingEnrollmentID         *string          `json:"viewerPendingEnrollmentId,omitempty"`
+	CatalogNickname                   *string          `json:"catalogNickname,omitempty"`
+	CatalogPinned                     bool             `json:"catalogPinned,omitempty"`
+	CatalogHidden                     bool             `json:"catalogHidden,omitempty"`
+	KanbanColumnID                    *string          `json:"kanbanColumnId,omitempty"`
+	KanbanSortOrder                   *int             `json:"kanbanSortOrder,omitempty"`
 	// Marketplace acquisition for the viewer (plan MKT5). Derived from active course_purchase.
 	AcquiredViaMarketplace bool    `json:"acquiredViaMarketplace,omitempty"`
 	AcquisitionSource      *string `json:"acquisitionSource,omitempty"` // free | stripe | comp
@@ -408,7 +409,7 @@ WHERE c.id IN (
     AND (e.active OR e.invitation_pending OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
-  AND ($2::text IS NULL OR c.grade_level = $2::text)` + enrolledUserOrgScope + `
+  AND ($2::text IS NULL OR c.grade_level = $2::text)`+enrolledUserOrgScope+`
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, gradeLevel)
 	if err != nil {
@@ -452,7 +453,7 @@ WHERE c.id IN (
         AND ce_guest.home_org_id IS NOT NULL AND ce_guest.home_org_id = ucat.org_id AND ce_guest.active
     )
   )
-  AND ($3::text IS NULL OR c.grade_level = $3::text)` + enrolledUserOrgScope + `
+  AND ($3::text IS NULL OR c.grade_level = $3::text)`+enrolledUserOrgScope+`
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, allowed, gradeLevel)
 	if err != nil {
@@ -485,8 +486,15 @@ WHERE c.id IN (
     AND (e.active OR e.invitation_pending OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
-  AND c.term_id = $2
-  AND ($3::text IS NULL OR c.grade_level = $3::text)` + enrolledUserOrgScope + `
+  AND c.term_id IN (
+    SELECT t2.id
+    FROM tenant.terms t1
+    INNER JOIN tenant.terms t2
+      ON t2.org_id = t1.org_id
+     AND lower(btrim(t2.name)) = lower(btrim(t1.name))
+    WHERE t1.id = $2
+  )
+  AND ($3::text IS NULL OR c.grade_level = $3::text)`+enrolledUserOrgScope+`
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, termID, gradeLevel)
 	if err != nil {
@@ -529,8 +537,15 @@ WHERE c.id IN (
         AND ce_guest.home_org_id IS NOT NULL AND ce_guest.home_org_id = ucat.org_id AND ce_guest.active
     )
   )
-  AND c.term_id = $3
-  AND ($4::text IS NULL OR c.grade_level = $4::text)` + enrolledUserOrgScope + `
+  AND c.term_id IN (
+    SELECT t2.id
+    FROM tenant.terms t1
+    INNER JOIN tenant.terms t2
+      ON t2.org_id = t1.org_id
+     AND lower(btrim(t2.name)) = lower(btrim(t1.name))
+    WHERE t1.id = $3
+  )
+  AND ($4::text IS NULL OR c.grade_level = $4::text)`+enrolledUserOrgScope+`
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, allowed, termID, gradeLevel)
 	if err != nil {

@@ -6,10 +6,26 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 )
+
+// canvasTimestampToDate converts a Canvas ISO-8601 timestamp to YYYY-MM-DD (UTC day).
+func canvasTimestampToDate(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return ""
+	}
+	if t, err := time.Parse(time.RFC3339, raw); err == nil {
+		return t.UTC().Format("2006-01-02")
+	}
+	if t, err := time.Parse("2006-01-02", raw); err == nil {
+		return t.Format("2006-01-02")
+	}
+	return ""
+}
 
 type canvasListCoursesBody struct {
 	CanvasBaseURL string `json:"canvasBaseUrl"`
@@ -22,6 +38,8 @@ type canvasCourseListItem struct {
 	CourseCode    string `json:"courseCode,omitempty"`
 	WorkflowState string `json:"workflowState,omitempty"`
 	TermName      string `json:"termName,omitempty"`
+	TermStartDate string `json:"termStartDate,omitempty"` // YYYY-MM-DD when Canvas provides start_at
+	TermEndDate   string `json:"termEndDate,omitempty"`   // YYYY-MM-DD when Canvas provides end_at
 }
 
 // handleCanvasListCourses is POST /api/v1/integrations/canvas/courses.
@@ -95,6 +113,8 @@ func (d Deps) handleCanvasListCourses() http.HandlerFunc {
 			}
 			if term := objAt(row, "term"); term != nil {
 				item.TermName = strAt(term, "name", "")
+				item.TermStartDate = canvasTimestampToDate(strAt(term, "start_at", ""))
+				item.TermEndDate = canvasTimestampToDate(strAt(term, "end_at", ""))
 			}
 			out = append(out, item)
 		}

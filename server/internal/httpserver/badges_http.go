@@ -30,6 +30,7 @@ func (d Deps) registerBadgesRoutes(r chi.Router) {
 	// Instructor: definitions under course
 	r.Get("/api/v1/courses/{courseId}/badge-definitions", d.handleListBadgeDefinitions())
 	r.Post("/api/v1/courses/{courseId}/badge-definitions", d.handleCreateBadgeDefinition())
+	r.Post("/api/v1/courses/{courseId}/badge-definitions/extract-from-syllabus", d.handleExtractCourseBadgesFromSyllabus())
 	r.Patch("/api/v1/badge-definitions/{id}", d.handlePatchBadgeDefinition())
 	r.Delete("/api/v1/badge-definitions/{id}", d.handleDeleteBadgeDefinition())
 	r.Post("/api/v1/badge-definitions/{id}/award", d.handleAwardBadge())
@@ -191,16 +192,16 @@ func (d Deps) handleCreateBadgeDefinition() http.HandlerFunc {
 
 func (d Deps) handlePatchBadgeDefinition() http.HandlerFunc {
 	type body struct {
-		Name              *string  `json:"name"`
-		Slug              *string  `json:"slug"`
-		Description       *string  `json:"description"`
-		CriteriaNarrative *string  `json:"criteriaNarrative"`
+		Name              *string   `json:"name"`
+		Slug              *string   `json:"slug"`
+		Description       *string   `json:"description"`
+		CriteriaNarrative *string   `json:"criteriaNarrative"`
 		Tags              *[]string `json:"tags"`
-		AutoAward         *bool    `json:"autoAward"`
-		Alignment         any      `json:"alignment"`
-		OutcomeID         *string  `json:"outcomeId"`
-		SubOutcomeID      *string  `json:"subOutcomeId"`
-		ImageUploadRef    *string  `json:"imageUploadRef"`
+		AutoAward         *bool     `json:"autoAward"`
+		Alignment         any       `json:"alignment"`
+		OutcomeID         *string   `json:"outcomeId"`
+		SubOutcomeID      *string   `json:"subOutcomeId"`
+		ImageUploadRef    *string   `json:"imageUploadRef"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if d.badgesFeatureOff(w) {
@@ -922,9 +923,9 @@ func (d Deps) notifyBadgeAwarded(r *http.Request, userID uuid.UUID, def *badgere
 	verifyURL := fmt.Sprintf("%s/api/v1/badges/verify/%s", base, award.ShareSlug)
 	svc := notifications.Service{Pool: d.Pool, Config: cfg}
 	_ = svc.EnqueueEmail(r.Context(), userID, notificationevents.CertificateIssued, "badge_awarded", map[string]string{
-		"badgeName":  def.Name,
-		"verifyUrl":  verifyURL,
-		"badgesUrl":  base + "/me/badges",
+		"badgeName": def.Name,
+		"verifyUrl": verifyURL,
+		"badgesUrl": base + "/me/badges",
 	}, nil)
 }
 
@@ -1025,11 +1026,11 @@ func badgeProfileJSON(p *badgerepo.BadgeProfile, origin string) map[string]any {
 		handle = *p.Handle
 	}
 	m := map[string]any{
-		"handle":          handle,
-		"pagePublic":      p.PagePublic,
-		"searchIndexable": p.SearchIndexable,
-		"hideRealName":    p.HideRealName,
-		"publicUrl":       base + "/badges/" + handle,
+		"handle":               handle,
+		"pagePublic":           p.PagePublic,
+		"searchIndexable":      p.SearchIndexable,
+		"hideRealName":         p.HideRealName,
+		"publicUrl":            base + "/badges/" + handle,
 		"handleChangeCount30d": p.HandleChangeCount30d,
 	}
 	if p.DisplayNameOverride != nil {

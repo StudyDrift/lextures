@@ -31,6 +31,8 @@ const (
 	FeatureModulesAIAssistant         = "modules_ai_assistant"
 	FeatureRAGNotebook                = "rag_notebook"
 	FeatureSyllabusGeneration         = "syllabus_generation"
+	FeatureOutcomesExtraction         = "outcomes_extraction"
+	FeatureBadgesExtraction           = "badges_extraction"
 	FeatureTranslation                = "translation"
 	FeatureQuizGeneration             = "quiz_generation"
 	FeatureLiveQuizKitGeneration      = "live_quiz_kit_generation"

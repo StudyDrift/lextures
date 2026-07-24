@@ -90,7 +90,7 @@ INSERT INTO course.courses (
     published,
     visible_from,
     grading_scale
-) VALUES ($1, $2, $3, $4, 'traditional', $5, $6, TRUE, $7, 'letter_standard')
+) VALUES ($1, $2, $3, $4, 'traditional', $5, $6, TRUE, $7, 'letter_plus_minus')
 RETURNING id
 `, CourseCode, ShortCode, Title, Description, createdBy, orgID, now).Scan(&id)
 	return id, err
@@ -108,7 +108,7 @@ SET
     starts_at = NULL,
     ends_at = NULL,
     hidden_at = NULL,
-    grading_scale = 'letter_standard',
+    grading_scale = 'letter_plus_minus',
     updated_at = NOW()
 WHERE id = $1
 `, courseID, Title, Description, now)

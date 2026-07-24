@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/organization"
+	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/terms"
 )
 
@@ -51,12 +52,98 @@ func (d Deps) handleOrgTermsPost() http.HandlerFunc {
 			switch err {
 			case terms.ErrInvalidTermType, terms.ErrInvalidTermStatus, terms.ErrInvalidDateRange:
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+			case terms.ErrTermDuplicate:
+				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "A term with this name already exists for the organization.")
 			default:
 				if strings.Contains(err.Error(), "required") {
 					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 					return
 				}
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create term.")
+			}
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusCreated)
+		_ = json.NewEncoder(w).Encode(t)
+	}
+}
+
+// handleOrgTermsEnsure is POST /api/v1/orgs/{orgId}/terms/ensure — idempotent find-or-create by name.
+// Used by Canvas import so many courses share one "Fall 2025" row instead of creating duplicates.
+func (d Deps) handleOrgTermsEnsure() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
+		orgID, err := uuid.Parse(orgIDStr)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid organization id.")
+			return
+		}
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		ctx := r.Context()
+		uOrg, err := organization.OrgIDForUser(ctx, d.Pool, userID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify organization.")
+			return
+		}
+		if uOrg != orgID {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have access to this organization.")
+			return
+		}
+		canCreateCourse, err := rbac.UserHasPermission(ctx, d.Pool, userID, "global:app:course:create")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		canManageRBAC, err := rbac.UserHasPermission(ctx, d.Pool, userID, permGlobalRBACManage)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !canCreateCourse && !canManageRBAC {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to ensure terms.")
+			return
+		}
+		var body struct {
+			Name     string `json:"name"`
+			TermType string `json:"termType"`
+			Start    string `json:"startDate"`
+			End      string `json:"endDate"`
+			Status   string `json:"status"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		existing, err := terms.FindByOrgName(ctx, d.Pool, orgID, body.Name)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to look up term.")
+			return
+		}
+		if existing != nil {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(existing)
+			return
+		}
+		t, err := terms.Ensure(ctx, d.Pool, orgID, body.Name, body.TermType, body.Start, body.End, body.Status)
+		if err != nil {
+			switch err {
+			case terms.ErrInvalidTermType, terms.ErrInvalidTermStatus, terms.ErrInvalidDateRange:
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+			default:
+				if strings.Contains(err.Error(), "required") {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+					return
+				}
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to ensure term.")
 			}
 			return
 		}
@@ -112,6 +199,8 @@ func (d Deps) handleOrgTermPatch() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			case terms.ErrTermWrongOrg:
 				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Wrong organization.")
+			case terms.ErrTermDuplicate:
+				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "A term with this name already exists for the organization.")
 			case terms.ErrInvalidTermType, terms.ErrInvalidTermStatus, terms.ErrInvalidDateRange:
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			default:

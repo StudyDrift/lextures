@@ -42,6 +42,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -77,6 +78,7 @@ import com.lextures.android.core.lms.AddCourseOutcomeLinkBody
 import com.lextures.android.core.lms.CourseCreateDraftStore
 import com.lextures.android.core.lms.CourseCreateLogic
 import com.lextures.android.core.lms.CourseCreateObservability
+import com.lextures.android.core.lms.CourseFeaturesLogic
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.CreateCourseOutcomeBody
 import com.lextures.android.core.lms.CreateCourseOutcomeSubOutcomeBody
@@ -133,10 +135,16 @@ fun CourseCreateScreen(
     var didRestoreDraft by remember { mutableStateOf(false) }
     var recordedStart by remember { mutableStateOf(false) }
     var draftReady by remember { mutableStateOf(false) }
+    var skipFirstModule by remember { mutableStateOf(false) }
+    var featuresQuery by remember { mutableStateOf("") }
+    var savingFeatureTool by remember { mutableStateOf<CourseFeaturesLogic.Tool?>(null) }
 
     val isCompetency = courseMode == CourseCreateLogic.CourseMode.CompetencyBased
     val offline = remember { com.lextures.android.core.offline.OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
+    val visibleFeatureTools = remember(featuresQuery) {
+        CourseFeaturesLogic.filterTools(CourseFeaturesLogic.allToolRows, featuresQuery)
+    }
 
     fun clearDraft() {
         if (draftKey.isNotEmpty()) draftStore.clear(draftKey)
@@ -231,7 +239,48 @@ fun CourseCreateScreen(
                 step = CourseCreateLogic.WizardStep.Basics
             }
             CourseCreateLogic.WizardStep.Finish -> step = CourseCreateLogic.WizardStep.Syllabus
+            CourseCreateLogic.WizardStep.Features -> step = CourseCreateLogic.WizardStep.Finish
             CourseCreateLogic.WizardStep.Basics, CourseCreateLogic.WizardStep.Source -> Unit
+        }
+    }
+
+    fun continueFromFinishStep() {
+        errorMessage = null
+        if (isCompetency && v2Enabled) {
+            val validation = CourseCreateLogic.validateCompetencies(competencies)
+            if (validation != null) {
+                errorMessage = formatCompetencyError(validation)
+                return
+            }
+        }
+        if (!isCompetency) {
+            skipFirstModule = false
+        }
+        if (v2Enabled) {
+            CourseCreateObservability.recordStepCompleted(context, 3)
+        }
+        step = CourseCreateLogic.WizardStep.Features
+    }
+
+    fun toggleCreateFeature(tool: CourseFeaturesLogic.Tool, enabled: Boolean) {
+        val course = createdCourse ?: return
+        val token = accessToken ?: return
+        scope.launch {
+            val previous = course
+            val optimistic = CourseFeaturesLogic.applyToggle(course, tool, enabled)
+            createdCourse = optimistic
+            savingFeatureTool = tool
+            errorMessage = null
+            try {
+                val patch = CourseFeaturesLogic.buildFeaturesPatch(optimistic)
+                createdCourse = LmsApi.patchCourseFeatures(course.courseCode, patch, token)
+            } catch (e: Exception) {
+                createdCourse = previous
+                errorMessage = session.mapError(e)
+                    .ifBlank { L.text(context, localePrefs, R.string.mobile_courseSettings_features_genericError) }
+            } finally {
+                savingFeatureTool = null
+            }
         }
     }
 
@@ -327,7 +376,7 @@ fun CourseCreateScreen(
                     }
                 }
                 if (v2Enabled) {
-                    CourseCreateObservability.recordStepCompleted(context, 3)
+                    CourseCreateObservability.recordStepCompleted(context, 4)
                     CourseCreateObservability.recordFinished(context, courseMode.value, selectedTemplateId)
                 }
                 clearDraft()
@@ -430,7 +479,7 @@ fun CourseCreateScreen(
                         )
                     }
                 }
-                CourseCreateObservability.recordStepCompleted(context, 3)
+                CourseCreateObservability.recordStepCompleted(context, 4)
                 CourseCreateObservability.recordFinished(context, courseMode.value, selectedTemplateId)
                 clearDraft()
                 shell?.refresh(token)
@@ -521,7 +570,11 @@ fun CourseCreateScreen(
             ) {
                 if (step != CourseCreateLogic.WizardStep.Source) {
                     Text(
-                        text = stringResource(R.string.mobile_createCourse_stepOf, step.number, 3),
+                        text = stringResource(
+                            R.string.mobile_createCourse_stepOf,
+                            step.number,
+                            CourseCreateLogic.WizardStep.TOTAL_PROGRESS_STEPS,
+                        ),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = textSecondary(),
@@ -546,6 +599,8 @@ fun CourseCreateScreen(
                                                 R.string.mobile_createCourse_step_basics
                                             s == CourseCreateLogic.WizardStep.Syllabus ->
                                                 R.string.mobile_createCourse_step_syllabus
+                                            s == CourseCreateLogic.WizardStep.Features ->
+                                                R.string.mobile_createCourse_step_features
                                             else -> R.string.mobile_createCourse_step_module
                                         },
                                     ),
@@ -754,6 +809,67 @@ fun CourseCreateScreen(
                             )
                         }
                     }
+
+                    CourseCreateLogic.WizardStep.Features -> {
+                        Text(
+                            stringResource(R.string.mobile_createCourse_features_intro),
+                            color = textSecondary(),
+                            fontSize = 14.sp,
+                        )
+                        OutlinedTextField(
+                            value = featuresQuery,
+                            onValueChange = { featuresQuery = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            placeholder = { Text(stringResource(R.string.mobile_courseSettings_features_searchPlaceholder)) },
+                        )
+                        if (visibleFeatureTools.isEmpty()) {
+                            Text(
+                                stringResource(R.string.mobile_courseSettings_features_noToolsMatch, featuresQuery),
+                                color = textSecondary(),
+                                fontSize = 14.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                            )
+                        } else {
+                            val course = createdCourse
+                            visibleFeatureTools.forEach { row ->
+                                val tool = row.tool
+                                val enabled = course != null && CourseFeaturesLogic.isEnabled(tool, course)
+                                val saving = savingFeatureTool == tool
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.Top,
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            stringResource(CourseFeaturesLogic.toolLabelRes(tool)),
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = textPrimary(),
+                                        )
+                                        Text(
+                                            stringResource(CourseFeaturesLogic.toolDescriptionRes(tool)),
+                                            fontSize = 12.sp,
+                                            color = textSecondary(),
+                                        )
+                                    }
+                                    if (saving) {
+                                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                    } else {
+                                        Switch(
+                                            checked = enabled,
+                                            onCheckedChange = { toggleCreateFeature(tool, it) },
+                                            enabled = !submitting && savingFeatureTool == null && course != null,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -781,7 +897,16 @@ fun CourseCreateScreen(
                 }
                 Spacer(Modifier.weight(1f))
                 if (step == CourseCreateLogic.WizardStep.Finish && !isCompetency) {
-                    TextButton(onClick = { finishTraditional(skipModule = true) }, enabled = !submitting) {
+                    TextButton(
+                        onClick = {
+                            skipFirstModule = true
+                            if (v2Enabled) {
+                                CourseCreateObservability.recordStepCompleted(context, 3)
+                            }
+                            step = CourseCreateLogic.WizardStep.Features
+                        },
+                        enabled = !submitting,
+                    ) {
                         Text(stringResource(R.string.mobile_createCourse_firstModule_skip))
                     }
                 }
@@ -792,16 +917,17 @@ fun CourseCreateScreen(
                                 CourseCreateLogic.WizardStep.Source -> Unit
                                 CourseCreateLogic.WizardStep.Basics -> submitBasics()
                                 CourseCreateLogic.WizardStep.Syllabus -> continueFromSyllabus()
-                                CourseCreateLogic.WizardStep.Finish -> {
+                                CourseCreateLogic.WizardStep.Finish -> continueFromFinishStep()
+                                CourseCreateLogic.WizardStep.Features -> {
                                     when {
                                         isCompetency && v2Enabled -> finishCompetencyBased()
                                         isCompetency -> finishCompetencyHandoff()
-                                        else -> finishTraditional(skipModule = false)
+                                        else -> finishTraditional(skipModule = skipFirstModule)
                                     }
                                 }
                             }
                         },
-                        enabled = !submitting,
+                        enabled = !submitting && savingFeatureTool == null,
                     ) {
                         if (submitting) {
                             CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = textPrimary())
@@ -809,10 +935,15 @@ fun CourseCreateScreen(
                             Text(
                                 stringResource(
                                     when {
-                                        step == CourseCreateLogic.WizardStep.Finish && isCompetency && v2Enabled ->
+                                        step == CourseCreateLogic.WizardStep.Features && isCompetency && v2Enabled ->
                                             R.string.mobile_createCourse_action_createCompetencies
-                                        step == CourseCreateLogic.WizardStep.Finish ->
+                                        step == CourseCreateLogic.WizardStep.Features &&
+                                            !isCompetency &&
+                                            !skipFirstModule &&
+                                            firstModuleTitle.isNotBlank() ->
                                             R.string.mobile_createCourse_action_createOpen
+                                        step == CourseCreateLogic.WizardStep.Features ->
+                                            R.string.mobile_createCourse_action_openCourse
                                         else -> R.string.mobile_createCourse_action_continue
                                     },
                                 ),

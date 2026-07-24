@@ -12,6 +12,7 @@ import {
   createCourseOutcomeSubOutcome,
   createModuleAssignment,
   createModuleQuiz,
+  dedupeOrgTermsForPicker,
   fetchOrgTerms,
   patchCourseOutcome,
   patchCourseSyllabus,
@@ -27,8 +28,10 @@ import {
   COURSE_CREATE_STARTER_TEMPLATES,
   templateSectionsToSyllabus,
 } from './course-create-templates'
+import { CourseFeaturesSection } from './course-features-section'
 
 const BLANK_TEMPLATE_ID = 'blank'
+const TOTAL_STEPS = 4
 
 type CourseMode = 'traditional' | 'competency_based'
 
@@ -45,7 +48,7 @@ type CompetencyDraft = {
   subOutcomes: SubOutcomeDraft[]
 }
 
-type WizardStep = 1 | 2 | 3
+type WizardStep = 1 | 2 | 3 | 4
 
 function putBodyFromCourse(c: CoursePublic, title: string, description: string) {
   const mode = c.scheduleMode === 'relative' ? 'relative' : 'fixed'
@@ -94,13 +97,14 @@ export default function CourseCreate() {
   const [termOptions, setTermOptions] = useState<OrgTerm[]>([])
   const [selectedTermId, setSelectedTermId] = useState<string>('')
   const [selectedGradeLevel, setSelectedGradeLevel] = useState<string>('')
+  const [skipFirstModule, setSkipFirstModule] = useState(false)
 
   useEffect(() => {
     if (!orgId) return
     let cancelled = false
     void fetchOrgTerms(orgId)
       .then((rows) => {
-        if (!cancelled) setTermOptions(rows)
+        if (!cancelled) setTermOptions(dedupeOrgTermsForPicker(rows))
       })
       .catch(() => {
         if (!cancelled) setTermOptions([])
@@ -112,7 +116,15 @@ export default function CourseCreate() {
 
   const isCompetency = courseMode === 'competency_based'
   const stepTitle =
-    step === 1 ? 'Basics' : step === 2 ? 'Syllabus template' : isCompetency ? 'Competencies' : 'First module'
+    step === 1
+      ? 'Basics'
+      : step === 2
+        ? 'Syllabus template'
+        : step === 3
+          ? isCompetency
+            ? 'Competencies'
+            : 'First module'
+          : 'Course features'
 
   async function submitBasics(e: FormEvent) {
     e.preventDefault()
@@ -204,6 +216,22 @@ export default function CourseCreate() {
     return null
   }
 
+  function continueFromTraditionalStep(skipModule: boolean) {
+    setError(null)
+    setSkipFirstModule(skipModule)
+    setStep(4)
+  }
+
+  function continueFromCompetencyStep() {
+    const v = validateCompetencies()
+    if (v) {
+      setError(v)
+      return
+    }
+    setError(null)
+    setStep(4)
+  }
+
   async function finishTraditional(skipModule: boolean) {
     if (!createdCourse) return
     setSubmitting(true)
@@ -286,21 +314,27 @@ export default function CourseCreate() {
     }
     if (step === 3) {
       setStep(2)
+      return
+    }
+    if (step === 4) {
+      setStep(3)
     }
   }
 
   const descriptionText =
     step === 1
-      ? 'Step 1 of 3 — name your course and choose how modules progress. You enroll as teacher and can publish later.'
+      ? `Step 1 of ${TOTAL_STEPS} — name your course and choose how modules progress. You enroll as teacher and can publish later.`
       : step === 2
-        ? 'Step 2 of 3 — pick a syllabus scaffold or start blank. You can edit everything later on the Syllabus page.'
-        : isCompetency
-          ? 'Step 3 of 3 — each competency becomes its own module. Learners unlock the next module after they complete every assessment for the previous competency.'
-          : 'Step 3 of 3 — optionally add your first module shell, then open the course.'
+        ? `Step 2 of ${TOTAL_STEPS} — pick a syllabus scaffold or start blank. You can edit everything later on the Syllabus page.`
+        : step === 3
+          ? isCompetency
+            ? `Step 3 of ${TOTAL_STEPS} — each competency becomes its own module. Learners unlock the next module after they complete every assessment for the previous competency.`
+            : `Step 3 of ${TOTAL_STEPS} — optionally add your first module shell.`
+          : `Step 4 of ${TOTAL_STEPS} — choose which tools are available in this course. You can change these later in course settings.`
 
   const progressLabels = isCompetency
-    ? (['Basics', 'Syllabus', 'Competencies'] as const)
-    : (['Basics', 'Syllabus', 'Module'] as const)
+    ? (['Basics', 'Syllabus', 'Competencies', 'Features'] as const)
+    : (['Basics', 'Syllabus', 'Module', 'Features'] as const)
 
   return (
     <LmsPage
@@ -312,7 +346,7 @@ export default function CourseCreate() {
           </h1>
           <nav aria-label="Progress">
             <ol className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-neutral-400">
-              {([1, 2, 3] as const).map((n, idx) => (
+              {([1, 2, 3, 4] as const).map((n, idx) => (
                 <li key={n} className="flex items-center gap-2">
                   {idx > 0 ? (
                     <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
@@ -655,16 +689,16 @@ export default function CourseCreate() {
                 <button
                   type="button"
                   disabled={submitting}
-                  onClick={() => void finishTraditional(false)}
+                  onClick={() => continueFromTraditionalStep(false)}
                   className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <Sparkles className="h-4 w-4" aria-hidden />
-                  {firstModuleTitle.trim() ? 'Create module & open course' : 'Open course'}
+                  Continue
+                  <ChevronRight className="h-4 w-4" aria-hidden />
                 </button>
                 <button
                   type="button"
                   disabled={submitting}
-                  onClick={() => void finishTraditional(true)}
+                  onClick={() => continueFromTraditionalStep(true)}
                   className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
                 >
                   Skip module
@@ -897,11 +931,52 @@ export default function CourseCreate() {
                 <button
                   type="button"
                   disabled={submitting}
-                  onClick={() => void finishCompetencyBased()}
+                  onClick={() => continueFromCompetencyStep()}
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Continue
+                  <ChevronRight className="h-4 w-4" aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={goBack}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                >
+                  Back
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && createdCourse && (
+            <div className="space-y-5">
+              <p className="text-sm text-slate-600 dark:text-neutral-300">
+                Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu. You can
+                change these anytime in course settings.
+              </p>
+              <CourseFeaturesSection
+                courseCode={createdCourse.courseCode}
+                course={createdCourse}
+                onCourseUpdated={setCreatedCourse}
+              />
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() =>
+                    void (isCompetency
+                      ? finishCompetencyBased()
+                      : finishTraditional(skipFirstModule))
+                  }
                   className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Sparkles className="h-4 w-4" aria-hidden />
-                  Create competencies & open course
+                  {isCompetency
+                    ? 'Create competencies & open course'
+                    : firstModuleTitle.trim() && !skipFirstModule
+                      ? 'Create module & open course'
+                      : 'Open course'}
                 </button>
                 <button
                   type="button"

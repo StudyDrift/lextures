@@ -30,6 +30,9 @@ struct CourseCreateView: View {
     @State private var draftKey = ""
     @State private var didRestoreDraft = false
     @State private var recordedStart = false
+    @State private var skipFirstModule = false
+    @State private var featuresQuery = ""
+    @State private var savingFeatureTool: CourseFeaturesLogic.Tool?
 
     private var isCompetency: Bool { courseMode == .competencyBased }
     private var v2Enabled: Bool { CourseCreateLogic.courseCreateV2Enabled(shell.platformFeatures) }
@@ -42,23 +45,29 @@ struct CourseCreateView: View {
                     if step != .source {
                         progressHeader
                     }
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 16) {
-                            if let errorMessage {
-                                LMSErrorBanner(message: errorMessage)
+                    if step == .features {
+                        featuresStep
+                    } else {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 16) {
+                                if let errorMessage {
+                                    LMSErrorBanner(message: errorMessage)
+                                }
+                                switch step {
+                                case .source:
+                                    sourceStep
+                                case .basics:
+                                    basicsStep
+                                case .syllabus:
+                                    syllabusStep
+                                case .finish:
+                                    finishStep
+                                case .features:
+                                    EmptyView()
+                                }
                             }
-                            switch step {
-                            case .source:
-                                sourceStep
-                            case .basics:
-                                basicsStep
-                            case .syllabus:
-                                syllabusStep
-                            case .finish:
-                                finishStep
-                            }
+                            .padding(16)
                         }
-                        .padding(16)
                     }
                     bottomBar
                 }
@@ -117,7 +126,7 @@ struct CourseCreateView: View {
 
     private var progressHeader: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(L.format("mobile.createCourse.stepOf", step.rawValue, 3))
+            Text(L.format("mobile.createCourse.stepOf", step.rawValue, CourseCreateLogic.WizardStep.totalProgressSteps))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             HStack(spacing: 8) {
@@ -136,7 +145,7 @@ struct CourseCreateView: View {
                 }
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel(L.format("mobile.createCourse.stepOf", step.rawValue, 3))
+            .accessibilityLabel(L.format("mobile.createCourse.stepOf", step.rawValue, CourseCreateLogic.WizardStep.totalProgressSteps))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -327,6 +336,85 @@ struct CourseCreateView: View {
         }
     }
 
+    private var featuresStep: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if let errorMessage {
+                    LMSErrorBanner(message: errorMessage)
+                }
+                Text(L.text("mobile.createCourse.features.intro"))
+                    .font(.subheadline)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                TextField(L.text("mobile.courseSettings.features.searchPlaceholder"), text: $featuresQuery)
+                    .textFieldStyle(.roundedBorder)
+                let tools = CourseFeaturesLogic.filterTools(CourseFeaturesLogic.allToolRows, query: featuresQuery)
+                if tools.isEmpty {
+                    Text(L.format("mobile.courseSettings.features.noToolsMatch", featuresQuery))
+                        .font(.subheadline)
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 24)
+                } else if let course = createdCourse {
+                    ForEach(tools) { row in
+                        createFeaturesToolRow(tool: row.tool, course: course)
+                    }
+                }
+            }
+            .padding(16)
+        }
+    }
+
+    private func createFeaturesToolRow(tool: CourseFeaturesLogic.Tool, course: CourseSummary) -> some View {
+        let enabled = CourseFeaturesLogic.isEnabled(tool, course: course)
+        let saving = savingFeatureTool == tool
+        return HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(L.text(String.LocalizationValue(tool.labelKey)))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                Text(L.text(String.LocalizationValue(tool.descriptionKey)))
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            }
+            Spacer(minLength: 8)
+            if saving {
+                ProgressView()
+            } else {
+                Toggle("", isOn: Binding(
+                    get: { enabled },
+                    set: { newValue in
+                        Task { await toggleCreateFeature(tool: tool, enabled: newValue) }
+                    }
+                ))
+                .labelsHidden()
+                .disabled(submitting || savingFeatureTool != nil)
+            }
+        }
+        .padding(.vertical, 10)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func toggleCreateFeature(tool: CourseFeaturesLogic.Tool, enabled: Bool) async {
+        guard let course = createdCourse, let token = session.accessToken else { return }
+        let previous = course
+        let optimistic = CourseFeaturesLogic.applyToggle(course: course, tool: tool, enabled: enabled)
+        createdCourse = optimistic
+        savingFeatureTool = tool
+        errorMessage = nil
+        defer { savingFeatureTool = nil }
+        do {
+            let patch = CourseFeaturesLogic.buildFeaturesPatch(from: optimistic)
+            createdCourse = try await LMSAPI.patchCourseFeatures(
+                courseCode: course.courseCode,
+                body: patch,
+                accessToken: token
+            )
+        } catch {
+            createdCourse = previous
+            errorMessage = CourseFeaturesLogic.userFacingError(error)
+        }
+    }
+
     private var competencyEditor: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(L.text("mobile.createCourse.competency.intro"))
@@ -448,7 +536,11 @@ struct CourseCreateView: View {
             Spacer()
             if step == .finish && !isCompetency {
                 Button(L.text("mobile.createCourse.firstModule.skip")) {
-                    Task { await finishTraditional(skipModule: true) }
+                    skipFirstModule = true
+                    if v2Enabled {
+                        CourseCreateObservability.recordStepCompleted(step: 3)
+                    }
+                    step = .features
                 }
                 .disabled(submitting)
             }
@@ -464,7 +556,7 @@ struct CourseCreateView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(submitting)
+                .disabled(submitting || savingFeatureTool != nil)
             }
         }
         .padding(16)
@@ -473,15 +565,16 @@ struct CourseCreateView: View {
 
     private var primaryButtonTitle: String {
         switch step {
-        case .source:
+        case .source, .basics, .syllabus, .finish:
             return L.text("mobile.createCourse.action.continue")
-        case .basics, .syllabus:
-            return L.text("mobile.createCourse.action.continue")
-        case .finish:
+        case .features:
             if isCompetency && v2Enabled {
                 return L.text("mobile.createCourse.action.createCompetencies")
             }
-            return L.text("mobile.createCourse.action.createOpen")
+            if !isCompetency, !skipFirstModule, !firstModuleTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return L.text("mobile.createCourse.action.createOpen")
+            }
+            return L.text("mobile.createCourse.action.openCourse")
         }
     }
 
@@ -515,6 +608,8 @@ struct CourseCreateView: View {
             step = .basics
         case .finish:
             step = .syllabus
+        case .features:
+            step = .finish
         case .basics, .source:
             break
         }
@@ -529,6 +624,8 @@ struct CourseCreateView: View {
         case .syllabus:
             await continueFromSyllabus()
         case .finish:
+            await continueFromFinishStep()
+        case .features:
             if isCompetency {
                 if v2Enabled {
                     await finishCompetencyBased()
@@ -536,9 +633,26 @@ struct CourseCreateView: View {
                     await finishCompetencyHandoff()
                 }
             } else {
-                await finishTraditional(skipModule: false)
+                await finishTraditional(skipModule: skipFirstModule)
             }
         }
+    }
+
+    private func continueFromFinishStep() async {
+        errorMessage = nil
+        if isCompetency && v2Enabled {
+            if let validation = CourseCreateLogic.validateCompetencies(competencies) {
+                errorMessage = formatCompetencyError(validation)
+                return
+            }
+        }
+        if !isCompetency {
+            skipFirstModule = false
+        }
+        if v2Enabled {
+            CourseCreateObservability.recordStepCompleted(step: 3)
+        }
+        step = .features
     }
 
     private func bootstrap() async {
@@ -714,7 +828,7 @@ struct CourseCreateView: View {
                 }
             }
             if v2Enabled {
-                CourseCreateObservability.recordStepCompleted(step: 3)
+                CourseCreateObservability.recordStepCompleted(step: 4)
                 CourseCreateObservability.recordFinished(mode: courseMode.rawValue, templateId: selectedTemplateId)
             }
             clearDraft()
@@ -817,7 +931,7 @@ struct CourseCreateView: View {
                     )
                 }
             }
-            CourseCreateObservability.recordStepCompleted(step: 3)
+            CourseCreateObservability.recordStepCompleted(step: 4)
             CourseCreateObservability.recordFinished(mode: courseMode.rawValue, templateId: selectedTemplateId)
             clearDraft()
             await shell.refresh(accessToken: token)

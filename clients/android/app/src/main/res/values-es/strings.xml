@@ -1919,6 +1919,9 @@ Bring a photo ID</string>
     <string name="mobile_createCourse_step_module">Module</string>
     <string name="mobile_createCourse_step_source">Source</string>
     <string name="mobile_createCourse_step_syllabus">Syllabus</string>
+    <string name="mobile_createCourse_step_features">Features</string>
+    <string name="mobile_createCourse_features_intro">Turn tools on or off for this course. You can change these later in course settings.</string>
+    <string name="mobile_createCourse_action_openCourse">Open course</string>
     <string name="mobile_createCourse_stepOf">Step %1$d of %2$d</string>
     <string name="mobile_createCourse_syllabus_intro">Choose a starter syllabus template or start blank.</string>
     <string name="mobile_createCourse_template_blank">Blank</string>

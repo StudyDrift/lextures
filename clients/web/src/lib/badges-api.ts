@@ -149,6 +149,32 @@ export async function createBadgeDefinition(
   return parseJson(res)
 }
 
+export type DraftBadgeDefinition = {
+  name: string
+  description: string
+  outcomeId?: string | null
+}
+
+export type ExtractCourseBadgesFromSyllabusResponse = {
+  badges: DraftBadgeDefinition[]
+  source: 'outcomes' | 'syllabus' | string
+}
+
+/** POST `/badge-definitions/extract-from-syllabus` — AI draft badges (not persisted). */
+export async function extractCourseBadgesFromSyllabus(
+  courseId: string,
+): Promise<ExtractCourseBadgesFromSyllabusResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseId)}/badge-definitions/extract-from-syllabus`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    },
+  )
+  return parseJson(res)
+}
+
 export async function awardBadge(
   definitionId: string,
   recipientIds: string[],

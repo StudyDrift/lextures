@@ -131,7 +131,7 @@ enum CourseGradingLogic {
         let passMin = parsePassMinPct(from: scheme?.scaleJson) ?? "60"
         let completeMin = parseCompleteMinPct(from: scheme?.scaleJson) ?? "50"
         return FormBaseline(
-            gradingScale: settings.gradingScale.nilIfEmpty ?? "letter_standard",
+            gradingScale: settings.gradingScale.nilIfEmpty ?? "letter_plus_minus",
             groups: groupsFromSettings(settings),
             schemeType: schemeType,
             bands: parsed.isEmpty ? defaultBands() : parsed,
