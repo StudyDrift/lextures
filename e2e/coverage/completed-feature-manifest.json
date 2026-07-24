@@ -8340,6 +8340,24 @@
         }
       ],
       "reviewed": true
+    },
+    {
+      "id": "W08",
+      "path": "docs/completed/web/W08-content-page-multi-paragraph-copy.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright journey selects across paragraphs on a content page and asserts ⌘/Ctrl+C copies every paragraph.",
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-page-selection-copy.spec.ts"
+        }
+      ],
+      "reviewed": true
     }
   ]
 }

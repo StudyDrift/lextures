@@ -198,6 +198,15 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
     const deferMath = reducedData && hasMath && !userForcedMath
     const mathPlugins = useMemo(() => mathPluginsFor(!deferMath), [deferMath])
 
+    const useCourseFileImages = Boolean(courseCode)
+    // Stable component map — new function identities each render remount markdown DOM and
+    // break live Selection/Range objects used by the content page reader (multi-paragraph copy).
+    const components = useMemo(
+      () => createMarkdownComponents(theme, { useCourseFileImages }),
+      [theme, useCourseFileImages],
+    )
+    const normalized = useMemo(() => normalizeMarkdownLists(markdown), [markdown])
+
     if (!src) {
       return (
         <div ref={ref} className={`syllabus-md ${theme.classes.article}`}>
@@ -205,8 +214,6 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
         </div>
       )
     }
-    const components = createMarkdownComponents(theme, { useCourseFileImages: Boolean(courseCode) })
-    const normalized = normalizeMarkdownLists(markdown)
     return (
       <div ref={ref} className={`syllabus-md ${theme.classes.article}`}>
         {deferMath ? (
