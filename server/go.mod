@@ -22,7 +22,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.12.0
 	github.com/crewjam/saml v0.4.14
 	github.com/getsentry/sentry-go v0.47.0
-	github.com/go-chi/chi/v5 v5.2.4
+	github.com/go-chi/chi/v5 v5.3.1
 	github.com/go-webauthn/webauthn v0.17.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
