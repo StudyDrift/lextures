@@ -244,6 +244,27 @@ export function getFileContentUrl(courseCode: string, itemId: string): string {
   return `/api/v1/courses/${encodeURIComponent(courseCode)}/files/items/${encodeURIComponent(itemId)}/content`
 }
 
+/** Upload a file into the course files manager (local body or S3 presign + confirm). */
+export async function uploadManagedCourseFile(
+  courseCode: string,
+  file: File,
+  folderId?: string | null,
+): Promise<FileItem> {
+  const result = await initiateFileUpload(courseCode, file, folderId)
+  if ('presigned' in result) {
+    await uploadToPresignedUrl(result.presigned.presignedPutUrl!, file)
+    return confirmFileUpload(
+      courseCode,
+      result.presigned.objectKey,
+      file.name,
+      file.type || 'application/octet-stream',
+      file.size,
+      folderId,
+    )
+  }
+  return result.item
+}
+
 /** Builds the server HTML preview URL from a file content URL. */
 export function fileContentUrlToPreviewUrl(contentUrl: string): string | null {
   const suffix = '/content'

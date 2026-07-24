@@ -1900,3 +1900,28 @@ export async function apiGetPeerReviewAssigned(token: string): Promise<unknown[]
   const raw = (await res.json()) as { allocations?: unknown[] }
   return raw.allocations ?? []
 }
+
+/** Upload a file into the course files manager (`POST .../files/items`). */
+export async function apiUploadCourseManagedFile(
+  token: string,
+  courseCode: string,
+  file: { name: string; mimeType: string; bytes: Uint8Array },
+): Promise<{ id: string; displayName: string; mimeType: string }> {
+  const params = new URLSearchParams({ filename: file.name })
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/files/items?${params.toString()}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': file.mimeType || 'application/octet-stream',
+      },
+      body: Buffer.from(file.bytes),
+    },
+  )
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Upload managed course file failed (${res.status}): ${text}`)
+  }
+  return res.json() as Promise<{ id: string; displayName: string; mimeType: string }>
+}

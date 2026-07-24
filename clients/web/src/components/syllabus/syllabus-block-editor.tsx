@@ -26,6 +26,10 @@ import {
   useBlockEditor,
   type MarkdownEditKind,
 } from '../editor/block-editor'
+import {
+  MarkdownImageUploadModal,
+  type CourseFileInsertItem,
+} from '../editor/block-editor/markdown-image-upload-modal'
 import { EquationEditorProvider, useEquationEditor } from '../editor/equation-editor-context'
 import { isEquationEditorEnabled } from '../../lib/math'
 import { BookLoader } from '../quiz/book-loader'
@@ -449,8 +453,9 @@ function SyllabusBlockEditorInner({
   const [generateSubmittingId, setGenerateSubmittingId] = useState<string | null>(null)
   const [generateError, setGenerateError] = useState<string | null>(null)
   const generateInputRef = useRef<HTMLInputElement>(null)
-  const toolbarImageInputRef = useRef<HTMLInputElement>(null)
   const pendingToolbarImageSectionRef = useRef<string | null>(null)
+  const [toolbarImageModalOpen, setToolbarImageModalOpen] = useState(false)
+  const [toolbarImageInitialFiles, setToolbarImageInitialFiles] = useState<File[]>([])
   const mathToolbarAnchorRef = useRef<HTMLButtonElement | null>(null)
   const equationEditorEnabled = isEquationEditorEnabled()
   const altTextOn = altTextEnforcementFeatureEnabled()
@@ -482,32 +487,56 @@ function SyllabusBlockEditorInner({
     editorRefs.current[sectionId] = editor
   }, [])
 
-  const insertImagesIntoSection = useCallback(
-    (sectionId: string, files: File[]) => {
+  const openToolbarImageModal = useCallback((sectionId: string, files?: File[]) => {
+    pendingToolbarImageSectionRef.current = sectionId
+    setSelectedId(sectionId)
+    setActiveField({ blockId: sectionId, field: 'markdown' })
+    editorRefs.current[sectionId]?.chain().focus().run()
+    setToolbarImageInitialFiles(files ?? [])
+    setToolbarImageModalOpen(true)
+  }, [setSelectedId])
+
+  const insertCourseFilesIntoSection = useCallback(
+    (sectionId: string, items: CourseFileInsertItem[]) => {
       const editor = editorRefs.current[sectionId]
-      if (!editor || !courseCode) return
-      void (async () => {
-        let pos = editor.state.selection.from
-        for (const file of files) {
-          if (!file.type.startsWith('image/')) continue
-          try {
-            const path = await uploadCourseFile(courseCode, file).then((r) => r.contentPath)
-            editor
-              .chain()
-              .focus()
-              .insertContentAt(pos, {
-                type: 'image',
-                attrs: imageInsertAttrs(path, file.name),
-              })
-              .run()
-            pos = editor.state.selection.to
-          } catch {
-            /* ignore */
-          }
+      if (!editor) return
+      let pos = editor.state.selection.from
+      for (const item of items) {
+        if (item.mimeType.toLowerCase().startsWith('image/')) {
+          editor
+            .chain()
+            .focus()
+            .insertContentAt(pos, {
+              type: 'image',
+              attrs: imageInsertAttrs(item.contentPath, item.displayName),
+            })
+            .run()
+        } else {
+          const label = item.displayName.replace(/[[\]]/g, '') || 'File'
+          editor
+            .chain()
+            .focus()
+            .insertContentAt(pos, {
+              type: 'text',
+              text: label,
+              marks: [{ type: 'link', attrs: { href: item.contentPath } }],
+            })
+            .run()
         }
-      })()
+        pos = editor.state.selection.to
+      }
     },
-    [courseCode, imageInsertAttrs],
+    [imageInsertAttrs],
+  )
+
+  const handleToolbarImageInsert = useCallback(
+    async (items: CourseFileInsertItem[]) => {
+      const sid = pendingToolbarImageSectionRef.current ?? selectedId
+      pendingToolbarImageSectionRef.current = null
+      if (!sid) throw new Error('No section selected.')
+      insertCourseFilesIntoSection(sid, items)
+    },
+    [insertCourseFilesIntoSection, selectedId],
   )
 
   /** Ignore stale field state when another block is selected (no sync effect). */
@@ -765,17 +794,10 @@ function SyllabusBlockEditorInner({
             courseCode
               ? {
                   onPickClick: () => {
-                    pendingToolbarImageSectionRef.current = section.id
-                    setSelectedId(section.id)
-                    setActiveField({ blockId: section.id, field: 'markdown' })
-                    editorRefs.current[section.id]?.chain().focus().run()
-                    requestAnimationFrame(() => toolbarImageInputRef.current?.click())
+                    openToolbarImageModal(section.id)
                   },
                   onFiles: (files) => {
-                    setSelectedId(section.id)
-                    setActiveField({ blockId: section.id, field: 'markdown' })
-                    editorRefs.current[section.id]?.chain().focus().run()
-                    insertImagesIntoSection(section.id, files)
+                    openToolbarImageModal(section.id, files)
                   },
                 }
               : undefined
@@ -874,23 +896,19 @@ function SyllabusBlockEditorInner({
       }
     >
       <BlockCanvas>
-        <input
-          ref={toolbarImageInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-          multiple
-          className="sr-only"
-          aria-hidden
-          tabIndex={-1}
-          onChange={(e) => {
-            const sid = pendingToolbarImageSectionRef.current ?? selectedId
-            pendingToolbarImageSectionRef.current = null
-            const list = e.target.files
-            e.target.value = ''
-            if (!sid || !list?.length) return
-            insertImagesIntoSection(sid, [...list])
-          }}
-        />
+        {courseCode ? (
+          <MarkdownImageUploadModal
+            open={toolbarImageModalOpen}
+            onClose={() => {
+              setToolbarImageModalOpen(false)
+              setToolbarImageInitialFiles([])
+              pendingToolbarImageSectionRef.current = null
+            }}
+            courseCode={courseCode}
+            initialFiles={toolbarImageInitialFiles}
+            onInsert={handleToolbarImageInsert}
+          />
+        ) : null}
         {altTextOn ? (
           <AltTextWarningBanner coverage={altCoverage} hardBlock={altTextHardBlock} />
         ) : null}
