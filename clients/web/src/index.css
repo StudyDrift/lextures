@@ -3,6 +3,7 @@
 @import "./styles/high-contrast.css";
 @import "./styles/ui-modes/k2.css";
 @import "./styles/ui-modes/elementary.css";
+@import "./styles/tiptap-tables.css";
 
 /* Lextures — our humanist sans for learning surfaces and brand moments. */
 @font-face {

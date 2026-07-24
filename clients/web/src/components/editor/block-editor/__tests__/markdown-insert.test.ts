@@ -63,4 +63,11 @@ describe('applyMarkdownEdit', () => {
     const r = applyMarkdownEdit('ab', -5, 99, 'bold')
     expect(r.value).toBe('**ab**')
   })
+
+  it('inserts a GFM markdown table', () => {
+    const r = applyMarkdownEdit('hi', 2, 2, 'table')
+    expect(r.value).toContain('| Column 1 | Column 2 | Column 3 |')
+    expect(r.value).toContain('| -------- | -------- | -------- |')
+    expect(r.value.startsWith('hi')).toBe(true)
+  })
 })

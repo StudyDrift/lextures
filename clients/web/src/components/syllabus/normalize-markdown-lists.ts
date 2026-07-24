@@ -1,3 +1,5 @@
+import { normalizeMarkdownTables } from './normalize-markdown-tables'
+
 /**
  * CommonMark requires indentation for nested lists. Canvas / LMS exports often leave
  * bullets and sub-numbered lines at column 0, so the parser emits flat <ol>/<ul> siblings
@@ -90,5 +92,7 @@ function indentNestedOrderedAfterTwo(markdown: string): string {
 }
 
 export function normalizeMarkdownLists(markdown: string): string {
-  return indentNestedOrderedAfterTwo(indentBulletsAfterOrderedOne(markdown))
+  return normalizeMarkdownTables(
+    indentNestedOrderedAfterTwo(indentBulletsAfterOrderedOne(markdown)),
+  )
 }
