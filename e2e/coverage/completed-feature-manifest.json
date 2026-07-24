@@ -8358,6 +8358,24 @@
         }
       ],
       "reviewed": true
+    },
+    {
+      "id": "W09",
+      "path": "docs/completed/web/W09-section-heading-enter-focuses-content.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright journey edits a content-page section title and asserts Enter moves focus into the section body editor.",
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/section-heading-enter-focus.spec.ts"
+        }
+      ],
+      "reviewed": true
     }
   ]
 }

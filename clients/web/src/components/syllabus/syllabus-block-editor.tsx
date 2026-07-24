@@ -10,6 +10,7 @@ import {
   type SyllabusSection,
 } from '../../lib/courses-api'
 import { sectionsToMarkdown, markdownToSectionsForEditor } from './syllabus-section-markdown'
+import { isSectionHeadingEnterToContentKey } from './section-heading-enter'
 import TurndownService from 'turndown'
 import { gfm } from 'turndown-plugin-gfm'
 import { stripPastedHtmlColors } from '../editor/block-editor/strip-pasted-html-colors'
@@ -487,6 +488,21 @@ function SyllabusBlockEditorInner({
     editorRefs.current[sectionId] = editor
   }, [])
 
+  const focusSectionContent = useCallback(
+    (sectionId: string) => {
+      setSelectedId(sectionId)
+      setActiveField({ blockId: sectionId, field: 'markdown' })
+      // TipTap may not be registered on the first paint after mount; retry once.
+      const focus = () =>
+        editorRefs.current[sectionId]?.chain().focus('end', { scrollIntoView: false }).run()
+      focus()
+      if (!editorRefs.current[sectionId]) {
+        requestAnimationFrame(focus)
+      }
+    },
+    [setSelectedId],
+  )
+
   const openToolbarImageModal = useCallback((sectionId: string, files?: File[]) => {
     pendingToolbarImageSectionRef.current = sectionId
     setSelectedId(sectionId)
@@ -943,6 +959,11 @@ function SyllabusBlockEditorInner({
                 value={section.heading}
                 onChange={(e) => updateAt(index, { heading: e.target.value })}
                 onFocus={() => setActiveField({ blockId: section.id, field: 'heading' })}
+                onKeyDown={(e) => {
+                  if (!isSectionHeadingEnterToContentKey(e)) return
+                  e.preventDefault()
+                  focusSectionContent(section.id)
+                }}
                 onBlur={(e) => {
                   const next = e.relatedTarget as HTMLElement | null
                   if (next?.closest('[data-toolbar-anchor]')) return
