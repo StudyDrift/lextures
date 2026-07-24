@@ -4,6 +4,7 @@ export type SettingsNavView =
   | 'ai-models'
   | 'ai-prompts'
   | 'ai-reports'
+  | 'ai-governance'
   | 'account'
   | 'notifications'
   | 'integrations'
@@ -31,6 +32,7 @@ export type SettingsNavView =
 export function settingsViewFromPathname(pathname: string): SettingsNavView {
   if (pathname.startsWith('/settings/ai/system-prompts')) return 'ai-prompts'
   if (pathname.startsWith('/settings/ai/reports')) return 'ai-reports'
+  if (pathname.startsWith('/settings/ai/governance')) return 'ai-governance'
   if (pathname.startsWith('/settings/ai/models')) return 'ai-models'
   if (pathname.startsWith('/settings/feedback')) return 'feedback'
   const m = matchPath({ path: '/settings/:tab', end: true }, pathname)

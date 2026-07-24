@@ -69,7 +69,11 @@ export function SideNavSettingsLinks() {
   } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
-  const aiSectionActive = view === 'ai-models' || view === 'ai-prompts' || view === 'ai-reports'
+  const aiSectionActive =
+    view === 'ai-models' ||
+    view === 'ai-prompts' ||
+    view === 'ai-reports' ||
+    view === 'ai-governance'
   const [aiOpen, setAiOpen] = useState(() => location.pathname.startsWith('/settings/ai'))
 
   useEffect(() => {
@@ -288,6 +292,9 @@ export function SideNavSettingsLinks() {
                     <div className="flex flex-col gap-0.5 pb-0.5">
                       <SideNavLink to="/settings/ai/models" nested>
                         Models
+                      </SideNavLink>
+                      <SideNavLink to="/settings/ai/governance" nested>
+                        Governance
                       </SideNavLink>
                       <SideNavLink to="/settings/ai/reports" nested>
                         Reports

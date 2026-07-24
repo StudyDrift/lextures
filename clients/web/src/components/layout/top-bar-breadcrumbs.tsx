@@ -71,6 +71,8 @@ function settingsSubLabel(view: ReturnType<typeof settingsViewFromPathname>): st
       return 'System Prompts'
     case 'ai-reports':
       return 'Reports'
+    case 'ai-governance':
+      return 'Governance'
     case 'lti-tools':
       return 'LTI tools'
     case 'platform':

@@ -20,6 +20,48 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 )
 
+func patchWriteFromUpdateModuleQuizRequest(req coursemodulequiz.UpdateModuleQuizRequest) coursemodulequizzes.PatchWrite {
+	return coursemodulequizzes.PatchWrite{
+		Title:                       req.Title,
+		Markdown:                    req.Markdown,
+		Questions:                   req.Questions,
+		DueAt:                       req.DueAt,
+		AvailableFrom:               req.AvailableFrom,
+		AvailableUntil:              req.AvailableUntil,
+		UnlimitedAttempts:           req.UnlimitedAttempts,
+		OneQuestionAtATime:          req.OneQuestionAtATime,
+		MaxAttempts:                 req.MaxAttempts,
+		GradeAttemptPolicy:          req.GradeAttemptPolicy,
+		PassingScorePercent:         req.PassingScorePercent,
+		PointsWorth:                 req.PointsWorth,
+		LateSubmissionPolicy:        req.LateSubmissionPolicy,
+		LatePenaltyPercent:          req.LatePenaltyPercent,
+		TimeLimitMinutes:            req.TimeLimitMinutes,
+		TimerPauseWhenTabHidden:     req.TimerPauseWhenTabHidden,
+		PerQuestionTimeLimitSeconds: req.PerQuestionTimeLimitSeconds,
+		ShowScoreTiming:             req.ShowScoreTiming,
+		ReviewVisibility:            req.ReviewVisibility,
+		ReviewWhen:                  req.ReviewWhen,
+		ShuffleQuestions:            req.ShuffleQuestions,
+		ShuffleChoices:              req.ShuffleChoices,
+		AllowBackNavigation:         req.AllowBackNavigation,
+		QuizAccessCode:              req.QuizAccessCode,
+		AdaptiveDifficulty:          req.AdaptiveDifficulty,
+		AdaptiveTopicBalance:        req.AdaptiveTopicBalance,
+		AdaptiveStopRule:            req.AdaptiveStopRule,
+		RandomQuestionPoolCount:     req.RandomQuestionPoolCount,
+		LockdownMode:                req.LockdownMode,
+		FocusLossThreshold:          req.FocusLossThreshold,
+		IsAdaptive:                  req.IsAdaptive,
+		AdaptiveSystemPrompt:        req.AdaptiveSystemPrompt,
+		AdaptiveSourceItemIDs:       req.AdaptiveSourceItemIDs,
+		AdaptiveQuestionCount:       req.AdaptiveQuestionCount,
+		AdaptiveDeliveryMode:        req.AdaptiveDeliveryMode,
+		NeverDrop:                   req.NeverDrop,
+		ReplaceWithFinal:            req.ReplaceWithFinal,
+	}
+}
+
 func effectiveLockdownMode(courseLockdownEnabled bool, rowSetting string) string {
 	if !courseLockdownEnabled {
 		return "standard"
@@ -278,16 +320,17 @@ func (d Deps) handlePatchModuleQuiz() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
 			return
 		}
-		var req struct {
-			TimeLimitMinutes *int32                         `json:"timeLimitMinutes"`
-			Questions        *[]coursemodulequiz.QuizQuestion `json:"questions"`
-		}
+		var req coursemodulequiz.UpdateModuleQuizRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		if req.TimeLimitMinutes == nil && req.Questions == nil {
+		if !req.HasUpdates() {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide at least one field to update.")
+			return
+		}
+		if err := req.ValidatePatch(); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
 		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
@@ -302,10 +345,7 @@ func (d Deps) handlePatchModuleQuiz() http.HandlerFunc {
 		if !d.guardCourseItemCreateBlueprint(w, r, courseCode, viewer, *cid, itemID) {
 			return
 		}
-		okWrite, err := coursemodulequizzes.PatchForCourseItem(r.Context(), d.Pool, *cid, itemID, coursemodulequizzes.PatchWrite{
-			TimeLimitMinutes: req.TimeLimitMinutes,
-			Questions:        req.Questions,
-		})
+		okWrite, err := coursemodulequizzes.PatchForCourseItem(r.Context(), d.Pool, *cid, itemID, patchWriteFromUpdateModuleQuizRequest(req))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save quiz.")
 			return

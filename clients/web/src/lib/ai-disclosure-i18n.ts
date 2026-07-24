@@ -15,7 +15,7 @@ export const aiDisclosureI18n = {
   bannerUnderstand: 'I understand',
   bannerOptOutLink: 'AI processing settings',
   fullDisclosureLink: 'Full AI disclosure',
-  adminTitle: 'AI governance',
+  adminTitle: 'Governance',
   adminIntro: 'Enable or disable AI features and restrict models for your organization.',
   adminSave: 'Save AI governance',
   adminSaved: 'AI governance settings saved.',
