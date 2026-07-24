@@ -1496,6 +1496,24 @@
       "reviewed": true
     },
     {
+      "id": "8.13",
+      "path": "docs/completed/08-content-media-files/8.13-editor-course-file-insert-modal.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright journey covers toolbar modal open, select existing course file, upload staging, and Insert embed.",
+      "owner": "Content / Media",
+      "specs": [
+        {
+          "path": "e2e/tests/editor-image-insert-modal.spec.ts"
+        }
+      ],
+      "reviewed": true
+    },
+    {
       "id": "8.2",
       "path": "docs/completed/08-content-media-files/8.2-resumable-chunked-uploads.md",
       "markets": [
