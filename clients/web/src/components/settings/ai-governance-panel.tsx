@@ -8,6 +8,7 @@ const FEATURE_KEYS = [
   { key: 'ai_tutor', label: 'AI Tutor' },
   { key: 'rag_notebook', label: 'Notebook AI' },
   { key: 'syllabus_generation', label: 'Syllabus generation' },
+  { key: 'content_page_generation', label: 'Content page generation' },
   { key: 'outcomes_extraction', label: 'Learning outcomes extraction' },
   { key: 'badges_extraction', label: 'Badge extraction' },
   { key: 'translation', label: 'Translation' },

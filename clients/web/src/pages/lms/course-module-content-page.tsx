@@ -1,25 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { Pencil, FastForward, Download, CheckCircle, Loader2 } from 'lucide-react'
+import { Pencil, FastForward, Download, CheckCircle, Loader2, Sparkles } from 'lucide-react'
 import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useOfflineContent } from '../../hooks/use-offline-content'
 import { useOnlineStatus } from '../../hooks/use-online-status'
 import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
-import {
-  fetchContentPageMarkups,
-  type ContentPageMarkup,
-} from '../../lib/courses-api'
+import { BuildContentPageWithAiModal } from '../../components/content-page/build-content-page-with-ai-modal'
 import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
 import { usePermissions } from '../../context/use-permissions'
 import {
+  buildContentPageWithAi,
+  fetchContentPageMarkups,
   fetchCourse,
   fetchEnrollmentNext,
   fetchModuleContentPage,
   learnerCourseItemHref,
   patchModuleContentPage,
   postCourseContext,
+  type ContentPageMarkup,
   type CoursePublic,
+  type DraftContentPageSection,
   type SyllabusSection,
 } from '../../lib/courses-api'
 import {
@@ -71,7 +72,7 @@ function newLocalId(): string {
 export default function CourseModuleContentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const { allows, loading: permLoading } = usePermissions()
-  const { ffCeuTracking, aiStudyBuddyEnabled } = usePlatformFeatures()
+  const { ffCeuTracking, aiStudyBuddyEnabled, aiConfigured } = usePlatformFeatures()
 
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
@@ -82,6 +83,7 @@ export default function CourseModuleContentPage() {
 
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<SyllabusSection[]>([])
+  const [buildAiOpen, setBuildAiOpen] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [lastLocalAuthoringSave, setLastLocalAuthoringSave] = useState<string | null>(null)
@@ -319,8 +321,20 @@ export default function CourseModuleContentPage() {
 
   function cancelEdit() {
     setSaveError(null)
+    setBuildAiOpen(false)
     setEditing(false)
     setDraft([])
+  }
+
+  function applyBuiltSections(sections: DraftContentPageSection[]) {
+    setDraft(
+      sections.map((s) => ({
+        id: newLocalId(),
+        heading: s.heading,
+        markdown: s.markdown,
+      })),
+    )
+    setBuildAiOpen(false)
   }
 
   async function save() {
@@ -405,6 +419,17 @@ export default function CourseModuleContentPage() {
           <div className="flex flex-wrap items-center gap-2">
             {canEdit ? <FeatureHelpTrigger topic="content-page" /> : null}
             <ReadingFocusToggle />
+            {canEdit && aiConfigured ? (
+              <button
+                type="button"
+                onClick={() => setBuildAiOpen(true)}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+              >
+                <Sparkles className="h-4 w-4" aria-hidden />
+                Build with AI
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={cancelEdit}
@@ -656,6 +681,21 @@ export default function CourseModuleContentPage() {
           simplifyDlg.setOpen(false)
         }}
       />
+      {courseCode && itemId ? (
+        <BuildContentPageWithAiModal
+          open={buildAiOpen}
+          existingMarkdown={sectionsToMarkdown(draft)}
+          onClose={() => setBuildAiOpen(false)}
+          onBuild={async ({ prompt, existingMarkdown }) => {
+            const { sections } = await buildContentPageWithAi(courseCode, itemId, {
+              prompt,
+              existingMarkdown: existingMarkdown || undefined,
+            })
+            return sections
+          }}
+          onBuilt={applyBuiltSections}
+        />
+      ) : null}
       {aiStudyBuddyEnabled && courseCode ? <StudyBuddyWidget courseCode={courseCode} /> : null}
     </LmsPage>
   )

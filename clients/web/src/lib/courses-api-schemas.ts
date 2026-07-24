@@ -882,6 +882,15 @@ export const generatedSyllabusSectionMarkdownSchema = z.object({
   markdown: z.string(),
 })
 
+export const draftContentPageSectionSchema = z.object({
+  heading: z.string(),
+  markdown: z.string(),
+})
+
+export const buildContentPageWithAiResponseSchema = z.object({
+  sections: z.array(draftContentPageSectionSchema),
+})
+
 const courseOutcomeLinkProgressSchema = z.object({
   avgScorePercent: z.number().nullable(),
   gradedLearners: z.number(),
@@ -931,6 +940,19 @@ export const draftCourseOutcomeSchema = z.object({
 
 export const extractCourseOutcomesFromSyllabusResponseSchema = z.object({
   outcomes: z.array(draftCourseOutcomeSchema),
+})
+
+export const quizOutcomeLinkSuggestionSchema = z.object({
+  targetKind: z.enum(['quiz', 'quiz_question']),
+  quizQuestionId: z.string(),
+  outcomeId: z.string(),
+  measurementLevel: z.string(),
+  intensityLevel: z.string(),
+  rationale: z.string(),
+})
+
+export const suggestQuizOutcomeLinksResponseSchema = z.object({
+  suggestions: z.array(quizOutcomeLinkSuggestionSchema),
 })
 
 export const courseScopedAppRoleSchema = z.object({
