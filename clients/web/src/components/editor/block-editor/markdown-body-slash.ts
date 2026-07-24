@@ -15,6 +15,7 @@ export type SlashCommandId =
   | 'task'
   | 'bulletList'
   | 'orderedList'
+  | 'table'
   | 'codeBlock'
   | 'blockquote'
   | 'horizontalRule'
@@ -87,6 +88,12 @@ const BASE_SLASH_COMMANDS: SlashCommand[] = [
     label: 'Numbered list',
     description: 'Ordered list',
     keywords: ['ol', 'list', 'numbers'],
+  },
+  {
+    id: 'table',
+    label: 'Table',
+    description: 'Insert a 3×3 table',
+    keywords: ['table', 'grid', 'spreadsheet', 'columns'],
   },
   {
     id: 'codeBlock',
@@ -247,6 +254,9 @@ export function applySlashCommand(
       break
     case 'orderedList':
       chain.toggleOrderedList().run()
+      break
+    case 'table':
+      chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
       break
     case 'codeBlock':
       chain.toggleCodeBlock().run()
