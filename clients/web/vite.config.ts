@@ -95,7 +95,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['turndown'],
+    include: ['turndown', 'turndown-plugin-gfm'],
   },
   build: isTauri
     ? {

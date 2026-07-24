@@ -28,6 +28,7 @@ import {
 } from '@dnd-kit/sortable'
 import { KeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyboardSensorConfig'
 import { CSS, type Transform } from '@dnd-kit/utilities'
+import { structureReorderDropAction } from './course-modules-reorder'
 import {
   AlertCircle,
   BookMarked,
@@ -2565,39 +2566,76 @@ export default function CourseModules() {
     (event: DragEndEvent) => {
       const { active, over } = event
       setActiveDragId(null)
-      if (!over || !courseCode || active.id === over.id) return
+      const committedDuringDrag = dragReorderCommittedRef.current
+      dragReorderCommittedRef.current = false
 
+      const dropAction = structureReorderDropAction({
+        hasCourseCode: Boolean(courseCode),
+        overId: over ? String(over.id) : null,
+        activeId: String(active.id),
+        committedDuringDrag,
+      })
+
+      if (dropAction === 'noop') return
+
+      if (dropAction === 'revert') {
+        void load({ silent: true })
+        return
+      }
+
+      if (dropAction === 'persist-current') {
+        setItems((prev) => {
+          void persistReorder(buildReorderPayloadFromItems(prev))
+          return prev
+        })
+        return
+      }
+
+      // dropAction === 'apply-over' (over is defined)
+      if (!over) return
+      const overId = String(over.id)
+      const overType = over.data.current?.type as string | undefined
+      const overModuleIdFromData = over.data.current?.moduleId as string | undefined
       const activeType = active.data.current?.type as string | undefined
       setItems((prev) => {
         let next = prev
         if (activeType === 'module') {
-          if (over.data.current?.type !== 'module') return prev
-          const reordered = reorderModulesInStructure(prev, String(active.id), String(over.id))
+          if (overType !== 'module') {
+            if (committedDuringDrag) {
+              void persistReorder(buildReorderPayloadFromItems(prev))
+            }
+            return prev
+          }
+          const reordered = reorderModulesInStructure(prev, String(active.id), overId)
           if (reordered) next = reordered
         } else if (activeType === 'child') {
           const moduleId = active.data.current?.moduleId as string | undefined
-          if (!moduleId) return prev
+          if (!moduleId) {
+            if (committedDuringDrag) {
+              void persistReorder(buildReorderPayloadFromItems(prev))
+            }
+            return prev
+          }
           const overModuleId =
-            (over.data.current?.moduleId as string | undefined) ??
-            findModuleIdForChildItem(String(over.id), buildModuleChildrenMap(prev))
-          if (!overModuleId || moduleId !== overModuleId) return prev
-          const reordered = reorderChildrenInStructure(
-            prev,
-            moduleId,
-            String(active.id),
-            String(over.id),
-          )
+            overModuleIdFromData ?? findModuleIdForChildItem(overId, buildModuleChildrenMap(prev))
+          if (!overModuleId || moduleId !== overModuleId) {
+            if (committedDuringDrag) {
+              void persistReorder(buildReorderPayloadFromItems(prev))
+            }
+            return prev
+          }
+          const reordered = reorderChildrenInStructure(prev, moduleId, String(active.id), overId)
           if (reordered) next = reordered
         } else {
           return prev
         }
 
-        if (next === prev && !dragReorderCommittedRef.current) return prev
+        if (next === prev && !committedDuringDrag) return prev
         void persistReorder(buildReorderPayloadFromItems(next))
         return next
       })
     },
-    [courseCode, persistReorder],
+    [courseCode, load, persistReorder],
   )
 
   const handleDragCancel = useCallback(() => {
@@ -2760,16 +2798,17 @@ export default function CourseModules() {
               onDragEnd({ active, over }) {
                 const item = items.find((i) => i.id === String(active.id))
                 if (!item) return
-                if (!over || active.id === over.id) {
+                // After live dragOver reorder, active often equals over on a successful drop.
+                if (!over) {
                   return `Dragging cancelled. "${item.title}" returned to its original position.`
                 }
                 if (item.kind === 'module') {
-                  const pos = moduleIds.indexOf(String(over.id)) + 1
+                  const pos = moduleIds.indexOf(String(active.id)) + 1
                   return `"${item.title}" dropped at position ${pos} of ${moduleIds.length}.`
                 }
                 const moduleId = active.data.current?.moduleId as string | undefined
                 const siblings = moduleId ? (moduleChildrenById.get(moduleId) ?? []) : []
-                const pos = siblings.findIndex((c) => c.id === String(over.id)) + 1
+                const pos = siblings.findIndex((c) => c.id === String(active.id)) + 1
                 return `"${item.title}" dropped at position ${pos} of ${siblings.length}.`
               },
               onDragCancel({ active }) {
