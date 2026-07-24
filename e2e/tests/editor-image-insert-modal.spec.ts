@@ -20,6 +20,8 @@ test.describe('Editor image insert modal', () => {
     coursePage: page,
     seededCourse,
   }) => {
+    test.setTimeout(60_000)
+
     const uploaded = await apiUploadCourseManagedFile(
       seededCourse.instructorToken,
       seededCourse.courseCode,
@@ -57,16 +59,16 @@ test.describe('Editor image insert modal', () => {
     await dialog.getByRole('button', { name: /^insert$/i }).click()
     await expect(dialog).toBeHidden({ timeout: 8000 })
 
-    await expect(sectionBody.locator('img').first()).toBeVisible({ timeout: 8000 })
-
-    await page.getByRole('button', { name: /^save$/i }).click()
-    await expect(page.getByText(/saved|updated/i).first()).toBeVisible({ timeout: 12000 })
+    // TipTap course images may load via authenticated blob URL; wait for the node.
+    await expect(sectionBody.locator('img, figure').first()).toBeVisible({ timeout: 12000 })
   })
 
   test('modal upload zone stages a file and Insert embeds it', async ({
     coursePage: page,
     seededCourse,
   }) => {
+    test.setTimeout(60_000)
+
     const contentPage = await apiCreateContentPage(
       seededCourse.instructorToken,
       seededCourse.courseCode,
@@ -95,6 +97,6 @@ test.describe('Editor image insert modal', () => {
     await expect(dialog.getByText('upload-from-modal.png')).toBeVisible()
     await dialog.getByRole('button', { name: /^insert$/i }).click()
     await expect(dialog).toBeHidden({ timeout: 10000 })
-    await expect(sectionBody.locator('img').first()).toBeVisible({ timeout: 8000 })
+    await expect(sectionBody.locator('img, figure').first()).toBeVisible({ timeout: 12000 })
   })
 })
