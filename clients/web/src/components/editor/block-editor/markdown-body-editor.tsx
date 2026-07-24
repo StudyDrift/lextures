@@ -34,7 +34,7 @@ import type { Board } from '../../../lib/boards-api'
 
 const editorShellClass = [
   'tiptap',
-  'min-h-[100px] w-full px-0 py-1 text-[15px] leading-[1.65] text-slate-800',
+  'min-h-[100px] w-full px-0 py-1 text-[15px] leading-[1.65] text-slate-800 dark:text-neutral-200',
   'focus:outline-none',
   '[&_p]:mt-3 [&_p:first-child]:mt-0',
   '[&_h1]:mt-6 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h1]:first:mt-0',

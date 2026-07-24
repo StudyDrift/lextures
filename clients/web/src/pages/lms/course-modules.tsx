@@ -1446,8 +1446,6 @@ type SortableModuleCardProps = {
   onOpenEditChildTitle: (child: CourseStructureItem) => void
   onArchiveChild: (child: CourseStructureItem) => void
   courseAdaptivePathsEnabled: boolean
-  conditionalReleaseEnabled: boolean
-  allModules: { id: string; title: string }[]
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
 }
 
@@ -1480,8 +1478,6 @@ function SortableModuleCard({
   onOpenEditChildTitle,
   onArchiveChild,
   courseAdaptivePathsEnabled,
-  conditionalReleaseEnabled,
-  allModules,
   studentGradeContext,
 }: SortableModuleCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -1569,18 +1565,9 @@ function SortableModuleCard({
           ) : null
         }
         footerExtra={
-          <>
-            {canEditModules && conditionalReleaseEnabled && !minified ? (
-              <ModuleRequirementsPanel
-                courseCode={courseCode}
-                moduleId={item.id}
-                allModules={allModules}
-              />
-            ) : null}
-            {canEditModules && courseAdaptivePathsEnabled && !minified ? (
-              <ModuleAdaptivePathPanel courseCode={courseCode} moduleId={item.id} />
-            ) : null}
-          </>
+          canEditModules && courseAdaptivePathsEnabled && !minified ? (
+            <ModuleAdaptivePathPanel courseCode={courseCode} moduleId={item.id} />
+          ) : null
         }
         childrenList={childrenList}
       />
@@ -1742,6 +1729,7 @@ export default function CourseModules() {
   const [moduleSettingsModuleId, setModuleSettingsModuleId] = useState<string | null>(null)
   const [moduleSettingsSaving, setModuleSettingsSaving] = useState(false)
   const [moduleSettingsSaveError, setModuleSettingsSaveError] = useState<string | null>(null)
+  const [moduleRequirementsSaving, setModuleRequirementsSaving] = useState(false)
   const [archiveConfirmItem, setArchiveConfirmItem] = useState<CourseStructureItem | null>(null)
   /** Module pending hard-delete (or archive when graded). Null when no confirm is open. */
   const [moduleDeleteTarget, setModuleDeleteTarget] = useState<CourseStructureItem | null>(null)
@@ -2846,8 +2834,6 @@ export default function CourseModules() {
                     onOpenEditChildTitle={openEditChildTitle}
                     onArchiveChild={requestArchiveChild}
                     courseAdaptivePathsEnabled={courseMeta?.adaptivePathsEnabled === true}
-                    conditionalReleaseEnabled={ffConditionalRelease}
-                    allModules={allModules}
                     studentGradeContext={studentGradeContext}
                   />
                 ))}
@@ -3120,7 +3106,7 @@ export default function CourseModules() {
         initialPublished={settingsTargetItem?.published ?? true}
         initialVisibleFrom={settingsTargetItem?.visibleFrom ?? null}
         onClose={() => {
-          if (!moduleSettingsSaving) {
+          if (!moduleSettingsSaving && !moduleRequirementsSaving) {
             setModuleSettingsOpen(false)
             setModuleSettingsModuleId(null)
           }
@@ -3129,6 +3115,17 @@ export default function CourseModules() {
         onDelete={() => void requestDeleteModule()}
         saving={moduleSettingsSaving}
         errorMessage={moduleSettingsSaveError}
+        requirementsSaving={moduleRequirementsSaving}
+        requirementsSection={
+          ffConditionalRelease && courseCode && settingsTargetItem ? (
+            <ModuleRequirementsPanel
+              courseCode={courseCode}
+              moduleId={settingsTargetItem.id}
+              allModules={allModules}
+              onSavingChange={setModuleRequirementsSaving}
+            />
+          ) : null
+        }
       />
 
       {moduleDeleteTarget ? (

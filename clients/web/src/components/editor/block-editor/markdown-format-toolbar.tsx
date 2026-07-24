@@ -42,7 +42,6 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
 
   return (
     <>
-      <span className="mx-0.5 h-5 w-px shrink-0 bg-slate-200 dark:bg-neutral-600" aria-hidden />
       <button
         type="button"
         disabled={disabled}
