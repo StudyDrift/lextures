@@ -141,7 +141,7 @@ INSERT INTO course.courses (
     open_enrollment,
     module_gating_enabled
 ) VALUES (
-    $1, $2, $3, $4, 'traditional', $5, $6, TRUE, $7::timestamptz, 'letter_standard',
+    $1, $2, $3, $4, 'traditional', $5, $6, TRUE, $7::timestamptz, 'letter_plus_minus',
     TRUE, $8, $9, $10, $11, $12, $13, 'usd', $14,
     CASE WHEN $14 THEN $7::timestamptz ELSE NULL END,
     'self_paced', TRUE, FALSE
@@ -181,7 +181,7 @@ SET
     starts_at = NULL,
     ends_at = NULL,
     hidden_at = NULL,
-    grading_scale = 'letter_standard',
+    grading_scale = 'letter_plus_minus',
     is_official = TRUE,
     is_public = $5,
     catalog_slug = $6,

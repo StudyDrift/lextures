@@ -81,6 +81,7 @@ test.describe('AN.7 delight motion', () => {
       test.skip(true, 'No animated progress on dashboard in this environment')
       return
     }
-    await expect(fill).toBeVisible()
+    // 0% progress can leave a zero-width fill that Playwright treats as hidden.
+    await expect(fill).toBeAttached()
   })
 })

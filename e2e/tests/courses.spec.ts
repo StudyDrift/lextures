@@ -68,11 +68,14 @@ test.describe('Create course', () => {
     await expect(page.getByRole('button', { name: /^continue$/i })).toBeVisible({ timeout: 10000 })
     await page.getByRole('button', { name: /^continue$/i }).click()
 
-    // Step 3 — Module: click "Skip module" to open the course immediately.
+    // Step 3 — Module: skip first module and continue to features.
     await expect(page.getByRole('button', { name: /skip module/i })).toBeVisible({ timeout: 10000 })
     await page.getByRole('button', { name: /skip module/i }).click()
 
-    // After step 3, the app navigates to the newly created course.
+    // Step 4 — Course features: finish setup and open the course.
+    await expect(page.getByRole('button', { name: /^open course$/i })).toBeVisible({ timeout: 10000 })
+    await page.getByRole('button', { name: /^open course$/i }).click()
+
     await expect(page).toHaveURL(/\/courses\/C-[A-Z0-9]+/, { timeout: 20000 })
   })
 

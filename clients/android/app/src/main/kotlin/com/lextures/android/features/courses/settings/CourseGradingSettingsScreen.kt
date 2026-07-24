@@ -73,7 +73,7 @@ fun CourseGradingSettingsScreen(
     var baseline by remember(course.courseCode) {
         mutableStateOf(
             CourseGradingLogic.FormBaseline(
-                gradingScale = "letter_standard",
+                gradingScale = "letter_plus_minus",
                 groups = CourseGradingLogic.defaultGroups(),
                 schemeType = "points",
                 bands = CourseGradingLogic.defaultBands(),

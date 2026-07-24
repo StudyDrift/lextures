@@ -67,11 +67,13 @@ object CourseCreateLogic {
         Basics(1),
         Syllabus(2),
         Finish(3),
+        Features(4),
         ;
 
         companion object {
+            const val TOTAL_PROGRESS_STEPS = 4
             fun fromNumber(n: Int): WizardStep = entries.firstOrNull { it.number == n } ?: Basics
-            val progressSteps: List<WizardStep> = listOf(Basics, Syllabus, Finish)
+            val progressSteps: List<WizardStep> = listOf(Basics, Syllabus, Finish, Features)
         }
     }
 

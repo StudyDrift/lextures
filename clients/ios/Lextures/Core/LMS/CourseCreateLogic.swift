@@ -109,15 +109,19 @@ enum CourseCreateLogic {
         case basics = 1
         case syllabus = 2
         case finish = 3
+        case features = 4
 
         var id: Int { rawValue }
+
+        /// Total progress steps shown in the header (excludes source chooser).
+        static let totalProgressSteps = 4
 
         static func < (lhs: WizardStep, rhs: WizardStep) -> Bool {
             lhs.rawValue < rhs.rawValue
         }
 
         /// Progress steps shown in the header (excludes source chooser).
-        static var progressSteps: [WizardStep] { [.basics, .syllabus, .finish] }
+        static var progressSteps: [WizardStep] { [.basics, .syllabus, .finish, .features] }
 
         var labelKey: String {
             switch self {
@@ -125,6 +129,7 @@ enum CourseCreateLogic {
             case .basics: return "mobile.createCourse.step.basics"
             case .syllabus: return "mobile.createCourse.step.syllabus"
             case .finish: return "mobile.createCourse.step.module"
+            case .features: return "mobile.createCourse.step.features"
             }
         }
 

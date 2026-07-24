@@ -65,7 +65,15 @@ import { LmsPage } from './lms-page'
 import { usePermissions } from '../../context/use-permissions'
 import { useBumpCoursesRevision, useCoursesRevision } from '../../context/use-inbox-unread'
 import { authorizedFetch } from '../../lib/api'
-import { putCourseCatalogOrder, type CoursePublic, fetchOrgTerms, fetchOrgType, type OrgTerm, type OrgType } from '../../lib/courses-api'
+import {
+  putCourseCatalogOrder,
+  type CoursePublic,
+  fetchOrgTerms,
+  fetchOrgType,
+  dedupeOrgTermsForPicker,
+  type OrgTerm,
+  type OrgType,
+} from '../../lib/courses-api'
 import { decodeJwtPayload } from '../../lib/jwt-payload'
 import { getAccessToken } from '../../lib/auth'
 import { readApiErrorMessage } from '../../lib/errors'
@@ -1099,7 +1107,7 @@ export default function Courses() {
     let cancelled = false
     void fetchOrgTerms(orgId)
       .then((t) => {
-        if (!cancelled) setTermList(t)
+        if (!cancelled) setTermList(dedupeOrgTermsForPicker(t))
       })
       .catch(() => {
         if (!cancelled) setTermList([])

@@ -1,22 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ConfirmDialog } from '../../components/confirm-dialog'
+import { ExtractOutcomesFromSyllabusModal } from '../../components/outcomes/extract-outcomes-from-syllabus-modal'
 import { UnsavedChangesBanner } from '../../components/ui/unsaved-changes-banner'
 import {
   ChevronDown,
   Link2,
   Loader2,
   Plus,
+  Sparkles,
   Target,
   Trash2,
   TrendingUp,
 } from 'lucide-react'
 import { usePermissions } from '../../context/use-permissions'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   addCourseOutcomeLink,
   courseItemCreatePermission,
   createCourseOutcome,
   deleteCourseOutcome,
   deleteCourseOutcomeLink,
+  extractCourseOutcomesFromSyllabus,
   fetchCourseOutcomes,
   fetchCourseStructure,
   fetchModuleQuiz,
@@ -26,6 +30,7 @@ import {
   type CourseOutcome,
   type CourseOutcomeLink,
   type CourseStructureItem,
+  type DraftCourseOutcome,
 } from '../../lib/courses-api'
 
 type GradableOption = {
@@ -113,6 +118,7 @@ function linkSummary(link: CourseOutcomeLink): string {
 
 export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
   const { allows, loading: permLoading } = usePermissions()
+  const { aiConfigured } = usePlatformFeatures()
   const canEdit = !permLoading && allows(courseItemCreatePermission(courseCode))
 
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -127,6 +133,9 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
   const [deleteOutcomeOpen, setDeleteOutcomeOpen] = useState(false)
   const [deleteOutcomeId, setDeleteOutcomeId] = useState<string | null>(null)
   const [deleteOutcomeTyped, setDeleteOutcomeTyped] = useState('')
+  const [extracting, setExtracting] = useState(false)
+  const [extractModalOpen, setExtractModalOpen] = useState(false)
+  const [extractDrafts, setExtractDrafts] = useState<DraftCourseOutcome[]>([])
 
   const gradableOptions = useMemo(() => gradableOptionsFromStructure(structure), [structure])
 
@@ -170,6 +179,25 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
       setLoadError(err instanceof Error ? err.message : 'Could not create outcome.')
     } finally {
       setCreating(false)
+    }
+  }
+
+  async function onExtractFromSyllabus() {
+    if (!aiConfigured || extracting) return
+    setExtracting(true)
+    setLoadError(null)
+    try {
+      const { outcomes: drafts } = await extractCourseOutcomesFromSyllabus(courseCode)
+      if (drafts.length === 0) {
+        setLoadError('No learning outcomes were found in the syllabus.')
+        return
+      }
+      setExtractDrafts(drafts)
+      setExtractModalOpen(true)
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Could not extract outcomes from syllabus.')
+    } finally {
+      setExtracting(false)
     }
   }
 
@@ -294,6 +322,21 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
               </ol>
             </div>
           </div>
+          {aiConfigured ? (
+            <button
+              type="button"
+              onClick={() => void onExtractFromSyllabus()}
+              disabled={extracting}
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+            >
+              {extracting ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Sparkles className="h-4 w-4" aria-hidden />
+              )}
+              {extracting ? 'Extracting…' : 'Extract from syllabus'}
+            </button>
+          ) : null}
         </div>
 
         <details className="group mt-4 border-t border-slate-100 pt-4 dark:border-neutral-800">
@@ -504,6 +547,17 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
           setDeleteOutcomeTyped('')
         }}
         onConfirm={() => void confirmDeleteOutcome()}
+      />
+
+      <ExtractOutcomesFromSyllabusModal
+        open={extractModalOpen}
+        courseCode={courseCode}
+        drafts={extractDrafts}
+        onClose={() => {
+          setExtractModalOpen(false)
+          setExtractDrafts([])
+        }}
+        onCreated={() => load()}
       />
 
       <UnsavedChangesBanner

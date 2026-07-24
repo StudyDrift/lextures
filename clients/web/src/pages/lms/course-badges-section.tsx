@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Award, Loader2, Plus } from 'lucide-react'
+import { Award, Loader2, Plus, Sparkles } from 'lucide-react'
+import { ExtractBadgesFromSyllabusModal } from '../../components/badges/extract-badges-from-syllabus-modal'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   awardBadge,
   createBadgeDefinition,
+  extractCourseBadgesFromSyllabus,
   fetchBadgeCandidates,
   listCourseBadgeDefinitions,
   type BadgeDefinition,
+  type DraftBadgeDefinition,
 } from '../../lib/badges-api'
 import { fetchCourseOutcomes, type CourseOutcome } from '../../lib/courses-api'
 
@@ -16,7 +19,7 @@ type Props = {
 }
 
 export function CourseBadgesSection({ courseCode, courseId }: Props) {
-  const { ffCompetencyBadges } = usePlatformFeatures()
+  const { ffCompetencyBadges, aiConfigured } = usePlatformFeatures()
   const [definitions, setDefinitions] = useState<BadgeDefinition[]>([])
   const [outcomes, setOutcomes] = useState<CourseOutcome[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,6 +36,10 @@ export function CourseBadgesSection({ courseCode, courseId }: Props) {
   >([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [awarding, setAwarding] = useState(false)
+  const [extracting, setExtracting] = useState(false)
+  const [extractModalOpen, setExtractModalOpen] = useState(false)
+  const [extractDrafts, setExtractDrafts] = useState<DraftBadgeDefinition[]>([])
+  const [extractSource, setExtractSource] = useState('outcomes')
 
   const resolvedCourseId = courseId || courseCode
 
@@ -119,16 +126,53 @@ export function CourseBadgesSection({ courseCode, courseId }: Props) {
     }
   }
 
+  async function onExtractFromSyllabus() {
+    if (!aiConfigured || extracting) return
+    setExtracting(true)
+    setError(null)
+    try {
+      const { badges, source } = await extractCourseBadgesFromSyllabus(resolvedCourseId)
+      if (!badges.length) {
+        setError('No badges could be drafted. Add learning outcomes or syllabus content, then try again.')
+        return
+      }
+      setExtractDrafts(badges)
+      setExtractSource(source)
+      setExtractModalOpen(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not extract badges from syllabus.')
+    } finally {
+      setExtracting(false)
+    }
+  }
+
   return (
     <div className="space-y-8">
-      <header>
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
-          <Award className="h-5 w-5 text-indigo-600" aria-hidden />
-          Competency micro-badges
-        </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-          Define signed Open Badges for learning outcomes and award them to students who demonstrate mastery.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+            <Award className="h-5 w-5 text-indigo-600" aria-hidden />
+            Competency micro-badges
+          </h2>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Define signed Open Badges for learning outcomes and award them to students who demonstrate mastery.
+          </p>
+        </div>
+        {aiConfigured ? (
+          <button
+            type="button"
+            onClick={() => void onExtractFromSyllabus()}
+            disabled={extracting || loading}
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+          >
+            {extracting ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Sparkles className="h-4 w-4" aria-hidden />
+            )}
+            {extracting ? 'Extracting…' : 'Extract from syllabus'}
+          </button>
+        ) : null}
       </header>
 
       {error ? (
@@ -303,6 +347,19 @@ export function CourseBadgesSection({ courseCode, courseId }: Props) {
           </div>
         </div>
       ) : null}
+
+      <ExtractBadgesFromSyllabusModal
+        open={extractModalOpen}
+        courseId={resolvedCourseId}
+        drafts={extractDrafts}
+        source={extractSource}
+        outcomes={outcomes}
+        onClose={() => {
+          setExtractModalOpen(false)
+          setExtractDrafts([])
+        }}
+        onCreated={() => load()}
+      />
     </div>
   )
 }

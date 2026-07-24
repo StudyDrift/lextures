@@ -19,7 +19,6 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/db"
 	"github.com/lextures/lextures/server/internal/migrate"
-	"github.com/lextures/lextures/server/internal/repos/organization"
 	transcriptsrepo "github.com/lextures/lextures/server/internal/repos/transcripts"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/transcriptissue"
@@ -47,7 +46,20 @@ func setupTranscriptDocsTest(t *testing.T, ctx context.Context) (*pgxpool.Pool, 
 		t.Fatalf("user: %v", err)
 	}
 	uid, _ := uuid.Parse(row.ID)
-	orgID := organization.SeedDefaultOrgID
+	// Use an isolated org so repeated runs cannot pollute the shared seed org's term list.
+	var orgID uuid.UUID
+	orgSlug := fmt.Sprintf("transcript-docs-%s", uuid.NewString()[:8])
+	if err := pool.QueryRow(ctx, `
+INSERT INTO tenant.organizations (slug, name, status)
+VALUES ($1, 'Transcript Docs Test', 'active')
+RETURNING id
+`, orgSlug).Scan(&orgID); err != nil {
+		pool.Close()
+		t.Fatalf("org: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = pool.Exec(context.Background(), `DELETE FROM tenant.organizations WHERE id = $1`, orgID)
+	})
 	if _, err := pool.Exec(ctx, `UPDATE "user".users SET org_id = $1 WHERE id = $2`, orgID, uid); err != nil {
 		pool.Close()
 		t.Fatalf("set org: %v", err)
@@ -75,9 +87,9 @@ RETURNING id
 		cc := "C-" + strings.ToUpper(strings.ReplaceAll(uuid.New().String(), "-", "")[:6])
 		var courseID, enrollID uuid.UUID
 		if err := pool.QueryRow(ctx, `
-INSERT INTO course.courses (course_code, title, created_by_user_id, term_id)
-VALUES ($1, $2, $3, $4) RETURNING id
-`, cc, fmt.Sprintf("Course %d", i+1), uid, termIDs[i]).Scan(&courseID); err != nil {
+INSERT INTO course.courses (org_id, course_code, title, created_by_user_id, term_id)
+VALUES ($1, $2, $3, $4, $5) RETURNING id
+`, orgID, cc, fmt.Sprintf("Course %d", i+1), uid, termIDs[i]).Scan(&courseID); err != nil {
 			pool.Close()
 			t.Fatalf("course: %v", err)
 		}

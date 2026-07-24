@@ -147,7 +147,7 @@ object CourseGradingLogic {
         val schemeType = scheme?.type?.trim()?.takeIf { it.isNotEmpty() } ?: "points"
         val parsed = parseBands(scheme?.scaleJson)
         return FormBaseline(
-            gradingScale = settings.gradingScale.trim().ifEmpty { "letter_standard" },
+            gradingScale = settings.gradingScale.trim().ifEmpty { "letter_plus_minus" },
             groups = groupsFromSettings(settings),
             schemeType = schemeType,
             bands = parsed.ifEmpty { defaultBands() },

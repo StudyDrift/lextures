@@ -17,3 +17,15 @@ func TestDeriveStatusFromDates(t *testing.T) {
 		t.Fatalf("completed after end: got %q", got)
 	}
 }
+
+func TestValidateTermTypeAndStatus(t *testing.T) {
+	if !validateTermType("semester") || !validateTermType("Quarter") {
+		t.Fatal("expected common term types to validate")
+	}
+	if validateTermType("bogus") {
+		t.Fatal("expected bogus term type to fail")
+	}
+	if !validateStatus("active") || validateStatus("nope") {
+		t.Fatal("status validation mismatch")
+	}
+}

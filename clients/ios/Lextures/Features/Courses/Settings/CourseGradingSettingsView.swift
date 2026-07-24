@@ -9,7 +9,7 @@ struct CourseGradingSettingsView: View {
     let course: CourseSummary
 
     @State private var baseline = CourseGradingLogic.FormBaseline(
-        gradingScale: "letter_standard",
+        gradingScale: "letter_plus_minus",
         groups: CourseGradingLogic.defaultGroups(),
         schemeType: "points",
         bands: CourseGradingLogic.defaultBands(),
@@ -17,7 +17,7 @@ struct CourseGradingSettingsView: View {
         completeMinPct: "50"
     )
     @State private var form = CourseGradingLogic.FormBaseline(
-        gradingScale: "letter_standard",
+        gradingScale: "letter_plus_minus",
         groups: CourseGradingLogic.defaultGroups(),
         schemeType: "points",
         bands: CourseGradingLogic.defaultBands(),
