@@ -4173,6 +4173,33 @@
       }
     },
     {
+      "id": "AC.8",
+      "path": "docs/completed/adaptive/AC.8-governance-safety-fairness-privacy.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "API contest/resolve + admin oversight/quarantine/kill-switch; deeper UI contest banner and fairness console journey remain backlog.",
+      "owner": "Trust & Safety",
+      "specs": [
+        {
+          "path": "e2e/tests/adaptive-content-governance.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Org adaptive_content toggle + durable kill-switch + quarantine covered; DSAR/fairness primarily server/unit tested."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
