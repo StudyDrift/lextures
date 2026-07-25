@@ -11,3 +11,4 @@ Shipped ACE plans. Active backlog: [`docs/plan/adaptive/`](../../plan/adaptive/)
 | **AC.5** | [Instructor authoring & human-in-the-loop approval](AC.5-instructor-authoring-and-approval.md) | DONE |
 | **AC.6** | [Student runtime experience & transparency](AC.6-student-runtime-and-transparency.md) | DONE |
 | **AC.7** | [Post-assessment, effectiveness & holdout experiments](AC.7-post-assessment-and-effectiveness.md) | DONE |
+| **AC.8** | [Governance, safety, fairness, privacy & compliance](AC.8-governance-safety-fairness-privacy.md) | DONE |

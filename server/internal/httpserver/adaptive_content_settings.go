@@ -38,6 +38,8 @@ func (d Deps) registerAdaptiveContentRoutes(r chi.Router) {
 	d.registerAdaptiveContentServingRoutes(r)
 	// AC.7
 	d.registerAdaptiveContentEffectivenessRoutes(r)
+	// AC.8
+	d.registerAdaptiveContentGovernanceRoutes(r)
 }
 
 func writeACEKillSwitch(w http.ResponseWriter) {
@@ -94,6 +96,8 @@ func unitToAPI(u acrepo.UnitRow) acmodel.Unit {
 		MasteryFreshnessDays: u.MasteryFreshnessDays,
 		ContentVersion:       u.ContentVersion,
 		MinFidelity:          u.MinFidelity,
+		Quarantined:          u.Quarantined,
+		QuarantinedReason:    u.QuarantinedReason,
 	}
 }
 

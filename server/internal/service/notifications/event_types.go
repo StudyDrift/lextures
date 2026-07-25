@@ -41,6 +41,8 @@ const (
 	EventTranscriptOrderCanceled    = notificationevents.TranscriptOrderCanceled
 	EventTranscriptOrderException   = notificationevents.TranscriptOrderException
 	EventAdaptiveContentRegressing  = notificationevents.AdaptiveContentRegressing
+	EventAdaptiveContentFairness    = notificationevents.AdaptiveContentFairness
+	EventAdaptiveContentContest     = notificationevents.AdaptiveContentContest
 )
 
 // AllEventTypes re-exports the canonical event list for callers outside this package.

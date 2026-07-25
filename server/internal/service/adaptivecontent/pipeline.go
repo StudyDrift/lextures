@@ -20,6 +20,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/systemprompts"
 	"github.com/lextures/lextures/server/internal/repos/userai"
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
+	coppasvc "github.com/lextures/lextures/server/internal/service/coppa"
 )
 
 // Job priority bands (higher = preferred at claim).
@@ -391,6 +392,16 @@ func (d WorkerDeps) processJob(ctx context.Context, job acrepo.JobRow) {
 		axes = settings.AllowedAxes
 	}
 	requireApproval := settings != nil && settings.RequireInstructorApproval
+	// AC.8: force instructor approval for COPPA minors and EU AI Act high-risk policy.
+	coppaMinor := false
+	if row, err := acrepo.GetAnyProfileBySignature(ctx, d.Pool, unit.ID, job.ProfileSignature); err == nil && row != nil && row.UserID != uuid.Nil {
+		if status, err := coppasvc.GetUserConsentStatus(ctx, d.Pool, row.UserID); err == nil && status.CoppaMinor {
+			coppaMinor = true
+		}
+	}
+	if ForceInstructorApproval(coppaMinor, EUHighRiskPolicyEnabled()) {
+		requireApproval = true
+	}
 
 	sysPrompt := DefaultSystemPrompt
 	if s, err := systemprompts.GetByKey(ctx, d.Pool, PromptKey); err == nil && strings.TrimSpace(s) != "" {

@@ -8,6 +8,9 @@ export type AdaptedBannerProps = {
   optoutAllowed?: boolean
   onToggleOriginal: () => void
   onPreferStandard?: () => void
+  /** AC.8 — report that this adaptation seems wrong (contest path). */
+  onReportAdaptation?: () => void
+  reportBusy?: boolean
   /** When true, expand the banner details on first render (mobile starts collapsed). */
   defaultExpanded?: boolean
 }
@@ -23,6 +26,8 @@ export function AdaptedBanner({
   optoutAllowed,
   onToggleOriginal,
   onPreferStandard,
+  onReportAdaptation,
+  reportBusy,
   defaultExpanded = true,
 }: AdaptedBannerProps) {
   const labelId = useId()
@@ -107,6 +112,16 @@ export function AdaptedBanner({
             onClick={onPreferStandard}
           >
             Prefer standard content?
+          </button>
+        ) : null}
+        {onReportAdaptation && !showingOriginal ? (
+          <button
+            type="button"
+            className="text-sm text-violet-800 underline underline-offset-2 dark:text-violet-200"
+            disabled={reportBusy}
+            onClick={onReportAdaptation}
+          >
+            Report this adaptation
           </button>
         ) : null}
       </div>

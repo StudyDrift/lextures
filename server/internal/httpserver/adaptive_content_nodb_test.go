@@ -216,3 +216,30 @@ func TestAdaptiveContent_EffectivenessRefresh_KillSwitch503_NoDB(t *testing.T) {
 		t.Fatalf("status %d body %s", rr.Code, rr.Body.String())
 	}
 }
+
+func TestAdaptiveContent_ContestRoute_Registered_NoDB(t *testing.T) {
+	d := Deps{}
+	r := chi.NewRouter()
+	d.registerAdaptiveContentRoutes(r)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/courses/demo/adaptive-content/units/"+uuidZero+"/contest", bytes.NewReader([]byte(`{}`)))
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+	// Without auth/DB we expect 401/403/500-class, not 404.
+	if rr.Code == http.StatusNotFound {
+		t.Fatalf("contest route not registered: %d", rr.Code)
+	}
+}
+
+func TestAdaptiveContent_OversightRoute_Registered_NoDB(t *testing.T) {
+	d := Deps{}
+	r := chi.NewRouter()
+	d.registerAdaptiveContentRoutes(r)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/adaptive-content/oversight", nil)
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+	if rr.Code == http.StatusNotFound {
+		t.Fatalf("oversight route not registered: %d", rr.Code)
+	}
+}

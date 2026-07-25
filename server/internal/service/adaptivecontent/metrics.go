@@ -49,6 +49,13 @@ var (
 	unitMeanLiftG           prometheus.Gauge
 	treatmentMinusHoldoutG  prometheus.Gauge
 	outcomeRecordMs         prometheus.Histogram
+	// AC.8 governance
+	fairnessDisparityFlagTotal prometheus.Counter
+	contestOpenedTotal         prometheus.Counter
+	gateBlockServedBaseTotal   prometheus.Counter
+	minorBlockedTotal          prometheus.Counter
+	quarantineTotal            prometheus.Counter
+	killSwitchToggleTotal      prometheus.Counter
 )
 
 func initMetrics() {
@@ -239,6 +246,36 @@ func initMetrics() {
 		Help:      "Wall time in milliseconds to record a post-assessment outcome (AC.7).",
 		Buckets:   []float64{1, 5, 10, 25, 50, 100, 150, 250, 500},
 	})
+	fairnessDisparityFlagTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_fairness_disparity_flag_total",
+		Help:      "Count of fairness audit cells flagged for disparity (AC.8).",
+	})
+	contestOpenedTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_contest_opened_total",
+		Help:      "Count of student adaptation contests opened (AC.8).",
+	})
+	gateBlockServedBaseTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_gate_block_served_base_total",
+		Help:      "Count of serves that fell back to base due to governance gates (AC.8).",
+	})
+	minorBlockedTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_minor_blocked_total",
+		Help:      "Count of ACE actions blocked for COPPA-gated minors (AC.8).",
+	})
+	quarantineTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_quarantine_total",
+		Help:      "Count of unit/course quarantine actions (AC.8).",
+	})
+	killSwitchToggleTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_kill_switch_toggle_total",
+		Help:      "Count of durable kill-switch engage/disengage actions (AC.8).",
+	})
 	prometheus.MustRegister(
 		coursesEnabled, settingsUpdated, killSwitchEngagedG,
 		profileComputeMs, profileEmphasisTotal, distinctSignatures,
@@ -248,6 +285,8 @@ func initMetrics() {
 		servedVariantTotal, servedBaseTotal, servedHoldoutTotal, servedFallbackTotal,
 		viewOriginalClicks, optoutTotal, serveLatencyMs,
 		outcomesRecordedTotal, verdictRegressingTotal, unitMeanLiftG, treatmentMinusHoldoutG, outcomeRecordMs,
+		fairnessDisparityFlagTotal, contestOpenedTotal, gateBlockServedBaseTotal,
+		minorBlockedTotal, quarantineTotal, killSwitchToggleTotal,
 	)
 	if KillSwitchEngaged() {
 		killSwitchEngagedG.Set(1)
@@ -490,4 +529,40 @@ func ObserveOutcomeRecord(ms float64) {
 	if ms >= 0 {
 		outcomeRecordMs.Observe(ms)
 	}
+}
+
+// IncFairnessDisparityFlag increments the fairness disparity flag counter (AC.8).
+func IncFairnessDisparityFlag() {
+	ensureMetrics()
+	fairnessDisparityFlagTotal.Inc()
+}
+
+// IncContestOpened increments the contest-opened counter (AC.8).
+func IncContestOpened() {
+	ensureMetrics()
+	contestOpenedTotal.Inc()
+}
+
+// IncGateBlockServedBase increments the gate-block → base serve counter (AC.8).
+func IncGateBlockServedBase() {
+	ensureMetrics()
+	gateBlockServedBaseTotal.Inc()
+}
+
+// IncMinorBlocked increments the COPPA/minor-blocked counter (AC.8).
+func IncMinorBlocked() {
+	ensureMetrics()
+	minorBlockedTotal.Inc()
+}
+
+// IncQuarantine increments the quarantine action counter (AC.8).
+func IncQuarantine() {
+	ensureMetrics()
+	quarantineTotal.Inc()
+}
+
+// IncKillSwitchToggle increments the durable kill-switch toggle counter (AC.8).
+func IncKillSwitchToggle() {
+	ensureMetrics()
+	killSwitchToggleTotal.Inc()
 }

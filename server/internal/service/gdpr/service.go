@@ -17,6 +17,7 @@ import (
 
 	pkgai "github.com/lextures/lextures/server/internal/aidisclosure"
 	repoaidisclosure "github.com/lextures/lextures/server/internal/repos/aidisclosure"
+	acrepo "github.com/lextures/lextures/server/internal/repos/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/repos/board"
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
 	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
@@ -163,6 +164,14 @@ func ApproveDSAR(ctx context.Context, pool *pgxpool.Pool, id, adminID uuid.UUID)
 		} else if n > 0 {
 			return fmt.Errorf("gdpr: live quiz erasure incomplete: %d rows remain", n)
 		}
+		if err := acrepo.EraseUserContent(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: erase adaptive content: %w", err)
+		}
+		if n, err := acrepo.CountUserContentRows(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: verify adaptive content erasure: %w", err)
+		} else if n > 0 {
+			return fmt.Errorf("gdpr: adaptive content erasure incomplete: %d rows remain", n)
+		}
 		if err := repo.AnonymiseUser(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: anonymise user: %w", err)
 		}
@@ -303,6 +312,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		ProductFeedback  []map[string]any         `json:"productFeedback,omitempty"`
 		Boards           board.UserBoardExport    `json:"boards,omitempty"`
 		LiveQuizzes      quizgame.UserQuizExport  `json:"liveQuizzes,omitempty"`
+		AdaptiveContent  acrepo.UserACEExport     `json:"adaptiveContent,omitempty"`
 		PinnedSettings   []map[string]any         `json:"pinnedSettings,omitempty"`
 		ExportedAt       string                   `json:"exportedAt"`
 	}
@@ -330,6 +340,10 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	if err != nil {
 		return "", fmt.Errorf("gdpr: live quiz export: %w", err)
 	}
+	aceExport, err := acrepo.ExportUserContent(ctx, pool, userID)
+	if err != nil {
+		return "", fmt.Errorf("gdpr: adaptive content export: %w", err)
+	}
 	pinnedExport := dsarPinnedSettingsExport(ctx, pool, userID)
 
 	var customFields map[string]any
@@ -347,6 +361,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		ProductFeedback: productFeedbackExport,
 		Boards:          boardsExport,
 		LiveQuizzes:     liveQuizExport,
+		AdaptiveContent: aceExport,
 		PinnedSettings:  pinnedExport,
 		ExportedAt:      time.Now().UTC().Format(time.RFC3339),
 	}

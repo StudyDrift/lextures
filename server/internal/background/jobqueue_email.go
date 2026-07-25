@@ -92,6 +92,7 @@ func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource) {
 	RegisterWalletExportJob(r, pool, cfg)
 	RegisterDiplomaBatchJob(r, pool, cfg)
 	RegisterAdaptiveContentEffectivenessJobs(r, pool, cfgSrc, nil)
+	RegisterAdaptiveContentFairnessJobs(r, pool, cfgSrc, nil)
 	registerScheduledJobs(r, pool, cfgSrc)
 }
 

@@ -37,7 +37,7 @@ course turns ACE on for itself. The only platform-level control is an **ops-only
 kill-switch** (`ADAPTIVE_CONTENT_KILL_SWITCH`, default *disengaged*) used solely for incident
 response; when disengaged it never blocks a course. This directly honors the requirement that the
 feature be flagged at the course level and not at the global platform level. Full rationale in
-**[AC.1](../../completed/adaptive/AC.1-foundations-flag-and-data-model.md)** §15 and **[AC.8](AC.8-governance-safety-fairness-privacy.md)**.
+**[AC.1](../../completed/adaptive/AC.1-foundations-flag-and-data-model.md)** §15 and **[AC.8](../../completed/adaptive/AC.8-governance-safety-fairness-privacy.md)**.
 
 ## Conventions
 
@@ -70,7 +70,7 @@ feature be flagged at the course level and not at the global platform level. Ful
 | **AC.5** | [Instructor authoring & human-in-the-loop approval](../../completed/adaptive/AC.5-instructor-authoring-and-approval.md) ✅ | BLOCKER | AC.1, AC.3 | Course-editor config, guardrails, preview, approve/lock, fallback |
 | **AC.6** | [Student runtime experience & transparency](../../completed/adaptive/AC.6-student-runtime-and-transparency.md) ✅ | BLOCKER | AC.2, AC.3, AC.5 | Serving variants, "adapted for you" disclosure, opt-out, a11y |
 | **AC.7** | [Post-assessment, effectiveness & holdout experiments](../../completed/adaptive/AC.7-post-assessment-and-effectiveness.md) ✅ | BLOCKER | AC.2, AC.6 | Exit-ticket lift, mastery delta, control-group causal measurement |
-| **AC.8** | [Governance, safety, fairness & privacy](AC.8-governance-safety-fairness-privacy.md) | BLOCKER | AC.3 | AI disclosure, FERPA/COPPA/EU-AI-Act, bias audit, oversight, DSAR |
+| **AC.8** | [Governance, safety, fairness & privacy](../../completed/adaptive/AC.8-governance-safety-fairness-privacy.md) ✅ | BLOCKER | AC.3 | AI disclosure, FERPA/COPPA/EU-AI-Act, bias audit, oversight, DSAR |
 | **AC.9** | [Analytics, reporting & operability](AC.9-analytics-reporting-and-operability.md) | MAJOR | AC.4, AC.7 | Instructor/admin dashboards, observability, alerts, rollout |
 
 ## Sequencing at a glance
@@ -95,6 +95,6 @@ ACE is a high-risk, AI-driven, student-facing system, so it inherits obligations
 [`../standards/`](../standards/): **S06** (DPIA / algorithmic-impact assessment) and **S13** (EU AI
 Act — education as high-risk AI) both apply to the generation engine; **S08** (children's privacy /
 age assurance) constrains adaptation for minors; **S01/S02** (DSAR / retention) cover adaptation
-profiles and stored variants as part of the education record. **[AC.8](AC.8-governance-safety-fairness-privacy.md)**
+profiles and stored variants as part of the education record. **[AC.8](../../completed/adaptive/AC.8-governance-safety-fairness-privacy.md)**
 is the single owner that discharges those obligations for this feature and links back to each
 standard.

@@ -202,11 +202,13 @@ func (d Deps) handleAdminAdaptiveContentGet() http.HandlerFunc {
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
+		acsvc.SyncDurableKillSwitchFromDB(r.Context(), d.Pool)
 		paused, err := acrepo.GetPlatformGenerationPaused(r.Context(), d.Pool)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load adaptive content admin state.")
 			return
 		}
+		orgEnabled, _ := acrepo.GetOrgAdaptiveContentEnabled(r.Context(), d.Pool)
 		pending, _ := acrepo.CountPendingJobs(r.Context(), d.Pool)
 		inflight, _ := acrepo.CountGeneratingJobs(r.Context(), d.Pool)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -215,6 +217,7 @@ func (d Deps) handleAdminAdaptiveContentGet() http.HandlerFunc {
 			QueueDepth:       pending,
 			Inflight:         inflight,
 			KillSwitch:       acsvc.KillSwitchEngaged(),
+			OrgEnabled:       orgEnabled,
 		})
 	}
 }
@@ -235,24 +238,42 @@ func (d Deps) handleAdminAdaptiveContentPatch() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		if body.GenerationPaused == nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "generationPaused is required.")
+		if body.GenerationPaused == nil && body.OrgEnabled == nil && !body.ClearOrgEnabled {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide generationPaused and/or orgEnabled.")
 			return
 		}
-		if err := acrepo.SetPlatformGenerationPaused(r.Context(), d.Pool, *body.GenerationPaused); err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update platform generation pause.")
-			return
+		paused := false
+		if body.GenerationPaused != nil {
+			if err := acrepo.SetPlatformGenerationPaused(r.Context(), d.Pool, *body.GenerationPaused); err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update platform generation pause.")
+				return
+			}
+			paused = *body.GenerationPaused
+		} else {
+			paused, _ = acrepo.GetPlatformGenerationPaused(r.Context(), d.Pool)
 		}
-		// Best-effort audit on a synthetic platform course event is not available; log via events only if needed.
+		if body.ClearOrgEnabled {
+			if err := acrepo.SetOrgAdaptiveContentEnabled(r.Context(), d.Pool, nil); err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to clear org adaptive content toggle.")
+				return
+			}
+		} else if body.OrgEnabled != nil {
+			if err := acrepo.SetOrgAdaptiveContentEnabled(r.Context(), d.Pool, body.OrgEnabled); err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update org adaptive content toggle.")
+				return
+			}
+		}
 		_ = actor
+		orgEnabled, _ := acrepo.GetOrgAdaptiveContentEnabled(r.Context(), d.Pool)
 		pending, _ := acrepo.CountPendingJobs(r.Context(), d.Pool)
 		inflight, _ := acrepo.CountGeneratingJobs(r.Context(), d.Pool)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(acmodel.AdminAdaptiveContentResponse{
-			GenerationPaused: *body.GenerationPaused,
+			GenerationPaused: paused,
 			QueueDepth:       pending,
 			Inflight:         inflight,
 			KillSwitch:       acsvc.KillSwitchEngaged(),
+			OrgEnabled:       orgEnabled,
 		})
 	}
 }

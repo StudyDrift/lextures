@@ -143,6 +143,10 @@ func (d Deps) handleAdaptiveContentVariantPreview() http.HandlerFunc {
 		if settings != nil {
 			requireApproval = settings.RequireInstructorApproval
 		}
+		// AC.8: EU AI Act high-risk policy forces pre-serve human sign-off.
+		if acsvc.ForceInstructorApproval(false, acsvc.EUHighRiskPolicyEnabled()) {
+			requireApproval = true
+		}
 
 		// Effective axes: unit override or course defaults.
 		axes := unit.AllowedAxes

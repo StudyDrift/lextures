@@ -10,7 +10,7 @@
 | **Section** | Adaptive Content Engine (ACE) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS (Global) |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Trust & safety + backend platform + legal/DPO |
 | **Depends on** | AC.3 (what's generated); cross-cuts AC.2–AC.7 |

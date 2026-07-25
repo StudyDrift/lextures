@@ -274,7 +274,8 @@ func ListActiveUnitsByPreAssessment(ctx context.Context, pool *pgxpool.Pool, cou
 SELECT id, course_id, target_kind, target_module_item_id, target_outcome_id,
        base_content_item_id, pre_assessment_item_id, post_assessment_item_id,
        allowed_axes, status, created_by, created_at, updated_at,
-       trigger_mode, mastery_freshness_days, content_version, min_fidelity
+       trigger_mode, mastery_freshness_days, content_version, min_fidelity,
+       quarantined, quarantined_reason
 FROM course.adaptive_content_units
 WHERE course_id = $1
   AND pre_assessment_item_id = $2

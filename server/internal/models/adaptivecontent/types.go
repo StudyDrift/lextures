@@ -1,4 +1,4 @@
-// Package adaptivecontent holds JSON shapes for Adaptive Content Engine HTTP APIs (plans AC.1–AC.7).
+// Package adaptivecontent holds JSON shapes for Adaptive Content Engine HTTP APIs (plans AC.1–AC.8).
 package adaptivecontent
 
 import (
@@ -50,17 +50,22 @@ type PrewarmResponse struct {
 	UnitID     uuid.UUID `json:"unitId"`
 }
 
-// AdminAdaptiveContentResponse is GET/PATCH /api/v1/admin/adaptive-content (AC.4).
+// AdminAdaptiveContentResponse is GET/PATCH /api/v1/admin/adaptive-content (AC.4 / AC.8).
 type AdminAdaptiveContentResponse struct {
 	GenerationPaused bool  `json:"generationPaused"`
 	QueueDepth       int64 `json:"queueDepth"`
 	Inflight         int64 `json:"inflight"`
 	KillSwitch       bool  `json:"killSwitch"`
+	// AC.8 org toggle: null = no opinion; false = org-wide disable.
+	OrgEnabled *bool `json:"orgEnabled"`
 }
 
 // AdminAdaptiveContentPatch is PATCH /api/v1/admin/adaptive-content body.
 type AdminAdaptiveContentPatch struct {
 	GenerationPaused *bool `json:"generationPaused"`
+	OrgEnabled       *bool `json:"orgEnabled"`
+	// ClearOrgEnabled when true sets org toggle back to NULL (no opinion).
+	ClearOrgEnabled bool `json:"clearOrgEnabled"`
 }
 
 // Unit is an authorable adaptive content unit.
@@ -91,6 +96,9 @@ type Unit struct {
 	VariantPendingReview *int64 `json:"variantPendingReview,omitempty"`
 	VariantRejected      *int64 `json:"variantRejected,omitempty"`
 	VariantAutoServed    *int64 `json:"variantAutoServed,omitempty"`
+	// AC.8
+	Quarantined       bool    `json:"quarantined,omitempty"`
+	QuarantinedReason *string `json:"quarantinedReason,omitempty"`
 }
 
 // CreateUnitRequest is the POST .../units body.
@@ -404,4 +412,86 @@ type CourseEffectivenessResponse struct {
 // EffectivenessRefreshResponse is POST .../effectiveness/refresh (AC.7).
 type EffectivenessRefreshResponse struct {
 	RefreshedUnits int `json:"refreshedUnits"`
+}
+
+// ContestRequest is POST .../units/{id}/contest (AC.8).
+type ContestRequest struct {
+	ServingID *uuid.UUID `json:"servingId"`
+	Reason    string     `json:"reason"`
+}
+
+// Contest is a student contest record (AC.8).
+type Contest struct {
+	ID            uuid.UUID  `json:"id"`
+	CourseID      uuid.UUID  `json:"courseId"`
+	UnitID        uuid.UUID  `json:"unitId"`
+	ServingID     *uuid.UUID `json:"servingId,omitempty"`
+	StudentUserID uuid.UUID  `json:"studentUserId"`
+	Reason        *string    `json:"reason,omitempty"`
+	Status        string     `json:"status"`
+	ResolvedBy    *uuid.UUID `json:"resolvedBy,omitempty"`
+	CreatedAt     time.Time  `json:"createdAt"`
+	ResolvedAt    *time.Time `json:"resolvedAt,omitempty"`
+}
+
+// ContestsListResponse is GET .../adaptive-content/contests.
+type ContestsListResponse struct {
+	Contests []Contest `json:"contests"`
+}
+
+// ResolveContestRequest is POST .../contests/{id}/resolve.
+type ResolveContestRequest struct {
+	Status string `json:"status"` // reviewed | resolved | dismissed
+}
+
+// FairnessCell is one fairness audit aggregate cell (AC.8).
+type FairnessCell struct {
+	ID            uuid.UUID `json:"id"`
+	CourseID      uuid.UUID `json:"courseId"`
+	Dimension     string    `json:"dimension"`
+	GroupLabel    string    `json:"groupLabel"`
+	N             int       `json:"n"`
+	MeanFidelity  *float32  `json:"meanFidelity"`
+	CoveragePct   *float32  `json:"coveragePct"`
+	MeanLift      *float32  `json:"meanLift"`
+	DisparityFlag bool      `json:"disparityFlag"`
+	ComputedAt    time.Time `json:"computedAt"`
+}
+
+// FairnessResponse is GET /api/v1/admin/adaptive-content/fairness.
+type FairnessResponse struct {
+	Cells         []FairnessCell `json:"cells"`
+	SmallCellMinN int            `json:"smallCellMinN"`
+	FairnessMinN  int            `json:"fairnessMinN"`
+}
+
+// OversightResponse is GET /api/v1/admin/adaptive-content/oversight (AC.8 FR-10).
+type OversightResponse struct {
+	GenerationPaused   bool    `json:"generationPaused"`
+	KillSwitch         bool    `json:"killSwitch"`
+	OrgEnabled         *bool   `json:"orgEnabled"`
+	QueueDepth         int64   `json:"queueDepth"`
+	Inflight           int64   `json:"inflight"`
+	OpenContests       int64   `json:"openContests"`
+	DisparityFlags     int64   `json:"disparityFlags"`
+	QuarantinedUnits   int64   `json:"quarantinedUnits"`
+	RegressingUnits    int64   `json:"regressingUnits"`
+	GateBlocks7d       int64   `json:"gateBlocks7d"`
+	CostUSD30d         float64 `json:"costUsd30d"`
+	DPIADocPath        string  `json:"dpiaDocPath"`
+	AIActChecklistPath string  `json:"aiActChecklistPath"`
+}
+
+// QuarantineRequest is POST /api/v1/admin/adaptive-content/quarantine.
+type QuarantineRequest struct {
+	UnitID   *uuid.UUID `json:"unitId"`
+	CourseID *uuid.UUID `json:"courseId"`
+	Reason   string     `json:"reason"`
+	// Clear when true lifts quarantine instead of setting it.
+	Clear bool `json:"clear"`
+}
+
+// KillSwitchRequest is POST /api/v1/admin/adaptive-content/kill-switch.
+type KillSwitchRequest struct {
+	Engage bool `json:"engage"`
 }
