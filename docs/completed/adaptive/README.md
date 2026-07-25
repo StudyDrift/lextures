@@ -10,3 +10,4 @@ Shipped ACE plans. Active backlog: [`docs/plan/adaptive/`](../../plan/adaptive/)
 | **AC.4** | [Generation pipeline, caching & cost controls](AC.4-generation-pipeline-caching-cost.md) | DONE |
 | **AC.5** | [Instructor authoring & human-in-the-loop approval](AC.5-instructor-authoring-and-approval.md) | DONE |
 | **AC.6** | [Student runtime experience & transparency](AC.6-student-runtime-and-transparency.md) | DONE |
+| **AC.7** | [Post-assessment, effectiveness & holdout experiments](AC.7-post-assessment-and-effectiveness.md) | DONE |

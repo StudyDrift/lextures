@@ -1,4 +1,4 @@
-// Package adaptivecontent holds JSON shapes for Adaptive Content Engine HTTP APIs (plans AC.1–AC.6).
+// Package adaptivecontent holds JSON shapes for Adaptive Content Engine HTTP APIs (plans AC.1–AC.7).
 package adaptivecontent
 
 import (
@@ -361,4 +361,47 @@ type OptoutPutRequest struct {
 // ViewedOriginalResponse is POST .../units/{id}/viewed-original (AC.6).
 type ViewedOriginalResponse struct {
 	ViewOriginalClicks int32 `json:"viewOriginalClicks"`
+}
+
+// ModeEffectiveness is one emphasis-mode effectiveness bucket (AC.7).
+type ModeEffectiveness struct {
+	EmphasisMode string   `json:"emphasisMode"`
+	N            int      `json:"n"`
+	MeanLift     *float32 `json:"meanLift"` // null when suppressed (n < k)
+}
+
+// VariantEffectiveness is one variant effectiveness bucket (AC.7).
+type VariantEffectiveness struct {
+	VariantID *uuid.UUID `json:"variantId"`
+	N         int        `json:"n"`
+	MeanLift  *float32   `json:"meanLift"` // null when suppressed (n < k)
+}
+
+// UnitEffectiveness is GET .../units/{id}/effectiveness (AC.7).
+type UnitEffectiveness struct {
+	UnitID                    uuid.UUID              `json:"unitId"`
+	NTreatment                int                    `json:"nTreatment"`
+	NHoldout                  int                    `json:"nHoldout"`
+	MeanLiftTreatment         *float32               `json:"meanLiftTreatment"`
+	MeanLiftHoldout           *float32               `json:"meanLiftHoldout"`
+	TreatmentMinusHoldout     *float32               `json:"treatmentMinusHoldout"`
+	DiffStdError              *float32               `json:"diffStdError"`
+	MeanMasteryDeltaTreatment *float32               `json:"meanMasteryDeltaTreatment,omitempty"`
+	MeanMasteryDeltaHoldout   *float32               `json:"meanMasteryDeltaHoldout,omitempty"`
+	Verdict                   string                 `json:"verdict"`
+	ByMode                    []ModeEffectiveness    `json:"byMode"`
+	ByVariant                 []VariantEffectiveness `json:"byVariant"`
+	RefreshedAt               *time.Time             `json:"refreshedAt,omitempty"`
+	SmallCellMinN             int                    `json:"smallCellMinN"`
+	MinNPerArm                int                    `json:"minNPerArm"`
+}
+
+// CourseEffectivenessResponse is GET .../adaptive-content/effectiveness (AC.7).
+type CourseEffectivenessResponse struct {
+	Units []UnitEffectiveness `json:"units"`
+}
+
+// EffectivenessRefreshResponse is POST .../effectiveness/refresh (AC.7).
+type EffectivenessRefreshResponse struct {
+	RefreshedUnits int `json:"refreshedUnits"`
 }

@@ -10,7 +10,7 @@
 | **Section** | Adaptive Content Engine (ACE) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Data/analytics + backend platform |
 | **Depends on** | AC.2 (pre-score), AC.6 (serving + holdout) |
@@ -81,10 +81,10 @@ The tagline promises the environment *adapts* — but adaptation without measure
 
 ## 8. Data Model
 
-Reserves `445_adaptive_content_effectiveness.sql`. Extends `adaptation_outcomes` (AC.1) + adds aggregate cache.
+Uses `446_adaptive_content_effectiveness.sql` (445 was taken by pinned settings). Extends `adaptation_outcomes` (AC.1) + adds aggregate cache.
 
 ```sql
--- 445_adaptive_content_effectiveness.sql
+-- 446_adaptive_content_effectiveness.sql
 ALTER TABLE course.adaptation_outcomes
     ADD COLUMN IF NOT EXISTS emphasis_mode TEXT,          -- denormalized from profile for grouping
     ADD COLUMN IF NOT EXISTS was_holdout BOOLEAN NOT NULL DEFAULT FALSE,
@@ -157,8 +157,8 @@ Measurement is statistics, not AI: difference-in-means between treatment and hol
 - `analytics.outcomes_report_student` / `analytics.outcomes_report` (9.5) — contribute adaptive outcome scores.
 - `server/internal/telemetry/` — metrics + regressing alert.
 - notifications service — instructor alert on `regressing`.
-- `server/migrations/445_adaptive_content_effectiveness.sql` (+ down).
-- Related: [AC.2](../../completed/adaptive/AC.2-pre-assessment-and-adaptation-profile.md), [AC.6](../../completed/adaptive/AC.6-student-runtime-and-transparency.md), [AC.9](AC.9-analytics-reporting-and-operability.md).
+- `server/migrations/446_adaptive_content_effectiveness.sql` (+ down).
+- Related: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.6](AC.6-student-runtime-and-transparency.md), [AC.9](../../plan/adaptive/AC.9-analytics-reporting-and-operability.md).
 
 ## 13. Dependencies & Sequencing
 

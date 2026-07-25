@@ -204,6 +204,13 @@ func (d Deps) handleQuizSubmit() http.HandlerFunc {
 			StructureItemID: itemID,
 			StudentUserID:   viewer,
 		})
+		// AC.7: record post-assessment lift against the student's serving (best-effort).
+		adaptivecontent.OnPostAssessmentSubmitted(ctx, d.Pool, adaptivecontent.PostAssessmentAttempt{
+			AttemptID:       body.AttemptID,
+			CourseID:        *cid,
+			StructureItemID: itemID,
+			StudentUserID:   viewer,
+		})
 
 		out := coursemodulequiz.QuizSubmitResponse{
 			AttemptID:      body.AttemptID,

@@ -69,7 +69,7 @@ feature be flagged at the course level and not at the global platform level. Ful
 | **AC.4** | [Generation pipeline, caching & cost controls](../../completed/adaptive/AC.4-generation-pipeline-caching-cost.md) ✅ | MAJOR | AC.3 | Async pre-warming, variant cache/dedup, per-course budgets |
 | **AC.5** | [Instructor authoring & human-in-the-loop approval](../../completed/adaptive/AC.5-instructor-authoring-and-approval.md) ✅ | BLOCKER | AC.1, AC.3 | Course-editor config, guardrails, preview, approve/lock, fallback |
 | **AC.6** | [Student runtime experience & transparency](../../completed/adaptive/AC.6-student-runtime-and-transparency.md) ✅ | BLOCKER | AC.2, AC.3, AC.5 | Serving variants, "adapted for you" disclosure, opt-out, a11y |
-| **AC.7** | [Post-assessment, effectiveness & holdout experiments](AC.7-post-assessment-and-effectiveness.md) | BLOCKER | AC.2, AC.6 | Exit-ticket lift, mastery delta, control-group causal measurement |
+| **AC.7** | [Post-assessment, effectiveness & holdout experiments](../../completed/adaptive/AC.7-post-assessment-and-effectiveness.md) ✅ | BLOCKER | AC.2, AC.6 | Exit-ticket lift, mastery delta, control-group causal measurement |
 | **AC.8** | [Governance, safety, fairness & privacy](AC.8-governance-safety-fairness-privacy.md) | BLOCKER | AC.3 | AI disclosure, FERPA/COPPA/EU-AI-Act, bias audit, oversight, DSAR |
 | **AC.9** | [Analytics, reporting & operability](AC.9-analytics-reporting-and-operability.md) | MAJOR | AC.4, AC.7 | Instructor/admin dashboards, observability, alerts, rollout |
 

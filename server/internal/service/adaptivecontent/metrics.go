@@ -43,6 +43,12 @@ var (
 	viewOriginalClicks   prometheus.Counter
 	optoutTotal          prometheus.Counter
 	serveLatencyMs       prometheus.Histogram
+	// AC.7 effectiveness
+	outcomesRecordedTotal   prometheus.Counter
+	verdictRegressingTotal  prometheus.Counter
+	unitMeanLiftG           prometheus.Gauge
+	treatmentMinusHoldoutG  prometheus.Gauge
+	outcomeRecordMs         prometheus.Histogram
 )
 
 func initMetrics() {
@@ -207,6 +213,32 @@ func initMetrics() {
 		Help:      "Wall time in milliseconds for adaptive content serving resolution (AC.6).",
 		Buckets:   []float64{1, 2, 5, 10, 15, 20, 30, 50, 100, 250, 500},
 	})
+	outcomesRecordedTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_outcomes_recorded_total",
+		Help:      "Count of adaptation_outcomes upserts after post-assessment submit (AC.7).",
+	})
+	verdictRegressingTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_verdict_regressing_total",
+		Help:      "Count of times a unit verdict transitions to regressing (AC.7).",
+	})
+	unitMeanLiftG = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_unit_mean_lift",
+		Help:      "Last refreshed mean lift for the treatment arm of a unit (AC.7).",
+	})
+	treatmentMinusHoldoutG = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_treatment_minus_holdout",
+		Help:      "Last refreshed treatment−holdout mean lift difference (AC.7).",
+	})
+	outcomeRecordMs = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: "lextures",
+		Name:      "adaptive_content_outcome_record_ms",
+		Help:      "Wall time in milliseconds to record a post-assessment outcome (AC.7).",
+		Buckets:   []float64{1, 5, 10, 25, 50, 100, 150, 250, 500},
+	})
 	prometheus.MustRegister(
 		coursesEnabled, settingsUpdated, killSwitchEngagedG,
 		profileComputeMs, profileEmphasisTotal, distinctSignatures,
@@ -215,6 +247,7 @@ func initMetrics() {
 		approvedTotal, rejectedTotal, editedTotal, revokedTotal, autoServedTotal, timeInQueueMs,
 		servedVariantTotal, servedBaseTotal, servedHoldoutTotal, servedFallbackTotal,
 		viewOriginalClicks, optoutTotal, serveLatencyMs,
+		outcomesRecordedTotal, verdictRegressingTotal, unitMeanLiftG, treatmentMinusHoldoutG, outcomeRecordMs,
 	)
 	if KillSwitchEngaged() {
 		killSwitchEngagedG.Set(1)
@@ -424,5 +457,37 @@ func ObserveServeLatency(ms float64) {
 	ensureMetrics()
 	if ms >= 0 {
 		serveLatencyMs.Observe(ms)
+	}
+}
+
+// IncOutcomesRecorded increments the post-assessment outcome counter (AC.7).
+func IncOutcomesRecorded() {
+	ensureMetrics()
+	outcomesRecordedTotal.Inc()
+}
+
+// IncVerdictRegressing increments the regressing-verdict counter (AC.7).
+func IncVerdictRegressing() {
+	ensureMetrics()
+	verdictRegressingTotal.Inc()
+}
+
+// SetUnitMeanLift sets the treatment mean-lift gauge (AC.7).
+func SetUnitMeanLift(v float64) {
+	ensureMetrics()
+	unitMeanLiftG.Set(v)
+}
+
+// SetTreatmentMinusHoldout sets the treatment−holdout difference gauge (AC.7).
+func SetTreatmentMinusHoldout(v float64) {
+	ensureMetrics()
+	treatmentMinusHoldoutG.Set(v)
+}
+
+// ObserveOutcomeRecord records post-assessment outcome upsert latency (AC.7).
+func ObserveOutcomeRecord(ms float64) {
+	ensureMetrics()
+	if ms >= 0 {
+		outcomeRecordMs.Observe(ms)
 	}
 }

@@ -19,7 +19,8 @@ const (
 	JobTypeBoardContentRetention      = "scheduled.board_content_retention"
 	JobTypeQuizgameUsageRollup        = "scheduled.quizgame_usage_rollup"
 	JobTypeQuizgameRetention          = "scheduled.quizgame_retention"
-	JobTypeTranscriptAnalyticsRollup  = "scheduled.transcript_analytics_rollup"
+	JobTypeTranscriptAnalyticsRollup       = "scheduled.transcript_analytics_rollup"
+	JobTypeAdaptiveContentEffectiveness    = "scheduled.adaptive_content_effectiveness"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -161,6 +162,13 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "30 1 * * *", // daily 01:30 UTC
 			JobType:        JobTypeTranscriptAnalyticsRollup,
 			Description:    "Refresh transcript order/delivery/revenue daily analytics rollups (T12).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "adaptive_content_effectiveness",
+			Spec:           "40 1 * * *", // daily 01:40 UTC
+			JobType:        JobTypeAdaptiveContentEffectiveness,
+			Description:    "Refresh adaptive content treatment-vs-holdout effectiveness aggregates (AC.7).",
 			DefaultEnabled: true,
 		},
 	}

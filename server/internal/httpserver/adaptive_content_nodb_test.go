@@ -199,3 +199,20 @@ func TestAdaptiveContent_Bulk_KillSwitch503_NoDB(t *testing.T) {
 		t.Fatalf("status %d body %s", rr.Code, rr.Body.String())
 	}
 }
+
+func TestAdaptiveContent_EffectivenessRefresh_KillSwitch503_NoDB(t *testing.T) {
+	t.Cleanup(func() { acsvc.SetKillSwitchForTest(nil) })
+	on := true
+	acsvc.SetKillSwitchForTest(&on)
+
+	d := Deps{}
+	r := chi.NewRouter()
+	d.registerAdaptiveContentRoutes(r)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/courses/demo/adaptive-content/effectiveness/refresh", nil)
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+	if rr.Code != http.StatusServiceUnavailable {
+		t.Fatalf("status %d body %s", rr.Code, rr.Body.String())
+	}
+}

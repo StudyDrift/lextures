@@ -1057,6 +1057,25 @@ export type CohortProfiles = {
   bySignature: { profileSignature: string; emphasisMode: string; count: number }[]
 }
 
+/** AC.7 — unit effectiveness vs holdout. */
+export type AdaptiveContentEffectiveness = {
+  unitId: string
+  nTreatment: number
+  nHoldout: number
+  meanLiftTreatment?: number | null
+  meanLiftHoldout?: number | null
+  treatmentMinusHoldout?: number | null
+  diffStdError?: number | null
+  meanMasteryDeltaTreatment?: number | null
+  meanMasteryDeltaHoldout?: number | null
+  verdict: 'helping' | 'no_effect' | 'insufficient_data' | 'regressing' | string
+  byMode: { emphasisMode: string; n: number; meanLift?: number | null }[]
+  byVariant: { variantId?: string | null; n: number; meanLift?: number | null }[]
+  refreshedAt?: string | null
+  smallCellMinN?: number
+  minNPerArm?: number
+}
+
 export async function fetchAdaptiveContentSettings(
   courseCode: string,
 ): Promise<AdaptiveContentSettings> {
@@ -1151,6 +1170,45 @@ export async function generateAdaptiveContentPreCheck(
     throw new Error('Invalid pre-check generate response.')
   }
   return { preAssessmentItemId: o.preAssessmentItemId, unit: o.unit }
+}
+
+/** AC.7 — fetch effectiveness for one unit. */
+export async function fetchAdaptiveContentUnitEffectiveness(
+  courseCode: string,
+  unitId: string,
+): Promise<AdaptiveContentEffectiveness> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/effectiveness`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as AdaptiveContentEffectiveness
+}
+
+/** AC.7 — fetch effectiveness for all units in a course. */
+export async function fetchAdaptiveContentEffectiveness(
+  courseCode: string,
+): Promise<AdaptiveContentEffectiveness[]> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/effectiveness`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = raw as { units?: AdaptiveContentEffectiveness[] }
+  return o.units ?? []
+}
+
+/** AC.7 — on-demand refresh of effectiveness aggregates. */
+export async function refreshAdaptiveContentEffectiveness(
+  courseCode: string,
+): Promise<{ refreshedUnits: number }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/effectiveness/refresh`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { refreshedUnits: number }
 }
 
 /** AC.2 — patch adaptive content unit fields (pre-assessment, trigger, concepts). */

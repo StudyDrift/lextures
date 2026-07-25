@@ -209,5 +209,5 @@ type AdaptationProfile = {
 ## 19. References
 
 - Existing files: `server/internal/service/learnerstate/mastery.go`, `server/migrations/087_learner_model.sql`, `088_concept_graph.sql`, `096_misconceptions.sql`, `040_quiz_adaptive.sql`.
-- Related plans: [AC.1](AC.1-foundations-flag-and-data-model.md), [AC.3](AC.3-content-generation-engine.md), [AC.7](../../plan/adaptive/AC.7-post-assessment-and-effectiveness.md), [AC.8](../../plan/adaptive/AC.8-governance-safety-fairness-privacy.md).
+- Related plans: [AC.1](AC.1-foundations-flag-and-data-model.md), [AC.3](AC.3-content-generation-engine.md), [AC.7](AC.7-post-assessment-and-effectiveness.md), [AC.8](../../plan/adaptive/AC.8-governance-safety-fairness-privacy.md).
 - External: GDPR Art. 22 (automated decisions); EU AI Act Annex III (education); Bloom's revised taxonomy.
