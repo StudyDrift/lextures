@@ -3,6 +3,7 @@ import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { aiDisclosureI18n } from '../../lib/ai-disclosure-i18n'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { AdminAdaptiveContentReportPanel } from '../lms/adaptive-content/reports/admin-report-panel'
 import { AdaptiveContentOversightPanel } from './adaptive-content-oversight-panel'
 
 const FEATURE_KEYS = [
@@ -123,6 +124,7 @@ export function AiGovernancePanel() {
         {saving ? 'Saving…' : aiDisclosureI18n.adminSave}
       </button>
       <AdaptiveContentOversightPanel />
+      <AdminAdaptiveContentReportPanel />
     </section>
   )
 }

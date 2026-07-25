@@ -72,10 +72,15 @@ export function AiReportsPanel() {
   }, [load])
 
   const featureOptions = useMemo(() => {
-    const keys = new Set<string>()
+    const keys = new Set<string>(['adaptive_content'])
     for (const row of report?.cost.byFeature ?? []) keys.add(row.feature)
     return Array.from(keys).sort()
   }, [report])
+
+  const aceCost = useMemo(
+    () => report?.cost.byFeature.find((r) => r.feature === 'adaptive_content') ?? null,
+    [report],
+  )
 
   const providerOptions = useMemo(() => {
     const keys = new Set<string>(report?.providers ?? [])
@@ -246,6 +251,54 @@ export function AiReportsPanel() {
                 </table>
               </div>
             )}
+
+            <section
+              aria-labelledby="ace-ai-cost-heading"
+              className="mt-6 rounded-xl border border-slate-200 px-4 py-3 dark:border-neutral-700"
+              data-testid="ace-ai-reports-slice"
+            >
+              <h4
+                id="ace-ai-cost-heading"
+                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+              >
+                Adaptive Content Engine
+              </h4>
+              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                Cost slice for feature <code>adaptive_content</code> (AC.9). Filter the reports above
+                by this feature for course/user drill-down.
+              </p>
+              {aceCost ? (
+                <dl className="mt-3 grid gap-2 sm:grid-cols-3">
+                  <div>
+                    <dt className="text-xs uppercase text-slate-500">Cost</dt>
+                    <dd className="text-sm font-semibold tabular-nums">{formatUsd(aceCost.costUsd)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs uppercase text-slate-500">Calls</dt>
+                    <dd className="text-sm font-semibold tabular-nums">
+                      {formatNumber(aceCost.calls)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs uppercase text-slate-500">Tokens</dt>
+                    <dd className="text-sm font-semibold tabular-nums">
+                      {formatNumber(aceCost.tokens)}
+                    </dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+                  No Adaptive Content usage in this window.
+                </p>
+              )}
+              <button
+                type="button"
+                className="mt-3 text-sm font-medium text-indigo-700 underline dark:text-indigo-300"
+                onClick={() => setFeature('adaptive_content')}
+              >
+                Filter reports to Adaptive content
+              </button>
+            </section>
 
             {report.cost.summary.totalCalls === 0 && (
               <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">

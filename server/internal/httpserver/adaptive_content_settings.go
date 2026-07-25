@@ -40,6 +40,8 @@ func (d Deps) registerAdaptiveContentRoutes(r chi.Router) {
 	d.registerAdaptiveContentEffectivenessRoutes(r)
 	// AC.8
 	d.registerAdaptiveContentGovernanceRoutes(r)
+	// AC.9
+	d.registerAdaptiveContentReportRoutes(r)
 }
 
 func writeACEKillSwitch(w http.ResponseWriter) {

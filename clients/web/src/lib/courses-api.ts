@@ -36,6 +36,8 @@ import {
   adaptiveContentContestsListSchema,
   adaptiveContentOversightSchema,
   adaptiveContentFairnessSchema,
+  adaptiveContentCourseReportSchema,
+  adaptiveContentAdminReportSchema,
   adaptationProfileSchema,
   cohortProfilesSchema,
   courseScopedRolesResponseSchema,
@@ -1623,6 +1625,68 @@ export async function fetchAdaptiveContentOversight(): Promise<AdaptiveContentOv
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return parseApiResponse('fetchAdaptiveContentOversight', adaptiveContentOversightSchema, raw)
+}
+
+/** AC.9 — instructor Adaptive Content course report. */
+export async function fetchAdaptiveContentCourseReport(
+  courseCode: string,
+): Promise<AdaptiveContentCourseReport> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/report`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const parsed = parseApiResponse(
+    'fetchAdaptiveContentCourseReport',
+    adaptiveContentCourseReportSchema,
+    raw,
+  )
+  return {
+    ...parsed,
+    units: (parsed.units as AdaptiveContentEffectiveness[]) ?? [],
+  }
+}
+
+/** AC.9 — download instructor report CSV (same suppression as on-screen). */
+export async function exportAdaptiveContentCourseReportCsv(courseCode: string): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/report/export`,
+  )
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `adaptive-content-report-${courseCode}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+/** AC.9 — admin org Adaptive Content report. */
+export async function fetchAdaptiveContentAdminReport(): Promise<AdaptiveContentAdminReport> {
+  const res = await authorizedFetch('/api/v1/admin/adaptive-content/report')
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchAdaptiveContentAdminReport', adaptiveContentAdminReportSchema, raw)
+}
+
+/** AC.9 — download admin org report CSV. */
+export async function exportAdaptiveContentAdminReportCsv(): Promise<void> {
+  const res = await authorizedFetch('/api/v1/admin/adaptive-content/report/export')
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'adaptive-content-org-report.csv'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 /** AC.8 — fairness audit cells for a course. */
@@ -3298,6 +3362,82 @@ export type AdaptiveContentOversight = {
   costUsd30d: number
   dpiaDocPath?: string
   aiActChecklistPath?: string
+}
+
+export type AdaptiveContentUnitToReview = {
+  unitId: string
+  reason: string
+  verdict: string
+  meanFidelity?: number | null
+  meanLift?: number | null
+  workspaceUrl: string
+}
+
+export type AdaptiveContentCourseReport = {
+  courseId: string
+  courseCode: string
+  empty: boolean
+  coverage: {
+    eligibleContentItems: number
+    adaptedUnits: number
+    coveragePct: number
+    studentsProfiled: number
+    studentsServedVariant: number
+    studentsHoldout: number
+  }
+  meanLiftVsControl?: number | null
+  nUnits: number
+  nActiveUnits: number
+  nHelping: number
+  nRegressing: number
+  nInsufficient: number
+  nNoEffect: number
+  cost: {
+    monthlyTokenBudget: number
+    tokensUsedPeriod: number
+    budgetRemaining?: number | null
+    unlimited: boolean
+    periodStart: string
+  }
+  unitsToReview: AdaptiveContentUnitToReview[]
+  units: AdaptiveContentEffectiveness[]
+  byMode: Array<{ emphasisMode: string; n: number; meanLift?: number | null }>
+  dataAsOf?: string | null
+  smallCellMinN: number
+  minNPerArm: number
+}
+
+export type AdaptiveContentAdminReport = {
+  coursesUsingAce: number
+  studentsImpacted: number
+  costUsd30d: number
+  budgetHeadroomTokens: number
+  aggregateLift?: number | null
+  disparityFlags: number
+  openContests: number
+  regressingUnits: number
+  killSwitch: boolean
+  generationPaused: boolean
+  queueDepth: number
+  courses: Array<{
+    courseId: string
+    courseCode: string
+    title: string
+    nUnits: number
+    nActiveUnits: number
+    meanLiftVsControl?: number | null
+    nRegressing: number
+    nHelping: number
+    tokensUsedPeriod: number
+    monthlyTokenBudget: number
+    coveragePct: number
+    studentsServedVariant: number
+    disparityFlags: number
+    openContests: number
+    reportUrl: string
+  }>
+  dataAsOf?: string | null
+  smallCellMinN: number
 }
 
 export type AdaptiveContentFairness = {

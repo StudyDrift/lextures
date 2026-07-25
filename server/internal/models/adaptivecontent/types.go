@@ -1,4 +1,4 @@
-// Package adaptivecontent holds JSON shapes for Adaptive Content Engine HTTP APIs (plans AC.1–AC.8).
+// Package adaptivecontent holds JSON shapes for Adaptive Content Engine HTTP APIs (plans AC.1–AC.9).
 package adaptivecontent
 
 import (
@@ -494,4 +494,99 @@ type QuarantineRequest struct {
 // KillSwitchRequest is POST /api/v1/admin/adaptive-content/kill-switch.
 type KillSwitchRequest struct {
 	Engage bool `json:"engage"`
+}
+
+// CourseReportCoverage is coverage KPIs for the instructor Adaptive Content report (AC.9).
+type CourseReportCoverage struct {
+	EligibleContentItems  int     `json:"eligibleContentItems"`
+	AdaptedUnits          int     `json:"adaptedUnits"`
+	CoveragePct           float64 `json:"coveragePct"`
+	StudentsProfiled      int     `json:"studentsProfiled"`
+	StudentsServedVariant int     `json:"studentsServedVariant"`
+	StudentsHoldout       int     `json:"studentsHoldout"`
+}
+
+// CourseReportCost is budget/spend for the instructor report (AC.9 / AC.4).
+type CourseReportCost struct {
+	MonthlyTokenBudget int64  `json:"monthlyTokenBudget"`
+	TokensUsedPeriod   int64  `json:"tokensUsedPeriod"`
+	BudgetRemaining    *int64 `json:"budgetRemaining"`
+	Unlimited          bool   `json:"unlimited"`
+	PeriodStart        string `json:"periodStart"`
+}
+
+// UnitToReview is a ranked unit needing instructor attention (AC.9).
+type UnitToReview struct {
+	UnitID       uuid.UUID `json:"unitId"`
+	Reason       string    `json:"reason"` // regressing | low_fidelity | insufficient_data
+	Verdict      string    `json:"verdict"`
+	MeanFidelity *float32  `json:"meanFidelity,omitempty"`
+	MeanLift     *float32  `json:"meanLift,omitempty"`
+	WorkspaceURL string    `json:"workspaceUrl"`
+}
+
+// ModeBreakdown is effectiveness aggregated by emphasis mode across the course (AC.9).
+type ModeBreakdown struct {
+	EmphasisMode string   `json:"emphasisMode"`
+	N            int      `json:"n"`
+	MeanLift     *float32 `json:"meanLift"`
+}
+
+// CourseReportResponse is GET .../adaptive-content/report (AC.9 FR-1).
+type CourseReportResponse struct {
+	CourseID           uuid.UUID              `json:"courseId"`
+	CourseCode         string                 `json:"courseCode"`
+	Empty              bool                   `json:"empty"`
+	Coverage           CourseReportCoverage   `json:"coverage"`
+	MeanLiftVsControl  *float32               `json:"meanLiftVsControl"`
+	NUnits             int                    `json:"nUnits"`
+	NActiveUnits       int                    `json:"nActiveUnits"`
+	NHelping           int                    `json:"nHelping"`
+	NRegressing        int                    `json:"nRegressing"`
+	NInsufficient      int                    `json:"nInsufficient"`
+	NNoEffect          int                    `json:"nNoEffect"`
+	Cost               CourseReportCost       `json:"cost"`
+	UnitsToReview      []UnitToReview         `json:"unitsToReview"`
+	Units              []UnitEffectiveness    `json:"units"`
+	ByMode             []ModeBreakdown        `json:"byMode"`
+	DataAsOf           *time.Time             `json:"dataAsOf,omitempty"`
+	SmallCellMinN      int                    `json:"smallCellMinN"`
+	MinNPerArm         int                    `json:"minNPerArm"`
+}
+
+// AdminReportCourse is one course drill-down row in the org rollup (AC.9 FR-2).
+type AdminReportCourse struct {
+	CourseID              uuid.UUID `json:"courseId"`
+	CourseCode            string    `json:"courseCode"`
+	Title                 string    `json:"title"`
+	NUnits                int       `json:"nUnits"`
+	NActiveUnits          int       `json:"nActiveUnits"`
+	MeanLiftVsControl     *float32  `json:"meanLiftVsControl"`
+	NRegressing           int       `json:"nRegressing"`
+	NHelping              int       `json:"nHelping"`
+	TokensUsedPeriod      int64     `json:"tokensUsedPeriod"`
+	MonthlyTokenBudget    int64     `json:"monthlyTokenBudget"`
+	CoveragePct           float64   `json:"coveragePct"`
+	StudentsServedVariant int       `json:"studentsServedVariant"`
+	DisparityFlags        int64     `json:"disparityFlags"`
+	OpenContests          int64     `json:"openContests"`
+	ReportURL             string    `json:"reportUrl"`
+}
+
+// AdminReportResponse is GET /api/v1/admin/adaptive-content/report (AC.9 FR-2).
+type AdminReportResponse struct {
+	CoursesUsingACE       int64               `json:"coursesUsingAce"`
+	StudentsImpacted      int64               `json:"studentsImpacted"`
+	CostUSD30d            float64             `json:"costUsd30d"`
+	BudgetHeadroomTokens  int64               `json:"budgetHeadroomTokens"`
+	AggregateLift         *float32            `json:"aggregateLift"`
+	DisparityFlags        int64               `json:"disparityFlags"`
+	OpenContests          int64               `json:"openContests"`
+	RegressingUnits       int64               `json:"regressingUnits"`
+	KillSwitch            bool                `json:"killSwitch"`
+	GenerationPaused      bool                `json:"generationPaused"`
+	QueueDepth            int64               `json:"queueDepth"`
+	Courses               []AdminReportCourse `json:"courses"`
+	DataAsOf              *time.Time          `json:"dataAsOf,omitempty"`
+	SmallCellMinN         int                 `json:"smallCellMinN"`
 }

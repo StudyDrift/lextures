@@ -10,7 +10,7 @@
 | **Section** | Adaptive Content Engine (ACE) |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Data/analytics + frontend + SRE |
 | **Depends on** | AC.4 (cost/cache metrics), AC.7 (effectiveness aggregates) |
@@ -80,22 +80,24 @@ ACE now runs end-to-end, but its value and health are invisible: an instructor c
 
 ## 8. Data Model
 
-Reserves `447_adaptive_content_reports.sql`. Mostly views over AC.4/AC.7/AC.8 tables.
+Shipped as `448_adaptive_content_reports.sql` (447 was taken by AC.8 governance). Mostly views over AC.4/AC.7/AC.8 tables.
 
 ```sql
--- 447_adaptive_content_reports.sql
+-- 448_adaptive_content_reports.sql
 -- Course-level rollup (refreshed with AC.7 effectiveness).
 CREATE MATERIALIZED VIEW analytics.adaptive_content_course_report AS
 SELECT
     u.course_id,
-    COUNT(*)                                            AS n_units,
-    COUNT(*) FILTER (WHERE u.status = 'active')         AS n_active_units,
-    AVG(e.treatment_minus_holdout)                      AS mean_lift_vs_control,
-    COUNT(*) FILTER (WHERE e.verdict = 'helping')       AS n_helping,
-    COUNT(*) FILTER (WHERE e.verdict = 'regressing')    AS n_regressing,
-    COUNT(*) FILTER (WHERE e.verdict = 'insufficient_data') AS n_insufficient,
-    s.tokens_used_period,
-    s.monthly_token_budget
+    COUNT(*)::INTEGER                                            AS n_units,
+    COUNT(*) FILTER (WHERE u.status = 'active')::INTEGER         AS n_active_units,
+    AVG(e.treatment_minus_holdout)::REAL                         AS mean_lift_vs_control,
+    COUNT(*) FILTER (WHERE e.verdict = 'helping')::INTEGER       AS n_helping,
+    COUNT(*) FILTER (WHERE e.verdict = 'regressing')::INTEGER    AS n_regressing,
+    COUNT(*) FILTER (WHERE e.verdict = 'insufficient_data')::INTEGER AS n_insufficient,
+    COUNT(*) FILTER (WHERE e.verdict = 'no_effect')::INTEGER     AS n_no_effect,
+    COALESCE(s.tokens_used_period, 0)::BIGINT                    AS tokens_used_period,
+    COALESCE(s.monthly_token_budget, 0)::BIGINT                  AS monthly_token_budget,
+    NOW()                                                        AS refreshed_at
 FROM course.adaptive_content_units u
 LEFT JOIN analytics.adaptive_content_effectiveness e ON e.unit_id = u.id
 LEFT JOIN course.adaptive_content_settings s ON s.course_id = u.course_id
@@ -153,8 +155,8 @@ No model calls. This story reports on the AI system's behavior — including **f
 - `clients/web/src/lib/ai-reports-api.ts` (existing) — ACE cost slice.
 - `server/internal/httpserver/adaptive_content_reports.go` (new); `repos/adaptivecontent/reports.go`.
 - `clients/web/src/components/lms/adaptive-content/reports/*` — reuse chart primitives + `dataviz` conventions.
-- `server/migrations/447_adaptive_content_reports.sql` (+ down).
-- Related: [AC.4](../../completed/adaptive/AC.4-generation-pipeline-caching-cost.md), [AC.7](../../completed/adaptive/AC.7-post-assessment-and-effectiveness.md), [AC.8](AC.8-governance-safety-fairness-privacy.md).
+- `server/migrations/448_adaptive_content_reports.sql` (+ down).
+- Related: [AC.4](AC.4-generation-pipeline-caching-cost.md), [AC.7](AC.7-post-assessment-and-effectiveness.md), [AC.8](AC.8-governance-safety-fairness-privacy.md).
 
 ## 13. Dependencies & Sequencing
 

@@ -1,0 +1,151 @@
+{
+  "uid": "lextures-adaptive-content",
+  "title": "Lextures — Adaptive Content Engine (AC.9)",
+  "tags": ["lextures", "ace", "adaptive-content"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1m",
+  "time": { "from": "now-24h", "to": "now" },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Queue depth",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [{ "refId": "A", "expr": "lextures_adaptive_content_queue_depth", "legendFormat": "pending" }]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "In-flight jobs",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [{ "refId": "A", "expr": "lextures_adaptive_content_inflight", "legendFormat": "inflight" }]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Kill-switch",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [{ "refId": "A", "expr": "lextures_adaptive_content_kill_switch_engaged", "legendFormat": "engaged" }]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Courses enabled",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [{ "refId": "A", "expr": "lextures_adaptive_content_courses_enabled", "legendFormat": "courses" }]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Serve latency p95 (ms)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(lextures_adaptive_content_serve_latency_ms_bucket[5m])))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Generation latency p95 (ms)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(lextures_adaptive_content_generate_ms_bucket[5m])))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Cache hit vs miss rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(lextures_adaptive_content_cache_hit_total[5m]))",
+          "legendFormat": "hit"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(lextures_adaptive_content_cache_miss_total[5m]))",
+          "legendFormat": "miss"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Served outcomes (variant / base / holdout / fallback)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(lextures_adaptive_content_served_variant_total[5m]))", "legendFormat": "variant" },
+        { "refId": "B", "expr": "sum(rate(lextures_adaptive_content_served_base_total[5m]))", "legendFormat": "base" },
+        { "refId": "C", "expr": "sum(rate(lextures_adaptive_content_served_holdout_total[5m]))", "legendFormat": "holdout" },
+        { "refId": "D", "expr": "sum(rate(lextures_adaptive_content_served_fallback_total[5m]))", "legendFormat": "fallback" }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Gate rejections (fidelity / safety)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(lextures_adaptive_content_rejected_fidelity_total[5m]))", "legendFormat": "fidelity" },
+        { "refId": "B", "expr": "sum(rate(lextures_adaptive_content_rejected_safety_total[5m]))", "legendFormat": "safety" }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Fidelity score distribution (rate)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(lextures_adaptive_content_fidelity_score_bucket[5m])) by (le)",
+          "legendFormat": "le={{le}}"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "SLO — generation success rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "1 - (sum(rate(lextures_adaptive_content_job_retry_total[15m])) / clamp_min(sum(rate(lextures_adaptive_content_job_latency_ms_count[15m])), 1))",
+          "legendFormat": "success"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "SLO — adapted availability with base fallback",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(sum(rate(lextures_adaptive_content_served_variant_total[15m])) + sum(rate(lextures_adaptive_content_served_base_total[15m])) + sum(rate(lextures_adaptive_content_served_holdout_total[15m])) + sum(rate(lextures_adaptive_content_served_fallback_total[15m]))) / clamp_min(sum(rate(lextures_adaptive_content_served_variant_total[15m])) + sum(rate(lextures_adaptive_content_served_base_total[15m])) + sum(rate(lextures_adaptive_content_served_holdout_total[15m])) + sum(rate(lextures_adaptive_content_served_fallback_total[15m])), 1)",
+          "legendFormat": "availability"
+        }
+      ]
+    }
+  ]
+}

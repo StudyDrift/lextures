@@ -87,6 +87,7 @@ export const AI_FEATURE_LABELS: Record<string, string> = {
   grader_agent: 'Grading agent',
   lesson_generation: 'Lesson generator',
   ai_study_buddy: 'AI study buddy',
+  adaptive_content: 'Adaptive content',
   unknown: 'Unknown',
 }
 

@@ -4200,6 +4200,33 @@
       }
     },
     {
+      "id": "AC.9",
+      "path": "docs/completed/adaptive/AC.9-analytics-reporting-and-operability.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Instructor report + CSV export, student authz deny, admin org rollup drill-down, and Report tab UI; deeper chart a11y and alert drills remain ops/manual.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/adaptive-content-reports.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": "n/a",
+        "disabledState": "n/a",
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": false,
+        "notes": "Depends on course adaptiveContentEnabled + AC.7 caches; student denied report; admin report gated by PERM_RBAC_MANAGE."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

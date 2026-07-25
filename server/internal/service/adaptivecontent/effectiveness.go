@@ -570,6 +570,10 @@ func RefreshCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, 
 		}
 		n++
 	}
+	// AC.9: keep coverage + course report matview in sync with effectiveness refresh.
+	if err := RefreshCourseReport(ctx, pool, courseID); err != nil {
+		slog.Warn("adaptivecontent: course report refresh failed", "course_id", courseID, "err", err)
+	}
 	return n, nil
 }
 

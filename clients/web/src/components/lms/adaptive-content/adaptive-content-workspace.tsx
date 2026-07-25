@@ -44,6 +44,7 @@ import {
 } from '../../../lib/courses-api'
 import { useConfirm } from '../../use-confirm'
 import { EffectivenessChip, EffectivenessSummaryTable } from './effectiveness-chip'
+import { CourseReportPanel } from './reports/course-report-panel'
 import { VariantDiff } from './variant-diff'
 
 const ALL_AXES = [
@@ -63,7 +64,7 @@ type Props = {
   canConfigure?: boolean
 }
 
-type WorkspaceTab = 'units' | 'queue' | 'contests'
+type WorkspaceTab = 'units' | 'queue' | 'contests' | 'report'
 
 function statusBadgeClass(status: string): string {
   switch (status) {
@@ -96,7 +97,13 @@ export function AdaptiveContentWorkspace({
   canConfigure = true,
 }: Props) {
   const { confirm, ConfirmDialogHost } = useConfirm()
-  const [tab, setTab] = useState<WorkspaceTab>('units')
+  const initialTab = ((): WorkspaceTab => {
+    if (typeof window === 'undefined') return 'units'
+    const q = new URLSearchParams(window.location.search).get('tab')
+    if (q === 'queue' || q === 'contests' || q === 'report' || q === 'units') return q
+    return 'units'
+  })()
+  const [tab, setTab] = useState<WorkspaceTab>(initialTab)
   const [units, setUnits] = useState<AdaptiveContentUnit[]>([])
   const [structure, setStructure] = useState<CourseStructureItem[]>([])
   const [budget, setBudget] = useState<AdaptiveContentBudget | null>(null)
@@ -652,6 +659,20 @@ export function AdaptiveContentWorkspace({
           Contests
           {contests.length > 0 ? ` (${contests.length})` : ''}
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'report'}
+          onClick={() => setTab('report')}
+          data-testid="ace-report-tab"
+          className={`px-3 py-2 text-sm font-medium ${
+            tab === 'report'
+              ? 'border-b-2 border-indigo-600 text-indigo-700 dark:text-indigo-300'
+              : 'text-slate-600 dark:text-neutral-400'
+          }`}
+        >
+          Report
+        </button>
       </div>
 
       {error && (
@@ -988,6 +1009,10 @@ export function AdaptiveContentWorkspace({
               ))}
             </ul>
           )}
+        </section>
+      ) : tab === 'report' ? (
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <CourseReportPanel courseCode={courseCode} />
         </section>
       ) : (
         <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
