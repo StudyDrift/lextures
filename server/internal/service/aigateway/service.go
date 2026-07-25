@@ -47,6 +47,8 @@ const (
 	FeatureLessonGeneration           = "lesson_generation"
 	FeatureAIStudyBuddy               = "ai_study_buddy"
 	FeatureReportCardComment          = "report_card_comment"
+	// FeatureAdaptiveContent is reserved for ACE generation (plan AC.1 / AC.3).
+	FeatureAdaptiveContent = "adaptive_content"
 )
 
 // BlockReason explains why a call was blocked.

@@ -737,6 +737,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'accessibility',
   },
   {
+    key: 'ffPinnedSettings',
+    label: 'Pinned editor settings',
+    description:
+      'Lets instructors pin frequently used assignment and quiz settings to the top of the editor panels (PS.2–PS.4). Defaults on at GA; turn off to hide pin UI and API while retaining stored pins.',
+    pack: 'core',
+  },
+  {
     key: 'ffMotionNavigation',
     label: 'Motion / animation',
     description:

@@ -55,6 +55,10 @@ type Metrics struct {
 	feedbackSubmitErrorsTotal    *prometheus.CounterVec
 	feedbackAdminListLatency     prometheus.Histogram
 	onboardingEventInsertFailed  *prometheus.CounterVec
+	pinnedSettingsWritesTotal    *prometheus.CounterVec
+	pinnedSettingsRejectsTotal   *prometheus.CounterVec
+	// pinnedSettingsPinsGauge is a histogram of pin-list length observed on write (PS.4 FR-12).
+	pinnedSettingsPinsGauge prometheus.Histogram
 }
 
 // NewMetrics builds a self-contained registry (not the global default, so tests
@@ -206,6 +210,22 @@ func NewMetrics(deployColor ...string) *Metrics {
 			Name:      "onboarding_event_insert_failed_total",
 			Help:      "Failed inserts into onboarding_events by validated program value (plan HS.5).",
 		}, []string{"program"}),
+		pinnedSettingsWritesTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "pinned_settings_writes_total",
+			Help:      "Successful pinned-settings PUT writes by surface (plan PS.2).",
+		}, []string{"surface"}),
+		pinnedSettingsRejectsTotal: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "pinned_settings_rejects_total",
+			Help:      "Rejected pinned-settings writes by reason: shape, too_many, duplicate, bad_surface (plan PS.2).",
+		}, []string{"reason"}),
+		pinnedSettingsPinsGauge: prometheus.NewHistogram(prometheus.HistogramOpts{
+			Namespace: namespace,
+			Name:      "pinned_settings_pins_gauge",
+			Help:      "Histogram of pin-list length observed on successful PUT (plan PS.4). Buckets 0–12.",
+			Buckets:   []float64{0, 1, 2, 3, 4, 5, 6, 8, 10, 12},
+		}),
 	}
 
 	reg.MustRegister(
@@ -235,6 +255,9 @@ func NewMetrics(deployColor ...string) *Metrics {
 		m.feedbackSubmitErrorsTotal,
 		m.feedbackAdminListLatency,
 		m.onboardingEventInsertFailed,
+		m.pinnedSettingsWritesTotal,
+		m.pinnedSettingsRejectsTotal,
+		m.pinnedSettingsPinsGauge,
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
@@ -470,6 +493,39 @@ func (m *Metrics) ObserveFeedbackAdminList(seconds float64) {
 
 // RecordOnboardingEventInsertFailed increments onboarding_event_insert_failed_total (plan HS.5).
 // program must already be validated to the closed set in onboarding_http.go.
+// RecordPinnedSettingsWrite increments pinned_settings_writes_total (plan PS.2).
+func (m *Metrics) RecordPinnedSettingsWrite(surface string) {
+	if m == nil || m.pinnedSettingsWritesTotal == nil {
+		return
+	}
+	if surface == "" {
+		surface = "unknown"
+	}
+	m.pinnedSettingsWritesTotal.WithLabelValues(surface).Inc()
+}
+
+// ObservePinnedSettingsPinCount records the submitted pin-list length (plan PS.4 FR-12).
+func (m *Metrics) ObservePinnedSettingsPinCount(count int) {
+	if m == nil || m.pinnedSettingsPinsGauge == nil {
+		return
+	}
+	if count < 0 {
+		count = 0
+	}
+	m.pinnedSettingsPinsGauge.Observe(float64(count))
+}
+
+// RecordPinnedSettingsReject increments pinned_settings_rejects_total (plan PS.2).
+func (m *Metrics) RecordPinnedSettingsReject(reason string) {
+	if m == nil || m.pinnedSettingsRejectsTotal == nil {
+		return
+	}
+	if reason == "" {
+		reason = "unknown"
+	}
+	m.pinnedSettingsRejectsTotal.WithLabelValues(reason).Inc()
+}
+
 func (m *Metrics) RecordOnboardingEventInsertFailed(program string) {
 	if m == nil || m.onboardingEventInsertFailed == nil {
 		return

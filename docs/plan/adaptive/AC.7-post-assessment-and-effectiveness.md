@@ -158,7 +158,7 @@ Measurement is statistics, not AI: difference-in-means between treatment and hol
 - `server/internal/telemetry/` — metrics + regressing alert.
 - notifications service — instructor alert on `regressing`.
 - `server/migrations/445_adaptive_content_effectiveness.sql` (+ down).
-- Related: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.6](AC.6-student-runtime-and-transparency.md), [AC.9](AC.9-analytics-reporting-and-operability.md).
+- Related: [AC.2](../../completed/adaptive/AC.2-pre-assessment-and-adaptation-profile.md), [AC.6](../../completed/adaptive/AC.6-student-runtime-and-transparency.md), [AC.9](AC.9-analytics-reporting-and-operability.md).
 
 ## 13. Dependencies & Sequencing
 
@@ -211,5 +211,5 @@ Measurement is statistics, not AI: difference-in-means between treatment and hol
 ## 19. References
 
 - Existing files: `server/migrations/173_outcomes_report.sql` (9.5 outcomes report), `087_learner_model.sql`, `069_quiz_attempts_responses.sql`, `server/internal/service/learnerstate/`.
-- Related plans: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.6](AC.6-student-runtime-and-transparency.md), [AC.9](AC.9-analytics-reporting-and-operability.md), `../standards/S06-dpia-pia-algorithmic-impact.md`, `../standards/S13-eu-ai-act-high-risk.md`.
+- Related plans: [AC.2](../../completed/adaptive/AC.2-pre-assessment-and-adaptation-profile.md), [AC.6](../../completed/adaptive/AC.6-student-runtime-and-transparency.md), [AC.9](AC.9-analytics-reporting-and-operability.md), `../standards/S06-dpia-pia-algorithmic-impact.md`, `../standards/S13-eu-ai-act-high-risk.md`.
 - External: difference-in-means / A-B testing basics; NIST AI RMF (measure function); education program-evaluation methodology.

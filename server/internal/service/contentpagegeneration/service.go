@@ -105,15 +105,26 @@ func ParseDraftSectionsJSON(raw string) ([]DraftSection, error) {
 
 func stripJSONFences(raw string) string {
 	text := strings.TrimSpace(raw)
-	if idx := strings.Index(text, "```json"); idx != -1 {
-		text = text[idx+7:]
-		if endIdx := strings.Index(text, "```"); endIdx != -1 {
-			text = text[:endIdx]
+	// Only strip markdown fences when they wrap the whole payload (leading fence).
+	// Do not scan for ``` inside JSON string values (e.g. fenced code in markdown fields).
+	if strings.HasPrefix(text, "```") {
+		text = strings.TrimPrefix(text, "```")
+		if strings.HasPrefix(strings.ToLower(text), "json") {
+			text = text[4:]
+			// optional language tag newline
+			text = strings.TrimPrefix(text, "\n")
+			text = strings.TrimPrefix(text, "\r\n")
+		} else if nl := strings.IndexByte(text, '\n'); nl >= 0 {
+			// language tag on first line (e.g. ```json or ```)
+			text = text[nl+1:]
 		}
-	} else if idx := strings.Index(text, "```"); idx != -1 {
-		text = text[idx+3:]
-		if endIdx := strings.Index(text, "```"); endIdx != -1 {
-			text = text[:endIdx]
+		// Drop a single trailing fence if present at end.
+		if endIdx := strings.LastIndex(text, "```"); endIdx != -1 {
+			// Prefer closing fence near the end of the payload.
+			after := strings.TrimSpace(text[endIdx+3:])
+			if after == "" {
+				text = text[:endIdx]
+			}
 		}
 	}
 	text = strings.TrimSpace(text)

@@ -1,6 +1,6 @@
 # AC.2 — Pre-Assessment Binding & Adaptation Profile
 
-> Implementation plan. Source: extends the shipped adaptive-learning core. Folder overview: [README](README.md).
+> Implementation plan. Source: extends the shipped adaptive-learning core. Folder overview: [README](../../plan/adaptive/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Adaptive Content Engine (ACE) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Backend platform team |
 | **Depends on** | AC.1; reuses 1.1 (learner model), 1.6 (IRT theta), 1.7 (diagnostic), 1.10 (misconceptions) |
@@ -209,5 +209,5 @@ type AdaptationProfile = {
 ## 19. References
 
 - Existing files: `server/internal/service/learnerstate/mastery.go`, `server/migrations/087_learner_model.sql`, `088_concept_graph.sql`, `096_misconceptions.sql`, `040_quiz_adaptive.sql`.
-- Related plans: [AC.1](AC.1-foundations-flag-and-data-model.md), [AC.3](AC.3-content-generation-engine.md), [AC.7](AC.7-post-assessment-and-effectiveness.md), [AC.8](AC.8-governance-safety-fairness-privacy.md).
+- Related plans: [AC.1](AC.1-foundations-flag-and-data-model.md), [AC.3](AC.3-content-generation-engine.md), [AC.7](../../plan/adaptive/AC.7-post-assessment-and-effectiveness.md), [AC.8](../../plan/adaptive/AC.8-governance-safety-fairness-privacy.md).
 - External: GDPR Art. 22 (automated decisions); EU AI Act Annex III (education); Bloom's revised taxonomy.

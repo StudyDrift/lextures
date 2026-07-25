@@ -61,6 +61,24 @@ type moduleAssignmentGetResponse struct {
 	ProfileRationale             *profileRationaleJSON `json:"profileRationale,omitempty"`
 	PreferredAlternateItemID     *uuid.UUID       `json:"preferredAlternateItemId,omitempty"`
 	ModalityAlternates           []modalityAlternateJSON `json:"modalityAlternates,omitempty"`
+	// Adaptive is set for students when the page is an active ACE unit base (AC.6).
+	Adaptive *moduleAdaptiveServingJSON `json:"adaptive,omitempty"`
+}
+
+// moduleAdaptiveServingJSON is the student-facing adaptive serving block (AC.6).
+type moduleAdaptiveServingJSON struct {
+	UnitID                uuid.UUID  `json:"unitId"`
+	IsAdapted             bool       `json:"isAdapted"`
+	ServedVariantID       *uuid.UUID `json:"servedVariantId,omitempty"`
+	AxesApplied           []string   `json:"axesApplied"`
+	CanViewOriginal       bool       `json:"canViewOriginal"`
+	OptedOut              bool       `json:"optedOut"`
+	IsHoldout             bool       `json:"isHoldout"`
+	WasFallback           bool       `json:"wasFallback,omitempty"`
+	AdaptationReason      string     `json:"adaptationReason,omitempty"`
+	PreAssessmentItemID   *uuid.UUID `json:"preAssessmentItemId,omitempty"`
+	RequiresPreAssessment bool       `json:"requiresPreAssessment,omitempty"`
+	OptoutAllowed         bool       `json:"optoutAllowed,omitempty"`
 }
 
 type modalityAlternateJSON struct {

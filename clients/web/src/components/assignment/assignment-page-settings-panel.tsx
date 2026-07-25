@@ -1,6 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDown, Loader2, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, Loader2, Plus, Search, Trash2 } from 'lucide-react'
 import {
   generateAssignmentRubric,
   GRADING_SCHEME_DISPLAY_TYPES,
@@ -11,6 +11,21 @@ import {
   type RubricCriterion,
   type RubricLevel,
 } from '../../lib/courses-api'
+import {
+  getMatchingSettingIds,
+  sectionHasMatchingSettings,
+  type AssignmentSettingsSectionId,
+} from '../../lib/settings-registry'
+import { SettingRow } from '../settings-panel/setting-row'
+import {
+  SettingsPanelProvider,
+  useSettingsPanelContext,
+} from '../settings-panel/settings-panel-context'
+import {
+  PinnedSectionHint,
+  PinnedSettingsGroup,
+} from '../settings-panel/pinned-settings-group'
+import { usePinnedSettings } from '../settings-panel/use-pinned-settings'
 import { ModuleItemOutcomesMappingAccordion } from '../outcomes/module-item-outcomes-mapping-accordion'
 import { AssignToEditor } from './assign-to-editor'
 
@@ -84,9 +99,30 @@ export type AssignmentPageSettingsPanelProps = {
 const inputClass =
   'w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
 
-function SettingsAccordion({ title, children }: { title: string; children: ReactNode }) {
+function SettingsAccordion({
+  title,
+  forceOpen,
+  sectionId,
+  children,
+}: {
+  title: string
+  /** When true (e.g. during search), keep the section expanded. */
+  forceOpen?: boolean
+  /** Registry section id — used for pin count hint (FR-7). */
+  sectionId?: AssignmentSettingsSectionId
+  children: ReactNode
+}) {
+  const panel = useSettingsPanelContext()
+  const pinCount = sectionId ? panel.pinnedCountForSection(sectionId) : 0
+  if (sectionId && !panel.sectionHasVisibleContent(sectionId)) {
+    if (panel.searching || pinCount === 0) return null
+  }
   return (
-    <details className="group border-b border-slate-100 last:border-b-0 dark:border-neutral-800/80">
+    <details
+      key={forceOpen ? 'forced-open' : 'manual'}
+      className="group border-b border-slate-100 last:border-b-0 dark:border-neutral-800/80"
+      open={forceOpen || undefined}
+    >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[13px] font-medium text-slate-600 outline-none transition-colors hover:bg-slate-50/80 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800/30 dark:hover:text-neutral-200 [&::-webkit-details-marker]:hidden">
         <span>{title}</span>
         <ChevronDown
@@ -94,9 +130,22 @@ function SettingsAccordion({ title, children }: { title: string; children: React
           aria-hidden
         />
       </summary>
-      <div className="px-3 pb-3 pt-0.5">{children}</div>
+      <div className="px-3 pb-3 pt-0.5">
+        <PinnedSectionHint count={pinCount} />
+        {children}
+      </div>
     </details>
   )
+}
+
+function AssignmentPinnedGroup({ pins }: { pins: ReturnType<typeof usePinnedSettings> }) {
+  const { getRegisteredIds, registeredVersion, matches } = useSettingsPanelContext()
+  const visiblePinned = useMemo(() => {
+    void registeredVersion
+    const reg = getRegisteredIds()
+    return pins.resolved.filter((d) => reg.has(d.id) && matches(d.id))
+  }, [pins.resolved, getRegisteredIds, registeredVersion, matches])
+  return <PinnedSettingsGroup pins={pins} visiblePinned={visiblePinned} />
 }
 
 function SettingsAccordionGroup({ children }: { children: ReactNode }) {
@@ -230,488 +279,614 @@ export function AssignmentPageSettingsPanel({
   replaceWithFinal = false,
   onReplaceWithFinalChange,
 }: AssignmentPageSettingsPanelProps) {
+  const [settingsQuery, setSettingsQuery] = useState('')
+  const searching = settingsQuery.trim().length > 0
+  const pins = usePinnedSettings('assignment')
+
+  useEffect(() => {
+    if (!pins.forceOpenSection) return
+    const t = window.setTimeout(() => pins.clearForceOpenSection(), 2500)
+    return () => window.clearTimeout(t)
+  }, [pins.forceOpenSection, pins.clearForceOpenSection])
+
+  const show = (id: AssignmentSettingsSectionId) =>
+    sectionHasMatchingSettings('assignment', id, settingsQuery)
+  const sectionForceOpen = (id: AssignmentSettingsSectionId) =>
+    searching || pins.forceOpenSection === id
   const submissionCount =
     Number(submissionAllowText) + Number(submissionAllowFileUpload) + Number(submissionAllowUrl)
 
+  const candidateSections: AssignmentSettingsSectionId[] = [
+    'scheduling',
+    'submission-type',
+    'academic-integrity',
+    'late-submission',
+    ...(onPostingPolicyChange ? (['grade-posting'] as AssignmentSettingsSectionId[]) : []),
+    'grading',
+    'rubric',
+    ...(courseCode && assignmentItemId
+      ? (['outcomes-mapping', 'assign-to'] as AssignmentSettingsSectionId[])
+      : []),
+    'access',
+  ]
+  const visibleSectionCount = candidateSections.filter((id) => show(id)).length
+  const hasPinnedSearchHit = useMemo(() => {
+    if (!searching || !pins.enabled) return false
+    const matchSet = getMatchingSettingIds('assignment', settingsQuery)
+    return pins.resolved.some((d) => matchSet.has(d.id))
+  }, [searching, pins.enabled, pins.resolved, settingsQuery])
+
   return (
+    <SettingsPanelProvider surface="assignment" query={settingsQuery} pins={pins}>
     <div className="space-y-3">
       <p className="text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
         Save the page from the toolbar to apply changes.
       </p>
 
-      <SettingsAccordionGroup>
-        <SettingsAccordion title="Scheduling">
-          <div className="space-y-3 pt-1">
-            <Field label="Due date" htmlFor="assignment-settings-due" hint="Shown on the course calendar. Clear the field to remove.">
-              <input
-                id="assignment-settings-due"
-                type="datetime-local"
-                value={dueLocal}
-                onChange={(e) => onDueLocalChange(e.target.value)}
-                disabled={disabled}
-                className={inputClass}
-              />
-            </Field>
-            <Field
-              label="Visibility start"
-              htmlFor="assignment-settings-visible-from"
-              hint="Learners cannot open the assignment before this time. Clear to remove."
-            >
-              <input
-                id="assignment-settings-visible-from"
-                type="datetime-local"
-                value={availableFromLocal}
-                onChange={(e) => onAvailableFromLocalChange(e.target.value)}
-                disabled={disabled}
-                className={inputClass}
-              />
-            </Field>
-            <Field
-              label="Visibility end"
-              htmlFor="assignment-settings-visible-until"
-              hint="After this time the assignment is no longer available. Clear to remove."
-            >
-              <input
-                id="assignment-settings-visible-until"
-                type="datetime-local"
-                value={availableUntilLocal}
-                onChange={(e) => onAvailableUntilLocalChange(e.target.value)}
-                disabled={disabled}
-                className={inputClass}
-              />
-            </Field>
-          </div>
-        </SettingsAccordion>
+      <div className="relative">
+        <Search
+          className="pointer-events-none absolute start-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+          aria-hidden
+        />
+        <input
+          id="assignment-settings-search"
+          type="search"
+          value={settingsQuery}
+          onChange={(e) => setSettingsQuery(e.target.value)}
+          placeholder="Search settings…"
+          aria-label="Search assignment settings"
+          className={`${inputClass} ps-8`}
+        />
+      </div>
 
-        <SettingsAccordion title="Submission type">
-          <div className="divide-y divide-slate-100/90 pt-1 dark:divide-neutral-800/80">
-            <ToggleRow
-              id="assignment-submission-text"
-              label="Text entry"
-              description="Learners can type or paste a written response."
-              checked={submissionAllowText}
-              onChange={(next) => {
-                if (!next && submissionCount <= 1) return
-                onSubmissionAllowTextChange(next)
-              }}
-              disabled={disabled}
-            />
-            <ToggleRow
-              id="assignment-submission-file"
-              label="File upload"
-              description="Learners can attach one or more files when submitting."
-              checked={submissionAllowFileUpload}
-              onChange={(next) => {
-                if (!next && submissionCount <= 1) return
-                onSubmissionAllowFileUploadChange(next)
-              }}
-              disabled={disabled}
-            />
-            <ToggleRow
-              id="assignment-submission-url"
-              label="Website URL"
-              description="Learners can submit a link (e.g. portfolio or cloud document)."
-              checked={submissionAllowUrl}
-              onChange={(next) => {
-                if (!next && submissionCount <= 1) return
-                onSubmissionAllowUrlChange(next)
-              }}
-              disabled={disabled}
-            />
-          </div>
-        </SettingsAccordion>
+      <AssignmentPinnedGroup pins={pins} />
 
-        <SettingsAccordion title="Academic integrity">
-          <div className="space-y-3 pt-1">
-            <Field
-              label="Originality checks"
-              htmlFor="assignment-originality-mode"
-              hint="Runs after each submission. Plagiarism modes require institutional provider configuration (admin)."
-            >
-              <select
-                id="assignment-originality-mode"
-                value={originalityDetection}
-                onChange={(e) => onOriginalityDetectionChange(e.target.value as OriginalityDetectionMode)}
-                disabled={disabled}
-                className={inputClass}
-              >
-                <option value="disabled">Disabled</option>
-                <option value="plagiarism">External similarity only</option>
-                <option value="ai">Internal AI signal only</option>
-                <option value="both">Similarity and AI signal</option>
-              </select>
-            </Field>
-            <Field
-              label="Student score visibility"
-              htmlFor="assignment-originality-visibility"
-              hint="Whether learners can see similarity or AI probability for their own submission."
-            >
-              <select
-                id="assignment-originality-visibility"
-                value={originalityStudentVisibility}
-                onChange={(e) =>
-                  onOriginalityStudentVisibilityChange(e.target.value as OriginalityStudentVisibility)
-                }
-                disabled={disabled}
-                className={inputClass}
-              >
-                <option value="hide">Hide from students</option>
-                <option value="show">Show to students</option>
-                <option value="show_after_grading">Show after a grade is posted</option>
-              </select>
-            </Field>
-            <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
-              Scores are advisory only and do not change grades automatically. Discuss unexpected results
-              with your instructor.
-            </p>
-          </div>
-        </SettingsAccordion>
-
-        <SettingsAccordion title="Late submission (after due)">
-          <div className="space-y-3 pt-1">
-            <Field label="Policy" htmlFor="assignment-late-policy">
-              <select
-                id="assignment-late-policy"
-                value={lateSubmissionPolicy}
-                onChange={(e) => onLateSubmissionPolicyChange(e.target.value as LateSubmissionPolicy)}
-                disabled={disabled}
-                className={inputClass}
-              >
-                <option value="allow">Allow (no block)</option>
-                <option value="penalty">Allow with penalty</option>
-                <option value="block">Block after due</option>
-              </select>
-            </Field>
-            {lateSubmissionPolicy === 'penalty' ? (
-              <Field label="Late penalty (% of points)" htmlFor="assignment-late-penalty">
-                <input
-                  id="assignment-late-penalty"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={latePenaltyPercent ?? ''}
-                  onChange={(e) => {
-                    const v = e.target.value
-                    onLatePenaltyPercentChange(v === '' ? null : Math.min(100, Math.max(0, Number(v))))
-                  }}
-                  disabled={disabled}
-                  className={`max-w-[8rem] ${inputClass}`}
-                />
-              </Field>
-            ) : null}
-            <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
-              For quizzes, penalties apply automatically to auto-graded scores. For file or text
-              assignments, use this when recording grades or when a submission workflow is enabled.
-            </p>
-          </div>
-        </SettingsAccordion>
-
-        {onPostingPolicyChange ? (
-          <SettingsAccordion title="Grade posting">
-            <div className="space-y-3 pt-1">
-              <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
-                Manual: entered grades stay hidden from students until you post from the course gradebook (or
-                the scheduled time below). Automatic: students see scores as you enter them.
-              </p>
-              <div className="space-y-2">
-                <label className="flex cursor-pointer items-start gap-2 text-[13px]">
-                  <input
-                    type="radio"
-                    name="posting-policy"
-                    className="mt-0.5"
-                    checked={postingPolicy === 'automatic'}
-                    disabled={disabled}
-                    onChange={() => onPostingPolicyChange('automatic')}
-                  />
-                  <span>Automatic — show grades as entered</span>
-                </label>
-                <label className="flex cursor-pointer items-start gap-2 text-[13px]">
-                  <input
-                    type="radio"
-                    name="posting-policy"
-                    className="mt-0.5"
-                    checked={postingPolicy === 'manual'}
-                    disabled={disabled}
-                    onChange={() => onPostingPolicyChange('manual')}
-                  />
-                  <span>Manual — hold until posted in gradebook or schedule</span>
-                </label>
-              </div>
-              {onReleaseAtLocalChange && postingPolicy === 'manual' ? (
-                <Field
-                  label="Release grades at (optional)"
-                  htmlFor="assignment-posting-release"
-                  hint="If set, held grades are posted at this time without opening the gradebook. Clear to use only the Post button."
-                >
-                  <input
-                    id="assignment-posting-release"
-                    type="datetime-local"
-                    value={releaseAtLocal}
-                    onChange={(e) => onReleaseAtLocalChange(e.target.value)}
-                    disabled={disabled}
-                    className={inputClass}
-                  />
-                </Field>
-              ) : null}
-            </div>
-          </SettingsAccordion>
-        ) : null}
-
-        <SettingsAccordion title="Grading">
-          <div className="space-y-3 pt-1">
-            <ToggleRow
-              id="assignment-blind-grading"
-              label="Blind grading"
-              description="Hide student names and IDs from graders until you reveal identities. Reduces unconscious bias while scoring."
-              checked={blindGrading}
-              onChange={onBlindGradingChange}
-              disabled={disabled}
-            />
-            <ToggleRow
-              id="assignment-moderated-grading"
-              label="Moderated grading"
-              description="Assign provisional graders and a moderator. Graders only see their own scores; the moderator reconciles disagreements before gradebook saves."
-              checked={moderatedGrading}
-              onChange={onModeratedGradingChange}
-              disabled={disabled}
-            />
-            {moderatedGrading ? (
-              <div className="space-y-3 border-t border-slate-100 pt-3 dark:border-neutral-800">
-                <Field
-                  label="Agreement threshold (% of points)"
-                  htmlFor="assignment-moderation-threshold"
-                  hint="When two provisional scores differ by more than this percentage of the assignment points, the submission is flagged for moderator review."
-                >
-                  <input
-                    id="assignment-moderation-threshold"
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={moderationThresholdPct}
-                    onChange={(e) => {
-                      const n = Math.floor(Number(e.target.value))
-                      if (!Number.isFinite(n)) return
-                      onModerationThresholdPctChange(Math.min(100, Math.max(0, n)))
-                    }}
-                    disabled={disabled}
-                    className={`max-w-[8rem] ${inputClass}`}
-                  />
-                </Field>
-                <Field label="Moderator" htmlFor="assignment-moderator">
-                  <select
-                    id="assignment-moderator"
-                    value={moderatorUserId ?? ''}
-                    onChange={(e) => {
-                      const v = e.target.value
-                      onModeratorUserIdChange(v === '' ? null : v)
-                    }}
-                    disabled={disabled}
-                    className={inputClass}
+      {searching && visibleSectionCount === 0 && !hasPinnedSearchHit ? (
+        <p className="rounded-lg border border-slate-200/70 px-3 py-6 text-center text-sm text-slate-400 dark:border-neutral-700/50 dark:text-neutral-500">
+          No settings match &ldquo;{settingsQuery.trim()}&rdquo;
+        </p>
+      ) : (
+        <SettingsAccordionGroup>
+          {show('scheduling') ? (
+            <SettingsAccordion title="Scheduling" sectionId="scheduling" forceOpen={sectionForceOpen('scheduling')}>
+              <div className="space-y-3 pt-1">
+                <SettingRow settingId="assignment.scheduling.due-date">
+                  <Field label="Due date" htmlFor="assignment-settings-due" hint="Shown on the course calendar. Clear the field to remove.">
+                    <input
+                      id="assignment-settings-due"
+                      type="datetime-local"
+                      value={dueLocal}
+                      onChange={(e) => onDueLocalChange(e.target.value)}
+                      disabled={disabled}
+                      className={inputClass}
+                    />
+                  </Field>
+                </SettingRow>
+                <SettingRow settingId="assignment.scheduling.visible-from">
+                  <Field
+                    label="Visibility start"
+                    htmlFor="assignment-settings-visible-from"
+                    hint="Learners cannot open the assignment before this time. Clear to remove."
                   >
-                    <option value="">— Select —</option>
-                    {staffDirectory.map((s) => (
-                      <option key={s.userId} value={s.userId}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <div>
-                  <p className="mb-2 text-[13px] font-medium text-slate-700 dark:text-neutral-200">
-                    Provisional graders
-                  </p>
-                  <p className="mb-2 text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
-                    Up to ten course staff may submit provisional scores. The moderator cannot be a grader.
-                  </p>
-                  <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-2 dark:border-neutral-700">
-                    {staffDirectory.map((s) => {
-                      const checked = provisionalGraderUserIds.includes(s.userId)
-                      const mod = moderatorUserId === s.userId
-                      return (
-                        <li key={s.userId} className="flex items-center gap-2 text-[13px]">
-                          <input
-                            id={`grader-${s.userId}`}
-                            type="checkbox"
-                            checked={checked}
-                            disabled={disabled || mod}
-                            onChange={() => {
-                              if (mod) return
-                              if (checked) {
-                                onProvisionalGraderUserIdsChange(
-                                  provisionalGraderUserIds.filter((id) => id !== s.userId),
-                                )
-                              } else if (provisionalGraderUserIds.length < 10) {
-                                onProvisionalGraderUserIdsChange([...provisionalGraderUserIds, s.userId])
-                              }
-                            }}
-                            className="rounded border-slate-300 dark:border-neutral-600"
-                          />
-                          <label htmlFor={`grader-${s.userId}`} className="cursor-pointer select-none">
-                            {s.label}
-                          </label>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
+                    <input
+                      id="assignment-settings-visible-from"
+                      type="datetime-local"
+                      value={availableFromLocal}
+                      onChange={(e) => onAvailableFromLocalChange(e.target.value)}
+                      disabled={disabled}
+                      className={inputClass}
+                    />
+                  </Field>
+                </SettingRow>
+                <SettingRow settingId="assignment.scheduling.visible-until">
+                  <Field
+                    label="Visibility end"
+                    htmlFor="assignment-settings-visible-until"
+                    hint="After this time the assignment is no longer available. Clear to remove."
+                  >
+                    <input
+                      id="assignment-settings-visible-until"
+                      type="datetime-local"
+                      value={availableUntilLocal}
+                      onChange={(e) => onAvailableUntilLocalChange(e.target.value)}
+                      disabled={disabled}
+                      className={inputClass}
+                    />
+                  </Field>
+                </SettingRow>
               </div>
-            ) : null}
-            <Field
-              label="Points worth"
-              htmlFor="assignment-settings-points"
-              hint="How many points this assignment counts for. Leave empty if not set (use 0 for no points)."
-            >
-              <input
-                id="assignment-settings-points"
-                type="number"
-                min={0}
-                max={1000000}
-                placeholder="Not set"
-                value={pointsWorth ?? ''}
-                onChange={(e) => {
-                  const v = e.target.value.trim()
-                  if (v === '') {
-                    onPointsWorthChange(null)
-                    return
-                  }
-                  const n = Math.floor(Number(v))
-                  if (!Number.isFinite(n)) return
-                  onPointsWorthChange(Math.min(1_000_000, Math.max(0, n)))
-                }}
-                disabled={disabled}
-                className={`max-w-[10rem] ${inputClass}`}
-              />
-            </Field>
-            <Field
-              label="Assignment group"
-              htmlFor="assignment-settings-group"
-              hint="Used with weighted assignment groups in course grading settings. Saves immediately when changed."
-            >
-              <select
-                id="assignment-settings-group"
-                value={assignmentGroupId ?? ''}
-                onChange={(e) => {
-                  const v = e.target.value
-                  onAssignmentGroupChange(v === '' ? null : v)
-                }}
-                disabled={disabled || Boolean(assignmentGroupSelectDisabled)}
-                className={inputClass}
-              >
-                <option value="">— None —</option>
-                {gradingGroups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            {gradingGroups.length === 0 ? (
-              <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
-                Add groups under Course Settings → Assignment groups & weights.
-              </p>
-            ) : null}
-            {onNeverDropChange && onReplaceWithFinalChange ? (
-              <div className="divide-y divide-slate-100/90 dark:divide-neutral-800/80">
-                <ToggleRow
-                  id="assignment-never-drop"
-                  label="Never drop this score"
-                  description="When the assignment group drops lowest or highest scores, this item is always kept in the average."
-                  checked={neverDrop}
-                  onChange={(next) => {
-                    onNeverDropChange(next)
-                    if (!next && replaceWithFinal) onReplaceWithFinalChange(false)
-                  }}
+            </SettingsAccordion>
+          ) : null}
+
+          {show('submission-type') ? (
+            <SettingsAccordion title="Submission type" sectionId="submission-type" forceOpen={sectionForceOpen('submission-type')}>
+              <div className="divide-y divide-slate-100/90 pt-1 dark:divide-neutral-800/80">
+                <SettingRow settingId="assignment.submission-type.text-entry">
+                  <ToggleRow
+                    id="assignment-submission-text"
+                    label="Text entry"
+                    description="Learners can type or paste a written response."
+                    checked={submissionAllowText}
+                    onChange={(next) => {
+                      if (!next && submissionCount <= 1) return
+                      onSubmissionAllowTextChange(next)
+                    }}
+                    disabled={disabled}
+                  />
+                </SettingRow>
+                <SettingRow settingId="assignment.submission-type.file-upload">
+                  <ToggleRow
+                    id="assignment-submission-file"
+                    label="File upload"
+                    description="Learners can attach one or more files when submitting."
+                    checked={submissionAllowFileUpload}
+                    onChange={(next) => {
+                      if (!next && submissionCount <= 1) return
+                      onSubmissionAllowFileUploadChange(next)
+                    }}
+                    disabled={disabled}
+                  />
+                </SettingRow>
+                <SettingRow settingId="assignment.submission-type.url">
+                  <ToggleRow
+                    id="assignment-submission-url"
+                    label="Website URL"
+                    description="Learners can submit a link (e.g. portfolio or cloud document)."
+                    checked={submissionAllowUrl}
+                    onChange={(next) => {
+                      if (!next && submissionCount <= 1) return
+                      onSubmissionAllowUrlChange(next)
+                    }}
+                    disabled={disabled}
+                  />
+                </SettingRow>
+              </div>
+            </SettingsAccordion>
+          ) : null}
+
+          {show('academic-integrity') ? (
+            <SettingsAccordion title="Academic integrity" sectionId="academic-integrity" forceOpen={sectionForceOpen('academic-integrity')}>
+              <div className="space-y-3 pt-1">
+                <SettingRow settingId="assignment.academic-integrity.originality-mode">
+                  <Field
+                    label="Originality checks"
+                    htmlFor="assignment-originality-mode"
+                    hint="Runs after each submission. Plagiarism modes require institutional provider configuration (admin)."
+                  >
+                    <select
+                      id="assignment-originality-mode"
+                      value={originalityDetection}
+                      onChange={(e) => onOriginalityDetectionChange(e.target.value as OriginalityDetectionMode)}
+                      disabled={disabled}
+                      className={inputClass}
+                    >
+                      <option value="disabled">Disabled</option>
+                      <option value="plagiarism">External similarity only</option>
+                      <option value="ai">Internal AI signal only</option>
+                      <option value="both">Similarity and AI signal</option>
+                    </select>
+                  </Field>
+                </SettingRow>
+                <SettingRow settingId="assignment.academic-integrity.student-visibility">
+                  <Field
+                    label="Student score visibility"
+                    htmlFor="assignment-originality-visibility"
+                    hint="Whether learners can see similarity or AI probability for their own submission."
+                  >
+                    <select
+                      id="assignment-originality-visibility"
+                      value={originalityStudentVisibility}
+                      onChange={(e) =>
+                        onOriginalityStudentVisibilityChange(e.target.value as OriginalityStudentVisibility)
+                      }
+                      disabled={disabled}
+                      className={inputClass}
+                    >
+                      <option value="hide">Hide from students</option>
+                      <option value="show">Show to students</option>
+                      <option value="show_after_grading">Show after a grade is posted</option>
+                    </select>
+                  </Field>
+                </SettingRow>
+                <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                  Scores are advisory only and do not change grades automatically. Discuss unexpected results
+                  with your instructor.
+                </p>
+              </div>
+            </SettingsAccordion>
+          ) : null}
+
+          {show('late-submission') ? (
+            <SettingsAccordion title="Late submission (after due)" sectionId="late-submission" forceOpen={sectionForceOpen('late-submission')}>
+              <div className="space-y-3 pt-1">
+                <SettingRow settingId="assignment.late-submission.policy">
+                  <Field label="Policy" htmlFor="assignment-late-policy">
+                    <select
+                      id="assignment-late-policy"
+                      value={lateSubmissionPolicy}
+                      onChange={(e) => onLateSubmissionPolicyChange(e.target.value as LateSubmissionPolicy)}
+                      disabled={disabled}
+                      className={inputClass}
+                    >
+                      <option value="allow">Allow (no block)</option>
+                      <option value="penalty">Allow with penalty</option>
+                      <option value="block">Block after due</option>
+                    </select>
+                  </Field>
+                </SettingRow>
+                {lateSubmissionPolicy === 'penalty' ? (
+                  <SettingRow settingId="assignment.late-submission.penalty">
+                    <Field label="Late penalty (% of points)" htmlFor="assignment-late-penalty">
+                      <input
+                        id="assignment-late-penalty"
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={latePenaltyPercent ?? ''}
+                        onChange={(e) => {
+                          const v = e.target.value
+                          onLatePenaltyPercentChange(v === '' ? null : Math.min(100, Math.max(0, Number(v))))
+                        }}
+                        disabled={disabled}
+                        className={`max-w-[8rem] ${inputClass}`}
+                      />
+                    </Field>
+                  </SettingRow>
+                ) : null}
+                <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                  For quizzes, penalties apply automatically to auto-graded scores. For file or text
+                  assignments, use this when recording grades or when a submission workflow is enabled.
+                </p>
+              </div>
+            </SettingsAccordion>
+          ) : null}
+
+          {onPostingPolicyChange && show('grade-posting') ? (
+            <SettingsAccordion title="Grade posting" sectionId="grade-posting" forceOpen={sectionForceOpen('grade-posting')}>
+              <div className="space-y-3 pt-1">
+                <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                  Manual: entered grades stay hidden from students until you post from the course gradebook (or
+                  the scheduled time below). Automatic: students see scores as you enter them.
+                </p>
+                <SettingRow settingId="assignment.grade-posting.policy">
+                  <div className="space-y-2">
+                    <label className="flex cursor-pointer items-start gap-2 text-[13px]">
+                      <input
+                        type="radio"
+                        name="posting-policy"
+                        className="mt-0.5"
+                        checked={postingPolicy === 'automatic'}
+                        disabled={disabled}
+                        onChange={() => onPostingPolicyChange('automatic')}
+                      />
+                      <span>Automatic — show grades as entered</span>
+                    </label>
+                    <label className="flex cursor-pointer items-start gap-2 text-[13px]">
+                      <input
+                        type="radio"
+                        name="posting-policy"
+                        className="mt-0.5"
+                        checked={postingPolicy === 'manual'}
+                        disabled={disabled}
+                        onChange={() => onPostingPolicyChange('manual')}
+                      />
+                      <span>Manual — hold until posted in gradebook or schedule</span>
+                    </label>
+                  </div>
+                </SettingRow>
+                {onReleaseAtLocalChange && postingPolicy === 'manual' ? (
+                  <SettingRow settingId="assignment.grade-posting.release-at">
+                    <Field
+                      label="Release grades at (optional)"
+                      htmlFor="assignment-posting-release"
+                      hint="If set, held grades are posted at this time without opening the gradebook. Clear to use only the Post button."
+                    >
+                      <input
+                        id="assignment-posting-release"
+                        type="datetime-local"
+                        value={releaseAtLocal}
+                        onChange={(e) => onReleaseAtLocalChange(e.target.value)}
+                        disabled={disabled}
+                        className={inputClass}
+                      />
+                    </Field>
+                  </SettingRow>
+                ) : null}
+              </div>
+            </SettingsAccordion>
+          ) : null}
+
+          {show('grading') ? (
+            <SettingsAccordion title="Grading" sectionId="grading" forceOpen={sectionForceOpen('grading')}>
+              <div className="space-y-3 pt-1">
+                <SettingRow settingId="assignment.grading.blind-grading">
+                  <ToggleRow
+                    id="assignment-blind-grading"
+                    label="Blind grading"
+                    description="Hide student names and IDs from graders until you reveal identities. Reduces unconscious bias while scoring."
+                    checked={blindGrading}
+                    onChange={onBlindGradingChange}
+                    disabled={disabled}
+                  />
+                </SettingRow>
+                <SettingRow settingId="assignment.grading.moderated-grading">
+                  <ToggleRow
+                    id="assignment-moderated-grading"
+                    label="Moderated grading"
+                    description="Assign provisional graders and a moderator. Graders only see their own scores; the moderator reconciles disagreements before gradebook saves."
+                    checked={moderatedGrading}
+                    onChange={onModeratedGradingChange}
+                    disabled={disabled}
+                  />
+                </SettingRow>
+                {moderatedGrading ? (
+                  <div className="space-y-3 border-t border-slate-100 pt-3 dark:border-neutral-800">
+                    <SettingRow settingId="assignment.grading.agreement-threshold">
+                      <Field
+                        label="Agreement threshold (% of points)"
+                        htmlFor="assignment-moderation-threshold"
+                        hint="When two provisional scores differ by more than this percentage of the assignment points, the submission is flagged for moderator review."
+                      >
+                        <input
+                          id="assignment-moderation-threshold"
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={moderationThresholdPct}
+                          onChange={(e) => {
+                            const n = Math.floor(Number(e.target.value))
+                            if (!Number.isFinite(n)) return
+                            onModerationThresholdPctChange(Math.min(100, Math.max(0, n)))
+                          }}
+                          disabled={disabled}
+                          className={`max-w-[8rem] ${inputClass}`}
+                        />
+                      </Field>
+                    </SettingRow>
+                    <SettingRow settingId="assignment.grading.moderator">
+                      <Field label="Moderator" htmlFor="assignment-moderator">
+                        <select
+                          id="assignment-moderator"
+                          value={moderatorUserId ?? ''}
+                          onChange={(e) => {
+                            const v = e.target.value
+                            onModeratorUserIdChange(v === '' ? null : v)
+                          }}
+                          disabled={disabled}
+                          className={inputClass}
+                        >
+                          <option value="">— Select —</option>
+                          {staffDirectory.map((s) => (
+                            <option key={s.userId} value={s.userId}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                    </SettingRow>
+                    <SettingRow settingId="assignment.grading.provisional-graders">
+                      <div>
+                        <p className="mb-2 text-[13px] font-medium text-slate-700 dark:text-neutral-200">
+                          Provisional graders
+                        </p>
+                        <p className="mb-2 text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                          Up to ten course staff may submit provisional scores. The moderator cannot be a grader.
+                        </p>
+                        <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-2 dark:border-neutral-700">
+                          {staffDirectory.map((s) => {
+                            const checked = provisionalGraderUserIds.includes(s.userId)
+                            const mod = moderatorUserId === s.userId
+                            return (
+                              <li key={s.userId} className="flex items-center gap-2 text-[13px]">
+                                <input
+                                  id={`grader-${s.userId}`}
+                                  type="checkbox"
+                                  checked={checked}
+                                  disabled={disabled || mod}
+                                  onChange={() => {
+                                    if (mod) return
+                                    if (checked) {
+                                      onProvisionalGraderUserIdsChange(
+                                        provisionalGraderUserIds.filter((id) => id !== s.userId),
+                                      )
+                                    } else if (provisionalGraderUserIds.length < 10) {
+                                      onProvisionalGraderUserIdsChange([...provisionalGraderUserIds, s.userId])
+                                    }
+                                  }}
+                                  className="rounded border-slate-300 dark:border-neutral-600"
+                                />
+                                <label htmlFor={`grader-${s.userId}`} className="cursor-pointer select-none">
+                                  {s.label}
+                                </label>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </div>
+                    </SettingRow>
+                  </div>
+                ) : null}
+                <SettingRow settingId="assignment.grading.points-worth">
+                  <Field
+                    label="Points worth"
+                    htmlFor="assignment-settings-points"
+                    hint="How many points this assignment counts for. Leave empty if not set (use 0 for no points)."
+                  >
+                    <input
+                      id="assignment-settings-points"
+                      type="number"
+                      min={0}
+                      max={1000000}
+                      placeholder="Not set"
+                      value={pointsWorth ?? ''}
+                      onChange={(e) => {
+                        const v = e.target.value.trim()
+                        if (v === '') {
+                          onPointsWorthChange(null)
+                          return
+                        }
+                        const n = Math.floor(Number(v))
+                        if (!Number.isFinite(n)) return
+                        onPointsWorthChange(Math.min(1_000_000, Math.max(0, n)))
+                      }}
+                      disabled={disabled}
+                      className={`max-w-[10rem] ${inputClass}`}
+                    />
+                  </Field>
+                </SettingRow>
+                <SettingRow settingId="assignment.grading.assignment-group">
+                  <Field
+                    label="Assignment group"
+                    htmlFor="assignment-settings-group"
+                    hint="Used with weighted assignment groups in course grading settings. Saves immediately when changed."
+                  >
+                    <select
+                      id="assignment-settings-group"
+                      value={assignmentGroupId ?? ''}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        onAssignmentGroupChange(v === '' ? null : v)
+                      }}
+                      disabled={disabled || Boolean(assignmentGroupSelectDisabled)}
+                      className={inputClass}
+                    >
+                      <option value="">— None —</option>
+                      {gradingGroups.map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.name}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                </SettingRow>
+                {gradingGroups.length === 0 ? (
+                  <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                    Add groups under Course Settings → Assignment groups & weights.
+                  </p>
+                ) : null}
+                {onNeverDropChange && onReplaceWithFinalChange ? (
+                  <div className="divide-y divide-slate-100/90 dark:divide-neutral-800/80">
+                    <SettingRow settingId="assignment.grading.never-drop">
+                      <ToggleRow
+                        id="assignment-never-drop"
+                        label="Never drop this score"
+                        description="When the assignment group drops lowest or highest scores, this item is always kept in the average."
+                        checked={neverDrop}
+                        onChange={(next) => {
+                          onNeverDropChange(next)
+                          if (!next && replaceWithFinal) onReplaceWithFinalChange(false)
+                        }}
+                        disabled={disabled}
+                      />
+                    </SettingRow>
+                    <SettingRow settingId="assignment.grading.replace-with-final">
+                      <ToggleRow
+                        id="assignment-replace-with-final"
+                        label="Use as final for replace-lowest"
+                        description="If the group uses “replace lowest with final,” this score is the replacement when it beats the student’s lowest eligible item."
+                        checked={replaceWithFinal}
+                        onChange={(next) => {
+                          onReplaceWithFinalChange(next)
+                          if (next) onNeverDropChange(true)
+                        }}
+                        disabled={disabled}
+                      />
+                    </SettingRow>
+                  </div>
+                ) : null}
+                {onGradingDisplayTypeChange ? (
+                  <SettingRow settingId="assignment.grading.display-override">
+                    <Field
+                      label="Grade display override"
+                      htmlFor="assignment-grading-display-type"
+                      hint="Leave as inherit to use the course grading scheme from Settings → Grading."
+                    >
+                      <select
+                        id="assignment-grading-display-type"
+                        value={gradingDisplayType}
+                        onChange={(e) => onGradingDisplayTypeChange(e.target.value)}
+                        disabled={disabled}
+                        className={inputClass}
+                      >
+                        <option value="">Inherit from course</option>
+                        {GRADING_SCHEME_DISPLAY_TYPES.map((opt) => (
+                          <option key={opt.id} value={opt.id}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                  </SettingRow>
+                ) : null}
+              </div>
+            </SettingsAccordion>
+          ) : null}
+
+          {show('rubric') ? (
+            <SettingsAccordion title="Rubric" sectionId="rubric" forceOpen={sectionForceOpen('rubric')}>
+              <SettingRow settingId="assignment.rubric.editor">
+                <AssignmentRubricSection
+                  disabled={disabled}
+                  pointsWorth={pointsWorth}
+                  draftRubric={draftRubric}
+                  onDraftRubricChange={onDraftRubricChange}
+                  courseCode={courseCode}
+                  assignmentItemId={assignmentItemId}
+                  assignmentMarkdown={assignmentMarkdown}
+                />
+              </SettingRow>
+            </SettingsAccordion>
+          ) : null}
+
+          {courseCode && assignmentItemId && show('outcomes-mapping') ? (
+            <SettingsAccordion title="Outcomes mapping" sectionId="outcomes-mapping" forceOpen={sectionForceOpen('outcomes-mapping')}>
+              <SettingRow settingId="assignment.outcomes-mapping.editor">
+                <ModuleItemOutcomesMappingAccordion
+                  courseCode={courseCode}
+                  itemId={assignmentItemId}
+                  mode="assignment"
                   disabled={disabled}
                 />
-                <ToggleRow
-                  id="assignment-replace-with-final"
-                  label="Use as final for replace-lowest"
-                  description="If the group uses “replace lowest with final,” this score is the replacement when it beats the student’s lowest eligible item."
-                  checked={replaceWithFinal}
-                  onChange={(next) => {
-                    onReplaceWithFinalChange(next)
-                    if (next) onNeverDropChange(true)
-                  }}
-                  disabled={disabled}
-                />
+              </SettingRow>
+            </SettingsAccordion>
+          ) : null}
+
+          {courseCode && assignmentItemId && show('assign-to') ? (
+            <SettingsAccordion title="Assign to" sectionId="assign-to" forceOpen={sectionForceOpen('assign-to')}>
+              <SettingRow settingId="assignment.assign-to.editor">
+                <AssignToEditor courseCode={courseCode} itemId={assignmentItemId} disabled={disabled} />
+              </SettingRow>
+            </SettingsAccordion>
+          ) : null}
+
+          {show('access') ? (
+            <SettingsAccordion title="Access" sectionId="access" forceOpen={sectionForceOpen('access')}>
+              <div className="space-y-3 pt-1">
+                <SettingRow settingId="assignment.access.access-code">
+                  <Field
+                    label="Assignment access code"
+                    htmlFor="assignment-access-code"
+                    hint="Learners must enter this before submitting. Leave empty for none. Cleared when you save with an empty field."
+                  >
+                    <input
+                      id="assignment-access-code"
+                      type="password"
+                      autoComplete="new-password"
+                      value={assignmentAccessCode}
+                      onChange={(e) => onAssignmentAccessCodeChange(e.target.value)}
+                      disabled={disabled}
+                      placeholder="Optional"
+                      className={inputClass}
+                    />
+                  </Field>
+                </SettingRow>
               </div>
-            ) : null}
-            {onGradingDisplayTypeChange ? (
-              <Field
-                label="Grade display override"
-                htmlFor="assignment-grading-display-type"
-                hint="Leave as inherit to use the course grading scheme from Settings → Grading."
-              >
-                <select
-                  id="assignment-grading-display-type"
-                  value={gradingDisplayType}
-                  onChange={(e) => onGradingDisplayTypeChange(e.target.value)}
-                  disabled={disabled}
-                  className={inputClass}
-                >
-                  <option value="">Inherit from course</option>
-                  {GRADING_SCHEME_DISPLAY_TYPES.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            ) : null}
-          </div>
-        </SettingsAccordion>
-
-        <SettingsAccordion title="Rubric">
-          <AssignmentRubricSection
-            disabled={disabled}
-            pointsWorth={pointsWorth}
-            draftRubric={draftRubric}
-            onDraftRubricChange={onDraftRubricChange}
-            courseCode={courseCode}
-            assignmentItemId={assignmentItemId}
-            assignmentMarkdown={assignmentMarkdown}
-          />
-        </SettingsAccordion>
-
-        {courseCode && assignmentItemId ? (
-          <SettingsAccordion title="Outcomes mapping">
-            <ModuleItemOutcomesMappingAccordion
-              courseCode={courseCode}
-              itemId={assignmentItemId}
-              mode="assignment"
-              disabled={disabled}
-            />
-          </SettingsAccordion>
-        ) : null}
-
-        {courseCode && assignmentItemId ? (
-          <SettingsAccordion title="Assign to">
-            <AssignToEditor courseCode={courseCode} itemId={assignmentItemId} disabled={disabled} />
-          </SettingsAccordion>
-        ) : null}
-
-        <SettingsAccordion title="Access">
-          <div className="space-y-3 pt-1">
-            <Field
-              label="Assignment access code"
-              htmlFor="assignment-access-code"
-              hint="Learners must enter this before submitting. Leave empty for none. Cleared when you save with an empty field."
-            >
-              <input
-                id="assignment-access-code"
-                type="password"
-                autoComplete="new-password"
-                value={assignmentAccessCode}
-                onChange={(e) => onAssignmentAccessCodeChange(e.target.value)}
-                disabled={disabled}
-                placeholder="Optional"
-                className={inputClass}
-              />
-            </Field>
-          </div>
-        </SettingsAccordion>
-      </SettingsAccordionGroup>
+            </SettingsAccordion>
+          ) : null}
+        </SettingsAccordionGroup>
+      )}
     </div>
+    </SettingsPanelProvider>
   )
 }
 

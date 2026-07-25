@@ -57,6 +57,7 @@ type CoursePublic struct {
 	DiagnosticAssessmentsEnabled  bool            `json:"diagnosticAssessmentsEnabled"`
 	HintScaffoldingEnabled        bool            `json:"hintScaffoldingEnabled"`
 	MisconceptionDetectionEnabled bool            `json:"misconceptionDetectionEnabled"`
+	AdaptiveContentEnabled        bool            `json:"adaptiveContentEnabled"`
 	CourseType                    string          `json:"courseType"`
 	CreatedAt                     time.Time       `json:"createdAt"`
 	UpdatedAt                     time.Time       `json:"updatedAt"`
@@ -114,6 +115,7 @@ type PatchCourseFeaturesRequest struct {
 	DiagnosticAssessmentsEnabled *bool `json:"diagnosticAssessmentsEnabled"`
 	HintScaffoldingEnabled       *bool `json:"hintScaffoldingEnabled"`
 	MisconceptionDetectionEnabled *bool `json:"misconceptionDetectionEnabled"`
+	AdaptiveContentEnabled        *bool `json:"adaptiveContentEnabled"`
 }
 
 type PatchCourseArchivedRequest struct {

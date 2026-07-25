@@ -429,6 +429,9 @@ type Config struct {
 	RTLEnabled bool
 	// FFReadingPreferences gates the reading preferences panel UI (plan 12.6). Default false; flip after QA sign-off.
 	FFReadingPreferences bool
+	// FFPinnedSettings gates per-user pinned settings in assignment/quiz editors (plan PS.2/PS.4).
+	// Platform default is true at GA (merge in platformconfig/features.go); env/DB can still force off.
+	FFPinnedSettings bool
 	// FFParentPortal enables the K-12 parent/guardian portal: parent-student linking, read-only grade access, and notification prefs (plan 13.1).
 	FFParentPortal bool
 	// FFParentPortalV2 enables expanded parent portal sections (attendance, behavior, report cards, message teacher) — plan W02.

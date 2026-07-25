@@ -6,7 +6,9 @@ import (
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	acrepo "github.com/lextures/lextures/server/internal/repos/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	acsvc "github.com/lextures/lextures/server/internal/service/adaptivecontent"
 )
 
 type patchCourseFeaturesBody struct {
@@ -37,6 +39,7 @@ type patchCourseFeaturesBody struct {
 	VisualBoardsEnabled           *bool `json:"visualBoardsEnabled"`
 	InteractiveQuizzesEnabled     *bool `json:"interactiveQuizzesEnabled"`
 	ScreenShareEnabled            *bool `json:"screenShareEnabled"`
+	AdaptiveContentEnabled        *bool `json:"adaptiveContentEnabled"`
 }
 
 // handlePatchCourseFeatures is PATCH /api/v1/courses/{course_code}/features.
@@ -158,6 +161,11 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 		if req.ScreenShareEnabled != nil {
 			screenShareEnabled = *req.ScreenShareEnabled
 		}
+		adaptiveContent := existing.AdaptiveContentEnabled
+		if req.AdaptiveContentEnabled != nil {
+			adaptiveContent = *req.AdaptiveContentEnabled
+		}
+		prevAdaptiveContent := existing.AdaptiveContentEnabled
 
 		out, err := course.PatchFeatures(
 			r.Context(), d.Pool, courseCode,
@@ -165,7 +173,7 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 			req.LockdownModeEnabled, standards, adaptivePaths, srs, diagnostic, hint, misconception,
 			req.DiscussionsEnabled, collabDocs, liveSessions, groupSpaces, officeHours, aiTutor,
 			modulesAiAssistant, multilingualMessaging, filesEnabled, attendanceEnabled, whiteboardEnabled, reportCardsEnabled,
-			visualBoardsEnabled, interactiveQuizzesEnabled, screenShareEnabled,
+			visualBoardsEnabled, interactiveQuizzesEnabled, screenShareEnabled, adaptiveContent,
 		)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to patch course features.")
@@ -183,6 +191,19 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 			}
 			if out2 != nil {
 				out = out2
+			}
+		}
+		// ACE audit + metrics when the adaptive content flag changes (plan AC.1 FR-7).
+		if prevAdaptiveContent != adaptiveContent {
+			if cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode); err == nil && cid != nil {
+				actor := viewer
+				_ = acrepo.InsertEvent(r.Context(), d.Pool, *cid, nil, &actor, nil, acsvc.EventFlagToggled, map[string]any{
+					"adaptiveContentEnabled": adaptiveContent,
+					"previous":               prevAdaptiveContent,
+				})
+				if n, err := acrepo.CountEnabledCourses(r.Context(), d.Pool); err == nil {
+					acsvc.SetCoursesEnabledGauge(float64(n))
+				}
 			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

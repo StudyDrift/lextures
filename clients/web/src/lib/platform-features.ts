@@ -41,6 +41,7 @@ export type PlatformFeaturesSnapshot = {
   videoCaptionsEnabled?: boolean
   autoCaptioningEnabled?: boolean
   ffReadingPreferences?: boolean
+  ffPinnedSettings?: boolean
   ffHighContrastReducedMotion?: boolean
   ffMotionNavigation?: boolean
   ffMotionReveal?: boolean
@@ -178,6 +179,7 @@ const defaults: PlatformFeaturesSnapshot = {
   videoCaptionsEnabled: false,
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
+  ffPinnedSettings: true,
   ffHighContrastReducedMotion: false,
   ffMotionNavigation: true,
   ffMotionReveal: true,

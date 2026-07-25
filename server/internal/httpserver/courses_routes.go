@@ -260,6 +260,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Put("/api/v1/courses/{course_code}/items/{item_id}/overrides", d.handleAssignmentOverridesCollection())
 	r.Post("/api/v1/courses/{course_code}/items/{item_id}/overrides/bulk-extend", d.handleAssignmentOverridesBulkExtend())
 	r.Patch("/api/v1/courses/{course_code}/features", d.handlePatchCourseFeatures())
+	d.registerAdaptiveContentRoutes(r)
 	r.Get("/api/v1/courses/{course_code}/whiteboards", d.handleCourseWhiteboardsList())
 	r.Post("/api/v1/courses/{course_code}/whiteboards", d.handleCourseWhiteboardsPost())
 	r.Get("/api/v1/courses/{course_code}/whiteboards/{board_id}", d.handleCourseWhiteboardItem())
@@ -441,6 +442,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/groups/{group_id}/feed/channels/{channel_id}/messages", d.handleListGroupMessages())
 	r.Post("/api/v1/courses/{course_code}/groups/{group_id}/feed/channels/{channel_id}/messages", d.handlePostGroupMessage())
 	r.Get("/api/v1/courses/{course_code}/feed/ws", d.handleFeedWS())
+	r.Get("/api/v1/courses/{course_code}/export", d.handleCourseExportGet())
 	r.Post("/api/v1/courses/{course_code}/import/canvas", d.handleCourseImportCanvasPost())
 	r.Get("/api/v1/courses/{course_code}/import/canvas/ws", d.handleCourseImportCanvasWS())
 	// 9.3 Mastery Heatmap

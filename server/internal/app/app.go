@@ -171,6 +171,8 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	// BACKGROUND_JOBS_ENABLED; safe to start on every instance — workers claim
 	// rows with SELECT ... FOR UPDATE SKIP LOCKED so they coordinate via Postgres.
 	jobRegistry := background.StartJobQueueWorker(ctx, pool, platform)
+	// AC.4: dedicated adaptive content generation pipeline (Postgres SKIP LOCKED).
+	background.StartAdaptiveContentPipelineWorker(ctx, pool, merged)
 
 	// Scheduled-jobs / cron layer (plan 17.4). The Scheduler is always
 	// constructed so the admin API can list and manually trigger jobs, but the

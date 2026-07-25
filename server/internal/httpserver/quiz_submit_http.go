@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
 	"github.com/lextures/lextures/server/internal/repos/questionbank"
 	"github.com/lextures/lextures/server/internal/repos/quizattempts"
+	"github.com/lextures/lextures/server/internal/service/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/service/gamification"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 	"github.com/lextures/lextures/server/internal/service/quizattemptgrading"
@@ -196,6 +197,13 @@ func (d Deps) handleQuizSubmit() http.HandlerFunc {
 		if score >= 60 && cid != nil {
 			gamification.EmitQuizPassed(d.Pool, d.effectiveConfig(), viewer, *cid, body.AttemptID)
 		}
+		// AC.2: compute adaptation profile when this quiz is a unit pre-assessment (best-effort).
+		adaptivecontent.OnPreAssessmentSubmitted(ctx, d.Pool, adaptivecontent.PreAssessmentAttempt{
+			AttemptID:       body.AttemptID,
+			CourseID:        *cid,
+			StructureItemID: itemID,
+			StudentUserID:   viewer,
+		})
 
 		out := coursemodulequiz.QuizSubmitResponse{
 			AttemptID:      body.AttemptID,

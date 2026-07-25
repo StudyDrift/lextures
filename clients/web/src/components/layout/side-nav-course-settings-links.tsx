@@ -14,6 +14,7 @@ import {
   Award,
   Eye,
   Shield,
+  Sparkles,
 } from 'lucide-react'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
@@ -54,6 +55,13 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
         icon={<SlidersHorizontal className="h-5 w-5" />}
       >
         Features
+      </SideNavLink>
+      <SideNavLink
+        to={`${base}/adaptive-content`}
+        className={() => (section === 'adaptive-content' ? sideNavActiveClass : '')}
+        icon={<Sparkles className="h-5 w-5" />}
+      >
+        Adaptive Content
       </SideNavLink>
       <SideNavLink
         to={`${base}/general`}

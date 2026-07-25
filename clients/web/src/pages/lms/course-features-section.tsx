@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FeatureToggleRow } from '../../components/settings/feature-toggle-row'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
-import { fetchCourseCanvasLink, patchCourseCanvasGradeSync, patchCourseFeatures } from '../../lib/courses-api'
+import {
+  fetchAdaptiveContentSettings,
+  fetchCourseCanvasLink,
+  patchCourseCanvasGradeSync,
+  patchCourseFeatures,
+  putAdaptiveContentSettings,
+  type AdaptiveContentSettings,
+} from '../../lib/courses-api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import type { CoursePublic } from '../../lib/courses-api'
 
@@ -69,7 +76,61 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const visualBoardsEnabled = course.visualBoardsEnabled === true
   const interactiveQuizzesEnabled = course.interactiveQuizzesEnabled === true
   const screenShareEnabled = course.screenShareEnabled === true
+  const adaptiveContentEnabled = course.adaptiveContentEnabled === true
   const canvasGradeSyncEnabled = course.canvasGradeSyncEnabled === true
+
+  const [aceSettings, setAceSettings] = useState<AdaptiveContentSettings | null>(null)
+  const [aceLoading, setAceLoading] = useState(false)
+  const [aceSaving, setAceSaving] = useState(false)
+
+  useEffect(() => {
+    if (!adaptiveContentEnabled) {
+      setAceSettings(null)
+      return
+    }
+    let cancelled = false
+    setAceLoading(true)
+    void (async () => {
+      try {
+        const s = await fetchAdaptiveContentSettings(courseCode)
+        if (!cancelled) setAceSettings(s)
+      } catch {
+        if (!cancelled) {
+          setAceSettings({
+            allowedAxes: ['emphasis', 'scaffolding', 'reading_level', 'misconception'],
+            defaultStrategy: 'balanced',
+            holdoutPercent: 0,
+            monthlyTokenBudget: 0,
+            requireInstructorApproval: false,
+            studentOptoutAllowed: true,
+          })
+        }
+      } finally {
+        if (!cancelled) setAceLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [adaptiveContentEnabled, courseCode])
+
+  const saveAceSettings = useCallback(async () => {
+    if (!aceSettings) return
+    setAceSaving(true)
+    setError(null)
+    try {
+      const updated = await putAdaptiveContentSettings(courseCode, aceSettings)
+      setAceSettings(updated)
+      setMessage('Adaptive content settings saved.')
+      toastSaveOk('Adaptive content settings saved')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Could not save adaptive content settings.'
+      setError(msg)
+      toastMutationError(msg)
+    } finally {
+      setAceSaving(false)
+    }
+  }, [aceSettings, courseCode])
 
   const persistCanvasGradeSync = useCallback(
     async (enabled: boolean) => {
@@ -123,6 +184,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       visualBoardsEnabled?: boolean
       interactiveQuizzesEnabled?: boolean
       screenShareEnabled?: boolean
+      adaptiveContentEnabled?: boolean
     }) => {
       setSaving(true)
       setMessage(null)
@@ -157,6 +219,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           visualBoardsEnabled: patch.visualBoardsEnabled ?? visualBoardsEnabled,
           interactiveQuizzesEnabled: patch.interactiveQuizzesEnabled ?? interactiveQuizzesEnabled,
           screenShareEnabled: patch.screenShareEnabled ?? screenShareEnabled,
+          adaptiveContentEnabled: patch.adaptiveContentEnabled ?? adaptiveContentEnabled,
         }
         const updated = await patchCourseFeatures(courseCode, body)
         onCourseUpdated(updated)
@@ -192,6 +255,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       visualBoardsEnabled,
       interactiveQuizzesEnabled,
       screenShareEnabled,
+      adaptiveContentEnabled,
       calendarEnabled,
       courseCode,
       feedEnabled,
@@ -206,6 +270,15 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
 
   const allFeatures = useMemo((): CourseFeatureRow[] => {
     const rows: CourseFeatureRow[] = [
+        {
+          label: 'Adaptive Content',
+          description:
+            'Rewrite content per learner based on a pre-check, then measure improvement.',
+          enabled: adaptiveContentEnabled,
+          onToggle: () => {
+            void persist({ adaptiveContentEnabled: !adaptiveContentEnabled })
+          },
+        },
         {
           label: 'Adaptive learning paths',
           description:
@@ -413,6 +486,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       ]
     return rows
   }, [
+      adaptiveContentEnabled,
       adaptivePathsEnabled,
       aiTutorEnabled,
       modulesAiAssistantEnabled,
@@ -488,6 +562,110 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
               onToggle={f.onToggle}
             />
           ))
+        )}
+      </div>
+
+      <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          Adaptive Content settings
+        </h3>
+        <p id="adaptive-content-settings-help" className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          Course-wide defaults for which adaptation axes are allowed, cost budget, and holdout
+          percent. Unit authoring, preview, and approval live under Settings → Adaptive Content.
+        </p>
+        {!adaptiveContentEnabled ? (
+          <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">
+            Turn on <span className="font-medium">Adaptive Content</span> to configure.
+          </p>
+        ) : aceLoading || !aceSettings ? (
+          <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">Loading settings…</p>
+        ) : (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+              Default strategy
+              <select
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                value={aceSettings.defaultStrategy}
+                onChange={(e) =>
+                  setAceSettings({ ...aceSettings, defaultStrategy: e.target.value })
+                }
+                aria-describedby="adaptive-content-settings-help"
+              >
+                <option value="gentle">gentle</option>
+                <option value="balanced">balanced</option>
+                <option value="aggressive">aggressive</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+              Holdout percent (0–50)
+              <input
+                type="number"
+                min={0}
+                max={50}
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                value={aceSettings.holdoutPercent}
+                onChange={(e) =>
+                  setAceSettings({
+                    ...aceSettings,
+                    holdoutPercent: Number(e.target.value),
+                  })
+                }
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+              Monthly token budget (0 = unlimited)
+              <input
+                type="number"
+                min={0}
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                value={aceSettings.monthlyTokenBudget}
+                onChange={(e) =>
+                  setAceSettings({
+                    ...aceSettings,
+                    monthlyTokenBudget: Number(e.target.value),
+                  })
+                }
+              />
+            </label>
+            <div className="flex flex-col gap-2 justify-end">
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+                <input
+                  type="checkbox"
+                  checked={aceSettings.requireInstructorApproval}
+                  onChange={(e) =>
+                    setAceSettings({
+                      ...aceSettings,
+                      requireInstructorApproval: e.target.checked,
+                    })
+                  }
+                />
+                Require instructor approval
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+                <input
+                  type="checkbox"
+                  checked={aceSettings.studentOptoutAllowed}
+                  onChange={(e) =>
+                    setAceSettings({
+                      ...aceSettings,
+                      studentOptoutAllowed: e.target.checked,
+                    })
+                  }
+                />
+                Allow student opt-out
+              </label>
+            </div>
+            <div className="sm:col-span-2">
+              <button
+                type="button"
+                disabled={aceSaving || saving}
+                onClick={() => void saveAceSettings()}
+                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+              >
+                {aceSaving ? 'Saving…' : 'Save Adaptive Content settings'}
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
