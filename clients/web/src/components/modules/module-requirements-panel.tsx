@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
+  fetchModuleRequirements,
   putModuleRequirements,
   type ModuleCompletionMode,
 } from '../../lib/conditional-release-api'
@@ -12,13 +13,24 @@ const MODES: { value: ModuleCompletionMode; label: string }[] = [
   { value: 'sequential_order', label: 'Sequential order' },
 ]
 
+function isoToDatetimeLocalValue(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 type Props = {
   courseCode: string
   moduleId: string
   allModules: { id: string; title: string }[]
   onSavingChange?: (saving: boolean) => void
+  onLoadingChange?: (loading: boolean) => void
   onErrorChange?: (error: string | null) => void
   onSaved?: () => void
+  /** Parent registers this to submit from a footer button outside the form. */
+  registerSubmit?: (submit: (() => void) | null) => void
 }
 
 export function ModuleRequirementsPanel({
@@ -26,16 +38,61 @@ export function ModuleRequirementsPanel({
   moduleId,
   allModules,
   onSavingChange,
+  onLoadingChange,
   onErrorChange,
   onSaved,
+  registerSubmit,
 }: Props) {
   const [mode, setMode] = useState<ModuleCompletionMode>('all_items')
   const [prereqs, setPrereqs] = useState<string[]>([])
   const [unlockAt, setUnlockAt] = useState('')
+  const [loading, setLoading] = useState(true)
   const [err, setErr] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    onLoadingChange?.(true)
+    setErr(null)
+    onErrorChange?.(null)
+    setSaved(false)
+    void (async () => {
+      try {
+        const req = await fetchModuleRequirements(courseCode, moduleId)
+        if (cancelled) return
+        if (req) {
+          setMode(req.completionMode ?? 'all_items')
+          setPrereqs(req.prerequisiteModuleIds ?? req.prerequisiteIds ?? [])
+          setUnlockAt(isoToDatetimeLocalValue(req.unlockAt))
+        } else {
+          setMode('all_items')
+          setPrereqs([])
+          setUnlockAt('')
+        }
+      } catch (e) {
+        if (cancelled) return
+        // Missing config is fine (404 → null from fetch); only surface unexpected failures.
+        const message = e instanceof Error ? e.message : 'Could not load requirements.'
+        if (!message.toLowerCase().includes('not found')) {
+          setErr(message)
+          onErrorChange?.(message)
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+          onLoadingChange?.(false)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+      onLoadingChange?.(false)
+    }
+  }, [courseCode, moduleId, onErrorChange, onLoadingChange])
+
   const save = useCallback(async () => {
+    if (loading) return
     onSavingChange?.(true)
     setErr(null)
     onErrorChange?.(null)
@@ -55,11 +112,29 @@ export function ModuleRequirementsPanel({
     } finally {
       onSavingChange?.(false)
     }
-  }, [courseCode, mode, moduleId, onErrorChange, onSaved, onSavingChange, prereqs, unlockAt])
+  }, [
+    courseCode,
+    loading,
+    mode,
+    moduleId,
+    onErrorChange,
+    onSaved,
+    onSavingChange,
+    prereqs,
+    unlockAt,
+  ])
 
   useEffect(() => {
     setSaved(false)
   }, [mode, prereqs, unlockAt])
+
+  useEffect(() => {
+    if (!registerSubmit) return
+    registerSubmit(() => {
+      void save()
+    })
+    return () => registerSubmit(null)
+  }, [registerSubmit, save])
 
   const otherModules = allModules.filter((m) => m.id !== moduleId)
 
@@ -67,15 +142,22 @@ export function ModuleRequirementsPanel({
     <form
       id={MODULE_REQUIREMENTS_FORM_ID}
       className="space-y-3 text-start"
+      noValidate
       onSubmit={(e) => {
         e.preventDefault()
+        e.stopPropagation()
         void save()
       }}
     >
       <p className="text-xs text-slate-500">
         Choose how students complete this module and any modules they must finish first.
       </p>
-      {err ? <p className="text-sm text-rose-700">{err}</p> : null}
+      {loading ? <p className="text-xs text-slate-500">Loading requirements…</p> : null}
+      {err ? (
+        <p className="text-sm text-rose-700" role="alert">
+          {err}
+        </p>
+      ) : null}
       {saved ? (
         <p className="text-sm text-emerald-700" role="status">
           Requirements saved.
@@ -86,7 +168,8 @@ export function ModuleRequirementsPanel({
         <select
           value={mode}
           onChange={(e) => setMode(e.target.value as ModuleCompletionMode)}
-          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+          disabled={loading}
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {MODES.map((m) => (
             <option key={m.value} value={m.value}>
@@ -96,7 +179,7 @@ export function ModuleRequirementsPanel({
         </select>
       </label>
       {otherModules.length > 0 ? (
-        <fieldset>
+        <fieldset disabled={loading}>
           <legend className="text-xs font-medium text-slate-600">Prerequisites</legend>
           <ul className="mt-1.5 max-h-36 space-y-1.5 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2">
             {otherModules.map((m) => (
@@ -127,9 +210,14 @@ export function ModuleRequirementsPanel({
           type="datetime-local"
           value={unlockAt}
           onChange={(e) => setUnlockAt(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+          disabled={loading}
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
         />
       </label>
+      {/* Enables Enter-to-submit; footer Save calls registerSubmit instead. */}
+      <button type="submit" className="sr-only" tabIndex={-1}>
+        Save requirements
+      </button>
     </form>
   )
 }

@@ -33,8 +33,13 @@ type putCourseBody struct {
 	TermID              *string    `json:"termId"`
 	CourseHomeLanding       *string `json:"courseHomeLanding"`
 	CourseHomeContentItemID *string `json:"courseHomeContentItemId"`
-	CourseTimezone          *string `json:"courseTimezone"`
-	GradeLevel              *string `json:"gradeLevel"`
+	CourseTimezone *string `json:"courseTimezone"`
+	// GradeLevels is the preferred multi-select payload. Present (including empty array) replaces grade levels.
+	// Omitted leaves existing grades unchanged.
+	GradeLevels []string `json:"gradeLevels"`
+	// GradeLevel is accepted for single-value clients; ignored when gradeLevels is present.
+	// Empty string clears. Omitted leaves existing grades unchanged.
+	GradeLevel *string `json:"gradeLevel"`
 	// Self-paced enrollment (plan 15.2). Optional; omitted fields are left unchanged.
 	CourseMode          *string `json:"courseMode"`
 	OpenEnrollment      *bool   `json:"openEnrollment"`
@@ -281,17 +286,31 @@ func (d Deps) handlePutCourse() http.HandlerFunc {
 				}
 			}
 		}
-		if body.GradeLevel != nil {
+		if body.GradeLevels != nil {
+			normalized, ok := course.NormalizeGradeLevels(body.GradeLevels)
+			if !ok {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid gradeLevels value.")
+				return
+			}
+			updated, err := course.SetGradeLevels(r.Context(), d.Pool, courseCode, normalized)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update grade levels.")
+				return
+			}
+			if updated != nil {
+				out = updated
+			}
+		} else if body.GradeLevel != nil {
 			gl := strings.TrimSpace(*body.GradeLevel)
-			var glPtr *string
+			var levels []string
 			if gl != "" {
 				if !course.ValidGradeLevel(gl) {
 					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid gradeLevel value.")
 					return
 				}
-				glPtr = &gl
+				levels = []string{gl}
 			}
-			updated, err := course.SetGradeLevel(r.Context(), d.Pool, courseCode, glPtr)
+			updated, err := course.SetGradeLevels(r.Context(), d.Pool, courseCode, levels)
 			if err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update grade level.")
 				return

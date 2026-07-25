@@ -1731,6 +1731,9 @@ export default function CourseModules() {
   const [moduleSettingsSaving, setModuleSettingsSaving] = useState(false)
   const [moduleSettingsSaveError, setModuleSettingsSaveError] = useState<string | null>(null)
   const [moduleRequirementsSaving, setModuleRequirementsSaving] = useState(false)
+  const [moduleRequirementsLoading, setModuleRequirementsLoading] = useState(false)
+  const [moduleRequirementsSaveError, setModuleRequirementsSaveError] = useState<string | null>(null)
+  const moduleRequirementsSubmitRef = useRef<(() => void) | null>(null)
   const [archiveConfirmItem, setArchiveConfirmItem] = useState<CourseStructureItem | null>(null)
   /** Module pending hard-delete (or archive when graded). Null when no confirm is open. */
   const [moduleDeleteTarget, setModuleDeleteTarget] = useState<CourseStructureItem | null>(null)
@@ -2302,9 +2305,15 @@ export default function CourseModules() {
 
   const handleOpenModuleSettings = useCallback((item: CourseStructureItem) => {
     setModuleSettingsSaveError(null)
+    setModuleRequirementsSaveError(null)
+    moduleRequirementsSubmitRef.current = null
     setModuleSettingsModuleId(item.id)
     setModuleSettingsKey((k) => k + 1)
     setModuleSettingsOpen(true)
+  }, [])
+
+  const registerModuleRequirementsSubmit = useCallback((submit: (() => void) | null) => {
+    moduleRequirementsSubmitRef.current = submit
   }, [])
 
   const saveModuleSettings = useCallback(
@@ -3148,13 +3157,20 @@ export default function CourseModules() {
           if (!moduleSettingsSaving && !moduleRequirementsSaving) {
             setModuleSettingsOpen(false)
             setModuleSettingsModuleId(null)
+            setModuleRequirementsSaveError(null)
           }
         }}
         onSave={(payload) => void saveModuleSettings(payload)}
         onDelete={() => void requestDeleteModule()}
         saving={moduleSettingsSaving}
-        errorMessage={moduleSettingsSaveError}
+        errorMessage={
+          moduleSettingsSaveError ?? moduleRequirementsSaveError
+        }
         requirementsSaving={moduleRequirementsSaving}
+        requirementsLoading={moduleRequirementsLoading}
+        onSaveRequirements={() => {
+          moduleRequirementsSubmitRef.current?.()
+        }}
         requirementsSection={
           ffConditionalRelease && courseCode && settingsTargetItem ? (
             <ModuleRequirementsPanel
@@ -3162,6 +3178,12 @@ export default function CourseModules() {
               moduleId={settingsTargetItem.id}
               allModules={allModules}
               onSavingChange={setModuleRequirementsSaving}
+              onLoadingChange={setModuleRequirementsLoading}
+              onErrorChange={setModuleRequirementsSaveError}
+              registerSubmit={registerModuleRequirementsSubmit}
+              onSaved={() => {
+                setModuleRequirementsSaveError(null)
+              }}
             />
           ) : null
         }

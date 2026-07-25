@@ -15,6 +15,32 @@ type ListConceptsQuery struct {
 	Q          *string
 }
 
+// ListConceptsForCourse returns concepts owned by a course (for adaptive path rule pickers).
+func ListConceptsForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]ConceptRow, error) {
+	rows, err := pool.Query(ctx, `
+SELECT
+	c.id,
+	c.course_id,
+	c.slug,
+	c.name,
+	c.description,
+	c.bloom_level::text,
+	c.parent_concept_id,
+	c.difficulty_tier,
+	(c.decay_lambda)::float8,
+	c.created_at,
+	c.updated_at
+FROM course.concepts c
+WHERE c.course_id = $1
+ORDER BY c.name ASC
+`, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanConceptRows(rows)
+}
+
 func ListConcepts(ctx context.Context, pool *pgxpool.Pool, q ListConceptsQuery) ([]ConceptRow, error) {
 	var parentID *uuid.UUID
 	if q.ParentSlug != nil && *q.ParentSlug != "" {

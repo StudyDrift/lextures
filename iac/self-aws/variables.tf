@@ -118,6 +118,17 @@ variable "public_web_origin" {
   default     = ""
 }
 
+variable "course_files_cors_allowed_origins" {
+  description = <<-EOT
+    Browser origins allowed to PUT/GET course-file objects via presigned S3 URLs
+    (e.g. ["https://self.lextures.com"]). Empty defaults to public_web_origin plus
+    https:// for each web_domain_names entry. Required for in-browser file uploads
+    from the SPA; without it the browser blocks the S3 preflight.
+  EOT
+  type        = list(string)
+  default     = []
+}
+
 variable "bootstrap_admin_email" {
   description = "If set, the first password signup whose email matches (case-insensitive) receives Global Admin when no human users exist yet. Empty disables bootstrap-on-signup (use server/cmd/bootstrap-admin instead)."
   type        = string

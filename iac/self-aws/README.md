@@ -34,7 +34,7 @@ flowchart TB
 | Cache | **ElastiCache Redis 7** (`cache.t3.micro` default) | Free-tier eligible size; single node; TLS + auth |
 | Queues | **SQS** (4 queues + DLQs) | Always Free: 1M requests/month |
 | Email | **Amazon SES** (when `ses_domain` is set) | Pay per send; sandbox until production access |
-| Files | **S3** (course files) | SSE-S3; IAM task role |
+| Files | **S3** (course files) | SSE-S3; IAM task role; **CORS** for SPA presigned PUT (origins from `public_web_origin` / `web_domain_names`) |
 | Secrets | **Secrets Manager** | `DATABASE_URL`, `REDIS_URL`, JWT, SQS URLs, storage; optional registry pull auth |
 
 Default networking places Fargate tasks in **public subnets with public IPs** so a NAT gateway is not required (~$32/mo savings). RDS and Redis stay private. Set `enable_nat_gateway = true` for private-subnet tasks.
@@ -183,6 +183,28 @@ Secrets Manager secret `${project}-${environment}/app` is a JSON object. ECS inj
 Plain environment variables (not secrets) when SES is enabled: `EMAIL_PROVIDER`, `SES_REGION`, `SES_FROM`, `SES_CONFIGURATION_SET`.
 
 `PUBLIC_WEB_ORIGIN` on the API task defaults to the CloudFront HTTPS URL (or `public_web_origin` when set).
+
+### Course-files S3 CORS (browser uploads)
+
+The SPA uploads files with a browser `PUT` to a **presigned S3 URL** (`uploadToPresignedUrl` in `clients/web`). That requires a bucket CORS rule that allows the SPA origin; otherwise Chrome reports:
+
+> Access to fetch at 'https://…s3…amazonaws.com/…' from origin 'https://self.lextures.com' has been blocked by CORS policy
+
+Terraform applies CORS from `public_web_origin` and `web_domain_names` (override with `course_files_cors_allowed_origins`). After changing origins, re-apply this stack.
+
+**Immediate fix** (before/without a full apply), for the production course-files bucket:
+
+```bash
+aws s3api put-bucket-cors --bucket lextures-production-course-files-215213927752 --cors-configuration '{
+  "CORSRules": [{
+    "AllowedOrigins": ["https://self.lextures.com"],
+    "AllowedMethods": ["GET", "PUT", "HEAD"],
+    "AllowedHeaders": ["*"],
+    "ExposeHeaders": ["ETag", "Content-Length", "Content-Type"],
+    "MaxAgeSeconds": 3600
+  }]
+}'
+```
 
 `BOOTSTRAP_ADMIN_EMAIL` comes from Terraform variable `bootstrap_admin_email` (HCP workspace or `terraform.tfvars`). When non-empty, the **first** password signup whose email matches (trimmed, lowercased) gets Global Admin if no human users exist yet. Leave empty and use `go run ./cmd/bootstrap-admin -email=…` against RDS to promote an account after the fact.
 
