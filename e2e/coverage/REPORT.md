@@ -1,13 +1,13 @@
 # Completed feature E2E coverage report
 
-Total stories: **515**
+Total stories: **516**
 
 ## Coverage levels
 
 | Level | Count |
 |---|---:|
 | journey | 86 |
-| smoke | 173 |
+| smoke | 174 |
 | api-contract | 1 |
 | covered-by-parent | 11 |
 | manual | 8 |
@@ -22,13 +22,13 @@ Total stories: **515**
 | docs | 15 |
 | mobile | 92 |
 | ops | 16 |
-| web | 344 |
+| web | 345 |
 
 ## By market tag
 
 | Market | Count |
 |---|---:|
-| ALL | 468 |
+| ALL | 469 |
 | HE | 15 |
 | HS | 19 |
 | K12 | 13 |
@@ -115,6 +115,7 @@ Total stories: **515**
 | 09 | disabledState, authorization, dependency, rollback | [docs/completed/09-platform-feature-flags-without-admin-toggle.md](../../docs/completed/09-platform-feature-flags-without-admin-toggle.md) |
 | 15.8 | disabledState, authorization, dependency, rollback | [docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md](../../docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md) |
 | AC.1 | enabledJourney, rollback | [docs/completed/adaptive/AC.1-foundations-flag-and-data-model.md](../../docs/completed/adaptive/AC.1-foundations-flag-and-data-model.md) |
+| AC.7 | rollback | [docs/completed/adaptive/AC.7-post-assessment-and-effectiveness.md](../../docs/completed/adaptive/AC.7-post-assessment-and-effectiveness.md) |
 | IQ.1 | disabledState, authorization, dependency, rollback | [docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md](../../docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md) |
 | PS.4 | disabledState, enabledJourney, rollback | [docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md](../../docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md) |
 | T01 | disabledState, authorization, dependency, rollback | [docs/completed/transcripts/T01-official-transcript-generation.md](../../docs/completed/transcripts/T01-official-transcript-generation.md) |
@@ -146,7 +147,7 @@ Total stories: **515**
 | 20-docs-trust | 0 | 0 | 0 | 0 | 2 | 0 | 0 |
 | 21-cli | 0 | 0 | 0 | 0 | 0 | 8 | 0 |
 | _root | 6 | 5 | 0 | 0 | 0 | 5 | 1 |
-| adaptive | 0 | 1 | 0 | 0 | 0 | 0 | 5 |
+| adaptive | 0 | 2 | 0 | 0 | 0 | 0 | 5 |
 | agent-grader | 0 | 6 | 0 | 0 | 0 | 0 | 3 |
 | ai-providers | 0 | 8 | 0 | 0 | 0 | 0 | 1 |
 | animations | 0 | 4 | 0 | 0 | 0 | 0 | 3 |

@@ -4146,6 +4146,33 @@
       "reviewed": true
     },
     {
+      "id": "AC.7",
+      "path": "docs/completed/adaptive/AC.7-post-assessment-and-effectiveness.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre→serve→post causal journey remains backlog.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/adaptive-content-effectiveness.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": "n/a",
+        "disabledState": "n/a",
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": false,
+        "notes": "Depends on course adaptiveContentEnabled; student denied effectiveness refresh; kill-switch covered by server nodb tests."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
