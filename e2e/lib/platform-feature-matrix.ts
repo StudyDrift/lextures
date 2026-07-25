@@ -794,6 +794,18 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     gatedSurface: null,
   },
   {
+    key: 'ffPinnedSettings',
+    label: 'Pinned editor settings',
+    category: 'platform',
+    ownershipSource: 'database',
+    sourceKey: null,
+    runtimeKey: 'ffPinnedSettings',
+    settingsOnlyRationale: null,
+    secretSensitive: false,
+    uiSample: false,
+    gatedSurface: 'Assignment and quiz editor pin UI + /me/pinned-settings API',
+  },
+  {
     key: 'ffProctoringIntegration',
     label: 'Proctoring integration',
     category: 'grading',

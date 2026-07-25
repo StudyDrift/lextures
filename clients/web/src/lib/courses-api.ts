@@ -20,6 +20,20 @@ import {
   suggestQuizOutcomeLinksResponseSchema,
   adaptivePathPreviewResponseSchema,
   courseSchema,
+  adaptiveContentSettingsSchema,
+  adaptiveContentUnitSchema,
+  adaptiveContentUnitsListSchema,
+  adaptiveContentVariantSchema,
+  adaptiveContentVariantsListSchema,
+  adaptiveContentPreviewSchema,
+  adaptiveContentKeyTermsSchema,
+  adaptiveContentBudgetSchema,
+  adaptiveContentReviewQueueSchema,
+  adaptiveContentBulkResultSchema,
+  adaptiveContentOptoutSchema,
+  adaptiveContentViewedOriginalSchema,
+  adaptationProfileSchema,
+  cohortProfilesSchema,
   courseScopedRolesResponseSchema,
   courseStructureItemSchema,
   courseStructureItemsResponseSchema,
@@ -165,6 +179,8 @@ export type CoursePublic = {
   interactiveQuizzesEnabled?: boolean
   /** SS.1 — cableless entire-screen sharing (default off). */
   screenShareEnabled?: boolean
+  /** AC.1 — Adaptive Content Engine per-course flag (default off). */
+  adaptiveContentEnabled?: boolean
   /** When true, saved grades are pushed back to the linked Canvas course (default off). */
   canvasGradeSyncEnabled?: boolean
   /** Plan 12.4 — block publishing video content without ready captions. */
@@ -869,6 +885,7 @@ export async function patchCourseFeatures(
     visualBoardsEnabled?: boolean
     interactiveQuizzesEnabled?: boolean
     screenShareEnabled?: boolean
+    adaptiveContentEnabled?: boolean
   },
 ): Promise<CoursePublic> {
   const res = await authorizedFetch(
@@ -906,6 +923,9 @@ export async function patchCourseFeatures(
           ? { interactiveQuizzesEnabled: body.interactiveQuizzesEnabled }
           : {}),
         ...(body.screenShareEnabled !== undefined ? { screenShareEnabled: body.screenShareEnabled } : {}),
+        ...(body.adaptiveContentEnabled !== undefined
+          ? { adaptiveContentEnabled: body.adaptiveContentEnabled }
+          : {}),
         ...(body.sectionsEnabled !== undefined ? { sectionsEnabled: body.sectionsEnabled } : {}),
       }),
     },
@@ -913,6 +933,573 @@ export async function patchCourseFeatures(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return parseApiResponse('patchCourseFeatures', courseSchema, raw)
+}
+
+/** AC.1 — Adaptive Content Engine course settings. */
+export type AdaptiveContentSettings = {
+  allowedAxes: Array<'emphasis' | 'scaffolding' | 'reading_level' | 'misconception' | 'modality' | string>
+  defaultStrategy: 'gentle' | 'balanced' | 'aggressive' | string
+  holdoutPercent: number
+  monthlyTokenBudget: number
+  requireInstructorApproval: boolean
+  studentOptoutAllowed: boolean
+  updatedAt?: string
+  generationPaused?: boolean
+  maxPrewarmVariants?: number
+}
+
+export type AdaptiveContentUnit = {
+  id: string
+  courseId: string
+  targetKind: 'module' | 'outcome' | string
+  targetModuleItemId?: string | null
+  targetOutcomeId?: string | null
+  baseContentItemId: string
+  preAssessmentItemId?: string | null
+  postAssessmentItemId?: string | null
+  allowedAxes: string[]
+  status: 'draft' | 'active' | 'paused' | 'archived' | string
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+  triggerMode?: 'pre_quiz' | 'diagnostic_first_visit' | 'mastery_snapshot' | string
+  masteryFreshnessDays?: number
+  conceptIds?: string[]
+  contentVersion?: number
+  minFidelity?: number
+  variantTotal?: number
+  variantApproved?: number
+  variantPendingReview?: number
+  variantRejected?: number
+  variantAutoServed?: number
+}
+
+/** AC.3 / AC.5 content variant. */
+export type AdaptiveContentVariant = {
+  id?: string
+  unitId?: string
+  profileSignature: string
+  axesApplied?: string[]
+  sections?: { heading: string; markdown: string }[]
+  variantMarkdown?: string
+  model?: string
+  fidelityScore?: number | null
+  safetyFlags?: string[]
+  a11yFlags?: string[]
+  status: string
+  promptVersion?: string
+  contentVersion?: number
+  promptTokens?: number
+  completionTokens?: number
+  createdAt?: string
+  fallback?: boolean
+  fallbackReason?: string
+  cacheHit?: boolean
+  humanEdited?: boolean
+  reviewedBy?: string | null
+  reviewedAt?: string | null
+  reviewNote?: string | null
+  variantVersion?: number
+  approvedBy?: string | null
+}
+
+export type AdaptiveContentPreview = {
+  variant: AdaptiveContentVariant
+  fidelityScore: number
+  a11yFlags: string[]
+  safetyFlags: string[]
+  promptTokens?: number
+  completionTokens?: number
+  baseMarkdown?: string
+}
+
+export type AdaptiveContentKeyTerm = {
+  id: string
+  unitId: string
+  term: string
+  mustAppear: boolean
+  createdAt?: string
+}
+
+export type AdaptiveContentBudget = {
+  monthlyTokenBudget: number
+  tokensUsedPeriod: number
+  budgetRemaining?: number | null
+  periodStart: string
+  generationPaused: boolean
+  unlimited: boolean
+}
+
+export type AdaptiveContentReviewQueue = {
+  variants: AdaptiveContentVariant[]
+  total: number
+  limit: number
+  offset: number
+}
+
+export type AdaptationProfile = {
+  unitId: string
+  emphasisMode: 'introduce' | 'reinforce' | 'compress' | 'remediate' | string
+  targetBloom?: string | null
+  profileSignature: string
+  isNeutral: boolean
+  conceptGaps: { conceptId: string; gap: number }[]
+  misconceptions: string[]
+  readingLevelPref?: string | null
+  modalityPref?: string | null
+  axisSet?: string[]
+  sourceAttemptId?: string | null
+  createdAt?: string
+}
+
+export type CohortProfiles = {
+  byEmphasis: { emphasisMode: string; count: number }[]
+  bySignature: { profileSignature: string; emphasisMode: string; count: number }[]
+}
+
+export async function fetchAdaptiveContentSettings(
+  courseCode: string,
+): Promise<AdaptiveContentSettings> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/settings`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchAdaptiveContentSettings', adaptiveContentSettingsSchema, raw)
+}
+
+export async function putAdaptiveContentSettings(
+  courseCode: string,
+  body: AdaptiveContentSettings,
+): Promise<AdaptiveContentSettings> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/settings`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        allowedAxes: body.allowedAxes,
+        defaultStrategy: body.defaultStrategy,
+        holdoutPercent: body.holdoutPercent,
+        monthlyTokenBudget: body.monthlyTokenBudget,
+        requireInstructorApproval: body.requireInstructorApproval,
+        studentOptoutAllowed: body.studentOptoutAllowed,
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('putAdaptiveContentSettings', adaptiveContentSettingsSchema, raw)
+}
+
+export async function fetchAdaptiveContentUnits(
+  courseCode: string,
+): Promise<AdaptiveContentUnit[]> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = parseApiResponse('fetchAdaptiveContentUnits', adaptiveContentUnitsListSchema, raw)
+  return body.units
+}
+
+/** AC.2 — own adaptation profile for a unit (student). */
+export async function fetchAdaptationProfile(
+  courseCode: string,
+  unitId: string,
+): Promise<AdaptationProfile> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/profile`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchAdaptationProfile', adaptationProfileSchema, raw)
+}
+
+/** AC.2 — cohort profile distribution (instructor). */
+export async function fetchCohortAdaptationProfiles(
+  courseCode: string,
+  unitId: string,
+): Promise<CohortProfiles> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/profiles`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchCohortAdaptationProfiles', cohortProfilesSchema, raw)
+}
+
+/** AC.2 — generate and bind an adaptive pre-check quiz for a unit (instructor). */
+export async function generateAdaptiveContentPreCheck(
+  courseCode: string,
+  unitId: string,
+  body?: { title?: string; questionCount?: number },
+): Promise<{ preAssessmentItemId: string; unit: AdaptiveContentUnit }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/pre-check/generate`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = raw as { preAssessmentItemId?: string; unit?: AdaptiveContentUnit }
+  if (!o.preAssessmentItemId || !o.unit) {
+    throw new Error('Invalid pre-check generate response.')
+  }
+  return { preAssessmentItemId: o.preAssessmentItemId, unit: o.unit }
+}
+
+/** AC.2 — patch adaptive content unit fields (pre-assessment, trigger, concepts). */
+export async function patchAdaptiveContentUnit(
+  courseCode: string,
+  unitId: string,
+  body: {
+    targetKind?: string
+    targetModuleItemId?: string | null
+    targetOutcomeId?: string | null
+    baseContentItemId?: string
+    preAssessmentItemId?: string | null
+    clearPreAssessment?: boolean
+    postAssessmentItemId?: string | null
+    clearPostAssessment?: boolean
+    allowedAxes?: string[]
+    triggerMode?: string
+    masteryFreshnessDays?: number
+    conceptIds?: string[]
+    clearConceptIds?: boolean
+    status?: string
+    minFidelity?: number
+  },
+): Promise<AdaptiveContentUnit> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('patchAdaptiveContentUnit', adaptiveContentUnitSchema, raw)
+}
+
+/** AC.1 / AC.5 — create adaptive content unit. */
+export async function createAdaptiveContentUnit(
+  courseCode: string,
+  body: {
+    targetKind: string
+    targetModuleItemId?: string | null
+    targetOutcomeId?: string | null
+    baseContentItemId: string
+    preAssessmentItemId?: string | null
+    postAssessmentItemId?: string | null
+    allowedAxes?: string[]
+    status?: string
+    triggerMode?: string
+    masteryFreshnessDays?: number
+    conceptIds?: string[]
+  },
+): Promise<AdaptiveContentUnit> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('createAdaptiveContentUnit', adaptiveContentUnitSchema, raw)
+}
+
+/** AC.5 — delete unit. */
+export async function deleteAdaptiveContentUnit(courseCode: string, unitId: string): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+}
+
+/** AC.4 — course budget status. */
+export async function fetchAdaptiveContentBudget(courseCode: string): Promise<AdaptiveContentBudget> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/budget`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchAdaptiveContentBudget', adaptiveContentBudgetSchema, raw)
+}
+
+/** AC.4 — pre-warm unit variants. */
+export async function prewarmAdaptiveContentUnit(
+  courseCode: string,
+  unitId: string,
+): Promise<{ enqueued: number; queueDepth: number; unitId: string }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/prewarm`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { enqueued: number; queueDepth: number; unitId: string }
+}
+
+/** AC.3 — list variants for a unit. */
+export async function fetchAdaptiveContentVariants(
+  courseCode: string,
+  unitId: string,
+  status?: string,
+): Promise<AdaptiveContentVariant[]> {
+  const q = status ? `?status=${encodeURIComponent(status)}` : ''
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/variants${q}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = parseApiResponse('fetchAdaptiveContentVariants', adaptiveContentVariantsListSchema, raw)
+  return body.variants
+}
+
+/** AC.3 — preview/generate a variant. */
+export async function previewAdaptiveContentVariant(
+  courseCode: string,
+  unitId: string,
+  body: {
+    profileSignature?: string
+    syntheticProfile?: {
+      emphasisMode?: string
+      targetBloom?: string
+      readingLevelPref?: string
+      modalityPref?: string
+      conceptGaps?: { conceptId: string; gap: number }[]
+      misconceptions?: string[]
+      axisSet?: string[]
+    }
+    persist?: boolean
+  },
+): Promise<AdaptiveContentPreview> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/variants/preview`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('previewAdaptiveContentVariant', adaptiveContentPreviewSchema, raw)
+}
+
+/** AC.3 — key terms. */
+export async function fetchAdaptiveContentKeyTerms(
+  courseCode: string,
+  unitId: string,
+): Promise<AdaptiveContentKeyTerm[]> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/key-terms`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = parseApiResponse('fetchAdaptiveContentKeyTerms', adaptiveContentKeyTermsSchema, raw)
+  return body.keyTerms
+}
+
+export async function putAdaptiveContentKeyTerms(
+  courseCode: string,
+  unitId: string,
+  terms: { term: string; mustAppear?: boolean }[],
+): Promise<AdaptiveContentKeyTerm[]> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/key-terms`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ terms }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = parseApiResponse('putAdaptiveContentKeyTerms', adaptiveContentKeyTermsSchema, raw)
+  return body.keyTerms
+}
+
+/** AC.5 — course-wide pending review queue. */
+export async function fetchAdaptiveContentReviewQueue(
+  courseCode: string,
+  opts?: { limit?: number; offset?: number },
+): Promise<AdaptiveContentReviewQueue> {
+  const params = new URLSearchParams()
+  if (opts?.limit != null) params.set('limit', String(opts.limit))
+  if (opts?.offset != null) params.set('offset', String(opts.offset))
+  const q = params.toString() ? `?${params}` : ''
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/review-queue${q}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchAdaptiveContentReviewQueue', adaptiveContentReviewQueueSchema, raw)
+}
+
+/** AC.5 — approve variant. */
+export async function approveAdaptiveContentVariant(
+  courseCode: string,
+  variantId: string,
+  body?: { expectedVariantVersion?: number; note?: string; overrideGate?: boolean },
+): Promise<AdaptiveContentVariant> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/variants/${encodeURIComponent(variantId)}/approve`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('approveAdaptiveContentVariant', adaptiveContentVariantSchema, raw)
+}
+
+/** AC.5 — reject variant. */
+export async function rejectAdaptiveContentVariant(
+  courseCode: string,
+  variantId: string,
+  body?: { expectedVariantVersion?: number; note?: string },
+): Promise<AdaptiveContentVariant> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/variants/${encodeURIComponent(variantId)}/reject`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('rejectAdaptiveContentVariant', adaptiveContentVariantSchema, raw)
+}
+
+/** AC.5 — edit-and-approve variant. */
+export async function editApproveAdaptiveContentVariant(
+  courseCode: string,
+  variantId: string,
+  body: {
+    variantMarkdown: string
+    expectedVariantVersion?: number
+    note?: string
+    overrideGate?: boolean
+  },
+): Promise<AdaptiveContentVariant> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/variants/${encodeURIComponent(variantId)}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('editApproveAdaptiveContentVariant', adaptiveContentVariantSchema, raw)
+}
+
+/** AC.5 — revoke approved/auto_served variant. */
+export async function revokeAdaptiveContentVariant(
+  courseCode: string,
+  variantId: string,
+  body?: { expectedVariantVersion?: number; note?: string },
+): Promise<AdaptiveContentVariant> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/variants/${encodeURIComponent(variantId)}/revoke`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('revokeAdaptiveContentVariant', adaptiveContentVariantSchema, raw)
+}
+
+/** AC.5 — bulk approve/reject for a unit. */
+export async function bulkReviewAdaptiveContentVariants(
+  courseCode: string,
+  unitId: string,
+  body: {
+    action: 'approve' | 'reject'
+    variantIds: string[]
+    note?: string
+    overrideGate?: boolean
+  },
+): Promise<{
+  succeeded: number
+  failed: number
+  results: { variantId: string; ok: boolean; error?: string; status?: string }[]
+}> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/variants/bulk`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('bulkReviewAdaptiveContentVariants', adaptiveContentBulkResultSchema, raw)
+}
+
+/** AC.6 — get student adaptive content opt-out preference. */
+export async function fetchAdaptiveContentOptout(courseCode: string): Promise<AdaptiveContentOptout> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/optout`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchAdaptiveContentOptout', adaptiveContentOptoutSchema, raw)
+}
+
+/** AC.6 — set student adaptive content opt-out preference. */
+export async function putAdaptiveContentOptout(
+  courseCode: string,
+  optedOut: boolean,
+): Promise<AdaptiveContentOptout> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/optout`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ optedOut }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('putAdaptiveContentOptout', adaptiveContentOptoutSchema, raw)
+}
+
+/** AC.6 — record a "View original" toggle click (telemetry). */
+export async function postAdaptiveContentViewedOriginal(
+  courseCode: string,
+  unitId: string,
+): Promise<{ viewOriginalClicks: number }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/viewed-original`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('postAdaptiveContentViewedOriginal', adaptiveContentViewedOriginalSchema, raw)
 }
 
 export async function patchCourseBlueprint(courseCode: string, isBlueprint: boolean): Promise<CoursePublic> {
@@ -1425,6 +2012,11 @@ export async function putCourse(
  */
 export function courseItemCreatePermission(courseId: string): string {
   return `course:${courseId}:item:create`
+}
+
+/** AC.5 — TA review-only: approve/reject variants without unit/settings config. */
+export function courseAdaptiveContentReviewPermission(courseCode: string): string {
+  return `course:${courseCode}:adaptive_content:review`
 }
 
 /**
@@ -2490,6 +3082,29 @@ export type ModuleContentPagePayload = {
   profileRationale?: ProfileRationale
   preferredAlternateItemId?: string | null
   modalityAlternates?: Array<{ itemId: string; title: string; modality: string }>
+  /** AC.6 — present when the page is an active adaptive content unit base (students). */
+  adaptive?: AdaptiveServingMeta | null
+}
+
+/** AC.6 — adaptive serving decision on content-page GET. */
+export type AdaptiveServingMeta = {
+  unitId: string
+  isAdapted: boolean
+  servedVariantId?: string | null
+  axesApplied?: string[]
+  canViewOriginal: boolean
+  optedOut: boolean
+  isHoldout: boolean
+  wasFallback?: boolean
+  adaptationReason?: string
+  preAssessmentItemId?: string | null
+  requiresPreAssessment?: boolean
+  optoutAllowed?: boolean
+}
+
+export type AdaptiveContentOptout = {
+  optedOut: boolean
+  optoutAllowed: boolean
 }
 
 export type OriginalityDetectionMode = 'disabled' | 'plagiarism' | 'ai' | 'both'
@@ -2584,6 +3199,31 @@ function normalizeModuleContentPagePayload(raw: unknown): ModuleContentPagePaylo
     preferredAlternateItemId:
       typeof r.preferredAlternateItemId === 'string' ? r.preferredAlternateItemId : null,
     modalityAlternates: parseModalityAlternates(r.modalityAlternates),
+    adaptive: parseAdaptiveServingMeta(r.adaptive),
+  }
+}
+
+function parseAdaptiveServingMeta(raw: unknown): AdaptiveServingMeta | null {
+  if (!raw || typeof raw !== 'object') return null
+  const o = raw as Record<string, unknown>
+  const unitId = typeof o.unitId === 'string' ? o.unitId : ''
+  if (!unitId) return null
+  return {
+    unitId,
+    isAdapted: o.isAdapted === true,
+    servedVariantId: typeof o.servedVariantId === 'string' ? o.servedVariantId : null,
+    axesApplied: Array.isArray(o.axesApplied)
+      ? (o.axesApplied as unknown[]).filter((x): x is string => typeof x === 'string')
+      : [],
+    canViewOriginal: o.canViewOriginal === true,
+    optedOut: o.optedOut === true,
+    isHoldout: o.isHoldout === true,
+    wasFallback: o.wasFallback === true,
+    adaptationReason: typeof o.adaptationReason === 'string' ? o.adaptationReason : undefined,
+    preAssessmentItemId:
+      typeof o.preAssessmentItemId === 'string' ? o.preAssessmentItemId : null,
+    requiresPreAssessment: o.requiresPreAssessment === true,
+    optoutAllowed: o.optoutAllowed === true,
   }
 }
 

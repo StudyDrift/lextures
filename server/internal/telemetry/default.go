@@ -140,6 +140,27 @@ func RecordOnboardingEventInsertFailed(program string) {
 	}
 }
 
+// RecordPinnedSettingsWrite records a successful pinned-settings PUT (plan PS.2).
+func RecordPinnedSettingsWrite(surface string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordPinnedSettingsWrite(surface)
+	}
+}
+
+// ObservePinnedSettingsPinCount records pin-list length on successful PUT (plan PS.4).
+func ObservePinnedSettingsPinCount(count int) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.ObservePinnedSettingsPinCount(count)
+	}
+}
+
+// RecordPinnedSettingsReject records a rejected pinned-settings write (plan PS.2).
+func RecordPinnedSettingsReject(reason string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordPinnedSettingsReject(reason)
+	}
+}
+
 // RecordAIProvider records an AI provider call on the default instance
 // (plan 16.7 / 17.7 §11). No-op when telemetry is not initialised.
 func RecordAIProvider(provider, model, outcome string, seconds, costDollars float64) {

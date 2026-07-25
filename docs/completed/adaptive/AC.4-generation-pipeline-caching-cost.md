@@ -1,6 +1,6 @@
 # AC.4 — Generation Pipeline, Caching & Cost Controls
 
-> Implementation plan. Source: operability layer for the AC.3 engine. Folder overview: [README](README.md).
+> Implementation plan. Source: operability layer for the AC.3 engine. Folder overview: [README](../../plan/adaptive/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Adaptive Content Engine (ACE) |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Backend platform team |
 | **Depends on** | AC.3; job queue (17.3) if present, else Postgres-backed worker |
@@ -158,7 +158,7 @@ Internal: `pipeline.Enqueue(unitID, signature, version, priority)`, `pipeline.Wo
 - `server/internal/httpserver/admin.go` — platform pause control (near AI governance).
 - `server/internal/telemetry/` — metrics registration (per the observability layer).
 - `server/migrations/442_adaptive_content_jobs.sql` (+ down).
-- Related: [AC.3](AC.3-content-generation-engine.md), [AC.6](AC.6-student-runtime-and-transparency.md), [AC.9](AC.9-analytics-reporting-and-operability.md).
+- Related: [AC.3](AC.3-content-generation-engine.md), [AC.6](AC.6-student-runtime-and-transparency.md), [AC.9](../../plan/adaptive/AC.9-analytics-reporting-and-operability.md).
 
 ## 13. Dependencies & Sequencing
 
@@ -209,5 +209,5 @@ Internal: `pipeline.Enqueue(unitID, signature, version, priority)`, `pipeline.Wo
 ## 19. References
 
 - Existing files: `analytics.ai_usage_log` (`server/migrations/281_ai_usage_logs.sql`), `server/internal/telemetry/`, `server/internal/httpserver/admin.go`.
-- Related plans: [AC.3](AC.3-content-generation-engine.md), [AC.6](AC.6-student-runtime-and-transparency.md), [AC.9](AC.9-analytics-reporting-and-operability.md); platform job queue plan `17.3`.
+- Related plans: [AC.3](AC.3-content-generation-engine.md), [AC.6](AC.6-student-runtime-and-transparency.md), [AC.9](../../plan/adaptive/AC.9-analytics-reporting-and-operability.md); platform job queue plan `17.3`.
 - External: token-bucket rate limiting; Postgres `SELECT … FOR UPDATE SKIP LOCKED` queue pattern.

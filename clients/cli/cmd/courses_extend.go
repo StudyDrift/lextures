@@ -42,6 +42,7 @@ type courseFeatures struct {
 	ReportCardsEnabled            *bool `json:"reportCardsEnabled,omitempty"`
 	VisualBoardsEnabled           *bool `json:"visualBoardsEnabled,omitempty"`
 	InteractiveQuizzesEnabled     *bool `json:"interactiveQuizzesEnabled,omitempty"`
+	AdaptiveContentEnabled        *bool `json:"adaptiveContentEnabled,omitempty"`
 }
 
 // courseDetail is the GET /courses/{code} payload used for merge updates.

@@ -1,6 +1,6 @@
 # AC.5 — Instructor Authoring & Human-in-the-Loop Approval
 
-> Implementation plan. Source: authoring surface for ACE. Folder overview: [README](README.md).
+> Implementation plan. Source: authoring surface for ACE. Folder overview: [README](../../plan/adaptive/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Adaptive Content Engine (ACE) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Frontend team + backend platform |
 | **Depends on** | AC.1, AC.3 (preview), AC.2 (pre-assessment picker) |
@@ -148,7 +148,7 @@ No new model surface. This story is the **human-oversight** layer over AC.3's ge
 - `server/internal/httpserver/adaptive_content_units.go`, `adaptive_content_variants.go` (new); reuse `requireCourseItemCreate`.
 - `server/internal/courseroles/` — add the `course:adaptive_content:review` capability wiring.
 - `server/migrations/443_adaptive_content_authoring.sql` (+ down).
-- Related: [AC.3](AC.3-content-generation-engine.md) (preview/generate), [AC.6](AC.6-student-runtime-and-transparency.md) (serves approved), [AC.9](AC.9-analytics-reporting-and-operability.md) (effectiveness links).
+- Related: [AC.3](AC.3-content-generation-engine.md) (preview/generate), [AC.6](AC.6-student-runtime-and-transparency.md) (serves approved), [AC.9](../../plan/adaptive/AC.9-analytics-reporting-and-operability.md) (effectiveness links).
 
 ## 13. Dependencies & Sequencing
 
@@ -201,5 +201,5 @@ No new model surface. This story is the **human-oversight** layer over AC.3's ge
 ## 19. References
 
 - Existing files: `clients/web/src/components/outcomes/outcome-links-editor.tsx`, `clients/web/src/components/lms/build-content-page-with-ai-modal.tsx` (commit #530), `server/internal/courseroles/`, `server/internal/httpserver/course_features.go`.
-- Related plans: [AC.3](AC.3-content-generation-engine.md), [AC.6](AC.6-student-runtime-and-transparency.md), [AC.8](AC.8-governance-safety-fairness-privacy.md), `../standards/S13-eu-ai-act-high-risk.md`.
+- Related plans: [AC.3](AC.3-content-generation-engine.md), [AC.6](AC.6-student-runtime-and-transparency.md), [AC.8](../../plan/adaptive/AC.8-governance-safety-fairness-privacy.md), `../standards/S13-eu-ai-act-high-risk.md`.
 - External: EU AI Act Art. 14 (human oversight); GDPR Art. 22(3) (human intervention).

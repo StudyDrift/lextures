@@ -81,6 +81,7 @@ var disclosureFeatures = []FeatureCard{
 	{Key: "lesson_generation", Label: "Lesson generator", Description: "Generates lesson plans, activities, and formative assessments from learning objectives."},
 	{Key: "ai_study_buddy", Label: "AI study buddy", Description: "Standalone study companion for homeschoolers."},
 	{Key: "alt_text_suggestion", Label: "Alt-text suggestions", Description: "Suggests accessible image descriptions for course media."},
+	{Key: "adaptive_content", Label: "Adaptive content", Description: "Rewrites course content pages per learner adaptation profile while preserving facts and required terminology."},
 }
 
 // platformModelBindings lists default models and the features that use them.
@@ -90,7 +91,7 @@ var platformModelBindings = []modelBinding{
 		modelID: user.DefaultCourseSetupModelID,
 		alias:   aiprovider.AliasCourseSetup,
 		purposes: []string{
-			"ai_tutor", "modules_ai_assistant", "rag_notebook", "syllabus_generation", "content_page_generation", "outcomes_extraction", "quiz_outcome_mapping", "badges_extraction", "quiz_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy",
+			"ai_tutor", "modules_ai_assistant", "rag_notebook", "syllabus_generation", "content_page_generation", "outcomes_extraction", "quiz_outcome_mapping", "badges_extraction", "quiz_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy", "adaptive_content",
 		},
 		dataSent: "Course context, prompts, and user questions necessary for the feature; PII is redacted where configured.",
 	},

@@ -11,6 +11,7 @@ import { UnsavedChangesBanner } from '../../components/ui/unsaved-changes-banner
 import { TimezoneSelector } from '../../components/timezone/timezone-selector'
 import { detectBrowserTimezone } from '../../lib/format'
 import {
+  courseAdaptiveContentReviewPermission,
   courseItemCreatePermission,
   fetchCourseStructure,
   patchCourseMarkdownTheme,
@@ -43,6 +44,7 @@ import CourseTranslationsSettings from './course-translations-settings'
 import { CourseAccessibilitySettingsSection } from './course-accessibility-settings'
 import { CoursePlagiarismSettingsSection } from './course-plagiarism-settings-section'
 import { CourseGradingAgentsSection } from './course-grading-agents-section'
+import { AdaptiveContentWorkspace } from '../../components/lms/adaptive-content/adaptive-content-workspace'
 import { CourseConsortiumSettingsSection } from './course-consortium-settings-section'
 import { CourseMarketplaceSettingsSection } from './course-marketplace-settings-section'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
@@ -128,6 +130,7 @@ type SettingsSection =
   | 'outcomes'
   | 'badges'
   | 'features'
+  | 'adaptive-content'
   | 'accessibility'
   | 'translations'
   | 'sections'
@@ -170,6 +173,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
   if (seg === 'outcomes') return 'outcomes'
   if (seg === 'badges') return 'badges'
   if (seg === 'features') return 'features'
+  if (seg === 'adaptive-content' || seg === 'adaptive') return 'adaptive-content'
   if (seg === 'accessibility') return 'accessibility'
   if (seg === 'translations') return 'translations'
   if (seg === 'sections') return 'sections'
@@ -768,7 +772,9 @@ export default function CourseSettings() {
     return null
   }
 
-  if (!allows(courseItemCreatePermission(courseCode))) {
+  const canConfigureCourse = allows(courseItemCreatePermission(courseCode))
+  const canReviewAdaptive = allows(courseAdaptiveContentReviewPermission(courseCode))
+  if (!canConfigureCourse && !canReviewAdaptive) {
     return <Navigate to={`/courses/${encodeURIComponent(courseCode)}`} replace />
   }
 
@@ -779,6 +785,10 @@ export default function CourseSettings() {
   }
 
   const section = parseSettingsSection(courseCode, location.pathname)
+  // Review-only staff may only open Adaptive Content (not other settings sections).
+  if (!canConfigureCourse && canReviewAdaptive && section !== 'adaptive-content') {
+    return <Navigate to={`${settingsBase}/adaptive-content`} replace />
+  }
   if (
     section === 'invalid' ||
     (section === 'translations' && !isTranslationMemoryEnabled()) ||
@@ -818,6 +828,10 @@ export default function CourseSettings() {
             ? course?.title
               ? `${course.title} — features`
               : 'Features'
+            : section === 'adaptive-content'
+              ? course?.title
+                ? `${course.title} — Adaptive Content`
+                : 'Adaptive Content'
             : section === 'accessibility'
               ? course?.title
                 ? `${course.title} — accessibility`
@@ -861,6 +875,8 @@ export default function CourseSettings() {
             ? 'Define competency micro-badges tied to outcomes and award signed Open Badges to students who demonstrate mastery.'
           : section === 'features'
             ? 'Choose which course tools appear in the menu and are available to instructors and learners.'
+            : section === 'adaptive-content'
+              ? 'Configure adaptive units, preview learner archetypes, and approve or reject generated variants.'
             : section === 'accessibility'
               ? 'Review image alt-text coverage and find content that still needs accessibility updates.'
             : section === 'translations'
@@ -907,7 +923,7 @@ export default function CourseSettings() {
 
       {course && !loading && (
         <div
-          className={`mt-8 space-y-6 ${section === 'grading-agents' ? 'w-full' : 'max-w-4xl'}`}
+          className={`mt-8 space-y-6 ${section === 'grading-agents' || section === 'adaptive-content' ? 'w-full' : 'max-w-4xl'}`}
         >
           {section === 'general' && (
             <form
@@ -1454,6 +1470,13 @@ export default function CourseSettings() {
                 />
               ) : null}
             </>
+          )}
+          {section === 'adaptive-content' && (
+            <AdaptiveContentWorkspace
+              courseCode={courseCode}
+              adaptiveContentEnabled={course.adaptiveContentEnabled === true}
+              canConfigure={canConfigureCourse}
+            />
           )}
           {section === 'accessibility' && (featuresLoading || altTextEnforcementEnabled) ? (
             featuresLoading ? (

@@ -55,6 +55,7 @@ export type PlatformFeatures = {
   videoCaptionsEnabled: boolean
   autoCaptioningEnabled: boolean
   ffReadingPreferences: boolean
+  ffPinnedSettings: boolean
   ffHighContrastReducedMotion: boolean
   ffMotionNavigation: boolean
   ffMotionReveal: boolean
@@ -200,6 +201,7 @@ const defaultFeatures: PlatformFeatures = {
   videoCaptionsEnabled: false,
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
+  ffPinnedSettings: true,
   ffHighContrastReducedMotion: false,
   ffMotionNavigation: true,
   ffMotionReveal: true,
@@ -343,6 +345,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     videoCaptionsEnabled: false,
     autoCaptioningEnabled: false,
     ffReadingPreferences: false,
+    ffPinnedSettings: true,
     ffHighContrastReducedMotion: false,
     ffMotionNavigation: true,
     ffMotionReveal: true,
@@ -493,6 +496,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           videoCaptionsEnabled: data.videoCaptionsEnabled === true,
           autoCaptioningEnabled: data.autoCaptioningEnabled === true,
           ffReadingPreferences: data.ffReadingPreferences === true,
+          ffPinnedSettings: data.ffPinnedSettings === true,
           ffHighContrastReducedMotion: data.ffHighContrastReducedMotion === true,
           ffMotionNavigation: data.ffMotionNavigation !== false,
           ffMotionReveal: data.ffMotionReveal !== false,
@@ -600,6 +604,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           videoCaptionsEnabled: next.videoCaptionsEnabled === true,
           autoCaptioningEnabled: next.autoCaptioningEnabled === true,
           ffReadingPreferences: next.ffReadingPreferences === true,
+          ffPinnedSettings: next.ffPinnedSettings === true,
           ffHighContrastReducedMotion: next.ffHighContrastReducedMotion === true,
           ffMotionNavigation: next.ffMotionNavigation !== false,
           ffMotionReveal: next.ffMotionReveal !== false,

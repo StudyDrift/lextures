@@ -12,12 +12,15 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/relativeschedule"
+	acrepo "github.com/lextures/lextures/server/internal/repos/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulecontent"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
-	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
+	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	acsvc "github.com/lextures/lextures/server/internal/service/adaptivecontent"
+	"github.com/lextures/lextures/server/internal/service/aigateway"
 	lpsvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
 )
 
@@ -173,8 +176,78 @@ func (d Deps) handleGetModuleContentPage() http.HandlerFunc {
 				}
 			}
 		}
+		// AC.6 — student adaptive content serving (non-blocking; base on any miss).
+		if !canEdit {
+			d.applyAdaptiveContentServing(r, *cid, itemID, viewer, &out)
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
+	}
+}
+
+// applyAdaptiveContentServing resolves ACE serving for a student content-page GET (AC.6).
+// Failures never block the page: students always receive base content at worst.
+func (d Deps) applyAdaptiveContentServing(r *http.Request, courseID, itemID, viewer uuid.UUID, out *moduleAssignmentGetResponse) {
+	if d.Pool == nil || out == nil {
+		return
+	}
+	enabled, err := acrepo.AdaptiveContentEnabledForCourse(r.Context(), d.Pool, courseID)
+	if err != nil || !acsvc.ActiveForCourse(enabled) {
+		return
+	}
+
+	// Gateway evaluate for COPPA / opt-out / consent (no model call — FR-7).
+	// Deny ⇒ base content with no adapted indicator.
+	gatewayAllowed := true
+	if _, blocked := d.evaluateAIGatewayBlock(r.Context(), viewer, aigateway.FeatureAdaptiveContent, "", "adaptive-content-serve"); blocked {
+		gatewayAllowed = false
+	}
+
+	baseMarkdown := out.Markdown
+	res := acsvc.ResolveServing(r.Context(), d.Pool, acsvc.ServeRequest{
+		CourseID:          courseID,
+		BaseContentItemID: itemID,
+		UserID:            viewer,
+		BaseMarkdown:      baseMarkdown,
+		CourseFlag:        enabled,
+		GatewayAllowed:    gatewayAllowed,
+		EnqueueOnMiss:     true,
+	})
+	if !res.Applicable {
+		return
+	}
+
+	// When adapted, swap markdown and ship base as originalMarkdown for "View original".
+	if res.IsAdapted {
+		out.Markdown = res.Markdown
+		if res.OriginalMarkdown != "" {
+			om := res.OriginalMarkdown
+			out.OriginalMarkdown = &om
+		}
+	}
+
+	axes := res.AxesApplied
+	if axes == nil {
+		axes = []string{}
+	}
+	optoutAllowed := true
+	if settings, err := acrepo.GetSettings(r.Context(), d.Pool, courseID); err == nil && settings != nil {
+		optoutAllowed = settings.StudentOptoutAllowed
+	}
+
+	out.Adaptive = &moduleAdaptiveServingJSON{
+		UnitID:                res.UnitID,
+		IsAdapted:             res.IsAdapted,
+		ServedVariantID:       res.ServedVariantID,
+		AxesApplied:           axes,
+		CanViewOriginal:       res.CanViewOriginal,
+		OptedOut:              res.OptedOut,
+		IsHoldout:             res.IsHoldout,
+		WasFallback:           res.WasFallback,
+		AdaptationReason:      res.AdaptationReason,
+		PreAssessmentItemID:   res.PreAssessmentItemID,
+		RequiresPreAssessment: res.RequiresPreAssessment,
+		OptoutAllowed:         optoutAllowed,
 	}
 }
 
@@ -271,6 +344,18 @@ func (d Deps) handlePatchModuleContentPage() http.HandlerFunc {
 		if row == nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
+		}
+		// AC.3/AC.4: base content edits bump content_version, supersede variants, re-enqueue signatures.
+		if units, _, err := acrepo.BumpUnitsForBaseContentItemWithIDs(r.Context(), d.Pool, *cid, itemID); err == nil {
+			for _, u := range units {
+				if u.Status != "active" {
+					continue
+				}
+				if _, err := acsvc.EnqueueRegenForUnit(r.Context(), d.Pool, u); err != nil {
+					// best-effort
+					_ = err
+				}
+			}
 		}
 		if d.readingLevelEnabled() {
 			_ = rlrepo.ScoreAndPersist(r.Context(), d.Pool, itemID, rlrepo.TypeContentPage, req.Markdown)

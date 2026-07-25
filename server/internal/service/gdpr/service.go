@@ -21,6 +21,7 @@ import (
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
 	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
 	lprepo "github.com/lextures/lextures/server/internal/repos/learnerprofile"
+	"github.com/lextures/lextures/server/internal/repos/pinnedsettings"
 	pfrepo "github.com/lextures/lextures/server/internal/repos/productfeedback"
 	"github.com/lextures/lextures/server/internal/repos/quizgame"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
@@ -293,16 +294,17 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	}
 
 	type archiveDoc struct {
-		UserID          string                `json:"userId"`
-		Profile         profileRow            `json:"profile"`
-		Consents        []consentSummary      `json:"consents"`
-		CustomFields    map[string]any        `json:"customFields,omitempty"`
-		AIInferenceLog  []map[string]any      `json:"aiInferenceLog,omitempty"`
-		LearnerProfile  any                   `json:"learnerProfile,omitempty"`
-		ProductFeedback []map[string]any      `json:"productFeedback,omitempty"`
-		Boards          board.UserBoardExport    `json:"boards,omitempty"`
-		LiveQuizzes     quizgame.UserQuizExport  `json:"liveQuizzes,omitempty"`
-		ExportedAt      string                   `json:"exportedAt"`
+		UserID           string                   `json:"userId"`
+		Profile          profileRow               `json:"profile"`
+		Consents         []consentSummary         `json:"consents"`
+		CustomFields     map[string]any           `json:"customFields,omitempty"`
+		AIInferenceLog   []map[string]any         `json:"aiInferenceLog,omitempty"`
+		LearnerProfile   any                      `json:"learnerProfile,omitempty"`
+		ProductFeedback  []map[string]any         `json:"productFeedback,omitempty"`
+		Boards           board.UserBoardExport    `json:"boards,omitempty"`
+		LiveQuizzes      quizgame.UserQuizExport  `json:"liveQuizzes,omitempty"`
+		PinnedSettings   []map[string]any         `json:"pinnedSettings,omitempty"`
+		ExportedAt       string                   `json:"exportedAt"`
 	}
 
 	cs := make([]consentSummary, 0, len(consents))
@@ -328,6 +330,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	if err != nil {
 		return "", fmt.Errorf("gdpr: live quiz export: %w", err)
 	}
+	pinnedExport := dsarPinnedSettingsExport(ctx, pool, userID)
 
 	var customFields map[string]any
 	if len(customRaw) > 0 {
@@ -344,6 +347,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		ProductFeedback: productFeedbackExport,
 		Boards:          boardsExport,
 		LiveQuizzes:     liveQuizExport,
+		PinnedSettings:  pinnedExport,
 		ExportedAt:      time.Now().UTC().Format(time.RFC3339),
 	}
 	b, err := json.Marshal(doc)
@@ -383,6 +387,23 @@ func dsarLearnerProfileExport(ctx context.Context, pool *pgxpool.Pool, userID uu
 		return nil
 	}
 	return doc
+}
+
+// dsarPinnedSettingsExport includes settings.user_pinned_settings (plan PS.2 FR-12).
+func dsarPinnedSettingsExport(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) []map[string]any {
+	rows, err := pinnedsettings.ListForExport(ctx, pool, userID)
+	if err != nil || len(rows) == 0 {
+		return nil
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, map[string]any{
+			"surface":     r.Surface,
+			"settingKeys": r.SettingKeys,
+			"updatedAt":   r.UpdatedAt.UTC().Format(time.RFC3339),
+		})
+	}
+	return out
 }
 
 func dsarProductFeedbackExport(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) []map[string]any {

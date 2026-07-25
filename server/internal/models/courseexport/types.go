@@ -46,7 +46,33 @@ type CourseExportSnapshot struct {
 	DiagnosticAssessmentsEnabled  bool            `json:"diagnosticAssessmentsEnabled"`
 	HintScaffoldingEnabled        bool            `json:"hintScaffoldingEnabled"`
 	MisconceptionDetectionEnabled bool            `json:"misconceptionDetectionEnabled"`
+	AdaptiveContentEnabled        bool            `json:"adaptiveContentEnabled"`
 	CourseType                    string          `json:"courseType"`
+}
+
+// ExportedAdaptiveContentSettings is course ACE config for export/import (plan AC.1 FR-9).
+// Per-student profiles/variants/servings are never exported.
+type ExportedAdaptiveContentSettings struct {
+	AllowedAxes               []string `json:"allowedAxes"`
+	DefaultStrategy           string   `json:"defaultStrategy"`
+	HoldoutPercent            int16    `json:"holdoutPercent"`
+	MonthlyTokenBudget        int64    `json:"monthlyTokenBudget"`
+	RequireInstructorApproval bool     `json:"requireInstructorApproval"`
+	StudentOptoutAllowed      bool     `json:"studentOptoutAllowed"`
+}
+
+// ExportedAdaptiveContentUnit is an ACE unit for course duplication (plan AC.1 FR-9 / AC.2).
+type ExportedAdaptiveContentUnit struct {
+	TargetKind           string     `json:"targetKind"`
+	TargetModuleItemID   *uuid.UUID `json:"targetModuleItemId,omitempty"`
+	TargetOutcomeID      *uuid.UUID `json:"targetOutcomeId,omitempty"`
+	BaseContentItemID    uuid.UUID  `json:"baseContentItemId"`
+	PreAssessmentItemID  *uuid.UUID `json:"preAssessmentItemId,omitempty"`
+	PostAssessmentItemID *uuid.UUID `json:"postAssessmentItemId,omitempty"`
+	AllowedAxes          []string   `json:"allowedAxes"`
+	Status               string     `json:"status"`
+	TriggerMode          string     `json:"triggerMode,omitempty"`
+	MasteryFreshnessDays int16      `json:"masteryFreshnessDays,omitempty"`
 }
 
 type ExportedContentPageBody struct {
@@ -130,6 +156,10 @@ type CourseExportV1 struct {
 	Assignments               map[uuid.UUID]ExportedAssignmentBody             `json:"assignments"`
 	Quizzes                   map[uuid.UUID]ExportedQuizBody                   `json:"quizzes"`
 	Enrollments               []ExportedCourseEnrollment                       `json:"enrollments"`
+	// AdaptiveContentSettings and AdaptiveContentUnits are optional ACE authoring data (AC.1).
+	// Never includes profiles, variants, or servings.
+	AdaptiveContentSettings *ExportedAdaptiveContentSettings `json:"adaptiveContentSettings,omitempty"`
+	AdaptiveContentUnits    []ExportedAdaptiveContentUnit    `json:"adaptiveContentUnits,omitempty"`
 }
 
 type CourseImportRequest struct {

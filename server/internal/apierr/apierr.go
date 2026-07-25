@@ -9,6 +9,8 @@ import (
 // API error code strings (JSON "error.code"); messages stay human-readable.
 const (
 	CodeInvalidInput       = "INVALID_INPUT"
+	// CodeValidation is an alias of INVALID_INPUT used by plans that name validation failures explicitly (PS.2).
+	CodeValidation         = CodeInvalidInput
 	CodeInvalidCredentials = "INVALID_CREDENTIALS"
 	CodeEmailTaken         = "EMAIL_TAKEN"
 	CodeInvalidResetToken  = "INVALID_RESET_TOKEN"
@@ -36,6 +38,8 @@ const (
 	CodePaymentRequired     = "PAYMENT_REQUIRED"
 	// CodeSeatLimitReached is returned when an org has no remaining learner seats (plan 18.8).
 	CodeSeatLimitReached = "SEAT_LIMIT_REACHED"
+	// CodeServiceUnavailable is returned for temporary outages (e.g. ops kill-switch).
+	CodeServiceUnavailable = "SERVICE_UNAVAILABLE"
 )
 
 // Body matches server/src/error.rs JSON error envelope.

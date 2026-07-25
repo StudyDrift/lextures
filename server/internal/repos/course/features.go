@@ -37,6 +37,7 @@ func PatchFeatures(
 	visualBoardsEnabled bool,
 	interactiveQuizzesEnabled bool,
 	screenShareEnabled bool,
+	adaptiveContentEnabled bool,
 ) (*CoursePublic, error) {
 	const q = `
 		UPDATE course.courses
@@ -67,8 +68,9 @@ func PatchFeatures(
 			visual_boards_enabled = $24,
 			interactive_quizzes_enabled = $25,
 			screen_share_enabled = $26,
+			adaptive_content_enabled = $27,
 			updated_at = NOW()
-		WHERE course_code = $27
+		WHERE course_code = $28
 	`
 
 	tag, err := pool.Exec(ctx, q,
@@ -78,7 +80,7 @@ func PatchFeatures(
 		discussionsEnabled, collabDocsEnabled, liveSessionsEnabled, groupSpacesEnabled,
 		officeHoursEnabled, aiTutorEnabled, modulesAiAssistantEnabled, multilingualMessagingEnabled, filesEnabled,
 		attendanceEnabled, whiteboardEnabled, reportCardsEnabled, visualBoardsEnabled,
-		interactiveQuizzesEnabled, screenShareEnabled,
+		interactiveQuizzesEnabled, screenShareEnabled, adaptiveContentEnabled,
 		courseCode,
 	)
 	if err != nil {

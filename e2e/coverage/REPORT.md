@@ -1,34 +1,34 @@
 # Completed feature E2E coverage report
 
-Total stories: **498**
+Total stories: **515**
 
 ## Coverage levels
 
 | Level | Count |
 |---|---:|
-| journey | 82 |
-| smoke | 172 |
+| journey | 86 |
+| smoke | 173 |
 | api-contract | 1 |
 | covered-by-parent | 11 |
 | manual | 8 |
-| not-applicable | 165 |
-| missing | 59 |
+| not-applicable | 168 |
+| missing | 68 |
 
 ## By client
 
 | Client | Count |
 |---|---:|
 | cli | 48 |
-| docs | 13 |
+| docs | 15 |
 | mobile | 92 |
-| ops | 15 |
-| web | 330 |
+| ops | 16 |
+| web | 344 |
 
 ## By market tag
 
 | Market | Count |
 |---|---:|
-| ALL | 451 |
+| ALL | 468 |
 | HE | 15 |
 | HS | 19 |
 | K12 | 13 |
@@ -70,6 +70,11 @@ Total stories: **498**
 | 14.9 | major | HE Product | E2E-coverage-backlog | [docs/completed/14-higher-ed-specific/14.9-proctoring-integration.md](../../docs/completed/14-higher-ed-specific/14.9-proctoring-integration.md) |
 | 15.9 | major | Homeschool Product | E2E-coverage-backlog | [docs/completed/15-self-learner-specific/15.9-gamification.md](../../docs/completed/15-self-learner-specific/15.9-gamification.md) |
 | 18.4 | major | Admin Experience | E2E-coverage-backlog | [docs/completed/18-admin-experience/18.4-org-wide-search.md](../../docs/completed/18-admin-experience/18.4-org-wide-search.md) |
+| AC.2 | critical | Learning Platform | E2E-coverage-backlog | [docs/completed/adaptive/AC.2-pre-assessment-and-adaptation-profile.md](../../docs/completed/adaptive/AC.2-pre-assessment-and-adaptation-profile.md) |
+| AC.3 | critical | Learning Platform | E2E-coverage-backlog | [docs/completed/adaptive/AC.3-content-generation-engine.md](../../docs/completed/adaptive/AC.3-content-generation-engine.md) |
+| AC.4 | major | Learning Platform | E2E-coverage-backlog | [docs/completed/adaptive/AC.4-generation-pipeline-caching-cost.md](../../docs/completed/adaptive/AC.4-generation-pipeline-caching-cost.md) |
+| AC.5 | critical | Learning Platform | E2E-coverage-backlog | [docs/completed/adaptive/AC.5-instructor-authoring-and-approval.md](../../docs/completed/adaptive/AC.5-instructor-authoring-and-approval.md) |
+| AC.6 | critical | Learning Platform | E2E-coverage-backlog | [docs/completed/adaptive/AC.6-student-runtime-and-transparency.md](../../docs/completed/adaptive/AC.6-student-runtime-and-transparency.md) |
 | node-code-test-runner | major | Grading Agent | E2E-coverage-backlog | [docs/completed/agent-grader/node-code-test-runner.md](../../docs/completed/agent-grader/node-code-test-runner.md) |
 | node-reference-material | major | Grading Agent | E2E-coverage-backlog | [docs/completed/agent-grader/node-reference-material.md](../../docs/completed/agent-grader/node-reference-material.md) |
 | node-score-aggregator | major | Grading Agent | E2E-coverage-backlog | [docs/completed/agent-grader/node-score-aggregator.md](../../docs/completed/agent-grader/node-score-aggregator.md) |
@@ -95,6 +100,10 @@ Total stories: **498**
 | LP03 | major | Learner Profile | E2E-coverage-backlog | [docs/completed/learner-profile/LP03-content-modality-preferences.md](../../docs/completed/learner-profile/LP03-content-modality-preferences.md) |
 | LP04 | major | Learner Profile | E2E-coverage-backlog | [docs/completed/learner-profile/LP04-strengths-growth-areas.md](../../docs/completed/learner-profile/LP04-strengths-growth-areas.md) |
 | LP05 | major | Learner Profile | E2E-coverage-backlog | [docs/completed/learner-profile/LP05-interests-topic-affinity.md](../../docs/completed/learner-profile/LP05-interests-topic-affinity.md) |
+| PS.1 | minor | Web Platform | E2E-coverage-backlog | [docs/completed/settings/PS.1-settings-registry-and-addressable-controls.md](../../docs/completed/settings/PS.1-settings-registry-and-addressable-controls.md) |
+| PS.2 | minor | Web Platform | E2E-coverage-backlog | [docs/completed/settings/PS.2-pinned-settings-data-model-and-api.md](../../docs/completed/settings/PS.2-pinned-settings-data-model-and-api.md) |
+| PS.3 | minor | Web Platform | E2E-coverage-backlog | [docs/completed/settings/PS.3-pin-and-reorder-ux-in-editor-panels.md](../../docs/completed/settings/PS.3-pin-and-reorder-ux-in-editor-panels.md) |
+| PS.4 | minor | Web Platform | E2E-coverage-backlog | [docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md](../../docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md) |
 | W05 | major | Web Platform | E2E-coverage-backlog | [docs/completed/web/W05-human-readable-entity-labels.md](../../docs/completed/web/W05-human-readable-entity-labels.md) |
 
 ## Flag lifecycle gaps
@@ -105,7 +114,9 @@ Total stories: **498**
 | 6.7 | disabledState, authorization, dependency, rollback | [docs/completed/06-communication-collaboration/6.7-office-hours.md](../../docs/completed/06-communication-collaboration/6.7-office-hours.md) |
 | 09 | disabledState, authorization, dependency, rollback | [docs/completed/09-platform-feature-flags-without-admin-toggle.md](../../docs/completed/09-platform-feature-flags-without-admin-toggle.md) |
 | 15.8 | disabledState, authorization, dependency, rollback | [docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md](../../docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md) |
+| AC.1 | enabledJourney, rollback | [docs/completed/adaptive/AC.1-foundations-flag-and-data-model.md](../../docs/completed/adaptive/AC.1-foundations-flag-and-data-model.md) |
 | IQ.1 | disabledState, authorization, dependency, rollback | [docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md](../../docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md) |
+| PS.4 | disabledState, enabledJourney, rollback | [docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md](../../docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md) |
 | T01 | disabledState, authorization, dependency, rollback | [docs/completed/transcripts/T01-official-transcript-generation.md](../../docs/completed/transcripts/T01-official-transcript-generation.md) |
 | VC.1 | disabledState, authorization, dependency, rollback | [docs/completed/visual-collaboration/VC.1-foundation-and-feature-flag.md](../../docs/completed/visual-collaboration/VC.1-foundation-and-feature-flag.md) |
 
@@ -120,7 +131,7 @@ Total stories: **498**
 | 05-multi-tenancy-org-roles | 3 | 5 | 0 | 0 | 0 | 0 | 3 |
 | 06-communication-collaboration | 7 | 4 | 0 | 0 | 0 | 0 | 0 |
 | 07-mobile-offline-cross-platform | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| 08-content-media-files | 6 | 4 | 0 | 0 | 0 | 0 | 2 |
+| 08-content-media-files | 8 | 4 | 0 | 0 | 0 | 0 | 2 |
 | 09-analytics-reporting | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | 10-compliance-privacy-security | 7 | 4 | 0 | 0 | 6 | 0 | 0 |
 | 11-i18n-l10n | 0 | 5 | 0 | 0 | 0 | 0 | 1 |
@@ -135,6 +146,7 @@ Total stories: **498**
 | 20-docs-trust | 0 | 0 | 0 | 0 | 2 | 0 | 0 |
 | 21-cli | 0 | 0 | 0 | 0 | 0 | 8 | 0 |
 | _root | 6 | 5 | 0 | 0 | 0 | 5 | 1 |
+| adaptive | 0 | 1 | 0 | 0 | 0 | 0 | 5 |
 | agent-grader | 0 | 6 | 0 | 0 | 0 | 0 | 3 |
 | ai-providers | 0 | 8 | 0 | 0 | 0 | 0 | 1 |
 | animations | 0 | 4 | 0 | 0 | 0 | 0 | 3 |
@@ -154,6 +166,7 @@ Total stories: **498**
 | mobile | 0 | 0 | 0 | 0 | 0 | 84 | 0 |
 | parent-portal | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | screenshare | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| settings | 0 | 0 | 0 | 0 | 0 | 3 | 4 |
 | transcripts | 2 | 7 | 0 | 3 | 0 | 0 | 0 |
 | visual-collaboration | 0 | 7 | 0 | 3 | 0 | 7 | 0 |
-| web | 4 | 2 | 0 | 0 | 0 | 0 | 1 |
+| web | 6 | 2 | 0 | 0 | 0 | 0 | 1 |

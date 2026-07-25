@@ -17,7 +17,10 @@ import {
   fetchModuleContentPage,
   learnerCourseItemHref,
   patchModuleContentPage,
+  postAdaptiveContentViewedOriginal,
   postCourseContext,
+  putAdaptiveContentOptout,
+  type AdaptiveServingMeta,
   type ContentPageMarkup,
   type CoursePublic,
   type DraftContentPageSection,
@@ -45,6 +48,8 @@ import { ProfileRationaleChip } from '../../components/learner-profile/profile-r
 import { SimplifyDiffDialog } from '../../components/reading-level/simplify-diff-dialog'
 import { useSimplifiedContentView } from '../../components/reading-level/use-simplified-content-view'
 import { useSimplifyDialog } from '../../components/reading-level/use-simplify-dialog'
+import { AdaptedBanner } from '../../components/lms/adaptive-content/adapted-banner'
+import { useAdaptedContentView } from '../../components/lms/adaptive-content/use-adapted-content-view'
 import {
   fetchItemReadingLevel,
   isReadingLevelEnabled,
@@ -94,7 +99,9 @@ export default function CourseModuleContentPage() {
     readingLevelTargetFkgl?: number | null
     profileRationale?: import('../../lib/courses-api').ProfileRationale
     preferredAlternateItemId?: string | null
+    adaptive?: AdaptiveServingMeta | null
   }>({})
+  const [optoutBusy, setOptoutBusy] = useState(false)
   const simplifyDlg = useSimplifyDialog()
   const readingLevelOn = isReadingLevelEnabled()
   const altTextOn = altTextEnforcementFeatureEnabled()
@@ -203,7 +210,17 @@ export default function CourseModuleContentPage() {
         readingLevelTargetFkgl: data.readingLevelTargetFkgl,
         profileRationale: data.profileRationale,
         preferredAlternateItemId: data.preferredAlternateItemId,
+        adaptive: data.adaptive ?? null,
       })
+      // AC.6 entry-ticket gate: route to pre-assessment when required and not yet profiled.
+      // Server only attaches `adaptive` for student viewers.
+      if (data.adaptive?.requiresPreAssessment && data.adaptive.preAssessmentItemId) {
+        navigate(
+          `/courses/${encodeURIComponent(courseCode)}/modules/quiz/${encodeURIComponent(data.adaptive.preAssessmentItemId)}`,
+          { replace: true },
+        )
+        return
+      }
       if (readingLevelOn && courseCode && itemId) {
         void fetchItemReadingLevel(courseCode, itemId)
           .then(setReadingLevel)
@@ -233,7 +250,7 @@ export default function CourseModuleContentPage() {
     } finally {
       setLoading(false)
     }
-  }, [courseCode, itemId, loadMarkups, readingLevelOn])
+  }, [courseCode, itemId, loadMarkups, readingLevelOn, navigate])
 
   useEffect(() => {
     void load()
@@ -368,15 +385,61 @@ export default function CourseModuleContentPage() {
     }
   }
 
-  const originalForStudent =
-    pagePayload.originalMarkdown && pagePayload.simplifiedForReadingLevel
+  const adaptiveMeta = pagePayload.adaptive
+  const isAdaptedServe = Boolean(adaptiveMeta?.isAdapted && adaptiveMeta.canViewOriginal)
+  // When adapted: markdown is the variant; originalMarkdown is the base (shipped for View original).
+  const adaptedOriginal =
+    isAdaptedServe && pagePayload.originalMarkdown
       ? pagePayload.originalMarkdown
       : markdown
+  const adaptedView = useAdaptedContentView(
+    isAdaptedServe ? markdown : undefined,
+    adaptedOriginal,
+    isAdaptedServe,
+  )
+
+  const originalForStudent =
+    !isAdaptedServe && pagePayload.originalMarkdown && pagePayload.simplifiedForReadingLevel
+      ? pagePayload.originalMarkdown
+      : isAdaptedServe
+        ? adaptedView.displayMarkdown
+        : markdown
   const simplifiedView = useSimplifiedContentView(
-    pagePayload.simplifiedForReadingLevel ? markdown : undefined,
+    !isAdaptedServe && pagePayload.simplifiedForReadingLevel ? markdown : undefined,
     originalForStudent,
   )
-  const displayMarkdown = simplifiedView.displayMarkdown
+  const displayMarkdown = isAdaptedServe
+    ? adaptedView.displayMarkdown
+    : simplifiedView.displayMarkdown
+
+  const handleToggleAdaptedOriginal = useCallback(() => {
+    const scrollY = typeof window !== 'undefined' ? window.scrollY : 0
+    if (adaptedView.showingOriginal) {
+      adaptedView.showAdapted()
+    } else {
+      adaptedView.showOriginal()
+      if (courseCode && adaptiveMeta?.unitId) {
+        void postAdaptiveContentViewedOriginal(courseCode, adaptiveMeta.unitId).catch(() => {})
+      }
+    }
+    // Preserve scroll position after toggle (AC.6 a11y).
+    requestAnimationFrame(() => {
+      if (typeof window !== 'undefined') window.scrollTo(0, scrollY)
+    })
+  }, [adaptedView, courseCode, adaptiveMeta?.unitId])
+
+  const handlePreferStandard = useCallback(async () => {
+    if (!courseCode || optoutBusy) return
+    setOptoutBusy(true)
+    try {
+      await putAdaptiveContentOptout(courseCode, true)
+      await load()
+    } catch (e) {
+      toastMutationError(e instanceof Error ? e.message : 'Could not update preference.')
+    } finally {
+      setOptoutBusy(false)
+    }
+  }, [courseCode, load, optoutBusy])
 
   if (!courseCode || !itemId) {
     return (
@@ -572,7 +635,20 @@ export default function CourseModuleContentPage() {
             </div>
           )}
 
-        {!loading && !loadError && !editing && simplifiedView.hasSimplified && (
+        {!loading && !loadError && !editing && !canEdit && adaptedView.hasAdapted && (
+          <AdaptedBanner
+            adaptationReason={adaptiveMeta?.adaptationReason}
+            showingOriginal={adaptedView.showingOriginal}
+            canViewOriginal={Boolean(adaptiveMeta?.canViewOriginal)}
+            optoutAllowed={Boolean(adaptiveMeta?.optoutAllowed) && !optoutBusy}
+            onToggleOriginal={handleToggleAdaptedOriginal}
+            onPreferStandard={
+              adaptiveMeta?.optoutAllowed ? () => void handlePreferStandard() : undefined
+            }
+          />
+        )}
+
+        {!loading && !loadError && !editing && !isAdaptedServe && simplifiedView.hasSimplified && (
           <SimplifiedContentBanner
             targetFkgl={pagePayload.readingLevelTargetFkgl ?? undefined}
             originalMarkdown={originalForStudent}

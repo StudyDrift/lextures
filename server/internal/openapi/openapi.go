@@ -1743,6 +1743,64 @@ const spec = `{
         }
       }
     },
+    "/api/v1/me/pinned-settings": {
+      "get": {
+        "tags": ["me"],
+        "summary": "Get per-user pinned editor settings (plan PS.2)",
+        "description": "Returns ordered setting keys per surface (assignment, quiz). Empty arrays when unset. Returns 404 when ff_pinned_settings is off.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "PinnedSettingsResponse",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PinnedSettingsResponse" }
+              }
+            }
+          },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Pinned settings are not enabled" }
+        }
+      }
+    },
+    "/api/v1/me/pinned-settings/{surface}": {
+      "put": {
+        "tags": ["me"],
+        "summary": "Replace pinned settings for one editor surface (plan PS.2)",
+        "description": "Full idempotent replace of the ordered pin list for assignment or quiz. Unknown-but-valid keys are stored. Max 12 keys. Rate limit 60 writes/minute per user.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          {
+            "name": "surface",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "enum": ["assignment", "quiz"] }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PutPinnedSettingsRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PinnedSettingsResponse (all surfaces)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PinnedSettingsResponse" }
+              }
+            }
+          },
+          "400": { "description": "Validation (bad surface, shape, duplicates, >12 keys)" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Pinned settings are not enabled" },
+          "429": { "description": "Write rate limit exceeded" }
+        }
+      }
+    },
     "/api/v1/me/permissions": {
       "get": {
         "tags": ["me"],
@@ -4272,7 +4330,8 @@ const spec = `{
                     "aiConfigured": { "type": "boolean" },
                     "aiProvidersConfigured": { "type": "array", "items": { "type": "string" } },
                     "aiProviderAbstractionEnabled": { "type": "boolean" },
-                    "openRouterConfigured": { "type": "boolean", "deprecated": true, "description": "Deprecated alias of aiConfigured" }
+                    "openRouterConfigured": { "type": "boolean", "deprecated": true, "description": "Deprecated alias of aiConfigured" },
+                    "ffPinnedSettings": { "type": "boolean", "description": "Plan PS.2: per-user pinned settings in assignment/quiz editors" }
                   }
                 }
               }
@@ -4314,6 +4373,495 @@ const spec = `{
         "summary": "Create an app role (empty permissions)",
         "security": [ { "bearerAuth": [] } ],
         "responses": { "200": { "description": "role" }, "400": {}, "401": {}, "403": {} }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/settings": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get Adaptive Content Engine settings for a course (plan AC.1)",
+        "description": "Course members may read. Returns migration defaults when no row exists yet. Succeeds even when ADAPTIVE_CONTENT_KILL_SWITCH is engaged.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "AdaptiveContentSettings", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdaptiveContentSettings" } } } },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Not a course member" },
+          "404": { "description": "Course not found" }
+        }
+      },
+      "put": {
+        "tags": ["courses"],
+        "summary": "Upsert Adaptive Content Engine settings (plan AC.1 / AC.4)",
+        "description": "Instructor (course item:create). holdoutPercent max 50. Returns 503 SERVICE_UNAVAILABLE when kill-switch is engaged.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdaptiveContentSettings" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "AdaptiveContentSettings" },
+          "400": { "description": "Validation error (e.g. holdoutPercent > 50)" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Instructor permission required" },
+          "503": { "description": "Kill-switch engaged (SERVICE_UNAVAILABLE)" }
+        }
+      },
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Patch pipeline controls for Adaptive Content (plan AC.4)",
+        "description": "Instructor. Partial update of generationPaused and/or maxPrewarmVariants.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "generationPaused": { "type": "boolean" },
+                  "maxPrewarmVariants": { "type": "integer", "minimum": 0, "maximum": 100 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "AdaptiveContentSettings" },
+          "400": { "description": "Validation error" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Instructor permission required" },
+          "503": { "description": "Kill-switch engaged" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/budget": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get adaptive content token budget for the course (plan AC.4)",
+        "description": "Instructor. Returns monthlyTokenBudget, tokensUsedPeriod, budgetRemaining, periodStart, generationPaused.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Budget snapshot",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdaptiveContentBudget" }
+              }
+            }
+          },
+          "401": {},
+          "403": {},
+          "404": {}
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List adaptive content units (plan AC.1)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "{ units: AdaptiveContentUnit[] }" },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Instructor permission required" }
+        }
+      },
+      "post": {
+        "tags": ["courses"],
+        "summary": "Create an adaptive content unit skeleton (plan AC.1)",
+        "description": "Validates structure items and outcomes belong to the course. Returns 503 when kill-switch is engaged.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdaptiveContentUnitCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "AdaptiveContentUnit" },
+          "400": { "description": "Validation error (cross-course refs, shape)" },
+          "403": { "description": "Instructor permission required" },
+          "503": { "description": "Kill-switch engaged (SERVICE_UNAVAILABLE)" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units/{unit_id}": {
+      "patch": {
+        "tags": ["courses"],
+        "summary": "Update an adaptive content unit (plan AC.1 / AC.2)",
+        "description": "May set preAssessmentItemId (quiz only), triggerMode, masteryFreshnessDays, conceptIds.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "AdaptiveContentUnit" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Unit not found" },
+          "503": { "description": "Kill-switch engaged (SERVICE_UNAVAILABLE)" }
+        }
+      },
+      "delete": {
+        "tags": ["courses"],
+        "summary": "Delete an adaptive content unit (plan AC.1)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Deleted" },
+          "404": { "description": "Unit not found" },
+          "503": { "description": "Kill-switch engaged (SERVICE_UNAVAILABLE)" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units/{unit_id}/profile": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get the current student's adaptation profile for a unit (plan AC.2)",
+        "description": "Students may only read their own profile. For mastery_snapshot trigger mode, computes a profile on first read when missing.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "AdaptationProfile", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdaptationProfile" } } } },
+          "401": { "description": "Not signed in" },
+          "403": { "description": "Not own profile" },
+          "404": { "description": "Unit or profile not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units/{unit_id}/profiles": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Cohort adaptation profile distribution for a unit (plan AC.2)",
+        "description": "Instructor only. Returns counts per emphasis_mode and profile_signature with no free-text PII.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "CohortProfiles", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CohortProfiles" } } } },
+          "403": { "description": "Instructor permission required" },
+          "404": { "description": "Unit not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units/{unit_id}/pre-check/generate": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Generate and bind an adaptive pre-check quiz for a unit (plan AC.2)",
+        "description": "Creates an is_adaptive quiz seeded from the unit's base content (reuses adaptive quiz generation path) and sets preAssessmentItemId. Returns 503 when kill-switch is engaged.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "questionCount": { "type": "integer", "minimum": 1, "maximum": 20, "default": 5 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Pre-check created and bound" },
+          "400": { "description": "Validation error (e.g. no parent module)" },
+          "403": { "description": "Instructor permission required" },
+          "503": { "description": "Kill-switch engaged (SERVICE_UNAVAILABLE)" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units/{unit_id}/prewarm": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Pre-warm top profile signatures for a unit (plan AC.4)",
+        "description": "Instructor. Enqueues generation jobs for the top cohort signatures (capped by maxPrewarmVariants). Dedupes against pending/generating/done jobs.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ enqueued, queueDepth, unitId }",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdaptiveContentPrewarmResponse" }
+              }
+            }
+          },
+          "401": {},
+          "403": {},
+          "404": {},
+          "409": { "description": "Course generation paused or feature disabled" },
+          "503": { "description": "Kill-switch engaged" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/optout": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "Get student adaptive content opt-out preference (plan AC.6)",
+        "description": "Returns whether the current user has opted out of AI-adapted content for this course, and whether the course allows opt-out.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ optedOut, optoutAllowed }",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdaptiveContentOptout" }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        }
+      },
+      "put": {
+        "tags": ["courses"],
+        "summary": "Set student adaptive content opt-out preference (plan AC.6)",
+        "description": "When the course allows student opt-out, persists the preference. Opted-out students are always served base content.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["optedOut"],
+                "properties": {
+                  "optedOut": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ optedOut, optoutAllowed }",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdaptiveContentOptout" }
+              }
+            }
+          },
+          "401": {},
+          "403": { "description": "Course does not allow opt-out" },
+          "404": {}
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units/{unit_id}/viewed-original": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Record a View original toggle (plan AC.6)",
+        "description": "Increments view_original_clicks on the student's serving row for the unit's current content version.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ viewOriginalClicks }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "viewOriginalClicks": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        }
+      }
+    },
+    "/api/v1/admin/adaptive-content": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Platform adaptive content pipeline status (plan AC.4)",
+        "description": "Global admin (global:app:rbac:manage). generationPaused is distinct from ADAPTIVE_CONTENT_KILL_SWITCH.",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "AdminAdaptiveContent",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminAdaptiveContent" }
+              }
+            }
+          },
+          "401": {},
+          "403": {}
+        }
+      },
+      "patch": {
+        "tags": ["admin"],
+        "summary": "Pause or resume platform adaptive content generation (plan AC.4)",
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["generationPaused"],
+                "properties": {
+                  "generationPaused": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "AdminAdaptiveContent" },
+          "400": {},
+          "401": {},
+          "403": {}
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units/{unit_id}/variants/preview": {
+      "post": {
+        "tags": ["courses"],
+        "summary": "Preview an adaptive content variant for a unit (plan AC.3)",
+        "description": "Instructor synchronous preview. Generates a per-profile rewrite with fidelity + safety gates. Neutral profiles short-circuit to base content. Cache hits reuse content_variants. Returns 503 when kill-switch is engaged. AI gateway may return 403 when the instructor has opted out of AI.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdaptiveContentPreviewRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "AdaptiveContentPreviewResponse", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdaptiveContentPreviewResponse" } } } },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Instructor permission required or AI gateway denied" },
+          "404": { "description": "Unit not found" },
+          "503": { "description": "Kill-switch engaged or AI not configured" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units/{unit_id}/variants": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List stored content variants for a unit (plan AC.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ variants: AdaptiveContentVariant[] }" },
+          "403": { "description": "Instructor permission required" },
+          "404": { "description": "Unit not found" }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/adaptive-content/units/{unit_id}/key-terms": {
+      "get": {
+        "tags": ["courses"],
+        "summary": "List instructor-marked key terms for fidelity hard-checks (plan AC.3)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "{ keyTerms: AdaptiveContentKeyTerm[] }" },
+          "403": { "description": "Instructor permission required" },
+          "404": { "description": "Unit not found" }
+        }
+      },
+      "put": {
+        "tags": ["courses"],
+        "summary": "Replace key terms for a unit (plan AC.3)",
+        "description": "Returns 503 when kill-switch is engaged.",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "course_code", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "unit_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "terms": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "term": { "type": "string" },
+                        "mustAppear": { "type": "boolean", "default": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "{ keyTerms: AdaptiveContentKeyTerm[] }" },
+          "400": { "description": "Invalid JSON" },
+          "403": { "description": "Instructor permission required" },
+          "503": { "description": "Kill-switch engaged" }
+        }
       }
     }
   },
@@ -4716,6 +5264,297 @@ const spec = `{
           "sizeBytes": { "type": "integer" },
           "altText": { "type": "string" },
           "scanStatus": { "type": "string", "enum": ["pending", "clean", "blocked"] }
+        }
+      },
+      "PinnedSettingsResponse": {
+        "type": "object",
+        "description": "Per-user pinned editor setting keys by surface (plan PS.2)",
+        "required": ["surfaces"],
+        "properties": {
+          "surfaces": {
+            "type": "object",
+            "required": ["assignment", "quiz"],
+            "properties": {
+              "assignment": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Ordered setting keys; empty when unset"
+              },
+              "quiz": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Ordered setting keys; empty when unset"
+              }
+            }
+          }
+        }
+      },
+      "PutPinnedSettingsRequest": {
+        "type": "object",
+        "description": "Full replace of pinned keys for one surface (plan PS.2)",
+        "required": ["settingKeys"],
+        "properties": {
+          "settingKeys": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+              "type": "string",
+              "maxLength": 96,
+              "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+            },
+            "description": "Ordered unique setting keys (normalised to lowercase)"
+          }
+        }
+      },
+      "AdaptiveContentSettings": {
+        "type": "object",
+        "description": "Per-course Adaptive Content Engine configuration (plan AC.1 / AC.4)",
+        "properties": {
+          "allowedAxes": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["emphasis", "scaffolding", "reading_level", "misconception", "modality"] }
+          },
+          "defaultStrategy": { "type": "string", "enum": ["gentle", "balanced", "aggressive"] },
+          "holdoutPercent": { "type": "integer", "minimum": 0, "maximum": 50 },
+          "monthlyTokenBudget": { "type": "integer", "minimum": 0, "description": "0 = unlimited" },
+          "requireInstructorApproval": { "type": "boolean" },
+          "studentOptoutAllowed": { "type": "boolean" },
+          "generationPaused": { "type": "boolean", "description": "AC.4: pause generation for this course" },
+          "maxPrewarmVariants": { "type": "integer", "minimum": 0, "maximum": 100, "description": "AC.4: cap pre-warm jobs per unit (default 12)" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AdaptiveContentBudget": {
+        "type": "object",
+        "description": "Per-course adaptive content token budget snapshot (plan AC.4)",
+        "properties": {
+          "monthlyTokenBudget": { "type": "integer" },
+          "tokensUsedPeriod": { "type": "integer" },
+          "budgetRemaining": { "type": "integer", "nullable": true, "description": "null when unlimited" },
+          "periodStart": { "type": "string", "format": "date" },
+          "generationPaused": { "type": "boolean" },
+          "unlimited": { "type": "boolean" }
+        }
+      },
+      "AdaptiveContentOptout": {
+        "type": "object",
+        "required": ["optedOut", "optoutAllowed"],
+        "properties": {
+          "optedOut": { "type": "boolean" },
+          "optoutAllowed": { "type": "boolean" }
+        }
+      },
+      "AdaptiveContentServingMeta": {
+        "type": "object",
+        "description": "Present on student content-page GET when the page is an active ACE unit base (plan AC.6).",
+        "required": ["unitId", "isAdapted", "canViewOriginal", "optedOut", "isHoldout"],
+        "properties": {
+          "unitId": { "type": "string", "format": "uuid" },
+          "isAdapted": { "type": "boolean" },
+          "servedVariantId": { "type": "string", "format": "uuid", "nullable": true },
+          "axesApplied": { "type": "array", "items": { "type": "string" } },
+          "canViewOriginal": { "type": "boolean" },
+          "optedOut": { "type": "boolean" },
+          "isHoldout": { "type": "boolean" },
+          "wasFallback": { "type": "boolean" },
+          "adaptationReason": { "type": "string" },
+          "preAssessmentItemId": { "type": "string", "format": "uuid", "nullable": true },
+          "requiresPreAssessment": { "type": "boolean" },
+          "optoutAllowed": { "type": "boolean" }
+        }
+      },
+      "AdaptiveContentPrewarmResponse": {
+        "type": "object",
+        "properties": {
+          "enqueued": { "type": "integer" },
+          "queueDepth": { "type": "integer" },
+          "unitId": { "type": "string", "format": "uuid" }
+        }
+      },
+      "AdminAdaptiveContent": {
+        "type": "object",
+        "description": "Platform adaptive content pipeline controls (plan AC.4)",
+        "properties": {
+          "generationPaused": { "type": "boolean" },
+          "queueDepth": { "type": "integer" },
+          "inflight": { "type": "integer" },
+          "killSwitch": { "type": "boolean", "description": "ADAPTIVE_CONTENT_KILL_SWITCH engaged" }
+        }
+      },
+      "AdaptiveContentUnitCreate": {
+        "type": "object",
+        "required": ["targetKind", "baseContentItemId"],
+        "properties": {
+          "targetKind": { "type": "string", "enum": ["module", "outcome"] },
+          "targetModuleItemId": { "type": "string", "format": "uuid" },
+          "targetOutcomeId": { "type": "string", "format": "uuid" },
+          "baseContentItemId": { "type": "string", "format": "uuid" },
+          "preAssessmentItemId": { "type": "string", "format": "uuid", "description": "Must be a quiz structure item in the same course" },
+          "postAssessmentItemId": { "type": "string", "format": "uuid" },
+          "allowedAxes": { "type": "array", "items": { "type": "string" } },
+          "status": { "type": "string", "enum": ["draft", "active", "paused", "archived"] },
+          "triggerMode": { "type": "string", "enum": ["pre_quiz", "diagnostic_first_visit", "mastery_snapshot"], "default": "pre_quiz" },
+          "masteryFreshnessDays": { "type": "integer", "minimum": 0, "default": 30 },
+          "conceptIds": { "type": "array", "items": { "type": "string", "format": "uuid" } }
+        }
+      },
+      "AdaptiveContentUnit": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "courseId": { "type": "string", "format": "uuid" },
+          "targetKind": { "type": "string" },
+          "targetModuleItemId": { "type": "string", "format": "uuid" },
+          "targetOutcomeId": { "type": "string", "format": "uuid" },
+          "baseContentItemId": { "type": "string", "format": "uuid" },
+          "preAssessmentItemId": { "type": "string", "format": "uuid" },
+          "postAssessmentItemId": { "type": "string", "format": "uuid" },
+          "allowedAxes": { "type": "array", "items": { "type": "string" } },
+          "status": { "type": "string" },
+          "createdBy": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "triggerMode": { "type": "string", "enum": ["pre_quiz", "diagnostic_first_visit", "mastery_snapshot"] },
+          "masteryFreshnessDays": { "type": "integer" },
+          "conceptIds": { "type": "array", "items": { "type": "string", "format": "uuid" } },
+          "contentVersion": { "type": "integer", "description": "AC.3: bumped when base content changes" },
+          "minFidelity": { "type": "number", "minimum": 0, "maximum": 1, "description": "AC.3: fidelity gate threshold (default 0.85)" }
+        }
+      },
+      "AdaptiveContentPreviewRequest": {
+        "type": "object",
+        "properties": {
+          "profileSignature": { "type": "string", "description": "Reuse a real profile signature; 'base' short-circuits to original content" },
+          "syntheticProfile": {
+            "type": "object",
+            "properties": {
+              "emphasisMode": { "type": "string", "enum": ["introduce", "reinforce", "compress", "remediate"] },
+              "targetBloom": { "type": "string" },
+              "readingLevelPref": { "type": "string" },
+              "modalityPref": { "type": "string" },
+              "conceptGaps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "conceptId": { "type": "string", "format": "uuid" },
+                    "gap": { "type": "number" }
+                  }
+                }
+              },
+              "misconceptions": { "type": "array", "items": { "type": "string" } },
+              "axisSet": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "persist": { "type": "boolean", "description": "When true (default), upsert content_variants for cache/audit" }
+        }
+      },
+      "AdaptiveContentVariant": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "unitId": { "type": "string", "format": "uuid" },
+          "profileSignature": { "type": "string" },
+          "axesApplied": { "type": "array", "items": { "type": "string" } },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "heading": { "type": "string" },
+                "markdown": { "type": "string" }
+              }
+            }
+          },
+          "variantMarkdown": { "type": "string" },
+          "model": { "type": "string" },
+          "fidelityScore": { "type": "number" },
+          "safetyFlags": { "type": "array", "items": { "type": "string" } },
+          "a11yFlags": { "type": "array", "items": { "type": "string" } },
+          "status": { "type": "string", "enum": ["draft", "pending_review", "approved", "rejected", "auto_served", "superseded"] },
+          "promptVersion": { "type": "string" },
+          "contentVersion": { "type": "integer" },
+          "promptTokens": { "type": "integer" },
+          "completionTokens": { "type": "integer" },
+          "fallback": { "type": "boolean" },
+          "fallbackReason": { "type": "string" },
+          "cacheHit": { "type": "boolean" }
+        }
+      },
+      "AdaptiveContentPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "variant": { "$ref": "#/components/schemas/AdaptiveContentVariant" },
+          "fidelityScore": { "type": "number" },
+          "a11yFlags": { "type": "array", "items": { "type": "string" } },
+          "safetyFlags": { "type": "array", "items": { "type": "string" } },
+          "promptTokens": { "type": "integer" },
+          "completionTokens": { "type": "integer" },
+          "baseMarkdown": { "type": "string" }
+        }
+      },
+      "AdaptiveContentKeyTerm": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "unitId": { "type": "string", "format": "uuid" },
+          "term": { "type": "string" },
+          "mustAppear": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AdaptationProfile": {
+        "type": "object",
+        "description": "Per-learner adaptation decision for a unit (plan AC.2). No free-text PII.",
+        "properties": {
+          "unitId": { "type": "string", "format": "uuid" },
+          "emphasisMode": { "type": "string", "enum": ["introduce", "reinforce", "compress", "remediate"] },
+          "targetBloom": { "type": "string" },
+          "profileSignature": { "type": "string" },
+          "isNeutral": { "type": "boolean" },
+          "conceptGaps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "conceptId": { "type": "string", "format": "uuid" },
+                "gap": { "type": "number" }
+              }
+            }
+          },
+          "misconceptions": { "type": "array", "items": { "type": "string" } },
+          "readingLevelPref": { "type": "string" },
+          "modalityPref": { "type": "string" },
+          "axisSet": { "type": "array", "items": { "type": "string" } },
+          "sourceAttemptId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CohortProfiles": {
+        "type": "object",
+        "description": "Instructor cohort view: counts only, no individual free-text or demographics (plan AC.2 AC-7).",
+        "properties": {
+          "byEmphasis": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "emphasisMode": { "type": "string" },
+                "count": { "type": "integer" }
+              }
+            }
+          },
+          "bySignature": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "profileSignature": { "type": "string" },
+                "emphasisMode": { "type": "string" },
+                "count": { "type": "integer" }
+              }
+            }
+          }
         }
       }
     }

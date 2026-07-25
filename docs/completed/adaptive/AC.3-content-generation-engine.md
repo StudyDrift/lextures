@@ -1,6 +1,6 @@
 # AC.3 — Adaptive Content Generation Engine
 
-> Implementation plan. Source: extends the shipped AI stack (`aiprovider` / `aigateway` / `contentpagegeneration`). Folder overview: [README](README.md).
+> Implementation plan. Source: extends the shipped AI stack (`aiprovider` / `aigateway` / `contentpagegeneration`). Folder overview: [README](../../plan/adaptive/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Adaptive Content Engine (ACE) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | AI/ML platform team |
 | **Depends on** | AC.1, AC.2; reuses 10.17 (AI disclosure/gateway) |
@@ -171,7 +171,7 @@ func GenerateVariant(ctx context.Context, client aiprovider.ScopedCompleter, in 
 - `settings.system_prompts` — `adaptive_content_variant` key.
 - `server/internal/aidisclosure/` — feature disclosure copy.
 - `server/migrations/441_adaptive_content_generation.sql` (+ down).
-- Related: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md) (profile input), [AC.4](AC.4-generation-pipeline-caching-cost.md) (queue/budget), [AC.8](AC.8-governance-safety-fairness-privacy.md) (safety/fairness enforcement).
+- Related: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md) (profile input), [AC.4](AC.4-generation-pipeline-caching-cost.md) (queue/budget), [AC.8](../../plan/adaptive/AC.8-governance-safety-fairness-privacy.md) (safety/fairness enforcement).
 
 ## 13. Dependencies & Sequencing
 
@@ -225,5 +225,5 @@ func GenerateVariant(ctx context.Context, client aiprovider.ScopedCompleter, in 
 ## 19. References
 
 - Existing files: `server/internal/service/contentpagegeneration/service.go`, `service/aigateway/service.go`, `service/aiprovider/`, `server/migrations/040_quiz_adaptive.sql`, `281_ai_usage_logs.sql`.
-- Related plans: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.4](AC.4-generation-pipeline-caching-cost.md), [AC.5](AC.5-instructor-authoring-and-approval.md), [AC.8](AC.8-governance-safety-fairness-privacy.md), `../standards/S13-eu-ai-act-high-risk.md`, `../standards/S06-dpia-pia-algorithmic-impact.md`.
+- Related plans: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.4](AC.4-generation-pipeline-caching-cost.md), [AC.5](AC.5-instructor-authoring-and-approval.md), [AC.8](../../plan/adaptive/AC.8-governance-safety-fairness-privacy.md), `../standards/S13-eu-ai-act-high-risk.md`, `../standards/S06-dpia-pia-algorithmic-impact.md`.
 - External: EU AI Act Annex III; NIST AI RMF (generative content controls); WCAG 2.1 AA.

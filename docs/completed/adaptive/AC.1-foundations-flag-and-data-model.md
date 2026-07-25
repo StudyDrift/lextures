@@ -1,6 +1,6 @@
 # AC.1 — Adaptive Content Engine: Foundations, Course Feature Flag & Data Model
 
-> Implementation plan. Source: realizes the Lextures tagline *"the learning environment that adapts"*; extends the shipped adaptive-learning core (`docs/completed/01-adaptive-learning-core/`). Folder overview: [README](README.md).
+> Implementation plan. Source: realizes the Lextures tagline *"the learning environment that adapts"*; extends the shipped adaptive-learning core (`docs/completed/01-adaptive-learning-core/`). Folder overview: [README](../../plan/adaptive/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Adaptive Content Engine (ACE) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Backend platform team |
 | **Depends on** | 1.1 (learner model), 1.2 (concept graph) — already shipped |
@@ -314,5 +314,5 @@ None in this story — AC.1 makes zero model calls. It only *reserves* the `adap
 ## 19. References
 
 - Existing files: `server/internal/httpserver/course_features.go`, `server/internal/repos/course/list_enrolled.go`, `server/internal/models/course/types.go`, `clients/web/src/lib/courses-api-schemas.ts`, `server/migrations/090_adaptive_paths.sql`, `server/migrations/096_misconceptions.sql`.
-- Related plans: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.8](AC.8-governance-safety-fairness-privacy.md), `../completed/01-adaptive-learning-core/1.4-adaptive-paths-across-modules.md`.
+- Related plans: [AC.2](../../plan/adaptive/AC.2-pre-assessment-and-adaptation-profile.md), [AC.8](../../plan/adaptive/AC.8-governance-safety-fairness-privacy.md), `../01-adaptive-learning-core/1.4-adaptive-paths-across-modules.md`.
 - External: FERPA 34 CFR Part 99 (education-record scope of the new tables).

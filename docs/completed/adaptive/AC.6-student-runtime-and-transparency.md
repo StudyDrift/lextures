@@ -10,7 +10,7 @@
 | **Section** | Adaptive Content Engine (ACE) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Frontend team + backend platform |
 | **Depends on** | AC.2 (profile), AC.3 (variant), AC.4 (cache serving), AC.5 (approval) |
@@ -150,7 +150,7 @@ No model call on the student hot path — serving is a cache read plus a determi
 - `clients/web/src/pages/lms/course-module-content-page.tsx` + new `components/lms/adaptive-content/adapted-banner.tsx`.
 - `clients/web/src/lib/adaptive-content-api.ts` (opt-out, viewed-original).
 - `server/migrations/444_adaptive_content_serving.sql` (+ down).
-- Related: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.4](AC.4-generation-pipeline-caching-cost.md), [AC.7](AC.7-post-assessment-and-effectiveness.md).
+- Related: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.4](AC.4-generation-pipeline-caching-cost.md), [AC.7](../../plan/adaptive/AC.7-post-assessment-and-effectiveness.md).
 
 ## 13. Dependencies & Sequencing
 
@@ -202,5 +202,5 @@ No model call on the student hot path — serving is a cache read plus a determi
 ## 19. References
 
 - Existing files: `clients/web/src/pages/lms/course-module-content-page.tsx`, `server/migrations/021_module_content_pages.sql`, `server/internal/service/aigateway/service.go`.
-- Related plans: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.4](AC.4-generation-pipeline-caching-cost.md), [AC.7](AC.7-post-assessment-and-effectiveness.md), [AC.8](AC.8-governance-safety-fairness-privacy.md), `../completed/01-adaptive-learning-core/1.10-misconception-detection-remediation.md`.
+- Related plans: [AC.2](AC.2-pre-assessment-and-adaptation-profile.md), [AC.4](AC.4-generation-pipeline-caching-cost.md), [AC.7](../../plan/adaptive/AC.7-post-assessment-and-effectiveness.md), [AC.8](../../plan/adaptive/AC.8-governance-safety-fairness-privacy.md), `../01-adaptive-learning-core/1.10-misconception-detection-remediation.md`.
 - External: EU AI Act Art. 52 (transparency to users); FERPA (serving records as education record); WCAG 2.1 AA.

@@ -81,6 +81,12 @@ func CopyFromCourse(ctx context.Context, pool *pgxpool.Pool, opts Options) error
 		return err
 	}
 
+	if include.Settings {
+		if err := copyAdaptiveContent(ctx, tx, opts.SourceCourseID, opts.TargetCourseID, opts.ActorUserID, itemMap); err != nil {
+			return err
+		}
+	}
+
 	if include.Enrollments {
 		if err := copyEnrollments(ctx, tx, opts.SourceCourseID, opts.TargetCourseID, opts.TargetCourseCode); err != nil {
 			return err
@@ -134,6 +140,7 @@ func copySettings(ctx context.Context, tx pgx.Tx, sourceID, targetID uuid.UUID) 
 			diagnostic_assessments_enabled = src.diagnostic_assessments_enabled,
 			hint_scaffolding_enabled = src.hint_scaffolding_enabled,
 			misconception_detection_enabled = src.misconception_detection_enabled,
+			adaptive_content_enabled = src.adaptive_content_enabled,
 			files_enabled = src.files_enabled,
 			grading_scale = src.grading_scale,
 			sbg_enabled = src.sbg_enabled,
@@ -167,6 +174,154 @@ func copySettings(ctx context.Context, tx pgx.Tx, sourceID, targetID uuid.UUID) 
 				require_syllabus_acceptance = EXCLUDED.require_syllabus_acceptance,
 				updated_at = NOW()
 		`, targetID, sections, require); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// copyAdaptiveContent copies ACE settings and units (never profiles/variants/servings). Plan AC.1 FR-9.
+func copyAdaptiveContent(ctx context.Context, tx pgx.Tx, sourceID, targetID, actorUserID uuid.UUID, itemMap map[uuid.UUID]uuid.UUID) error {
+	// Settings (one row; skip if source has none).
+	var allowedAxes []string
+	var strategy string
+	var holdout int16
+	var budget int64
+	var requireApproval, studentOptout bool
+	err := tx.QueryRow(ctx, `
+		SELECT allowed_axes, default_strategy, holdout_percent, monthly_token_budget,
+		       require_instructor_approval, student_optout_allowed
+		FROM course.adaptive_content_settings
+		WHERE course_id = $1
+	`, sourceID).Scan(&allowedAxes, &strategy, &holdout, &budget, &requireApproval, &studentOptout)
+	if err != nil && err != pgx.ErrNoRows {
+		return err
+	}
+	if err == nil {
+		if allowedAxes == nil {
+			allowedAxes = []string{}
+		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO course.adaptive_content_settings (
+			  course_id, allowed_axes, default_strategy, holdout_percent, monthly_token_budget,
+			  require_instructor_approval, student_optout_allowed, updated_by, updated_at
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+			ON CONFLICT (course_id) DO UPDATE SET
+			  allowed_axes = EXCLUDED.allowed_axes,
+			  default_strategy = EXCLUDED.default_strategy,
+			  holdout_percent = EXCLUDED.holdout_percent,
+			  monthly_token_budget = EXCLUDED.monthly_token_budget,
+			  require_instructor_approval = EXCLUDED.require_instructor_approval,
+			  student_optout_allowed = EXCLUDED.student_optout_allowed,
+			  updated_by = EXCLUDED.updated_by,
+			  updated_at = NOW()
+		`, targetID, allowedAxes, strategy, holdout, budget, requireApproval, studentOptout, actorUserID); err != nil {
+			return err
+		}
+	}
+
+	// Units — remap structure item FKs via itemMap; skip units whose base item was not copied.
+	// Outcomes are course-scoped and not remapped in this story (units targeting outcomes are skipped
+	// unless target_outcome_id is null after shape check — outcome-target units require outcomes copy).
+	// Unit concept links are not copied (concepts are course-scoped and not remapped here).
+	rows, err := tx.Query(ctx, `
+		SELECT target_kind, target_module_item_id, target_outcome_id,
+		       base_content_item_id, pre_assessment_item_id, post_assessment_item_id,
+		       allowed_axes, status, trigger_mode, mastery_freshness_days
+		FROM course.adaptive_content_units
+		WHERE course_id = $1
+		ORDER BY created_at ASC
+	`, sourceID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	type unitSrc struct {
+		targetKind           string
+		targetModuleItemID   *uuid.UUID
+		targetOutcomeID      *uuid.UUID
+		baseContentItemID    uuid.UUID
+		preAssessmentItemID  *uuid.UUID
+		postAssessmentItemID *uuid.UUID
+		allowedAxes          []string
+		status               string
+		triggerMode          string
+		masteryFreshnessDays int16
+	}
+	var units []unitSrc
+	for rows.Next() {
+		var u unitSrc
+		if err := rows.Scan(
+			&u.targetKind, &u.targetModuleItemID, &u.targetOutcomeID,
+			&u.baseContentItemID, &u.preAssessmentItemID, &u.postAssessmentItemID,
+			&u.allowedAxes, &u.status, &u.triggerMode, &u.masteryFreshnessDays,
+		); err != nil {
+			return err
+		}
+		units = append(units, u)
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	mapItem := func(id *uuid.UUID) *uuid.UUID {
+		if id == nil {
+			return nil
+		}
+		if next, ok := itemMap[*id]; ok {
+			return &next
+		}
+		return nil
+	}
+
+	for _, u := range units {
+		newBase, ok := itemMap[u.baseContentItemID]
+		if !ok {
+			continue
+		}
+		var newModule *uuid.UUID
+		var newOutcome *uuid.UUID
+		if u.targetKind == "module" {
+			newModule = mapItem(u.targetModuleItemID)
+			if newModule == nil {
+				continue
+			}
+		} else if u.targetKind == "outcome" {
+			// Outcomes are not remapped by coursecopy yet; skip outcome-target units.
+			continue
+		} else {
+			continue
+		}
+		newPre := mapItem(u.preAssessmentItemID)
+		newPost := mapItem(u.postAssessmentItemID)
+		axes := u.allowedAxes
+		if axes == nil {
+			axes = []string{}
+		}
+		status := u.status
+		if status == "" {
+			status = "draft"
+		}
+		trigger := u.triggerMode
+		if trigger == "" {
+			trigger = "pre_quiz"
+		}
+		createdBy := actorUserID
+		if createdBy == uuid.Nil {
+			// Prefer a stable non-nil creator; fall back by reading any enrollment teacher is not required.
+			// Insert requires created_by NOT NULL — use a system placeholder only if actor is nil UUID.
+			// Caller always sets ActorUserID for course copy from HTTP; if missing, skip units.
+			continue
+		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO course.adaptive_content_units (
+			  course_id, target_kind, target_module_item_id, target_outcome_id,
+			  base_content_item_id, pre_assessment_item_id, post_assessment_item_id,
+			  allowed_axes, status, created_by, trigger_mode, mastery_freshness_days
+			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		`, targetID, u.targetKind, newModule, newOutcome, newBase, newPre, newPost, axes, status, createdBy,
+			trigger, u.masteryFreshnessDays); err != nil {
 			return err
 		}
 	}

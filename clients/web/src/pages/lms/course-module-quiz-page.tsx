@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatDateTime } from '../../lib/format'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Check, CheckCircle, ChevronDown, Download, Eye, FileText, Library, Loader2, BarChart3, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
@@ -75,6 +76,8 @@ import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { LmsPage } from './lms-page'
 import { QuizAnalyticsModal } from '../../components/quiz/quiz-analytics-modal'
 import { AssignmentAnnotationWorkbench } from '../../components/annotation/assignment-annotation-workbench'
+import { GraderAgentWorkflowModal } from '../../components/annotation/grader-agent/grader-agent-workflow-modal'
+import { computeQuizQuestionSlots } from '../../components/annotation/grader-agent/quiz-question-slots'
 
 import { ProctoringPreExamChecklist } from '../../components/quiz/proctoring-pre-exam-checklist'
 import { fetchQuizProctoringConfig, type ProctoringConfig } from '../../lib/courses-api'
@@ -150,13 +153,20 @@ function QuizEditorMoreMenu({
   onEditIntro,
   onGenerate,
   onAnalytics,
+  showGradingAgent = false,
+  onGradingAgent,
+  reviewCount = 0,
 }: {
   disabled: boolean
   onPreview: () => void
   onEditIntro: () => void
   onGenerate: () => void
   onAnalytics: () => void
+  showGradingAgent?: boolean
+  onGradingAgent?: () => void
+  reviewCount?: number
 }) {
+  const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
@@ -210,6 +220,30 @@ function QuizEditorMoreMenu({
             <Pencil className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Edit
           </button>
+          {showGradingAgent && onGradingAgent ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                onGradingAgent()
+                setOpen(false)
+              }}
+              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            >
+              <Sparkles className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+              <span className="flex flex-1 items-center justify-between gap-2">
+                <span>{t('gradingAgent.button')}</span>
+                {reviewCount > 0 ? (
+                  <span
+                    className="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold text-white"
+                    aria-live="polite"
+                  >
+                    {t('gradingAgent.review.inbox.countShort', { count: reviewCount })}
+                  </span>
+                ) : null}
+              </span>
+            </button>
+          ) : null}
           <button
             type="button"
             role="menuitem"
@@ -450,12 +484,13 @@ export default function CourseModuleQuizPage() {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [gradingOpen, setGradingOpen] = useState(false)
+  const [gradingAgentOpen, setGradingAgentOpen] = useState(false)
   const [ungradedAttemptCount, setUngradedAttemptCount] = useState<number | null>(null)
   const [enrolledStudentCount, setEnrolledStudentCount] = useState<number | null>(null)
   const [studentQuizBanner, setStudentQuizBanner] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
   const [proctoringConfig, setProctoringConfig] = useState<ProctoringConfig | null | undefined>(undefined)
   const [proctoringChecklistOpen, setProctoringChecklistOpen] = useState(false)
-  const { ffProctoringIntegration, aiConfigured } = usePlatformFeatures()
+  const { ffProctoringIntegration, aiConfigured, graderAgentEnabled } = usePlatformFeatures()
   const [mdTheme, setMdTheme] = useState<ResolvedMarkdownTheme>(() =>
     resolveMarkdownTheme('classic', null),
   )
@@ -464,6 +499,17 @@ export default function CourseModuleQuizPage() {
   const { status: offlineStatus, saveForOffline } = useOfflineContent(itemId)
 
   const quizMarkupTarget = useMemo(() => ({ variant: 'quiz' as const, itemId: itemId! }), [itemId])
+
+  const quizQuestionSlots = useMemo(
+    () =>
+      computeQuizQuestionSlots({
+        questions,
+        randomQuestionPoolCount: quizAdvanced.randomQuestionPoolCount,
+        shuffleQuestions: quizAdvanced.shuffleQuestions,
+        usesServerQuestionSampling: false,
+      }),
+    [questions, quizAdvanced.randomQuestionPoolCount, quizAdvanced.shuffleQuestions],
+  )
 
   const loadMarkups = useCallback(async () => {
     if (!courseCode || !itemId) return
@@ -1299,6 +1345,8 @@ export default function CourseModuleQuizPage() {
                   onEditIntro={beginEditContent}
                   onGenerate={openGenerateModal}
                   onAnalytics={() => setAnalyticsOpen(true)}
+                  showGradingAgent={graderAgentEnabled}
+                  onGradingAgent={() => setGradingAgentOpen(true)}
                 />
                 <button
                   type="button"
@@ -1935,6 +1983,22 @@ export default function CourseModuleQuizPage() {
           presentation="modal"
           modalOpen={gradingOpen}
           onModalClose={() => setGradingOpen(false)}
+        />
+      ) : null}
+
+      {courseCode && itemId ? (
+        <GraderAgentWorkflowModal
+          open={gradingAgentOpen}
+          onClose={() => setGradingAgentOpen(false)}
+          courseCode={courseCode}
+          itemId={itemId}
+          itemKind="quiz"
+          assignmentTitle={title || 'Quiz'}
+          submissionId={null}
+          rubric={null}
+          maxPoints={pointsWorth}
+          quizQuestionSlots={quizQuestionSlots}
+          quizQuestions={questions}
         />
       ) : null}
 

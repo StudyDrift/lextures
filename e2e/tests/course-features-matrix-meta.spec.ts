@@ -16,7 +16,7 @@ test.describe('Course feature matrix metadata', () => {
     expect(errors, errors.join('; ')).toEqual([])
   })
 
-  test('UI shards partition all 25 settings rows without overlap', () => {
+  test('UI shards partition all 26 settings rows without overlap', () => {
     const a = uiEntriesForShard('a')
     const b = uiEntriesForShard('b')
     const c = uiEntriesForShard('c')

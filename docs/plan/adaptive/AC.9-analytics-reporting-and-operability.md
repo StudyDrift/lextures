@@ -154,7 +154,7 @@ No model calls. This story reports on the AI system's behavior — including **f
 - `server/internal/httpserver/adaptive_content_reports.go` (new); `repos/adaptivecontent/reports.go`.
 - `clients/web/src/components/lms/adaptive-content/reports/*` — reuse chart primitives + `dataviz` conventions.
 - `server/migrations/447_adaptive_content_reports.sql` (+ down).
-- Related: [AC.4](AC.4-generation-pipeline-caching-cost.md), [AC.7](AC.7-post-assessment-and-effectiveness.md), [AC.8](AC.8-governance-safety-fairness-privacy.md).
+- Related: [AC.4](../../completed/adaptive/AC.4-generation-pipeline-caching-cost.md), [AC.7](AC.7-post-assessment-and-effectiveness.md), [AC.8](AC.8-governance-safety-fairness-privacy.md).
 
 ## 13. Dependencies & Sequencing
 
@@ -208,5 +208,5 @@ No model calls. This story reports on the AI system's behavior — including **f
 ## 19. References
 
 - Existing files: `server/internal/telemetry/` (17.7 observability), `clients/web/src/lib/ai-reports-api.ts`, `server/migrations/173_outcomes_report.sql`, `281_ai_usage_logs.sql`.
-- Related plans: [AC.4](AC.4-generation-pipeline-caching-cost.md), [AC.7](AC.7-post-assessment-and-effectiveness.md), [AC.8](AC.8-governance-safety-fairness-privacy.md); analytics section `../completed/09-analytics-reporting/`.
+- Related plans: [AC.4](../../completed/adaptive/AC.4-generation-pipeline-caching-cost.md), [AC.7](AC.7-post-assessment-and-effectiveness.md), [AC.8](AC.8-governance-safety-fairness-privacy.md); analytics section `../completed/09-analytics-reporting/`.
 - External: `dataviz` skill (chart/accessibility conventions); Prometheus/OpenTelemetry; NIST AI RMF (measure/monitor); WCAG 2.1 AA.

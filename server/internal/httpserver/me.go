@@ -254,6 +254,9 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Put("/api/v1/me/notification-preferences", d.handlePutMyNotificationPreferences())
 	r.Get("/api/v1/me/reading-preferences", d.handleGetMyReadingPreferences())
 	r.Patch("/api/v1/me/reading-preferences", d.handlePatchMyReadingPreferences())
+	// Plan PS.2: per-user pinned editor settings (assignment/quiz panels).
+	r.Get("/api/v1/me/pinned-settings", d.handleGetMyPinnedSettings())
+	r.Put("/api/v1/me/pinned-settings/{surface}", d.handlePutMyPinnedSettings())
 	// Self-paced enrollments with progress for the Dashboard (plan 15.2)
 	r.Get("/api/v1/me/enrollments", d.handleMySelfPacedEnrollments())
 	d.registerIntroCourseMeRoutes(r)

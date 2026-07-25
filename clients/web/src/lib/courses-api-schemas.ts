@@ -73,6 +73,7 @@ export const courseSchema = z
     visualBoardsEnabled: z.boolean().optional(),
     interactiveQuizzesEnabled: z.boolean().optional(),
     screenShareEnabled: z.boolean().optional(),
+    adaptiveContentEnabled: z.boolean().optional(),
     canvasGradeSyncEnabled: z.boolean().optional(),
     courseType: z.string().optional(),
     courseMode: z.string().optional(),
@@ -997,3 +998,195 @@ export const courseStandardsCoverageResponseSchema = z.object({
 
 export type StandardCoverageItem = z.infer<typeof standardCoverageItemSchema>
 export type CourseStandardsCoveragePayload = z.infer<typeof courseStandardsCoverageResponseSchema>
+
+/** AC.1 — Adaptive Content Engine settings. */
+export const adaptiveContentSettingsSchema = z.object({
+  allowedAxes: z.array(z.string()),
+  defaultStrategy: z.string(),
+  holdoutPercent: z.number(),
+  monthlyTokenBudget: z.number(),
+  requireInstructorApproval: z.boolean(),
+  studentOptoutAllowed: z.boolean(),
+  updatedAt: z.string().optional(),
+  generationPaused: z.boolean().optional(),
+  maxPrewarmVariants: z.number().optional(),
+})
+
+export const adaptiveContentUnitSchema = z.object({
+  id: z.string(),
+  courseId: z.string(),
+  targetKind: z.string(),
+  targetModuleItemId: z.string().optional().nullable(),
+  targetOutcomeId: z.string().optional().nullable(),
+  baseContentItemId: z.string(),
+  preAssessmentItemId: z.string().optional().nullable(),
+  postAssessmentItemId: z.string().optional().nullable(),
+  allowedAxes: z.array(z.string()),
+  status: z.string(),
+  createdBy: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  triggerMode: z.string().optional(),
+  masteryFreshnessDays: z.number().optional(),
+  conceptIds: z.array(z.string()).optional(),
+  contentVersion: z.number().optional(),
+  minFidelity: z.number().optional(),
+  variantTotal: z.number().optional(),
+  variantApproved: z.number().optional(),
+  variantPendingReview: z.number().optional(),
+  variantRejected: z.number().optional(),
+  variantAutoServed: z.number().optional(),
+})
+
+export const adaptiveContentUnitsListSchema = z.object({
+  units: z.array(adaptiveContentUnitSchema),
+})
+
+/** AC.3 / AC.5 — content variants. */
+export const adaptiveContentVariantSchema = z.object({
+  id: z.string().optional(),
+  unitId: z.string().optional(),
+  profileSignature: z.string(),
+  axesApplied: z.array(z.string()).optional().default([]),
+  sections: z
+    .array(z.object({ heading: z.string(), markdown: z.string() }))
+    .optional(),
+  variantMarkdown: z.string().optional().default(''),
+  model: z.string().optional(),
+  fidelityScore: z.number().nullable().optional(),
+  safetyFlags: z.array(z.string()).optional().default([]),
+  a11yFlags: z.array(z.string()).optional().default([]),
+  status: z.string(),
+  promptVersion: z.string().optional(),
+  contentVersion: z.number().optional(),
+  promptTokens: z.number().optional(),
+  completionTokens: z.number().optional(),
+  createdAt: z.string().optional(),
+  fallback: z.boolean().optional(),
+  fallbackReason: z.string().optional(),
+  cacheHit: z.boolean().optional(),
+  humanEdited: z.boolean().optional(),
+  reviewedBy: z.string().nullable().optional(),
+  reviewedAt: z.string().nullable().optional(),
+  reviewNote: z.string().nullable().optional(),
+  variantVersion: z.number().optional(),
+  approvedBy: z.string().nullable().optional(),
+})
+
+export const adaptiveContentVariantsListSchema = z.object({
+  variants: z.array(adaptiveContentVariantSchema),
+})
+
+export const adaptiveContentPreviewSchema = z.object({
+  variant: adaptiveContentVariantSchema,
+  fidelityScore: z.number(),
+  a11yFlags: z.array(z.string()).optional().default([]),
+  safetyFlags: z.array(z.string()).optional().default([]),
+  promptTokens: z.number().optional(),
+  completionTokens: z.number().optional(),
+  baseMarkdown: z.string().optional(),
+})
+
+export const adaptiveContentKeyTermsSchema = z.object({
+  keyTerms: z.array(
+    z.object({
+      id: z.string(),
+      unitId: z.string(),
+      term: z.string(),
+      mustAppear: z.boolean(),
+      createdAt: z.string().optional(),
+    }),
+  ),
+})
+
+export const adaptiveContentBudgetSchema = z.object({
+  monthlyTokenBudget: z.number(),
+  tokensUsedPeriod: z.number(),
+  budgetRemaining: z.number().nullable().optional(),
+  periodStart: z.string(),
+  generationPaused: z.boolean(),
+  unlimited: z.boolean(),
+})
+
+export const adaptiveContentReviewQueueSchema = z.object({
+  variants: z.array(adaptiveContentVariantSchema),
+  total: z.number(),
+  limit: z.number(),
+  offset: z.number(),
+})
+
+export const adaptiveContentBulkResultSchema = z.object({
+  succeeded: z.number(),
+  failed: z.number(),
+  results: z.array(
+    z.object({
+      variantId: z.string(),
+      ok: z.boolean(),
+      error: z.string().optional(),
+      status: z.string().optional(),
+    }),
+  ),
+})
+
+/** AC.2 — student adaptation profile (own only). */
+export const adaptationProfileSchema = z.object({
+  unitId: z.string(),
+  emphasisMode: z.string(),
+  targetBloom: z.string().optional().nullable(),
+  profileSignature: z.string(),
+  isNeutral: z.boolean(),
+  conceptGaps: z.array(
+    z.object({
+      conceptId: z.string(),
+      gap: z.number(),
+    }),
+  ),
+  misconceptions: z.array(z.string()),
+  readingLevelPref: z.string().optional().nullable(),
+  modalityPref: z.string().optional().nullable(),
+  axisSet: z.array(z.string()).optional(),
+  sourceAttemptId: z.string().optional().nullable(),
+  createdAt: z.string().optional(),
+})
+
+/** AC.6 — student adaptive serving meta on content-page GET. */
+export const adaptiveServingMetaSchema = z.object({
+  unitId: z.string(),
+  isAdapted: z.boolean(),
+  servedVariantId: z.string().optional().nullable(),
+  axesApplied: z.array(z.string()).optional().default([]),
+  canViewOriginal: z.boolean(),
+  optedOut: z.boolean(),
+  isHoldout: z.boolean(),
+  wasFallback: z.boolean().optional(),
+  adaptationReason: z.string().optional(),
+  preAssessmentItemId: z.string().optional().nullable(),
+  requiresPreAssessment: z.boolean().optional(),
+  optoutAllowed: z.boolean().optional(),
+})
+
+/** AC.6 — student opt-out preference. */
+export const adaptiveContentOptoutSchema = z.object({
+  optedOut: z.boolean(),
+  optoutAllowed: z.boolean(),
+})
+
+export const adaptiveContentViewedOriginalSchema = z.object({
+  viewOriginalClicks: z.number(),
+})
+
+export const cohortProfilesSchema = z.object({
+  byEmphasis: z.array(
+    z.object({
+      emphasisMode: z.string(),
+      count: z.number(),
+    }),
+  ),
+  bySignature: z.array(
+    z.object({
+      profileSignature: z.string(),
+      emphasisMode: z.string(),
+      count: z.number(),
+    }),
+  ),
+})
