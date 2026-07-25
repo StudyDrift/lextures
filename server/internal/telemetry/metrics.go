@@ -8,10 +8,12 @@ package telemetry
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	dto "github.com/prometheus/client_model/go"
 )
 
 // namespace prefixes every Lextures-authored metric so operators can filter
@@ -282,13 +284,57 @@ func (m *Metrics) RegisterCollector(c prometheus.Collector) error {
 	return m.registry.Register(c)
 }
 
+// skipDefaultPrefixes are metric families already registered on the private
+// telemetry registry (Go/process collectors). When merging the default registry
+// for ACE metrics (AC.9), these must be filtered out to avoid scrape conflicts.
+var skipDefaultPrefixes = []string{"go_", "process_"}
+
+// filteringGatherer wraps a Gatherer and drops metric families whose names start
+// with any of denyPrefixes.
+type filteringGatherer struct {
+	inner        prometheus.Gatherer
+	denyPrefixes []string
+}
+
+func (f filteringGatherer) Gather() ([]*dto.MetricFamily, error) {
+	families, err := f.inner.Gather()
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*dto.MetricFamily, 0, len(families))
+	for _, fam := range families {
+		name := fam.GetName()
+		skip := false
+		for _, p := range f.denyPrefixes {
+			if strings.HasPrefix(name, p) {
+				skip = true
+				break
+			}
+		}
+		if !skip {
+			out = append(out, fam)
+		}
+	}
+	return out, nil
+}
+
 // Handler returns the Prometheus exposition handler for GET /metrics. It is
 // served on the internal metrics port, never the public LB port (plan 17.7
 // FR-1 / NFR Security).
+//
+// AC.9: also gathers the default Prometheus registry (minus go_/process_ which
+// the private registry already exposes) so Adaptive Content Engine metrics
+// registered via prometheus.MustRegister (service/adaptivecontent) appear on
+// the scraped /metrics endpoint.
 func (m *Metrics) Handler() http.Handler {
-	return promhttp.HandlerFor(m.registry, promhttp.HandlerOpts{
+	return promhttp.HandlerFor(prometheus.Gatherers{
+		m.registry,
+		filteringGatherer{
+			inner:        prometheus.DefaultGatherer,
+			denyPrefixes: skipDefaultPrefixes,
+		},
+	}, promhttp.HandlerOpts{
 		EnableOpenMetrics: false,
-		Registry:          m.registry,
 	})
 }
 

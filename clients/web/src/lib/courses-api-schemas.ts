@@ -1230,6 +1230,92 @@ export const adaptiveContentFairnessSchema = z.object({
   fairnessMinN: z.number(),
 })
 
+/** AC.9 — instructor course report. */
+export const adaptiveContentCourseReportSchema = z.object({
+  courseId: z.string(),
+  courseCode: z.string(),
+  empty: z.boolean(),
+  coverage: z.object({
+    eligibleContentItems: z.number(),
+    adaptedUnits: z.number(),
+    coveragePct: z.number(),
+    studentsProfiled: z.number(),
+    studentsServedVariant: z.number(),
+    studentsHoldout: z.number(),
+  }),
+  meanLiftVsControl: z.number().nullable().optional(),
+  nUnits: z.number(),
+  nActiveUnits: z.number(),
+  nHelping: z.number(),
+  nRegressing: z.number(),
+  nInsufficient: z.number(),
+  nNoEffect: z.number(),
+  cost: z.object({
+    monthlyTokenBudget: z.number(),
+    tokensUsedPeriod: z.number(),
+    budgetRemaining: z.number().nullable().optional(),
+    unlimited: z.boolean(),
+    periodStart: z.string(),
+  }),
+  unitsToReview: z.array(
+    z.object({
+      unitId: z.string(),
+      reason: z.string(),
+      verdict: z.string(),
+      meanFidelity: z.number().nullable().optional(),
+      meanLift: z.number().nullable().optional(),
+      workspaceUrl: z.string(),
+    }),
+  ),
+  units: z.array(z.record(z.string(), z.unknown())),
+  byMode: z.array(
+    z.object({
+      emphasisMode: z.string(),
+      n: z.number(),
+      meanLift: z.number().nullable().optional(),
+    }),
+  ),
+  dataAsOf: z.string().nullable().optional(),
+  smallCellMinN: z.number(),
+  minNPerArm: z.number(),
+})
+
+/** AC.9 — admin org rollup. */
+export const adaptiveContentAdminReportSchema = z.object({
+  coursesUsingAce: z.number(),
+  studentsImpacted: z.number(),
+  costUsd30d: z.number(),
+  budgetHeadroomTokens: z.number(),
+  aggregateLift: z.number().nullable().optional(),
+  disparityFlags: z.number(),
+  openContests: z.number(),
+  regressingUnits: z.number(),
+  killSwitch: z.boolean(),
+  generationPaused: z.boolean(),
+  queueDepth: z.number(),
+  courses: z.array(
+    z.object({
+      courseId: z.string(),
+      courseCode: z.string(),
+      title: z.string(),
+      nUnits: z.number(),
+      nActiveUnits: z.number(),
+      meanLiftVsControl: z.number().nullable().optional(),
+      nRegressing: z.number(),
+      nHelping: z.number(),
+      tokensUsedPeriod: z.number(),
+      monthlyTokenBudget: z.number(),
+      coveragePct: z.number(),
+      studentsServedVariant: z.number(),
+      disparityFlags: z.number(),
+      openContests: z.number(),
+      reportUrl: z.string(),
+    }),
+  ),
+  dataAsOf: z.string().nullable().optional(),
+  smallCellMinN: z.number(),
+})
+
 export const cohortProfilesSchema = z.object({
   byEmphasis: z.array(
     z.object({

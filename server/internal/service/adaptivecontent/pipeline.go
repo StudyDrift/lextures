@@ -21,6 +21,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/userai"
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	coppasvc "github.com/lextures/lextures/server/internal/service/coppa"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 // Job priority bands (higher = preferred at claim).
@@ -299,6 +300,8 @@ func (d WorkerDeps) RunOnce(ctx context.Context) (processed int) {
 }
 
 func (d WorkerDeps) processJob(ctx context.Context, job acrepo.JobRow) {
+	ctx, span := telemetry.Tracer("adaptivecontent").Start(ctx, "adaptivecontent.pipeline.process_job")
+	defer span.End()
 	start := time.Now()
 	defer func() {
 		ObserveJobLatency(float64(time.Since(start).Milliseconds()))
@@ -372,7 +375,9 @@ func (d WorkerDeps) processJob(ctx context.Context, job acrepo.JobRow) {
 		return
 	}
 
-	profile := d.profileForJob(ctx, *unit, job.ProfileSignature)
+	profileCtx, profileSpan := telemetry.Tracer("adaptivecontent").Start(ctx, "adaptivecontent.profile")
+	profile := d.profileForJob(profileCtx, *unit, job.ProfileSignature)
+	profileSpan.End()
 	if profile.IsNeutral || profile.ProfileSignature == NeutralSignature {
 		_ = acrepo.CompleteJob(ctx, d.Pool, job.ID, d.now())
 		return
@@ -427,7 +432,9 @@ func (d WorkerDeps) processJob(ctx context.Context, job acrepo.JobRow) {
 		BudgetExhausted:           false,
 	}
 
-	variant, callMeta, genErr := GenerateVariant(ctx, d.Client, genIn)
+	genCtx, genSpan := telemetry.Tracer("adaptivecontent").Start(ctx, "adaptivecontent.cache_generate")
+	variant, callMeta, genErr := GenerateVariant(genCtx, d.Client, genIn)
+	genSpan.End()
 
 	// Log usage when the model was involved.
 	tokens := int64(variant.PromptTokens + variant.CompletionTokens)

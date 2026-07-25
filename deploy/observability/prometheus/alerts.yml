@@ -111,3 +111,105 @@ groups:
           summary: "Lextures API metrics target is down"
           description: "Prometheus cannot scrape {{ $labels.instance }} (/metrics unreachable for 2m)."
           runbook: "docs/runbooks/observability-oncall.md#apitargetdown"
+
+  # AC.9 — Adaptive Content Engine operability (FR-5).
+  - name: lextures-adaptive-content
+    rules:
+      - alert: ACEQueueDepthHigh
+        expr: lextures_adaptive_content_queue_depth > 100
+        for: 10m
+        labels:
+          severity: warning
+          statuspage_component: api
+        annotations:
+          summary: "ACE generation queue depth above 100"
+          description: "Adaptive content job queue depth is {{ $value }} (threshold 100 for 10m)."
+          runbook: "docs/runbooks/adaptive-content-operability.md#acequeuedepthhigh"
+
+      - alert: ACECacheHitRateLow
+        expr: |
+          sum(rate(lextures_adaptive_content_cache_hit_total[15m]))
+            /
+          clamp_min(
+            sum(rate(lextures_adaptive_content_cache_hit_total[15m]))
+              + sum(rate(lextures_adaptive_content_cache_miss_total[15m])),
+            1
+          ) < 0.5
+        for: 15m
+        labels:
+          severity: warning
+          statuspage_component: api
+        annotations:
+          summary: "ACE cache hit rate below 50%"
+          description: "Adaptive content cache hit rate is {{ $value | humanizePercentage }} over 15m (target ≥ 50%)."
+          runbook: "docs/runbooks/adaptive-content-operability.md#acecachehitratelow"
+
+      - alert: ACEGenerationRetryStorm
+        expr: sum(rate(lextures_adaptive_content_job_retry_total[5m])) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          statuspage_component: api
+        annotations:
+          summary: "ACE generation retry storm"
+          description: "Adaptive content job retries are {{ $value | humanize }} /s over 5m."
+          runbook: "docs/runbooks/adaptive-content-operability.md#acegenerationretrystorm"
+
+      - alert: ACEBudgetExhausted
+        expr: increase(lextures_adaptive_content_budget_exhausted_total[15m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          statuspage_component: api
+        annotations:
+          summary: "ACE monthly token budget exhausted"
+          description: "At least one adaptive content generation was skipped due to budget in the last 15m."
+          runbook: "docs/runbooks/adaptive-content-operability.md#acebudgetexhausted"
+
+      - alert: ACEFidelityRejectionSpike
+        expr: |
+          sum(rate(lextures_adaptive_content_rejected_fidelity_total[10m]))
+            /
+          clamp_min(sum(rate(lextures_adaptive_content_generated_total[10m])), 1)
+            > 0.25
+        for: 10m
+        labels:
+          severity: warning
+          statuspage_component: api
+        annotations:
+          summary: "ACE fidelity rejection rate above 25%"
+          description: "Fidelity gate rejection rate is {{ $value | humanizePercentage }} over 10m."
+          runbook: "docs/runbooks/adaptive-content-operability.md#acefidelityrejectionspike"
+
+      - alert: ACEUnitRegressing
+        expr: increase(lextures_adaptive_content_verdict_regressing_total[30m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          statuspage_component: api
+        annotations:
+          summary: "ACE unit verdict regressing"
+          description: "At least one adaptive content unit transitioned to verdict=regressing."
+          runbook: "docs/runbooks/adaptive-content-operability.md#aceunitregressing"
+
+      - alert: ACEDisparityFlag
+        expr: increase(lextures_adaptive_content_fairness_disparity_flag_total[30m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          statuspage_component: api
+        annotations:
+          summary: "ACE fairness disparity flag raised"
+          description: "Fairness audit flagged at least one disparity cell in the last 30m."
+          runbook: "docs/runbooks/adaptive-content-operability.md#acedisparityflag"
+
+      - alert: ACEKillSwitchEngaged
+        expr: lextures_adaptive_content_kill_switch_engaged == 1
+        for: 1m
+        labels:
+          severity: critical
+          statuspage_component: api
+        annotations:
+          summary: "ACE kill-switch engaged"
+          description: "Adaptive Content Engine kill-switch is engaged; generation and adapted serving are halted."
+          runbook: "docs/runbooks/adaptive-content-kill-switch.md"

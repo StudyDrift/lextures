@@ -88,3 +88,17 @@ func TestMetrics_SetBannerActive(t *testing.T) {
 		t.Errorf("expected active global warning gauge, got: %s", body)
 	}
 }
+
+func TestMetricsHandler_IncludesDefaultRegistryGatherer(t *testing.T) {
+	// AC.9: Handler must gather prometheus.DefaultGatherer so ACE metrics appear.
+	m := NewMetrics()
+	rr := httptest.NewRecorder()
+	m.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status %d", rr.Code)
+	}
+	if !strings.Contains(rr.Body.String(), "lextures_http_requests_total") &&
+		!strings.Contains(rr.Body.String(), "go_goroutines") {
+		t.Error("expected private registry metrics in exposition")
+	}
+}

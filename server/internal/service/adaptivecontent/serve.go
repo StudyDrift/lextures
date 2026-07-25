@@ -8,8 +8,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.opentelemetry.io/otel/attribute"
 
 	acrepo "github.com/lextures/lextures/server/internal/repos/adaptivecontent"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 // Event names for serving audit.
@@ -89,15 +91,22 @@ type ServeResult struct {
 // ResolveServing decides which content to show a student for a unit's base content page.
 // Never blocks: any error or miss yields base content. Serving-record writes are best-effort.
 func ResolveServing(ctx context.Context, pool *pgxpool.Pool, req ServeRequest) ServeResult {
+	ctx, span := telemetry.Tracer("adaptivecontent").Start(ctx, "adaptivecontent.serve")
 	start := time.Now()
-	defer func() {
-		ObserveServeLatency(float64(time.Since(start).Milliseconds()))
-	}()
-
 	out := ServeResult{
 		AxesApplied: []string{},
 		Reason:      ServeReasonNoUnit,
 	}
+	defer func() {
+		span.SetAttributes(
+			attribute.String("ace.serve_reason", string(out.Reason)),
+			attribute.Bool("ace.is_adapted", out.IsAdapted),
+			attribute.Bool("ace.is_holdout", out.IsHoldout),
+			attribute.Bool("ace.was_fallback", out.WasFallback),
+		)
+		span.End()
+		ObserveServeLatency(float64(time.Since(start).Milliseconds()))
+	}()
 
 	if pool == nil || req.UserID == uuid.Nil || req.CourseID == uuid.Nil {
 		return out

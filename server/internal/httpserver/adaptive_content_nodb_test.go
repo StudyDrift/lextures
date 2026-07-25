@@ -243,3 +243,32 @@ func TestAdaptiveContent_OversightRoute_Registered_NoDB(t *testing.T) {
 		t.Fatalf("oversight route not registered: %d", rr.Code)
 	}
 }
+
+func TestAdaptiveContent_CourseReportRoute_Registered_NoDB(t *testing.T) {
+	d := Deps{}
+	r := chi.NewRouter()
+	d.registerAdaptiveContentRoutes(r)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/courses/demo/adaptive-content/report", nil)
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+	if rr.Code == http.StatusNotFound {
+		t.Fatalf("course report route not registered: %d", rr.Code)
+	}
+}
+
+func TestAdaptiveContent_AdminReportRoute_Registered_NoDB(t *testing.T) {
+	d := Deps{}
+	r := chi.NewRouter()
+	d.registerAdaptiveContentRoutes(r)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/adaptive-content/report", nil)
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+	if rr.Code == http.StatusNotFound {
+		t.Fatalf("admin report route not registered: %d", rr.Code)
+	}
+	if rr.Code == http.StatusOK {
+		t.Fatalf("expected auth gate on admin report, got 200")
+	}
+}

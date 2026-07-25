@@ -10,9 +10,11 @@ import (
 	"unicode/utf8"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/contentpagegeneration"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 // Prompt keys and versions.
@@ -154,6 +156,8 @@ func GenerateVariant(
 	client aiprovider.ScopedCompleter,
 	in GenerateInput,
 ) (Variant, aiprovider.CallMeta, error) {
+	ctx, span := telemetry.Tracer("adaptivecontent").Start(ctx, "adaptivecontent.generate")
+	defer span.End()
 	start := time.Now()
 	defer func() {
 		ObserveGenerate(float64(time.Since(start).Milliseconds()))
@@ -310,6 +314,8 @@ func GenerateVariant(
 	}
 
 	// Gate decision (FR-4 / FR-5 / AC.8 FR-2).
+	_, gateSpan := telemetry.Tracer("adaptivecontent").Start(ctx, "adaptivecontent.gate_check")
+	gateSpan.SetAttributes(attribute.Float64("ace.fidelity_score", fid.Score))
 	if len(safetyFlags) > 0 {
 		v.Status = "rejected"
 		v.Fallback = true
@@ -317,6 +323,8 @@ func GenerateVariant(
 		v.SafetyFlags = append(v.SafetyFlags, fid.Flags...)
 		IncRejectedSafety()
 		IncGenerated("rejected_safety")
+		gateSpan.SetAttributes(attribute.String("ace.gate_result", "rejected_safety"))
+		gateSpan.End()
 		return v, meta, ErrRejectedSafety
 	}
 	if !fid.HardPass || fid.Score < minFid {
@@ -326,8 +334,12 @@ func GenerateVariant(
 		v.SafetyFlags = append(v.SafetyFlags, fid.Flags...)
 		IncRejectedFidelity()
 		IncGenerated("rejected_fidelity")
+		gateSpan.SetAttributes(attribute.String("ace.gate_result", "rejected_fidelity"))
+		gateSpan.End()
 		return v, meta, ErrRejectedFidelity
 	}
+	gateSpan.SetAttributes(attribute.String("ace.gate_result", "pass"))
+	gateSpan.End()
 	// Blocking a11y flags prevent auto-serve; force pending_review (or reject when
 	// instructor approval is not available and policy is strict). AC.8 enforces at serve time too.
 	if HasBlockingA11yFlag(a11yFlags) {
