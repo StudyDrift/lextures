@@ -172,13 +172,8 @@ CREATE TABLE IF NOT EXISTS settings.user_pinned_settings (
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id, surface),
     CONSTRAINT ups_surface_check  CHECK (surface IN ('assignment', 'quiz')),
-    CONSTRAINT ups_max_pins_check CHECK (cardinality(setting_keys) <= 12),
-    CONSTRAINT ups_key_len_check  CHECK (
-        NOT EXISTS (
-            SELECT 1 FROM unnest(setting_keys) AS k
-            WHERE char_length(k) = 0 OR char_length(k) > 96
-        )
-    )
+    -- Key shape/length enforced in app code (ValidateKeys); no subquery CHECK.
+    CONSTRAINT ups_max_pins_check CHECK (cardinality(setting_keys) <= 12)
 );
 
 COMMENT ON TABLE settings.user_pinned_settings IS
