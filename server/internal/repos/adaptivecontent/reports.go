@@ -164,7 +164,7 @@ SELECT
      FROM course.adaptation_servings s
      INNER JOIN course.adaptive_content_units u ON u.id = s.unit_id
      WHERE u.course_id = $1
-       AND s.served_variant_id IS NOT NULL
+       AND s.variant_id IS NOT NULL
        AND COALESCE(s.was_holdout, FALSE) = FALSE
        AND COALESCE(s.was_fallback, FALSE) = FALSE),
   (SELECT COUNT(DISTINCT s.enrollment_id)::INTEGER

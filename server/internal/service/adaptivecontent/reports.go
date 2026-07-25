@@ -122,7 +122,7 @@ func rankUnitsToReview(
 	for _, f := range fidelity {
 		fidByUnit[f.UnitID] = f
 	}
-	var out []acmodel.UnitToReview
+	out := make([]acmodel.UnitToReview, 0)
 	seen := make(map[uuid.UUID]bool)
 	workspaceBase := "/courses/" + courseCode + "/settings/adaptive-content"
 
@@ -338,13 +338,39 @@ func BuildCourseReport(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UU
 		units = append(units, mapUnitEffectiveness(&c, modes, variants, c.UnitID))
 	}
 	out.Units = units
+	if out.Units == nil {
+		out.Units = []acmodel.UnitEffectiveness{}
+	}
 	out.ByMode = aggregateModes(units)
+	if out.ByMode == nil {
+		out.ByMode = []acmodel.ModeBreakdown{}
+	}
 
 	fid, err := acrepo.ListUnitMeanFidelity(ctx, pool, courseID)
 	if err != nil {
 		return out, err
 	}
 	out.UnitsToReview = rankUnitsToReview(courseCode, units, fid)
+	if out.UnitsToReview == nil {
+		out.UnitsToReview = []acmodel.UnitToReview{}
+	}
+
+	// Self-heal coverage when the snapshot was never refreshed (first report open).
+	if cov == nil && out.NUnits > 0 {
+		if snap, err := acrepo.ComputeCoverageSnapshot(ctx, pool, courseID); err == nil {
+			_ = acrepo.UpsertCoverage(ctx, pool, snap)
+			out.Coverage = acmodel.CourseReportCoverage{
+				EligibleContentItems:  snap.EligibleContentItems,
+				AdaptedUnits:          snap.AdaptedUnits,
+				CoveragePct:           coveragePct(snap.AdaptedUnits, snap.EligibleContentItems),
+				StudentsProfiled:      snap.StudentsProfiled,
+				StudentsServedVariant: snap.StudentsServedVariant,
+				StudentsHoldout:       snap.StudentsHoldout,
+			}
+			t := snap.RefreshedAt
+			out.DataAsOf = &t
+		}
+	}
 
 	out.Empty = out.NUnits == 0 &&
 		out.Coverage.StudentsProfiled == 0 &&
@@ -426,7 +452,7 @@ func WriteCourseReportCSV(w io.Writer, report acmodel.CourseReportResponse) erro
 // BuildAdminReport assembles the org-wide Adaptive Content rollup (AC.9 FR-2).
 func BuildAdminReport(ctx context.Context, pool *pgxpool.Pool) (acmodel.AdminReportResponse, error) {
 	out := acmodel.AdminReportResponse{
-		Courses:       []acmodel.AdminReportCourse{},
+		Courses:       make([]acmodel.AdminReportCourse, 0),
 		SmallCellMinN: SmallCellMinN,
 		KillSwitch:    KillSwitchEngaged(),
 	}

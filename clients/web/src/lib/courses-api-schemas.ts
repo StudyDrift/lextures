@@ -1257,24 +1257,36 @@ export const adaptiveContentCourseReportSchema = z.object({
     unlimited: z.boolean(),
     periodStart: z.string(),
   }),
-  unitsToReview: z.array(
-    z.object({
-      unitId: z.string(),
-      reason: z.string(),
-      verdict: z.string(),
-      meanFidelity: z.number().nullable().optional(),
-      meanLift: z.number().nullable().optional(),
-      workspaceUrl: z.string(),
-    }),
-  ),
-  units: z.array(z.record(z.string(), z.unknown())),
-  byMode: z.array(
-    z.object({
-      emphasisMode: z.string(),
-      n: z.number(),
-      meanLift: z.number().nullable().optional(),
-    }),
-  ),
+  unitsToReview: z
+    .array(
+      z.object({
+        unitId: z.string(),
+        reason: z.string(),
+        verdict: z.string(),
+        meanFidelity: z.number().nullable().optional(),
+        meanLift: z.number().nullable().optional(),
+        workspaceUrl: z.string(),
+      }),
+    )
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  units: z
+    .array(z.record(z.string(), z.unknown()))
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  byMode: z
+    .array(
+      z.object({
+        emphasisMode: z.string(),
+        n: z.number(),
+        meanLift: z.number().nullable().optional(),
+      }),
+    )
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
   dataAsOf: z.string().nullable().optional(),
   smallCellMinN: z.number(),
   minNPerArm: z.number(),
@@ -1293,25 +1305,29 @@ export const adaptiveContentAdminReportSchema = z.object({
   killSwitch: z.boolean(),
   generationPaused: z.boolean(),
   queueDepth: z.number(),
-  courses: z.array(
-    z.object({
-      courseId: z.string(),
-      courseCode: z.string(),
-      title: z.string(),
-      nUnits: z.number(),
-      nActiveUnits: z.number(),
-      meanLiftVsControl: z.number().nullable().optional(),
-      nRegressing: z.number(),
-      nHelping: z.number(),
-      tokensUsedPeriod: z.number(),
-      monthlyTokenBudget: z.number(),
-      coveragePct: z.number(),
-      studentsServedVariant: z.number(),
-      disparityFlags: z.number(),
-      openContests: z.number(),
-      reportUrl: z.string(),
-    }),
-  ),
+  courses: z
+    .array(
+      z.object({
+        courseId: z.string(),
+        courseCode: z.string(),
+        title: z.string(),
+        nUnits: z.number(),
+        nActiveUnits: z.number(),
+        meanLiftVsControl: z.number().nullable().optional(),
+        nRegressing: z.number(),
+        nHelping: z.number(),
+        tokensUsedPeriod: z.number(),
+        monthlyTokenBudget: z.number(),
+        coveragePct: z.number(),
+        studentsServedVariant: z.number(),
+        disparityFlags: z.number(),
+        openContests: z.number(),
+        reportUrl: z.string(),
+      }),
+    )
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
   dataAsOf: z.string().nullable().optional(),
   smallCellMinN: z.number(),
 })

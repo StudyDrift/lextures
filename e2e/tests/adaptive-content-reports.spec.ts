@@ -46,10 +46,17 @@ async function apiCreateAdaptiveUnit(
 }
 
 function bootstrapGlobalAdmin(email: string) {
+  const databaseURL =
+    process.env.DATABASE_URL ??
+    'postgres://studydrift:studydrift@localhost:5432/studydrift?sslmode=disable'
   execSync(`go run ./cmd/bootstrap-admin -email=${email}`, {
     cwd: path.join(repoRoot, 'server'),
     stdio: 'pipe',
-    env: { ...process.env, PATH: `/usr/local/go/bin:${process.env.PATH ?? ''}` },
+    env: {
+      ...process.env,
+      PATH: `/usr/local/go/bin:${process.env.PATH ?? ''}`,
+      DATABASE_URL: databaseURL,
+    },
   })
 }
 
