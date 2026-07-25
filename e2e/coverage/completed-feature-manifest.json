@@ -4038,6 +4038,114 @@
       "reviewed": true
     },
     {
+      "id": "AC.1",
+      "path": "docs/completed/adaptive/AC.1-foundations-flag-and-data-model.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Course feature matrix covers adaptiveContentEnabled toggle/authz/disabled state; deepen to ACE journey coverage when risk warrants.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/course-features-matrix-meta.spec.ts"
+        },
+        {
+          "path": "e2e/tests/course-features-authz.spec.ts"
+        },
+        {
+          "path": "e2e/tests/course-features-ui-matrix-a.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": true,
+        "dependency": "n/a",
+        "rollback": false,
+        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2\u2013AC.6 gaps."
+      }
+    },
+    {
+      "id": "AC.2",
+      "path": "docs/completed/adaptive/AC.2-pre-assessment-and-adaptation-profile.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Learning Platform",
+      "severity": "critical",
+      "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true
+    },
+    {
+      "id": "AC.3",
+      "path": "docs/completed/adaptive/AC.3-content-generation-engine.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Learning Platform",
+      "severity": "critical",
+      "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true
+    },
+    {
+      "id": "AC.4",
+      "path": "docs/completed/adaptive/AC.4-generation-pipeline-caching-cost.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Learning Platform",
+      "severity": "major",
+      "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true
+    },
+    {
+      "id": "AC.5",
+      "path": "docs/completed/adaptive/AC.5-instructor-authoring-and-approval.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Learning Platform",
+      "severity": "critical",
+      "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true
+    },
+    {
+      "id": "AC.6",
+      "path": "docs/completed/adaptive/AC.6-student-runtime-and-transparency.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Learning Platform",
+      "severity": "critical",
+      "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
@@ -7714,6 +7822,114 @@
       "reviewed": true
     },
     {
+      "id": "PS.1",
+      "path": "docs/completed/settings/PS.1-settings-registry-and-addressable-controls.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Web Platform",
+      "severity": "minor",
+      "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true
+    },
+    {
+      "id": "PS.2",
+      "path": "docs/completed/settings/PS.2-pinned-settings-data-model-and-api.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Web Platform",
+      "severity": "minor",
+      "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true
+    },
+    {
+      "id": "PS.3",
+      "path": "docs/completed/settings/PS.3-pin-and-reorder-ux-in-editor-panels.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Web Platform",
+      "severity": "minor",
+      "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true
+    },
+    {
+      "id": "PS.4",
+      "path": "docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "missing",
+      "rationale": "No durable Playwright journey linked yet; tracked as an owned coverage gap.",
+      "owner": "Web Platform",
+      "severity": "minor",
+      "targetMilestone": "E2E-coverage-backlog",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": false,
+        "enabledJourney": false,
+        "authorization": "n/a",
+        "dependency": "n/a",
+        "rollback": false,
+        "notes": "ffPinnedSettings platform kill-switch; Playwright flag lifecycle not yet linked."
+      }
+    },
+    {
+      "id": "pinned-settings-analytics-inventory",
+      "path": "docs/completed/settings/pinned-settings-analytics-inventory.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "none",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Privacy/analytics inventory mapping doc; not a user-journey surface.",
+      "owner": "Web Platform",
+      "reviewed": true
+    },
+    {
+      "id": "pinned-settings-event-dictionary",
+      "path": "docs/completed/settings/pinned-settings-event-dictionary.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "none",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Client event dictionary for product analytics; not a user-journey surface.",
+      "owner": "Web Platform",
+      "reviewed": true
+    },
+    {
+      "id": "pinned-settings-reporting",
+      "path": "docs/completed/settings/pinned-settings-reporting.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "none",
+      "client": "ops",
+      "coverage": "not-applicable",
+      "rationale": "Ops reporting queries and FR-15 review checklist; not a Playwright journey.",
+      "owner": "Web Platform",
+      "reviewed": true
+    },
+    {
       "id": "T01",
       "path": "docs/completed/transcripts/T01-official-transcript-generation.md",
       "markets": [
@@ -8350,7 +8566,7 @@
       "risk": "minor",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright journey selects across paragraphs on a content page and asserts ⌘/Ctrl+C copies every paragraph.",
+      "rationale": "Playwright journey selects across paragraphs on a content page and asserts \u2318/Ctrl+C copies every paragraph.",
       "owner": "Web Platform",
       "specs": [
         {
