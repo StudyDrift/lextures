@@ -17,6 +17,7 @@ import {
   fetchModuleContentPage,
   learnerCourseItemHref,
   patchModuleContentPage,
+  postAdaptiveContentContest,
   postAdaptiveContentViewedOriginal,
   postCourseContext,
   putAdaptiveContentOptout,
@@ -50,6 +51,7 @@ import { useSimplifiedContentView } from '../../components/reading-level/use-sim
 import { useSimplifyDialog } from '../../components/reading-level/use-simplify-dialog'
 import { AdaptedBanner } from '../../components/lms/adaptive-content/adapted-banner'
 import { useAdaptedContentView } from '../../components/lms/adaptive-content/use-adapted-content-view'
+import { usePrompt } from '../../components/use-prompt'
 import {
   fetchItemReadingLevel,
   isReadingLevelEnabled,
@@ -78,6 +80,7 @@ export default function CourseModuleContentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const { allows, loading: permLoading } = usePermissions()
   const { ffCeuTracking, aiStudyBuddyEnabled, aiConfigured } = usePlatformFeatures()
+  const { prompt, InputDialogHost } = usePrompt()
 
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
@@ -102,6 +105,7 @@ export default function CourseModuleContentPage() {
     adaptive?: AdaptiveServingMeta | null
   }>({})
   const [optoutBusy, setOptoutBusy] = useState(false)
+  const [contestBusy, setContestBusy] = useState(false)
   const simplifyDlg = useSimplifyDialog()
   const readingLevelOn = isReadingLevelEnabled()
   const altTextOn = altTextEnforcementFeatureEnabled()
@@ -441,6 +445,28 @@ export default function CourseModuleContentPage() {
     }
   }, [courseCode, load, optoutBusy])
 
+  const handleReportAdaptation = useCallback(async () => {
+    if (!courseCode || !adaptiveMeta?.unitId || contestBusy) return
+    const reason = await prompt({
+      title: 'Report this adaptation',
+      description: 'What seems wrong about this adaptation? (optional)',
+      confirmLabel: 'Submit report',
+    })
+    if (reason === null) return
+    setContestBusy(true)
+    try {
+      await postAdaptiveContentContest(courseCode, adaptiveMeta.unitId, {
+        reason: reason.trim() || undefined,
+      })
+      adaptedView.showOriginal()
+      toastSaveOk('Thanks — your instructor will review this adaptation. Showing the original.')
+    } catch (e) {
+      toastMutationError(e instanceof Error ? e.message : 'Could not submit report.')
+    } finally {
+      setContestBusy(false)
+    }
+  }, [adaptedView, adaptiveMeta?.unitId, contestBusy, courseCode, prompt])
+
   if (!courseCode || !itemId) {
     return (
       <LmsPage title="Content page" description="">
@@ -645,6 +671,8 @@ export default function CourseModuleContentPage() {
             onPreferStandard={
               adaptiveMeta?.optoutAllowed ? () => void handlePreferStandard() : undefined
             }
+            onReportAdaptation={() => void handleReportAdaptation()}
+            reportBusy={contestBusy}
           />
         )}
 
@@ -773,6 +801,7 @@ export default function CourseModuleContentPage() {
         />
       ) : null}
       {aiStudyBuddyEnabled && courseCode ? <StudyBuddyWidget courseCode={courseCode} /> : null}
+      {InputDialogHost}
     </LmsPage>
   )
 }

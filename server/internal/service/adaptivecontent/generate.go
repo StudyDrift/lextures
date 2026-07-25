@@ -309,7 +309,7 @@ func GenerateVariant(
 		UnsupportedClaims: unsupported,
 	}
 
-	// Gate decision (FR-4 / FR-5).
+	// Gate decision (FR-4 / FR-5 / AC.8 FR-2).
 	if len(safetyFlags) > 0 {
 		v.Status = "rejected"
 		v.Fallback = true
@@ -327,6 +327,13 @@ func GenerateVariant(
 		IncRejectedFidelity()
 		IncGenerated("rejected_fidelity")
 		return v, meta, ErrRejectedFidelity
+	}
+	// Blocking a11y flags prevent auto-serve; force pending_review (or reject when
+	// instructor approval is not available and policy is strict). AC.8 enforces at serve time too.
+	if HasBlockingA11yFlag(a11yFlags) {
+		v.Status = "pending_review"
+		IncGenerated("pending_a11y")
+		return v, meta, nil
 	}
 
 	if in.RequireInstructorApproval {

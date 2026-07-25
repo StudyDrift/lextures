@@ -14,6 +14,7 @@ import {
   createAdaptiveContentUnit,
   editApproveAdaptiveContentVariant,
   fetchAdaptiveContentBudget,
+  fetchAdaptiveContentContests,
   fetchAdaptiveContentEffectiveness,
   fetchAdaptiveContentKeyTerms,
   fetchAdaptiveContentReviewQueue,
@@ -29,8 +30,10 @@ import {
   putAdaptiveContentSettings,
   refreshAdaptiveContentEffectiveness,
   rejectAdaptiveContentVariant,
+  resolveAdaptiveContentContest,
   revokeAdaptiveContentVariant,
   type AdaptiveContentBudget,
+  type AdaptiveContentContest,
   type AdaptiveContentEffectiveness,
   type AdaptiveContentKeyTerm,
   type AdaptiveContentPreview,
@@ -60,7 +63,7 @@ type Props = {
   canConfigure?: boolean
 }
 
-type WorkspaceTab = 'units' | 'queue'
+type WorkspaceTab = 'units' | 'queue' | 'contests'
 
 function statusBadgeClass(status: string): string {
   switch (status) {
@@ -146,6 +149,10 @@ export function AdaptiveContentWorkspace({
   const [selectedQueueIds, setSelectedQueueIds] = useState<Set<string>>(new Set())
   const [unitVariants, setUnitVariants] = useState<AdaptiveContentVariant[]>([])
 
+  // AC.8 contests inbox
+  const [contests, setContests] = useState<AdaptiveContentContest[]>([])
+  const [contestsLoading, setContestsLoading] = useState(false)
+
   const contentPages = useMemo(
     () => structure.filter((i) => i.kind === 'content_page'),
     [structure],
@@ -207,9 +214,22 @@ export function AdaptiveContentWorkspace({
     }
   }, [courseCode])
 
+  const loadContests = useCallback(async () => {
+    setContestsLoading(true)
+    try {
+      const rows = await fetchAdaptiveContentContests(courseCode, 'open')
+      setContests(rows)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load contests.')
+    } finally {
+      setContestsLoading(false)
+    }
+  }, [courseCode])
+
   useEffect(() => {
     if (tab === 'queue' && adaptiveContentEnabled) void loadQueue()
-  }, [tab, adaptiveContentEnabled, loadQueue])
+    if (tab === 'contests' && adaptiveContentEnabled) void loadContests()
+  }, [tab, adaptiveContentEnabled, loadQueue, loadContests])
 
   async function openUnit(unit: AdaptiveContentUnit) {
     setSelectedUnitId(unit.id)
@@ -617,6 +637,21 @@ export function AdaptiveContentWorkspace({
           Review queue
           {queueTotal > 0 ? ` (${queueTotal})` : ''}
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'contests'}
+          onClick={() => setTab('contests')}
+          data-testid="ace-contests-tab"
+          className={`px-3 py-2 text-sm font-medium ${
+            tab === 'contests'
+              ? 'border-b-2 border-indigo-600 text-indigo-700 dark:text-indigo-300'
+              : 'text-slate-600 dark:text-neutral-400'
+          }`}
+        >
+          Contests
+          {contests.length > 0 ? ` (${contests.length})` : ''}
+        </button>
       </div>
 
       {error && (
@@ -879,6 +914,81 @@ export function AdaptiveContentWorkspace({
             </>
           )}
         </>
+      ) : tab === 'contests' ? (
+        <section
+          className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+          data-testid="ace-contests-inbox"
+        >
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+            Open contests ({contests.length})
+          </h3>
+          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            Students reported that an adaptation seems wrong. Resolve after reviewing the variant.
+          </p>
+          {contestsLoading ? (
+            <p className="mt-4 text-sm text-slate-500">Loading contests…</p>
+          ) : contests.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">No open contests.</p>
+          ) : (
+            <ul className="mt-3 divide-y divide-slate-100 dark:divide-neutral-800">
+              {contests.map((c) => (
+                <li key={c.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+                      {titleById.get(
+                        units.find((u) => u.id === c.unitId)?.baseContentItemId ?? '',
+                      ) ?? 'Adaptive unit'}
+                    </p>
+                    {c.reason ? (
+                      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">{c.reason}</p>
+                    ) : (
+                      <p className="mt-1 text-sm text-slate-500">No reason provided</p>
+                    )}
+                    <p className="mt-1 text-xs text-slate-400">
+                      {new Date(c.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white"
+                      onClick={() => {
+                        void (async () => {
+                          try {
+                            await resolveAdaptiveContentContest(courseCode, c.id, 'resolved')
+                            setStatusLive('Contest resolved.')
+                            await loadContests()
+                          } catch (e) {
+                            setError(e instanceof Error ? e.message : 'Could not resolve contest.')
+                          }
+                        })()
+                      }}
+                    >
+                      Resolve
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs dark:border-neutral-700"
+                      onClick={() => {
+                        void (async () => {
+                          try {
+                            await resolveAdaptiveContentContest(courseCode, c.id, 'dismissed')
+                            setStatusLive('Contest dismissed.')
+                            await loadContests()
+                          } catch (e) {
+                            setError(e instanceof Error ? e.message : 'Could not dismiss contest.')
+                          }
+                        })()
+                      }}
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       ) : (
         <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
           <div className="flex flex-wrap items-center justify-between gap-2">

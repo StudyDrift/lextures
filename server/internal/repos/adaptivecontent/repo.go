@@ -50,6 +50,9 @@ type UnitRow struct {
 	// AC.3
 	ContentVersion int32
 	MinFidelity    float64
+	// AC.8
+	Quarantined       bool
+	QuarantinedReason *string
 }
 
 // DefaultSettings returns in-memory defaults matching the migration defaults.
@@ -192,7 +195,8 @@ func ListUnits(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]U
 SELECT id, course_id, target_kind, target_module_item_id, target_outcome_id,
        base_content_item_id, pre_assessment_item_id, post_assessment_item_id,
        allowed_axes, status, created_by, created_at, updated_at,
-       trigger_mode, mastery_freshness_days, content_version, min_fidelity
+       trigger_mode, mastery_freshness_days, content_version, min_fidelity,
+       quarantined, quarantined_reason
 FROM course.adaptive_content_units
 WHERE course_id = $1
 ORDER BY created_at ASC
@@ -218,7 +222,8 @@ func GetUnit(ctx context.Context, pool *pgxpool.Pool, courseID, unitID uuid.UUID
 SELECT id, course_id, target_kind, target_module_item_id, target_outcome_id,
        base_content_item_id, pre_assessment_item_id, post_assessment_item_id,
        allowed_axes, status, created_by, created_at, updated_at,
-       trigger_mode, mastery_freshness_days, content_version, min_fidelity
+       trigger_mode, mastery_freshness_days, content_version, min_fidelity,
+       quarantined, quarantined_reason
 FROM course.adaptive_content_units
 WHERE course_id = $1 AND id = $2
 `, courseID, unitID)
@@ -259,7 +264,8 @@ INSERT INTO course.adaptive_content_units (
 RETURNING id, course_id, target_kind, target_module_item_id, target_outcome_id,
           base_content_item_id, pre_assessment_item_id, post_assessment_item_id,
           allowed_axes, status, created_by, created_at, updated_at,
-          trigger_mode, mastery_freshness_days, content_version, min_fidelity
+          trigger_mode, mastery_freshness_days, content_version, min_fidelity,
+          quarantined, quarantined_reason
 `, u.CourseID, u.TargetKind, u.TargetModuleItemID, u.TargetOutcomeID,
 		u.BaseContentItemID, u.PreAssessmentItemID, u.PostAssessmentItemID,
 		u.AllowedAxes, u.Status, u.CreatedBy, u.TriggerMode, u.MasteryFreshnessDays,
@@ -304,7 +310,8 @@ WHERE course_id = $1 AND id = $2
 RETURNING id, course_id, target_kind, target_module_item_id, target_outcome_id,
           base_content_item_id, pre_assessment_item_id, post_assessment_item_id,
           allowed_axes, status, created_by, created_at, updated_at,
-          trigger_mode, mastery_freshness_days, content_version, min_fidelity
+          trigger_mode, mastery_freshness_days, content_version, min_fidelity,
+          quarantined, quarantined_reason
 `, u.CourseID, u.ID, u.TargetKind, u.TargetModuleItemID, u.TargetOutcomeID,
 		u.BaseContentItemID, u.PreAssessmentItemID, u.PostAssessmentItemID,
 		u.AllowedAxes, u.Status, u.TriggerMode, u.MasteryFreshnessDays, u.MinFidelity,
@@ -402,6 +409,7 @@ func scanUnit(row scannable) (UnitRow, error) {
 		&u.BaseContentItemID, &u.PreAssessmentItemID, &u.PostAssessmentItemID,
 		&u.AllowedAxes, &u.Status, &u.CreatedBy, &u.CreatedAt, &u.UpdatedAt,
 		&u.TriggerMode, &u.MasteryFreshnessDays, &u.ContentVersion, &u.MinFidelity,
+		&u.Quarantined, &u.QuarantinedReason,
 	)
 	if err != nil {
 		return UnitRow{}, err

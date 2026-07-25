@@ -3,6 +3,7 @@ import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { aiDisclosureI18n } from '../../lib/ai-disclosure-i18n'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { AdaptiveContentOversightPanel } from './adaptive-content-oversight-panel'
 
 const FEATURE_KEYS = [
   { key: 'ai_tutor', label: 'AI Tutor' },
@@ -14,6 +15,7 @@ const FEATURE_KEYS = [
   { key: 'translation', label: 'Translation' },
   { key: 'quiz_generation', label: 'Quiz generation' },
   { key: 'lesson_generation', label: 'Lesson generator' },
+  { key: 'adaptive_content', label: 'Adaptive content' },
 ] as const
 
 export function AiGovernancePanel() {
@@ -120,6 +122,7 @@ export function AiGovernancePanel() {
       >
         {saving ? 'Saving…' : aiDisclosureI18n.adminSave}
       </button>
+      <AdaptiveContentOversightPanel />
     </section>
   )
 }

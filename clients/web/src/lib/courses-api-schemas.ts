@@ -1036,6 +1036,8 @@ export const adaptiveContentUnitSchema = z.object({
   variantPendingReview: z.number().optional(),
   variantRejected: z.number().optional(),
   variantAutoServed: z.number().optional(),
+  quarantined: z.boolean().optional(),
+  quarantinedReason: z.string().nullable().optional(),
 })
 
 export const adaptiveContentUnitsListSchema = z.object({
@@ -1173,6 +1175,59 @@ export const adaptiveContentOptoutSchema = z.object({
 
 export const adaptiveContentViewedOriginalSchema = z.object({
   viewOriginalClicks: z.number(),
+})
+
+/** AC.8 — student contest / fairness / oversight. */
+export const adaptiveContentContestSchema = z.object({
+  id: z.string(),
+  courseId: z.string(),
+  unitId: z.string(),
+  servingId: z.string().nullable().optional(),
+  studentUserId: z.string(),
+  reason: z.string().nullable().optional(),
+  status: z.string(),
+  resolvedBy: z.string().nullable().optional(),
+  createdAt: z.string(),
+  resolvedAt: z.string().nullable().optional(),
+})
+
+export const adaptiveContentContestsListSchema = z.object({
+  contests: z.array(adaptiveContentContestSchema),
+})
+
+export const adaptiveContentOversightSchema = z.object({
+  generationPaused: z.boolean(),
+  killSwitch: z.boolean(),
+  orgEnabled: z.boolean().nullable().optional(),
+  queueDepth: z.number(),
+  inflight: z.number(),
+  openContests: z.number(),
+  disparityFlags: z.number(),
+  quarantinedUnits: z.number(),
+  regressingUnits: z.number(),
+  gateBlocks7d: z.number(),
+  costUsd30d: z.number(),
+  dpiaDocPath: z.string().optional(),
+  aiActChecklistPath: z.string().optional(),
+})
+
+export const adaptiveContentFairnessSchema = z.object({
+  cells: z.array(
+    z.object({
+      id: z.string(),
+      courseId: z.string(),
+      dimension: z.string(),
+      groupLabel: z.string(),
+      n: z.number(),
+      meanFidelity: z.number().nullable().optional(),
+      coveragePct: z.number().nullable().optional(),
+      meanLift: z.number().nullable().optional(),
+      disparityFlag: z.boolean(),
+      computedAt: z.string(),
+    }),
+  ),
+  smallCellMinN: z.number(),
+  fairnessMinN: z.number(),
 })
 
 export const cohortProfilesSchema = z.object({

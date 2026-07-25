@@ -21,6 +21,7 @@ const (
 	JobTypeQuizgameRetention          = "scheduled.quizgame_retention"
 	JobTypeTranscriptAnalyticsRollup       = "scheduled.transcript_analytics_rollup"
 	JobTypeAdaptiveContentEffectiveness    = "scheduled.adaptive_content_effectiveness"
+	JobTypeAdaptiveContentFairness         = "scheduled.adaptive_content_fairness"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -169,6 +170,13 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "40 1 * * *", // daily 01:40 UTC
 			JobType:        JobTypeAdaptiveContentEffectiveness,
 			Description:    "Refresh adaptive content treatment-vs-holdout effectiveness aggregates (AC.7).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "adaptive_content_fairness",
+			Spec:           "50 1 * * *", // daily 01:50 UTC
+			JobType:        JobTypeAdaptiveContentFairness,
+			Description:    "Refresh adaptive content fairness audit aggregates and disparity flags (AC.8).",
 			DefaultEnabled: true,
 		},
 	}

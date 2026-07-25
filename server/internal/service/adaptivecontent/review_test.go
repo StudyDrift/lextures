@@ -31,6 +31,10 @@ func TestSoftGateFailed(t *testing.T) {
 	if SoftGateFailed(&score, 0.85, []string{"missing_key_term:X"}, nil) {
 		t.Fatal("hard key term alone is not a soft gate failure")
 	}
+	// AC.8: blocking a11y flags are soft-gate failures.
+	if !SoftGateFailed(&score, 0.85, nil, []string{"image_missing_alt"}) {
+		t.Fatal("blocking a11y should soft-fail")
+	}
 }
 
 func TestValidateBulkAction(t *testing.T) {

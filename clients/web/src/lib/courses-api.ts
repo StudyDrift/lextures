@@ -32,6 +32,10 @@ import {
   adaptiveContentBulkResultSchema,
   adaptiveContentOptoutSchema,
   adaptiveContentViewedOriginalSchema,
+  adaptiveContentContestSchema,
+  adaptiveContentContestsListSchema,
+  adaptiveContentOversightSchema,
+  adaptiveContentFairnessSchema,
   adaptationProfileSchema,
   cohortProfilesSchema,
   courseScopedRolesResponseSchema,
@@ -1558,6 +1562,108 @@ export async function postAdaptiveContentViewedOriginal(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return parseApiResponse('postAdaptiveContentViewedOriginal', adaptiveContentViewedOriginalSchema, raw)
+}
+
+/** AC.8 — student reports that an adaptation seems wrong. */
+export async function postAdaptiveContentContest(
+  courseCode: string,
+  unitId: string,
+  body?: { servingId?: string; reason?: string },
+): Promise<AdaptiveContentContest> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units/${encodeURIComponent(unitId)}/contest`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('postAdaptiveContentContest', adaptiveContentContestSchema, raw)
+}
+
+/** AC.8 — instructor contests inbox. */
+export async function fetchAdaptiveContentContests(
+  courseCode: string,
+  status?: string,
+): Promise<AdaptiveContentContest[]> {
+  const q = status ? `?status=${encodeURIComponent(status)}` : ''
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/contests${q}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = parseApiResponse('fetchAdaptiveContentContests', adaptiveContentContestsListSchema, raw)
+  return body.contests
+}
+
+/** AC.8 — resolve a contest. */
+export async function resolveAdaptiveContentContest(
+  courseCode: string,
+  contestId: string,
+  status: 'reviewed' | 'resolved' | 'dismissed',
+): Promise<AdaptiveContentContest> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/contests/${encodeURIComponent(contestId)}/resolve`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('resolveAdaptiveContentContest', adaptiveContentContestSchema, raw)
+}
+
+/** AC.8 — admin oversight console payload. */
+export async function fetchAdaptiveContentOversight(): Promise<AdaptiveContentOversight> {
+  const res = await authorizedFetch('/api/v1/admin/adaptive-content/oversight')
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchAdaptiveContentOversight', adaptiveContentOversightSchema, raw)
+}
+
+/** AC.8 — fairness audit cells for a course. */
+export async function fetchAdaptiveContentFairness(
+  course: string,
+): Promise<AdaptiveContentFairness> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/adaptive-content/fairness?course=${encodeURIComponent(course)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchAdaptiveContentFairness', adaptiveContentFairnessSchema, raw)
+}
+
+/** AC.8 — engage/disengage durable kill-switch. */
+export async function postAdaptiveContentKillSwitch(engage: boolean): Promise<{ killSwitch: boolean }> {
+  const res = await authorizedFetch('/api/v1/admin/adaptive-content/kill-switch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ engage }),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { killSwitch: boolean }
+}
+
+/** AC.8 — quarantine a unit or course. */
+export async function postAdaptiveContentQuarantine(body: {
+  unitId?: string
+  courseId?: string
+  reason?: string
+  clear?: boolean
+}): Promise<{ ok: boolean }> {
+  const res = await authorizedFetch('/api/v1/admin/adaptive-content/quarantine', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { ok: boolean }
 }
 
 export async function patchCourseBlueprint(courseCode: string, isBlueprint: boolean): Promise<CoursePublic> {
@@ -3163,6 +3269,52 @@ export type AdaptiveServingMeta = {
 export type AdaptiveContentOptout = {
   optedOut: boolean
   optoutAllowed: boolean
+}
+
+export type AdaptiveContentContest = {
+  id: string
+  courseId: string
+  unitId: string
+  servingId?: string | null
+  studentUserId: string
+  reason?: string | null
+  status: string
+  resolvedBy?: string | null
+  createdAt: string
+  resolvedAt?: string | null
+}
+
+export type AdaptiveContentOversight = {
+  generationPaused: boolean
+  killSwitch: boolean
+  orgEnabled?: boolean | null
+  queueDepth: number
+  inflight: number
+  openContests: number
+  disparityFlags: number
+  quarantinedUnits: number
+  regressingUnits: number
+  gateBlocks7d: number
+  costUsd30d: number
+  dpiaDocPath?: string
+  aiActChecklistPath?: string
+}
+
+export type AdaptiveContentFairness = {
+  cells: Array<{
+    id: string
+    courseId: string
+    dimension: string
+    groupLabel: string
+    n: number
+    meanFidelity?: number | null
+    coveragePct?: number | null
+    meanLift?: number | null
+    disparityFlag: boolean
+    computedAt: string
+  }>
+  smallCellMinN: number
+  fairnessMinN: number
 }
 
 export type OriginalityDetectionMode = 'disabled' | 'plagiarism' | 'ai' | 'both'

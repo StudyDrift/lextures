@@ -41,6 +41,8 @@ const (
 	TranscriptOrderCanceled    = "transcript_order_canceled"
 	TranscriptOrderException   = "transcript_order_exception"
 	AdaptiveContentRegressing  = "adaptive_content_regressing"
+	AdaptiveContentFairness    = "adaptive_content_fairness"
+	AdaptiveContentContest     = "adaptive_content_contest"
 )
 
 // All is the canonical list for defaults and UI.
@@ -84,4 +86,6 @@ var All = []string{
 	TranscriptOrderCanceled,
 	TranscriptOrderException,
 	AdaptiveContentRegressing,
+	AdaptiveContentFairness,
+	AdaptiveContentContest,
 }

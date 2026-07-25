@@ -50,6 +50,7 @@ import (
 	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
 	learnerprofilederivers "github.com/lextures/lextures/server/internal/service/learnerprofile/derivers"
 	marketplacecoursesservice "github.com/lextures/lextures/server/internal/service/marketplacecourses"
+	acsvc "github.com/lextures/lextures/server/internal/service/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
@@ -79,6 +80,9 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		return fmt.Errorf("app: database: %w", err)
 	}
 	defer pool.Close()
+
+	// AC.8: sync durable kill-switch into process cache (OR'd with env).
+	acsvc.SyncDurableKillSwitchFromDB(ctx, pool)
 
 	healthPool, err := db.NewHealthPool(ctx, cfg.DatabaseURL)
 	if err != nil {

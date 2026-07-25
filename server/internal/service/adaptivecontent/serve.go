@@ -108,6 +108,12 @@ func ResolveServing(ctx context.Context, pool *pgxpool.Pool, req ServeRequest) S
 		return out
 	}
 
+	// Org-level affirmative disable (AC.8 FR-1) — fail-closed on governance check error.
+	if !OrgACEAllowed(ctx, pool) {
+		out.Reason = ServeReasonOrgDisabled
+		return out
+	}
+
 	unit, err := acrepo.GetActiveUnitByBaseContentItem(ctx, pool, req.CourseID, req.BaseContentItemID)
 	if err != nil {
 		slog.Debug("adaptivecontent.serve: unit lookup failed", "err", err)
@@ -126,6 +132,26 @@ func ResolveServing(ctx context.Context, pool *pgxpool.Pool, req ServeRequest) S
 	}
 	out.PreAssessmentItemID = unit.PreAssessmentItemID
 	out.Markdown = req.BaseMarkdown
+
+	// Incident quarantine (unit or course) → base only (AC.8 FR-9 / AC-6).
+	if unit.Quarantined || CourseQuarantined(ctx, pool, req.CourseID) {
+		out.WasFallback = true
+		out.Reason = ServeReasonQuarantine
+		IncServedFallback()
+		IncGateBlockServedBase()
+		enrollmentID, _ := acrepo.GetEnrollmentIDForUser(ctx, pool, req.CourseID, req.UserID)
+		if enrollmentID != nil {
+			out.EnrollmentID = enrollmentID
+			writeServingAsync(ctx, pool, req, unit, out, nil, nil, false, true)
+			uid := unit.ID
+			subj := req.UserID
+			_ = acrepo.InsertEvent(ctx, pool, req.CourseID, &uid, &subj, &subj, EventGateBlock, map[string]any{
+				"reason": "quarantined",
+				"unitId": unit.ID,
+			})
+		}
+		return out
+	}
 
 	enrollmentID, err := acrepo.GetEnrollmentIDForUser(ctx, pool, req.CourseID, req.UserID)
 	if err != nil {
@@ -176,11 +202,12 @@ func ResolveServing(ctx context.Context, pool *pgxpool.Pool, req ServeRequest) S
 		return out
 	}
 
-	// COPPA / gateway deny → base, no indicator (FR-7).
+	// COPPA / gateway deny → base, no indicator (AC.6 FR-7 / AC.8 FR-4).
 	if !req.GatewayAllowed {
 		out.WasFallback = true
 		out.Reason = ServeReasonGatewayDeny
 		IncServedFallback()
+		IncMinorBlocked()
 		writeServingAsync(ctx, pool, req, unit, out, nil, nil, false, true)
 		return out
 	}
@@ -262,6 +289,37 @@ func ResolveServing(ctx context.Context, pool *pgxpool.Pool, req ServeRequest) S
 			}
 		}
 		writeServingAsync(ctx, pool, req, unit, out, &profile.ID, nil, false, true)
+		return out
+	}
+
+	// Serve-time gate re-check (AC.8 FR-2 / AC-1): fidelity, safety, blocking a11y.
+	// Fail-closed: any governance-check error ⇒ serve base.
+	minFid := unit.MinFidelity
+	if minFid <= 0 {
+		minFid = DefaultMinFidelity
+	}
+	gateReason := GateBlockReason(GateCheckInput{
+		Status:        variant.Status,
+		FidelityScore: variant.FidelityScore,
+		MinFidelity:   minFid,
+		SafetyFlags:   DecodeStringFlags(variant.SafetyFlags),
+		A11yFlags:     DecodeStringFlags(variant.A11yFlags),
+	})
+	if gateReason != "" {
+		out.WasFallback = true
+		out.Reason = ServeReasonGateBlock
+		IncServedFallback()
+		IncGateBlockServedBase()
+		writeServingAsync(ctx, pool, req, unit, out, &profile.ID, nil, false, true)
+		uid := unit.ID
+		subj := req.UserID
+		vid := variant.ID
+		_ = acrepo.InsertEvent(ctx, pool, req.CourseID, &uid, &subj, &subj, EventGateBlock, map[string]any{
+			"reason":    gateReason,
+			"unitId":    unit.ID,
+			"variantId": vid,
+			"status":    variant.Status,
+		})
 		return out
 	}
 

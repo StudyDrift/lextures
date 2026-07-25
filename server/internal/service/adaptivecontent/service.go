@@ -79,8 +79,12 @@ func SetKillSwitchForTest(engaged *bool) {
 }
 
 // KillSwitchEngaged reports whether the ops emergency kill-switch is on.
-// Default is disengaged. True values: 1, true, yes, on (case-insensitive).
+// True when env ADAPTIVE_CONTENT_KILL_SWITCH is set, a test override is set,
+// or the durable admin kill-switch (AC.8) is engaged. Default is disengaged.
 func KillSwitchEngaged() bool {
+	if DurableKillSwitchCached() {
+		return true
+	}
 	killSwitchMu.RLock()
 	if killSwitchOverride != nil {
 		v := *killSwitchOverride

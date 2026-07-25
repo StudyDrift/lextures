@@ -41,22 +41,6 @@ func HasHardKeyTermFailure(flags []string) bool {
 	return false
 }
 
-// SoftGateFailed reports fidelity/safety/a11y soft failures that can be instructor-overridden.
-// Hard key-term failures are excluded (never overridable).
-func SoftGateFailed(fidelityScore *float64, minFidelity float64, safetyFlags, a11yFlags []string) bool {
-	if fidelityScore != nil && minFidelity > 0 && *fidelityScore < minFidelity {
-		return true
-	}
-	for _, f := range safetyFlags {
-		if f != "" && !strings.HasPrefix(f, "missing_key_term:") {
-			return true
-		}
-	}
-	// a11y flags are warnings; do not block approval by default.
-	_ = a11yFlags
-	return false
-}
-
 // ValidateBulkAction checks bulk review request bounds.
 func ValidateBulkAction(action string, n int) error {
 	switch strings.ToLower(strings.TrimSpace(action)) {
