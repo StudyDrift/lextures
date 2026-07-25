@@ -98,7 +98,10 @@ type CoursePublic struct {
 	CourseHomeLanding                 string           `json:"courseHomeLanding"`
 	CourseHomeContentItemID           *string          `json:"courseHomeContentItemId,omitempty"`
 	CourseTimezone                    *string          `json:"courseTimezone,omitempty"`
-	GradeLevel                        *string          `json:"gradeLevel,omitempty"`
+	// GradeLevels is the multi-select set of K-12 grade tokens (plan 13.6).
+	GradeLevels []string `json:"gradeLevels,omitempty"`
+	// GradeLevel is the first selected grade for backward compatibility with single-value clients.
+	GradeLevel *string `json:"gradeLevel,omitempty"`
 	ViewerEnrollmentState             *string          `json:"viewerEnrollmentState,omitempty"`
 	ViewerEnrollmentStateChangedAt    *time.Time       `json:"viewerEnrollmentStateChangedAt,omitempty"`
 	ViewerEnrollmentInvitationPending bool             `json:"viewerEnrollmentInvitationPending,omitempty"`
@@ -178,7 +181,7 @@ const coursePublicSelect = `
     c.course_home_landing,
     c.course_home_content_item_id,
     c.course_timezone,
-    c.grade_level,
+    c.grade_levels,
     c.course_mode,
     c.open_enrollment,
     c.module_gating_enabled,
@@ -211,7 +214,7 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 	var homeLanding string
 	var homeContentItem pgtype.UUID
 	var courseTZ sql.NullString
-	var gradeLevel sql.NullString
+	var gradeLevels []string
 	var termIDCol, trID sql.NullString
 	var trName, trType, trStart, trEnd, trStatus sql.NullString
 
@@ -279,7 +282,7 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 		&homeLanding,
 		&homeContentItem,
 		&courseTZ,
-		&gradeLevel,
+		&gradeLevels,
 		&p.CourseMode,
 		&p.OpenEnrollment,
 		&p.ModuleGatingEnabled,
@@ -327,9 +330,21 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 		s := courseTZ.String
 		p.CourseTimezone = &s
 	}
-	if gradeLevel.Valid && strings.TrimSpace(gradeLevel.String) != "" {
-		s := gradeLevel.String
-		p.GradeLevel = &s
+	if len(gradeLevels) > 0 {
+		// Drop empties defensively; DB should already store clean tokens.
+		clean := make([]string, 0, len(gradeLevels))
+		for _, gl := range gradeLevels {
+			gl = strings.TrimSpace(gl)
+			if gl != "" {
+				clean = append(clean, gl)
+			}
+		}
+		if len(clean) > 0 {
+			p.GradeLevels = clean
+			// Legacy single-value field: first selected grade.
+			s := clean[0]
+			p.GradeLevel = &s
+		}
 	}
 	if hero.Valid {
 		s := hero.String
@@ -396,7 +411,7 @@ WHERE c.course_code = $1
 
 // ListForEnrolledUser returns non-archived courses the user is enrolled in, in catalog order (parity with Rust `list_for_enrolled_user`).
 // Relative-schedule “materialization” for students is not applied here yet.
-// gradeLevel filters by course.grade_level when non-nil; nil returns all grades.
+// gradeLevel filters by membership in course.grade_levels when non-nil; nil returns all grades.
 func ListForEnrolledUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	rows, err := pool.Query(ctx, `
 SELECT`+coursePublicSelect+coursePublicFrom+`
@@ -409,7 +424,7 @@ WHERE c.id IN (
     AND (e.active OR e.invitation_pending OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
-  AND ($2::text IS NULL OR c.grade_level = $2::text)`+enrolledUserOrgScope+`
+  AND ($2::text IS NULL OR $2::text = ANY(c.grade_levels))`+enrolledUserOrgScope+`
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, gradeLevel)
 	if err != nil {
@@ -429,7 +444,7 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 }
 
 // ListForEnrolledUserInOrgUnits returns enrolled courses whose org_unit_id is in allowed (non-null only).
-// gradeLevel filters by course.grade_level when non-nil.
+// gradeLevel filters by membership in course.grade_levels when non-nil.
 func ListForEnrolledUserInOrgUnits(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, allowed []uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	if len(allowed) == 0 {
 		return []CoursePublic{}, nil
@@ -453,7 +468,7 @@ WHERE c.id IN (
         AND ce_guest.home_org_id IS NOT NULL AND ce_guest.home_org_id = ucat.org_id AND ce_guest.active
     )
   )
-  AND ($3::text IS NULL OR c.grade_level = $3::text)`+enrolledUserOrgScope+`
+  AND ($3::text IS NULL OR $3::text = ANY(c.grade_levels))`+enrolledUserOrgScope+`
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, allowed, gradeLevel)
 	if err != nil {
@@ -473,7 +488,7 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 }
 
 // ListForEnrolledUserByTerm filters enrolled courses by term_id (must belong to user's org).
-// gradeLevel filters by course.grade_level when non-nil.
+// gradeLevel filters by membership in course.grade_levels when non-nil.
 func ListForEnrolledUserByTerm(ctx context.Context, pool *pgxpool.Pool, userID, termID uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	rows, err := pool.Query(ctx, `
 SELECT`+coursePublicSelect+coursePublicFrom+`
@@ -494,7 +509,7 @@ WHERE c.id IN (
      AND lower(btrim(t2.name)) = lower(btrim(t1.name))
     WHERE t1.id = $2
   )
-  AND ($3::text IS NULL OR c.grade_level = $3::text)`+enrolledUserOrgScope+`
+  AND ($3::text IS NULL OR $3::text = ANY(c.grade_levels))`+enrolledUserOrgScope+`
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, termID, gradeLevel)
 	if err != nil {
@@ -513,7 +528,7 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 }
 
 // ListForEnrolledUserInOrgUnitsByTerm is ListForEnrolledUserInOrgUnits with term filter.
-// gradeLevel filters by course.grade_level when non-nil.
+// gradeLevel filters by membership in course.grade_levels when non-nil.
 func ListForEnrolledUserInOrgUnitsByTerm(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, allowed []uuid.UUID, termID uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	if len(allowed) == 0 {
 		return []CoursePublic{}, nil
@@ -545,7 +560,7 @@ WHERE c.id IN (
      AND lower(btrim(t2.name)) = lower(btrim(t1.name))
     WHERE t1.id = $3
   )
-  AND ($4::text IS NULL OR c.grade_level = $4::text)`+enrolledUserOrgScope+`
+  AND ($4::text IS NULL OR $4::text = ANY(c.grade_levels))`+enrolledUserOrgScope+`
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, allowed, termID, gradeLevel)
 	if err != nil {

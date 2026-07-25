@@ -1,4 +1,5 @@
 import { authorizedFetch } from './api'
+import { readApiErrorMessage } from './errors'
 
 export type ModuleCompletionMode = 'all_items' | 'one_item' | 'sequential_order'
 
@@ -13,6 +14,9 @@ export type ModuleRequirement = {
   moduleId: string
   completionMode: ModuleCompletionMode
   unlockAt?: string | null
+  /** API field name from Go model. */
+  prerequisiteModuleIds?: string[]
+  /** Legacy alias kept for older clients. */
   prerequisiteIds?: string[]
 }
 
@@ -67,7 +71,17 @@ export type RequirementsReportRow = {
 async function parseJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(text || `Request failed: ${res.status}`)
+    if (text) {
+      try {
+        throw new Error(readApiErrorMessage(JSON.parse(text) as unknown))
+      } catch (e) {
+        if (e instanceof SyntaxError) {
+          throw new Error(text)
+        }
+        throw e
+      }
+    }
+    throw new Error(`Request failed: ${res.status}`)
   }
   if (res.status === 204) return undefined as T
   return (await res.json()) as T
@@ -77,6 +91,18 @@ export async function fetchModulesProgress(courseCode: string): Promise<ModulesP
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/modules/progress`,
   )
+  return parseJson(res)
+}
+
+/** Loads module requirements. Returns null when none are configured yet. */
+export async function fetchModuleRequirements(
+  courseCode: string,
+  moduleId: string,
+): Promise<ModuleRequirement | null> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/requirements`,
+  )
+  if (res.status === 404) return null
   return parseJson(res)
 }
 

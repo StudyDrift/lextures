@@ -21,6 +21,13 @@ locals {
     "${local.name_prefix}-course-files-${data.aws_caller_identity.current.account_id}"
   )
 
+  # Origins allowed to call S3 with browser fetch() + presigned PUT/GET.
+  # Prefer explicit override; otherwise public_web_origin + https:// for each custom domain.
+  course_files_cors_origins = length(var.course_files_cors_allowed_origins) > 0 ? var.course_files_cors_allowed_origins : distinct(compact(concat(
+    var.public_web_origin != "" ? [trimsuffix(var.public_web_origin, "/")] : [],
+    [for d in var.web_domain_names : "https://${d}"],
+  )))
+
   azs = slice(data.aws_availability_zones.available.names, 0, 2)
 
   # Public Fargate avoids a ~$32/mo NAT gateway; tasks get public IPs and

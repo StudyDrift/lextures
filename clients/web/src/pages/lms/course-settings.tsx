@@ -48,6 +48,11 @@ import { CourseMarketplaceSettingsSection } from './course-marketplace-settings-
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { CourseHeroImage } from '../../components/course-hero-image'
+import { GradeLevelMultiSelect } from '../../components/lms/grade-level-multi-select'
+import {
+  gradeLevelsEqual,
+  gradeLevelsFromCourse,
+} from '../../lib/grade-levels'
 
 function isoToDatetimeLocal(iso: string | null): string {
   if (!iso) return ''
@@ -112,7 +117,7 @@ type SavePayload = {
   courseHomeLanding: CourseHomeLanding
   courseHomeContentItemId: string | null
   courseTimezone: string | null
-  gradeLevel: string | null
+  gradeLevels: string[]
 }
 
 type SettingsSection =
@@ -208,7 +213,7 @@ export default function CourseSettings() {
   const [courseHomeLanding, setCourseHomeLanding] = useState<CourseHomeLanding>('data')
   const [courseHomeContentItemId, setCourseHomeContentItemId] = useState('')
   const [courseTimezone, setCourseTimezone] = useState(() => detectBrowserTimezone())
-  const [gradeLevel, setGradeLevel] = useState<string>('')
+  const [gradeLevels, setGradeLevels] = useState<string[]>([])
   const [structureForHomePicker, setStructureForHomePicker] = useState<CourseStructureItem[]>([])
 
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -268,7 +273,7 @@ export default function CourseSettings() {
       setCourseHomeLanding(normalizeCourseHomeLanding(c.courseHomeLanding))
       setCourseHomeContentItemId((c.courseHomeContentItemId ?? '').trim())
       setCourseTimezone(c.courseTimezone?.trim() || detectBrowserTimezone())
-      setGradeLevel(c.gradeLevel?.trim() ?? '')
+      setGradeLevels(gradeLevelsFromCourse(c))
       setMarkdownThemePreset(c.markdownThemePreset ?? 'default')
       try {
         const items = await fetchCourseStructure(courseCode)
@@ -303,7 +308,7 @@ export default function CourseSettings() {
     applyScheduleStateFromCourse(course)
     setCourseHomeLanding(normalizeCourseHomeLanding(course.courseHomeLanding))
     setCourseHomeContentItemId((course.courseHomeContentItemId ?? '').trim())
-    setGradeLevel(course.gradeLevel?.trim() ?? '')
+    setGradeLevels(gradeLevelsFromCourse(course))
     setMarkdownThemePreset(course.markdownThemePreset ?? 'default')
     setCustomDraft({
       ...markdownThemeCustomSeed,
@@ -331,7 +336,7 @@ export default function CourseSettings() {
     if (title.trim() !== course.title) return true
     if (description.trim() !== course.description) return true
     if (published !== course.published) return true
-    if ((gradeLevel.trim() || null) !== (course.gradeLevel?.trim() || null)) return true
+    if (!gradeLevelsEqual(gradeLevels, gradeLevelsFromCourse(course))) return true
 
     // Check course home landing
     const normHome = normalizeCourseHomeLanding(course.courseHomeLanding)
@@ -375,7 +380,7 @@ export default function CourseSettings() {
     title,
     description,
     published,
-    gradeLevel,
+    gradeLevels,
     courseHomeLanding,
     courseHomeContentItemId,
     scheduleMode,
@@ -412,7 +417,7 @@ export default function CourseSettings() {
           ? courseHomeContentItemId.trim()
           : null,
       courseTimezone: courseTimezone.trim() || null,
-      gradeLevel: gradeLevel.trim() || null,
+      gradeLevels,
     }
   }
 
@@ -440,7 +445,7 @@ export default function CourseSettings() {
       title.trim() !== course.title ||
       description.trim() !== course.description ||
       published !== course.published ||
-      (gradeLevel.trim() || null) !== (course.gradeLevel?.trim() || null) ||
+      !gradeLevelsEqual(gradeLevels, gradeLevelsFromCourse(course)) ||
       courseHomeLanding !== normalizeCourseHomeLanding(course.courseHomeLanding) ||
       (courseHomeLanding === 'content_page' && courseHomeContentItemId.trim() !== (course.courseHomeContentItemId ?? '').trim()) ||
       (courseTimezone.trim() || null) !== (course.courseTimezone?.trim() || null) ||
@@ -497,7 +502,7 @@ export default function CourseSettings() {
             courseHomeLanding: payload.courseHomeLanding,
             courseHomeContentItemId: payload.courseHomeContentItemId,
             courseTimezone: payload.courseTimezone,
-            gradeLevel: payload.gradeLevel,
+            gradeLevels: payload.gradeLevels,
           }),
         })
         const raw: unknown = await res.json().catch(() => ({}))
@@ -529,7 +534,7 @@ export default function CourseSettings() {
       applyScheduleStateFromCourse(updatedCourse)
       setCourseHomeLanding(normalizeCourseHomeLanding(updatedCourse.courseHomeLanding))
       setCourseHomeContentItemId((updatedCourse.courseHomeContentItemId ?? '').trim())
-      setGradeLevel(updatedCourse.gradeLevel?.trim() ?? '')
+      setGradeLevels(gradeLevelsFromCourse(updatedCourse))
       setMarkdownThemePreset(updatedCourse.markdownThemePreset ?? 'default')
       setCustomDraft({
         ...markdownThemeCustomSeed,
@@ -937,38 +942,18 @@ export default function CourseSettings() {
                       placeholder="What is this course about?"
                     />
                   </label>
-                  <label className="block">
+                  <div>
                     <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
-                      Grade level <span className="font-normal text-slate-500 dark:text-neutral-400">(optional)</span>
+                      Grade levels{' '}
+                      <span className="font-normal text-slate-500 dark:text-neutral-400">(optional)</span>
                     </span>
-                    <select
+                    <GradeLevelMultiSelect
                       id="course-settings-grade-level"
-                      value={gradeLevel}
-                      onChange={(e) => setGradeLevel(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-50"
-                      aria-label="Grade level"
-                    >
-                      <option value="">No grade level — higher ed or unspecified</option>
-                      <option value="K">Kindergarten</option>
-                      <option value="1">Grade 1</option>
-                      <option value="2">Grade 2</option>
-                      <option value="3">Grade 3</option>
-                      <option value="4">Grade 4</option>
-                      <option value="5">Grade 5</option>
-                      <option value="6">Grade 6</option>
-                      <option value="7">Grade 7</option>
-                      <option value="8">Grade 8</option>
-                      <option value="9">Grade 9</option>
-                      <option value="10">Grade 10</option>
-                      <option value="11">Grade 11</option>
-                      <option value="12">Grade 12</option>
-                      <option value="K-2">K–2 (multi-grade)</option>
-                      <option value="3-5">3–5 (multi-grade)</option>
-                      <option value="6-8">6–8 (multi-grade)</option>
-                      <option value="9-12">9–12 (multi-grade)</option>
-                      <option value="K-12">K–12 (all grades)</option>
-                    </select>
-                  </label>
+                      value={gradeLevels}
+                      onChange={setGradeLevels}
+                      aria-label="Grade levels"
+                    />
+                  </div>
                 </div>
               </section>
 

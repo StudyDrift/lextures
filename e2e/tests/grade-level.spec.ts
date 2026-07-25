@@ -25,7 +25,7 @@ function authHeaders(token: string) {
 
 async function apiCreateCourseWithGradeLevel(
   token: string,
-  payload: { title: string; gradeLevel?: string | null },
+  payload: { title: string; gradeLevel?: string | null; gradeLevels?: string[] },
 ): Promise<Record<string, unknown>> {
   const res = await fetch(`${API_BASE}/api/v1/courses`, {
     method: 'POST',
@@ -95,9 +95,24 @@ test.describe('Grade-Level Scoping API', () => {
     const { access_token: token } = await apiSignup({ email: uniqueEmail(), password: PASSWORD })
     const course = await apiCreateCourseWithGradeLevel(token, { title: 'Grade 5 Science', gradeLevel: '5' })
     expect(course.gradeLevel).toBe('5')
+    expect(course.gradeLevels).toEqual(['5'])
     const code = course.courseCode as string
     const fetched = await apiGetCourse(token, code)
     expect(fetched.gradeLevel).toBe('5')
+    expect(fetched.gradeLevels).toEqual(['5'])
+  })
+
+  test('create course with multiple grade levels stores them correctly', async () => {
+    const { access_token: token } = await apiSignup({ email: uniqueEmail(), password: PASSWORD })
+    const course = await apiCreateCourseWithGradeLevel(token, {
+      title: 'Multi Grade Science',
+      gradeLevels: ['3', '4', '5'],
+    })
+    expect(course.gradeLevels).toEqual(['3', '4', '5'])
+    expect(course.gradeLevel).toBe('3')
+    const code = course.courseCode as string
+    const fetched = await apiGetCourse(token, code)
+    expect(fetched.gradeLevels).toEqual(['3', '4', '5'])
   })
 
   test('create course without grade level returns null gradeLevel', async () => {
@@ -105,21 +120,30 @@ test.describe('Grade-Level Scoping API', () => {
     const course = await apiCreateCourse(token, { title: 'No Grade Level Course' })
     const fetched = await apiGetCourse(token, course.courseCode)
     expect(fetched.gradeLevel == null || fetched.gradeLevel === undefined).toBe(true)
+    const levels = fetched.gradeLevels as string[] | null | undefined
+    expect(levels == null || levels.length === 0).toBe(true)
   })
 
   test('GET courses filtered by grade_level returns only matching courses', async () => {
     const { access_token: token } = await apiSignup({ email: uniqueEmail(), password: PASSWORD })
     await apiCreateCourseWithGradeLevel(token, { title: 'Grade 5 Math', gradeLevel: '5' })
+    await apiCreateCourseWithGradeLevel(token, {
+      title: 'Grades 4-5 Science',
+      gradeLevels: ['4', '5'],
+    })
     await apiCreateCourseWithGradeLevel(token, { title: 'Grade 3 Reading', gradeLevel: '3' })
     await apiCreateCourse(token, { title: 'Higher Ed Course' })
 
     const filtered = await apiListCourses(token, { grade_level: '5' })
     expect(filtered.courses.length).toBeGreaterThanOrEqual(1)
     for (const c of filtered.courses) {
-      expect(c.gradeLevel).toBe('5')
+      const levels = (c.gradeLevels as string[] | undefined) ?? []
+      const single = c.gradeLevel as string | undefined
+      expect(levels.includes('5') || single === '5').toBe(true)
     }
     const grade5Titles = filtered.courses.map((c) => c.title)
     expect(grade5Titles).toContain('Grade 5 Math')
+    expect(grade5Titles).toContain('Grades 4-5 Science')
     expect(grade5Titles).not.toContain('Grade 3 Reading')
     expect(grade5Titles).not.toContain('Higher Ed Course')
   })
@@ -153,9 +177,34 @@ test.describe('Grade-Level Scoping API', () => {
       gradeLevel: '7',
     })
     expect(updated.gradeLevel).toBe('7')
+    expect(updated.gradeLevels).toEqual(['7'])
 
     const fetched = await apiGetCourse(token, code)
     expect(fetched.gradeLevel).toBe('7')
+  })
+
+  test('PUT course sets multiple grade levels', async () => {
+    const { access_token: token } = await apiSignup({ email: uniqueEmail(), password: PASSWORD })
+    const created = await apiCreateCourse(token, { title: 'Update Multi Grade' })
+    const code = created.courseCode
+
+    const updated = await apiPutCourse(token, code, {
+      title: 'Update Multi Grade',
+      description: '',
+      published: false,
+      startsAt: null,
+      endsAt: null,
+      visibleFrom: null,
+      hiddenAt: null,
+      scheduleMode: 'fixed',
+      relativeEndAfter: null,
+      relativeHiddenAfter: null,
+      gradeLevels: ['6', '7', '8'],
+    })
+    expect(updated.gradeLevels).toEqual(['6', '7', '8'])
+
+    const fetched = await apiGetCourse(token, code)
+    expect(fetched.gradeLevels).toEqual(['6', '7', '8'])
   })
 
   test('PUT course clears grade level when set to null', async () => {
@@ -174,11 +223,13 @@ test.describe('Grade-Level Scoping API', () => {
       scheduleMode: 'fixed',
       relativeEndAfter: null,
       relativeHiddenAfter: null,
-      gradeLevel: '',
+      gradeLevels: [],
     })
 
     const fetched = await apiGetCourse(token, code)
     expect(fetched.gradeLevel == null || fetched.gradeLevel === undefined).toBe(true)
+    const levels = fetched.gradeLevels as string[] | null | undefined
+    expect(levels == null || levels.length === 0).toBe(true)
   })
 
   test('grade level band values are accepted (K-2, 3-5, 6-8, 9-12, K-12)', async () => {
@@ -190,6 +241,7 @@ test.describe('Grade-Level Scoping API', () => {
         gradeLevel: band,
       })
       expect(course.gradeLevel).toBe(band)
+      expect(course.gradeLevels).toEqual([band])
     }
   })
 })

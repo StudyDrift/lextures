@@ -15,12 +15,15 @@ import (
 )
 
 type createCourseBody struct {
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	CourseType  *string `json:"courseType"`
-	OrgUnitID   *string `json:"orgUnitId"`
-	TermID      *string `json:"termId"`
-	GradeLevel  *string `json:"gradeLevel"`
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	CourseType  *string  `json:"courseType"`
+	OrgUnitID   *string  `json:"orgUnitId"`
+	TermID      *string  `json:"termId"`
+	// GradeLevels is the preferred multi-select payload.
+	GradeLevels []string `json:"gradeLevels"`
+	// GradeLevel is accepted for single-value clients; ignored when gradeLevels is non-empty.
+	GradeLevel *string `json:"gradeLevel"`
 }
 
 // handleCreateCourse is POST /api/v1/courses.
@@ -135,16 +138,23 @@ func (d Deps) handleCreateCourse() http.HandlerFunc {
 			termIDPtr = &tid
 		}
 
-		var gradeLevelPtr *string
-		if body.GradeLevel != nil && strings.TrimSpace(*body.GradeLevel) != "" {
+		var gradeLevels []string
+		if len(body.GradeLevels) > 0 {
+			normalized, ok := course.NormalizeGradeLevels(body.GradeLevels)
+			if !ok {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid gradeLevels value.")
+				return
+			}
+			gradeLevels = normalized
+		} else if body.GradeLevel != nil && strings.TrimSpace(*body.GradeLevel) != "" {
 			gl := strings.TrimSpace(*body.GradeLevel)
 			if !course.ValidGradeLevel(gl) {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid gradeLevel value.")
 				return
 			}
-			gradeLevelPtr = &gl
+			gradeLevels = []string{gl}
 		}
-		out, err := course.CreateCourse(ctx, d.Pool, userID, title, description, courseType, orgUnitID, termIDPtr, gradeLevelPtr)
+		out, err := course.CreateCourse(ctx, d.Pool, userID, title, description, courseType, orgUnitID, termIDPtr, gradeLevels)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create course.")
 			return

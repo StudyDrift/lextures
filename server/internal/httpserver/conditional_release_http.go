@@ -48,12 +48,51 @@ type unlockOverrideBody struct {
 }
 
 func (d Deps) registerConditionalReleaseRoutes(r chi.Router) {
+	r.Get("/api/v1/courses/{course_code}/structure/modules/{module_id}/requirements", d.handleGetModuleRequirements())
 	r.Put("/api/v1/courses/{course_code}/structure/modules/{module_id}/requirements", d.handlePutModuleRequirements())
 	r.Put("/api/v1/courses/{course_code}/items/{item_id}/completion-rule", d.handlePutItemCompletionRule())
 	r.Delete("/api/v1/courses/{course_code}/items/{item_id}/completion-rule", d.handleDeleteItemCompletionRule())
 	r.Get("/api/v1/courses/{course_code}/modules/progress", d.handleGetModulesProgress())
 	r.Get("/api/v1/courses/{course_code}/requirements/report", d.handleGetRequirementsReport())
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/unlock-override", d.handlePostModuleUnlockOverride())
+}
+
+func (d Deps) handleGetModuleRequirements() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if d.conditionalReleaseFeatureOff(w) {
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		perm := "course:" + courseCode + ":item:create"
+		canEdit, err := rbac.UserHasPermission(r.Context(), d.Pool, viewer, perm)
+		if err != nil || !canEdit {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Instructor permission required.")
+			return
+		}
+		moduleID, err := uuid.Parse(chi.URLParam(r, "module_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid module id.")
+			return
+		}
+		req, err := crrepo.GetModuleRequirement(r.Context(), d.Pool, moduleID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load module requirements.")
+			return
+		}
+		if req == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Module requirements not configured.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(req)
+	}
 }
 
 func (d Deps) handlePutModuleRequirements() http.HandlerFunc {

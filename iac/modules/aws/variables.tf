@@ -111,6 +111,16 @@ variable "course_files_bucket_force_destroy" {
   default     = false
 }
 
+variable "course_files_cors_allowed_origins" {
+  description = <<-EOT
+    Browser origins allowed to PUT/GET course-file objects via presigned S3 URLs
+    (e.g. ["https://app.example.com"]). Empty skips CORS configuration; set this
+    whenever the SPA uploads files with browser fetch() to presigned URLs.
+  EOT
+  type        = list(string)
+  default     = []
+}
+
 variable "enable_bastion" {
   description = "Provision an SSM-managed bastion for emergency Postgres access. Defaults to true in production."
   type        = bool

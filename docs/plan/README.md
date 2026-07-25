@@ -46,6 +46,7 @@ One plan per feature gap identified in `[docs/MISSING_FEATURES.md](../MISSING_FE
 - [AN — Motion & Animation Polish](animations/) · [completed](../completed/animations/) — one cross-platform motion language (web/desktop/iOS/Android): the signature "bubble" spring, shared tokens, launch→landing & navigation transitions, skeleton→content load choreography, list/overlay/control motion, and delight moments — all reduced-motion & performance-budgeted (AN.1–AN.7)
 - [PP — Parent Portal (staff workflows)](../completed/parent-portal/) — permission-gated assign parents/guardians, invite-when-missing-account, activate-link pairing (PP.1+) on top of shipped 13.1 / W02
 - [HS — Homeschool rebrand](homeschool/) · [completed](../completed/homeschool/) — product segment rebrand to Homeschool across marketing, clients, server, docs & e2e metadata (HS.1–HS.6)
+- [AC — Adaptive Content Engine](adaptive/) — the tagline ("the learning environment that adapts") realized as a per-course loop: a pre-assessment profiles each learner, the content page is **rewritten / re-emphasized** for them (introduce · reinforce · compress · remediate) with a fidelity guarantee, and a post-assessment measures lift against a holdout — behind a per-course feature flag, with human-in-the-loop approval, safety/fairness governance, and effectiveness reporting (AC.1–AC.9)
 
 ## Standards & Legal Hardening (2026-07-06)
 

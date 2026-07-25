@@ -215,7 +215,12 @@ export type CoursePublic = {
   courseHomeContentItemId?: string | null
   /** Instructor-authoritative IANA timezone for deadline intent (plan 11.4). */
   courseTimezone?: string | null
-  /** K-12 grade level (plan 13.6). Values: K, 1-12, K-2, 3-5, 6-8, 9-12, K-12. Null for non-K12. */
+  /**
+   * K-12 grade levels (plan 13.6). Values: K, 1-12, K-2, 3-5, 6-8, 9-12, K-12.
+   * Empty/omitted for non-K12. Prefer this over legacy `gradeLevel`.
+   */
+  gradeLevels?: string[] | null
+  /** First selected grade for backward compatibility with single-value clients. */
   gradeLevel?: string | null
   /** Per-user catalog nickname from GET /api/v1/courses. */
   catalogNickname?: string | null
@@ -1298,12 +1303,25 @@ export async function createCourse(body: {
   description: string
   courseType?: 'traditional' | 'competency_based'
   termId?: string | null
+  /** Preferred multi-select payload. */
+  gradeLevels?: string[] | null
+  /** Legacy single-value; ignored by API when gradeLevels is non-empty. */
   gradeLevel?: string | null
 }): Promise<CoursePublic> {
   const res = await authorizedFetch('/api/v1/courses', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      title: body.title,
+      description: body.description,
+      ...(body.courseType !== undefined ? { courseType: body.courseType } : {}),
+      ...(body.termId !== undefined ? { termId: body.termId } : {}),
+      ...(body.gradeLevels !== undefined
+        ? { gradeLevels: body.gradeLevels ?? [] }
+        : body.gradeLevel !== undefined
+          ? { gradeLevel: body.gradeLevel }
+          : {}),
+    }),
   })
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
@@ -1368,6 +1386,9 @@ export async function putCourse(
     relativeEndAfter: string | null
     relativeHiddenAfter: string | null
     termId?: string | null
+    /** Preferred multi-select payload (including empty array to clear). */
+    gradeLevels?: string[] | null
+    /** Legacy single-value; ignored when gradeLevels is sent. */
     gradeLevel?: string | null
   },
 ): Promise<CoursePublic> {
@@ -1386,7 +1407,11 @@ export async function putCourse(
       relativeEndAfter: body.relativeEndAfter,
       relativeHiddenAfter: body.relativeHiddenAfter,
       ...(body.termId !== undefined ? { termId: body.termId } : {}),
-      ...(body.gradeLevel !== undefined ? { gradeLevel: body.gradeLevel } : {}),
+      ...(body.gradeLevels !== undefined
+        ? { gradeLevels: body.gradeLevels ?? [] }
+        : body.gradeLevel !== undefined
+          ? { gradeLevel: body.gradeLevel }
+          : {}),
     }),
   })
   const raw = await parseJson(res)

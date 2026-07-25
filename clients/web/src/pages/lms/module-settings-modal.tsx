@@ -35,6 +35,10 @@ type ModuleSettingsModalProps = {
   /** When set, shows a Requirements tab with this content. */
   requirementsSection?: ReactNode
   requirementsSaving?: boolean
+  /** True while existing requirements are loading for the Requirements tab. */
+  requirementsLoading?: boolean
+  /** Optional explicit submit for the requirements tab (preferred over form= association). */
+  onSaveRequirements?: () => void
 }
 
 export function ModuleSettingsModal(props: ModuleSettingsModalProps) {
@@ -53,6 +57,8 @@ function ModuleSettingsModalInner({
   errorMessage,
   requirementsSection,
   requirementsSaving = false,
+  requirementsLoading = false,
+  onSaveRequirements,
 }: ModuleSettingsModalProps) {
   const titleId = useId()
   const nameInputId = useId()
@@ -79,9 +85,10 @@ function ModuleSettingsModalInner({
     return () => window.removeEventListener('keydown', onKey)
   }, [busy, onClose])
 
-  const activeFormId = tab === 'requirements' ? MODULE_REQUIREMENTS_FORM_ID : MODULE_SETTINGS_FORM_ID
   const saveDisabled =
-    busy || (tab === 'general' && !title.trim()) || (tab === 'requirements' && !showRequirementsTab)
+    busy ||
+    (tab === 'general' && !title.trim()) ||
+    (tab === 'requirements' && (!showRequirementsTab || requirementsLoading))
   const saveLabel =
     tab === 'requirements'
       ? requirementsSaving
@@ -90,6 +97,25 @@ function ModuleSettingsModalInner({
       : saving
         ? 'Saving…'
         : 'Save'
+
+  function submitActiveTab() {
+    if (busy || saveDisabled) return
+    if (tab === 'requirements') {
+      if (onSaveRequirements) {
+        onSaveRequirements()
+        return
+      }
+      const form = document.getElementById(MODULE_REQUIREMENTS_FORM_ID)
+      if (form instanceof HTMLFormElement) {
+        form.requestSubmit()
+      }
+      return
+    }
+    const form = document.getElementById(MODULE_SETTINGS_FORM_ID)
+    if (form instanceof HTMLFormElement) {
+      form.requestSubmit()
+    }
+  }
 
   return (
     <div
@@ -218,6 +244,9 @@ function ModuleSettingsModalInner({
                 disabled={busy}
                 className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
               />
+              <button type="submit" className="sr-only" tabIndex={-1}>
+                Save
+              </button>
             </form>
           </div>
 
@@ -232,8 +261,8 @@ function ModuleSettingsModalInner({
             </div>
           ) : null}
 
-          {errorMessage && tab === 'general' ? (
-            <p className="mt-3 text-sm text-rose-700" role="status">
+          {errorMessage ? (
+            <p className="mt-3 text-sm text-rose-700" role="alert">
               {errorMessage}
             </p>
           ) : null}
@@ -260,8 +289,8 @@ function ModuleSettingsModalInner({
               Cancel
             </button>
             <button
-              type="submit"
-              form={activeFormId}
+              type="button"
+              onClick={() => submitActiveTab()}
               disabled={saveDisabled}
               className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
