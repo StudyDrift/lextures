@@ -159,7 +159,7 @@ context where the "hidden setting" problem bites hardest.
 
 ## 8. Data Model
 
-Migration pair: `server/migrations/443_user_pinned_settings.sql` / `443_user_pinned_settings.down.sql`
+Migration pair: `server/migrations/445_user_pinned_settings.sql` / `445_user_pinned_settings.down.sql`
 (shipped as 443; adaptive-content migrations took 439–442).
 
 ```sql
@@ -264,7 +264,7 @@ Not applicable.
 
 ## 12. Integration Points
 
-- New: `server/migrations/443_user_pinned_settings.sql` (+ `.down.sql`),
+- New: `server/migrations/445_user_pinned_settings.sql` (+ `.down.sql`),
   `server/internal/repos/pinnedsettings/pinnedsettings.go`,
   `server/internal/httpserver/pinned_settings_http.go`,
   `clients/web/src/lib/pinned-settings-api.ts`.
