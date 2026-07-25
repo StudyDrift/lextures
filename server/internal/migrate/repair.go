@@ -57,6 +57,8 @@ var demoChecksumRepairMigrations = []struct {
 	{367, "367_user_course_catalog_hidden.sql"},
 	// Idempotent INSERT ON CONFLICT DO NOTHING + CREATE TABLE IF NOT EXISTS; default_markdown seeded after first apply (PP.1).
 	{431, "431_parent_link_assign.sql"},
+	// Idempotent grade_level→grade_levels backfill (IF EXISTS + DROP IF EXISTS); edited for re-apply after repair_345.
+	{438, "438_course_grade_levels_array.sql"},
 }
 
 // repairMigration289RenumberCollision fixes dev/demo DBs that applied grading_agent as v289
