@@ -37,6 +37,7 @@ var (
 	ErrOutcomeNotInCourse    = errors.New("Referenced learning outcome does not belong to this course.")
 	ErrKillSwitchEngaged     = errors.New("Adaptive Content Engine is temporarily unavailable (kill-switch engaged).")
 	ErrPreAssessmentNotQuiz  = errors.New("preAssessmentItemId must reference a quiz structure item in this course.")
+	ErrPostAssessmentNotQuiz = errors.New("postAssessmentItemId must reference a quiz structure item in this course.")
 	ErrInvalidFreshnessDays  = errors.New("masteryFreshnessDays must be >= 0.")
 )
 

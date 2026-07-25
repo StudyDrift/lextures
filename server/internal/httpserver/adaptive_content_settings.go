@@ -36,6 +36,8 @@ func (d Deps) registerAdaptiveContentRoutes(r chi.Router) {
 	d.registerAdaptiveContentAuthoringRoutes(r)
 	// AC.6
 	d.registerAdaptiveContentServingRoutes(r)
+	// AC.7
+	d.registerAdaptiveContentEffectivenessRoutes(r)
 }
 
 func writeACEKillSwitch(w http.ResponseWriter) {
@@ -340,7 +342,8 @@ func (d Deps) handleAdaptiveContentUnitsCreate() http.HandlerFunc {
 			return
 		}
 		if err := d.validateUnitRefs(r, *cid, body.BaseContentItemID, body.TargetModuleItemID, body.TargetOutcomeID, body.PreAssessmentItemID, body.PostAssessmentItemID); err != nil {
-			if errors.Is(err, acsvc.ErrItemNotInCourse) || errors.Is(err, acsvc.ErrOutcomeNotInCourse) || errors.Is(err, acsvc.ErrPreAssessmentNotQuiz) {
+			if errors.Is(err, acsvc.ErrItemNotInCourse) || errors.Is(err, acsvc.ErrOutcomeNotInCourse) ||
+				errors.Is(err, acsvc.ErrPreAssessmentNotQuiz) || errors.Is(err, acsvc.ErrPostAssessmentNotQuiz) {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 				return
 			}
@@ -532,7 +535,8 @@ func (d Deps) handleAdaptiveContentUnitPatch() http.HandlerFunc {
 			return
 		}
 		if err := d.validateUnitRefs(r, *cid, next.BaseContentItemID, next.TargetModuleItemID, next.TargetOutcomeID, next.PreAssessmentItemID, next.PostAssessmentItemID); err != nil {
-			if errors.Is(err, acsvc.ErrItemNotInCourse) || errors.Is(err, acsvc.ErrOutcomeNotInCourse) || errors.Is(err, acsvc.ErrPreAssessmentNotQuiz) {
+			if errors.Is(err, acsvc.ErrItemNotInCourse) || errors.Is(err, acsvc.ErrOutcomeNotInCourse) ||
+				errors.Is(err, acsvc.ErrPreAssessmentNotQuiz) || errors.Is(err, acsvc.ErrPostAssessmentNotQuiz) {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 				return
 			}
@@ -682,6 +686,16 @@ func (d Deps) validateUnitRefs(
 	}
 	if err := checkItem(postID); err != nil {
 		return err
+	}
+	// FR-1 (AC.7): post-assessment must be a quiz-kind structure item.
+	if postID != nil && *postID != uuid.Nil {
+		isQuiz, err := acrepo.StructureItemIsQuiz(r.Context(), d.Pool, courseID, *postID)
+		if err != nil {
+			return err
+		}
+		if !isQuiz {
+			return acsvc.ErrPostAssessmentNotQuiz
+		}
 	}
 	if outcomeID != nil && *outcomeID != uuid.Nil {
 		ok, err := acrepo.OutcomeBelongsToCourse(r.Context(), d.Pool, courseID, *outcomeID)

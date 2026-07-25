@@ -446,14 +446,29 @@ func rebuildStudentRows(ctx context.Context, pool *pgxpool.Pool, courseID uuid.U
 				return err
 			}
 			avg := WeightedAvgForStudentLinks(links, scores)
+			// AC.7 FR-7: fold adaptive-unit post-assessment into outcome achievement when the
+			// unit targets this learning outcome; tag treatment vs holdout for separation.
+			var adaptiveArm *string
+			adaptiveScore, wasHoldout, hasAdaptive, aerr := adaptivePostScore(ctx, tx, lo.ID, stu.EnrollmentID)
+			if aerr != nil {
+				return aerr
+			}
+			if hasAdaptive && adaptiveScore != nil {
+				avg = mergeAdaptiveScore(avg, *adaptiveScore)
+				arm := "treatment"
+				if wasHoldout {
+					arm = "holdout"
+				}
+				adaptiveArm = &arm
+			}
 			assessed := avg != nil
 			met := studentMet(avg, threshold)
 			_, err = tx.Exec(ctx, `
 INSERT INTO analytics.outcomes_report_student (
     course_id, outcome_id, user_id, enrollment_id, section_id,
-    avg_score_pct, assessed, met
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-`, courseID, lo.ID, stu.UserID, stu.EnrollmentID, stu.SectionID, avg, assessed, met)
+    avg_score_pct, assessed, met, adaptive_arm
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+`, courseID, lo.ID, stu.UserID, stu.EnrollmentID, stu.SectionID, avg, assessed, met, adaptiveArm)
 			if err != nil {
 				return err
 			}
@@ -573,4 +588,45 @@ WHERE qr.question_id = $4
 
 func isFiniteF64(v float64) bool {
 	return !math.IsNaN(v) && !math.IsInf(v, 0)
+}
+
+// adaptivePostScore loads the latest adaptive-unit post-assessment score for an
+// enrollment on an outcome-targeted unit (AC.7 FR-7).
+func adaptivePostScore(
+	ctx context.Context,
+	q pgx.Tx,
+	outcomeID, enrollmentID uuid.UUID,
+) (score *float32, wasHoldout bool, ok bool, err error) {
+	var pct *float32
+	var holdout bool
+	scanErr := q.QueryRow(ctx, `
+SELECT o.post_score_pct, o.was_holdout
+FROM course.adaptive_content_units u
+INNER JOIN course.adaptation_servings s ON s.unit_id = u.id AND s.enrollment_id = $2
+INNER JOIN course.adaptation_outcomes o ON o.serving_id = s.id
+WHERE u.target_kind = 'outcome'
+  AND u.target_outcome_id = $1
+  AND u.post_assessment_item_id IS NOT NULL
+  AND o.post_score_pct IS NOT NULL
+ORDER BY o.measured_at DESC
+LIMIT 1
+`, outcomeID, enrollmentID).Scan(&pct, &holdout)
+	if errors.Is(scanErr, pgx.ErrNoRows) {
+		return nil, false, false, nil
+	}
+	if scanErr != nil {
+		return nil, false, false, scanErr
+	}
+	return pct, holdout, true, nil
+}
+
+// mergeAdaptiveScore blends an existing weighted outcome average with an adaptive
+// post-assessment score (equal weight when both present).
+func mergeAdaptiveScore(existing *float32, adaptive float32) *float32 {
+	if existing == nil {
+		v := adaptive
+		return &v
+	}
+	avg := (*existing + adaptive) / 2
+	return &avg
 }

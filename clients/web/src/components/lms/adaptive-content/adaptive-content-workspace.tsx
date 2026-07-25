@@ -14,9 +14,11 @@ import {
   createAdaptiveContentUnit,
   editApproveAdaptiveContentVariant,
   fetchAdaptiveContentBudget,
+  fetchAdaptiveContentEffectiveness,
   fetchAdaptiveContentKeyTerms,
   fetchAdaptiveContentReviewQueue,
   fetchAdaptiveContentSettings,
+  fetchAdaptiveContentUnitEffectiveness,
   fetchAdaptiveContentUnits,
   fetchAdaptiveContentVariants,
   fetchCourseStructure,
@@ -25,9 +27,11 @@ import {
   prewarmAdaptiveContentUnit,
   putAdaptiveContentKeyTerms,
   putAdaptiveContentSettings,
+  refreshAdaptiveContentEffectiveness,
   rejectAdaptiveContentVariant,
   revokeAdaptiveContentVariant,
   type AdaptiveContentBudget,
+  type AdaptiveContentEffectiveness,
   type AdaptiveContentKeyTerm,
   type AdaptiveContentPreview,
   type AdaptiveContentSettings,
@@ -36,6 +40,7 @@ import {
   type CourseStructureItem,
 } from '../../../lib/courses-api'
 import { useConfirm } from '../../use-confirm'
+import { EffectivenessChip, EffectivenessSummaryTable } from './effectiveness-chip'
 import { VariantDiff } from './variant-diff'
 
 const ALL_AXES = [
@@ -104,6 +109,7 @@ export function AdaptiveContentWorkspace({
   // Create form
   const [newBaseId, setNewBaseId] = useState('')
   const [newPreId, setNewPreId] = useState('')
+  const [newPostId, setNewPostId] = useState('')
   const [newAxes, setNewAxes] = useState<string[]>(['emphasis', 'scaffolding', 'reading_level', 'misconception'])
   const [newMinFidelity, setNewMinFidelity] = useState(0.85)
   const [newTrigger, setNewTrigger] = useState('pre_quiz')
@@ -114,9 +120,17 @@ export function AdaptiveContentWorkspace({
   const [editStatus, setEditStatus] = useState('draft')
   const [editTrigger, setEditTrigger] = useState('pre_quiz')
   const [editPreId, setEditPreId] = useState('')
+  const [editPostId, setEditPostId] = useState('')
+  const [unitEffectiveness, setUnitEffectiveness] = useState<AdaptiveContentEffectiveness | null>(
+    null,
+  )
+  const [effectivenessByUnit, setEffectivenessByUnit] = useState<
+    Record<string, AdaptiveContentEffectiveness>
+  >({})
   const [keyTerms, setKeyTerms] = useState<AdaptiveContentKeyTerm[]>([])
   const [keyTermInput, setKeyTermInput] = useState('')
   const [savingUnit, setSavingUnit] = useState(false)
+  const [refreshingEff, setRefreshingEff] = useState(false)
 
   // Preview
   const [previewMode, setPreviewMode] = useState<(typeof EMPHASIS_MODES)[number]>('remediate')
@@ -155,16 +169,20 @@ export function AdaptiveContentWorkspace({
     setLoading(true)
     setError(null)
     try {
-      const [u, s, b, st] = await Promise.all([
+      const [u, s, b, st, eff] = await Promise.all([
         fetchAdaptiveContentUnits(courseCode),
         fetchCourseStructure(courseCode),
         fetchAdaptiveContentBudget(courseCode).catch(() => null),
         fetchAdaptiveContentSettings(courseCode).catch(() => null),
+        fetchAdaptiveContentEffectiveness(courseCode).catch(() => [] as AdaptiveContentEffectiveness[]),
       ])
       setUnits(u)
       setStructure(s)
       setBudget(b)
       setSettings(st)
+      const byUnit: Record<string, AdaptiveContentEffectiveness> = {}
+      for (const e of eff) byUnit[e.unitId] = e
+      setEffectivenessByUnit(byUnit)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load adaptive content.')
     } finally {
@@ -201,15 +219,22 @@ export function AdaptiveContentWorkspace({
     setEditStatus(unit.status)
     setEditTrigger(unit.triggerMode ?? 'pre_quiz')
     setEditPreId(unit.preAssessmentItemId ?? '')
+    setEditPostId(unit.postAssessmentItemId ?? '')
+    setUnitEffectiveness(effectivenessByUnit[unit.id] ?? null)
     setPreview(null)
     setEditMarkdown('')
     try {
-      const [terms, variants] = await Promise.all([
+      const [terms, variants, eff] = await Promise.all([
         fetchAdaptiveContentKeyTerms(courseCode, unit.id),
         fetchAdaptiveContentVariants(courseCode, unit.id),
+        fetchAdaptiveContentUnitEffectiveness(courseCode, unit.id).catch(() => null),
       ])
       setKeyTerms(terms)
       setUnitVariants(variants)
+      if (eff) {
+        setUnitEffectiveness(eff)
+        setEffectivenessByUnit((prev) => ({ ...prev, [unit.id]: eff }))
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load unit details.')
     }
@@ -229,6 +254,7 @@ export function AdaptiveContentWorkspace({
         targetModuleItemId: moduleParent ?? newBaseId,
         baseContentItemId: newBaseId,
         preAssessmentItemId: newPreId || null,
+        postAssessmentItemId: newPostId || null,
         allowedAxes: newAxes,
         status: 'draft',
         triggerMode: newTrigger,
@@ -238,6 +264,7 @@ export function AdaptiveContentWorkspace({
       setStatusLive('Unit created as draft.')
       setNewBaseId('')
       setNewPreId('')
+      setNewPostId('')
       await load()
       await openUnit({ ...unit, minFidelity: newMinFidelity })
     } catch (e) {
@@ -265,6 +292,8 @@ export function AdaptiveContentWorkspace({
         triggerMode: editTrigger,
         preAssessmentItemId: editPreId || null,
         clearPreAssessment: !editPreId,
+        postAssessmentItemId: editPostId || null,
+        clearPostAssessment: !editPostId,
       })
       setUnits((prev) => prev.map((u) => (u.id === updated.id ? { ...u, ...updated } : u)))
       setStatusLive('Unit saved.')
@@ -652,6 +681,22 @@ export function AdaptiveContentWorkspace({
                   </select>
                 </label>
                 <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+                  Exit ticket (post-assessment)
+                  <select
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                    value={newPostId}
+                    onChange={(e) => setNewPostId(e.target.value)}
+                    data-testid="ace-new-post-assessment"
+                  >
+                    <option value="">None</option>
+                    {quizzes.map((q) => (
+                      <option key={q.id} value={q.id}>
+                        {q.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
                   Min fidelity
                   <div className="flex items-center gap-2">
                     <input
@@ -729,60 +774,109 @@ export function AdaptiveContentWorkspace({
               Turn on Adaptive Content and add your first unit.
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-neutral-800">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-neutral-900 dark:text-neutral-400">
-                  <tr>
-                    <th className="px-3 py-2">Content page</th>
-                    <th className="px-3 py-2">Status</th>
-                    <th className="px-3 py-2">Coverage</th>
-                    <th className="px-3 py-2">Axes</th>
-                    <th className="px-3 py-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
-                  {units.map((u) => (
-                    <tr key={u.id} className="bg-white dark:bg-neutral-950">
-                      <td className="px-3 py-2 font-medium text-slate-900 dark:text-neutral-100">
-                        {titleById.get(u.baseContentItemId) ?? u.baseContentItemId.slice(0, 8)}
-                      </td>
-                      <td className="px-3 py-2">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass(u.status)}`}>
-                          {u.status}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-slate-600 dark:text-neutral-300">
-                        {u.variantTotal ?? 0} total · {u.variantApproved ?? 0} approved ·{' '}
-                        {u.variantPendingReview ?? 0} pending
-                      </td>
-                      <td className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">
-                        {(u.allowedAxes ?? []).join(', ') || '—'}
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() => void openUnit(u)}
-                            className="text-xs font-medium text-indigo-600 hover:text-indigo-500"
+            <>
+              <div className="mb-2 flex justify-end">
+                {canConfigure && (
+                  <button
+                    type="button"
+                    disabled={refreshingEff}
+                    data-testid="ace-refresh-effectiveness"
+                    onClick={() => {
+                      void (async () => {
+                        setRefreshingEff(true)
+                        try {
+                          await refreshAdaptiveContentEffectiveness(courseCode)
+                          const eff = await fetchAdaptiveContentEffectiveness(courseCode)
+                          const byUnit: Record<string, AdaptiveContentEffectiveness> = {}
+                          for (const e of eff) byUnit[e.unitId] = e
+                          setEffectivenessByUnit(byUnit)
+                          setStatusLive('Effectiveness refreshed.')
+                        } catch (e) {
+                          setError(
+                            e instanceof Error ? e.message : 'Could not refresh effectiveness.',
+                          )
+                        } finally {
+                          setRefreshingEff(false)
+                        }
+                      })()
+                    }}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-900"
+                  >
+                    {refreshingEff ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    )}
+                    Refresh effectiveness
+                  </button>
+                )}
+              </div>
+              <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-neutral-800">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-neutral-900 dark:text-neutral-400">
+                    <tr>
+                      <th className="px-3 py-2">Content page</th>
+                      <th className="px-3 py-2">Status</th>
+                      <th className="px-3 py-2">Effectiveness</th>
+                      <th className="px-3 py-2">Coverage</th>
+                      <th className="px-3 py-2">Axes</th>
+                      <th className="px-3 py-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
+                    {units.map((u) => (
+                      <tr key={u.id} className="bg-white dark:bg-neutral-950">
+                        <td className="px-3 py-2 font-medium text-slate-900 dark:text-neutral-100">
+                          {titleById.get(u.baseContentItemId) ?? u.baseContentItemId.slice(0, 8)}
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass(u.status)}`}
                           >
-                            Open
-                          </button>
-                          {canConfigure && u.status === 'active' && (
+                            {u.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <EffectivenessChip
+                            effectiveness={
+                              u.postAssessmentItemId ? effectivenessByUnit[u.id] ?? null : null
+                            }
+                            compact
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-slate-600 dark:text-neutral-300">
+                          {u.variantTotal ?? 0} total · {u.variantApproved ?? 0} approved ·{' '}
+                          {u.variantPendingReview ?? 0} pending
+                        </td>
+                        <td className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">
+                          {(u.allowedAxes ?? []).join(', ') || '—'}
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex flex-wrap gap-2">
                             <button
                               type="button"
-                              onClick={() => void handlePrewarm(u.id)}
-                              className="text-xs font-medium text-slate-600 hover:text-slate-800 dark:text-neutral-400"
+                              onClick={() => void openUnit(u)}
+                              className="text-xs font-medium text-indigo-600 hover:text-indigo-500"
                             >
-                              Pre-warm now
+                              Open
                             </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                            {canConfigure && u.status === 'active' && (
+                              <button
+                                type="button"
+                                onClick={() => void handlePrewarm(u.id)}
+                                className="text-xs font-medium text-slate-600 hover:text-slate-800 dark:text-neutral-400"
+                              >
+                                Pre-warm now
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </>
       ) : (
@@ -911,6 +1005,38 @@ export function AdaptiveContentWorkspace({
             </div>
 
             <div className="space-y-6 p-4">
+              {unitEffectiveness && (
+                <section
+                  className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-neutral-800 dark:bg-neutral-900"
+                  data-testid="ace-verdict-banner"
+                  aria-live="polite"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Effectiveness
+                    </span>
+                    <EffectivenessChip effectiveness={unitEffectiveness} />
+                  </div>
+                  <EffectivenessSummaryTable effectiveness={unitEffectiveness} />
+                  {unitEffectiveness.byMode.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                        By emphasis mode
+                      </p>
+                      <ul className="mt-1 space-y-0.5 text-xs text-slate-600 dark:text-neutral-400">
+                        {unitEffectiveness.byMode.map((m) => (
+                          <li key={m.emphasisMode}>
+                            {m.emphasisMode}: n={m.n}
+                            {m.meanLift != null
+                              ? `, mean lift ${Math.round(m.meanLift)} pts`
+                              : ' (suppressed)'}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </section>
+              )}
               {canConfigure ? (
                 <section className="space-y-3">
                   <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -948,6 +1074,22 @@ export function AdaptiveContentWorkspace({
                         value={editPreId}
                         onChange={(e) => setEditPreId(e.target.value)}
                         className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                      >
+                        <option value="">None</option>
+                        {quizzes.map((q) => (
+                          <option key={q.id} value={q.id}>
+                            {q.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="flex flex-col gap-1 text-xs font-medium sm:col-span-2">
+                      Exit ticket (post-assessment)
+                      <select
+                        value={editPostId}
+                        onChange={(e) => setEditPostId(e.target.value)}
+                        className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                        data-testid="ace-edit-post-assessment"
                       >
                         <option value="">None</option>
                         {quizzes.map((q) => (
