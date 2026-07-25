@@ -1,13 +1,14 @@
 package adaptivecontent
 
 import (
+	"context"
 	"testing"
 
 	"github.com/google/uuid"
 )
 
 func TestResolveServing_NilPool(t *testing.T) {
-	res := ResolveServing(nil, nil, ServeRequest{
+	res := ResolveServing(context.TODO(), nil, ServeRequest{
 		CourseID:          uuid.New(),
 		BaseContentItemID: uuid.New(),
 		UserID:            uuid.New(),
@@ -29,7 +30,7 @@ func TestResolveServing_FlagOff(t *testing.T) {
 	off := false
 	SetKillSwitchForTest(&off)
 
-	res := ResolveServing(nil, nil, ServeRequest{
+	res := ResolveServing(context.TODO(), nil, ServeRequest{
 		CourseID:          uuid.New(),
 		BaseContentItemID: uuid.New(),
 		UserID:            uuid.New(),

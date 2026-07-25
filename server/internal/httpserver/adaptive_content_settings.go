@@ -517,9 +517,10 @@ func (d Deps) handleAdaptiveContentUnitPatch() http.HandlerFunc {
 		}
 		baseChanged := body.BaseContentItemID != nil && *body.BaseContentItemID != existing.BaseContentItemID
 		// Enforce target shape after merges.
-		if next.TargetKind == "module" {
+		switch next.TargetKind {
+		case "module":
 			next.TargetOutcomeID = nil
-		} else if next.TargetKind == "outcome" {
+		case "outcome":
 			next.TargetModuleItemID = nil
 		}
 		if err := acsvc.ValidateUnitTargetShape(next.TargetKind, next.TargetModuleItemID, next.TargetOutcomeID); err != nil {

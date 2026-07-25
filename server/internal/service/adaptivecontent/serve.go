@@ -150,7 +150,7 @@ func ResolveServing(ctx context.Context, pool *pgxpool.Pool, req ServeRequest) S
 		settings = nil
 	}
 	holdoutPct := int16(0)
-	studentOptoutAllowed := true
+	var studentOptoutAllowed bool
 	if settings != nil {
 		holdoutPct = settings.HoldoutPercent
 		studentOptoutAllowed = settings.StudentOptoutAllowed

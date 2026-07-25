@@ -459,7 +459,8 @@ func (d Deps) applyVariantReview(
 	safetyFlags := acrepo.ParseFlagsJSON(existing.SafetyFlags)
 	a11yFlags := acrepo.ParseFlagsJSON(existing.A11yFlags)
 
-	if action == "approve" {
+	switch action {
+	case "approve":
 		if !acsvc.CanApproveStatus(existing.Status) {
 			return acmodel.ContentVariant{}, acsvc.ErrVariantNotPending
 		}
@@ -475,11 +476,11 @@ func (d Deps) applyVariantReview(
 		}
 		// If human-edited, re-check soft fidelity score floor only when score is known and no override.
 		// (We do not re-run the LLM judge on edit.)
-	} else if action == "reject" {
+	case "reject":
 		if !acsvc.CanRejectStatus(existing.Status) {
 			return acmodel.ContentVariant{}, acsvc.ErrVariantNotPending
 		}
-	} else {
+	default:
 		return acmodel.ContentVariant{}, acsvc.ErrInvalidReviewAction
 	}
 

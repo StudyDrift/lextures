@@ -14,16 +14,14 @@ func TestPinnedSettingsPinsGauge_ObservesLength(t *testing.T) {
 	if got := testutil.ToFloat64(m.pinnedSettingsWritesTotal.WithLabelValues("quiz")); got != 1 {
 		t.Fatalf("writes_total quiz = %v, want 1", got)
 	}
-	// Histogram: observation count must be 1 and sum 5.
-	count := testutil.CollectAndCount(m.pinnedSettingsPinsGauge)
-	if count != 1 {
-		// CollectAndCount returns number of metrics; for a single histogram it is 1.
-		// Prefer reading sum via dto if needed — assert Observe is non-panicking and count > 0.
-	}
 	if m.pinnedSettingsPinsGauge == nil {
 		t.Fatal("pinnedSettingsPinsGauge not registered")
 	}
-	// Second observation
+	// Histogram: CollectAndCount returns metric family count (1 for a single histogram).
+	if count := testutil.CollectAndCount(m.pinnedSettingsPinsGauge); count < 1 {
+		t.Fatalf("pinnedSettingsPinsGauge metrics count = %d, want >= 1", count)
+	}
+	// Further observations must not panic.
 	m.ObservePinnedSettingsPinCount(0)
 	m.ObservePinnedSettingsPinCount(12)
 }

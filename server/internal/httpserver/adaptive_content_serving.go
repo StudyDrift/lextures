@@ -95,7 +95,7 @@ func (d Deps) handleAdaptiveContentOptoutPut() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load settings.")
 			return
 		}
-		optoutAllowed := true
+		var optoutAllowed bool
 		if settings != nil {
 			optoutAllowed = settings.StudentOptoutAllowed
 		} else {
