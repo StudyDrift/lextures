@@ -10,6 +10,7 @@ keys:
   calendarEnabled
   canvasGradeSyncEnabled
   collabDocsEnabled
+  contentToolsEnabled
   courseCode
   courseHomeLanding
   courseMode
