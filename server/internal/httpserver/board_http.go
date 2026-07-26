@@ -17,6 +17,10 @@ import (
 // visualBoardsFeatureOff returns true when boards are disabled for the course.
 // Access is controlled only by the per-course visualBoardsEnabled flag (no platform master switch).
 func (d Deps) visualBoardsFeatureOff(w http.ResponseWriter, r *http.Request, courseCode string) bool {
+	if d.Pool == nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+		return true
+	}
 	crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
 	if err != nil || crow == nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")

@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -121,12 +122,21 @@ func materializePath(pattern string) string {
 	return p
 }
 
+// probeIPSeq assigns a unique synthetic client IP to each inventory probe so
+// process-wide rate limiters (global middleware + institution-inquiry form) do
+// not trip when the suite walks 1k+ routes. Empty RemoteAddr would otherwise
+// share one bucket and flake parallel nodb tests with 429.
+var probeIPSeq atomic.Uint64
+
 // probeAuthPosture classifies a route by issuing an unauthenticated request.
 // 401 => session; anything else => anonymous (auth gate did not block).
 func probeAuthPosture(h http.Handler, method, pattern string) string {
 	path := materializePath(pattern)
 	req := httptest.NewRequest(method, path, nil)
 	req.Header.Set("Accept-Language", "en")
+	n := probeIPSeq.Add(1)
+	// 10.a.b.c — unique per probe, valid for onboardingRealIP / ratelimit.ClientIP.
+	req.RemoteAddr = fmt.Sprintf("10.%d.%d.%d:1", (n>>16)&0xff, (n>>8)&0xff, n&0xff)
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code == http.StatusUnauthorized {
