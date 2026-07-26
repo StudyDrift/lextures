@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Web / authoring team |
 | **Depends on** | CT.1 |

@@ -12,54 +12,54 @@ import (
 	"github.com/lextures/lextures/server/internal/relativeschedule"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
-	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
-	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
+	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 )
 
 // moduleAssignmentGetResponse matches `ModuleContentPageResponse` in Rust (assignment branch).
 type moduleAssignmentGetResponse struct {
-	ItemID                       uuid.UUID        `json:"itemId"`
-	Title                        string           `json:"title"`
-	Markdown                     string           `json:"markdown"`
-	DueAt                        *time.Time       `json:"dueAt"`
-	PointsWorth                  *int             `json:"pointsWorth,omitempty"`
-	AssignmentGroupID            *uuid.UUID       `json:"assignmentGroupId,omitempty"`
-	UpdatedAt                    time.Time        `json:"updatedAt"`
-	AvailableFrom                *time.Time       `json:"availableFrom,omitempty"`
-	AvailableUntil               *time.Time       `json:"availableUntil,omitempty"`
-	RequiresAssignmentAccessCode *bool            `json:"requiresAssignmentAccessCode,omitempty"`
-	AssignmentAccessCode         *string          `json:"assignmentAccessCode,omitempty"`
-	SubmissionAllowText          *bool            `json:"submissionAllowText,omitempty"`
-	SubmissionAllowFileUpload    *bool            `json:"submissionAllowFileUpload,omitempty"`
-	SubmissionAllowURL           *bool            `json:"submissionAllowUrl,omitempty"`
-	LateSubmissionPolicy         *string          `json:"lateSubmissionPolicy,omitempty"`
-	LatePenaltyPercent           *int             `json:"latePenaltyPercent,omitempty"`
-	Rubric                       *json.RawMessage `json:"rubric,omitempty"`
-	BlindGrading                 bool             `json:"blindGrading"`
-	IdentitiesRevealedAt         *time.Time       `json:"identitiesRevealedAt,omitempty"`
-	ViewerCanRevealIdentities    bool             `json:"viewerCanRevealIdentities"`
-	ModeratedGrading             bool             `json:"moderatedGrading"`
-	ModerationThresholdPct       *int             `json:"moderationThresholdPct,omitempty"`
-	ModeratorUserID              *uuid.UUID       `json:"moderatorUserId,omitempty"`
-	ProvisionalGraderUserIds     *[]string        `json:"provisionalGraderUserIds,omitempty"`
-	OriginalityDetection         *string          `json:"originalityDetection,omitempty"`
-	OriginalityStudentVisibility *string          `json:"originalityStudentVisibility,omitempty"`
-	GradingType                  *string          `json:"gradingType,omitempty"`
-	PostingPolicy                *string          `json:"postingPolicy,omitempty"`
-	ReleaseAt                    *time.Time       `json:"releaseAt,omitempty"`
-	NeverDrop                    bool             `json:"neverDrop"`
-	ReplaceWithFinal             bool             `json:"replaceWithFinal"`
-	ReadingLevelFkgl             *float64         `json:"readingLevelFkgl,omitempty"`
-	ReadingLevelFre              *float64         `json:"readingLevelFre,omitempty"`
-	SimplifiedForReadingLevel    bool             `json:"simplifiedForReadingLevel,omitempty"`
-	OriginalMarkdown             *string          `json:"originalMarkdown,omitempty"`
-	ReadingLevelTargetFkgl       *int             `json:"readingLevelTargetFkgl,omitempty"`
-	ProfileRationale             *profileRationaleJSON `json:"profileRationale,omitempty"`
-	PreferredAlternateItemID     *uuid.UUID       `json:"preferredAlternateItemId,omitempty"`
+	ItemID                       uuid.UUID               `json:"itemId"`
+	Title                        string                  `json:"title"`
+	Markdown                     string                  `json:"markdown"`
+	DueAt                        *time.Time              `json:"dueAt"`
+	PointsWorth                  *int                    `json:"pointsWorth,omitempty"`
+	AssignmentGroupID            *uuid.UUID              `json:"assignmentGroupId,omitempty"`
+	UpdatedAt                    time.Time               `json:"updatedAt"`
+	AvailableFrom                *time.Time              `json:"availableFrom,omitempty"`
+	AvailableUntil               *time.Time              `json:"availableUntil,omitempty"`
+	RequiresAssignmentAccessCode *bool                   `json:"requiresAssignmentAccessCode,omitempty"`
+	AssignmentAccessCode         *string                 `json:"assignmentAccessCode,omitempty"`
+	SubmissionAllowText          *bool                   `json:"submissionAllowText,omitempty"`
+	SubmissionAllowFileUpload    *bool                   `json:"submissionAllowFileUpload,omitempty"`
+	SubmissionAllowURL           *bool                   `json:"submissionAllowUrl,omitempty"`
+	LateSubmissionPolicy         *string                 `json:"lateSubmissionPolicy,omitempty"`
+	LatePenaltyPercent           *int                    `json:"latePenaltyPercent,omitempty"`
+	Rubric                       *json.RawMessage        `json:"rubric,omitempty"`
+	BlindGrading                 bool                    `json:"blindGrading"`
+	IdentitiesRevealedAt         *time.Time              `json:"identitiesRevealedAt,omitempty"`
+	ViewerCanRevealIdentities    bool                    `json:"viewerCanRevealIdentities"`
+	ModeratedGrading             bool                    `json:"moderatedGrading"`
+	ModerationThresholdPct       *int                    `json:"moderationThresholdPct,omitempty"`
+	ModeratorUserID              *uuid.UUID              `json:"moderatorUserId,omitempty"`
+	ProvisionalGraderUserIds     *[]string               `json:"provisionalGraderUserIds,omitempty"`
+	OriginalityDetection         *string                 `json:"originalityDetection,omitempty"`
+	OriginalityStudentVisibility *string                 `json:"originalityStudentVisibility,omitempty"`
+	GradingType                  *string                 `json:"gradingType,omitempty"`
+	PostingPolicy                *string                 `json:"postingPolicy,omitempty"`
+	ReleaseAt                    *time.Time              `json:"releaseAt,omitempty"`
+	NeverDrop                    bool                    `json:"neverDrop"`
+	ReplaceWithFinal             bool                    `json:"replaceWithFinal"`
+	ReadingLevelFkgl             *float64                `json:"readingLevelFkgl,omitempty"`
+	ReadingLevelFre              *float64                `json:"readingLevelFre,omitempty"`
+	SimplifiedForReadingLevel    bool                    `json:"simplifiedForReadingLevel,omitempty"`
+	OriginalMarkdown             *string                 `json:"originalMarkdown,omitempty"`
+	ReadingLevelTargetFkgl       *int                    `json:"readingLevelTargetFkgl,omitempty"`
+	ProfileRationale             *profileRationaleJSON   `json:"profileRationale,omitempty"`
+	PreferredAlternateItemID     *uuid.UUID              `json:"preferredAlternateItemId,omitempty"`
 	ModalityAlternates           []modalityAlternateJSON `json:"modalityAlternates,omitempty"`
 	// Adaptive is set for students when the page is an active ACE unit base (AC.6).
 	Adaptive *moduleAdaptiveServingJSON `json:"adaptive,omitempty"`
@@ -423,6 +423,8 @@ func (d Deps) handlePatchModuleAssignment() http.HandlerFunc {
 			}
 			prov = append(prov, u)
 		}
+		itemIDCopy := itemID
+		req.Markdown = d.maybeReconcileContentToolMarkdown(r.Context(), courseCode, *cid, &itemIDCopy, req.Markdown)
 		okWrite, err := coursemoduleassignments.PatchForCourseItem(r.Context(), d.Pool, *cid, itemID, coursemoduleassignments.PatchWrite{
 			Markdown:                     req.Markdown,
 			DueAt:                        req.DueAt,

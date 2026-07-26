@@ -15,10 +15,10 @@ import (
 	acrepo "github.com/lextures/lextures/server/internal/repos/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulecontent"
-	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
-	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
+	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	acsvc "github.com/lextures/lextures/server/internal/service/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/service/aigateway"
 	lpsvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
@@ -332,6 +332,8 @@ func (d Deps) handlePatchModuleContentPage() http.HandlerFunc {
 			touchDue = true
 			duePtr = &dueVal
 		}
+		itemIDCopy := itemID
+		req.Markdown = d.maybeReconcileContentToolMarkdown(r.Context(), courseCode, *cid, &itemIDCopy, req.Markdown)
 		row, err := coursemodulecontent.PatchContentPage(r.Context(), d.Pool, *cid, itemID, req.Markdown, touchDue, duePtr)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {

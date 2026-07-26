@@ -20,6 +20,7 @@ export type SlashCommandId =
   | 'blockquote'
   | 'horizontalRule'
   | 'equation'
+  | `tool:${string}`
 
 export type SlashCommand = {
   id: SlashCommandId
@@ -122,6 +123,14 @@ const EQUATION_COMMAND: SlashCommand = {
   keywords: ['math', 'latex', 'equation', 'formula'],
 }
 
+export function isToolSlashCommandId(id: SlashCommandId): id is `tool:${string}` {
+  return id.startsWith('tool:')
+}
+
+export function toolIdFromSlashCommand(id: `tool:${string}`): string {
+  return id.slice('tool:'.length)
+}
+
 /** Slash command in the current block: `/` after whitespace or block start, query has no spaces. */
 export function getSlashState(text: string, caret: number): { start: number; query: string } | null {
   const before = text.slice(0, caret)
@@ -152,12 +161,22 @@ export function slashCommandsForEditor(options?: {
   equation?: boolean
   image?: boolean
   board?: boolean
+  tools?: Array<{ id: string; name: string; description: string; keywords?: string[] }>
 }): SlashCommand[] {
-  return BASE_SLASH_COMMANDS.filter((cmd) => {
+  const base = BASE_SLASH_COMMANDS.filter((cmd) => {
     if (cmd.id === 'image') return Boolean(options?.image)
     if (cmd.id === 'board') return Boolean(options?.board)
     return true
   }).concat(options?.equation ? [EQUATION_COMMAND] : [])
+
+  const toolCommands: SlashCommand[] = (options?.tools ?? []).map((tool) => ({
+    id: `tool:${tool.id}` as const,
+    label: tool.name,
+    description: tool.description,
+    keywords: [tool.id, ...(tool.keywords ?? [])],
+  }))
+
+  return base.concat(toolCommands)
 }
 
 export function filterSlashCommands(commands: SlashCommand[], query: string): SlashCommand[] {
@@ -167,6 +186,10 @@ export function filterSlashCommands(commands: SlashCommand[], query: string): Sl
 }
 
 function slashCommandMatchesQuery(cmd: SlashCommand, q: string): boolean {
+  if (isToolSlashCommandId(cmd.id)) {
+    const toolId = toolIdFromSlashCommand(cmd.id)
+    if (toolId === q || toolId.startsWith(q) || q.startsWith(toolId)) return true
+  }
   if (cmd.id === q || cmd.id.startsWith(q) || q.startsWith(cmd.id)) return true
   const label = cmd.label.toLowerCase()
   const description = cmd.description.toLowerCase()
@@ -184,8 +207,18 @@ export function applySlashCommand(
   editor: Editor,
   command: SlashCommand,
   range: { from: number; to: number },
-  options?: { onEquation?: () => void; onImage?: () => void; onBoard?: () => void },
+  options?: {
+    onEquation?: () => void
+    onImage?: () => void
+    onBoard?: () => void
+    onTool?: (toolId: string) => void
+  },
 ): void {
+  if (isToolSlashCommandId(command.id)) {
+    editor.chain().focus().deleteRange({ from: range.from, to: range.to }).run()
+    options?.onTool?.(toolIdFromSlashCommand(command.id))
+    return
+  }
   if (command.id === 'equation') {
     editor.chain().focus().deleteRange({ from: range.from, to: range.to }).run()
     options?.onEquation?.()

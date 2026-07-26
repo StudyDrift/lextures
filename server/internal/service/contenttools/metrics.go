@@ -21,6 +21,18 @@ var (
 		Help:      "Config JSON Schema validation failures by tool_id.",
 	}, []string{"tool_id"})
 
+	insertTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_insert_total",
+		Help:      "Content tool inserts by tool_id and surface (toolbar|slash|paste|duplicate|api).",
+	}, []string{"tool_id", "surface"})
+
+	configSaveTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_config_save_total",
+		Help:      "Content tool config save outcomes by tool_id and outcome.",
+	}, []string{"tool_id", "outcome"})
+
 	registrySize = prometheus.NewGauge(prometheus.GaugeOpts{
 		Namespace: "lextures",
 		Name:      "content_tool_registry_size",
@@ -36,7 +48,10 @@ var (
 
 func registerMetrics() {
 	metricsOnce.Do(func() {
-		prometheus.MustRegister(instancesTotal, configValidationFailures, registrySize, killSwitchEngaged)
+		prometheus.MustRegister(
+			instancesTotal, configValidationFailures, insertTotal, configSaveTotal,
+			registrySize, killSwitchEngaged,
+		)
 	})
 }
 
@@ -50,6 +65,24 @@ func IncInstanceAction(toolID, action string) {
 func IncConfigValidationFailure(toolID string) {
 	registerMetrics()
 	configValidationFailures.WithLabelValues(toolID).Inc()
+}
+
+// IncInsert increments lextures_content_tool_insert_total{tool_id,surface}.
+func IncInsert(toolID, surface string) {
+	registerMetrics()
+	if surface == "" {
+		surface = "api"
+	}
+	insertTotal.WithLabelValues(toolID, surface).Inc()
+}
+
+// IncConfigSave increments lextures_content_tool_config_save_total{tool_id,outcome}.
+func IncConfigSave(toolID, outcome string) {
+	registerMetrics()
+	if outcome == "" {
+		outcome = "ok"
+	}
+	configSaveTotal.WithLabelValues(toolID, outcome).Inc()
 }
 
 // SetRegistrySizeGauge sets lextures_content_tool_registry_size.

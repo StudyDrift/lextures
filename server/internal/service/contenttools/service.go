@@ -19,26 +19,28 @@ const (
 	// DefaultMaxStateBytes matches the DB CHECK on state_json.
 	DefaultMaxStateBytes = 64 * 1024
 
-	EventFlagToggled       = "flag_toggled"
-	EventSettingsUpdated   = "settings_updated"
-	EventInstanceCreated   = "instance_created"
-	EventInstanceUpdated   = "instance_updated"
-	EventInstanceArchived  = "instance_archived"
+	EventFlagToggled        = "flag_toggled"
+	EventSettingsUpdated    = "settings_updated"
+	EventInstanceCreated    = "instance_created"
+	EventInstanceUpdated    = "instance_updated"
+	EventInstanceArchived   = "instance_archived"
+	EventInstanceDuplicated = "instance_duplicated"
+	EventInstanceDeleted    = "instance_deleted"
 )
 
 var (
-	ErrKillSwitchEngaged   = errors.New("Content Tools are temporarily unavailable.")
-	ErrFeatureDisabled     = errors.New("Content Tools are not enabled for this course.")
-	ErrToolNotFound        = errors.New("tool not found")
-	ErrToolNotAllowed      = errors.New("tool is not on the course allowlist")
-	ErrInvalidHostKind     = errors.New("hostKind must be content_page, assignment, quiz, syllabus, or portfolio_artifact")
-	ErrInvalidStatus       = errors.New("status must be active or archived")
-	ErrStructureItemRequired = errors.New("structureItemId is required for this hostKind")
+	ErrKillSwitchEngaged      = errors.New("Content Tools are temporarily unavailable.")
+	ErrFeatureDisabled        = errors.New("Content Tools are not enabled for this course.")
+	ErrToolNotFound           = errors.New("tool not found")
+	ErrToolNotAllowed         = errors.New("tool is not on the course allowlist")
+	ErrInvalidHostKind        = errors.New("hostKind must be content_page, assignment, quiz, syllabus, or portfolio_artifact")
+	ErrInvalidStatus          = errors.New("status must be active or archived")
+	ErrStructureItemRequired  = errors.New("structureItemId is required for this hostKind")
 	ErrStructureItemForbidden = errors.New("structureItemId must be null for syllabus hostKind")
-	ErrItemNotInCourse     = errors.New("Referenced structure item does not belong to this course.")
-	ErrConfigTooLarge      = errors.New("config payload exceeds size limit")
-	ErrStateTooLarge       = errors.New("state payload exceeds size limit")
-	ErrMaxInstances        = errors.New("maximum instances per item exceeded")
+	ErrItemNotInCourse        = errors.New("Referenced structure item does not belong to this course.")
+	ErrConfigTooLarge         = errors.New("config payload exceeds size limit")
+	ErrStateTooLarge          = errors.New("state payload exceeds size limit")
+	ErrMaxInstances           = errors.New("maximum instances per item exceeded")
 )
 
 // KillSwitchEngaged reports whether the ops emergency kill-switch is on.

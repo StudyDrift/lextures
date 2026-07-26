@@ -264,6 +264,7 @@ export default function CourseSyllabus() {
           <div className="px-4 md:px-8">
             <SyllabusBlockEditor
               courseCode={courseCode}
+              hostKind="syllabus"
               sections={draft}
               onChange={setDraft}
               disabled={saving}

@@ -22,6 +22,7 @@ const (
 	JobTypeTranscriptAnalyticsRollup       = "scheduled.transcript_analytics_rollup"
 	JobTypeAdaptiveContentEffectiveness    = "scheduled.adaptive_content_effectiveness"
 	JobTypeAdaptiveContentFairness         = "scheduled.adaptive_content_fairness"
+	JobTypeContentToolPreviewPurge         = "scheduled.content_tool_preview_purge"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -177,6 +178,13 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "50 1 * * *", // daily 01:50 UTC
 			JobType:        JobTypeAdaptiveContentFairness,
 			Description:    "Refresh adaptive content fairness audit aggregates and disparity flags (AC.8).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "content_tool_preview_purge",
+			Spec:           "10 4 * * *", // daily 04:10 UTC
+			JobType:        JobTypeContentToolPreviewPurge,
+			Description:    "Purge instructor Content Tool preview-as-student state older than 24h (CT.2).",
 			DefaultEnabled: true,
 		},
 	}

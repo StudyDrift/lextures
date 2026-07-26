@@ -1039,6 +1039,115 @@ export const contentToolsCatalogSchema = z.object({
   tools: z.array(contentToolsCatalogToolSchema),
 })
 
+/** CT.2 — Content Tool instance + manifest + usage. */
+export const contentToolInstanceSchema = z.object({
+  id: z.string(),
+  toolId: z.string(),
+  toolVersion: z.string(),
+  hostKind: z.string(),
+  structureItemId: z.string().nullable().optional(),
+  sectionKey: z.string().nullable().optional(),
+  title: z.string().nullable().optional(),
+  config: z.record(z.string(), z.unknown()),
+  status: z.string(),
+  updatedAt: z.string(),
+})
+
+export const contentToolInstancesListSchema = z.object({
+  instances: z.array(contentToolInstanceSchema),
+})
+
+export const contentToolManifestSchema = z.object({
+  id: z.string(),
+  version: z.string(),
+  name: z.string(),
+  category: z.string(),
+  capabilities: z.array(z.string()).optional().default([]),
+  configSchema: z.record(z.string(), z.unknown()),
+  stateSchema: z.record(z.string(), z.unknown()),
+  scoring: z
+    .object({
+      mode: z.string(),
+      maxScore: z.number().optional().nullable(),
+    })
+    .passthrough()
+    .optional(),
+  ai: z
+    .object({
+      featureId: z.string(),
+      required: z.boolean(),
+    })
+    .passthrough()
+    .optional()
+    .nullable(),
+  network: z
+    .object({
+      allowedHosts: z.array(z.string()),
+    })
+    .passthrough()
+    .optional()
+    .nullable(),
+  storage: z
+    .object({
+      maxStateBytes: z.number(),
+    })
+    .passthrough()
+    .optional(),
+  roles: z
+    .object({
+      interact: z.array(z.string()),
+    })
+    .passthrough()
+    .optional(),
+  a11y: z
+    .object({
+      keyboardOperable: z.boolean(),
+      srPattern: z.string(),
+      wcagNotes: z.string().optional(),
+    })
+    .passthrough()
+    .optional(),
+  i18nNamespace: z.string().optional(),
+  ui: z
+    .object({
+      renderer: z.string(),
+      icon: z.string(),
+      group: z.string(),
+      customEditor: z.string().optional(),
+      aiAssist: z.boolean().optional(),
+      allowedHostKinds: z.array(z.string()).optional(),
+    })
+    .passthrough()
+    .optional(),
+})
+
+export const toolInstanceUsageSchema = z.object({
+  instanceId: z.string(),
+  learnersWithState: z.number(),
+  learnersCompleted: z.number(),
+  lastInteractionAt: z.string().nullable(),
+  referencedInBody: z.boolean(),
+})
+
+export const contentToolStateSchema = z.object({
+  stateJson: z.record(z.string(), z.unknown()),
+  revision: z.number(),
+  status: z.string(),
+})
+
+export const contentToolFieldErrorSchema = z.object({
+  path: z.string(),
+  message: z.string(),
+})
+
+export const contentToolValidationErrorBodySchema = z.object({
+  error: z.object({
+    code: z.string().optional(),
+    message: z.string().optional(),
+    errors: z.array(contentToolFieldErrorSchema).optional(),
+  }),
+})
+
 export const adaptiveContentUnitSchema = z.object({
   id: z.string(),
   courseId: z.string(),

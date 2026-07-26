@@ -950,6 +950,8 @@ export default function CourseModuleAssignmentPage() {
           <div className="px-4 md:px-8">
             <SyllabusBlockEditor
               courseCode={courseCode}
+              structureItemId={itemId}
+              hostKind="assignment"
               sections={draft}
               onChange={setDraft}
               disabled={saving}

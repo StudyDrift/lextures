@@ -156,6 +156,75 @@ func ArchiveInstance(ctx context.Context, pool *pgxpool.Pool, courseID, instance
 	return UpdateInstance(ctx, pool, courseID, instanceID, nil, nil, nil, &st)
 }
 
+// HardDeleteInstance permanently deletes an instance (cascades states/events that reference it).
+func HardDeleteInstance(ctx context.Context, pool *pgxpool.Pool, courseID, instanceID uuid.UUID) error {
+	tag, err := pool.Exec(ctx, `
+DELETE FROM course.content_tool_instances
+WHERE id = $1 AND course_id = $2
+`, instanceID, courseID)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
+}
+
+// ArchiveUnreferencedForItem archives active instances for a structure item (or syllabus when
+// structureItemID is nil) whose ids are not in referencedIDs.
+func ArchiveUnreferencedForItem(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	courseID uuid.UUID,
+	structureItemID *uuid.UUID,
+	referencedIDs []uuid.UUID,
+) error {
+	if referencedIDs == nil {
+		referencedIDs = []uuid.UUID{}
+	}
+	_, err := pool.Exec(ctx, `
+UPDATE course.content_tool_instances
+SET status = 'archived', updated_at = NOW()
+WHERE course_id = $1
+  AND status = 'active'
+  AND (
+    ($2::uuid IS NULL AND structure_item_id IS NULL)
+    OR structure_item_id = $2
+  )
+  AND NOT (id = ANY($3::uuid[]))
+`, courseID, structureItemID, referencedIDs)
+	return err
+}
+
+// GetInstancesByIDs returns instances in the course matching the given ids (any status).
+func GetInstancesByIDs(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, ids []uuid.UUID) ([]InstanceRow, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	rows, err := pool.Query(ctx, `
+SELECT `+instanceCols+`
+FROM course.content_tool_instances
+WHERE course_id = $1 AND id = ANY($2::uuid[])
+ORDER BY created_at ASC
+`, courseID, ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []InstanceRow
+	for rows.Next() {
+		r, err := scanInstance(rows)
+		if err != nil {
+			return nil, err
+		}
+		if r != nil {
+			out = append(out, *r)
+		}
+	}
+	return out, rows.Err()
+}
+
 // IsConfigSizeViolation reports whether err is the config_json size CHECK.
 func IsConfigSizeViolation(err error) bool {
 	var pgErr *pgconn.PgError

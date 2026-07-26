@@ -334,7 +334,8 @@ func copyAdaptiveContent(ctx context.Context, tx pgx.Tx, sourceID, targetID, act
 }
 
 // copyContentTools copies CT settings and instances with new ids, rewrites ```lex-tool
-// fences in copied content-page bodies, and never copies learner state (plan CT.1).
+// fences in copied content-page / assignment / quiz / syllabus bodies, and never
+// copies learner state (plan CT.1 / CT.2).
 func copyContentTools(ctx context.Context, tx pgx.Tx, sourceID, targetID, actorUserID uuid.UUID, itemMap map[uuid.UUID]uuid.UUID) error {
 	var allowed []string
 	var studentReset bool
@@ -453,31 +454,108 @@ func copyContentTools(ctx context.Context, tx pgx.Tx, sourceID, targetID, actorU
 		return nil
 	}
 
-	// Rewrite ```lex-tool fences in copied content-page bodies.
+	// Rewrite ```lex-tool fences in copied content-page / assignment / quiz bodies.
 	for oldItem, newItem := range itemMap {
-		var md string
-		err := tx.QueryRow(ctx, `
+		_ = oldItem
+		if err := rewriteLexToolMarkdownTable(ctx, tx, `
 			SELECT markdown FROM course.module_content_pages WHERE structure_item_id = $1
-		`, newItem).Scan(&md)
-		if err == pgx.ErrNoRows {
-			continue
-		}
-		if err != nil {
-			return err
-		}
-		rewritten := ctsvc.RewriteLexToolFences(md, idMap)
-		if rewritten == md {
-			_ = oldItem
-			continue
-		}
-		if _, err := tx.Exec(ctx, `
+		`, `
 			UPDATE course.module_content_pages SET markdown = $1, updated_at = NOW()
 			WHERE structure_item_id = $2
-		`, rewritten, newItem); err != nil {
+		`, newItem, idMap); err != nil {
+			return err
+		}
+		if err := rewriteLexToolMarkdownTable(ctx, tx, `
+			SELECT markdown FROM course.module_assignments WHERE structure_item_id = $1
+		`, `
+			UPDATE course.module_assignments SET markdown = $1, updated_at = NOW()
+			WHERE structure_item_id = $2
+		`, newItem, idMap); err != nil {
+			return err
+		}
+		if err := rewriteLexToolMarkdownTable(ctx, tx, `
+			SELECT markdown FROM course.module_quizzes WHERE structure_item_id = $1
+		`, `
+			UPDATE course.module_quizzes SET markdown = $1, updated_at = NOW()
+			WHERE structure_item_id = $2
+		`, newItem, idMap); err != nil {
 			return err
 		}
 	}
+
+	// Rewrite fences inside course_syllabus.sections JSON markdown fields.
+	var sectionsRaw []byte
+	err = tx.QueryRow(ctx, `
+		SELECT sections FROM course.course_syllabus WHERE course_id = $1
+	`, targetID).Scan(&sectionsRaw)
+	if err != nil && err != pgx.ErrNoRows {
+		return err
+	}
+	if err == nil && len(sectionsRaw) > 0 {
+		rewritten, changed, rerr := rewriteLexToolSyllabusSections(sectionsRaw, idMap)
+		if rerr != nil {
+			return rerr
+		}
+		if changed {
+			if _, err := tx.Exec(ctx, `
+				UPDATE course.course_syllabus SET sections = $1::jsonb, updated_at = NOW()
+				WHERE course_id = $2
+			`, rewritten, targetID); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
+}
+
+func rewriteLexToolMarkdownTable(
+	ctx context.Context,
+	tx pgx.Tx,
+	selectSQL, updateSQL string,
+	itemID uuid.UUID,
+	idMap map[string]string,
+) error {
+	var md string
+	err := tx.QueryRow(ctx, selectSQL, itemID).Scan(&md)
+	if err == pgx.ErrNoRows {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	rewritten := ctsvc.RewriteLexToolFences(md, idMap)
+	if rewritten == md {
+		return nil
+	}
+	_, err = tx.Exec(ctx, updateSQL, rewritten, itemID)
+	return err
+}
+
+func rewriteLexToolSyllabusSections(raw []byte, idMap map[string]string) ([]byte, bool, error) {
+	var sections []struct {
+		ID       string `json:"id"`
+		Heading  string `json:"heading"`
+		Markdown string `json:"markdown"`
+	}
+	if err := json.Unmarshal(raw, &sections); err != nil {
+		return raw, false, err
+	}
+	changed := false
+	for i := range sections {
+		next := ctsvc.RewriteLexToolFences(sections[i].Markdown, idMap)
+		if next != sections[i].Markdown {
+			sections[i].Markdown = next
+			changed = true
+		}
+	}
+	if !changed {
+		return raw, false, nil
+	}
+	out, err := json.Marshal(sections)
+	if err != nil {
+		return raw, false, err
+	}
+	return out, true, nil
 }
 
 func copyAssignmentGroups(ctx context.Context, tx pgx.Tx, sourceID, targetID uuid.UUID, include Include) (map[uuid.UUID]uuid.UUID, error) {
@@ -904,4 +982,3 @@ func copyBlobFile(src, dst string) error {
 	}
 	return out.Close()
 }
-

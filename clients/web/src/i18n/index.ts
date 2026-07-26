@@ -12,6 +12,7 @@ import enCommon from '../../public/locales/en/common.json'
 import enCompliance from '../../public/locales/en/compliance.json'
 import enDashboard from '../../public/locales/en/dashboard.json'
 import enIntroCourse from '../../public/locales/en/introCourse.json'
+import enContentTools from '../../public/locales/en/contentTools.json'
 import enLearnerProfile from '../../public/locales/en/learnerProfile.json'
 import enOnboarding from '../../public/locales/en/onboarding.json'
 import enParent from '../../public/locales/en/parent.json'
@@ -21,6 +22,7 @@ import esCommon from '../../public/locales/es/common.json'
 import esCompliance from '../../public/locales/es/compliance.json'
 import esDashboard from '../../public/locales/es/dashboard.json'
 import esIntroCourse from '../../public/locales/es/introCourse.json'
+import esContentTools from '../../public/locales/es/contentTools.json'
 import esLearnerProfile from '../../public/locales/es/learnerProfile.json'
 import esOnboarding from '../../public/locales/es/onboarding.json'
 import esParent from '../../public/locales/es/parent.json'
@@ -30,6 +32,7 @@ import frCommon from '../../public/locales/fr/common.json'
 import frCompliance from '../../public/locales/fr/compliance.json'
 import frDashboard from '../../public/locales/fr/dashboard.json'
 import frIntroCourse from '../../public/locales/fr/introCourse.json'
+import frContentTools from '../../public/locales/fr/contentTools.json'
 import frLearnerProfile from '../../public/locales/fr/learnerProfile.json'
 import frOnboarding from '../../public/locales/fr/onboarding.json'
 import frParent from '../../public/locales/fr/parent.json'
@@ -44,6 +47,7 @@ export const I18N_NAMESPACES = [
   'onboarding',
   'learnerProfile',
   'introCourse',
+  'contentTools',
 ] as const
 
 const bundledResources = {
@@ -57,6 +61,7 @@ const bundledResources = {
     onboarding: enOnboarding,
     learnerProfile: enLearnerProfile,
     introCourse: enIntroCourse,
+    contentTools: enContentTools,
   },
   es: {
     common: esCommon,
@@ -68,6 +73,7 @@ const bundledResources = {
     onboarding: esOnboarding,
     learnerProfile: esLearnerProfile,
     introCourse: esIntroCourse,
+    contentTools: esContentTools,
   },
   fr: {
     common: frCommon,
@@ -79,6 +85,7 @@ const bundledResources = {
     onboarding: frOnboarding,
     learnerProfile: frLearnerProfile,
     introCourse: frIntroCourse,
+    contentTools: frContentTools,
   },
 } as const
 
