@@ -1,0 +1,13 @@
+# TD.3 — OpenAPI documentation coverage baseline (shrink-only on documented path count).
+#
+# min_documented_paths is the absolute number of path keys under openapi.json "paths".
+# Coverage may only increase (or stay equal). Removing path documentation fails CI.
+# Adding an undocumented route does NOT fail this check (ratchet is absolute, not %).
+#
+# Update when intentionally documenting more routes:
+#   1. Add path entries to server/internal/openapi/openapi.json
+#   2. Raise min_documented_paths to match (scripts/check-openapi-coverage.sh prints the live count)
+#
+# Owner: TD.3 / backend platform. Related: make openapi-check, go test ./internal/openapi/
+
+min_documented_paths=252

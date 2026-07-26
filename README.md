@@ -83,7 +83,7 @@ lextures/
 | **Queue** | RabbitMQ (async jobs, e.g. Canvas import) |
 | **AI (optional)** | Provider credentials (BYOK) in **Settings → Intelligence → Models** — see [docs/ai-providers-byok.md](docs/ai-providers-byok.md) |
 
-For architecture notes (Compose port layout, dev vs prod web, testing conventions), see [docs/ARCH.md](docs/ARCH.md).
+For architecture notes (Compose port layout, dev vs prod web, testing conventions), see [docs/ARCH.md](docs/ARCH.md). For where new code belongs and structural CI ratchets, see [docs/ARCHITECTURE_CONVENTIONS.md](docs/ARCHITECTURE_CONVENTIONS.md).
 
 ## Getting started
 

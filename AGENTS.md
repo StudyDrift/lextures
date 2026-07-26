@@ -10,6 +10,8 @@ Lextures is an LMS (Learning Management System) with two main services:
 - **React SPA** (`clients/web/`): React 19, Vite 8, TypeScript 6, Tailwind CSS v4. Runs on port 5173.
 - **PostgreSQL 16**: Primary data store (Docker container, port 5432). Credentials: `studydrift/studydrift`, database `studydrift`.
 
+**Conventions:** [docs/ARCHITECTURE_CONVENTIONS.md](docs/ARCHITECTURE_CONVENTIONS.md) — package layout, layering, file/package budgets, naming, and automated ratchets (`make lint-structure`).
+
 ### Starting services
 
 1. **Database**: `docker compose -f docker-compose.yml up -d postgres` (from repo root)
@@ -48,6 +50,15 @@ Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run de
 | E2E suite | `make e2e` | repo root |
 | E2E (stack already up) | `make e2e-run` | repo root |
 | Terminology guard | `bash scripts/check-homeschool-terminology.sh` (required CI; fails on non-allowlisted banned terms) | repo root |
+| Structure checks (TD.2) | `make lint-structure` | repo root |
+| Structure remaining counts | `make lint-structure-report` | repo root |
+| Structure self-tests | `bash scripts/check-structure.sh --self-test` | repo root |
+| Route inventory (TD.1) | `make route-inventory` | repo root |
+| Route inventory update (TD.1) | `make route-inventory-update` | repo root |
+| Characterization goldens (TD.1) | `UPDATE_GOLDEN=1 go test ./internal/httpserver/ -run TestCharacterization -count=1` (needs `DATABASE_URL`) | `server/` |
+| OpenAPI contract (TD.3) | `make openapi-check` | repo root |
+| OpenAPI Go tests (TD.3) | `go test ./internal/openapi/ -count=1` | `server/` |
+| Regenerate web OpenAPI types | `npm run openapi:types` (API running) or `npm run openapi:types:file` | `clients/web/` |
 
 ### Lighthouse harness (LH.1)
 

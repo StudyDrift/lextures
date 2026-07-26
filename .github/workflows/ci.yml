@@ -61,6 +61,17 @@ jobs:
       - name: Verify committed OpenAPI spec (plan 16.1)
         run: go test ./internal/publicapi -run TestOpenAPISpec -count=1
 
+      # TD.1 — route inventory + characterization harness (blocks accidental route/auth drift).
+      - name: Route inventory & characterization (TD.1)
+        run: |
+          go test ./internal/httpserver/ -run 'TestRouteInventory|TestCharacterization' -count=1 -timeout=3m
+
+      # TD.3 — OpenAPI must be valid JSON / OpenAPI 3.0.3 shape; coverage ratchet; $refs resolve.
+      - name: OpenAPI contract (TD.3)
+        run: |
+          go test ./internal/openapi/ -count=1 -timeout=1m
+          bash ../scripts/check-openapi-coverage.sh
+
       # Aggregate coverage of all ./internal/... is low while most packages lack tests. The true
       # total is ~11–12% but `go tool cover -func` prints one decimal, so values like 10.9% can
       # appear; use a 10.5% floor to avoid flaky CI while still catching large drops.
@@ -111,6 +122,55 @@ jobs:
       - name: govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
+  # TD.2 — architecture convention ratchets (file/package budgets, layering, naming, deadcode).
+  # Charter: docs/ARCHITECTURE_CONVENTIONS.md. Override allowlist growth with label
+  # structure-allowlist-override (sets STRUCTURE_ALLOWLIST_GROW=1).
+  structure-checks:
+    name: Structure (TD.2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.12"
+          cache-dependency-path: server/go.sum
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install ripgrep if needed
+        run: command -v rg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ripgrep)
+
+      - name: Detect structure-allowlist-override label
+        id: override
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            labels='${{ toJson(github.event.pull_request.labels.*.name) }}'
+            if echo "$labels" | grep -q 'structure-allowlist-override'; then
+              echo "grow=1" >> "$GITHUB_OUTPUT"
+              echo "Allowlist growth permitted by PR label structure-allowlist-override"
+            else
+              echo "grow=0" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "grow=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Structural convention checks (TD.2)
+        env:
+          STRUCTURE_ALLOWLIST_GROW: ${{ steps.override.outputs.grow }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: bash scripts/check-structure.sh
+
+      - name: Structure self-tests
+        run: bash scripts/check-structure.sh --self-test
+
   server-lint:
     name: Server (lint)
     runs-on: ubuntu-latest
@@ -135,7 +195,7 @@ jobs:
   server-go:
     name: Server (Go)
     if: always()
-    needs: [server-tests, server-static, server-lint]
+    needs: [server-tests, server-static, server-lint, structure-checks]
     runs-on: ubuntu-latest
     steps:
       - name: Verify all server checks passed
@@ -143,10 +203,12 @@ jobs:
           TESTS_RESULT: ${{ needs.server-tests.result }}
           STATIC_RESULT: ${{ needs.server-static.result }}
           LINT_RESULT: ${{ needs.server-lint.result }}
+          STRUCTURE_RESULT: ${{ needs.structure-checks.result }}
         run: |
           test "$TESTS_RESULT" = success
           test "$STATIC_RESULT" = success
           test "$LINT_RESULT" = success
+          test "$STRUCTURE_RESULT" = success
 
   client-cli:
     name: Client (CLI)

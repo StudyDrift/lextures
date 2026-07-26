@@ -1,0 +1,6 @@
+status: 401
+content-type: application/json
+keys:
+  error
+  error.code
+  error.message

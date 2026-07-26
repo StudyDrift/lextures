@@ -1,0 +1,6 @@
+status: 200
+content-type: application/json
+keys:
+  attempts
+  attempts[*]
+  retakePolicy

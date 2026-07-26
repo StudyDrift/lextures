@@ -92,7 +92,7 @@ No schema change. Artefacts:
 
 **No HTTP API change.** Every candidate is an unexported-or-internal Go symbol with no route binding. The TD.1 inventory being unchanged (AC-2) is the proof.
 
-One candidate requires care: `internal/publicapi/openapi_serve.go:54 SpecBytes` — resolve jointly with [TD.3 Open Question 1](TD.3-repair-and-verify-openapi-contract.md#18-open-questions) before deleting, since it may be the intended public-API spec path rather than dead scaffolding.
+One candidate requires care: `internal/publicapi/openapi_serve.go:54 SpecBytes` — [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md) resolved this: the public API embed is intentional (partner surface at `/api/v1/openapi.json`). Do **not** delete `SpecBytes` as dead scaffolding; the deadcode baseline may still list it if call-graph tools miss embed/serve use — re-verify before removal.
 
 ## 10. UI / UX
 
@@ -188,4 +188,4 @@ sed 's|/[^/]*\.go:.*||' /tmp/deadcode-now.txt | sort | uniq -c | sort -rn   # pe
 - `deadcode` — <https://pkg.go.dev/golang.org/x/tools/cmd/deadcode>
 - Full findings: regenerate with the §16 commands (223 entries at `4f8a82b1`)
 - Active plans whose packages are affected: [AP — AI providers](../../completed/ai-providers/), [AC — Adaptive Content](../adaptive/README.md), [IQ — Interactive Quizzes](../../completed/interactive-quizzes/), [VC — Visual Collaboration](../../completed/visual-collaboration/)
-- Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.2](TD.2-convention-charter-and-enforcement.md), [TD.3](TD.3-repair-and-verify-openapi-contract.md), [TD.6](TD.6-decompose-httpserver-package.md)
+- Related plans: [TD.1](../../completed/tech_debt/TD.1-refactoring-safety-net.md), [TD.2](../../completed/tech_debt/TD.2-convention-charter-and-enforcement.md), [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md), [TD.6](TD.6-decompose-httpserver-package.md)

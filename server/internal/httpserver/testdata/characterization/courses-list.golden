@@ -1,0 +1,5 @@
+status: 200
+content-type: application/json
+keys:
+  courses
+  courses[*]

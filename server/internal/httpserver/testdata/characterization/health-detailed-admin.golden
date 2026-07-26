@@ -1,0 +1,8 @@
+status: 200
+content-type: application/json
+keys:
+  checks
+  checks[*]
+  checks[*].latency_ms
+  checks[*].name
+  checks[*].status

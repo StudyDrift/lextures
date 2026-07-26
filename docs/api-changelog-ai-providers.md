@@ -1,6 +1,22 @@
 # API changelog — multi-provider AI (AP.9)
 
-**OpenAPI bootstrap version:** `0.2.0` (`server/internal/openapi/openapi.go`)
+**OpenAPI bootstrap version:** `0.2.1` (`server/internal/openapi/openapi.json`)
+
+## TD.3 — OpenAPI contract repair (0.2.1)
+
+`GET /api/openapi.json` previously closed the root object before the `components` block
+(security schemes and reusable schemas), so the document was **invalid JSON** for consumers.
+The repair:
+
+- Moved the document to `server/internal/openapi/openapi.json` (embedded via `go:embed`).
+- Restored the missing path key for `/api/v1/settings/permissions` that collapsed brace
+  structure and orphaned `components`.
+- Reattached `components.securitySchemes.bearerAuth` and all schemas.
+- Added CI guards (`make openapi-check`, `go test ./internal/openapi/`) so invalid or
+  non-conforming specs cannot merge.
+
+No intentional request/response shape changes. Content is strictly more complete for
+parsers that previously failed at the first JSON value.
 
 ## Summary
 

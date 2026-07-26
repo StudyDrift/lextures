@@ -58,7 +58,9 @@ server/internal/httpserver/onboarding_http.go:self-learner
 server/internal/httpserver/onboarding_nodb_test.go:self-learner
 
 # OpenAPI marks 'self-learner' deprecated but still lists it in the program enum (HS.5).
-server/internal/openapi/openapi.go:self-learner
+# Spec lives in openapi.json (embedded); web types are generated from that file (TD.3).
+server/internal/openapi/openapi.json:self-learner
+clients/web/src/lib/generated/openapi-types.ts:self-learner
 
 # --- DO NOT RENAME: permanent /self-learner redirect stub (HS.2) ---
 # Note: www/dist/** is always skipped by the guard scanner; source that emits the stub is allowlisted.

@@ -196,4 +196,4 @@ grep -rl 'DATABASE_URL\|testing.Short()' internal/ --include='*_test.go' | wc -l
 - `server/internal/telemetry/` — existing observability layer for decorator integration
 - `server/internal/logging/` — redaction path relevant to §6
 - `pgx` v5 — <https://pkg.go.dev/github.com/jackc/pgx/v5>
-- Related plans: [TD.2](TD.2-convention-charter-and-enforcement.md), [TD.9](TD.9-enforce-repo-layering.md), [TD.6](TD.6-decompose-httpserver-package.md)
+- Related plans: [TD.2](../../completed/tech_debt/TD.2-convention-charter-and-enforcement.md), [TD.9](TD.9-enforce-repo-layering.md), [TD.6](TD.6-decompose-httpserver-package.md)

@@ -95,6 +95,12 @@ func (d Deps) aiProvidersConfigured(ctx context.Context, orgID *uuid.UUID) []str
 			add(p)
 		}
 	}
+	// Prefer [] over null so clients and characterization goldens see a stable
+	// array shape (aiProvidersConfigured / aiProvidersConfigured[*]) regardless
+	// of whether any provider is configured.
+	if out == nil {
+		return []string{}
+	}
 	return out
 }
 

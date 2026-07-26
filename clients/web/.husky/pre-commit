@@ -1,4 +1,13 @@
 #!/usr/bin/env sh
-cd clients/web || exit 1
+# Pre-commit: web lint-staged + typecheck, plus TD.2 fast structure checks
+# (file naming + file size). Full structure suite runs in CI / `make lint-structure`.
+set -e
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$ROOT/clients/web" || exit 1
 npx lint-staged
 npm run typecheck
+
+# TD.2 fast structural ratchets (skip slow deadcode analysis).
+cd "$ROOT" || exit 1
+STRUCTURE_SKIP_DEADCODE=1 bash scripts/check-file-budgets.sh
+node scripts/check-file-naming.mjs

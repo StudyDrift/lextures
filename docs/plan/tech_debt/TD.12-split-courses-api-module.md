@@ -20,7 +20,7 @@
 
 ## 1. Problem Statement
 
-`clients/web/src/lib/courses-api.ts` is **8,631 lines** exporting **521 symbols** — 319 functions and 202 types — and is imported by **215 files**, roughly a third of the web source tree. It is the frontend's counterpart to `internal/httpserver`: a single module that every feature reaches into, where any change has repository-wide blast radius, where merge conflicts are routine, and where a bundler cannot tree-shake meaningfully because everything is entangled. It is not alone — `boards-api.ts` is 1,453 lines and `live-quiz-api.ts` 1,583 — but it is the extreme case. Its 202 hand-written types also duplicate contracts the server already defines, drifting silently whenever the API changes, because [TD.3](TD.3-repair-and-verify-openapi-contract.md)'s broken spec makes generated types impossible.
+`clients/web/src/lib/courses-api.ts` is **8,631 lines** exporting **521 symbols** — 319 functions and 202 types — and is imported by **215 files**, roughly a third of the web source tree. It is the frontend's counterpart to `internal/httpserver`: a single module that every feature reaches into, where any change has repository-wide blast radius, where merge conflicts are routine, and where a bundler cannot tree-shake meaningfully because everything is entangled. It is not alone — `boards-api.ts` is 1,453 lines and `live-quiz-api.ts` 1,583 — but it is the extreme case. Its 202 hand-written types also duplicate contracts the server already defines, drifting silently whenever the API changes, because until [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md) the broken spec made generated types impossible (now repaired; migration still optional).
 
 ## 2. Goals
 
@@ -184,4 +184,4 @@ wc -l src/lib/boards-api.ts src/lib/live-quiz-api.ts src/lib/transcripts-api.ts
 - `clients/web/src/lib/courses-api-schemas.ts` — 1,071 LOC
 - `clients/web/src/lazy-pages.ts` — route-level code splitting
 - `clients/web/scripts/check-bundle-size.mjs` — existing bundle gate
-- Related plans: [TD.11](TD.11-consolidate-http-client-foundation.md), [TD.13](TD.13-adopt-server-state-management.md), [TD.6](TD.6-decompose-httpserver-package.md), [TD.3](TD.3-repair-and-verify-openapi-contract.md)
+- Related plans: [TD.11](TD.11-consolidate-http-client-foundation.md), [TD.13](TD.13-adopt-server-state-management.md), [TD.6](TD.6-decompose-httpserver-package.md), [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md)
