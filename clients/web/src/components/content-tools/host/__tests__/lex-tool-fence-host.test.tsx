@@ -12,6 +12,15 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
+vi.mock('../../../../context/use-permissions', () => ({
+  usePermissions: () => ({
+    allows: () => false,
+    loading: false,
+    error: null,
+    refresh: async () => undefined,
+  }),
+}))
+
 vi.mock('../registry', () => {
   const MockRenderer = (props: ContentToolRendererProps) => (
     <div data-testid="mock-renderer">

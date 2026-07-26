@@ -59,5 +59,6 @@
     }
   ],
   "conflictPolicy": "server_wins",
-  "autosaveMs": 1500
+  "autosaveMs": 1500,
+  "allowsSelfReset": true
 }

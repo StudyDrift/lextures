@@ -43,6 +43,7 @@ const (
 	EventAdaptiveContentRegressing  = notificationevents.AdaptiveContentRegressing
 	EventAdaptiveContentFairness    = notificationevents.AdaptiveContentFairness
 	EventAdaptiveContentContest     = notificationevents.AdaptiveContentContest
+	EventContentToolStateReset      = notificationevents.ContentToolStateReset
 )
 
 // AllEventTypes re-exports the canonical event list for callers outside this package.

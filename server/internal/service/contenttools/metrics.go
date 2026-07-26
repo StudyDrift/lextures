@@ -75,6 +75,31 @@ var (
 		Name:      "content_tool_offline_replays_total",
 		Help:      "Offline outbox replay outcomes for content tool writes.",
 	}, []string{"outcome"})
+
+	resetsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_resets_total",
+		Help:      "Content tool resets by tool_id, scope, and actor_role.",
+	}, []string{"tool_id", "scope", "actor_role"})
+
+	resetRowsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_reset_rows_total",
+		Help:      "Content tool reset rows cleared by scope.",
+	}, []string{"scope"})
+
+	resetRestoresTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_reset_restores_total",
+		Help:      "Content tool reset snapshot restores.",
+	})
+
+	resetJobDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_reset_job_duration_seconds",
+		Help:      "Async content tool reset job duration.",
+		Buckets:   []float64{0.1, 0.5, 1, 2.5, 5, 10, 30, 60},
+	})
 )
 
 func registerMetrics() {
@@ -83,6 +108,7 @@ func registerMetrics() {
 			instancesTotal, configValidationFailures, insertTotal, configSaveTotal,
 			registrySize, killSwitchEngaged,
 			stateSavesTotal, stateConflictsTotal, actionLatency, renderErrorsTotal, offlineReplaysTotal,
+			resetsTotal, resetRowsTotal, resetRestoresTotal, resetJobDuration,
 		)
 		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
 		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
@@ -155,5 +181,38 @@ func IncStateConflict(toolID string) {
 func ObserveActionLatency(toolID, action string, seconds float64) {
 	registerMetrics()
 	actionLatency.WithLabelValues(toolID, action).Observe(seconds)
+}
+
+// IncResets increments lextures_content_tool_resets_total.
+func IncResets(toolID, scope, actorRole string) {
+	registerMetrics()
+	if toolID == "" {
+		toolID = "_unknown"
+	}
+	if actorRole == "" {
+		actorRole = "instructor"
+	}
+	resetsTotal.WithLabelValues(toolID, scope, actorRole).Inc()
+}
+
+// IncResetRows increments lextures_content_tool_reset_rows_total by n.
+func IncResetRows(scope string, n int) {
+	registerMetrics()
+	if n <= 0 {
+		return
+	}
+	resetRowsTotal.WithLabelValues(scope).Add(float64(n))
+}
+
+// IncResetRestores increments lextures_content_tool_reset_restores_total.
+func IncResetRestores() {
+	registerMetrics()
+	resetRestoresTotal.Inc()
+}
+
+// ObserveResetJobDuration records async reset job duration.
+func ObserveResetJobDuration(seconds float64) {
+	registerMetrics()
+	resetJobDuration.Observe(seconds)
 }
 

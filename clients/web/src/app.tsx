@@ -161,6 +161,7 @@ export default function App() {
               <Route path="mastery-heatmap" element={<Pages.CourseMasteryHeatmap />} />
               <Route path="outcomes-report" element={<Pages.CourseOutcomesReport />} />
               <Route path="whats-working" element={<Pages.CourseWhatsWorking />} />
+              <Route path="content-tools" element={<Pages.CourseContentToolsInsights />} />
               <Route path="enrollments" element={<Pages.CourseEnrollments />} />
               <Route path="attendance" element={<Pages.CourseAttendance />} />
               <Route path="behavior" element={<Pages.CourseBehavior />} />

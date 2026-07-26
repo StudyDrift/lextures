@@ -28,6 +28,7 @@ func (d Deps) registerContentToolsRoutes(r chi.Router) {
 	d.registerContentToolsAuthoringRoutes(r)
 	d.registerContentToolsStateRoutes(r)
 	d.registerContentToolsActionRoutes(r)
+	d.registerContentToolsInstructorRoutes(r)
 }
 
 func writeContentToolsUnavailable(w http.ResponseWriter) {

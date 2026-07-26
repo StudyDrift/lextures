@@ -1,6 +1,6 @@
 # CT.4 — Content Tools: Instructor State Console & Per-Enrollment Reset
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Backend platform + web |
 | **Depends on** | CT.1, CT.3 |
@@ -394,7 +394,7 @@ privacy behaviour.
 - External standards: FERPA §99.31 access logging expectations; RFC 2119.
 - Related plans: [CT.1](CT.1-foundations-registry-and-data-model.md),
   [CT.3](CT.3-student-runtime-and-state-persistence.md),
-  [CT.7](CT.7-analytics-insights-and-gradebook.md),
-  [CT.8](CT.8-governance-safety-privacy-accessibility.md),
-  [S01 DSAR](../standards/S01-unified-data-subject-rights-orchestration.md),
-  [S02 retention](../standards/S02-data-retention-deletion-engine.md).
+  [CT.7](../plan/content_tools/CT.7-analytics-insights-and-gradebook.md),
+  [CT.8](../plan/content_tools/CT.8-governance-safety-privacy-accessibility.md),
+  [S01 DSAR](../../plan/standards/S01-unified-data-subject-rights-orchestration.md),
+  [S02 retention](../../plan/standards/S02-data-retention-deletion-engine.md).

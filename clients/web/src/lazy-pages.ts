@@ -88,6 +88,9 @@ export const CourseEventLogPage = lazy(() => import('./pages/lms/course-event-lo
 export const CourseMasteryHeatmap = lazy(() => import('./pages/lms/course-mastery-heatmap'))
 export const CourseOutcomesReport = lazy(() => import('./pages/lms/course-outcomes-report'))
 export const CourseWhatsWorking = lazy(() => import('./pages/lms/course-whats-working'))
+export const CourseContentToolsInsights = lazy(
+  () => import('./pages/lms/course-content-tools-insights'),
+)
 export const Settings = lazy(() => import('./pages/lms/settings'))
 export const ForgotPassword = lazy(() => import('./pages/forgot-password'))
 export const Login = lazy(() => import('./pages/login'))

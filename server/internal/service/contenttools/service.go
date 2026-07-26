@@ -44,6 +44,8 @@ const (
 	EventStateSaved         = "state_saved"
 	EventStateSubmitted     = "state_submitted"
 	EventActionRan          = "action_ran"
+	EventStateReset         = "state_reset"
+	EventStateResetRestored = "state_reset_restored"
 )
 
 // Learner state status values (server-enforced transitions).

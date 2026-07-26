@@ -43,6 +43,7 @@ const (
 	AdaptiveContentRegressing  = "adaptive_content_regressing"
 	AdaptiveContentFairness    = "adaptive_content_fairness"
 	AdaptiveContentContest     = "adaptive_content_contest"
+	ContentToolStateReset      = "content_tool_state_reset"
 )
 
 // All is the canonical list for defaults and UI.
@@ -88,4 +89,5 @@ var All = []string{
 	AdaptiveContentRegressing,
 	AdaptiveContentFairness,
 	AdaptiveContentContest,
+	ContentToolStateReset,
 }
