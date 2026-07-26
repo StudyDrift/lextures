@@ -2260,5 +2260,16 @@
   "screenShare.state.waitingPresenter": "No one is presenting",
   "screenShare.error.flagOff": "Screen sharing is not enabled for this course.",
   "screenShare.error.loadFailed": "Could not load course.",
-  "screenShare.error.unsupportedCapture": "Entire-screen capture needs a desktop browser. You can still watch as a viewer."
+  "screenShare.error.unsupportedCapture": "Entire-screen capture needs a desktop browser. You can still watch as a viewer.",
+  "course.features.contentTools.title": "Herramientas de contenido",
+  "course.features.contentTools.description": "Inserta herramientas interactivas en el cuerpo de las secciones con estado por inscripción.",
+  "course.features.contentTools.allowlistLabel": "Herramientas disponibles",
+  "course.features.contentTools.allowlistHelp": "No selecciones ninguna para permitir todas las herramientas registradas. Selecciona herramientas para restringir el catálogo del curso. También puedes gestionar la lista con la API de configuración.",
+  "course.features.contentTools.disableConfirm": "¿Desactivar Herramientas de contenido? Los bloques existentes se mostrarán como no disponibles. El estado del estudiante no se elimina.",
+  "course.features.contentTools.studentResetAllowed": "Permitir que los estudiantes restablezcan el estado de sus herramientas",
+  "course.features.contentTools.maxInstancesPerItem": "Máximo de instancias por elemento de contenido (1–200)",
+  "course.features.contentTools.save": "Guardar configuración de Herramientas de contenido",
+  "course.features.contentTools.saving": "Guardando…",
+  "course.features.contentTools.settingsSaved": "Configuración de Herramientas de contenido guardada.",
+  "course.features.contentTools.settingsSaveError": "No se pudo guardar la configuración de Herramientas de contenido."
 }
