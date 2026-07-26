@@ -8,7 +8,9 @@ import (
 	"github.com/lextures/lextures/server/internal/courseroles"
 	acrepo "github.com/lextures/lextures/server/internal/repos/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	acsvc "github.com/lextures/lextures/server/internal/service/adaptivecontent"
+	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
 
 type patchCourseFeaturesBody struct {
@@ -40,6 +42,7 @@ type patchCourseFeaturesBody struct {
 	InteractiveQuizzesEnabled     *bool `json:"interactiveQuizzesEnabled"`
 	ScreenShareEnabled            *bool `json:"screenShareEnabled"`
 	AdaptiveContentEnabled        *bool `json:"adaptiveContentEnabled"`
+	ContentToolsEnabled           *bool `json:"contentToolsEnabled"`
 }
 
 // handlePatchCourseFeatures is PATCH /api/v1/courses/{course_code}/features.
@@ -166,6 +169,11 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 			adaptiveContent = *req.AdaptiveContentEnabled
 		}
 		prevAdaptiveContent := existing.AdaptiveContentEnabled
+		contentTools := existing.ContentToolsEnabled
+		if req.ContentToolsEnabled != nil {
+			contentTools = *req.ContentToolsEnabled
+		}
+		prevContentTools := existing.ContentToolsEnabled
 
 		out, err := course.PatchFeatures(
 			r.Context(), d.Pool, courseCode,
@@ -173,7 +181,7 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 			req.LockdownModeEnabled, standards, adaptivePaths, srs, diagnostic, hint, misconception,
 			req.DiscussionsEnabled, collabDocs, liveSessions, groupSpaces, officeHours, aiTutor,
 			modulesAiAssistant, multilingualMessaging, filesEnabled, attendanceEnabled, whiteboardEnabled, reportCardsEnabled,
-			visualBoardsEnabled, interactiveQuizzesEnabled, screenShareEnabled, adaptiveContent,
+			visualBoardsEnabled, interactiveQuizzesEnabled, screenShareEnabled, adaptiveContent, contentTools,
 		)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to patch course features.")
@@ -204,6 +212,16 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 				if n, err := acrepo.CountEnabledCourses(r.Context(), d.Pool); err == nil {
 					acsvc.SetCoursesEnabledGauge(float64(n))
 				}
+			}
+		}
+		// Content Tools audit when the flag changes (plan CT.1 FR-13).
+		if prevContentTools != contentTools {
+			if cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode); err == nil && cid != nil {
+				actor := viewer
+				_ = ctrepo.InsertEvent(r.Context(), d.Pool, *cid, nil, nil, &actor, "_flag", ctsvc.EventFlagToggled, map[string]any{
+					"contentToolsEnabled": contentTools,
+					"previous":            prevContentTools,
+				})
 			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

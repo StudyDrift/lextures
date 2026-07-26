@@ -1,0 +1,26 @@
+// Package tools is the generated-style index of first-party Content Tools.
+// Adding a tool = drop a folder here and register it in All() (CT.1 contract:
+// no migration, no new route, no Deps change).
+package tools
+
+import (
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/noop_probe"
+)
+
+// Entry is one built-in tool's embeddable assets.
+type Entry struct {
+	ID           string
+	ManifestJSON []byte
+	I18nEN       map[string]string
+}
+
+// All returns every first-party tool. Keep sorted by id.
+func All() []Entry {
+	return []Entry{
+		{
+			ID:           noop_probe.ID,
+			ManifestJSON: noop_probe.ManifestJSON,
+			I18nEN:       noop_probe.I18nEN,
+		},
+	}
+}

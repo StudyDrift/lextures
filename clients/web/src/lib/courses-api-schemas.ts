@@ -74,6 +74,7 @@ export const courseSchema = z
     interactiveQuizzesEnabled: z.boolean().optional(),
     screenShareEnabled: z.boolean().optional(),
     adaptiveContentEnabled: z.boolean().optional(),
+    contentToolsEnabled: z.boolean().optional(),
     canvasGradeSyncEnabled: z.boolean().optional(),
     courseType: z.string().optional(),
     courseMode: z.string().optional(),
@@ -1010,6 +1011,32 @@ export const adaptiveContentSettingsSchema = z.object({
   updatedAt: z.string().optional(),
   generationPaused: z.boolean().optional(),
   maxPrewarmVariants: z.number().optional(),
+})
+
+/** CT.1 — Content Tools course settings. */
+export const contentToolsSettingsSchema = z.object({
+  allowedToolIds: z.array(z.string()),
+  studentResetAllowed: z.boolean(),
+  maxInstancesPerItem: z.number(),
+  updatedAt: z.string().optional(),
+})
+
+export const contentToolsCatalogToolSchema = z.object({
+  id: z.string(),
+  version: z.string(),
+  name: z.string(),
+  category: z.string(),
+  capabilities: z.array(z.string()),
+  i18nNamespace: z.string(),
+  ui: z.object({
+    renderer: z.string(),
+    icon: z.string(),
+    group: z.string(),
+  }),
+})
+
+export const contentToolsCatalogSchema = z.object({
+  tools: z.array(contentToolsCatalogToolSchema),
 })
 
 export const adaptiveContentUnitSchema = z.object({

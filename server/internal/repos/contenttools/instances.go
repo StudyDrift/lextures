@@ -1,0 +1,208 @@
+package contenttools
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+func scanInstance(row pgx.Row) (*InstanceRow, error) {
+	var r InstanceRow
+	var cfg []byte
+	err := row.Scan(
+		&r.ID, &r.CourseID, &r.StructureItemID, &r.HostKind, &r.SectionKey,
+		&r.ToolID, &r.ToolVersion, &r.Title, &cfg, &r.ConfigSchemaVersion,
+		&r.Status, &r.CreatedBy, &r.CreatedAt, &r.UpdatedAt,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if len(cfg) == 0 {
+		cfg = []byte(`{}`)
+	}
+	r.ConfigJSON = json.RawMessage(cfg)
+	return &r, nil
+}
+
+const instanceCols = `
+id, course_id, structure_item_id, host_kind, section_key,
+tool_id, tool_version, title, config_json, config_schema_version,
+status, created_by, created_at, updated_at
+`
+
+// GetInstance returns one instance by id scoped to course, or nil.
+func GetInstance(ctx context.Context, pool *pgxpool.Pool, courseID, instanceID uuid.UUID) (*InstanceRow, error) {
+	row := pool.QueryRow(ctx, `
+SELECT `+instanceCols+`
+FROM course.content_tool_instances
+WHERE id = $1 AND course_id = $2
+`, instanceID, courseID)
+	return scanInstance(row)
+}
+
+// ListInstances returns instances for a course, optionally filtered by item/host/status.
+// A single query — no N+1 (AC-9).
+func ListInstances(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	courseID uuid.UUID,
+	structureItemID *uuid.UUID,
+	hostKind string,
+	includeArchived bool,
+) ([]InstanceRow, error) {
+	rows, err := pool.Query(ctx, `
+SELECT `+instanceCols+`
+FROM course.content_tool_instances
+WHERE course_id = $1
+  AND ($2::uuid IS NULL OR structure_item_id = $2)
+  AND ($3::text = '' OR host_kind = $3)
+  AND ($4::bool OR status = 'active')
+ORDER BY created_at ASC
+`, courseID, structureItemID, hostKind, includeArchived)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []InstanceRow
+	for rows.Next() {
+		r, err := scanInstance(rows)
+		if err != nil {
+			return nil, err
+		}
+		if r != nil {
+			out = append(out, *r)
+		}
+	}
+	return out, rows.Err()
+}
+
+// CountActiveForItem returns active instance count for a structure item (or syllabus when item nil).
+func CountActiveForItem(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, structureItemID *uuid.UUID) (int, error) {
+	var n int
+	err := pool.QueryRow(ctx, `
+SELECT COUNT(*) FROM course.content_tool_instances
+WHERE course_id = $1 AND status = 'active'
+  AND (
+    ($2::uuid IS NULL AND structure_item_id IS NULL)
+    OR structure_item_id = $2
+  )
+`, courseID, structureItemID).Scan(&n)
+	return n, err
+}
+
+// CreateInstance inserts a new instance row.
+func CreateInstance(ctx context.Context, pool *pgxpool.Pool, r InstanceRow) (*InstanceRow, error) {
+	cfg := r.ConfigJSON
+	if len(cfg) == 0 {
+		cfg = json.RawMessage(`{}`)
+	}
+	ver := r.ConfigSchemaVersion
+	if ver <= 0 {
+		ver = 1
+	}
+	row := pool.QueryRow(ctx, `
+INSERT INTO course.content_tool_instances (
+  course_id, structure_item_id, host_kind, section_key, tool_id, tool_version,
+  title, config_json, config_schema_version, status, created_by
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,'active',$10)
+RETURNING `+instanceCols+`
+`, r.CourseID, r.StructureItemID, r.HostKind, r.SectionKey, r.ToolID, r.ToolVersion,
+		r.Title, cfg, ver, r.CreatedBy)
+	return scanInstance(row)
+}
+
+// UpdateInstance patches mutable fields.
+func UpdateInstance(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	courseID, instanceID uuid.UUID,
+	title *string,
+	sectionKey *string,
+	config json.RawMessage,
+	status *string,
+) (*InstanceRow, error) {
+	row := pool.QueryRow(ctx, `
+UPDATE course.content_tool_instances
+SET
+  title = COALESCE($3, title),
+  section_key = COALESCE($4, section_key),
+  config_json = COALESCE($5::jsonb, config_json),
+  status = COALESCE($6, status),
+  updated_at = NOW()
+WHERE id = $1 AND course_id = $2
+RETURNING `+instanceCols+`
+`, instanceID, courseID, title, sectionKey, nullableJSON(config), status)
+	return scanInstance(row)
+}
+
+func nullableJSON(raw json.RawMessage) []byte {
+	if len(raw) == 0 {
+		return nil
+	}
+	return []byte(raw)
+}
+
+// ArchiveInstance soft-deletes an instance (status=archived).
+func ArchiveInstance(ctx context.Context, pool *pgxpool.Pool, courseID, instanceID uuid.UUID) (*InstanceRow, error) {
+	st := "archived"
+	return UpdateInstance(ctx, pool, courseID, instanceID, nil, nil, nil, &st)
+}
+
+// IsConfigSizeViolation reports whether err is the config_json size CHECK.
+func IsConfigSizeViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23514" && (pgErr.ConstraintName == "content_tool_instances_config_size" ||
+			pgErr.ConstraintName == "content_tool_states_size")
+	}
+	return false
+}
+
+// ListInstancesForCourseCopy returns all instances for course copy (any status).
+func ListInstancesForCourseCopy(ctx context.Context, tx pgx.Tx, courseID uuid.UUID) ([]InstanceRow, error) {
+	rows, err := tx.Query(ctx, `
+SELECT `+instanceCols+`
+FROM course.content_tool_instances
+WHERE course_id = $1
+ORDER BY created_at ASC
+`, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []InstanceRow
+	for rows.Next() {
+		r, err := scanInstance(rows)
+		if err != nil {
+			return nil, err
+		}
+		if r != nil {
+			out = append(out, *r)
+		}
+	}
+	return out, rows.Err()
+}
+
+// InsertInstanceCopy inserts a cloned instance with an explicit id (course copy).
+func InsertInstanceCopy(ctx context.Context, tx pgx.Tx, r InstanceRow) error {
+	cfg := r.ConfigJSON
+	if len(cfg) == 0 {
+		cfg = json.RawMessage(`{}`)
+	}
+	_, err := tx.Exec(ctx, `
+INSERT INTO course.content_tool_instances (
+  id, course_id, structure_item_id, host_kind, section_key, tool_id, tool_version,
+  title, config_json, config_schema_version, status, created_by, created_at, updated_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10,$11,$12,NOW(),NOW())
+`, r.ID, r.CourseID, r.StructureItemID, r.HostKind, r.SectionKey, r.ToolID, r.ToolVersion,
+		r.Title, cfg, r.ConfigSchemaVersion, r.Status, r.CreatedBy)
+	return err
+}

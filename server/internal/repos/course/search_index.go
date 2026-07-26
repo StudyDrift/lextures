@@ -38,7 +38,8 @@ SELECT
     c.visual_boards_enabled,
     c.interactive_quizzes_enabled,
     c.screen_share_enabled,
-    c.adaptive_content_enabled
+    c.adaptive_content_enabled,
+    c.content_tools_enabled
 FROM course.courses c
 LEFT JOIN course.user_course_catalog_order o ON o.user_id = $1 AND o.course_id = c.id
 WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
@@ -80,6 +81,7 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 			&it.InteractiveQuizzesEnabled,
 			&it.ScreenShareEnabled,
 			&it.AdaptiveContentEnabled,
+			&it.ContentToolsEnabled,
 		); err != nil {
 			return nil, err
 		}

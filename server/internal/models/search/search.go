@@ -32,6 +32,7 @@ type CourseItem struct {
 	InteractiveQuizzesEnabled     bool   `json:"interactiveQuizzesEnabled"`
 	ScreenShareEnabled            bool   `json:"screenShareEnabled"`
 	AdaptiveContentEnabled        bool   `json:"adaptiveContentEnabled"`
+	ContentToolsEnabled           bool   `json:"contentToolsEnabled"`
 }
 
 // PersonItem is a roster person visible to the caller (when they have enrollments:read for that course).

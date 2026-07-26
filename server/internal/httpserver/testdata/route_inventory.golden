@@ -673,6 +673,14 @@ POST	/api/v1/courses/{course_code}/content-pages/{item_id}/build-with-ai	session
 GET	/api/v1/courses/{course_code}/content-pages/{item_id}/markups	anonymous
 POST	/api/v1/courses/{course_code}/content-pages/{item_id}/markups	anonymous
 DELETE	/api/v1/courses/{course_code}/content-pages/{item_id}/markups/{markup_id}	anonymous
+GET	/api/v1/courses/{course_code}/content-tools/catalog	session
+GET	/api/v1/courses/{course_code}/content-tools/instances	session
+POST	/api/v1/courses/{course_code}/content-tools/instances	session
+DELETE	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	session
+PATCH	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	session
+GET	/api/v1/courses/{course_code}/content-tools/manifests/{tool_id}	session
+GET	/api/v1/courses/{course_code}/content-tools/settings	session
+PUT	/api/v1/courses/{course_code}/content-tools/settings	session
 POST	/api/v1/courses/{course_code}/course-context	session
 POST	/api/v1/courses/{course_code}/course-files	session
 DELETE	/api/v1/courses/{course_code}/course-files/{file_id}	session

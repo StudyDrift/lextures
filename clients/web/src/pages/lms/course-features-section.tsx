@@ -1,13 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FeatureToggleRow } from '../../components/settings/feature-toggle-row'
+import { useConfirm } from '../../components/use-confirm'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import {
   fetchAdaptiveContentSettings,
+  fetchContentToolsCatalog,
+  fetchContentToolsSettings,
   fetchCourseCanvasLink,
   patchCourseCanvasGradeSync,
   patchCourseFeatures,
   putAdaptiveContentSettings,
+  putContentToolsSettings,
   type AdaptiveContentSettings,
+  type ContentToolsCatalogTool,
+  type ContentToolsSettings,
 } from '../../lib/courses-api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import type { CoursePublic } from '../../lib/courses-api'
@@ -28,6 +35,8 @@ type CourseFeatureRow = {
 }
 
 export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: Props) {
+  const { t } = useTranslation('common')
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const { refresh } = useCourseNavFeatures()
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
@@ -77,11 +86,17 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const interactiveQuizzesEnabled = course.interactiveQuizzesEnabled === true
   const screenShareEnabled = course.screenShareEnabled === true
   const adaptiveContentEnabled = course.adaptiveContentEnabled === true
+  const contentToolsEnabled = course.contentToolsEnabled === true
   const canvasGradeSyncEnabled = course.canvasGradeSyncEnabled === true
 
   const [aceSettings, setAceSettings] = useState<AdaptiveContentSettings | null>(null)
   const [aceLoading, setAceLoading] = useState(false)
   const [aceSaving, setAceSaving] = useState(false)
+
+  const [ctSettings, setCtSettings] = useState<ContentToolsSettings | null>(null)
+  const [ctCatalog, setCtCatalog] = useState<ContentToolsCatalogTool[]>([])
+  const [ctLoading, setCtLoading] = useState(false)
+  const [ctSaving, setCtSaving] = useState(false)
 
   useEffect(() => {
     if (!adaptiveContentEnabled) {
@@ -114,6 +129,42 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
     }
   }, [adaptiveContentEnabled, courseCode])
 
+  useEffect(() => {
+    if (!contentToolsEnabled) {
+      setCtSettings(null)
+      setCtCatalog([])
+      return
+    }
+    let cancelled = false
+    setCtLoading(true)
+    void (async () => {
+      try {
+        const [settings, tools] = await Promise.all([
+          fetchContentToolsSettings(courseCode),
+          fetchContentToolsCatalog(courseCode),
+        ])
+        if (!cancelled) {
+          setCtSettings(settings)
+          setCtCatalog(tools)
+        }
+      } catch {
+        if (!cancelled) {
+          setCtSettings({
+            allowedToolIds: [],
+            studentResetAllowed: false,
+            maxInstancesPerItem: 50,
+          })
+          setCtCatalog([])
+        }
+      } finally {
+        if (!cancelled) setCtLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [contentToolsEnabled, courseCode])
+
   const saveAceSettings = useCallback(async () => {
     if (!aceSettings) return
     setAceSaving(true)
@@ -131,6 +182,27 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       setAceSaving(false)
     }
   }, [aceSettings, courseCode])
+
+  const saveCtSettings = useCallback(async () => {
+    if (!ctSettings) return
+    setCtSaving(true)
+    setError(null)
+    try {
+      const updated = await putContentToolsSettings(courseCode, ctSettings)
+      setCtSettings(updated)
+      const tools = await fetchContentToolsCatalog(courseCode)
+      setCtCatalog(tools)
+      setMessage(t('course.features.contentTools.settingsSaved'))
+      toastSaveOk(t('course.features.contentTools.settingsSaved'))
+    } catch (e) {
+      const msg =
+        e instanceof Error ? e.message : t('course.features.contentTools.settingsSaveError')
+      setError(msg)
+      toastMutationError(msg)
+    } finally {
+      setCtSaving(false)
+    }
+  }, [ctSettings, courseCode, t])
 
   const persistCanvasGradeSync = useCallback(
     async (enabled: boolean) => {
@@ -185,6 +257,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       interactiveQuizzesEnabled?: boolean
       screenShareEnabled?: boolean
       adaptiveContentEnabled?: boolean
+      contentToolsEnabled?: boolean
     }) => {
       setSaving(true)
       setMessage(null)
@@ -220,6 +293,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           interactiveQuizzesEnabled: patch.interactiveQuizzesEnabled ?? interactiveQuizzesEnabled,
           screenShareEnabled: patch.screenShareEnabled ?? screenShareEnabled,
           adaptiveContentEnabled: patch.adaptiveContentEnabled ?? adaptiveContentEnabled,
+          contentToolsEnabled: patch.contentToolsEnabled ?? contentToolsEnabled,
         }
         const updated = await patchCourseFeatures(courseCode, body)
         onCourseUpdated(updated)
@@ -256,6 +330,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       interactiveQuizzesEnabled,
       screenShareEnabled,
       adaptiveContentEnabled,
+      contentToolsEnabled,
       calendarEnabled,
       courseCode,
       feedEnabled,
@@ -277,6 +352,24 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           enabled: adaptiveContentEnabled,
           onToggle: () => {
             void persist({ adaptiveContentEnabled: !adaptiveContentEnabled })
+          },
+        },
+        {
+          label: 'Content Tools',
+          description: t('course.features.contentTools.description'),
+          enabled: contentToolsEnabled,
+          onToggle: () => {
+            void (async () => {
+              if (contentToolsEnabled) {
+                const ok = await confirm({
+                  title: t('course.features.contentTools.title'),
+                  description: t('course.features.contentTools.disableConfirm'),
+                  variant: 'danger',
+                })
+                if (!ok) return
+              }
+              await persist({ contentToolsEnabled: !contentToolsEnabled })
+            })()
           },
         },
         {
@@ -487,6 +580,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
     return rows
   }, [
       adaptiveContentEnabled,
+      contentToolsEnabled,
       adaptivePathsEnabled,
       aiTutorEnabled,
       modulesAiAssistantEnabled,
@@ -517,6 +611,8 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       screenShareEnabled,
       persist,
       persistCanvasGradeSync,
+      confirm,
+      t,
   ])
 
   const visibleFeatures = useMemo(() => {
@@ -669,6 +765,104 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         )}
       </div>
 
+      <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          {t('course.features.contentTools.title')} settings
+        </h3>
+        <p id="content-tools-settings-help" className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          {t('course.features.contentTools.allowlistHelp')}
+        </p>
+        {!contentToolsEnabled ? (
+          <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">
+            Turn on <span className="font-medium">{t('course.features.contentTools.title')}</span> to
+            configure.
+          </p>
+        ) : ctLoading || !ctSettings ? (
+          <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">Loading settings…</p>
+        ) : (
+          <div className="mt-3 grid gap-3">
+            <fieldset>
+              <legend className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+                {t('course.features.contentTools.allowlistLabel')}
+              </legend>
+              {ctCatalog.length === 0 ? (
+                <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+                  No tools in the catalog yet.
+                </p>
+              ) : (
+                <ul className="mt-2 space-y-1.5">
+                  {ctCatalog.map((tool) => {
+                    const checked = ctSettings.allowedToolIds.includes(tool.id)
+                    return (
+                      <li key={tool.id}>
+                        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(e) => {
+                              const next = e.target.checked
+                                ? [...ctSettings.allowedToolIds, tool.id]
+                                : ctSettings.allowedToolIds.filter((id) => id !== tool.id)
+                              setCtSettings({ ...ctSettings, allowedToolIds: next })
+                            }}
+                          />
+                          <span className="font-mono text-xs">{tool.id}</span>
+                          <span className="text-slate-400 dark:text-neutral-500">
+                            ({tool.category})
+                          </span>
+                        </label>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </fieldset>
+            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+              <input
+                type="checkbox"
+                checked={ctSettings.studentResetAllowed}
+                onChange={(e) =>
+                  setCtSettings({
+                    ...ctSettings,
+                    studentResetAllowed: e.target.checked,
+                  })
+                }
+              />
+              {t('course.features.contentTools.studentResetAllowed')}
+            </label>
+            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+              {t('course.features.contentTools.maxInstancesPerItem')}
+              <input
+                type="number"
+                min={1}
+                max={200}
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                value={ctSettings.maxInstancesPerItem}
+                onChange={(e) =>
+                  setCtSettings({
+                    ...ctSettings,
+                    maxInstancesPerItem: Number(e.target.value),
+                  })
+                }
+                aria-describedby="content-tools-settings-help"
+              />
+            </label>
+            <div>
+              <button
+                type="button"
+                disabled={ctSaving || saving}
+                onClick={() => void saveCtSettings()}
+                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+              >
+                {ctSaving
+                  ? t('course.features.contentTools.saving')
+                  : t('course.features.contentTools.save')}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {message && (
         <p className="mt-4 text-sm text-emerald-700 dark:text-emerald-400" role="status">
           {message}
@@ -679,6 +873,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           {error}
         </p>
       )}
+      {ConfirmDialogHost}
     </section>
   )
 }

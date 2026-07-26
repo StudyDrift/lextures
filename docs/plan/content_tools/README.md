@@ -111,7 +111,7 @@ Content Tools without enabling, say, the code sandbox.
 
 | ID | Plan | Severity | Effort | Depends on | Delivers |
 |---|---|---|---|---|---|
-| **CT.1** | [Foundations: tool registry, manifest contract & data model](CT.1-foundations-registry-and-data-model.md) | BLOCKER | M | — | `content_tools_enabled` flag, manifest contract, `content_tool_instances` / `content_tool_states` / `content_tool_events`, config API |
+| **CT.1** | [Foundations: tool registry, manifest contract & data model](../../completed/content_tools/CT.1-foundations-registry-and-data-model.md) | BLOCKER | M | — | `content_tools_enabled` flag, manifest contract, `content_tool_instances` / `content_tool_states` / `content_tool_events`, config API |
 | **CT.2** | [Authoring: the Tools dropdown, insert flow & config panel](CT.2-authoring-tools-dropdown-and-config.md) | BLOCKER | M | CT.1 | Toolbar dropdown + slash command, ` ```lex-tool ` serialization, per-tool config forms, preview-as-student |
 | **CT.3** | [Student runtime host & state persistence](CT.3-student-runtime-and-state-persistence.md) | BLOCKER | M | CT.1, CT.2 | Renderer host, autosave with optimistic concurrency, offline queue, action dispatch, a11y baseline |
 | **CT.4** | [Instructor state console & per-enrollment reset](CT.4-instructor-state-console-and-reset.md) | BLOCKER | S | CT.3 | Inspect any learner's tool state; reset one/many/all with snapshot, audit and grade side-effects |

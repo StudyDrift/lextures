@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "StudyDrift API",
-    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features — use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for ≥1 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure).",
+    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features \u2014 use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for \u22651 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure).",
     "version": "0.2.1"
   },
   "tags": [
@@ -48,7 +48,11 @@
     },
     {
       "name": "transcripts",
-      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01–T06)"
+      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01\u2013T06)"
+    },
+    {
+      "name": "content-tools",
+      "description": "Interactive Content Tools inside section bodies (plan CT.1)"
     }
   ],
   "paths": {
@@ -2543,7 +2547,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Sign in with Apple (AuthenticationServices identity token → Lextures tokens)",
+        "summary": "Native Sign in with Apple (AuthenticationServices identity token \u2192 Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -2596,7 +2600,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Google Sign-In (Credential Manager ID token → Lextures tokens)",
+        "summary": "Native Google Sign-In (Credential Manager ID token \u2192 Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -3348,7 +3352,7 @@
         ],
         "responses": {
           "200": {
-            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } — no owned field"
+            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } \u2014 no owned field"
           },
           "400": {
             "description": "Invalid filter"
@@ -3528,7 +3532,7 @@
             "description": "Sign in required"
           },
           "402": {
-            "description": "Paid course — use checkout; body includes checkoutHint"
+            "description": "Paid course \u2014 use checkout; body includes checkoutHint"
           },
           "404": {
             "description": "Not listed or feature disabled"
@@ -3565,7 +3569,7 @@
             "description": "{ checkoutUrl, sessionId } or { alreadyOwned, courseCode, courseId }"
           },
           "400": {
-            "description": "Free course — use claim instead"
+            "description": "Free course \u2014 use claim instead"
           },
           "401": {
             "description": "Sign in required"
@@ -4290,7 +4294,7 @@
         "tags": [
           "accommodations"
         ],
-        "summary": "List a learner’s accommodation records (coordinator perm)",
+        "summary": "List a learner\u2019s accommodation records (coordinator perm)",
         "security": [
           {
             "bearerAuth": []
@@ -4457,7 +4461,7 @@
           "accommodations",
           "me"
         ],
-        "summary": "List this learner’s active (by date range) accommodation summary entries",
+        "summary": "List this learner\u2019s active (by date range) accommodation summary entries",
         "security": [
           {
             "bearerAuth": []
@@ -4478,7 +4482,7 @@
         "tags": [
           "admin"
         ],
-        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with ≥200 responses; optional conceptId scopes to one concept",
+        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with \u2265200 responses; optional conceptId scopes to one concept",
         "security": [
           {
             "bearerAuth": []
@@ -7736,7 +7740,7 @@
         "tags": [
           "courses"
         ],
-        "summary": "Force-rename a player (plan IQ.9); empty body → Player N",
+        "summary": "Force-rename a player (plan IQ.9); empty body \u2192 Player N",
         "security": [
           {
             "bearerAuth": []
@@ -8939,7 +8943,7 @@
           "courses"
         ],
         "summary": "Board realtime WebSocket (plan VC.4)",
-        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"…\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
+        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"\u2026\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
         "parameters": [
           {
             "name": "course_code",
@@ -11942,6 +11946,405 @@
           }
         }
       }
+    },
+    "/api/v1/courses/{course_code}/content-tools/catalog": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "List Content Tools available in a course",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolCatalogResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/manifests/{tool_id}": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Get a Content Tool manifest",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolManifest"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/settings": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Get Content Tools course settings",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolsSettings"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Update Content Tools course settings",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentToolsSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolsSettings"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "List Content Tool instances",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "hostKind",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instances",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolInstanceList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Create a Content Tool instance",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentToolCreateInstanceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolInstance"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Config validation failed"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}": {
+      "patch": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Update a Content Tool instance",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolInstance"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Config validation failed"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Archive a Content Tool instance",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Archived"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -12304,7 +12707,7 @@
           },
           "sourceRef": {
             "type": "object",
-            "description": "topic/passage text or contentId — never student data",
+            "description": "topic/passage text or contentId \u2014 never student data",
             "properties": {
               "topic": {
                 "type": "string"
@@ -13868,6 +14271,244 @@
             }
           }
         }
+      },
+      "ContentToolsSettings": {
+        "type": "object",
+        "properties": {
+          "allowedToolIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "studentResetAllowed": {
+            "type": "boolean"
+          },
+          "maxInstancesPerItem": {
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "allowedToolIds",
+          "studentResetAllowed",
+          "maxInstancesPerItem"
+        ]
+      },
+      "ContentToolCatalogTool": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "i18nNamespace": {
+            "type": "string"
+          },
+          "ui": {
+            "type": "object",
+            "properties": {
+              "renderer": {
+                "type": "string"
+              },
+              "icon": {
+                "type": "string"
+              },
+              "group": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "name",
+          "category"
+        ]
+      },
+      "ContentToolCatalogResponse": {
+        "type": "object",
+        "properties": {
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentToolCatalogTool"
+            }
+          }
+        },
+        "required": [
+          "tools"
+        ]
+      },
+      "ContentToolInstance": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toolId": {
+            "type": "string"
+          },
+          "toolVersion": {
+            "type": "string"
+          },
+          "hostKind": {
+            "type": "string"
+          },
+          "structureItemId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sectionKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "toolId",
+          "toolVersion",
+          "hostKind",
+          "config",
+          "status",
+          "updatedAt"
+        ]
+      },
+      "ContentToolInstanceList": {
+        "type": "object",
+        "properties": {
+          "instances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentToolInstance"
+            }
+          }
+        },
+        "required": [
+          "instances"
+        ]
+      },
+      "ContentToolCreateInstanceRequest": {
+        "type": "object",
+        "properties": {
+          "toolId": {
+            "type": "string"
+          },
+          "hostKind": {
+            "type": "string"
+          },
+          "structureItemId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sectionKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "toolId",
+          "hostKind"
+        ]
+      },
+      "ContentToolManifest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "configSchema": {
+            "type": "object"
+          },
+          "stateSchema": {
+            "type": "object"
+          },
+          "scoring": {
+            "type": "object"
+          },
+          "storage": {
+            "type": "object"
+          },
+          "roles": {
+            "type": "object"
+          },
+          "a11y": {
+            "type": "object"
+          },
+          "i18nNamespace": {
+            "type": "string"
+          },
+          "ui": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "name",
+          "category",
+          "configSchema",
+          "stateSchema"
+        ]
       }
     }
   }
