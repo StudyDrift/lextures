@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -43,7 +44,8 @@ func seedCourse(t *testing.T, pool *pgxpool.Pool) uuid.UUID {
 	t.Helper()
 	ctx := context.Background()
 	courseID := uuid.New()
-	courseCode := "ct1-" + courseID.String()[:8]
+	// Format: C-[A-Z0-9]{6} (courses_course_code_format).
+	courseCode := "C-" + strings.ToUpper(strings.ReplaceAll(courseID.String(), "-", "")[:6])
 	_, err := pool.Exec(ctx, `
 INSERT INTO course.courses (id, course_code, title, content_tools_enabled)
 VALUES ($1, $2, 'CT.1 test', TRUE)
@@ -75,8 +77,8 @@ func seedEnrollment(t *testing.T, pool *pgxpool.Pool, courseID uuid.UUID) (userI
 	}
 	enrollmentID = uuid.New()
 	if _, err := pool.Exec(ctx, `
-INSERT INTO course.course_enrollments (id, course_id, user_id, active)
-VALUES ($1, $2, $3, TRUE)
+INSERT INTO course.course_enrollments (id, course_id, user_id, role, active)
+VALUES ($1, $2, $3, 'student', TRUE)
 `, enrollmentID, courseID, userID); err != nil {
 		t.Fatalf("seed enrollment: %v", err)
 	}
