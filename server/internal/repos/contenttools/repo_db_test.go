@@ -341,7 +341,16 @@ func TestDB_StateRevisionConflictAndIdempotency(t *testing.T) {
 	if err != nil || got2 == nil {
 		t.Fatal(err)
 	}
-	if string(got2.ResultJSON) != string(raw) {
-		t.Fatalf("idempotency overwritten: %s", got2.ResultJSON)
+	var a, b any
+	if err := json.Unmarshal(got2.ResultJSON, &a); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(raw, &b); err != nil {
+		t.Fatal(err)
+	}
+	aNorm, _ := json.Marshal(a)
+	bNorm, _ := json.Marshal(b)
+	if string(aNorm) != string(bNorm) {
+		t.Fatalf("idempotency overwritten: %s vs %s", got2.ResultJSON, raw)
 	}
 }
