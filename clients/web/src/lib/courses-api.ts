@@ -29,6 +29,10 @@ import {
   toolInstanceUsageSchema,
   contentToolStateSchema,
   contentToolValidationErrorBodySchema,
+  contentToolSchemaInvalidBodySchema,
+  contentToolRevisionConflictBodySchema,
+  contentToolStateTooLargeBodySchema,
+  contentToolActionResponseSchema,
   adaptiveContentUnitSchema,
   adaptiveContentUnitsListSchema,
   adaptiveContentVariantSchema,
@@ -1177,6 +1181,25 @@ export type ContentToolHostKind =
   | 'syllabus'
   | 'portfolio_artifact'
 
+export type ContentToolScore = {
+  raw: number
+  max: number
+}
+
+/** CT.3 learner state envelope (`stateJson` kept for CT.1/CT.2 callers). */
+export type ContentToolState = {
+  instanceId?: string
+  revision: number
+  status: string
+  state: Record<string, unknown>
+  score?: ContentToolScore | null
+  updatedAt?: string | null
+  resetCount?: number
+  lastResetAt?: string | null
+  stateJson: Record<string, unknown>
+  scope?: string
+}
+
 export type ContentToolInstance = {
   id: string
   toolId: string
@@ -1188,6 +1211,8 @@ export type ContentToolInstance = {
   config: Record<string, unknown>
   status: string
   updatedAt: string
+  /** Present when listed with `withState=1`. */
+  state?: ContentToolState | null
 }
 
 export type ContentToolManifest = {
@@ -1223,12 +1248,6 @@ export type ToolInstanceUsage = {
   referencedInBody: boolean
 }
 
-export type ContentToolState = {
-  stateJson: Record<string, unknown>
-  revision: number
-  status: string
-}
-
 export type ContentToolFieldError = { path: string; message: string }
 
 export class ContentToolsConfigValidationError extends Error {
@@ -1239,6 +1258,31 @@ export class ContentToolsConfigValidationError extends Error {
     this.name = 'ContentToolsConfigValidationError'
     this.fieldErrors = fieldErrors
   }
+}
+
+export class ContentToolRevisionConflictError extends Error {
+  readonly current: ContentToolState
+
+  constructor(current: ContentToolState) {
+    super('revision_conflict')
+    this.name = 'ContentToolRevisionConflictError'
+    this.current = current
+  }
+}
+
+export class ContentToolStateTooLargeError extends Error {
+  readonly maxBytes: number
+
+  constructor(maxBytes: number) {
+    super('state_too_large')
+    this.name = 'ContentToolStateTooLargeError'
+    this.maxBytes = maxBytes
+  }
+}
+
+export type ContentToolActionResponse = {
+  result: Record<string, unknown>
+  state: ContentToolState
 }
 
 export type CreateContentToolInstanceBody = {
@@ -1266,6 +1310,10 @@ export function defaultContentToolConfig(toolId: string): Record<string, unknown
 }
 
 function throwContentToolsConfigError(raw: unknown): never {
+  const ct3 = contentToolSchemaInvalidBodySchema.safeParse(raw)
+  if (ct3.success) {
+    throw new ContentToolsConfigValidationError('schema_invalid', ct3.data.errors)
+  }
   const parsed = contentToolValidationErrorBodySchema.safeParse(raw)
   if (parsed.success && parsed.data.error.errors?.length) {
     throw new ContentToolsConfigValidationError(
@@ -1276,13 +1324,31 @@ function throwContentToolsConfigError(raw: unknown): never {
   throw new Error(readApiErrorMessage(raw))
 }
 
+function throwContentToolsStateWriteError(res: Response, raw: unknown): never {
+  if (res.status === 409) {
+    const parsed = contentToolRevisionConflictBodySchema.safeParse(raw)
+    if (parsed.success) {
+      throw new ContentToolRevisionConflictError(parsed.data.current)
+    }
+  }
+  if (res.status === 413) {
+    const parsed = contentToolStateTooLargeBodySchema.safeParse(raw)
+    if (parsed.success) {
+      throw new ContentToolStateTooLargeError(parsed.data.maxBytes)
+    }
+  }
+  if (res.status === 422) throwContentToolsConfigError(raw)
+  throw new Error(readApiErrorMessage(raw))
+}
+
 export async function fetchContentToolsInstances(
   courseCode: string,
-  opts?: { itemId?: string; hostKind?: string },
+  opts?: { itemId?: string; hostKind?: string; withState?: boolean },
 ): Promise<ContentToolInstance[]> {
   const params = new URLSearchParams()
   if (opts?.itemId) params.set('itemId', opts.itemId)
   if (opts?.hostKind) params.set('hostKind', opts.hostKind)
+  if (opts?.withState) params.set('withState', '1')
   const qs = params.toString()
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances${qs ? `?${qs}` : ''}`,
@@ -1413,24 +1479,81 @@ export async function getContentToolState(
 export async function putContentToolState(
   courseCode: string,
   instanceId: string,
-  body: { stateJson: Record<string, unknown>; revision: number; scope?: 'enrollment' | 'preview' },
+  body: {
+    revision: number
+    state?: Record<string, unknown>
+    stateJson?: Record<string, unknown>
+    scope?: 'enrollment' | 'preview'
+  },
 ): Promise<ContentToolState> {
+  const state = body.state ?? body.stateJson ?? {}
+  const params = new URLSearchParams()
+  if (body.scope) params.set('scope', body.scope)
+  const qs = params.toString()
   const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/state`,
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/state${qs ? `?${qs}` : ''}`,
     {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        stateJson: body.stateJson,
         revision: body.revision,
-        ...(body.scope ? { scope: body.scope } : {}),
+        state,
+        stateJson: state,
       }),
     },
   )
   const raw = await parseJson(res)
-  if (res.status === 422) throwContentToolsConfigError(raw)
-  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  if (!res.ok) throwContentToolsStateWriteError(res, raw)
   return parseApiResponse('putContentToolState', contentToolStateSchema, raw)
+}
+
+export async function submitContentToolState(
+  courseCode: string,
+  instanceId: string,
+  body: {
+    revision: number
+    state?: Record<string, unknown>
+    stateJson?: Record<string, unknown>
+  },
+): Promise<ContentToolState> {
+  const state = body.state ?? body.stateJson ?? {}
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/submit`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        revision: body.revision,
+        state,
+        stateJson: state,
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throwContentToolsStateWriteError(res, raw)
+  return parseApiResponse('submitContentToolState', contentToolStateSchema, raw)
+}
+
+export async function runContentToolAction(
+  courseCode: string,
+  instanceId: string,
+  action: string,
+  body: { input: Record<string, unknown>; idempotencyKey?: string },
+): Promise<ContentToolActionResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/actions/${encodeURIComponent(action)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: body.input,
+        ...(body.idempotencyKey ? { idempotencyKey: body.idempotencyKey } : {}),
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throwContentToolsStateWriteError(res, raw)
+  return parseApiResponse('runContentToolAction', contentToolActionResponseSchema, raw)
 }
 
 export async function putAdaptiveContentSettings(

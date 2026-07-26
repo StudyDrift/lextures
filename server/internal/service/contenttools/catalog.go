@@ -87,12 +87,26 @@ func ManifestToPublic(m *CompiledManifest) (ctmodel.ToolManifestPublic, error) {
 			SRPattern:        m.A11y.SRPattern,
 			WCAGNotes:        m.A11y.WCAGNotes,
 		},
-		I18nNamespace: m.I18nNamespace,
+		I18nNamespace:   m.I18nNamespace,
 		UI: ctmodel.ToolUI{
 			Renderer: m.UI.Renderer,
 			Icon:     m.UI.Icon,
 			Group:    m.UI.Group,
 		},
+		ConflictPolicy:  EffectiveConflictPolicy(m),
+		AutosaveMs:      EffectiveAutosaveMs(m),
+		RespectsDueDate: m.RespectsDueDate,
+	}
+	if len(m.Actions) > 0 {
+		out.Actions = make([]ctmodel.ActionPublic, 0, len(m.Actions))
+		for _, a := range m.Actions {
+			out.Actions = append(out.Actions, ctmodel.ActionPublic{
+				Name:            a.Name,
+				RateLimitPerMin: EffectiveActionRateLimit(m, &a),
+				RequiresAI:      a.RequiresAI,
+				Description:     a.Description,
+			})
+		}
 	}
 	if m.AI != nil {
 		out.AI = &ctmodel.AIBlock{FeatureID: m.AI.FeatureID, Required: m.AI.Required}

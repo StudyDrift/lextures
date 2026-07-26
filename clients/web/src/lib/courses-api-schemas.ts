@@ -1039,6 +1039,39 @@ export const contentToolsCatalogSchema = z.object({
   tools: z.array(contentToolsCatalogToolSchema),
 })
 
+/** CT.3 — learner state envelope (state / stateJson aliases). */
+export const contentToolScoreSchema = z
+  .object({
+    raw: z.number(),
+    max: z.number(),
+  })
+  .passthrough()
+
+const contentToolStateObjectSchema = z.record(z.string(), z.unknown())
+
+export const contentToolStateSchema = z
+  .object({
+    instanceId: z.string().optional(),
+    revision: z.number(),
+    status: z.string(),
+    state: contentToolStateObjectSchema.optional(),
+    score: contentToolScoreSchema.nullable().optional(),
+    updatedAt: z.string().nullable().optional(),
+    resetCount: z.number().optional(),
+    lastResetAt: z.string().nullable().optional(),
+    stateJson: contentToolStateObjectSchema.optional(),
+    scope: z.string().optional(),
+  })
+  .passthrough()
+  .transform((v) => {
+    const state = v.state ?? v.stateJson ?? {}
+    return {
+      ...v,
+      state,
+      stateJson: v.stateJson ?? state,
+    }
+  })
+
 /** CT.2 — Content Tool instance + manifest + usage. */
 export const contentToolInstanceSchema = z.object({
   id: z.string(),
@@ -1051,6 +1084,8 @@ export const contentToolInstanceSchema = z.object({
   config: z.record(z.string(), z.unknown()),
   status: z.string(),
   updatedAt: z.string(),
+  /** Present when listed with `withState=1`. */
+  state: contentToolStateSchema.optional().nullable(),
 })
 
 export const contentToolInstancesListSchema = z.object({
@@ -1119,6 +1154,21 @@ export const contentToolManifestSchema = z.object({
     })
     .passthrough()
     .optional(),
+  actions: z
+    .array(
+      z
+        .object({
+          name: z.string(),
+          rateLimitPerMin: z.number().optional(),
+          requiresAi: z.boolean().optional(),
+          description: z.string().optional(),
+        })
+        .passthrough(),
+    )
+    .optional(),
+  conflictPolicy: z.string().optional(),
+  autosaveMs: z.number().optional(),
+  respectsDueDate: z.boolean().optional(),
 })
 
 export const toolInstanceUsageSchema = z.object({
@@ -1127,12 +1177,6 @@ export const toolInstanceUsageSchema = z.object({
   learnersCompleted: z.number(),
   lastInteractionAt: z.string().nullable(),
   referencedInBody: z.boolean(),
-})
-
-export const contentToolStateSchema = z.object({
-  stateJson: z.record(z.string(), z.unknown()),
-  revision: z.number(),
-  status: z.string(),
 })
 
 export const contentToolFieldErrorSchema = z.object({
@@ -1146,6 +1190,27 @@ export const contentToolValidationErrorBodySchema = z.object({
     message: z.string().optional(),
     errors: z.array(contentToolFieldErrorSchema).optional(),
   }),
+})
+
+/** CT.3 — `{ error: 'schema_invalid', errors: [...] }`. */
+export const contentToolSchemaInvalidBodySchema = z.object({
+  error: z.literal('schema_invalid'),
+  errors: z.array(contentToolFieldErrorSchema),
+})
+
+export const contentToolRevisionConflictBodySchema = z.object({
+  error: z.literal('revision_conflict'),
+  current: contentToolStateSchema,
+})
+
+export const contentToolStateTooLargeBodySchema = z.object({
+  error: z.literal('state_too_large'),
+  maxBytes: z.number(),
+})
+
+export const contentToolActionResponseSchema = z.object({
+  result: z.record(z.string(), z.unknown()),
+  state: contentToolStateSchema,
 })
 
 export const adaptiveContentUnitSchema = z.object({

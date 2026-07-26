@@ -4289,7 +4289,37 @@
         "authorization": true,
         "dependency": true,
         "rollback": false,
-        "notes": "Depends on contentToolsEnabled (CT.1). Student runtime host remains CT.3; preview modal uses preview scope."
+        "notes": "Depends on contentToolsEnabled (CT.1). Student runtime host is CT.3; preview modal uses preview scope."
+      }
+    },
+    {
+      "id": "CT.3",
+      "path": "docs/completed/content_tools/CT.3-student-runtime-and-state-persistence.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright student runtime covers host mount (no raw lex-tool fence), autosave restore after reload, server-side grade action with idempotency, and 409 revision conflict + 422 schema rejection.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-runtime.spec.ts"
+        },
+        {
+          "path": "e2e/tests/content-tools-authoring.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Depends on CT.1 flag + CT.2 fences. CONTENT_TOOLS_RUNTIME_READONLY kill-switch; offline outbox via content-tools-sync-queue."
       }
     },
     {

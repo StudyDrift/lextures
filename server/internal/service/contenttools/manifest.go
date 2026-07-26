@@ -39,23 +39,40 @@ var AllowedHostKinds = map[string]struct{}{
 	"content_page": {}, "assignment": {}, "quiz": {}, "syllabus": {}, "portfolio_artifact": {},
 }
 
+// AllowedConflictPolicies is the closed set of conflict resolution policies (CT.3).
+var AllowedConflictPolicies = map[string]struct{}{
+	ConflictServerWins: {}, ConflictClientWins: {}, ConflictMerge: {},
+}
+
 // Manifest is the declarative contract every Content Tool obeys (FR-3).
 type Manifest struct {
-	ID            string          `json:"id"`
-	Version       string          `json:"version"`
-	Name          string          `json:"name"`
-	Category      string          `json:"category"`
-	Capabilities  []string        `json:"capabilities"`
-	ConfigSchema  json.RawMessage `json:"configSchema"`
-	StateSchema   json.RawMessage `json:"stateSchema"`
-	Scoring       ScoringDecl     `json:"scoring"`
-	AI            *AIDecl         `json:"ai,omitempty"`
-	Network       *NetworkDecl    `json:"network,omitempty"`
-	Storage       StorageDecl     `json:"storage"`
-	Roles         RolesDecl       `json:"roles"`
-	A11y          A11yDecl        `json:"a11y"`
-	I18nNamespace string          `json:"i18nNamespace"`
-	UI            UIDecl          `json:"ui"`
+	ID              string          `json:"id"`
+	Version         string          `json:"version"`
+	Name            string          `json:"name"`
+	Category        string          `json:"category"`
+	Capabilities    []string        `json:"capabilities"`
+	ConfigSchema    json.RawMessage `json:"configSchema"`
+	StateSchema     json.RawMessage `json:"stateSchema"`
+	Scoring         ScoringDecl     `json:"scoring"`
+	AI              *AIDecl         `json:"ai,omitempty"`
+	Network         *NetworkDecl    `json:"network,omitempty"`
+	Storage         StorageDecl     `json:"storage"`
+	Roles           RolesDecl       `json:"roles"`
+	A11y            A11yDecl        `json:"a11y"`
+	I18nNamespace   string          `json:"i18nNamespace"`
+	UI              UIDecl          `json:"ui"`
+	Actions         []ActionDecl    `json:"actions,omitempty"`
+	ConflictPolicy  string          `json:"conflictPolicy,omitempty"`
+	AutosaveMs      int             `json:"autosaveMs,omitempty"`
+	RespectsDueDate bool            `json:"respectsDueDate,omitempty"`
+}
+
+// ActionDecl declares a server-side action a tool may invoke (CT.3).
+type ActionDecl struct {
+	Name             string `json:"name"`
+	RateLimitPerMin  int    `json:"rateLimitPerMin,omitempty"`
+	RequiresAI       bool   `json:"requiresAi,omitempty"`
+	Description      string `json:"description,omitempty"`
 }
 
 // ScoringDecl is the scoring block of a manifest.
@@ -201,7 +218,76 @@ func ValidateManifest(m Manifest, i18n map[string]string) error {
 	if len(m.StateSchema) == 0 {
 		return fmt.Errorf("tool %s: stateSchema is required", m.ID)
 	}
+	if m.ConflictPolicy != "" {
+		if _, ok := AllowedConflictPolicies[m.ConflictPolicy]; !ok {
+			return fmt.Errorf("tool %s: unknown conflictPolicy %q", m.ID, m.ConflictPolicy)
+		}
+	}
+	if m.AutosaveMs != 0 && (m.AutosaveMs < MinAutosaveDebounceMs || m.AutosaveMs > MaxAutosaveDebounceMs) {
+		return fmt.Errorf("tool %s: autosaveMs must be between %d and %d", m.ID, MinAutosaveDebounceMs, MaxAutosaveDebounceMs)
+	}
+	seenActions := map[string]struct{}{}
+	for _, a := range m.Actions {
+		name := strings.TrimSpace(a.Name)
+		if name == "" {
+			return fmt.Errorf("tool %s: action name is required", m.ID)
+		}
+		if !toolIDPattern.MatchString(name) {
+			return fmt.Errorf("tool %s: action name %q must be snake_case", m.ID, name)
+		}
+		if _, dup := seenActions[name]; dup {
+			return fmt.Errorf("tool %s: duplicate action %q", m.ID, name)
+		}
+		seenActions[name] = struct{}{}
+		if a.RateLimitPerMin < 0 {
+			return fmt.Errorf("tool %s: action %s rateLimitPerMin must be >= 0", m.ID, name)
+		}
+	}
 	return nil
+}
+
+// EffectiveConflictPolicy returns the tool's policy or server_wins default.
+func EffectiveConflictPolicy(m *CompiledManifest) string {
+	if m == nil || m.ConflictPolicy == "" {
+		return ConflictServerWins
+	}
+	return m.ConflictPolicy
+}
+
+// EffectiveAutosaveMs returns the tool override or the host default.
+func EffectiveAutosaveMs(m *CompiledManifest) int {
+	if m == nil || m.AutosaveMs == 0 {
+		return DefaultAutosaveDebounceMs
+	}
+	return m.AutosaveMs
+}
+
+// FindAction returns the declared action or nil.
+func FindAction(m *CompiledManifest, name string) *ActionDecl {
+	if m == nil {
+		return nil
+	}
+	name = strings.TrimSpace(name)
+	for i := range m.Actions {
+		if m.Actions[i].Name == name {
+			return &m.Actions[i]
+		}
+	}
+	return nil
+}
+
+// EffectiveActionRateLimit returns per-minute limit for an action.
+func EffectiveActionRateLimit(m *CompiledManifest, a *ActionDecl) int {
+	if a != nil && a.RateLimitPerMin > 0 {
+		return a.RateLimitPerMin
+	}
+	if a != nil && a.RequiresAI {
+		return DefaultAIActionRateLimitPerMin
+	}
+	if m != nil && m.AI != nil {
+		return DefaultAIActionRateLimitPerMin
+	}
+	return DefaultActionRateLimitPerMin
 }
 
 // CompileManifest validates and compiles JSON Schemas for a manifest.

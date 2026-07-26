@@ -352,5 +352,5 @@ own config shape instead of centralising them here.
   CommonMark fenced code blocks.
 - Related plans: [CT.1](CT.1-foundations-registry-and-data-model.md),
   [CT.3](CT.3-student-runtime-and-state-persistence.md),
-  [CT.5](CT.5-tool-sdk-sandboxing-and-versioning.md),
+  [CT.5](../../plan/content_tools/CT.5-tool-sdk-sandboxing-and-versioning.md),
   [PS.1–PS.4 pinned settings](../../completed/settings/).

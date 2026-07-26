@@ -37,21 +37,33 @@ type ToolUI struct {
 // ToolManifestPublic is a manifest returned by GET .../manifests/{tool_id}
 // (sensitive schema annotations stripped).
 type ToolManifestPublic struct {
-	ID            string          `json:"id"`
-	Version       string          `json:"version"`
-	Name          string          `json:"name"`
-	Category      string          `json:"category"`
-	Capabilities  []string        `json:"capabilities"`
-	ConfigSchema  json.RawMessage `json:"configSchema"`
-	StateSchema   json.RawMessage `json:"stateSchema"`
-	Scoring       Scoring         `json:"scoring"`
-	AI            *AIBlock        `json:"ai,omitempty"`
-	Network       *NetworkBlock   `json:"network,omitempty"`
-	Storage       StorageBlock    `json:"storage"`
-	Roles         RolesBlock      `json:"roles"`
-	A11y          A11yBlock       `json:"a11y"`
-	I18nNamespace string          `json:"i18nNamespace"`
-	UI            ToolUI          `json:"ui"`
+	ID              string          `json:"id"`
+	Version         string          `json:"version"`
+	Name            string          `json:"name"`
+	Category        string          `json:"category"`
+	Capabilities    []string        `json:"capabilities"`
+	ConfigSchema    json.RawMessage `json:"configSchema"`
+	StateSchema     json.RawMessage `json:"stateSchema"`
+	Scoring         Scoring         `json:"scoring"`
+	AI              *AIBlock        `json:"ai,omitempty"`
+	Network         *NetworkBlock   `json:"network,omitempty"`
+	Storage         StorageBlock    `json:"storage"`
+	Roles           RolesBlock      `json:"roles"`
+	A11y            A11yBlock       `json:"a11y"`
+	I18nNamespace   string          `json:"i18nNamespace"`
+	UI              ToolUI          `json:"ui"`
+	Actions         []ActionPublic  `json:"actions,omitempty"`
+	ConflictPolicy  string          `json:"conflictPolicy,omitempty"`
+	AutosaveMs      int             `json:"autosaveMs,omitempty"`
+	RespectsDueDate bool            `json:"respectsDueDate,omitempty"`
+}
+
+// ActionPublic is one server action declared on a manifest (CT.3).
+type ActionPublic struct {
+	Name            string `json:"name"`
+	RateLimitPerMin int    `json:"rateLimitPerMin,omitempty"`
+	RequiresAI      bool   `json:"requiresAi,omitempty"`
+	Description     string `json:"description,omitempty"`
 }
 
 // Scoring is the manifest scoring block.
@@ -90,16 +102,76 @@ type A11yBlock struct {
 
 // ToolInstance is a placed tool returned by instance CRUD.
 type ToolInstance struct {
-	ID              uuid.UUID       `json:"id"`
-	ToolID          string          `json:"toolId"`
-	ToolVersion     string          `json:"toolVersion"`
-	HostKind        string          `json:"hostKind"`
-	StructureItemID *uuid.UUID      `json:"structureItemId"`
-	SectionKey      *string         `json:"sectionKey"`
-	Title           *string         `json:"title"`
-	Config          json.RawMessage `json:"config"`
-	Status          string          `json:"status"`
-	UpdatedAt       time.Time       `json:"updatedAt"`
+	ID              uuid.UUID          `json:"id"`
+	ToolID          string             `json:"toolId"`
+	ToolVersion     string             `json:"toolVersion"`
+	HostKind        string             `json:"hostKind"`
+	StructureItemID *uuid.UUID         `json:"structureItemId"`
+	SectionKey      *string            `json:"sectionKey"`
+	Title           *string            `json:"title"`
+	Config          json.RawMessage    `json:"config"`
+	Status          string             `json:"status"`
+	UpdatedAt       time.Time          `json:"updatedAt"`
+	State           *ToolStateEnvelope `json:"state,omitempty"`
+}
+
+// ToolStateEnvelope is the CT.3 learner state contract.
+type ToolStateEnvelope struct {
+	InstanceID  uuid.UUID       `json:"instanceId"`
+	Revision    int64           `json:"revision"`
+	Status      string          `json:"status"`
+	State       json.RawMessage `json:"state"`
+	Score       *ToolScore      `json:"score"`
+	UpdatedAt   *time.Time      `json:"updatedAt"`
+	ResetCount  int             `json:"resetCount"`
+	LastResetAt *time.Time      `json:"lastResetAt"`
+	// Backward-compatible aliases for CT.1/CT.2 clients.
+	StateJSON json.RawMessage `json:"stateJson,omitempty"`
+	Scope     string          `json:"scope,omitempty"`
+}
+
+// ToolScore is the optional scored outcome on a state row.
+type ToolScore struct {
+	Raw float64 `json:"raw"`
+	Max float64 `json:"max"`
+}
+
+// SaveStateRequest is PUT .../state (CT.3).
+type SaveStateRequest struct {
+	Revision  int64           `json:"revision"`
+	State     json.RawMessage `json:"state"`
+	StateJSON json.RawMessage `json:"stateJson"` // CT.1/CT.2 alias
+	Status    string          `json:"status,omitempty"`
+}
+
+// RunActionRequest is POST .../actions/{action}.
+type RunActionRequest struct {
+	Input          json.RawMessage `json:"input"`
+	IdempotencyKey string          `json:"idempotencyKey,omitempty"`
+}
+
+// RunActionResponse is the action dispatch result.
+type RunActionResponse struct {
+	Result map[string]any     `json:"result"`
+	State  ToolStateEnvelope  `json:"state"`
+}
+
+// RevisionConflictBody is HTTP 409 for stale revision saves.
+type RevisionConflictBody struct {
+	Error   string            `json:"error"`
+	Current ToolStateEnvelope `json:"current"`
+}
+
+// StateTooLargeBody is HTTP 413 for oversized state.
+type StateTooLargeBody struct {
+	Error    string `json:"error"`
+	MaxBytes int    `json:"maxBytes"`
+}
+
+// SchemaInvalidBody is HTTP 422 for state schema failures (CT.3 shape).
+type SchemaInvalidBody struct {
+	Error  string       `json:"error"`
+	Errors []FieldError `json:"errors"`
 }
 
 // CreateInstanceRequest is POST .../instances.

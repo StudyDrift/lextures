@@ -678,9 +678,11 @@ GET	/api/v1/courses/{course_code}/content-tools/instances	session
 POST	/api/v1/courses/{course_code}/content-tools/instances	session
 DELETE	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	session
 PATCH	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	session
+POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/actions/{action}	session
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/duplicate	session
 GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/state	session
 PUT	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/state	session
+POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/submit	session
 GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/usage	session
 GET	/api/v1/courses/{course_code}/content-tools/manifests/{tool_id}	session
 GET	/api/v1/courses/{course_code}/content-tools/settings	session

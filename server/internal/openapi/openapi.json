@@ -12158,6 +12158,18 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "withState",
+            "in": "query",
+            "required": false,
+            "description": "When 1, include viewer state envelopes on each instance (CT.3 batched load).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
           }
         ],
         "responses": {
@@ -12471,7 +12483,7 @@
         "tags": [
           "content-tools"
         ],
-        "summary": "Get learner state for a Content Tool instance (CT.1 foundation; CT.3 expands)",
+        "summary": "Get learner state for a Content Tool instance (CT.3 envelope)",
         "parameters": [
           {
             "name": "course_code",
@@ -12507,7 +12519,14 @@
         ],
         "responses": {
           "200": {
-            "description": "State"
+            "description": "ToolStateEnvelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolStateEnvelope"
+                }
+              }
+            }
           },
           "403": {
             "description": "No enrollment"
@@ -12528,7 +12547,7 @@
         "tags": [
           "content-tools"
         ],
-        "summary": "Upsert learner state for a Content Tool instance (CT.1 foundation; CT.3 expands)",
+        "summary": "Autosave learner state with optimistic concurrency (CT.3)",
         "parameters": [
           {
             "name": "course_code",
@@ -12567,35 +12586,54 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "stateJson": {
-                    "type": "object"
-                  },
-                  "revision": {
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "stateJson",
-                  "revision"
-                ]
+                "$ref": "#/components/schemas/ContentToolSaveStateRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "State"
+            "description": "Saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolStateEnvelope"
+                }
+              }
+            }
           },
           "409": {
-            "description": "Revision conflict"
+            "description": "Revision conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolRevisionConflict"
+                }
+              }
+            }
           },
           "413": {
-            "description": "State too large"
+            "description": "State too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolStateTooLarge"
+                }
+              }
+            }
           },
           "422": {
-            "description": "Schema validation failed"
+            "description": "Schema invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolSchemaInvalid"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not found",
@@ -12606,6 +12644,178 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "503": {
+            "description": "Runtime read-only"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/submit": {
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Explicitly submit learner state for a Content Tool instance (CT.3)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "enrollment",
+                "preview"
+              ],
+              "default": "enrollment"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentToolSaveStateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolStateEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolRevisionConflict"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "State too large"
+          },
+          "422": {
+            "description": "Schema invalid"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/actions/{action}": {
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Dispatch a manifest-declared server action (CT.3)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "enrollment",
+                "preview"
+              ],
+              "default": "enrollment"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentToolRunActionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Action result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolRunActionResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision conflict"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         }
       }
@@ -14801,6 +15011,208 @@
           "category",
           "configSchema",
           "stateSchema"
+        ]
+      },
+      "ContentToolScore": {
+        "type": "object",
+        "properties": {
+          "raw": {
+            "type": "number"
+          },
+          "max": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "raw",
+          "max"
+        ]
+      },
+      "ContentToolStateEnvelope": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "in_progress",
+              "submitted",
+              "completed"
+            ]
+          },
+          "state": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "score": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ContentToolScore"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resetCount": {
+            "type": "integer"
+          },
+          "lastResetAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stateJson": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "CT.1/CT.2 alias of state"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "enrollment",
+              "preview"
+            ]
+          }
+        },
+        "required": [
+          "instanceId",
+          "revision",
+          "status",
+          "state",
+          "resetCount"
+        ]
+      },
+      "ContentToolSaveStateRequest": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer"
+          },
+          "state": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "stateJson": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Alias of state"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_progress",
+              "submitted"
+            ]
+          }
+        },
+        "required": [
+          "revision"
+        ]
+      },
+      "ContentToolRevisionConflict": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "revision_conflict"
+            ]
+          },
+          "current": {
+            "$ref": "#/components/schemas/ContentToolStateEnvelope"
+          }
+        },
+        "required": [
+          "error",
+          "current"
+        ]
+      },
+      "ContentToolStateTooLarge": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "state_too_large"
+            ]
+          },
+          "maxBytes": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "error",
+          "maxBytes"
+        ]
+      },
+      "ContentToolSchemaInvalid": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "schema_invalid"
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "error",
+          "errors"
+        ]
+      },
+      "ContentToolRunActionRequest": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "idempotencyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentToolRunActionResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "state": {
+            "$ref": "#/components/schemas/ContentToolStateEnvelope"
+          }
+        },
+        "required": [
+          "result",
+          "state"
         ]
       }
     }

@@ -12,7 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/scheduler"
 )
 
-// RegisterContentToolsPreviewJobs registers the CT.2 nightly preview-state purge.
+// RegisterContentToolsPreviewJobs registers CT.2/CT.3 nightly purge jobs.
 func RegisterContentToolsPreviewJobs(r *Registry, pool *pgxpool.Pool) {
 	if r == nil || pool == nil {
 		return
@@ -24,6 +24,13 @@ func RegisterContentToolsPreviewJobs(r *Registry, pool *pgxpool.Pool) {
 		}
 		if n > 0 {
 			slog.Info("scheduled.content_tool_preview_purge", "deleted", n)
+		}
+		n2, err := ctrepo.PurgeStaleActionIdempotency(ctx, pool, 24*time.Hour)
+		if err != nil {
+			return err
+		}
+		if n2 > 0 {
+			slog.Info("scheduled.content_tool_action_idempotency_purge", "deleted", n2)
 		}
 		return nil
 	}))
