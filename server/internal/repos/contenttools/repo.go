@@ -133,16 +133,6 @@ RETURNING course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_
 	return &r, nil
 }
 
-// CourseFlagEnabled returns content_tools_enabled for a course id.
-func CourseFlagEnabled(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (bool, error) {
-	var enabled bool
-	err := pool.QueryRow(ctx, `SELECT content_tools_enabled FROM course.courses WHERE id = $1`, courseID).Scan(&enabled)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return false, nil
-	}
-	return enabled, err
-}
-
 // StructureItemInCourse reports whether the structure item belongs to the course.
 func StructureItemInCourse(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID) (bool, error) {
 	var ok bool
@@ -177,11 +167,4 @@ INSERT INTO course.content_tool_events (instance_id, course_id, enrollment_id, a
 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
 `, instanceID, courseID, enrollmentID, actorUserID, toolID, eventType, b)
 	return err
-}
-
-// CountEnabledCourses returns how many courses have content_tools_enabled = true.
-func CountEnabledCourses(ctx context.Context, pool *pgxpool.Pool) (int64, error) {
-	var n int64
-	err := pool.QueryRow(ctx, `SELECT COUNT(*) FROM course.courses WHERE content_tools_enabled = TRUE`).Scan(&n)
-	return n, err
 }

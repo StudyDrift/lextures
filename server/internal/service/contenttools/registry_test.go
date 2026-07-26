@@ -157,14 +157,11 @@ func TestFilterCatalog_Allowlist(t *testing.T) {
 }
 
 func TestActiveForCourseAndKillSwitch(t *testing.T) {
-	t.Cleanup(func() { SetKillSwitchForTest(nil) })
-	off := false
-	SetKillSwitchForTest(&off)
+	t.Setenv(EnvKillSwitch, "")
 	if !ActiveForCourse(true) || !AvailableForCourse(true) {
 		t.Fatal("expected available")
 	}
-	on := true
-	SetKillSwitchForTest(&on)
+	t.Setenv(EnvKillSwitch, "on")
 	if AvailableForCourse(true) {
 		t.Fatal("kill switch should 404")
 	}

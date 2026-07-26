@@ -109,15 +109,14 @@ func TestDB_EnrollmentCascadeDeletesState(t *testing.T) {
 	if _, err := UpsertState(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"a"}`), 0); err != nil {
 		t.Fatalf("upsert state: %v", err)
 	}
-	n, err := CountStatesForEnrollment(ctx, pool, enrollmentID)
-	if err != nil || n != 1 {
+	var n int64
+	if err := pool.QueryRow(ctx, `SELECT COUNT(*) FROM course.content_tool_states WHERE enrollment_id = $1`, enrollmentID).Scan(&n); err != nil || n != 1 {
 		t.Fatalf("count before delete: n=%d err=%v", n, err)
 	}
 	if _, err := pool.Exec(ctx, `DELETE FROM course.course_enrollments WHERE id = $1`, enrollmentID); err != nil {
 		t.Fatalf("delete enrollment: %v", err)
 	}
-	n, err = CountStatesForEnrollment(ctx, pool, enrollmentID)
-	if err != nil || n != 0 {
+	if err := pool.QueryRow(ctx, `SELECT COUNT(*) FROM course.content_tool_states WHERE enrollment_id = $1`, enrollmentID).Scan(&n); err != nil || n != 0 {
 		t.Fatalf("expected cascade delete, n=%d err=%v", n, err)
 	}
 }

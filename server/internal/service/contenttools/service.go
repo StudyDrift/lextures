@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"strings"
-	"sync"
 )
 
 const (
@@ -42,29 +41,8 @@ var (
 	ErrMaxInstances        = errors.New("maximum instances per item exceeded")
 )
 
-// killSwitchOverride allows tests to force the kill-switch without mutating process env.
-var (
-	killSwitchMu       sync.RWMutex
-	killSwitchOverride *bool
-)
-
-// SetKillSwitchForTest forces kill-switch state in tests. Pass nil to clear.
-func SetKillSwitchForTest(engaged *bool) {
-	killSwitchMu.Lock()
-	defer killSwitchMu.Unlock()
-	killSwitchOverride = engaged
-}
-
 // KillSwitchEngaged reports whether the ops emergency kill-switch is on.
 func KillSwitchEngaged() bool {
-	killSwitchMu.RLock()
-	if killSwitchOverride != nil {
-		v := *killSwitchOverride
-		killSwitchMu.RUnlock()
-		return v
-	}
-	killSwitchMu.RUnlock()
-
 	v := strings.TrimSpace(os.Getenv(EnvKillSwitch))
 	switch strings.ToLower(v) {
 	case "1", "true", "yes", "on":

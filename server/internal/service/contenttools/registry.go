@@ -57,10 +57,9 @@ func (r *Registry) Size() int {
 }
 
 var (
-	defaultRegMu sync.RWMutex
-	defaultReg   *Registry
-	defaultErr   error
-	defaultOnce  sync.Once
+	defaultReg  *Registry
+	defaultErr  error
+	defaultOnce sync.Once
 )
 
 // MustDefault returns the process-wide default registry, building it once.
@@ -81,32 +80,4 @@ func MustDefault() *Registry {
 		panic(fmt.Sprintf("contenttools registry: %v", defaultErr))
 	}
 	return defaultReg
-}
-
-// DefaultOrNil returns the default registry without panicking; used by tests that
-// want to inspect build errors via BuildBuiltinRegistry.
-func DefaultOrNil() *Registry {
-	defaultRegMu.RLock()
-	defer defaultRegMu.RUnlock()
-	return defaultReg
-}
-
-// SetDefaultForTest replaces the process default registry (tests only).
-func SetDefaultForTest(r *Registry) {
-	defaultRegMu.Lock()
-	defer defaultRegMu.Unlock()
-	defaultReg = r
-	defaultErr = nil
-	if r != nil {
-		SetRegistrySizeGauge(float64(r.Size()))
-	}
-}
-
-// ResetDefaultForTest clears the once so the next MustDefault rebuilds.
-func ResetDefaultForTest() {
-	defaultRegMu.Lock()
-	defer defaultRegMu.Unlock()
-	defaultOnce = sync.Once{}
-	defaultReg = nil
-	defaultErr = nil
 }

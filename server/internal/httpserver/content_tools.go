@@ -25,6 +25,7 @@ func (d Deps) registerContentToolsRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/content-tools/instances", d.handleContentToolsInstancesCreate())
 	r.Patch("/api/v1/courses/{course_code}/content-tools/instances/{instance_id}", d.handleContentToolsInstancePatch())
 	r.Delete("/api/v1/courses/{course_code}/content-tools/instances/{instance_id}", d.handleContentToolsInstanceDelete())
+	d.registerContentToolsStateRoutes(r)
 }
 
 func writeContentToolsUnavailable(w http.ResponseWriter) {

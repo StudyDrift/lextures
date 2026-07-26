@@ -12345,6 +12345,122 @@
           }
         }
       }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/state": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Get learner state for a Content Tool instance (CT.1 foundation; CT.3 expands)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "State"
+          },
+          "403": {
+            "description": "No enrollment"
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Upsert learner state for a Content Tool instance (CT.1 foundation; CT.3 expands)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stateJson": {
+                    "type": "object"
+                  },
+                  "revision": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "stateJson",
+                  "revision"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "State"
+          },
+          "409": {
+            "description": "Revision conflict"
+          },
+          "413": {
+            "description": "State too large"
+          },
+          "422": {
+            "description": "Schema validation failed"
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

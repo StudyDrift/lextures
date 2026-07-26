@@ -84,10 +84,3 @@ RETURNING id, instance_id, enrollment_id, user_id, state_json, state_schema_vers
 `, instanceID, enrollmentID, userID, stateJSON, expectedRevision)
 	return scanState(row)
 }
-
-// CountStatesForEnrollment is a test helper.
-func CountStatesForEnrollment(ctx context.Context, pool *pgxpool.Pool, enrollmentID uuid.UUID) (int64, error) {
-	var n int64
-	err := pool.QueryRow(ctx, `SELECT COUNT(*) FROM course.content_tool_states WHERE enrollment_id = $1`, enrollmentID).Scan(&n)
-	return n, err
-}
