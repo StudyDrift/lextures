@@ -36,5 +36,19 @@
   "contentTools.authoring.archive": "Archiver",
   "contentTools.authoring.deletePermanently": "Supprimer définitivement",
   "contentTools.tools.noop_probe.name": "Sonde no-op",
-  "contentTools.tools.noop_probe.description": "Outil de test intégré pour Content Tools."
+  "contentTools.tools.noop_probe.description": "Outil de test intégré pour Content Tools.",
+  "contentTools.runtime.saved": "Enregistré",
+  "contentTools.runtime.saving": "Enregistrement…",
+  "contentTools.runtime.unsynced": "Enregistré sur cet appareil — synchronisation à venir",
+  "contentTools.runtime.retry": "Réessayer",
+  "contentTools.runtime.unavailable": "Cet élément interactif n’est pas disponible.",
+  "contentTools.runtime.readOnlyArchived": "Archivé par votre enseignant — lecture seule.",
+  "contentTools.runtime.readOnlyPastDue": "Date limite dépassée — lecture seule.",
+  "contentTools.runtime.readOnlyPreview": "Aperçu — les modifications ne sont pas enregistrées pour les étudiants.",
+  "contentTools.runtime.openInBrowser": "Ouvrez dans le navigateur pour utiliser cette activité.",
+  "contentTools.runtime.loading": "Chargement de l’élément interactif…",
+  "contentTools.runtime.errorTitle": "Impossible d’afficher cet élément interactif.",
+  "contentTools.runtime.checkAnswer": "Vérifier la réponse",
+  "contentTools.runtime.yourAnswer": "Votre réponse",
+  "contentTools.runtime.score": "Score"
 }

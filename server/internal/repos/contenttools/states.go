@@ -18,7 +18,11 @@ first_interacted_at, last_interacted_at, completed_at,
 reset_count, last_reset_at, last_reset_by, created_at, updated_at
 `
 
-func scanState(row pgx.Row) (*StateRow, error) {
+type stateScanner interface {
+	Scan(dest ...any) error
+}
+
+func scanState(row stateScanner) (*StateRow, error) {
 	var r StateRow
 	var state []byte
 	err := row.Scan(
@@ -66,6 +70,7 @@ LIMIT 1
 
 // UpsertState inserts or updates enrollment-scoped state with optimistic concurrency on revision.
 // expectedRevision is the client's known revision; on conflict mismatch returns nil,nil for 409.
+// Status advances not_started → in_progress (CT.1 helper; CT.3 writes use UpsertStateWithStatus).
 func UpsertState(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -73,37 +78,10 @@ func UpsertState(
 	stateJSON json.RawMessage,
 	expectedRevision int64,
 ) (*StateRow, error) {
-	if len(stateJSON) == 0 {
-		stateJSON = json.RawMessage(`{}`)
-	}
-	row := pool.QueryRow(ctx, `
-INSERT INTO course.content_tool_states (
-  instance_id, enrollment_id, user_id, scope, state_json, revision, status,
-  interaction_count, first_interacted_at, last_interacted_at
-) VALUES (
-  $1, $2, $3, 'enrollment', $4::jsonb, 1, 'in_progress',
-  1, NOW(), NOW()
-)
-ON CONFLICT (instance_id, enrollment_id) WHERE (scope = 'enrollment') DO UPDATE SET
-  state_json = EXCLUDED.state_json,
-  revision = course.content_tool_states.revision + 1,
-  status = CASE
-    WHEN course.content_tool_states.status = 'not_started' THEN 'in_progress'
-    ELSE course.content_tool_states.status
-  END,
-  interaction_count = course.content_tool_states.interaction_count + 1,
-  first_interacted_at = COALESCE(course.content_tool_states.first_interacted_at, NOW()),
-  last_interacted_at = NOW(),
-  updated_at = NOW()
-WHERE course.content_tool_states.revision = $5
-RETURNING `+stateCols+`
-`, instanceID, enrollmentID, userID, stateJSON, expectedRevision)
-	return scanState(row)
+	return UpsertStateWithStatus(ctx, pool, instanceID, enrollmentID, userID, stateJSON, expectedRevision, "in_progress")
 }
 
 // UpsertPreviewState writes instructor preview-as-student state (scope=preview).
-// Preview rows do not participate in enrollment uniqueness; updates the latest
-// preview row for (instance, enrollment) or inserts a new one.
 func UpsertPreviewState(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -111,43 +89,7 @@ func UpsertPreviewState(
 	stateJSON json.RawMessage,
 	expectedRevision int64,
 ) (*StateRow, error) {
-	if len(stateJSON) == 0 {
-		stateJSON = json.RawMessage(`{}`)
-	}
-	existing, err := GetStateByScope(ctx, pool, instanceID, enrollmentID, ScopePreview)
-	if err != nil {
-		return nil, err
-	}
-	if existing == nil {
-		row := pool.QueryRow(ctx, `
-INSERT INTO course.content_tool_states (
-  instance_id, enrollment_id, user_id, scope, state_json, revision, status,
-  interaction_count, first_interacted_at, last_interacted_at
-) VALUES (
-  $1, $2, $3, 'preview', $4::jsonb, 1, 'in_progress',
-  1, NOW(), NOW()
-)
-RETURNING `+stateCols+`
-`, instanceID, enrollmentID, userID, stateJSON)
-		return scanState(row)
-	}
-	if existing.Revision != expectedRevision {
-		return nil, nil
-	}
-	row := pool.QueryRow(ctx, `
-UPDATE course.content_tool_states
-SET
-  state_json = $2::jsonb,
-  revision = revision + 1,
-  status = CASE WHEN status = 'not_started' THEN 'in_progress' ELSE status END,
-  interaction_count = interaction_count + 1,
-  first_interacted_at = COALESCE(first_interacted_at, NOW()),
-  last_interacted_at = NOW(),
-  updated_at = NOW()
-WHERE id = $1 AND revision = $3
-RETURNING `+stateCols+`
-`, existing.ID, stateJSON, expectedRevision)
-	return scanState(row)
+	return UpsertPreviewStateWithStatus(ctx, pool, instanceID, enrollmentID, userID, stateJSON, expectedRevision, "in_progress")
 }
 
 // CountInstanceUsage returns distinct enrollments with real state, completed count, and last interaction.

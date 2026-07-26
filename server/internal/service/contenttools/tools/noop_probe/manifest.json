@@ -50,5 +50,14 @@
     "renderer": "noop_probe",
     "icon": "flask",
     "group": "assess"
-  }
+  },
+  "actions": [
+    {
+      "name": "grade",
+      "rateLimitPerMin": 30,
+      "description": "Server-side grade against answerKey"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500
 }

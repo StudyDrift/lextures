@@ -104,6 +104,26 @@ const discussionSyncQueue = new Queue('discussion-sync-queue', {
   },
 })
 
+const contentToolsSyncQueue = new Queue('content-tools-sync-queue', {
+  maxRetentionTime: 24 * 60,
+  onSync: async ({ queue }) => {
+    let entry
+    while ((entry = await queue.shiftRequest())) {
+      try {
+        await fetch(entry.request)
+      } catch {
+        await queue.unshiftRequest(entry)
+        throw new Error('content-tools-sync: network unavailable, retrying later')
+      }
+    }
+  },
+})
+
+function isContentToolsSyncUrl(url: string): boolean {
+  if (!url.includes('/content-tools/')) return false
+  return url.includes('/state') || url.includes('/submit') || url.includes('/actions/')
+}
+
 // Intercept failed quiz submission requests and add to sync queue
 self.addEventListener('fetch', (event) => {
   const { request } = event
@@ -139,6 +159,25 @@ self.addEventListener('fetch', (event) => {
         return await fetch(request.clone())
       } catch {
         await discussionSyncQueue.pushRequest({ request })
+        return new Response(JSON.stringify({ queued: true }), {
+          status: 202,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+    }
+    event.respondWith(handler())
+    return
+  }
+
+  if (
+    (request.method === 'PUT' || request.method === 'POST') &&
+    isContentToolsSyncUrl(request.url)
+  ) {
+    const handler = async () => {
+      try {
+        return await fetch(request.clone())
+      } catch {
+        await contentToolsSyncQueue.pushRequest({ request })
         return new Response(JSON.stringify({ queued: true }), {
           status: 202,
           headers: { 'Content-Type': 'application/json' },

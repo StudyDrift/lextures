@@ -288,3 +288,60 @@ func TestDB_HardDeleteAndArchiveUnreferenced(t *testing.T) {
 		t.Fatal("expected hard delete")
 	}
 }
+
+func TestDB_StateRevisionConflictAndIdempotency(t *testing.T) {
+	pool := testPool(t)
+	ctx := context.Background()
+	courseID := seedCourse(t, pool)
+	userID, enrollmentID := seedEnrollment(t, pool, courseID)
+
+	inst, err := CreateInstance(ctx, pool, InstanceRow{
+		CourseID: courseID, HostKind: "syllabus", ToolID: "noop_probe", ToolVersion: "1.0.0",
+		ConfigJSON: json.RawMessage(`{"prompt":"q","answerKey":"yes"}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	st, err := UpsertStateWithStatus(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"a"}`), 0, "in_progress")
+	if err != nil || st == nil {
+		t.Fatalf("first upsert: %v %#v", err, st)
+	}
+	conflict, err := UpsertStateWithStatus(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"b"}`), 0, "in_progress")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if conflict != nil {
+		t.Fatal("expected revision conflict (nil row)")
+	}
+	ok, err := UpsertStateWithStatus(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"c"}`), st.Revision, "in_progress")
+	if err != nil || ok == nil {
+		t.Fatalf("second upsert: %v %#v", err, ok)
+	}
+	if ok.Revision != st.Revision+1 {
+		t.Fatalf("revision=%d want %d", ok.Revision, st.Revision+1)
+	}
+
+	raw, _ := json.Marshal(map[string]any{"result": map[string]any{"correct": true}})
+	key := "ct3-idem-" + uuid.NewString()
+	if err := PutActionIdempotency(ctx, pool, key, inst.ID, enrollmentID, "grade", raw); err != nil {
+		t.Fatal(err)
+	}
+	got, err := GetActionIdempotency(ctx, pool, key)
+	if err != nil || got == nil {
+		t.Fatalf("get idempotency: %v", err)
+	}
+	if got.Action != "grade" {
+		t.Fatalf("action=%s", got.Action)
+	}
+	// First-write-wins on conflict.
+	if err := PutActionIdempotency(ctx, pool, key, inst.ID, enrollmentID, "grade", json.RawMessage(`{"result":{"correct":false}}`)); err != nil {
+		t.Fatal(err)
+	}
+	got2, err := GetActionIdempotency(ctx, pool, key)
+	if err != nil || got2 == nil {
+		t.Fatal(err)
+	}
+	if string(got2.ResultJSON) != string(raw) {
+		t.Fatalf("idempotency overwritten: %s", got2.ResultJSON)
+	}
+}

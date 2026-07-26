@@ -1,5 +1,5 @@
 import type { Components } from 'react-markdown'
-import { forwardRef, useMemo, useState } from 'react'
+import { forwardRef, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
@@ -20,6 +20,10 @@ import { sectionsToMarkdown } from './syllabus-section-markdown'
 import { authorizedFetch } from '../../lib/api'
 import { createThemedMarkdownComponents } from '../markdown/markdown-themed-components'
 import type { PluggableList } from 'unified'
+import { ContentToolHost } from '../content-tools/host/content-tool-host'
+import { ContentToolsPageProvider } from '../content-tools/host/content-tools-page-context'
+import { LiveRegionProvider } from '../content-tools/host/tool-live-region'
+import { extractLexToolFenceText } from '../content-tools/host/lex-tool-fence-from-pre'
 
 // Matches Lextures course-file content URLs: /api/v1/courses/{code}/files/items/{id}/content
 const lexturesCourseFileRe = /^\/api\/v1\/courses\/[^/]+\/files\/items\/[^/]+\/content/
@@ -120,9 +124,16 @@ function mathPluginsFor(enabled: boolean) {
     : { remark: [], rehype: [] as PluggableList }
 }
 
+export type MarkdownContentToolsOpts = {
+  courseCode: string
+  itemId?: string
+  hostKind?: string
+  enabled: boolean
+}
+
 function createMarkdownComponents(
   theme: ResolvedMarkdownTheme,
-  opts?: { useCourseFileImages?: boolean },
+  opts?: { useCourseFileImages?: boolean; contentToolsEnabled?: boolean },
 ): Components {
   const o = theme.styleOverrides
   const c = theme.classes
@@ -161,6 +172,19 @@ function createMarkdownComponents(
           loading="lazy"
         />
       ),
+    pre: ({ children }) => {
+      if (opts?.contentToolsEnabled) {
+        const fenceText = extractLexToolFenceText(children as ReactNode)
+        if (fenceText != null && fenceText.length > 0) {
+          return <ContentToolHost fenceText={fenceText} />
+        }
+      }
+      return (
+        <pre className={c.pre} style={o.pre}>
+          {children}
+        </pre>
+      )
+    },
   }
 }
 
@@ -179,6 +203,8 @@ type MarkdownArticleViewProps = {
   theme?: ResolvedMarkdownTheme
   /** When set, images under `/api/v1/.../course-files/.../content` load with the signed-in session. */
   courseCode?: string
+  /** When enabled, ```lex-tool fences mount ContentToolHost (CT.3). */
+  contentTools?: MarkdownContentToolsOpts
 }
 
 /** Renders a single Markdown document with the same styling as the syllabus. */
@@ -188,7 +214,13 @@ function markdownLooksLikeMath(src: string): boolean {
 
 export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleViewProps>(
   function MarkdownArticleView(
-    { markdown, emptyMessage = 'No content yet.', theme = defaultResolved, courseCode },
+    {
+      markdown,
+      emptyMessage = 'No content yet.',
+      theme = defaultResolved,
+      courseCode,
+      contentTools,
+    },
     ref,
   ) {
     const reducedData = useReducedData()
@@ -199,11 +231,12 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
     const mathPlugins = useMemo(() => mathPluginsFor(!deferMath), [deferMath])
 
     const useCourseFileImages = Boolean(courseCode)
+    const contentToolsEnabled = contentTools?.enabled === true
     // Stable component map — new function identities each render remount markdown DOM and
     // break live Selection/Range objects used by the content page reader (multi-paragraph copy).
     const components = useMemo(
-      () => createMarkdownComponents(theme, { useCourseFileImages }),
-      [theme, useCourseFileImages],
+      () => createMarkdownComponents(theme, { useCourseFileImages, contentToolsEnabled }),
+      [theme, useCourseFileImages, contentToolsEnabled],
     )
     const normalized = useMemo(() => normalizeMarkdownLists(markdown), [markdown])
 
@@ -214,7 +247,8 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
         </div>
       )
     }
-    return (
+
+    const article = (
       <div ref={ref} className={`syllabus-md ${theme.classes.article}`}>
         {deferMath ? (
           <div className="mb-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
@@ -237,6 +271,22 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
         </ReactMarkdown>
       </div>
     )
+
+    if (contentToolsEnabled && contentTools) {
+      return (
+        <LiveRegionProvider>
+          <ContentToolsPageProvider
+            courseCode={contentTools.courseCode}
+            itemId={contentTools.itemId}
+            hostKind={contentTools.hostKind}
+          >
+            {article}
+          </ContentToolsPageProvider>
+        </LiveRegionProvider>
+      )
+    }
+
+    return article
   },
 )
 

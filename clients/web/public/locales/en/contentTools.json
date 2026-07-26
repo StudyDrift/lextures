@@ -36,5 +36,19 @@
   "contentTools.authoring.archive": "Archive",
   "contentTools.authoring.deletePermanently": "Delete permanently",
   "contentTools.tools.noop_probe.name": "No-op probe",
-  "contentTools.tools.noop_probe.description": "Built-in test tool for Content Tools foundations."
+  "contentTools.tools.noop_probe.description": "Built-in test tool for Content Tools foundations.",
+  "contentTools.runtime.saved": "Saved",
+  "contentTools.runtime.saving": "Saving…",
+  "contentTools.runtime.unsynced": "Saved on this device — will sync",
+  "contentTools.runtime.retry": "Retry",
+  "contentTools.runtime.unavailable": "This interactive element is unavailable.",
+  "contentTools.runtime.readOnlyArchived": "Archived by your instructor — view only.",
+  "contentTools.runtime.readOnlyPastDue": "Past due — view only.",
+  "contentTools.runtime.readOnlyPreview": "Preview — changes are not saved for students.",
+  "contentTools.runtime.openInBrowser": "Open in browser to use this activity.",
+  "contentTools.runtime.loading": "Loading interactive element…",
+  "contentTools.runtime.errorTitle": "This interactive element could not be displayed.",
+  "contentTools.runtime.checkAnswer": "Check answer",
+  "contentTools.runtime.yourAnswer": "Your answer",
+  "contentTools.runtime.score": "Score"
 }

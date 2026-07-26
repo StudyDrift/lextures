@@ -8,6 +8,7 @@ import { sortedChildren, type CourseNotebookPage } from '../../lib/course-notebo
 import { appendContentQuoteToNotebookPage, loadCourseNotebook } from '../../lib/student-notebook-storage'
 import type { ResolvedMarkdownTheme } from '../../lib/markdown-theme'
 import { plainTextFromRange } from './selection-plain-text'
+import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 
 type SelectionOverlayRect = { left: number; top: number; width: number; height: number }
 
@@ -225,6 +226,23 @@ type ContentPageReaderProps = {
   disabled?: boolean
 }
 
+function contentToolsHostKind(target: ReaderMarkupTarget): string {
+  switch (target.variant) {
+    case 'content_page':
+      return 'content_page'
+    case 'assignment':
+      return 'assignment'
+    case 'quiz':
+      return 'quiz'
+    case 'syllabus':
+      return 'syllabus'
+    default: {
+      const _exhaustive: never = target
+      return _exhaustive
+    }
+  }
+}
+
 export function ContentPageReader({
   markdown,
   theme,
@@ -236,6 +254,7 @@ export function ContentPageReader({
   emptyMessage,
   disabled = false,
 }: ContentPageReaderProps) {
+  const { contentToolsEnabled } = useCourseNavFeatures()
   const articleRef = useRef<HTMLDivElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
   const pendingSelectionRangeRef = useRef<Range | null>(null)
@@ -629,6 +648,16 @@ export function ContentPageReader({
           theme={theme}
           courseCode={courseCode}
           emptyMessage={emptyMessage}
+          contentTools={
+            contentToolsEnabled
+              ? {
+                  courseCode,
+                  itemId: 'itemId' in markupTarget ? markupTarget.itemId : undefined,
+                  hostKind: contentToolsHostKind(markupTarget),
+                  enabled: true,
+                }
+              : undefined
+          }
         />
       </div>
 

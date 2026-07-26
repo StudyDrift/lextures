@@ -57,6 +57,8 @@ func TestContentTools_AuthoringRoutesRegistered_NoDB(t *testing.T) {
 	}{
 		{http.MethodPost, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/duplicate"},
 		{http.MethodGet, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/usage"},
+		{http.MethodPost, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/submit"},
+		{http.MethodPost, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/actions/grade"},
 	} {
 		req := httptest.NewRequest(path.method, path.url, nil)
 		rr := httptest.NewRecorder()
@@ -64,6 +66,13 @@ func TestContentTools_AuthoringRoutesRegistered_NoDB(t *testing.T) {
 		if rr.Code == http.StatusNotFound && rr.Body.String() == "404 page not found\n" {
 			t.Fatalf("%s %s: chi returned 404 page not found (route missing)", path.method, path.url)
 		}
+	}
+}
+
+func TestContentTools_RuntimeReadonly_Env(t *testing.T) {
+	t.Setenv(ctsvc.EnvRuntimeReadonly, "on")
+	if !ctsvc.RuntimeReadonly() {
+		t.Fatal("expected runtime readonly")
 	}
 }
 

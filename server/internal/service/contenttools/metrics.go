@@ -44,6 +44,37 @@ var (
 		Name:      "content_tools_kill_switch_engaged",
 		Help:      "1 when CONTENT_TOOLS_KILL_SWITCH is engaged, else 0.",
 	})
+
+	stateSavesTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_state_saves_total",
+		Help:      "Content tool state save outcomes by tool_id and outcome.",
+	}, []string{"tool_id", "outcome"})
+
+	stateConflictsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_state_conflicts_total",
+		Help:      "Content tool state revision conflicts by tool_id.",
+	}, []string{"tool_id"})
+
+	actionLatency = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_action_latency_seconds",
+		Help:      "Content tool server action latency by tool_id and action.",
+		Buckets:   []float64{0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10},
+	}, []string{"tool_id", "action"})
+
+	renderErrorsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_render_errors_total",
+		Help:      "Client-reported content tool render errors by tool_id (reserved; incremented via telemetry ingest).",
+	}, []string{"tool_id"})
+
+	offlineReplaysTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_offline_replays_total",
+		Help:      "Offline outbox replay outcomes for content tool writes.",
+	}, []string{"outcome"})
 )
 
 func registerMetrics() {
@@ -51,7 +82,11 @@ func registerMetrics() {
 		prometheus.MustRegister(
 			instancesTotal, configValidationFailures, insertTotal, configSaveTotal,
 			registrySize, killSwitchEngaged,
+			stateSavesTotal, stateConflictsTotal, actionLatency, renderErrorsTotal, offlineReplaysTotal,
 		)
+		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
+		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
+		offlineReplaysTotal.WithLabelValues("_reserved").Add(0)
 	})
 }
 
@@ -100,3 +135,25 @@ func RefreshKillSwitchMetric() {
 		killSwitchEngaged.Set(0)
 	}
 }
+
+// IncStateSave increments lextures_content_tool_state_saves_total{tool_id,outcome}.
+func IncStateSave(toolID, outcome string) {
+	registerMetrics()
+	if outcome == "" {
+		outcome = "ok"
+	}
+	stateSavesTotal.WithLabelValues(toolID, outcome).Inc()
+}
+
+// IncStateConflict increments lextures_content_tool_state_conflicts_total{tool_id}.
+func IncStateConflict(toolID string) {
+	registerMetrics()
+	stateConflictsTotal.WithLabelValues(toolID).Inc()
+}
+
+// ObserveActionLatency records action latency seconds.
+func ObserveActionLatency(toolID, action string, seconds float64) {
+	registerMetrics()
+	actionLatency.WithLabelValues(toolID, action).Observe(seconds)
+}
+

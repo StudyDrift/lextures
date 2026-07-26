@@ -1,6 +1,6 @@
 # CT.3 — Content Tools: Student Runtime Host & State Persistence
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Web platform + backend platform |
 | **Depends on** | CT.1, CT.2 |
@@ -373,6 +373,6 @@ the action returns a typed `provider_unavailable` error, the tool keeps its stat
 - External standards: WCAG 2.1 AA; RFC 7232 (optimistic concurrency semantics); RFC 2119.
 - Related plans: [CT.1](CT.1-foundations-registry-and-data-model.md),
   [CT.2](CT.2-authoring-tools-dropdown-and-config.md),
-  [CT.4](CT.4-instructor-state-console-and-reset.md),
-  [CT.5](CT.5-tool-sdk-sandboxing-and-versioning.md),
-  [CT.8](CT.8-governance-safety-privacy-accessibility.md).
+  [CT.4](../../plan/content_tools/CT.4-instructor-state-console-and-reset.md),
+  [CT.5](../../plan/content_tools/CT.5-tool-sdk-sandboxing-and-versioning.md),
+  [CT.8](../../plan/content_tools/CT.8-governance-safety-privacy-accessibility.md).

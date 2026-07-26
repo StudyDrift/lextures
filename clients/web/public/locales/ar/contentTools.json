@@ -36,5 +36,19 @@
   "contentTools.authoring.archive": "أرشفة",
   "contentTools.authoring.deletePermanently": "حذف نهائي",
   "contentTools.tools.noop_probe.name": "مسبار تجريبي",
-  "contentTools.tools.noop_probe.description": "أداة اختبار مدمجة لأساسات أدوات المحتوى."
+  "contentTools.tools.noop_probe.description": "أداة اختبار مدمجة لأساسات أدوات المحتوى.",
+  "contentTools.runtime.saved": "تم الحفظ",
+  "contentTools.runtime.saving": "جارٍ الحفظ…",
+  "contentTools.runtime.unsynced": "محفوظ على هذا الجهاز — سيتم المزامنة",
+  "contentTools.runtime.retry": "إعادة المحاولة",
+  "contentTools.runtime.unavailable": "هذا العنصر التفاعلي غير متاح.",
+  "contentTools.runtime.readOnlyArchived": "مؤرشف بواسطة المدرّس — للعرض فقط.",
+  "contentTools.runtime.readOnlyPastDue": "انتهى الموعد — للعرض فقط.",
+  "contentTools.runtime.readOnlyPreview": "معاينة — لا تُحفظ التغييرات للطلاب.",
+  "contentTools.runtime.openInBrowser": "افتح في المتصفح لاستخدام هذا النشاط.",
+  "contentTools.runtime.loading": "جارٍ تحميل العنصر التفاعلي…",
+  "contentTools.runtime.errorTitle": "تعذّر عرض هذا العنصر التفاعلي.",
+  "contentTools.runtime.checkAnswer": "تحقق من الإجابة",
+  "contentTools.runtime.yourAnswer": "إجابتك",
+  "contentTools.runtime.score": "الدرجة"
 }
