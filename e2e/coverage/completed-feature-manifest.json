@@ -8699,6 +8699,24 @@
       "rationale": "Internal convention charter and static structure checks. No user-facing journey; enforced via make lint-structure and CI.",
       "owner": "Platform",
       "reviewed": true
+    },
+    {
+      "id": "TD.3",
+      "path": "docs/completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Repaired /api/openapi.json contract and coverage ratchet. Smoke Playwright asserts valid OpenAPI 3.0.3 shape; deeper coverage is Go openapi package tests + make openapi-check.",
+      "owner": "Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/public-api.spec.ts"
+        }
+      ],
+      "reviewed": true
     }
   ]
 }

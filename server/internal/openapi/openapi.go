@@ -45,11 +45,6 @@ func ServeOpenAPI(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(specBytes)
 }
 
-// SpecBytes returns the embedded OpenAPI document (for tests and tooling).
-func SpecBytes() []byte {
-	return specBytes
-}
-
 // ServeDocs returns HTML that loads Swagger UI against /api/openapi.json.
 func ServeDocs(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
