@@ -18,6 +18,7 @@ vi.mock('../../../hooks/use-speech-to-text-availability', () => ({
 vi.mock('../../../context/course-nav-features-context', () => ({
   useCourseNavFeatures: () => ({
     visualBoardsEnabled: false,
+    contentToolsEnabled: false,
   }),
 }))
 

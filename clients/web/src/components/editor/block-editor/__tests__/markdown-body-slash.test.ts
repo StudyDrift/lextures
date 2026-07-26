@@ -87,6 +87,27 @@ describe('filterSlashCommands', () => {
     expect(filterSlashCommands(commands, 'todo').map((c) => c.id)).toEqual(['task'])
     expect(filterSlashCommands(commands, 'task').map((c) => c.id)).toEqual(['task'])
   })
+
+  it('includes tool: slash commands and filters by tool id / keywords', () => {
+    const commands = slashCommandsForEditor({
+      tools: [
+        {
+          id: 'noop_probe',
+          name: 'No-op probe',
+          description: 'Test tool',
+          keywords: ['noop', 'probe'],
+        },
+      ],
+    })
+    expect(commands.some((c) => c.id === 'tool:noop_probe')).toBe(true)
+    expect(filterSlashCommands(commands, 'noop').map((c) => c.id)).toEqual(['tool:noop_probe'])
+    expect(filterSlashCommands(commands, 'probe').map((c) => c.id)).toEqual(['tool:noop_probe'])
+  })
+
+  it('omits tool commands when tools list is empty', () => {
+    const commands = slashCommandsForEditor({ tools: [] })
+    expect(commands.some((c) => c.id.startsWith('tool:'))).toBe(false)
+  })
 })
 
 describe('getBlockSlashRange', () => {

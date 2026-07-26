@@ -762,6 +762,7 @@ export default function CourseModuleContentPage() {
             <SyllabusBlockEditor
               courseCode={courseCode}
               structureItemId={itemId}
+              hostKind="content_page"
               sections={draft}
               onChange={setDraft}
               disabled={saving}

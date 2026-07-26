@@ -12306,7 +12306,64 @@
         "tags": [
           "content-tools"
         ],
-        "summary": "Archive a Content Tool instance",
+        "summary": "Archive or permanently delete a Content Tool instance",
+        "description": "By default archives the instance (status=archived). Pass permanent=true to hard-delete the instance and cascaded learner state.",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "permanent",
+            "in": "query",
+            "required": false,
+            "description": "When true, hard-delete the instance instead of archiving.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Archived or permanently deleted"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/duplicate": {
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Duplicate a Content Tool instance",
+        "description": "Creates a new instance with copied config and a new instance id (plan CT.2). Rate limited to 30/min/user.",
         "parameters": [
           {
             "name": "course_code",
@@ -12327,8 +12384,71 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "Archived"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolInstance"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found (feature off or kill-switch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/usage": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Get learner usage for a Content Tool instance",
+        "description": "Drives the authoring delete confirmation dialog (plan CT.2).",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usage summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolInstanceUsage"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden"
@@ -12368,6 +12488,20 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "description": "enrollment (default) for real learner state; preview for instructor preview-as-student (CT.2).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "enrollment",
+                "preview"
+              ],
+              "default": "enrollment"
             }
           }
         ],
@@ -12411,6 +12545,20 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "description": "enrollment (default) for real learner state; preview for instructor preview-as-student (CT.2).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "enrollment",
+                "preview"
+              ],
+              "default": "enrollment"
             }
           }
         ],
@@ -14569,6 +14717,35 @@
         "required": [
           "toolId",
           "hostKind"
+        ]
+      },
+      "ContentToolInstanceUsage": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "learnersWithState": {
+            "type": "integer"
+          },
+          "learnersCompleted": {
+            "type": "integer"
+          },
+          "lastInteractionAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "referencedInBody": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "instanceId",
+          "learnersWithState",
+          "learnersCompleted",
+          "referencedInBody"
         ]
       },
       "ContentToolManifest": {

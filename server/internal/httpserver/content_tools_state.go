@@ -3,13 +3,14 @@ package httpserver
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
 	"github.com/lextures/lextures/server/internal/apierr"
-	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
+	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
 
@@ -23,14 +24,31 @@ type contentToolsStatePutBody struct {
 	Revision  int64           `json:"revision"`
 }
 
+func parseContentToolsStateScope(q string) (scope string, ok bool) {
+	s := strings.TrimSpace(strings.ToLower(q))
+	switch s {
+	case "", ctrepo.ScopeEnrollment:
+		return ctrepo.ScopeEnrollment, true
+	case ctrepo.ScopePreview:
+		return ctrepo.ScopePreview, true
+	default:
+		return "", false
+	}
+}
+
 func (d Deps) handleContentToolsStateGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		_, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
+		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
+			return
+		}
+		scope, okScope := parseContentToolsStateScope(r.URL.Query().Get("scope"))
+		if !okScope {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "scope must be enrollment or preview.")
 			return
 		}
 		instanceID, err := uuid.Parse(chi.URLParam(r, "instance_id"))
@@ -47,12 +65,37 @@ func (d Deps) handleContentToolsStateGet() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Instance not found.")
 			return
 		}
-		enrollID, err := enrollment.GetStudentEnrollmentID(r.Context(), d.Pool, courseID, viewer)
-		if err != nil || enrollID == nil {
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Active enrollment required.")
-			return
+
+		var enrollID *uuid.UUID
+		if scope == ctrepo.ScopePreview {
+			canEdit, err := d.viewerCanEditContentTools(r.Context(), courseCode, viewer)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+				return
+			}
+			if !canEdit {
+				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
+				return
+			}
+			enrollID, err = enrollment.GetActiveEnrollmentID(r.Context(), d.Pool, courseID, viewer)
+			if err != nil || enrollID == nil {
+				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Active enrollment required.")
+				return
+			}
+		} else {
+			enrollID, err = enrollment.GetStudentEnrollmentID(r.Context(), d.Pool, courseID, viewer)
+			if err != nil || enrollID == nil {
+				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Active enrollment required.")
+				return
+			}
 		}
-		st, err := ctrepo.GetState(r.Context(), d.Pool, instanceID, *enrollID)
+
+		var st *ctrepo.StateRow
+		if scope == ctrepo.ScopePreview {
+			st, err = ctrepo.GetStateByScope(r.Context(), d.Pool, instanceID, *enrollID, scope)
+		} else {
+			st, err = ctrepo.GetState(r.Context(), d.Pool, instanceID, *enrollID)
+		}
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load state.")
 			return
@@ -63,6 +106,7 @@ func (d Deps) handleContentToolsStateGet() http.HandlerFunc {
 				"stateJson": json.RawMessage(`{}`),
 				"revision":  0,
 				"status":    "not_started",
+				"scope":     scope,
 			})
 			return
 		}
@@ -71,6 +115,7 @@ func (d Deps) handleContentToolsStateGet() http.HandlerFunc {
 			"stateJson": st.StateJSON,
 			"revision":  st.Revision,
 			"status":    st.Status,
+			"scope":     st.Scope,
 		})
 	}
 }
@@ -81,8 +126,13 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		_, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
+		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
+			return
+		}
+		scope, okScope := parseContentToolsStateScope(r.URL.Query().Get("scope"))
+		if !okScope {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "scope must be enrollment or preview.")
 			return
 		}
 		instanceID, err := uuid.Parse(chi.URLParam(r, "instance_id"))
@@ -104,11 +154,31 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Tool no longer registered.")
 			return
 		}
-		enrollID, err := enrollment.GetStudentEnrollmentID(r.Context(), d.Pool, courseID, viewer)
-		if err != nil || enrollID == nil {
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Active enrollment required.")
-			return
+
+		var enrollID *uuid.UUID
+		if scope == ctrepo.ScopePreview {
+			canEdit, err := d.viewerCanEditContentTools(r.Context(), courseCode, viewer)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+				return
+			}
+			if !canEdit {
+				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
+				return
+			}
+			enrollID, err = enrollment.GetActiveEnrollmentID(r.Context(), d.Pool, courseID, viewer)
+			if err != nil || enrollID == nil {
+				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Active enrollment required.")
+				return
+			}
+		} else {
+			enrollID, err = enrollment.GetStudentEnrollmentID(r.Context(), d.Pool, courseID, viewer)
+			if err != nil || enrollID == nil {
+				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Active enrollment required.")
+				return
+			}
 		}
+
 		var body contentToolsStatePutBody
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -126,7 +196,13 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
-		st, err := ctrepo.UpsertState(r.Context(), d.Pool, instanceID, *enrollID, viewer, body.StateJSON, body.Revision)
+
+		var st *ctrepo.StateRow
+		if scope == ctrepo.ScopePreview {
+			st, err = ctrepo.UpsertPreviewState(r.Context(), d.Pool, instanceID, *enrollID, viewer, body.StateJSON, body.Revision)
+		} else {
+			st, err = ctrepo.UpsertState(r.Context(), d.Pool, instanceID, *enrollID, viewer, body.StateJSON, body.Revision)
+		}
 		if err != nil {
 			if ctrepo.IsConfigSizeViolation(err) {
 				apierr.WriteJSON(w, http.StatusRequestEntityTooLarge, apierr.CodeInvalidInput, ctsvc.ErrStateTooLarge.Error())
@@ -144,6 +220,7 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			"stateJson": st.StateJSON,
 			"revision":  st.Revision,
 			"status":    st.Status,
+			"scope":     st.Scope,
 		})
 	}
 }

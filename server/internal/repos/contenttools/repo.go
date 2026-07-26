@@ -45,6 +45,7 @@ type StateRow struct {
 	InstanceID         uuid.UUID
 	EnrollmentID       uuid.UUID
 	UserID             uuid.UUID
+	Scope              string
 	StateJSON          json.RawMessage
 	StateSchemaVersion int
 	Revision           int64
@@ -61,6 +62,11 @@ type StateRow struct {
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
 }
+
+const (
+	ScopeEnrollment = "enrollment"
+	ScopePreview    = "preview"
+)
 
 // DefaultSettings returns in-memory defaults matching the migration.
 func DefaultSettings(courseID uuid.UUID) SettingsRow {

@@ -10,10 +10,10 @@ import (
 
 // Settings is the course-scoped Content Tools configuration.
 type Settings struct {
-	AllowedToolIDs       []string  `json:"allowedToolIds"`
-	StudentResetAllowed  bool      `json:"studentResetAllowed"`
-	MaxInstancesPerItem  int16     `json:"maxInstancesPerItem"`
-	UpdatedAt            time.Time `json:"updatedAt,omitempty"`
+	AllowedToolIDs      []string  `json:"allowedToolIds"`
+	StudentResetAllowed bool      `json:"studentResetAllowed"`
+	MaxInstancesPerItem int16     `json:"maxInstancesPerItem"`
+	UpdatedAt           time.Time `json:"updatedAt,omitempty"`
 }
 
 // CatalogTool is one tool available in a course after flag/allowlist/role filtering.
@@ -118,6 +118,15 @@ type PatchInstanceRequest struct {
 	SectionKey *string          `json:"sectionKey"`
 	Config     *json.RawMessage `json:"config"`
 	Status     *string          `json:"status"`
+}
+
+// ToolInstanceUsage is GET .../instances/{id}/usage (plan CT.2 delete confirmation).
+type ToolInstanceUsage struct {
+	InstanceID        uuid.UUID `json:"instanceId"`
+	LearnersWithState int       `json:"learnersWithState"`
+	LearnersCompleted int       `json:"learnersCompleted"`
+	LastInteractionAt *string   `json:"lastInteractionAt"`
+	ReferencedInBody  bool      `json:"referencedInBody"`
 }
 
 // FieldError is one JSON Schema validation failure (HTTP 422).

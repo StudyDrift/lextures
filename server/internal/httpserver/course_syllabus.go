@@ -89,12 +89,12 @@ func (d Deps) handleGetCourseSyllabus() http.HandlerFunc {
 
 type patchSyllabusBody struct {
 	Sections                  []course.SyllabusSection `json:"sections"`
-	RequireSyllabusAcceptance bool                      `json:"requireSyllabusAcceptance"`
+	RequireSyllabusAcceptance bool                     `json:"requireSyllabusAcceptance"`
 }
 
 type generateSyllabusSectionBody struct {
-	Instructions    string `json:"instructions"`
-	SectionHeading  string `json:"sectionHeading"`
+	Instructions     string `json:"instructions"`
+	SectionHeading   string `json:"sectionHeading"`
 	ExistingMarkdown string `json:"existingMarkdown"`
 }
 
@@ -139,6 +139,21 @@ func (d Deps) handlePatchCourseSyllabus() http.HandlerFunc {
 		}
 		if body.Sections == nil {
 			body.Sections = []course.SyllabusSection{}
+		}
+		if len(body.Sections) > 0 {
+			mds := make([]string, len(body.Sections))
+			for i := range body.Sections {
+				mds[i] = body.Sections[i].Markdown
+			}
+			cleaned := d.maybeReconcileContentToolMarkdownBodies(r.Context(), courseCode, p0.CourseID, nil, mds)
+			for i := range body.Sections {
+				if i < len(cleaned) {
+					body.Sections[i].Markdown = cleaned[i]
+				}
+			}
+		} else {
+			// Empty sections still archive unreferenced syllabus instances when CT is on.
+			_ = d.maybeReconcileContentToolMarkdownBodies(r.Context(), courseCode, p0.CourseID, nil, []string{""})
 		}
 		_, err = course.UpsertSyllabus(r.Context(), d.Pool, p0.CourseID, body.Sections, body.RequireSyllabusAcceptance)
 		if err != nil {
@@ -293,7 +308,7 @@ func (d Deps) handlePostSyllabusAccept() http.HandlerFunc {
 func (d Deps) handleSyllabusAcceptanceStatus() http.HandlerFunc {
 	type resp struct {
 		RequireSyllabusAcceptance bool `json:"requireSyllabusAcceptance"`
-		HasAcceptedSyllabus      bool `json:"hasAcceptedSyllabus"`
+		HasAcceptedSyllabus       bool `json:"hasAcceptedSyllabus"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
@@ -322,7 +337,7 @@ func (d Deps) handleSyllabusAcceptanceStatus() http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			_ = json.NewEncoder(w).Encode(resp{
 				RequireSyllabusAcceptance: false,
-				HasAcceptedSyllabus:      true,
+				HasAcceptedSyllabus:       true,
 			})
 			return
 		}
@@ -334,7 +349,7 @@ func (d Deps) handleSyllabusAcceptanceStatus() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp{
 			RequireSyllabusAcceptance: true,
-			HasAcceptedSyllabus:      has,
+			HasAcceptedSyllabus:       has,
 		})
 	}
 }

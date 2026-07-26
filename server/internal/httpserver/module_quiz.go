@@ -145,7 +145,7 @@ func buildModuleQuizResponse(
 		QuizAccessCode:                quizAccess,
 		AdaptiveDifficulty:            row.AdaptiveDifficulty,
 		AdaptiveTopicBalance:          row.AdaptiveTopicBalance,
-		AdaptiveStopRule:            row.AdaptiveStopRule,
+		AdaptiveStopRule:              row.AdaptiveStopRule,
 		RandomQuestionPoolCount:       row.RandomQuestionPoolCount,
 		Questions:                     questions,
 		UsesServerQuestionSampling:    usesServerQuestionSampling,
@@ -155,7 +155,7 @@ func buildModuleQuizResponse(
 		AdaptiveSourceItemIDs:         adaptiveSources,
 		AdaptiveQuestionCount:         row.AdaptiveQuestionCount,
 		AdaptiveDeliveryMode:          row.AdaptiveDeliveryMode,
-		AssignmentGroupID:            row.AssignmentGroupID,
+		AssignmentGroupID:             row.AssignmentGroupID,
 		HintScaffoldingEnabled:        meta.HintScaffoldingEnabled,
 		MisconceptionDetectionEnabled: meta.MisconceptionDetectionEnabled,
 		NeverDrop:                     row.NeverDrop,
@@ -344,6 +344,11 @@ func (d Deps) handlePatchModuleQuiz() http.HandlerFunc {
 		}
 		if !d.guardCourseItemCreateBlueprint(w, r, courseCode, viewer, *cid, itemID) {
 			return
+		}
+		if req.Markdown != nil {
+			itemIDCopy := itemID
+			cleaned := d.maybeReconcileContentToolMarkdown(r.Context(), courseCode, *cid, &itemIDCopy, *req.Markdown)
+			req.Markdown = &cleaned
 		}
 		okWrite, err := coursemodulequizzes.PatchForCourseItem(r.Context(), d.Pool, *cid, itemID, patchWriteFromUpdateModuleQuizRequest(req))
 		if err != nil {

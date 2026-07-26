@@ -25,7 +25,8 @@ unknown `ai.featureId`).
    The framework strips those fields for non-instructors — do not rely on the
    renderer to hide them.
 4. Add a client renderer under `clients/web/src/components/content-tools/tools/`
-   (CT.2 / CT.3). Until those land, the tool appears only in the catalog API.
+   (CT.2 authoring UI / CT.3 student runtime). CT.2 ships the Tools dropdown and
+   generic config form; student rendering lands in CT.3.
 5. Run `go test ./internal/service/contenttools -run TestRegistryContract`.
 
 ## Immutability

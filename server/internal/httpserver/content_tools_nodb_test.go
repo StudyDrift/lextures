@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 
 	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
@@ -42,5 +43,42 @@ func TestContentTools_BuiltinRegistryLoads(t *testing.T) {
 	reg := ctsvc.MustDefault()
 	if reg.Get("noop_probe") == nil {
 		t.Fatal("noop_probe must be registered")
+	}
+}
+
+func TestContentTools_AuthoringRoutesRegistered_NoDB(t *testing.T) {
+	d := Deps{}
+	r := chi.NewRouter()
+	d.registerContentToolsRoutes(r)
+
+	for _, path := range []struct {
+		method string
+		url    string
+	}{
+		{http.MethodPost, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/duplicate"},
+		{http.MethodGet, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/usage"},
+	} {
+		req := httptest.NewRequest(path.method, path.url, nil)
+		rr := httptest.NewRecorder()
+		r.ServeHTTP(rr, req)
+		if rr.Code == http.StatusNotFound && rr.Body.String() == "404 page not found\n" {
+			t.Fatalf("%s %s: chi returned 404 page not found (route missing)", path.method, path.url)
+		}
+	}
+}
+
+func TestContentTools_DuplicateRateLimit_NoDB(t *testing.T) {
+	uid := uuid.MustParse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+	contentToolsDupRateMu.Lock()
+	delete(contentToolsDupRateByUser, uid)
+	contentToolsDupRateMu.Unlock()
+
+	for i := 0; i < contentToolsDuplicateRateLimitPerMin; i++ {
+		if !checkContentToolsDuplicateRateLimit(uid) {
+			t.Fatalf("request %d unexpectedly rate limited", i+1)
+		}
+	}
+	if checkContentToolsDuplicateRateLimit(uid) {
+		t.Fatal("expected rate limit after burst")
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -11,8 +12,8 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	ctmodel "github.com/lextures/lextures/server/internal/models/contenttools"
-	"github.com/lextures/lextures/server/internal/repos/course"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
+	"github.com/lextures/lextures/server/internal/repos/course"
 	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
 
@@ -25,6 +26,7 @@ func (d Deps) registerContentToolsRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/content-tools/instances", d.handleContentToolsInstancesCreate())
 	r.Patch("/api/v1/courses/{course_code}/content-tools/instances/{instance_id}", d.handleContentToolsInstancePatch())
 	r.Delete("/api/v1/courses/{course_code}/content-tools/instances/{instance_id}", d.handleContentToolsInstanceDelete())
+	d.registerContentToolsAuthoringRoutes(r)
 	d.registerContentToolsStateRoutes(r)
 }
 
@@ -419,6 +421,7 @@ func (d Deps) handleContentToolsInstancesCreate() http.HandlerFunc {
 			"hostKind": created.HostKind,
 		})
 		ctsvc.IncInstanceAction(created.ToolID, "create")
+		ctsvc.IncInsert(created.ToolID, "api")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(instanceToAPI(*created, created.ConfigJSON))
@@ -479,13 +482,16 @@ func (d Deps) handleContentToolsInstancePatch() http.HandlerFunc {
 			if err := ctsvc.ValidateConfigJSON(m, *body.Config); err != nil {
 				if ve, ok := err.(*ctsvc.ConfigValidationError); ok {
 					ctsvc.IncConfigValidationFailure(existing.ToolID)
+					ctsvc.IncConfigSave(existing.ToolID, "validation_error")
 					writeContentToolsConfigValidation(w, ve)
 					return
 				}
 				if err == ctsvc.ErrConfigTooLarge {
+					ctsvc.IncConfigSave(existing.ToolID, "too_large")
 					apierr.WriteJSON(w, http.StatusRequestEntityTooLarge, apierr.CodeInvalidInput, err.Error())
 					return
 				}
+				ctsvc.IncConfigSave(existing.ToolID, "error")
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 				return
 			}
@@ -494,9 +500,11 @@ func (d Deps) handleContentToolsInstancePatch() http.HandlerFunc {
 		updated, err := ctrepo.UpdateInstance(r.Context(), d.Pool, courseID, instanceID, body.Title, body.SectionKey, cfg, body.Status)
 		if err != nil {
 			if ctrepo.IsConfigSizeViolation(err) {
+				ctsvc.IncConfigSave(existing.ToolID, "too_large")
 				apierr.WriteJSON(w, http.StatusRequestEntityTooLarge, apierr.CodeInvalidInput, ctsvc.ErrConfigTooLarge.Error())
 				return
 			}
+			ctsvc.IncConfigSave(existing.ToolID, "error")
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update instance.")
 			return
 		}
@@ -507,6 +515,9 @@ func (d Deps) handleContentToolsInstancePatch() http.HandlerFunc {
 		actor := viewer
 		_ = ctrepo.InsertEvent(r.Context(), d.Pool, courseID, &updated.ID, nil, &actor, updated.ToolID, ctsvc.EventInstanceUpdated, map[string]any{})
 		ctsvc.IncInstanceAction(updated.ToolID, "update")
+		if body.Config != nil {
+			ctsvc.IncConfigSave(updated.ToolID, "ok")
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(instanceToAPI(*updated, updated.ConfigJSON))
 	}
@@ -536,6 +547,31 @@ func (d Deps) handleContentToolsInstanceDelete() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid instance id.")
 			return
 		}
+		permanent := strings.EqualFold(r.URL.Query().Get("permanent"), "true")
+		actor := viewer
+		if permanent {
+			existing, err := ctrepo.GetInstance(r.Context(), d.Pool, courseID, instanceID)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load instance.")
+				return
+			}
+			if existing == nil {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Instance not found.")
+				return
+			}
+			if err := ctrepo.HardDeleteInstance(r.Context(), d.Pool, courseID, instanceID); err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete instance.")
+				return
+			}
+			// instance_id is CASCADE-null-unsafe; record course-scoped audit with id in payload.
+			_ = ctrepo.InsertEvent(r.Context(), d.Pool, courseID, nil, nil, &actor, existing.ToolID, ctsvc.EventInstanceDeleted, map[string]any{
+				"permanent":  true,
+				"instanceId": existing.ID.String(),
+			})
+			ctsvc.IncInstanceAction(existing.ToolID, "delete")
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		archived, err := ctrepo.ArchiveInstance(r.Context(), d.Pool, courseID, instanceID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to archive instance.")
@@ -545,7 +581,6 @@ func (d Deps) handleContentToolsInstanceDelete() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Instance not found.")
 			return
 		}
-		actor := viewer
 		_ = ctrepo.InsertEvent(r.Context(), d.Pool, courseID, &archived.ID, nil, &actor, archived.ToolID, ctsvc.EventInstanceArchived, map[string]any{})
 		ctsvc.IncInstanceAction(archived.ToolID, "archive")
 		w.WriteHeader(http.StatusNoContent)

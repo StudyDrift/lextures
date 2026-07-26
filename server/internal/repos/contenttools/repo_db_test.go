@@ -197,3 +197,94 @@ func TestDB_ConfigSizeConstraint(t *testing.T) {
 		t.Logf("got error (ok): %v", err)
 	}
 }
+
+func TestDB_UpsertStatePartialUniqueAndPreview(t *testing.T) {
+	pool := testPool(t)
+	ctx := context.Background()
+	courseID := seedCourse(t, pool)
+	userID, enrollmentID := seedEnrollment(t, pool, courseID)
+
+	inst, err := CreateInstance(ctx, pool, InstanceRow{
+		CourseID: courseID, HostKind: "syllabus", ToolID: "noop_probe", ToolVersion: "1.0.0",
+		ConfigJSON: json.RawMessage(`{"prompt":"q"}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	st, err := UpsertState(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"a"}`), 0)
+	if err != nil || st == nil {
+		t.Fatalf("upsert enrollment: %v %#v", err, st)
+	}
+	if st.Scope != ScopeEnrollment {
+		t.Fatalf("scope=%q", st.Scope)
+	}
+	prev, err := UpsertPreviewState(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"preview"}`), 0)
+	if err != nil || prev == nil {
+		t.Fatalf("upsert preview: %v %#v", err, prev)
+	}
+	if prev.Scope != ScopePreview {
+		t.Fatalf("preview scope=%q", prev.Scope)
+	}
+	// Preview must not overwrite enrollment state.
+	got, err := GetState(ctx, pool, inst.ID, enrollmentID)
+	if err != nil || got == nil {
+		t.Fatalf("get enrollment: %v", err)
+	}
+	if string(got.StateJSON) == string(prev.StateJSON) {
+		t.Fatal("preview must not replace enrollment state")
+	}
+	withState, completed, _, err := CountInstanceUsage(ctx, pool, inst.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if withState != 1 || completed != 0 {
+		t.Fatalf("usage with=%d completed=%d", withState, completed)
+	}
+}
+
+func TestDB_HardDeleteAndArchiveUnreferenced(t *testing.T) {
+	pool := testPool(t)
+	ctx := context.Background()
+	courseID := seedCourse(t, pool)
+
+	keep, err := CreateInstance(ctx, pool, InstanceRow{
+		CourseID: courseID, HostKind: "syllabus", ToolID: "noop_probe", ToolVersion: "1.0.0",
+		ConfigJSON: json.RawMessage(`{"prompt":"keep"}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	drop, err := CreateInstance(ctx, pool, InstanceRow{
+		CourseID: courseID, HostKind: "syllabus", ToolID: "noop_probe", ToolVersion: "1.0.0",
+		ConfigJSON: json.RawMessage(`{"prompt":"drop"}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ArchiveUnreferencedForItem(ctx, pool, courseID, nil, []uuid.UUID{keep.ID}); err != nil {
+		t.Fatal(err)
+	}
+	rows, err := ListInstances(ctx, pool, courseID, nil, "", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var dropStatus string
+	for _, r := range rows {
+		if r.ID == drop.ID {
+			dropStatus = r.Status
+		}
+	}
+	if dropStatus != "archived" {
+		t.Fatalf("expected archived, got %q", dropStatus)
+	}
+	if err := HardDeleteInstance(ctx, pool, courseID, drop.ID); err != nil {
+		t.Fatal(err)
+	}
+	gone, err := GetInstance(ctx, pool, courseID, drop.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gone != nil {
+		t.Fatal("expected hard delete")
+	}
+}

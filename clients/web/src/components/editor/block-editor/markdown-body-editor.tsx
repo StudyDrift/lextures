@@ -35,10 +35,12 @@ import { setNotebookTaskContext } from '../../../lib/notebook-task-context'
 import { NotebookTask, type NotebookTaskContext } from '../extensions/notebook-task-tip-tap'
 import { WhiteboardBlock } from '../extensions/whiteboard-tip-tap'
 import { BoardBlock } from '../extensions/board-tip-tap'
+import { ContentToolBlock } from '../extensions/content-tool-tip-tap'
 import { BoardPickerDialog } from '../../boards/board-picker-dialog'
 import { useCourseNavFeatures } from '../../../context/course-nav-features-context'
 import { altTextEnforcementFeatureEnabled } from '../../../lib/platform-features'
 import type { Board } from '../../../lib/boards-api'
+import type { ContentToolsCatalogTool } from '../../../lib/courses-api'
 
 const editorShellClass = [
   'tiptap',
@@ -112,6 +114,13 @@ export type MarkdownBodyEditorProps = {
   onEquationSlash?: () => void
   /** When set (student notebooks), notebook tasks sync to the server. */
   notebookTaskContext?: NotebookTaskContext | null
+  /** CT.2 — Content Tools authoring in this editor. */
+  contentToolsEnabled?: boolean
+  contentToolsCatalog?: ContentToolsCatalogTool[]
+  /** Create instance + insert fence; return false/throw to skip insert. */
+  onInsertContentTool?: (toolId: string) => void | Promise<void>
+  structureItemId?: string
+  hostKind?: string
 }
 
 type MentionUi = {
@@ -158,10 +167,17 @@ export function MarkdownBodyEditor({
   showImagePickerRow,
   onEquationSlash,
   notebookTaskContext = null,
+  contentToolsEnabled = false,
+  contentToolsCatalog = [],
+  onInsertContentTool,
 }: MarkdownBodyEditorProps) {
   const { visualBoardsEnabled } = useCourseNavFeatures()
   const [boardPickerOpen, setBoardPickerOpen] = useState(false)
   const boardInsertPosRef = useRef<number | null>(null)
+  const onInsertContentToolRef = useRef(onInsertContentTool)
+  useEffect(() => {
+    onInsertContentToolRef.current = onInsertContentTool
+  }, [onInsertContentTool])
   const skipEmit = useRef(false)
   const onChangeRef = useRef(onChange)
   const onFocusRef = useRef(onFocus)
@@ -402,6 +418,8 @@ export function MarkdownBodyEditor({
     Boolean(uploadCourseImage) || Boolean(showImagePickerRow) || Boolean(courseCode)
 
   const boardSlashEnabled = Boolean(courseCode) && visualBoardsEnabled
+  const contentToolsSlashEnabled =
+    Boolean(courseCode) && contentToolsEnabled && contentToolsCatalog.length > 0
 
   const slashCommands = useMemo(
     () =>
@@ -409,8 +427,22 @@ export function MarkdownBodyEditor({
         equation: Boolean(onEquationSlash),
         image: imageSlashEnabled,
         board: boardSlashEnabled,
+        tools: contentToolsSlashEnabled
+          ? contentToolsCatalog.map((tool) => ({
+              id: tool.id,
+              name: tool.name,
+              description: tool.category,
+              keywords: [tool.id, tool.category, tool.ui.group],
+            }))
+          : undefined,
       }),
-    [onEquationSlash, imageSlashEnabled, boardSlashEnabled],
+    [
+      onEquationSlash,
+      imageSlashEnabled,
+      boardSlashEnabled,
+      contentToolsSlashEnabled,
+      contentToolsCatalog,
+    ],
   )
 
   const filteredSlashCommands = useMemo(
@@ -464,6 +496,7 @@ export function MarkdownBodyEditor({
         MathInline,
         WhiteboardBlock,
         BoardBlock,
+        ContentToolBlock,
         NotebookTask.configure({ notebookTaskContext }),
         TableKit.configure({
           table: {
@@ -645,11 +678,29 @@ export function MarkdownBodyEditor({
           boardInsertPosRef.current = su.from
           setBoardPickerOpen(true)
         },
+        onTool: (toolId) => {
+          void onInsertContentToolRef.current?.(toolId)
+        },
       })
       setSlashUi(null)
     },
     [editor, openImageModal],
   )
+
+  /** Ensure content_tool_block / board_block nodes carry courseCode after markdown parse. */
+  useEffect(() => {
+    if (!editor || !courseCode) return
+    const { state } = editor
+    let tr = state.tr
+    let modified = false
+    state.doc.descendants((node, pos) => {
+      if (node.type.name !== 'content_tool_block' && node.type.name !== 'board_block') return
+      if (node.attrs.courseCode === courseCode) return
+      tr = tr.setNodeMarkup(pos, undefined, { ...node.attrs, courseCode })
+      modified = true
+    })
+    if (modified) editor.view.dispatch(tr)
+  }, [editor, courseCode, value])
 
   const insertPickedBoard = useCallback(
     (board: Board) => {

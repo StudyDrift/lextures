@@ -23,6 +23,12 @@ import {
   adaptiveContentSettingsSchema,
   contentToolsSettingsSchema,
   contentToolsCatalogSchema,
+  contentToolInstanceSchema,
+  contentToolInstancesListSchema,
+  contentToolManifestSchema,
+  toolInstanceUsageSchema,
+  contentToolStateSchema,
+  contentToolValidationErrorBodySchema,
   adaptiveContentUnitSchema,
   adaptiveContentUnitsListSchema,
   adaptiveContentVariantSchema,
@@ -1161,6 +1167,270 @@ export async function fetchContentToolsCatalog(
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   const body = parseApiResponse('fetchContentToolsCatalog', contentToolsCatalogSchema, raw)
   return body.tools
+}
+
+/** CT.2 — placed Content Tool instance. */
+export type ContentToolHostKind =
+  | 'content_page'
+  | 'assignment'
+  | 'quiz'
+  | 'syllabus'
+  | 'portfolio_artifact'
+
+export type ContentToolInstance = {
+  id: string
+  toolId: string
+  toolVersion: string
+  hostKind: string
+  structureItemId?: string | null
+  sectionKey?: string | null
+  title?: string | null
+  config: Record<string, unknown>
+  status: string
+  updatedAt: string
+}
+
+export type ContentToolManifest = {
+  id: string
+  version: string
+  name: string
+  category: string
+  capabilities: string[]
+  configSchema: Record<string, unknown>
+  stateSchema: Record<string, unknown>
+  scoring?: { mode: string; maxScore?: number | null }
+  ai?: { featureId: string; required: boolean } | null
+  network?: { allowedHosts: string[] } | null
+  storage?: { maxStateBytes: number }
+  roles?: { interact: string[] }
+  a11y?: { keyboardOperable: boolean; srPattern: string; wcagNotes?: string }
+  i18nNamespace?: string
+  ui?: {
+    renderer: string
+    icon: string
+    group: string
+    customEditor?: string
+    aiAssist?: boolean
+    allowedHostKinds?: string[]
+  }
+}
+
+export type ToolInstanceUsage = {
+  instanceId: string
+  learnersWithState: number
+  learnersCompleted: number
+  lastInteractionAt: string | null
+  referencedInBody: boolean
+}
+
+export type ContentToolState = {
+  stateJson: Record<string, unknown>
+  revision: number
+  status: string
+}
+
+export type ContentToolFieldError = { path: string; message: string }
+
+export class ContentToolsConfigValidationError extends Error {
+  readonly fieldErrors: ContentToolFieldError[]
+
+  constructor(message: string, fieldErrors: ContentToolFieldError[]) {
+    super(message)
+    this.name = 'ContentToolsConfigValidationError'
+    this.fieldErrors = fieldErrors
+  }
+}
+
+export type CreateContentToolInstanceBody = {
+  toolId: string
+  hostKind: ContentToolHostKind | string
+  structureItemId?: string | null
+  sectionKey?: string | null
+  title?: string | null
+  config: Record<string, unknown>
+}
+
+export type PatchContentToolInstanceBody = {
+  title?: string | null
+  sectionKey?: string | null
+  config?: Record<string, unknown>
+  status?: 'active' | 'archived' | string
+}
+
+/** Default config for create — server validates required fields. */
+export function defaultContentToolConfig(toolId: string): Record<string, unknown> {
+  if (toolId === 'noop_probe') {
+    return { prompt: 'New prompt', maxAttempts: 3 }
+  }
+  return {}
+}
+
+function throwContentToolsConfigError(raw: unknown): never {
+  const parsed = contentToolValidationErrorBodySchema.safeParse(raw)
+  if (parsed.success && parsed.data.error.errors?.length) {
+    throw new ContentToolsConfigValidationError(
+      parsed.data.error.message ?? 'Config validation failed.',
+      parsed.data.error.errors,
+    )
+  }
+  throw new Error(readApiErrorMessage(raw))
+}
+
+export async function fetchContentToolsInstances(
+  courseCode: string,
+  opts?: { itemId?: string; hostKind?: string },
+): Promise<ContentToolInstance[]> {
+  const params = new URLSearchParams()
+  if (opts?.itemId) params.set('itemId', opts.itemId)
+  if (opts?.hostKind) params.set('hostKind', opts.hostKind)
+  const qs = params.toString()
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances${qs ? `?${qs}` : ''}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = parseApiResponse('fetchContentToolsInstances', contentToolInstancesListSchema, raw)
+  return body.instances
+}
+
+export async function createContentToolInstance(
+  courseCode: string,
+  body: CreateContentToolInstanceBody,
+): Promise<ContentToolInstance> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        toolId: body.toolId,
+        hostKind: body.hostKind,
+        ...(body.structureItemId !== undefined ? { structureItemId: body.structureItemId } : {}),
+        ...(body.sectionKey !== undefined ? { sectionKey: body.sectionKey } : {}),
+        ...(body.title !== undefined ? { title: body.title } : {}),
+        config: body.config,
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (res.status === 422) throwContentToolsConfigError(raw)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('createContentToolInstance', contentToolInstanceSchema, raw)
+}
+
+export async function patchContentToolInstance(
+  courseCode: string,
+  instanceId: string,
+  body: PatchContentToolInstanceBody,
+): Promise<ContentToolInstance> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...(body.title !== undefined ? { title: body.title } : {}),
+        ...(body.sectionKey !== undefined ? { sectionKey: body.sectionKey } : {}),
+        ...(body.config !== undefined ? { config: body.config } : {}),
+        ...(body.status !== undefined ? { status: body.status } : {}),
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (res.status === 422) throwContentToolsConfigError(raw)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('patchContentToolInstance', contentToolInstanceSchema, raw)
+}
+
+export async function deleteContentToolInstance(
+  courseCode: string,
+  instanceId: string,
+  opts?: { permanent?: boolean },
+): Promise<void> {
+  const qs = opts?.permanent ? '?permanent=true' : ''
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}${qs}`,
+    { method: 'DELETE' },
+  )
+  if (res.status === 204) return
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+}
+
+export async function duplicateContentToolInstance(
+  courseCode: string,
+  instanceId: string,
+): Promise<ContentToolInstance> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/duplicate`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('duplicateContentToolInstance', contentToolInstanceSchema, raw)
+}
+
+export async function fetchContentToolInstanceUsage(
+  courseCode: string,
+  instanceId: string,
+): Promise<ToolInstanceUsage> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/usage`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchContentToolInstanceUsage', toolInstanceUsageSchema, raw)
+}
+
+export async function fetchContentToolManifest(
+  courseCode: string,
+  toolId: string,
+): Promise<ContentToolManifest> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/manifests/${encodeURIComponent(toolId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchContentToolManifest', contentToolManifestSchema, raw)
+}
+
+export async function getContentToolState(
+  courseCode: string,
+  instanceId: string,
+  opts?: { scope?: 'enrollment' | 'preview' },
+): Promise<ContentToolState> {
+  const params = new URLSearchParams()
+  if (opts?.scope) params.set('scope', opts.scope)
+  const qs = params.toString()
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/state${qs ? `?${qs}` : ''}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('getContentToolState', contentToolStateSchema, raw)
+}
+
+export async function putContentToolState(
+  courseCode: string,
+  instanceId: string,
+  body: { stateJson: Record<string, unknown>; revision: number; scope?: 'enrollment' | 'preview' },
+): Promise<ContentToolState> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/state`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        stateJson: body.stateJson,
+        revision: body.revision,
+        ...(body.scope ? { scope: body.scope } : {}),
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (res.status === 422) throwContentToolsConfigError(raw)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('putContentToolState', contentToolStateSchema, raw)
 }
 
 export async function putAdaptiveContentSettings(

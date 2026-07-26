@@ -5,10 +5,31 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { useTranslation } from 'react-i18next'
 import type { Editor } from '@tiptap/core'
 import {
-  generateSyllabusSectionMarkdown,
+  createContentToolInstance,
+  defaultContentToolConfig,
+  deleteContentToolInstance,
+  duplicateContentToolInstance,
+  fetchContentToolsCatalog,
+  fetchContentToolsInstances,
+  fetchContentToolsSettings,
+  patchContentToolInstance,
   uploadCourseFile,
+  generateSyllabusSectionMarkdown,
+  type ContentToolHostKind,
+  type ContentToolInstance,
+  type ContentToolManifest,
+  type ContentToolsCatalogTool,
   type SyllabusSection,
 } from '../../lib/courses-api'
+import { useCourseNavFeatures } from '../../context/course-nav-features-context'
+import {
+  ContentToolAuthoringProvider,
+  type ContentToolAuthoringContextValue,
+} from '../content-tools/authoring/content-tool-authoring-context'
+import { ToolsDropdown } from '../content-tools/authoring/tools-dropdown'
+import { ToolConfigPanel } from '../content-tools/authoring/tool-config-panel'
+import { ToolPreviewModal } from '../content-tools/authoring/tool-preview-modal'
+import { ToolDeleteDialog } from '../content-tools/authoring/tool-delete-dialog'
 import { sectionsToMarkdown, markdownToSectionsForEditor } from './syllabus-section-markdown'
 import { isSectionHeadingEnterToContentKey } from './section-heading-enter'
 import TurndownService from 'turndown'
@@ -68,6 +89,8 @@ type SyllabusBlockEditorProps = {
   courseCode?: string
   /** Content page / assignment structure item for equation audit events. */
   structureItemId?: string
+  /** CT.2 — host surface for Content Tool instances. */
+  hostKind?: ContentToolHostKind
   /** Sidebar copy: syllabus vs module page / assignment body. */
   documentVariant?: 'syllabus' | 'page'
   /**
@@ -343,6 +366,12 @@ function SyllabusSidebar({
   pageDocumentPanel,
   requireSyllabusAcceptance,
   onRequireSyllabusAcceptanceChange,
+  configureInstance,
+  courseCode,
+  onConfigSaved,
+  onConfigClose,
+  onManifestLoaded,
+  manifests,
 }: {
   sections: SyllabusSection[]
   onChange: (next: SyllabusSection[]) => void
@@ -351,6 +380,12 @@ function SyllabusSidebar({
   pageDocumentPanel?: ReactNode
   requireSyllabusAcceptance?: boolean
   onRequireSyllabusAcceptanceChange?: (next: boolean) => void
+  configureInstance: ContentToolInstance | null
+  courseCode?: string
+  onConfigSaved: (instance: ContentToolInstance) => void
+  onConfigClose: () => void
+  onManifestLoaded: (manifest: ContentToolManifest) => void
+  manifests: Record<string, ContentToolManifest>
 }) {
   const { selectedId } = useBlockEditor()
   const index = selectedId ? sections.findIndex((s) => s.id === selectedId) : -1
@@ -376,7 +411,16 @@ function SyllabusSidebar({
         )
       }
       blockPanel={
-        section ? (
+        configureInstance && courseCode ? (
+          <ToolConfigPanel
+            courseCode={courseCode}
+            instance={configureInstance}
+            manifestCache={manifests[configureInstance.toolId] ?? null}
+            onManifestLoaded={onManifestLoaded}
+            onSaved={onConfigSaved}
+            onClose={onConfigClose}
+          />
+        ) : section ? (
           <SyllabusBlockPanel
             section={section}
             index={index}
@@ -385,7 +429,7 @@ function SyllabusSidebar({
           />
         ) : null
       }
-      blockDisabled={!section}
+      blockDisabled={!section && !configureInstance}
       blockDisabledMessage="Click any section to edit its settings here."
     />
   )
@@ -438,6 +482,8 @@ function SyllabusBlockEditorInner({
   onChange,
   disabled,
   courseCode,
+  structureItemId,
+  hostKind: hostKindProp,
   documentVariant = 'syllabus',
   pageDocumentPanel,
   requireSyllabusAcceptance,
@@ -447,12 +493,24 @@ function SyllabusBlockEditorInner({
   const { selectedId, setSelectedId } = useBlockEditor()
   const { confirm, ConfirmDialogHost } = useConfirm()
   const equationEditor = useEquationEditor()
+  const { contentToolsEnabled } = useCourseNavFeatures()
+  const hostKind: ContentToolHostKind =
+    hostKindProp ?? (documentVariant === 'syllabus' ? 'syllabus' : 'content_page')
   const [activeField, setActiveField] = useState<ActiveField | null>(null)
   const editorRefs = useRef<Record<string, Editor | null>>({})
   const [generateSectionId, setGenerateSectionId] = useState<string | null>(null)
   const [generateInstructions, setGenerateInstructions] = useState('')
   const [generateSubmittingId, setGenerateSubmittingId] = useState<string | null>(null)
   const [generateError, setGenerateError] = useState<string | null>(null)
+  const [ctCatalog, setCtCatalog] = useState<ContentToolsCatalogTool[]>([])
+  const [ctCatalogLoading, setCtCatalogLoading] = useState(false)
+  const [ctInstances, setCtInstances] = useState<Record<string, ContentToolInstance>>({})
+  const [ctManifests, setCtManifests] = useState<Record<string, ContentToolManifest>>({})
+  const [ctMaxInstances, setCtMaxInstances] = useState(50)
+  const [configureInstanceId, setConfigureInstanceId] = useState<string | null>(null)
+  const [previewInstanceId, setPreviewInstanceId] = useState<string | null>(null)
+  const [deleteInstanceId, setDeleteInstanceId] = useState<string | null>(null)
+  const [ctInsertError, setCtInsertError] = useState<string | null>(null)
   const generateInputRef = useRef<HTMLInputElement>(null)
   const pendingToolbarImageSectionRef = useRef<string | null>(null)
   const [toolbarImageModalOpen, setToolbarImageModalOpen] = useState(false)
@@ -554,6 +612,200 @@ function SyllabusBlockEditorInner({
     },
     [insertCourseFilesIntoSection, selectedId],
   )
+
+  useEffect(() => {
+    if (!courseCode || !contentToolsEnabled) {
+      setCtCatalog([])
+      setCtInstances({})
+      return
+    }
+    let cancelled = false
+    setCtCatalogLoading(true)
+    void Promise.all([
+      fetchContentToolsCatalog(courseCode),
+      fetchContentToolsSettings(courseCode).catch(() => null),
+      fetchContentToolsInstances(courseCode, {
+        ...(structureItemId ? { itemId: structureItemId } : {}),
+        ...(hostKind ? { hostKind } : {}),
+      }).catch(() => [] as ContentToolInstance[]),
+    ])
+      .then(([catalog, settings, instances]) => {
+        if (cancelled) return
+        setCtCatalog(catalog)
+        if (settings) setCtMaxInstances(settings.maxInstancesPerItem)
+        const map: Record<string, ContentToolInstance> = {}
+        for (const inst of instances) map[inst.id] = inst
+        setCtInstances(map)
+      })
+      .catch(() => {
+        if (!cancelled) setCtCatalog([])
+      })
+      .finally(() => {
+        if (!cancelled) setCtCatalogLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode, contentToolsEnabled, structureItemId, hostKind])
+
+  const activeInstanceCount = Object.values(ctInstances).filter((i) => i.status === 'active').length
+  const atMaxInstances = activeInstanceCount >= ctMaxInstances
+
+  const insertContentToolAtEditor = useCallback(
+    async (toolId: string, sectionId: string) => {
+      if (!courseCode) return
+      setCtInsertError(null)
+      const editor = editorRefs.current[sectionId]
+      if (!editor) return
+      try {
+        const created = await createContentToolInstance(courseCode, {
+          toolId,
+          hostKind,
+          structureItemId: hostKind === 'syllabus' ? null : structureItemId ?? null,
+          sectionKey: hostKind === 'syllabus' ? sectionId : sectionId,
+          config: defaultContentToolConfig(toolId),
+        })
+        setCtInstances((prev) => ({ ...prev, [created.id]: created }))
+        const pos = editor.state.selection.from
+        editor
+          .chain()
+          .focus()
+          .insertContentAt(pos, {
+            type: 'content_tool_block',
+            attrs: {
+              instanceId: created.id,
+              toolId: created.toolId,
+              courseCode,
+            },
+          })
+          .run()
+        setConfigureInstanceId(created.id)
+        setSelectedId(sectionId)
+      } catch (err) {
+        setCtInsertError(err instanceof Error ? err.message : String(err))
+        toastMutationError(err instanceof Error ? err.message : 'Could not insert tool.')
+      }
+    },
+    [courseCode, hostKind, structureItemId, setSelectedId],
+  )
+
+  const removeToolBlockFromEditors = useCallback((instanceId: string) => {
+    for (const editor of Object.values(editorRefs.current)) {
+      if (!editor) continue
+      const { state } = editor
+      let tr = state.tr
+      let modified = false
+      state.doc.descendants((node, pos) => {
+        if (node.type.name !== 'content_tool_block') return
+        if (String(node.attrs.instanceId) !== instanceId) return
+        tr = tr.delete(pos, pos + node.nodeSize)
+        modified = true
+      })
+      if (modified) editor.view.dispatch(tr)
+    }
+  }, [])
+
+  const authoringValue = useMemo((): ContentToolAuthoringContextValue | null => {
+    if (!courseCode || !contentToolsEnabled) return null
+    return {
+      courseCode,
+      instances: ctInstances,
+      catalog: ctCatalog,
+      manifests: ctManifests,
+      onConfigure: (instanceId) => setConfigureInstanceId(instanceId),
+      onPreview: (instanceId) => setPreviewInstanceId(instanceId),
+      onDuplicate: (instanceId) => {
+        void (async () => {
+          try {
+            const dup = await duplicateContentToolInstance(courseCode, instanceId)
+            setCtInstances((prev) => ({ ...prev, [dup.id]: dup }))
+            const sectionId = selectedId ?? sections[0]?.id
+            const editor = sectionId ? editorRefs.current[sectionId] : null
+            if (editor) {
+              const pos = editor.state.selection.from
+              editor
+                .chain()
+                .focus()
+                .insertContentAt(pos, {
+                  type: 'content_tool_block',
+                  attrs: {
+                    instanceId: dup.id,
+                    toolId: dup.toolId,
+                    courseCode,
+                  },
+                })
+                .run()
+            }
+            setConfigureInstanceId(dup.id)
+          } catch (err) {
+            // Fallback: clone via create when duplicate route is not yet available.
+            const src = ctInstances[instanceId]
+            if (!src) {
+              toastMutationError(err instanceof Error ? err.message : 'Duplicate failed.')
+              return
+            }
+            try {
+              const created = await createContentToolInstance(courseCode, {
+                toolId: src.toolId,
+                hostKind,
+                structureItemId: hostKind === 'syllabus' ? null : structureItemId ?? null,
+                sectionKey: selectedId ?? src.sectionKey ?? null,
+                config: { ...src.config },
+                title: src.title,
+              })
+              setCtInstances((prev) => ({ ...prev, [created.id]: created }))
+              const sectionId = selectedId ?? sections[0]?.id
+              const editor = sectionId ? editorRefs.current[sectionId] : null
+              if (editor) {
+                editor
+                  .chain()
+                  .focus()
+                  .insertContentAt(editor.state.selection.from, {
+                    type: 'content_tool_block',
+                    attrs: {
+                      instanceId: created.id,
+                      toolId: created.toolId,
+                      courseCode,
+                    },
+                  })
+                  .run()
+              }
+              setConfigureInstanceId(created.id)
+            } catch (err2) {
+              toastMutationError(err2 instanceof Error ? err2.message : 'Duplicate failed.')
+            }
+          }
+        })()
+      },
+      onDelete: (instanceId) => setDeleteInstanceId(instanceId),
+      upsertInstance: (instance) => {
+        setCtInstances((prev) => ({ ...prev, [instance.id]: instance }))
+      },
+      removeInstance: (instanceId) => {
+        setCtInstances((prev) => {
+          const next = { ...prev }
+          delete next[instanceId]
+          return next
+        })
+      },
+      cacheManifest: (manifest) => {
+        setCtManifests((prev) => ({ ...prev, [manifest.id]: manifest }))
+      },
+    }
+  }, [
+    courseCode,
+    contentToolsEnabled,
+    ctInstances,
+    ctCatalog,
+    ctManifests,
+    selectedId,
+    sections,
+    hostKind,
+    structureItemId,
+  ])
+
+  const configureInstance = configureInstanceId ? ctInstances[configureInstanceId] ?? null : null
+  const previewInstance = previewInstanceId ? ctInstances[previewInstanceId] ?? null : null
 
   /** Ignore stale field state when another block is selected (no sync effect). */
   const activeFieldResolved = useMemo((): ActiveField | null => {
@@ -846,6 +1098,24 @@ function SyllabusBlockEditorInner({
               : undefined
           }
         />
+        {courseCode && contentToolsEnabled ? (
+          <>
+            <span className="mx-0.5 h-5 w-px shrink-0 bg-slate-200 dark:bg-neutral-600" aria-hidden />
+            <ToolsDropdown
+              tools={ctCatalog}
+              loading={ctCatalogLoading}
+              emptyCatalog={!ctCatalogLoading && ctCatalog.length === 0}
+              atMaxInstances={atMaxInstances}
+              disabled={disabled || genBusy}
+              settingsHref={`/courses/${encodeURIComponent(courseCode)}/settings`}
+              onSelect={(toolId) => {
+                setSelectedId(section.id)
+                setActiveField({ blockId: section.id, field: 'markdown' })
+                void insertContentToolAtEditor(toolId, section.id)
+              }}
+            />
+          </>
+        ) : null}
         {courseCode ? (
           <>
             <span className="mx-0.5 h-5 w-px shrink-0 bg-slate-200 dark:bg-neutral-600" aria-hidden />
@@ -866,7 +1136,7 @@ function SyllabusBlockEditorInner({
     )
   }
 
-  return (
+  const editorTree = (
     <AltTextEnforcementProvider
       value={{
         enabled: altTextOn,
@@ -908,6 +1178,14 @@ function SyllabusBlockEditorInner({
           pageDocumentPanel={pageDocumentPanel}
           requireSyllabusAcceptance={requireSyllabusAcceptance}
           onRequireSyllabusAcceptanceChange={onRequireSyllabusAcceptanceChange}
+          configureInstance={configureInstance}
+          courseCode={courseCode}
+          manifests={ctManifests}
+          onManifestLoaded={(m) => setCtManifests((prev) => ({ ...prev, [m.id]: m }))}
+          onConfigSaved={(inst) => {
+            setCtInstances((prev) => ({ ...prev, [inst.id]: inst }))
+          }}
+          onConfigClose={() => setConfigureInstanceId(null)}
         />
       }
     >
@@ -950,6 +1228,11 @@ function SyllabusBlockEditorInner({
               {generateSectionId === section.id && courseCode
                 ? renderGeneratePanel(section, index)
                 : null}
+              {ctInsertError && selectedId === section.id ? (
+                <p className="mb-2 text-xs text-rose-600 dark:text-rose-400" role="alert">
+                  {ctInsertError}
+                </p>
+              ) : null}
               <label className="sr-only" htmlFor={`canvas-heading-${section.id}`}>
                 Section heading (optional)
               </label>
@@ -1014,6 +1297,15 @@ function SyllabusBlockEditorInner({
                         }
                       : undefined
                   }
+                  contentToolsEnabled={contentToolsEnabled}
+                  contentToolsCatalog={ctCatalog}
+                  structureItemId={structureItemId}
+                  hostKind={hostKind}
+                  onInsertContentTool={(toolId) => {
+                    setSelectedId(section.id)
+                    setActiveField({ blockId: section.id, field: 'markdown' })
+                    void insertContentToolAtEditor(toolId, section.id)
+                  }}
                 />
               </div>
             </div>
@@ -1025,9 +1317,56 @@ function SyllabusBlockEditorInner({
         <BlockInsertionRow onAdd={() => addSectionAt(sections.length)} disabled={disabled} />
       </BlockCanvas>
     </BlockEditorShell>
+    {courseCode ? (
+      <>
+        <ToolPreviewModal
+          open={Boolean(previewInstance)}
+          courseCode={courseCode}
+          instance={previewInstance}
+          onClose={() => setPreviewInstanceId(null)}
+        />
+        <ToolDeleteDialog
+          open={Boolean(deleteInstanceId)}
+          courseCode={courseCode}
+          instanceId={deleteInstanceId}
+          onClose={() => setDeleteInstanceId(null)}
+          onArchive={async () => {
+            if (!deleteInstanceId) return
+            await patchContentToolInstance(courseCode, deleteInstanceId, { status: 'archived' })
+            setCtInstances((prev) => {
+              const cur = prev[deleteInstanceId]
+              if (!cur) return prev
+              return { ...prev, [deleteInstanceId]: { ...cur, status: 'archived' } }
+            })
+            removeToolBlockFromEditors(deleteInstanceId)
+            if (configureInstanceId === deleteInstanceId) setConfigureInstanceId(null)
+            setDeleteInstanceId(null)
+          }}
+          onDeletePermanently={async () => {
+            if (!deleteInstanceId) return
+            await deleteContentToolInstance(courseCode, deleteInstanceId, { permanent: true })
+            setCtInstances((prev) => {
+              const next = { ...prev }
+              delete next[deleteInstanceId]
+              return next
+            })
+            removeToolBlockFromEditors(deleteInstanceId)
+            if (configureInstanceId === deleteInstanceId) setConfigureInstanceId(null)
+            setDeleteInstanceId(null)
+          }}
+        />
+      </>
+    ) : null}
     {ConfirmDialogHost}
     </AltTextEnforcementProvider>
   )
+
+  if (authoringValue) {
+    return (
+      <ContentToolAuthoringProvider value={authoringValue}>{editorTree}</ContentToolAuthoringProvider>
+    )
+  }
+  return editorTree
 }
 
 export function SyllabusBlockEditor(props: SyllabusBlockEditorProps) {
