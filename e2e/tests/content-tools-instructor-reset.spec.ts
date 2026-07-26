@@ -108,12 +108,13 @@ test.describe('Content Tools instructor reset (CT.4)', () => {
         }),
       ).toBe(200)
 
-      const mod = await apiCreateModule(instructorToken, courseCode, {
-        title: `CT4 ${Date.now()}`,
-      })
-      const content = await apiCreateContentPage(instructorToken, courseCode, mod.id, {
-        title: 'CT4 page',
-      })
+      const mod = await apiCreateModule(instructorToken, courseCode, `CT4 ${Date.now()}`)
+      const content = await apiCreateContentPage(
+        instructorToken,
+        courseCode,
+        mod.id,
+        'CT4 page',
+      )
       const inst = await createInstance(instructorToken, courseCode, content.id)
       await apiPatchContentPage(instructorToken, courseCode, content.id, {
         markdown: [
