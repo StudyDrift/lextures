@@ -2260,5 +2260,16 @@
   "screenShare.state.waitingPresenter": "No one is presenting",
   "screenShare.error.flagOff": "Screen sharing is not enabled for this course.",
   "screenShare.error.loadFailed": "Could not load course.",
-  "screenShare.error.unsupportedCapture": "Entire-screen capture needs a desktop browser. You can still watch as a viewer."
+  "screenShare.error.unsupportedCapture": "Entire-screen capture needs a desktop browser. You can still watch as a viewer.",
+  "course.features.contentTools.title": "Outils de contenu",
+  "course.features.contentTools.description": "Insérez des outils interactifs dans les sections avec un état par inscription.",
+  "course.features.contentTools.allowlistLabel": "Outils disponibles",
+  "course.features.contentTools.allowlistHelp": "N’en sélectionnez aucune pour autoriser tous les outils enregistrés. Sélectionnez des outils pour restreindre le catalogue du cours. Vous pouvez aussi gérer la liste via l’API de paramètres.",
+  "course.features.contentTools.disableConfirm": "Désactiver les outils de contenu ? Les blocs existants s’afficheront comme indisponibles. L’état des apprenants n’est pas supprimé.",
+  "course.features.contentTools.studentResetAllowed": "Autoriser les étudiants à réinitialiser l’état de leurs outils",
+  "course.features.contentTools.maxInstancesPerItem": "Nombre max d’instances par élément de contenu (1–200)",
+  "course.features.contentTools.save": "Enregistrer les paramètres des outils de contenu",
+  "course.features.contentTools.saving": "Enregistrement…",
+  "course.features.contentTools.settingsSaved": "Paramètres des outils de contenu enregistrés.",
+  "course.features.contentTools.settingsSaveError": "Impossible d’enregistrer les paramètres des outils de contenu."
 }

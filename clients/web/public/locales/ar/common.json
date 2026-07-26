@@ -2260,5 +2260,16 @@
   "screenShare.state.waitingPresenter": "No one is presenting",
   "screenShare.error.flagOff": "Screen sharing is not enabled for this course.",
   "screenShare.error.loadFailed": "Could not load course.",
-  "screenShare.error.unsupportedCapture": "Entire-screen capture needs a desktop browser. You can still watch as a viewer."
+  "screenShare.error.unsupportedCapture": "Entire-screen capture needs a desktop browser. You can still watch as a viewer.",
+  "course.features.contentTools.title": "أدوات المحتوى",
+  "course.features.contentTools.description": "أدرج أدوات تفاعلية في محتوى الأقسام مع حالة لكل تسجيل.",
+  "course.features.contentTools.allowlistLabel": "الأدوات المتاحة",
+  "course.features.contentTools.allowlistHelp": "اترك الكل غير محدد للسماح بكل الأدوات المسجّلة. حدّد أدوات لتقييد كتالوج المقرر. يمكنك أيضًا إدارة القائمة عبر واجهة إعدادات أدوات المحتوى.",
+  "course.features.contentTools.disableConfirm": "هل تريد إيقاف أدوات المحتوى؟ ستظهر الكتل الحالية كعناصر غير متاحة. لن تُحذف حالة المتعلم.",
+  "course.features.contentTools.studentResetAllowed": "السماح للطلاب بإعادة تعيين حالة أداتهم",
+  "course.features.contentTools.maxInstancesPerItem": "الحد الأقصى لنسخ الأداة لكل عنصر محتوى (1–200)",
+  "course.features.contentTools.save": "حفظ إعدادات أدوات المحتوى",
+  "course.features.contentTools.saving": "جارٍ الحفظ…",
+  "course.features.contentTools.settingsSaved": "تم حفظ إعدادات أدوات المحتوى.",
+  "course.features.contentTools.settingsSaveError": "تعذّر حفظ إعدادات أدوات المحتوى."
 }

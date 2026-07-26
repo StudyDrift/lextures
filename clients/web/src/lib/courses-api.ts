@@ -21,6 +21,8 @@ import {
   adaptivePathPreviewResponseSchema,
   courseSchema,
   adaptiveContentSettingsSchema,
+  contentToolsSettingsSchema,
+  contentToolsCatalogSchema,
   adaptiveContentUnitSchema,
   adaptiveContentUnitsListSchema,
   adaptiveContentVariantSchema,
@@ -187,6 +189,8 @@ export type CoursePublic = {
   screenShareEnabled?: boolean
   /** AC.1 — Adaptive Content Engine per-course flag (default off). */
   adaptiveContentEnabled?: boolean
+  /** CT.1 — Content Tools per-course flag (default off). */
+  contentToolsEnabled?: boolean
   /** When true, saved grades are pushed back to the linked Canvas course (default off). */
   canvasGradeSyncEnabled?: boolean
   /** Plan 12.4 — block publishing video content without ready captions. */
@@ -892,6 +896,7 @@ export async function patchCourseFeatures(
     interactiveQuizzesEnabled?: boolean
     screenShareEnabled?: boolean
     adaptiveContentEnabled?: boolean
+    contentToolsEnabled?: boolean
   },
 ): Promise<CoursePublic> {
   const res = await authorizedFetch(
@@ -931,6 +936,9 @@ export async function patchCourseFeatures(
         ...(body.screenShareEnabled !== undefined ? { screenShareEnabled: body.screenShareEnabled } : {}),
         ...(body.adaptiveContentEnabled !== undefined
           ? { adaptiveContentEnabled: body.adaptiveContentEnabled }
+          : {}),
+        ...(body.contentToolsEnabled !== undefined
+          ? { contentToolsEnabled: body.contentToolsEnabled }
           : {}),
         ...(body.sectionsEnabled !== undefined ? { sectionsEnabled: body.sectionsEnabled } : {}),
       }),
@@ -1091,6 +1099,68 @@ export async function fetchAdaptiveContentSettings(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return parseApiResponse('fetchAdaptiveContentSettings', adaptiveContentSettingsSchema, raw)
+}
+
+/** CT.1 — Content Tools course settings. */
+export type ContentToolsSettings = {
+  allowedToolIds: string[]
+  studentResetAllowed: boolean
+  maxInstancesPerItem: number
+  updatedAt?: string
+}
+
+export type ContentToolsCatalogTool = {
+  id: string
+  version: string
+  name: string
+  category: string
+  capabilities: string[]
+  i18nNamespace: string
+  ui: { renderer: string; icon: string; group: string }
+}
+
+export async function fetchContentToolsSettings(
+  courseCode: string,
+): Promise<ContentToolsSettings> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/settings`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchContentToolsSettings', contentToolsSettingsSchema, raw)
+}
+
+export async function putContentToolsSettings(
+  courseCode: string,
+  settings: ContentToolsSettings,
+): Promise<ContentToolsSettings> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/settings`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        allowedToolIds: settings.allowedToolIds,
+        studentResetAllowed: settings.studentResetAllowed,
+        maxInstancesPerItem: settings.maxInstancesPerItem,
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('putContentToolsSettings', contentToolsSettingsSchema, raw)
+}
+
+export async function fetchContentToolsCatalog(
+  courseCode: string,
+): Promise<ContentToolsCatalogTool[]> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/catalog`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = parseApiResponse('fetchContentToolsCatalog', contentToolsCatalogSchema, raw)
+  return body.tools
 }
 
 export async function putAdaptiveContentSettings(

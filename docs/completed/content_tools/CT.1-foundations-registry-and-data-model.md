@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Backend platform team |
 | **Depends on** | — (builds on shipped course structure, enrollments, RBAC) |

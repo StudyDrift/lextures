@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
+	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
 
 // Options configures a one-way copy from an existing course into a newly created empty target course.
@@ -85,6 +86,9 @@ func CopyFromCourse(ctx context.Context, pool *pgxpool.Pool, opts Options) error
 		if err := copyAdaptiveContent(ctx, tx, opts.SourceCourseID, opts.TargetCourseID, opts.ActorUserID, itemMap); err != nil {
 			return err
 		}
+		if err := copyContentTools(ctx, tx, opts.SourceCourseID, opts.TargetCourseID, opts.ActorUserID, itemMap); err != nil {
+			return err
+		}
 	}
 
 	if include.Enrollments {
@@ -141,6 +145,7 @@ func copySettings(ctx context.Context, tx pgx.Tx, sourceID, targetID uuid.UUID) 
 			hint_scaffolding_enabled = src.hint_scaffolding_enabled,
 			misconception_detection_enabled = src.misconception_detection_enabled,
 			adaptive_content_enabled = src.adaptive_content_enabled,
+			content_tools_enabled = src.content_tools_enabled,
 			files_enabled = src.files_enabled,
 			grading_scale = src.grading_scale,
 			sbg_enabled = src.sbg_enabled,
@@ -322,6 +327,153 @@ func copyAdaptiveContent(ctx context.Context, tx pgx.Tx, sourceID, targetID, act
 			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
 		`, targetID, u.targetKind, newModule, newOutcome, newBase, newPre, newPost, axes, status, createdBy,
 			trigger, u.masteryFreshnessDays); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// copyContentTools copies CT settings and instances with new ids, rewrites ```lex-tool
+// fences in copied content-page bodies, and never copies learner state (plan CT.1).
+func copyContentTools(ctx context.Context, tx pgx.Tx, sourceID, targetID, actorUserID uuid.UUID, itemMap map[uuid.UUID]uuid.UUID) error {
+	var allowed []string
+	var studentReset bool
+	var maxInst int16
+	err := tx.QueryRow(ctx, `
+		SELECT allowed_tool_ids, student_reset_allowed, max_instances_per_item
+		FROM course.content_tool_settings
+		WHERE course_id = $1
+	`, sourceID).Scan(&allowed, &studentReset, &maxInst)
+	if err != nil && err != pgx.ErrNoRows {
+		return err
+	}
+	if err == nil {
+		if allowed == nil {
+			allowed = []string{}
+		}
+		if maxInst <= 0 {
+			maxInst = 50
+		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO course.content_tool_settings (
+			  course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item, updated_by, updated_at
+			) VALUES ($1, $2, $3, $4, $5, NOW())
+			ON CONFLICT (course_id) DO UPDATE SET
+			  allowed_tool_ids = EXCLUDED.allowed_tool_ids,
+			  student_reset_allowed = EXCLUDED.student_reset_allowed,
+			  max_instances_per_item = EXCLUDED.max_instances_per_item,
+			  updated_by = EXCLUDED.updated_by,
+			  updated_at = NOW()
+		`, targetID, allowed, studentReset, maxInst, actorUserID); err != nil {
+			return err
+		}
+	}
+
+	rows, err := tx.Query(ctx, `
+		SELECT id, structure_item_id, host_kind, section_key, tool_id, tool_version,
+		       title, config_json, config_schema_version, status
+		FROM course.content_tool_instances
+		WHERE course_id = $1
+		ORDER BY created_at ASC
+	`, sourceID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	idMap := map[string]string{}
+	type instSrc struct {
+		oldID               uuid.UUID
+		structureItemID     *uuid.UUID
+		hostKind            string
+		sectionKey          *string
+		toolID              string
+		toolVersion         string
+		title               *string
+		configJSON          []byte
+		configSchemaVersion int
+		status              string
+	}
+	var instances []instSrc
+	for rows.Next() {
+		var in instSrc
+		if err := rows.Scan(
+			&in.oldID, &in.structureItemID, &in.hostKind, &in.sectionKey, &in.toolID, &in.toolVersion,
+			&in.title, &in.configJSON, &in.configSchemaVersion, &in.status,
+		); err != nil {
+			return err
+		}
+		instances = append(instances, in)
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	for _, in := range instances {
+		var newItem *uuid.UUID
+		if in.structureItemID != nil {
+			mapped, ok := itemMap[*in.structureItemID]
+			if !ok {
+				continue // host item not copied
+			}
+			newItem = &mapped
+		} else if in.hostKind != "syllabus" {
+			continue
+		}
+		newID := uuid.New()
+		idMap[in.oldID.String()] = newID.String()
+		status := in.status
+		if status == "" {
+			status = "active"
+		}
+		ver := in.configSchemaVersion
+		if ver <= 0 {
+			ver = 1
+		}
+		cfg := in.configJSON
+		if len(cfg) == 0 {
+			cfg = []byte(`{}`)
+		}
+		var createdBy *uuid.UUID
+		if actorUserID != uuid.Nil {
+			createdBy = &actorUserID
+		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO course.content_tool_instances (
+			  id, course_id, structure_item_id, host_kind, section_key, tool_id, tool_version,
+			  title, config_json, config_schema_version, status, created_by
+			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10,$11,$12)
+		`, newID, targetID, newItem, in.hostKind, in.sectionKey, in.toolID, in.toolVersion,
+			in.title, cfg, ver, status, createdBy); err != nil {
+			return err
+		}
+	}
+
+	if len(idMap) == 0 {
+		return nil
+	}
+
+	// Rewrite ```lex-tool fences in copied content-page bodies.
+	for oldItem, newItem := range itemMap {
+		var md string
+		err := tx.QueryRow(ctx, `
+			SELECT markdown FROM course.module_content_pages WHERE structure_item_id = $1
+		`, newItem).Scan(&md)
+		if err == pgx.ErrNoRows {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		rewritten := ctsvc.RewriteLexToolFences(md, idMap)
+		if rewritten == md {
+			_ = oldItem
+			continue
+		}
+		if _, err := tx.Exec(ctx, `
+			UPDATE course.module_content_pages SET markdown = $1, updated_at = NOW()
+			WHERE structure_item_id = $2
+		`, rewritten, newItem); err != nil {
 			return err
 		}
 	}

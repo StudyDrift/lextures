@@ -4227,6 +4227,42 @@
       }
     },
     {
+      "id": "CT.1",
+      "path": "docs/completed/content_tools/CT.1-foundations-registry-and-data-model.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Course feature matrix covers contentToolsEnabled; dedicated foundations spec covers catalog, allowlist, and flag-off 404.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-foundations.spec.ts"
+        },
+        {
+          "path": "e2e/tests/course-features-matrix-meta.spec.ts"
+        },
+        {
+          "path": "e2e/tests/course-features-ui-matrix-a.spec.ts"
+        },
+        {
+          "path": "e2e/tests/course-features-authz.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": true,
+        "dependency": "n/a",
+        "rollback": false,
+        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2\u2013CT.3."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

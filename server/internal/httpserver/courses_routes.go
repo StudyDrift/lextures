@@ -261,6 +261,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/items/{item_id}/overrides/bulk-extend", d.handleAssignmentOverridesBulkExtend())
 	r.Patch("/api/v1/courses/{course_code}/features", d.handlePatchCourseFeatures())
 	d.registerAdaptiveContentRoutes(r)
+	d.registerContentToolsRoutes(r)
 	r.Get("/api/v1/courses/{course_code}/whiteboards", d.handleCourseWhiteboardsList())
 	r.Post("/api/v1/courses/{course_code}/whiteboards", d.handleCourseWhiteboardsPost())
 	r.Get("/api/v1/courses/{course_code}/whiteboards/{board_id}", d.handleCourseWhiteboardItem())

@@ -19,6 +19,7 @@ import (
 	repoaidisclosure "github.com/lextures/lextures/server/internal/repos/aidisclosure"
 	acrepo "github.com/lextures/lextures/server/internal/repos/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/repos/board"
+	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
 	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
 	lprepo "github.com/lextures/lextures/server/internal/repos/learnerprofile"
@@ -172,6 +173,14 @@ func ApproveDSAR(ctx context.Context, pool *pgxpool.Pool, id, adminID uuid.UUID)
 		} else if n > 0 {
 			return fmt.Errorf("gdpr: adaptive content erasure incomplete: %d rows remain", n)
 		}
+		if err := ctrepo.EraseUserContent(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: erase content tools: %w", err)
+		}
+		if n, err := ctrepo.CountUserContentRows(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: verify content tools erasure: %w", err)
+		} else if n > 0 {
+			return fmt.Errorf("gdpr: content tools erasure incomplete: %d rows remain", n)
+		}
 		if err := repo.AnonymiseUser(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: anonymise user: %w", err)
 		}
@@ -312,9 +321,10 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		ProductFeedback  []map[string]any         `json:"productFeedback,omitempty"`
 		Boards           board.UserBoardExport    `json:"boards,omitempty"`
 		LiveQuizzes      quizgame.UserQuizExport  `json:"liveQuizzes,omitempty"`
-		AdaptiveContent  acrepo.UserACEExport     `json:"adaptiveContent,omitempty"`
-		PinnedSettings   []map[string]any         `json:"pinnedSettings,omitempty"`
-		ExportedAt       string                   `json:"exportedAt"`
+		AdaptiveContent  acrepo.UserACEExport           `json:"adaptiveContent,omitempty"`
+		ContentTools     ctrepo.UserContentToolsExport  `json:"contentTools,omitempty"`
+		PinnedSettings   []map[string]any               `json:"pinnedSettings,omitempty"`
+		ExportedAt       string                         `json:"exportedAt"`
 	}
 
 	cs := make([]consentSummary, 0, len(consents))
@@ -344,6 +354,10 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	if err != nil {
 		return "", fmt.Errorf("gdpr: adaptive content export: %w", err)
 	}
+	ctExport, err := ctrepo.ExportUserContent(ctx, pool, userID)
+	if err != nil {
+		return "", fmt.Errorf("gdpr: content tools export: %w", err)
+	}
 	pinnedExport := dsarPinnedSettingsExport(ctx, pool, userID)
 
 	var customFields map[string]any
@@ -362,6 +376,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		Boards:          boardsExport,
 		LiveQuizzes:     liveQuizExport,
 		AdaptiveContent: aceExport,
+		ContentTools:    ctExport,
 		PinnedSettings:  pinnedExport,
 		ExportedAt:      time.Now().UTC().Format(time.RFC3339),
 	}

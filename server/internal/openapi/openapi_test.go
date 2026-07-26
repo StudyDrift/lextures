@@ -215,6 +215,8 @@ func TestSpec_NothingLostInRepair(t *testing.T) {
 		"CatalogListing",
 		"AdaptiveContentUnit",
 		"AdaptiveContentVariant",
+		"ContentToolsSettings",
+		"ContentToolInstance",
 	}
 	for _, s := range requiredSchemas {
 		if _, ok := schemas[s]; !ok {

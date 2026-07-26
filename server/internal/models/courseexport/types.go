@@ -47,6 +47,7 @@ type CourseExportSnapshot struct {
 	HintScaffoldingEnabled        bool            `json:"hintScaffoldingEnabled"`
 	MisconceptionDetectionEnabled bool            `json:"misconceptionDetectionEnabled"`
 	AdaptiveContentEnabled        bool            `json:"adaptiveContentEnabled"`
+	ContentToolsEnabled           bool            `json:"contentToolsEnabled"`
 	CourseType                    string          `json:"courseType"`
 }
 

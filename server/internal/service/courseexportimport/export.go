@@ -97,6 +97,7 @@ func BuildExport(ctx context.Context, pool *pgxpool.Pool, courseCode string) (*B
 		HintScaffoldingEnabled:        pub.HintScaffoldingEnabled,
 		MisconceptionDetectionEnabled: pub.MisconceptionDetectionEnabled,
 		AdaptiveContentEnabled:        pub.AdaptiveContentEnabled,
+		ContentToolsEnabled:           pub.ContentToolsEnabled,
 		CourseType:                    orDefault(pub.CourseType, "traditional"),
 	}
 	if pub.MarkdownThemeCustom != nil {

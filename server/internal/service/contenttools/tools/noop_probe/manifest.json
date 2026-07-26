@@ -1,0 +1,54 @@
+{
+  "id": "noop_probe",
+  "version": "1.0.0",
+  "name": "contentTools.tools.noop_probe.name",
+  "category": "assess",
+  "capabilities": ["state", "scoring"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["prompt"],
+    "properties": {
+      "prompt": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Student-visible prompt"
+      },
+      "answerKey": {
+        "type": "string",
+        "description": "Instructor-only expected answer",
+        "x-lex-sensitive": true
+      },
+      "maxAttempts": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 20,
+        "default": 3
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "response": { "type": "string" },
+      "attempts": { "type": "integer", "minimum": 0 }
+    }
+  },
+  "scoring": { "mode": "auto", "maxScore": 1 },
+  "storage": { "maxStateBytes": 4096 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "form",
+    "wcagNotes": "Test probe only; not shown to learners in production curricula."
+  },
+  "i18nNamespace": "contentTools.tools.noop_probe",
+  "ui": {
+    "renderer": "noop_probe",
+    "icon": "flask",
+    "group": "assess"
+  }
+}

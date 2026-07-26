@@ -33,6 +33,7 @@ export type CourseFeatureKey =
   | 'visualBoardsEnabled'
   | 'interactiveQuizzesEnabled'
   | 'adaptiveContentEnabled'
+  | 'contentToolsEnabled'
 
 /** Non-pointer bool fields on PATCH — omitted JSON keys decode as false on the server. */
 export const NON_POINTER_BOOL_KEYS = [
@@ -98,6 +99,12 @@ export const COURSE_FEATURE_MATRIX: readonly CourseFeatureMatrixEntry[] = [
   {
     key: 'adaptiveContentEnabled',
     uiLabel: 'Adaptive Content',
+    uiDefaultOn: false,
+    uiShard: 'a',
+  },
+  {
+    key: 'contentToolsEnabled',
+    uiLabel: 'Content Tools',
     uiDefaultOn: false,
     uiShard: 'a',
   },
@@ -448,14 +455,14 @@ export function validateCourseFeatureMatrix(): string[] {
     }
   }
 
-  const expectedCount = 27
+  const expectedCount = 28
   if (COURSE_FEATURE_MATRIX.length !== expectedCount) {
     errors.push(`expected ${expectedCount} matrix rows, got ${COURSE_FEATURE_MATRIX.length}`)
   }
 
   const uiCount = UI_COURSE_FEATURE_ENTRIES.length
-  if (uiCount !== 26) {
-    errors.push(`expected 26 UI-exposed flags, got ${uiCount}`)
+  if (uiCount !== 27) {
+    errors.push(`expected 27 UI-exposed flags, got ${uiCount}`)
   }
 
   return errors
