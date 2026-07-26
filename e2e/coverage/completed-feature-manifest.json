@@ -4263,6 +4263,36 @@
       }
     },
     {
+      "id": "CT.2",
+      "path": "docs/completed/content_tools/CT.2-authoring-tools-dropdown-and-config.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright authoring journey covers flag-off Tools absence, Tools dropdown insert of noop_probe, config save round-trip, and slash /noop insert.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-authoring.spec.ts"
+        },
+        {
+          "path": "e2e/tests/content-tools-foundations.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": false,
+        "notes": "Depends on contentToolsEnabled (CT.1). Student runtime host remains CT.3; preview modal uses preview scope."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
