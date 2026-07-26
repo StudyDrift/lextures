@@ -189,7 +189,7 @@ func ValidateManifest(m Manifest, i18n map[string]string) error {
 	if strings.TrimSpace(m.I18nNamespace) == "" {
 		return fmt.Errorf("tool %s: i18nNamespace is required", m.ID)
 	}
-	if i18n == nil || len(i18n) == 0 {
+	if len(i18n) == 0 {
 		return fmt.Errorf("tool %s: missing i18n bundle", m.ID)
 	}
 	if strings.TrimSpace(m.UI.Renderer) == "" || strings.TrimSpace(m.UI.Icon) == "" || strings.TrimSpace(m.UI.Group) == "" {
