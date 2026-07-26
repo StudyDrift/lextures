@@ -1,6 +1,6 @@
 # TD.1 — Refactoring Safety Net: Route Inventory & API Characterization Harness
 
-> Implementation plan. Source: technical-debt static analysis, 2026-07-25. Folder overview: [README](README.md).
+> Implementation plan — **completed 2026-07-25**. Source: technical-debt static analysis. Programme overview: [tech_debt README](../../plan/tech_debt/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Technical Debt Remediation |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS (internal — no market-facing change) |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE (2026-07-25) |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Backend platform team |
 | **Depends on** | — |
@@ -182,4 +182,25 @@ make route-inventory | wc -l      # expect 1407
 - `e2e/` — 190 existing Playwright specs (control suite)
 - `chi` router `Walk` API — <https://pkg.go.dev/github.com/go-chi/chi/v5#Walk>
 - Michael Feathers, *Working Effectively with Legacy Code* — characterization-test technique
-- Related plans: [TD.2](TD.2-convention-charter-and-enforcement.md), [TD.6](TD.6-decompose-httpserver-package.md)
+- Related plans: [TD.2](TD.2-convention-charter-and-enforcement.md), [TD.6](../../plan/tech_debt/TD.6-decompose-httpserver-package.md)
+
+## 20. Implementation notes (2026-07-25)
+
+Shipped as test-only harness (no production path changes):
+
+| Deliverable | Location |
+|---|---|
+| Route inventory test + print | `server/internal/httpserver/route_inventory_*.go` |
+| Golden inventory (1559 routes) | `server/internal/httpserver/testdata/route_inventory.golden` |
+| Characterization suite | `server/internal/httpserver/characterization_*.go` + `testdata/characterization/` |
+| Harness docs | `server/internal/httpserver/testdata/README.md` |
+| Web export surface guard | `clients/web/src/lib/__tests__/api-surface.test.ts` + `api-surface.golden.json` |
+| Make targets | `make route-inventory`, `make route-inventory-update` |
+| CI | `.github/workflows/ci.yml` step *Route inventory & characterization (TD.1)* |
+
+**Open-question resolutions for this ship:**
+
+1. Auth posture for the fast inventory is `anonymous` \| `session` from unauthenticated probes (DB-free). Elevated scope is covered by characterization + existing RBAC tests rather than a full side-effect-safe probe of every mutator.
+2. Characterization set is the FR-6 minimum (auth, courses, modules, enrollments, gradebook, quiz take/submit, assignments, platform features) plus `/health/detailed`.
+3. WebSocket routes appear in the inventory as `(method, pattern)`; behaviour remains with existing tests.
+4. Web export-surface guard is **blocking** from day one (fails CI on missing/dropped exports).

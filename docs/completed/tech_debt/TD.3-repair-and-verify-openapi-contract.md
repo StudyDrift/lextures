@@ -1,6 +1,6 @@
 # TD.3 — Repair and Verify the OpenAPI Contract
 
-> Implementation plan. Source: technical-debt static analysis, 2026-07-25. Folder overview: [README](README.md).
+> Implementation plan — **completed 2026-07-25**. Source: technical-debt static analysis. Programme overview: [tech_debt README](../../plan/tech_debt/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Technical Debt Remediation |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | PARTIAL (and **broken**) |
+| **Status (today)** | DONE (2026-07-25) |
 | **Estimated effort** | S (1w) for the repair + guard; M to close documentation coverage |
 | **Owner (proposed)** | Backend platform team |
 | **Depends on** | TD.1 (route inventory supplies the coverage denominator) |
@@ -181,15 +181,64 @@ _ = dec.Decode(&v)
 
 1. **Which spec is canonical?** `internal/openapi` serves `/api/openapi.json`, while `internal/publicapi/openapi_serve.go` has an unreachable `SpecBytes`. Are these two specs (internal vs public API) intended to coexist? Resolve before repairing — this determines where the fix lands and whether TD.4 should delete `SpecBytes`.
 2. Should the spec move to YAML for reviewability, accepting a build-time conversion, or stay JSON for zero tooling?
-3. Is code-first generation (`swaggo` annotations on handlers) worth adopting after [TD.6](TD.6-decompose-httpserver-package.md) splits the package into domains? Doing it before the split would embed annotations in files that are about to move.
+3. Is code-first generation (`swaggo` annotations on handlers) worth adopting after [TD.6](../../plan/tech_debt/TD.6-decompose-httpserver-package.md) splits the package into domains? Doing it before the split would embed annotations in files that are about to move.
 4. What is the target coverage and by when? 16% today; a credible ratchet needs a destination.
 5. Should the coverage ratchet be absolute count or percentage? (Proposed: absolute, per §14.)
 
 ## 19. References
 
-- `server/internal/openapi/openapi.go` — the 5,390-line literal (`const spec`)
-- `server/internal/publicapi/openapi_serve.go:54` — unreachable `SpecBytes`
-- `clients/web/package.json` — `openapi:types` script
-- `docs/api-changelog-ai-providers.md` — existing deprecation notes carried in `info.description`
+- `server/internal/openapi/openapi.json` — embedded LMS OpenAPI 3.0.3 document
+- `server/internal/publicapi/openapi_serve.go` — partner Public API OpenAPI 3.1 (separate product surface)
+- `clients/web/package.json` — `openapi:types` / `openapi:types:file`
+- `docs/api-changelog-ai-providers.md` — deprecation notes + TD.3 repair entry
 - OpenAPI 3.0.3 specification — <https://spec.openapis.org/oas/v3.0.3>
-- Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.4](TD.4-delete-confirmed-dead-code.md), [TD.12](TD.12-split-courses-api-module.md)
+- Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.4](../../plan/tech_debt/TD.4-delete-confirmed-dead-code.md), [TD.12](../../plan/tech_debt/TD.12-split-courses-api-module.md)
+
+---
+
+## 20. Implementation notes (completed 2026-07-25)
+
+### Root cause
+
+The document was not merely “closed early before `components`.” A **missing path key** for
+`/api/v1/settings/permissions` left orphaned `"get"` / `"post"` operations after
+`/oneroster/v1p2/users`. The extra closing brace that followed collapsed the `paths` object,
+so subsequent path entries became **root-level keys**. The first JSON value therefore ended
+before `components`, leaving ~32 KB of trailing data unparseable by strict consumers.
+
+### Repair
+
+1. Restored `"/api/v1/settings/permissions": { ... }` around the orphaned methods.
+2. Extracted the literal into `server/internal/openapi/openapi.json` and rewrote
+   `openapi.go` to `go:embed` + thin handlers (`Cache-Control: public, max-age=300`).
+3. Bumped `info.version` to **0.2.1** and noted the repair in `info.description` and
+   `docs/api-changelog-ai-providers.md`.
+4. Security/privacy skim of restored `components`: no emails or real PII in examples.
+
+### Guards
+
+| Deliverable | Location |
+|---|---|
+| Spec file | `server/internal/openapi/openapi.json` |
+| Embed + handlers | `server/internal/openapi/openapi.go` |
+| Go tests (JSON, structure, bearerAuth, `$ref`, coverage, reverse path check) | `server/internal/openapi/openapi_test.go` |
+| Coverage baseline | `scripts/allowlists/openapi-coverage.txt` (`min_documented_paths=252`) |
+| Shell + Python check | `scripts/check-openapi-coverage.sh`, `scripts/lib/openapi_check.py` |
+| Make target | `make openapi-check` |
+| CI | `.github/workflows/ci.yml` step *OpenAPI contract (TD.3)* |
+| Generated TS types | `clients/web/src/lib/generated/openapi-types.ts` |
+| E2E smoke | `e2e/tests/public-api.spec.ts` (`/api/openapi.json`, `/api/docs`) |
+
+Live coverage at ship: **252 / 1260** unique route patterns (**20.0%**); **302** documented
+operations vs **1559** inventory rows. Ratchet is on **absolute documented path count**.
+
+### Open-question resolutions for this ship
+
+1. **Two specs coexist intentionally.** `internal/openapi` = full LMS surface at
+   `/api/openapi.json` (3.0.3). `internal/publicapi` = partner Public API at
+   `/api/v1/openapi.json` (3.1). `publicapi.SpecBytes` remains for that package’s tests/serving
+   path; TD.4 should not delete it as dead without re-checking call graph after this work.
+2. **Stay JSON** for zero tooling and `go:embed` simplicity.
+3. **Code-first / swaggo deferred** until after TD.6 package splits.
+4. **Target coverage:** not fixed in this story; ratchet floor is 252 paths; raise as docs land.
+5. **Absolute count** ratchet confirmed (adding undocumented routes does not fail CI).

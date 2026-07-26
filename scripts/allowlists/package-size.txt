@@ -1,0 +1,5 @@
+# TD.2 package-size allowlist. Owner: TD.6 (httpserver), TD.10/background cleanup. Shrink only.
+# Budget: ≤ 40 non-test .go files per package directory under server/.
+# One repo-relative package directory per line, sorted.
+server/internal/background
+server/internal/httpserver

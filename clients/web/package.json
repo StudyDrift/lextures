@@ -16,6 +16,7 @@
     "test:tdd": "vitest",
     "test:coverage": "vitest run --coverage",
     "openapi:types": "openapi-typescript http://127.0.0.1:8080/api/openapi.json -o src/lib/generated/openapi-types.ts",
+    "openapi:types:file": "openapi-typescript ../../server/internal/openapi/openapi.json -o src/lib/generated/openapi-types.ts",
     "analyze": "ANALYZE=1 vite build",
     "bundle:check": "node scripts/check-bundle-size.mjs",
     "i18n:check": "node scripts/check-i18n-locales.mjs",

@@ -1,6 +1,7 @@
-.PHONY: dev desktop e2e e2e-run e2e-teardown e2e-coverage-check lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www intro-course-validate marketplace-courses-validate iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-build-ios-test mobile-test-ios mobile-test-ios-fast ios-xcodebuild android ios server web cli www
+.PHONY: dev desktop e2e e2e-run e2e-teardown e2e-coverage-check lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www lint-structure lint-structure-report intro-course-validate marketplace-courses-validate iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-build-ios-test mobile-test-ios mobile-test-ios-fast ios-xcodebuild android ios server web cli www route-inventory route-inventory-update openapi-check
 
 # Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
+# When no app filter is given, also runs TD.2 structural convention checks.
 LINT_APPS := server web cli www
 
 lint:
@@ -9,7 +10,21 @@ lint:
 	for app in $$apps; do \
 		echo "==> lint $$app"; \
 		$(MAKE) lint-$$app || exit 1; \
-	done
+	done; \
+	if [ -z "$(filter $(LINT_APPS),$(MAKECMDGOALS))" ]; then \
+		echo "==> lint structure (TD.2)"; \
+		$(MAKE) lint-structure || exit 1; \
+	fi
+
+# TD.2 — structural convention checks (file/package budgets, layering, naming, deadcode).
+# Charter: docs/ARCHITECTURE_CONVENTIONS.md
+# Warn-only: STRUCTURE_CHECKS_WARN=1 make lint-structure
+# Skip slow deadcode (pre-commit): STRUCTURE_SKIP_DEADCODE=1 make lint-structure
+lint-structure:
+	bash scripts/check-structure.sh
+
+lint-structure-report:
+	bash scripts/check-structure.sh --report
 
 # Swallow app names when passed as goals alongside `lint` (e.g. `make lint server`).
 server web:
@@ -129,6 +144,18 @@ intro-course-validate:
 
 marketplace-courses-validate:
 	$(MAKE) -C server marketplace-courses-validate
+
+# TD.1 — print the live HTTP route inventory (METHOD, pattern, auth posture).
+route-inventory:
+	cd server && go test ./internal/httpserver/ -run 'TestRouteInventoryPrint$$' -count=1 -v
+
+# TD.1 — regenerate server/internal/httpserver/testdata/route_inventory.golden
+route-inventory-update:
+	cd server && UPDATE_GOLDEN=1 go test ./internal/httpserver/ -run 'TestRouteInventory$$' -count=1 -v
+
+# TD.3 — OpenAPI validity, $ref resolution, and documentation coverage ratchet.
+openapi-check:
+	bash scripts/check-openapi-coverage.sh
 
 lint-server:
 	$(MAKE) -C server lint

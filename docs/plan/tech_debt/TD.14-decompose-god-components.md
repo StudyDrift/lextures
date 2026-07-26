@@ -213,4 +213,4 @@ done
 - `clients/web/src/lib/dnd/` — drag-and-drop keyboard handling
 - `clients/web/src/hooks/` — 16 shared hooks for 718 components and pages
 - `docs/accessibility/`, `docs/vpat/` — conformance obligations
-- Related plans: [TD.13](TD.13-adopt-server-state-management.md), [TD.12](TD.12-split-courses-api-module.md), [TD.2](TD.2-convention-charter-and-enforcement.md)
+- Related plans: [TD.13](TD.13-adopt-server-state-management.md), [TD.12](TD.12-split-courses-api-module.md), [TD.2](../../completed/tech_debt/TD.2-convention-charter-and-enforcement.md)

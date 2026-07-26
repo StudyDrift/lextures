@@ -1,0 +1,19 @@
+status: 200
+content-type: application/json
+keys:
+  columns
+  columns[*]
+  columns[*].effectiveDisplayType
+  columns[*].id
+  columns[*].kind
+  columns[*].maxPoints
+  columns[*].neverDrop
+  columns[*].postingPolicy
+  columns[*].replaceWithFinal
+  columns[*].title
+  crossListMerged
+  gradebookCsvEnabled
+  students
+  students[*]
+  students[*].displayName
+  students[*].userId

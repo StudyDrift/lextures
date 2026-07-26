@@ -1,6 +1,6 @@
 # TD.2 — Convention Charter & Automated Enforcement
 
-> Implementation plan. Source: technical-debt static analysis, 2026-07-25. Folder overview: [README](README.md).
+> Implementation plan — **completed 2026-07-25**. Source: technical-debt static analysis. Programme overview: [tech_debt README](../../plan/tech_debt/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Technical Debt Remediation |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS (internal) |
-| **Status (today)** | THIN |
+| **Status (today)** | DONE (2026-07-25) |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Platform team (Go + web leads jointly) |
 | **Depends on** | — |
@@ -202,4 +202,25 @@ cd server && deadcode ./... | sort
 - `clients/web/package.json` — `oxlint`, existing `check-*.mjs` scripts
 - `scripts/check-homeschool-terminology.sh` — existing enforcement-script pattern to follow
 - `.husky/pre-commit` — existing hook
-- Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.4](TD.4-delete-confirmed-dead-code.md), [TD.6](TD.6-decompose-httpserver-package.md), [TD.9](TD.9-enforce-repo-layering.md)
+- Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.4](../../plan/tech_debt/TD.4-delete-confirmed-dead-code.md), [TD.6](../../plan/tech_debt/TD.6-decompose-httpserver-package.md), [TD.9](../../plan/tech_debt/TD.9-enforce-repo-layering.md)
+
+---
+
+## Implementation notes (completed 2026-07-25)
+
+Delivered artefacts:
+
+| Artefact | Path |
+|---|---|
+| Charter | `docs/ARCHITECTURE_CONVENTIONS.md` |
+| Orchestrator | `scripts/check-structure.sh` (`make lint-structure`) |
+| Checks | `scripts/check-file-budgets.sh`, `check-package-budgets.sh`, `check-layering.sh`, `check-file-naming.mjs`, `check-deadcode-baseline.sh`, `check-allowlist-shrink.sh` |
+| Allowlists | `scripts/allowlists/{file-size,package-size,layering,file-naming,deadcode-baseline}.txt` |
+| CI | `.github/workflows/ci.yml` job **Structure (TD.2)** |
+| Pre-commit | Fast checks (file-size + naming) in `clients/web/.husky/pre-commit` |
+
+Initial allowlist sizes (ratchet shrinks only): file-size 172, package-size 2, layering 63, file-naming 51, deadcode 232.
+
+Self-tests: `bash scripts/check-structure.sh --self-test`.
+Warn-only rollback: `STRUCTURE_CHECKS_WARN=1 make lint-structure`.
+Allowlist growth override: PR label `structure-allowlist-override` or `STRUCTURE_ALLOWLIST_GROW=1`.

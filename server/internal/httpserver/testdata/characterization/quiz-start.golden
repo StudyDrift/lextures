@@ -1,0 +1,17 @@
+status: 200
+content-type: application/json
+keys:
+  attemptId
+  attemptNumber
+  backNavigationAllowed
+  currentQuestionIndex
+  extendedTimeActive
+  hintScaffoldingEnabled
+  hintsDisabled
+  lockdownMode
+  maxAttempts
+  misconceptionDetectionEnabled
+  reducedDistractionMode
+  remainingAttempts
+  retakePolicy
+  startedAt

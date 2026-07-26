@@ -173,4 +173,4 @@ grep -rhoE 'd\.Pool\.(Query|QueryRow|Exec)' internal/httpserver/*.go | wc -l    
 - `server/internal/httpserver/canvas_import_ws.go` (1,693 LOC), `quizgame_game_ws.go` (884 LOC) — WebSocket handlers per FR-10
 - `server/internal/repos/` — destination layer
 - `docs/isms/`, `docs/soc2/` — compliance artefacts consuming §6 output
-- Related plans: [TD.2](TD.2-convention-charter-and-enforcement.md), [TD.6](TD.6-decompose-httpserver-package.md), [TD.8](TD.8-querier-abstraction-for-repos.md)
+- Related plans: [TD.2](../../completed/tech_debt/TD.2-convention-charter-and-enforcement.md), [TD.6](TD.6-decompose-httpserver-package.md), [TD.8](TD.8-querier-abstraction-for-repos.md)

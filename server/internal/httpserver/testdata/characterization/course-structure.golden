@@ -1,0 +1,18 @@
+status: 200
+content-type: application/json
+keys:
+  items
+  items[*]
+  items[*].archived
+  items[*].assignmentGroupId
+  items[*].blueprintLocked
+  items[*].createdAt
+  items[*].dueAt
+  items[*].id
+  items[*].kind
+  items[*].parentId
+  items[*].published
+  items[*].sortOrder
+  items[*].title
+  items[*].updatedAt
+  items[*].visibleFrom

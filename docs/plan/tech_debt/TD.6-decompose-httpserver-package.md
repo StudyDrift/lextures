@@ -223,4 +223,4 @@ grep -c 'requireCourseAccess' internal/httpserver/*.go | awk -F: '{s+=$2} END{pr
 - `server/internal/httpserver/courses_routes.go:5` — `registerCourseRoutes`, 455 lines
 - `server/internal/app/app.go` — dependency construction
 - `docs/ARCH.md` — current architecture documentation
-- Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.2](TD.2-convention-charter-and-enforcement.md), [TD.5](TD.5-remove-unreachable-method-dispatch.md), [TD.7](TD.7-handler-toolkit.md), [TD.9](TD.9-enforce-repo-layering.md), [TD.10](TD.10-composition-root-decomposition.md)
+- Related plans: [TD.1](../../completed/tech_debt/TD.1-refactoring-safety-net.md), [TD.2](../../completed/tech_debt/TD.2-convention-charter-and-enforcement.md), [TD.5](TD.5-remove-unreachable-method-dispatch.md), [TD.7](TD.7-handler-toolkit.md), [TD.9](TD.9-enforce-repo-layering.md), [TD.10](TD.10-composition-root-decomposition.md)

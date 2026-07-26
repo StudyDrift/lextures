@@ -209,4 +209,4 @@ grep -rho 'requireCourseAccess' internal/httpserver/*.go | wc -l   # 329
 - `server/internal/httpserver/course_outcomes.go:334` — representative hand-rolled handler
 - `server/internal/courseroles` — permission checks wrapped by guards
 - `clients/web/src/lib/errors.ts` — client-side envelope parsing
-- Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.5](TD.5-remove-unreachable-method-dispatch.md), [TD.6](TD.6-decompose-httpserver-package.md), [TD.3](TD.3-repair-and-verify-openapi-contract.md)
+- Related plans: [TD.1](../../completed/tech_debt/TD.1-refactoring-safety-net.md), [TD.5](TD.5-remove-unreachable-method-dispatch.md), [TD.6](TD.6-decompose-httpserver-package.md), [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md)

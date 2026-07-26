@@ -1,0 +1,16 @@
+status: 201
+content-type: application/json
+keys:
+  archived
+  assignmentGroupId
+  blueprintLocked
+  createdAt
+  dueAt
+  id
+  kind
+  parentId
+  published
+  sortOrder
+  title
+  updatedAt
+  visibleFrom

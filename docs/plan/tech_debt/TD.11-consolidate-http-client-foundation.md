@@ -36,7 +36,7 @@
 - Introducing a data-fetching/caching library — that is [TD.13](TD.13-adopt-server-state-management.md).
 - Changing endpoint URLs, payloads, or error-message copy.
 - Rewriting the 113 modules' function signatures.
-- Adopting generated OpenAPI types (blocked on [TD.3](TD.3-repair-and-verify-openapi-contract.md)).
+- Adopting generated OpenAPI types (unblocked by [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md)).
 
 ## 4. Personas & User Stories
 
@@ -181,4 +181,4 @@ ls src/lib/*api*.ts | wc -l                                             # 113
 - `clients/web/src/lib/api.ts` — `authorizedFetch`, `tryRefreshSession`
 - `clients/web/src/lib/errors.ts` — `readApiErrorMessage`
 - Duplicates: `av-scan-api.ts:6`, `captions-api.ts:4`, `demographics-api.ts:4`, `email-templates-api.ts:44`, `scheduler-api.ts:4`, `system-email-templates-api.ts:45`
-- Related plans: [TD.2](TD.2-convention-charter-and-enforcement.md), [TD.12](TD.12-split-courses-api-module.md), [TD.13](TD.13-adopt-server-state-management.md), [TD.3](TD.3-repair-and-verify-openapi-contract.md)
+- Related plans: [TD.2](../../completed/tech_debt/TD.2-convention-charter-and-enforcement.md), [TD.12](TD.12-split-courses-api-module.md), [TD.13](TD.13-adopt-server-state-management.md), [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md)

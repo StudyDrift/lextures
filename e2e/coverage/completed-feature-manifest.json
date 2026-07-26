@@ -4154,7 +4154,7 @@
       "risk": "critical",
       "client": "web",
       "coverage": "smoke",
-      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre→serve→post causal journey remains backlog.",
+      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre\u2192serve\u2192post causal journey remains backlog.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -8672,6 +8672,32 @@
           "path": "e2e/tests/section-heading-enter-focus.spec.ts"
         }
       ],
+      "reviewed": true
+    },
+    {
+      "id": "TD.1",
+      "path": "docs/completed/tech_debt/TD.1-refactoring-safety-net.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "none",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Internal refactoring safety net (route inventory + characterization goldens). No user-facing journey; guarded by Go tests and CI, not Playwright.",
+      "owner": "Platform",
+      "reviewed": true
+    },
+    {
+      "id": "TD.2",
+      "path": "docs/completed/tech_debt/TD.2-convention-charter-and-enforcement.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "none",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Internal convention charter and static structure checks. No user-facing journey; enforced via make lint-structure and CI.",
+      "owner": "Platform",
       "reviewed": true
     }
   ]

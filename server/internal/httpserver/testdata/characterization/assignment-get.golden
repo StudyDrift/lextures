@@ -1,0 +1,24 @@
+status: 200
+content-type: application/json
+keys:
+  blindGrading
+  dueAt
+  itemId
+  lateSubmissionPolicy
+  markdown
+  moderatedGrading
+  moderationThresholdPct
+  neverDrop
+  originalityDetection
+  originalityStudentVisibility
+  postingPolicy
+  provisionalGraderUserIds
+  provisionalGraderUserIds[*]
+  replaceWithFinal
+  requiresAssignmentAccessCode
+  submissionAllowFileUpload
+  submissionAllowText
+  submissionAllowUrl
+  title
+  updatedAt
+  viewerCanRevealIdentities

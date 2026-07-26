@@ -1,0 +1,10 @@
+status: 200
+content-type: application/json
+keys:
+  enrollments
+  enrollments[*]
+  enrollments[*].displayName
+  enrollments[*].id
+  enrollments[*].role
+  enrollments[*].roleDisplay
+  enrollments[*].userId
