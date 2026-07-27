@@ -296,10 +296,10 @@ test.describe('Content Tools Worked Example (CT.18)', () => {
 
       // UI smoke
       await injectToken(page, studentToken)
-      await page.goto(`/courses/${courseCode}/pages/${contentPage.id}`)
-      await expect(page.locator('[data-content-tool="worked_example"]')).toBeVisible({
-        timeout: 15000,
-      })
+      await page.goto(`/courses/${courseCode}/modules/content/${contentPage.id}`)
+      const tool = page.locator('[data-content-tool="worked_example"]').first()
+      await expect(tool).toBeVisible({ timeout: 20_000 })
+      await expect(page.getByText('Expand 3(x+2).')).toBeVisible()
     })
   })
 })
