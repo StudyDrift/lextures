@@ -9,6 +9,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/highlight_annotate"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_questions"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/noop_probe"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/parameter_explorer"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/predict_reveal"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/sandbox_probe"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/sort_sequence"
@@ -48,6 +49,11 @@ func All() []Entry {
 			ID:           noop_probe.ID,
 			ManifestJSON: noop_probe.ManifestJSON,
 			I18nEN:       noop_probe.I18nEN,
+		},
+		{
+			ID:           parameter_explorer.ID,
+			ManifestJSON: parameter_explorer.ManifestJSON,
+			I18nEN:       parameter_explorer.I18nEN,
 		},
 		{
 			ID:           predict_reveal.ID,

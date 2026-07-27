@@ -1,6 +1,6 @@
 # CT.16 — Tool: Parameter Explorer (sliders drive a live model, with guided noticing)
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Web platform team |
 | **Depends on** | CT.1, CT.2, CT.3 |
@@ -295,4 +295,4 @@ v1 because the tool's value does not depend on them.
 - External standards: WCAG 2.1 AA (1.4.11 non-text contrast, 4.1.3 status messages); WAI-ARIA slider
   pattern.
 - Related plans: [CT.5](CT.5-tool-sdk-sandboxing-and-versioning.md),
-  [CT.17](CT.17-tool-code-sandbox.md), [CT.7](CT.7-analytics-insights-and-gradebook.md).
+  [CT.17](../plan/content_tools/CT.17-tool-code-sandbox.md), [CT.7](CT.7-analytics-insights-and-gradebook.md).

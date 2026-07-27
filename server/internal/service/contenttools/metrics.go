@@ -241,6 +241,7 @@ var (
 		Name:      "content_tool_diagram_hotspot_list_mode_total",
 		Help:      "Diagram & Hotspot checks that used list mode (CT.15).",
 	}, []string{"tool_id"})
+
 )
 
 func registerMetrics() {
@@ -595,4 +596,3 @@ func ObserveDiagramHotspotListMode() {
 	registerMetrics()
 	diagramHotspotListModeTotal.WithLabelValues("diagram_hotspot").Inc()
 }
-

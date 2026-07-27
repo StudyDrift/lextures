@@ -158,6 +158,11 @@ func init() {
 		{Key: "correct", Label: "contentTools.analytics.facets.correct", Type: "boolean"},
 		{Key: "gridCell", Label: "contentTools.analytics.facets.gridCell", Type: "string"},
 	})
+	RegisterProjector("parameter_explorer", projectParameterExplorer, []FacetSchema{
+		{Key: "paramBin", Label: "contentTools.analytics.facets.paramBin", Type: "string"},
+		{Key: "checkpointId", Label: "contentTools.analytics.facets.checkpointId", Type: "string"},
+		{Key: "promptAnswered", Label: "contentTools.analytics.facets.promptAnswered", Type: "string"},
+	})
 }
 
 func projectNoopProbe(in ProjectInput) Summary {
@@ -457,4 +462,101 @@ func projectDiagramHotspot(in ProjectInput) Summary {
 		s.Facets["usedListMode"] = true
 	}
 	return s
+}
+
+func projectParameterExplorer(in ProjectInput) Summary {
+	s := defaultProject(in)
+	var st struct {
+		Params      map[string]any            `json:"params"`
+		Trace       []map[string]any          `json:"trace"`
+		Checkpoints map[string]string         `json:"checkpoints"`
+		Answers     map[string]string         `json:"answers"`
+		CompletedAt string                    `json:"completedAt"`
+	}
+	_ = json.Unmarshal(in.StateJSON, &st)
+
+	if len(st.Params) > 0 || len(st.Trace) > 0 || len(st.Answers) > 0 || len(st.Checkpoints) > 0 {
+		s.Engaged = true
+	}
+	if st.CompletedAt != "" || in.Status == "completed" {
+		s.Completed = true
+	}
+
+	// Coarse param bins from current params + trace (coverage).
+	paramBins := make([]string, 0)
+	seenBin := map[string]struct{}{}
+	addBinsFrom := func(params map[string]any) {
+		for k, v := range params {
+			f, ok := toFloat(v)
+			if !ok {
+				continue
+			}
+			// 10 buckets over a wide default range when config unknown; use value magnitude.
+			bucket := 0
+			if f < -10 {
+				bucket = 0
+			} else if f > 10 {
+				bucket = 9
+			} else {
+				bucket = int((f + 10) / 2)
+				if bucket < 0 {
+					bucket = 0
+				}
+				if bucket > 9 {
+					bucket = 9
+				}
+			}
+			key := k + ":" + strconv.Itoa(bucket)
+			if _, dup := seenBin[key]; dup {
+				continue
+			}
+			seenBin[key] = struct{}{}
+			paramBins = append(paramBins, key)
+		}
+	}
+	addBinsFrom(st.Params)
+	for _, entry := range st.Trace {
+		if p, ok := entry["params"].(map[string]any); ok {
+			addBinsFrom(p)
+		}
+	}
+
+	checkpointIDs := make([]string, 0, len(st.Checkpoints))
+	for id := range st.Checkpoints {
+		checkpointIDs = append(checkpointIDs, id)
+	}
+	answered := make([]string, 0, len(st.Answers))
+	for id, ans := range st.Answers {
+		if strings.TrimSpace(ans) != "" {
+			answered = append(answered, id)
+		}
+	}
+
+	s.Facets["paramBin"] = paramBins
+	s.Facets["checkpointId"] = checkpointIDs
+	s.Facets["promptAnswered"] = answered
+	return s
+}
+
+func toFloat(v any) (float64, bool) {
+	switch t := v.(type) {
+	case float64:
+		return t, true
+	case float32:
+		return float64(t), true
+	case int:
+		return float64(t), true
+	case int64:
+		return float64(t), true
+	case json.Number:
+		f, err := t.Float64()
+		return f, err == nil
+	case bool:
+		if t {
+			return 1, true
+		}
+		return 0, true
+	default:
+		return 0, false
+	}
 }
