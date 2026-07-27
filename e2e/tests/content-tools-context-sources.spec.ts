@@ -168,8 +168,9 @@ test.describe('Content Tools grounded context (CT.6)', () => {
         await ack.click()
       }
       await page.getByTestId(`ct-open-sources-${inst.id}`).click()
-      await expect(page.getByTestId('content-tools-sources-panel')).toBeVisible({ timeout: 15000 })
-      await expect(page.getByTestId('ct-sources-empty').or(page.locator('table'))).toBeVisible()
+      const sources = page.getByTestId('content-tools-sources-panel')
+      await expect(sources).toBeVisible({ timeout: 15000 })
+      await expect(sources.getByTestId('ct-sources-token-budget')).toBeVisible()
     })
   })
 })
