@@ -12819,6 +12819,422 @@
           }
         }
       }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/states": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "List per-enrollment tool state roster (CT.4)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "not_started",
+                "in_progress",
+                "submitted",
+                "completed"
+              ]
+            }
+          },
+          {
+            "name": "sectionId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roster page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolRosterStatesResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/states/export": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Export learner tool states as CSV or JSON (CT.4)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "csv",
+                "json"
+              ],
+              "default": "csv"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Export payload"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/states/{enrollment_id}": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Get one learner's full tool state detail (CT.4)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enrollment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "State detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolStateDetailResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/state-resets": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "List reset snapshots (CT.4)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instanceId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enrollmentId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Snapshot list"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Reset tool state at a scope (dry-run or execute) (CT.4)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentToolResetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sync reset or dry-run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolResetResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Async job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolResetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/state-resets/{reset_id}/restore": {
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Restore a reset snapshot within retention (CT.4)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restored"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Already restored or expired"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/reset-jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Poll async reset job progress (CT.4)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolResetJobStatus"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/self-reset": {
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Student self-reset when course and tool permit (CT.4)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reset applied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolResetResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -15002,6 +15418,9 @@
           },
           "ui": {
             "type": "object"
+          },
+          "allowsSelfReset": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -15214,6 +15633,283 @@
           "result",
           "state"
         ]
+      },
+      "ContentToolRosterStateRow": {
+        "type": "object",
+        "required": [
+          "enrollmentId",
+          "displayName",
+          "status",
+          "interactionCount",
+          "resetCount"
+        ],
+        "properties": {
+          "enrollmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "score": {
+            "$ref": "#/components/schemas/ContentToolScore"
+          },
+          "interactionCount": {
+            "type": "integer"
+          },
+          "lastInteractedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resetCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "ContentToolRosterStatesResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentToolRosterStateRow"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "ContentToolStateDetailResponse": {
+        "type": "object",
+        "required": [
+          "enrollmentId",
+          "displayName",
+          "summary",
+          "state"
+        ],
+        "properties": {
+          "enrollmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ContentToolStateEnvelope"
+          }
+        }
+      },
+      "ContentToolResetRequest": {
+        "type": "object",
+        "required": [
+          "scope"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": [
+              "instance_enrollment",
+              "instance_all",
+              "item_enrollment",
+              "item_all",
+              "course_enrollment"
+            ]
+          },
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "enrollmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sectionIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notify": {
+            "type": "boolean",
+            "default": true
+          },
+          "dryRun": {
+            "type": "boolean",
+            "default": false
+          },
+          "idempotencyKey": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentToolResetSample": {
+        "type": "object",
+        "properties": {
+          "enrollmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "ContentToolGradeEffect": {
+        "type": "object",
+        "properties": {
+          "enrollmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "reverted",
+              "unchanged",
+              "blocked"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentToolResetResponse": {
+        "type": "object",
+        "required": [
+          "dryRun",
+          "affectedCount",
+          "sample",
+          "gradeEffects"
+        ],
+        "properties": {
+          "dryRun": {
+            "type": "boolean"
+          },
+          "affectedCount": {
+            "type": "integer"
+          },
+          "sample": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentToolResetSample"
+            }
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gradeEffects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentToolGradeEffect"
+            }
+          },
+          "scopeNarrowed": {
+            "type": "boolean"
+          },
+          "appliedSections": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "ContentToolResetJobStatus": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "scope",
+          "totalRows",
+          "processedRows",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "scope": {
+            "type": "string"
+          },
+          "totalRows": {
+            "type": "integer"
+          },
+          "processedRows": {
+            "type": "integer"
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "error": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     }
   }

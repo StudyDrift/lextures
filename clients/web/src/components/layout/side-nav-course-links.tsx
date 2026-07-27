@@ -82,6 +82,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     visualBoardsEnabled,
     interactiveQuizzesEnabled,
     screenShareEnabled,
+    contentToolsEnabled,
   } = useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
   const {
@@ -319,6 +320,11 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
           {instructorInsightsEnabled && canViewGradebook ? (
             <SideNavLink to={`${base}/whats-working`} icon={<TrendingUp className="h-5 w-5" />}>
               What&apos;s working
+            </SideNavLink>
+          ) : null}
+          {contentToolsEnabled && canViewGradebook ? (
+            <SideNavLink to={`${base}/content-tools`} icon={<Layers className="h-5 w-5" />}>
+              Content Tools
             </SideNavLink>
           ) : null}
         </>

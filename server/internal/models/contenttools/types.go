@@ -56,6 +56,105 @@ type ToolManifestPublic struct {
 	ConflictPolicy  string          `json:"conflictPolicy,omitempty"`
 	AutosaveMs      int             `json:"autosaveMs,omitempty"`
 	RespectsDueDate bool            `json:"respectsDueDate,omitempty"`
+	AllowsSelfReset bool            `json:"allowsSelfReset,omitempty"`
+}
+
+// RosterStateRow is one learner on GET .../instances/{id}/states (CT.4).
+type RosterStateRow struct {
+	EnrollmentID     uuid.UUID  `json:"enrollmentId"`
+	DisplayName      string     `json:"displayName"`
+	Status           string     `json:"status"`
+	Score            *ToolScore `json:"score"`
+	InteractionCount int        `json:"interactionCount"`
+	LastInteractedAt *time.Time `json:"lastInteractedAt"`
+	ResetCount       int        `json:"resetCount"`
+}
+
+// RosterStatesResponse is the paginated roster.
+type RosterStatesResponse struct {
+	Items      []RosterStateRow `json:"items"`
+	Page       int              `json:"page"`
+	PageSize   int              `json:"pageSize"`
+	TotalCount int              `json:"totalCount"`
+}
+
+// StateDetailResponse is GET .../states/{enrollment_id}.
+type StateDetailResponse struct {
+	EnrollmentID uuid.UUID         `json:"enrollmentId"`
+	DisplayName  string            `json:"displayName"`
+	Summary      string            `json:"summary"`
+	State        ToolStateEnvelope `json:"state"`
+}
+
+// ResetRequest is POST .../state-resets.
+type ResetRequest struct {
+	Scope          string      `json:"scope"`
+	InstanceID     *uuid.UUID  `json:"instanceId"`
+	ItemID         *uuid.UUID  `json:"itemId"`
+	EnrollmentID   *uuid.UUID  `json:"enrollmentId"`
+	SectionIDs     []uuid.UUID `json:"sectionIds"`
+	Reason         *string     `json:"reason"`
+	Notify         *bool       `json:"notify"`
+	DryRun         bool        `json:"dryRun"`
+	IdempotencyKey *string     `json:"idempotencyKey"`
+}
+
+// ResetSampleLearner is one sample row in a reset response.
+type ResetSampleLearner struct {
+	EnrollmentID uuid.UUID `json:"enrollmentId"`
+	DisplayName  string    `json:"displayName"`
+	Status       string    `json:"status"`
+	Score        *float64  `json:"score"`
+}
+
+// GradeEffect describes gradebook side-effects for a reset.
+type GradeEffect struct {
+	EnrollmentID uuid.UUID `json:"enrollmentId"`
+	Action       string    `json:"action"`
+	Reason       *string   `json:"reason,omitempty"`
+}
+
+// ResetResponse is the dry-run or sync reset result (202 adds jobId).
+type ResetResponse struct {
+	DryRun          bool                 `json:"dryRun"`
+	AffectedCount   int                  `json:"affectedCount"`
+	Sample          []ResetSampleLearner `json:"sample"`
+	BatchID         *uuid.UUID           `json:"batchId,omitempty"`
+	JobID           *uuid.UUID           `json:"jobId,omitempty"`
+	GradeEffects    []GradeEffect        `json:"gradeEffects"`
+	ScopeNarrowed   bool                 `json:"scopeNarrowed,omitempty"`
+	AppliedSections []uuid.UUID          `json:"appliedSections,omitempty"`
+}
+
+// StateResetSnapshot is one restorable snapshot.
+type StateResetSnapshot struct {
+	ID            uuid.UUID  `json:"id"`
+	InstanceID    uuid.UUID  `json:"instanceId"`
+	EnrollmentID  uuid.UUID  `json:"enrollmentId"`
+	ToolID        string     `json:"toolId"`
+	Scope         string     `json:"scope"`
+	Reason        *string    `json:"reason"`
+	BatchID       *uuid.UUID `json:"batchId"`
+	ResetBy       *uuid.UUID `json:"resetBy"`
+	ResetAt       time.Time  `json:"resetAt"`
+	RestoredAt    *time.Time `json:"restoredAt"`
+	PurgeAfter    time.Time  `json:"purgeAfter"`
+	PriorStatus   string     `json:"priorStatus"`
+	PriorRevision int64      `json:"priorRevision"`
+}
+
+// ResetJobStatus is GET .../reset-jobs/{job_id}.
+type ResetJobStatus struct {
+	ID            uuid.UUID       `json:"id"`
+	Status        string          `json:"status"`
+	Scope         string          `json:"scope"`
+	TotalRows     int             `json:"totalRows"`
+	ProcessedRows int             `json:"processedRows"`
+	BatchID       *uuid.UUID      `json:"batchId,omitempty"`
+	Error         *string         `json:"error,omitempty"`
+	Result        json.RawMessage `json:"result,omitempty"`
+	CreatedAt     time.Time       `json:"createdAt"`
+	FinishedAt    *time.Time      `json:"finishedAt,omitempty"`
 }
 
 // ActionPublic is one server action declared on a manifest (CT.3).
@@ -152,8 +251,8 @@ type RunActionRequest struct {
 
 // RunActionResponse is the action dispatch result.
 type RunActionResponse struct {
-	Result map[string]any     `json:"result"`
-	State  ToolStateEnvelope  `json:"state"`
+	Result map[string]any    `json:"result"`
+	State  ToolStateEnvelope `json:"state"`
 }
 
 // RevisionConflictBody is HTTP 409 for stale revision saves.

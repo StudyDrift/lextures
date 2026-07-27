@@ -23,6 +23,7 @@ const (
 	JobTypeAdaptiveContentEffectiveness    = "scheduled.adaptive_content_effectiveness"
 	JobTypeAdaptiveContentFairness         = "scheduled.adaptive_content_fairness"
 	JobTypeContentToolPreviewPurge         = "scheduled.content_tool_preview_purge"
+	JobTypeContentToolResetPurge           = "scheduled.content_tool_reset_purge"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -185,6 +186,13 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "10 4 * * *", // daily 04:10 UTC
 			JobType:        JobTypeContentToolPreviewPurge,
 			Description:    "Purge instructor Content Tool preview-as-student state older than 24h (CT.2).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "content_tool_reset_purge",
+			Spec:           "20 4 * * *", // daily 04:20 UTC
+			JobType:        JobTypeContentToolResetPurge,
+			Description:    "Purge expired Content Tool reset snapshots past org retention (CT.4).",
 			DefaultEnabled: true,
 		},
 	}

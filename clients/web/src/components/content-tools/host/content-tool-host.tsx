@@ -1,6 +1,9 @@
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePermissions } from '../../../context/use-permissions'
 import { parseFencePayload } from '../../../lib/content-tools/lex-tool-fence'
+import { permCourseItemCreate } from '../../../lib/rbac-api'
+import { ToolResponsesPanel } from '../instructor/tool-responses-panel'
 import { useContentToolsPage } from './content-tools-page-context'
 import { isRendererRegistered, resolveRenderer } from './registry'
 import { ToolErrorBoundary } from './tool-error-boundary'
@@ -25,9 +28,13 @@ function ContentToolHostMounted({
   const { t } = useTranslation('contentTools')
   const announce = useAnnounce()
   const page = useContentToolsPage()
+  const { allows, loading: permLoading } = usePermissions()
   const courseCode = page?.courseCode ?? ''
   const instance = page?.getInstance(instanceId)
   const Renderer = resolveRenderer(toolId)
+  const [responsesOpen, setResponsesOpen] = useState(false)
+  const canManage =
+    Boolean(courseCode) && !permLoading && allows(permCourseItemCreate(courseCode))
 
   const archived = instance?.status === 'archived'
   const readOnly = archived
@@ -92,56 +99,69 @@ function ContentToolHostMounted({
   }
 
   return (
-    <ToolFrame
-      label={t('contentTools.authoring.toolBlockAria', { name: label })}
-      status={toolState.status}
-      syncStatus={toolState.syncStatus}
-      savedLabel={t('contentTools.runtime.saved')}
-      savingLabel={t('contentTools.runtime.saving')}
-      unsyncedLabel={t('contentTools.runtime.unsynced')}
-      onBlurCapture={() => {
-        void toolState.flush()
-      }}
-      busy={action.busy}
-    >
-      <ToolErrorBoundary
-        title={t('contentTools.runtime.errorTitle')}
-        retryLabel={t('contentTools.runtime.retry')}
+    <>
+      <ToolFrame
+        label={t('contentTools.authoring.toolBlockAria', { name: label })}
+        status={toolState.status}
+        syncStatus={toolState.syncStatus}
+        savedLabel={t('contentTools.runtime.saved')}
+        savingLabel={t('contentTools.runtime.saving')}
+        unsyncedLabel={t('contentTools.runtime.unsynced')}
+        onBlurCapture={() => {
+          void toolState.flush()
+        }}
+        busy={action.busy}
+        responsesLabel={canManage ? t('contentTools.instructor.responses') : undefined}
+        onResponsesClick={canManage ? () => setResponsesOpen(true) : undefined}
       >
-        <Suspense
-          fallback={
-            <ToolPlaceholder reason="loading" message={t('contentTools.runtime.loading')} />
-          }
+        <ToolErrorBoundary
+          title={t('contentTools.runtime.errorTitle')}
+          retryLabel={t('contentTools.runtime.retry')}
         >
-          <Renderer
-            instanceId={instanceId}
-            toolId={toolId}
-            config={instance.config}
-            state={toolState.state}
-            status={toolState.status}
-            readOnly={readOnly}
-            save={toolState.save}
-            submit={toolState.submit}
-            runAction={async (name, input) => {
-              const res = await action.runAction(name, input)
-              return res.result
-            }}
-            t={(key, options) => t(key, options)}
-            announce={announce}
-          />
-        </Suspense>
-      </ToolErrorBoundary>
-      {toolState.score ? (
-        <p className="mt-2 text-xs text-slate-600 dark:text-neutral-300">
-          {t('contentTools.runtime.score')}: {toolState.score.raw}/{toolState.score.max}
-        </p>
+          <Suspense
+            fallback={
+              <ToolPlaceholder reason="loading" message={t('contentTools.runtime.loading')} />
+            }
+          >
+            <Renderer
+              instanceId={instanceId}
+              toolId={toolId}
+              config={instance.config}
+              state={toolState.state}
+              status={toolState.status}
+              readOnly={readOnly}
+              save={toolState.save}
+              submit={toolState.submit}
+              runAction={async (name, input) => {
+                const res = await action.runAction(name, input)
+                return res.result
+              }}
+              t={(key, options) => t(key, options)}
+              announce={announce}
+            />
+          </Suspense>
+        </ToolErrorBoundary>
+        {toolState.score ? (
+          <p className="mt-2 text-xs text-slate-600 dark:text-neutral-300">
+            {t('contentTools.runtime.score')}: {toolState.score.raw}/{toolState.score.max}
+          </p>
+        ) : null}
+        {toolState.error || action.error ? (
+          <p className="mt-2 text-xs text-rose-700 dark:text-rose-300" role="status">
+            {toolState.error || action.error}
+          </p>
+        ) : null}
+      </ToolFrame>
+      {canManage ? (
+        <ToolResponsesPanel
+          open={responsesOpen}
+          courseCode={courseCode}
+          instanceId={instanceId}
+          itemId={page?.itemId}
+          onClose={() => setResponsesOpen(false)}
+        />
       ) : null}
-      {toolState.error || action.error ? (
-        <p className="mt-2 text-xs text-rose-700 dark:text-rose-300" role="status">
-          {toolState.error || action.error}
-        </p>
-      ) : null}
-    </ToolFrame>
+    </>
   )
 }
 

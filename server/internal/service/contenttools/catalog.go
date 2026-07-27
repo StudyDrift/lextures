@@ -96,6 +96,7 @@ func ManifestToPublic(m *CompiledManifest) (ctmodel.ToolManifestPublic, error) {
 		ConflictPolicy:  EffectiveConflictPolicy(m),
 		AutosaveMs:      EffectiveAutosaveMs(m),
 		RespectsDueDate: m.RespectsDueDate,
+		AllowsSelfReset: m.AllowsSelfReset,
 	}
 	if len(m.Actions) > 0 {
 		out.Actions = make([]ctmodel.ActionPublic, 0, len(m.Actions))

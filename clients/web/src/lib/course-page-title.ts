@@ -36,6 +36,7 @@ const EXACT_SUBPATH_TITLES: Record<string, string> = {
   'mastery-heatmap': 'Mastery Heatmap',
   'outcomes-report': 'Outcomes report',
   'whats-working': "What's working",
+  'content-tools': 'Content Tools',
   enrollments: 'Enrollments',
   attendance: 'Attendance',
   behavior: 'Behavior & PBIS',

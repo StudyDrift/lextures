@@ -4323,6 +4323,36 @@
       }
     },
     {
+      "id": "CT.4",
+      "path": "docs/completed/content_tools/CT.4-instructor-state-console-and-reset.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers instructor roster (incl. not_started peers), dry-run non-mutation, single-enrollment reset clearing state/reset_count, self-reset 403 when disallowed, and Responses UI affordance.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-instructor-reset.spec.ts"
+        },
+        {
+          "path": "e2e/tests/content-tools-runtime.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Inherits content_tools_enabled (CT.1). studentResetAllowed + allowsSelfReset gate self-reset; async threshold via CONTENT_TOOLS_ASYNC_RESET_THRESHOLD."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

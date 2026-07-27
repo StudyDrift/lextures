@@ -33,6 +33,12 @@ import {
   contentToolRevisionConflictBodySchema,
   contentToolStateTooLargeBodySchema,
   contentToolActionResponseSchema,
+  contentToolRosterStatesResponseSchema,
+  contentToolStateDetailResponseSchema,
+  contentToolResetResponseSchema,
+  contentToolResetJobStatusSchema,
+  contentToolStateResetsListSchema,
+  contentToolRestoreResetResponseSchema,
   adaptiveContentUnitSchema,
   adaptiveContentUnitsListSchema,
   adaptiveContentVariantSchema,
@@ -1554,6 +1560,215 @@ export async function runContentToolAction(
   const raw = await parseJson(res)
   if (!res.ok) throwContentToolsStateWriteError(res, raw)
   return parseApiResponse('runContentToolAction', contentToolActionResponseSchema, raw)
+}
+
+/** CT.4 — instructor roster / reset. */
+export type ContentToolResetScope =
+  | 'instance_enrollment'
+  | 'instance_all'
+  | 'item_enrollment'
+  | 'item_all'
+  | 'course_enrollment'
+
+export type ContentToolRosterStateRow = {
+  enrollmentId: string
+  displayName: string
+  status: string
+  score?: ContentToolScore | null
+  interactionCount: number
+  lastInteractedAt?: string | null
+  resetCount: number
+}
+
+export type ContentToolRosterStatesResponse = {
+  items: ContentToolRosterStateRow[]
+  page: number
+  pageSize: number
+  totalCount: number
+}
+
+export type ContentToolStateDetail = {
+  enrollmentId: string
+  displayName: string
+  summary: string
+  state: ContentToolState
+}
+
+export type ContentToolResetRequest = {
+  scope: ContentToolResetScope
+  instanceId?: string
+  itemId?: string
+  enrollmentId?: string
+  sectionIds?: string[]
+  reason?: string
+  notify?: boolean
+  dryRun?: boolean
+  idempotencyKey?: string
+}
+
+export type ContentToolResetResponse = {
+  dryRun: boolean
+  affectedCount: number
+  sample: Array<{
+    enrollmentId: string
+    displayName: string
+    status: string
+    score?: number | null
+  }>
+  batchId?: string | null
+  jobId?: string | null
+  gradeEffects: Array<{ enrollmentId: string; action: string; reason?: string }>
+  scopeNarrowed?: boolean
+  appliedSections?: string[]
+}
+
+export type ContentToolStateResetSnapshot = {
+  id: string
+  instanceId: string
+  enrollmentId: string
+  toolId: string
+  scope: string
+  reason?: string | null
+  batchId?: string | null
+  resetBy?: string | null
+  resetAt: string
+  restoredAt?: string | null
+  purgeAfter: string
+  priorStatus: string
+  priorRevision: number
+}
+
+export type ContentToolResetJobStatus = {
+  id: string
+  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled'
+  scope: string
+  totalRows: number
+  processedRows: number
+  batchId?: string | null
+  error?: string | null
+  result?: unknown
+  createdAt: string
+  finishedAt?: string | null
+}
+
+export async function fetchContentToolInstanceStates(
+  courseCode: string,
+  instanceId: string,
+  opts?: { page?: number; pageSize?: number; status?: string; sectionId?: string },
+): Promise<ContentToolRosterStatesResponse> {
+  const params = new URLSearchParams()
+  if (opts?.page) params.set('page', String(opts.page))
+  if (opts?.pageSize) params.set('pageSize', String(opts.pageSize))
+  if (opts?.status) params.set('status', opts.status)
+  if (opts?.sectionId) params.set('sectionId', opts.sectionId)
+  const qs = params.toString()
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/states${qs ? `?${qs}` : ''}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse(
+    'fetchContentToolInstanceStates',
+    contentToolRosterStatesResponseSchema,
+    raw,
+  )
+}
+
+export async function fetchContentToolStateDetail(
+  courseCode: string,
+  instanceId: string,
+  enrollmentId: string,
+): Promise<ContentToolStateDetail> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/states/${encodeURIComponent(enrollmentId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse(
+    'fetchContentToolStateDetail',
+    contentToolStateDetailResponseSchema,
+    raw,
+  )
+}
+
+export async function postContentToolStateReset(
+  courseCode: string,
+  body: ContentToolResetRequest,
+): Promise<ContentToolResetResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/state-resets`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('postContentToolStateReset', contentToolResetResponseSchema, raw)
+}
+
+export async function fetchContentToolStateResets(
+  courseCode: string,
+  opts?: { instanceId?: string; enrollmentId?: string },
+): Promise<ContentToolStateResetSnapshot[]> {
+  const params = new URLSearchParams()
+  if (opts?.instanceId) params.set('instanceId', opts.instanceId)
+  if (opts?.enrollmentId) params.set('enrollmentId', opts.enrollmentId)
+  const qs = params.toString()
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/state-resets${qs ? `?${qs}` : ''}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = parseApiResponse(
+    'fetchContentToolStateResets',
+    contentToolStateResetsListSchema,
+    raw,
+  )
+  return body.items
+}
+
+export async function restoreContentToolStateReset(
+  courseCode: string,
+  resetId: string,
+): Promise<{ reset: ContentToolStateResetSnapshot; state: ContentToolState }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/state-resets/${encodeURIComponent(resetId)}/restore`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse(
+    'restoreContentToolStateReset',
+    contentToolRestoreResetResponseSchema,
+    raw,
+  )
+}
+
+export async function fetchContentToolResetJob(
+  courseCode: string,
+  jobId: string,
+): Promise<ContentToolResetJobStatus> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/reset-jobs/${encodeURIComponent(jobId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchContentToolResetJob', contentToolResetJobStatusSchema, raw)
+}
+
+export async function postContentToolSelfReset(
+  courseCode: string,
+  instanceId: string,
+): Promise<ContentToolResetResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/self-reset`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('postContentToolSelfReset', contentToolResetResponseSchema, raw)
 }
 
 export async function putAdaptiveContentSettings(

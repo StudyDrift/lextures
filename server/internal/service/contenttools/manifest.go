@@ -65,6 +65,7 @@ type Manifest struct {
 	ConflictPolicy  string          `json:"conflictPolicy,omitempty"`
 	AutosaveMs      int             `json:"autosaveMs,omitempty"`
 	RespectsDueDate bool            `json:"respectsDueDate,omitempty"`
+	AllowsSelfReset bool            `json:"allowsSelfReset,omitempty"`
 }
 
 // ActionDecl declares a server-side action a tool may invoke (CT.3).

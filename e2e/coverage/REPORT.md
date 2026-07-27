@@ -1,17 +1,17 @@
 # Completed feature E2E coverage report
 
-Total stories: **517**
+Total stories: **525**
 
 ## Coverage levels
 
 | Level | Count |
 |---|---:|
-| journey | 86 |
-| smoke | 175 |
+| journey | 89 |
+| smoke | 178 |
 | api-contract | 1 |
 | covered-by-parent | 11 |
 | manual | 8 |
-| not-applicable | 168 |
+| not-applicable | 170 |
 | missing | 68 |
 
 ## By client
@@ -19,16 +19,16 @@ Total stories: **517**
 | Client | Count |
 |---|---:|
 | cli | 48 |
-| docs | 15 |
+| docs | 17 |
 | mobile | 92 |
 | ops | 16 |
-| web | 346 |
+| web | 352 |
 
 ## By market tag
 
 | Market | Count |
 |---|---:|
-| ALL | 470 |
+| ALL | 478 |
 | HE | 15 |
 | HS | 19 |
 | K12 | 13 |
@@ -116,6 +116,9 @@ Total stories: **517**
 | 15.8 | disabledState, authorization, dependency, rollback | [docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md](../../docs/completed/15-self-learner-specific/15.8-affiliate-revenue-share.md) |
 | AC.1 | enabledJourney, rollback | [docs/completed/adaptive/AC.1-foundations-flag-and-data-model.md](../../docs/completed/adaptive/AC.1-foundations-flag-and-data-model.md) |
 | AC.7 | rollback | [docs/completed/adaptive/AC.7-post-assessment-and-effectiveness.md](../../docs/completed/adaptive/AC.7-post-assessment-and-effectiveness.md) |
+| AC.9 | rollback | [docs/completed/adaptive/AC.9-analytics-reporting-and-operability.md](../../docs/completed/adaptive/AC.9-analytics-reporting-and-operability.md) |
+| CT.1 | enabledJourney, rollback | [docs/completed/content_tools/CT.1-foundations-registry-and-data-model.md](../../docs/completed/content_tools/CT.1-foundations-registry-and-data-model.md) |
+| CT.2 | rollback | [docs/completed/content_tools/CT.2-authoring-tools-dropdown-and-config.md](../../docs/completed/content_tools/CT.2-authoring-tools-dropdown-and-config.md) |
 | IQ.1 | disabledState, authorization, dependency, rollback | [docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md](../../docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md) |
 | PS.4 | disabledState, enabledJourney, rollback | [docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md](../../docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md) |
 | T01 | disabledState, authorization, dependency, rollback | [docs/completed/transcripts/T01-official-transcript-generation.md](../../docs/completed/transcripts/T01-official-transcript-generation.md) |
@@ -147,12 +150,13 @@ Total stories: **517**
 | 20-docs-trust | 0 | 0 | 0 | 0 | 2 | 0 | 0 |
 | 21-cli | 0 | 0 | 0 | 0 | 0 | 8 | 0 |
 | _root | 6 | 5 | 0 | 0 | 0 | 5 | 1 |
-| adaptive | 0 | 3 | 0 | 0 | 0 | 0 | 5 |
+| adaptive | 0 | 4 | 0 | 0 | 0 | 0 | 5 |
 | agent-grader | 0 | 6 | 0 | 0 | 0 | 0 | 3 |
 | ai-providers | 0 | 8 | 0 | 0 | 0 | 0 | 1 |
 | animations | 0 | 4 | 0 | 0 | 0 | 0 | 3 |
 | badges | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | cli | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
+| content_tools | 3 | 1 | 0 | 0 | 0 | 0 | 0 |
 | e2e | 3 | 0 | 1 | 0 | 0 | 0 | 0 |
 | emails | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 | feedback | 0 | 5 | 0 | 0 | 0 | 0 | 0 |
@@ -168,6 +172,7 @@ Total stories: **517**
 | parent-portal | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | screenshare | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | settings | 0 | 0 | 0 | 0 | 0 | 3 | 4 |
+| tech_debt | 0 | 1 | 0 | 0 | 0 | 2 | 0 |
 | transcripts | 2 | 7 | 0 | 3 | 0 | 0 | 0 |
 | visual-collaboration | 0 | 7 | 0 | 3 | 0 | 7 | 0 |
 | web | 6 | 2 | 0 | 0 | 0 | 0 | 1 |

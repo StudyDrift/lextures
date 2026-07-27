@@ -1169,6 +1169,7 @@ export const contentToolManifestSchema = z.object({
   conflictPolicy: z.string().optional(),
   autosaveMs: z.number().optional(),
   respectsDueDate: z.boolean().optional(),
+  allowsSelfReset: z.boolean().optional(),
 })
 
 export const toolInstanceUsageSchema = z.object({
@@ -1177,6 +1178,92 @@ export const toolInstanceUsageSchema = z.object({
   learnersCompleted: z.number(),
   lastInteractionAt: z.string().nullable(),
   referencedInBody: z.boolean(),
+})
+
+export const contentToolRosterStateRowSchema = z.object({
+  enrollmentId: z.string(),
+  displayName: z.string(),
+  status: z.string(),
+  score: contentToolScoreSchema.nullable().optional(),
+  interactionCount: z.number(),
+  lastInteractedAt: z.string().nullable().optional(),
+  resetCount: z.number(),
+})
+
+export const contentToolRosterStatesResponseSchema = z.object({
+  items: z.array(contentToolRosterStateRowSchema),
+  page: z.number(),
+  pageSize: z.number(),
+  totalCount: z.number(),
+})
+
+export const contentToolStateDetailResponseSchema = z.object({
+  enrollmentId: z.string(),
+  displayName: z.string(),
+  summary: z.string(),
+  state: contentToolStateSchema,
+})
+
+export const contentToolResetSampleSchema = z.object({
+  enrollmentId: z.string(),
+  displayName: z.string(),
+  status: z.string(),
+  score: z.number().nullable().optional(),
+})
+
+export const contentToolGradeEffectSchema = z.object({
+  enrollmentId: z.string(),
+  action: z.enum(['reverted', 'unchanged', 'blocked']),
+  reason: z.string().optional(),
+})
+
+export const contentToolResetResponseSchema = z.object({
+  dryRun: z.boolean(),
+  affectedCount: z.number(),
+  sample: z.array(contentToolResetSampleSchema),
+  batchId: z.string().optional().nullable(),
+  jobId: z.string().optional().nullable(),
+  gradeEffects: z.array(contentToolGradeEffectSchema),
+  scopeNarrowed: z.boolean().optional(),
+  appliedSections: z.array(z.string()).optional(),
+})
+
+export const contentToolStateResetSnapshotSchema = z.object({
+  id: z.string(),
+  instanceId: z.string(),
+  enrollmentId: z.string(),
+  toolId: z.string(),
+  scope: z.string(),
+  reason: z.string().nullable().optional(),
+  batchId: z.string().nullable().optional(),
+  resetBy: z.string().nullable().optional(),
+  resetAt: z.string(),
+  restoredAt: z.string().nullable().optional(),
+  purgeAfter: z.string(),
+  priorStatus: z.string(),
+  priorRevision: z.number(),
+})
+
+export const contentToolResetJobStatusSchema = z.object({
+  id: z.string(),
+  status: z.enum(['queued', 'running', 'succeeded', 'failed', 'cancelled']),
+  scope: z.string(),
+  totalRows: z.number(),
+  processedRows: z.number(),
+  batchId: z.string().optional().nullable(),
+  error: z.string().optional().nullable(),
+  result: z.unknown().optional(),
+  createdAt: z.string(),
+  finishedAt: z.string().optional().nullable(),
+})
+
+export const contentToolStateResetsListSchema = z.object({
+  items: z.array(contentToolStateResetSnapshotSchema),
+})
+
+export const contentToolRestoreResetResponseSchema = z.object({
+  reset: contentToolStateResetSnapshotSchema,
+  state: contentToolStateSchema,
 })
 
 export const contentToolFieldErrorSchema = z.object({

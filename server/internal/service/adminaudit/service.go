@@ -46,6 +46,8 @@ const (
 	EventIntroCourseAdmin            = "intro_course_admin"
 	EventFeedbackAdminRead           = "feedback_admin_read"
 	EventFeedbackAdminUpdate         = "feedback_admin_update"
+	EventContentToolStateReset       = "content_tool_state_reset"
+	EventContentToolStateRestore     = "content_tool_state_restore"
 )
 
 const EventPlatformSettingsChange = "platform_settings_change"
