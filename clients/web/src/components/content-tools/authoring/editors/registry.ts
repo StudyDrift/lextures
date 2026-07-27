@@ -18,6 +18,10 @@ import {
 } from '../editors/parameter-explorer-editor'
 import { PredictRevealEditor, type PredictRevealEditorProps } from '../editors/predict-reveal-editor'
 import { SortSequenceEditor, type SortSequenceEditorProps } from '../editors/sort-sequence-editor'
+import {
+  WorkedExampleEditor,
+  type WorkedExampleEditorProps,
+} from '../editors/worked-example-editor'
 
 export type CustomEditorProps =
   | InlineQuestionsEditorProps
@@ -27,6 +31,7 @@ export type CustomEditorProps =
   | DiagramHotspotEditorProps
   | ParameterExplorerEditorProps
   | CodeSandboxEditorProps
+  | WorkedExampleEditorProps
 
 const EDITORS: Record<string, ComponentType<CustomEditorProps>> = {
   code_sandbox: CodeSandboxEditor as ComponentType<CustomEditorProps>,
@@ -36,6 +41,7 @@ const EDITORS: Record<string, ComponentType<CustomEditorProps>> = {
   parameter_explorer: ParameterExplorerEditor as ComponentType<CustomEditorProps>,
   predict_reveal: PredictRevealEditor,
   sort_sequence: SortSequenceEditor as ComponentType<CustomEditorProps>,
+  worked_example: WorkedExampleEditor as ComponentType<CustomEditorProps>,
 }
 
 export function resolveCustomEditor(

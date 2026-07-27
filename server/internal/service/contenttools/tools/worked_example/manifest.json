@@ -1,0 +1,226 @@
+{
+  "id": "worked_example",
+  "version": "1.0.0",
+  "name": "contentTools.tools.worked_example.name",
+  "category": "practice",
+  "capabilities": ["state", "scoring"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["problem", "steps"],
+    "properties": {
+      "title": { "type": "string" },
+      "problem": { "type": "string", "minLength": 1 },
+      "variables": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1, "maxLength": 16 },
+        "maxItems": 8
+      },
+      "steps": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 20,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "text"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "label": { "type": "string" },
+            "text": { "type": "string" },
+            "blank": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["numeric", "expression", "choice", "text"]
+                },
+                "expected": {
+                  "x-lex-sensitive": true
+                },
+                "tolerance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["kind", "value"],
+                  "properties": {
+                    "kind": { "type": "string", "enum": ["absolute", "relative"] },
+                    "value": { "type": "number", "minimum": 0 }
+                  }
+                },
+                "acceptedAnswers": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "x-lex-sensitive": true
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["id", "text"],
+                    "properties": {
+                      "id": { "type": "string", "minLength": 1 },
+                      "text": { "type": "string" }
+                    }
+                  }
+                },
+                "correctOptionId": {
+                  "type": "string",
+                  "x-lex-sensitive": true
+                },
+                "unit": { "type": "string" }
+              }
+            },
+            "hints": {
+              "type": "array",
+              "items": { "type": "string" },
+              "maxItems": 3,
+              "x-lex-sensitive": true
+            },
+            "explanation": {
+              "type": "string",
+              "x-lex-sensitive": true
+            }
+          }
+        }
+      },
+      "blankPolicy": {
+        "type": "string",
+        "enum": ["author", "progressive", "all"],
+        "default": "author"
+      },
+      "attemptsPerStep": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "default": 3
+      },
+      "hintsAffectScore": { "type": "boolean", "default": false },
+      "practiceOnly": { "type": "boolean", "default": true },
+      "showAllSteps": { "type": "boolean", "default": false },
+      "allowRevealAll": { "type": "boolean", "default": false }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "steps": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "attempts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["value", "result", "at"],
+                "properties": {
+                  "value": { "type": "string" },
+                  "result": {
+                    "type": "string",
+                    "enum": ["correct", "incorrect", "needs_review"]
+                  },
+                  "at": { "type": "string" }
+                }
+              }
+            },
+            "hintsUsed": { "type": "integer", "minimum": 0 },
+            "revealed": { "type": "boolean" },
+            "draft": { "type": "string" },
+            "completedAt": { "type": "string" },
+            "startedAt": { "type": "string" }
+          }
+        }
+      },
+      "blankedStepIds": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "currentStepId": { "type": "string" },
+      "scoreRaw": { "type": "number" },
+      "scoreMax": { "type": "number" },
+      "completedAt": { "type": "string" },
+      "revealAllAt": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "auto" },
+  "storage": { "maxStateBytes": 32000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "form",
+    "wcagNotes": "Each step is a labelled group; math preview exposes plain-text source; results and hints announced politely; focus moves to next step input on success; correctness never colour-only."
+  },
+  "dataSheet": {
+    "collects": {
+      "steps": {
+        "purpose": "Per-step attempt history, hint usage, reveals and drafts",
+        "retention": "life_of_enrollment"
+      },
+      "scoreRaw": {
+        "purpose": "Server-computed score for optional gradebook bridge",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "KaTeX output relies on MathML where available; plain-text source is always the accessible value.",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.worked_example",
+  "ui": {
+    "renderer": "worked_example",
+    "icon": "list-ordered",
+    "group": "practice",
+    "customEditor": "worked_example"
+  },
+  "actions": [
+    {
+      "name": "prepare",
+      "rateLimitPerMin": 20,
+      "description": "Resolve blanked steps for this enrollment"
+    },
+    {
+      "name": "check_step",
+      "rateLimitPerMin": 30,
+      "description": "Check one blanked step server-side"
+    },
+    {
+      "name": "hint",
+      "rateLimitPerMin": 20,
+      "description": "Reveal the next hint for a step"
+    },
+    {
+      "name": "reveal_step",
+      "rateLimitPerMin": 10,
+      "description": "Show the author explanation for a step after attempts are exhausted"
+    },
+    {
+      "name": "reveal_all",
+      "rateLimitPerMin": 5,
+      "description": "Reveal the full solution when the author allows it"
+    },
+    {
+      "name": "verify",
+      "rateLimitPerMin": 20,
+      "description": "Authoring: run expected answers through the checker"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

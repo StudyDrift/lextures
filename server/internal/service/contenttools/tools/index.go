@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/predict_reveal"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/sandbox_probe"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/sort_sequence"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/worked_example"
 )
 
 // Entry is one built-in tool's embeddable assets.
@@ -75,6 +76,11 @@ func All() []Entry {
 			ID:           sort_sequence.ID,
 			ManifestJSON: sort_sequence.ManifestJSON,
 			I18nEN:       sort_sequence.I18nEN,
+		},
+		{
+			ID:           worked_example.ID,
+			ManifestJSON: worked_example.ManifestJSON,
+			I18nEN:       worked_example.I18nEN,
 		},
 	}
 }
