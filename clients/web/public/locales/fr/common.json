@@ -2271,5 +2271,12 @@
   "course.features.contentTools.save": "Enregistrer les paramètres des outils de contenu",
   "course.features.contentTools.saving": "Enregistrement…",
   "course.features.contentTools.settingsSaved": "Paramètres des outils de contenu enregistrés.",
-  "course.features.contentTools.settingsSaveError": "Impossible d’enregistrer les paramètres des outils de contenu."
+  "course.features.contentTools.settingsSaveError": "Impossible d’enregistrer les paramètres des outils de contenu.",
+  "course.features.contentTools.linkIngestionMode": "Link ingestion",
+  "course.features.contentTools.linkIngestionPublic": "Public hosts",
+  "course.features.contentTools.linkIngestionAllowlist": "Allowlist only",
+  "course.features.contentTools.linkIngestionOff": "Off",
+  "course.features.contentTools.linkHostAllowlist": "Allowed hosts (comma-separated)",
+  "course.features.contentTools.dailyAiCallsPerUser": "Daily AI calls per user",
+  "course.features.contentTools.monthlyAiTokenBudget": "Monthly AI token budget (0 = unlimited)"
 }

@@ -2271,5 +2271,12 @@
   "course.features.contentTools.save": "حفظ إعدادات أدوات المحتوى",
   "course.features.contentTools.saving": "جارٍ الحفظ…",
   "course.features.contentTools.settingsSaved": "تم حفظ إعدادات أدوات المحتوى.",
-  "course.features.contentTools.settingsSaveError": "تعذّر حفظ إعدادات أدوات المحتوى."
+  "course.features.contentTools.settingsSaveError": "تعذّر حفظ إعدادات أدوات المحتوى.",
+  "course.features.contentTools.linkIngestionMode": "Link ingestion",
+  "course.features.contentTools.linkIngestionPublic": "Public hosts",
+  "course.features.contentTools.linkIngestionAllowlist": "Allowlist only",
+  "course.features.contentTools.linkIngestionOff": "Off",
+  "course.features.contentTools.linkHostAllowlist": "Allowed hosts (comma-separated)",
+  "course.features.contentTools.dailyAiCallsPerUser": "Daily AI calls per user",
+  "course.features.contentTools.monthlyAiTokenBudget": "Monthly AI token budget (0 = unlimited)"
 }

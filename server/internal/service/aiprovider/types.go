@@ -118,11 +118,12 @@ type Settings struct {
 
 // CapabilitySet describes which operations a provider supports.
 type CapabilitySet struct {
-	Complete bool
-	Stream   bool
-	Vision   bool
-	Embed    bool
-	Image    bool
+	Complete    bool
+	Stream      bool
+	Vision      bool
+	Embed       bool
+	Image       bool
+	ToolCalling bool // optional; CT.6 uses orchestrated fallback when false
 }
 
 // Operation labels for metrics (AP.1 observability).

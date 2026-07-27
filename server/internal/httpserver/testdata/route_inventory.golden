@@ -679,6 +679,10 @@ GET	/api/v1/courses/{course_code}/content-pages/{item_id}/markups	anonymous
 POST	/api/v1/courses/{course_code}/content-pages/{item_id}/markups	anonymous
 DELETE	/api/v1/courses/{course_code}/content-pages/{item_id}/markups/{markup_id}	anonymous
 GET	/api/v1/courses/{course_code}/content-tools/catalog	session
+POST	/api/v1/courses/{course_code}/content-tools/context/preview	session
+GET	/api/v1/courses/{course_code}/content-tools/context/sources	session
+PATCH	/api/v1/courses/{course_code}/content-tools/context/sources/{source_id}	session
+POST	/api/v1/courses/{course_code}/content-tools/context/sources/{source_id}/reingest	session
 GET	/api/v1/courses/{course_code}/content-tools/instances	session
 POST	/api/v1/courses/{course_code}/content-tools/instances	session
 DELETE	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	session

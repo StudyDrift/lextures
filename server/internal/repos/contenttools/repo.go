@@ -13,12 +13,16 @@ import (
 
 // SettingsRow is a course.content_tool_settings row.
 type SettingsRow struct {
-	CourseID            uuid.UUID
-	AllowedToolIDs      []string
-	StudentResetAllowed bool
-	MaxInstancesPerItem int16
-	UpdatedBy           *uuid.UUID
-	UpdatedAt           time.Time
+	CourseID             uuid.UUID
+	AllowedToolIDs       []string
+	StudentResetAllowed  bool
+	MaxInstancesPerItem  int16
+	MonthlyAITokenBudget int64
+	DailyAICallsPerUser  int
+	LinkIngestionMode    string
+	LinkHostAllowlist    []string
+	UpdatedBy            *uuid.UUID
+	UpdatedAt            time.Time
 }
 
 // InstanceRow is a course.content_tool_instances row.
@@ -71,11 +75,33 @@ const (
 // DefaultSettings returns in-memory defaults matching the migration.
 func DefaultSettings(courseID uuid.UUID) SettingsRow {
 	return SettingsRow{
-		CourseID:            courseID,
-		AllowedToolIDs:      []string{},
-		StudentResetAllowed: false,
-		MaxInstancesPerItem: 50,
-		UpdatedAt:           time.Now().UTC(),
+		CourseID:             courseID,
+		AllowedToolIDs:       []string{},
+		StudentResetAllowed:  false,
+		MaxInstancesPerItem:  50,
+		MonthlyAITokenBudget: 0,
+		DailyAICallsPerUser:  50,
+		LinkIngestionMode:    "public",
+		LinkHostAllowlist:    []string{},
+		UpdatedAt:            time.Now().UTC(),
+	}
+}
+
+func normalizeSettings(r *SettingsRow) {
+	if r.AllowedToolIDs == nil {
+		r.AllowedToolIDs = []string{}
+	}
+	if r.LinkHostAllowlist == nil {
+		r.LinkHostAllowlist = []string{}
+	}
+	if r.LinkIngestionMode == "" {
+		r.LinkIngestionMode = "public"
+	}
+	if r.DailyAICallsPerUser <= 0 {
+		r.DailyAICallsPerUser = 50
+	}
+	if r.MaxInstancesPerItem <= 0 {
+		r.MaxInstancesPerItem = 50
 	}
 }
 
@@ -84,11 +110,15 @@ func GetSettings(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (*
 	var r SettingsRow
 	var updatedBy *uuid.UUID
 	err := pool.QueryRow(ctx, `
-SELECT course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item, updated_by, updated_at
+SELECT course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item,
+       monthly_ai_token_budget, daily_ai_calls_per_user, link_ingestion_mode, link_host_allowlist,
+       updated_by, updated_at
 FROM course.content_tool_settings
 WHERE course_id = $1
 `, courseID).Scan(
-		&r.CourseID, &r.AllowedToolIDs, &r.StudentResetAllowed, &r.MaxInstancesPerItem, &updatedBy, &r.UpdatedAt,
+		&r.CourseID, &r.AllowedToolIDs, &r.StudentResetAllowed, &r.MaxInstancesPerItem,
+		&r.MonthlyAITokenBudget, &r.DailyAICallsPerUser, &r.LinkIngestionMode, &r.LinkHostAllowlist,
+		&updatedBy, &r.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
@@ -97,45 +127,50 @@ WHERE course_id = $1
 		return nil, err
 	}
 	r.UpdatedBy = updatedBy
-	if r.AllowedToolIDs == nil {
-		r.AllowedToolIDs = []string{}
-	}
+	normalizeSettings(&r)
 	return &r, nil
 }
 
 // UpsertSettings inserts or updates settings for a course.
 func UpsertSettings(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, s SettingsRow, actorUserID uuid.UUID) (*SettingsRow, error) {
+	normalizeSettings(&s)
 	maxInst := s.MaxInstancesPerItem
-	if maxInst <= 0 {
-		maxInst = 50
-	}
 	allowed := s.AllowedToolIDs
-	if allowed == nil {
-		allowed = []string{}
-	}
+	allowlist := s.LinkHostAllowlist
+	mode := s.LinkIngestionMode
+	daily := s.DailyAICallsPerUser
 	var r SettingsRow
 	var updatedBy *uuid.UUID
 	err := pool.QueryRow(ctx, `
 INSERT INTO course.content_tool_settings (
-  course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item, updated_by, updated_at
-) VALUES ($1, $2, $3, $4, $5, NOW())
+  course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item,
+  monthly_ai_token_budget, daily_ai_calls_per_user, link_ingestion_mode, link_host_allowlist,
+  updated_by, updated_at
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
 ON CONFLICT (course_id) DO UPDATE SET
   allowed_tool_ids = EXCLUDED.allowed_tool_ids,
   student_reset_allowed = EXCLUDED.student_reset_allowed,
   max_instances_per_item = EXCLUDED.max_instances_per_item,
+  monthly_ai_token_budget = EXCLUDED.monthly_ai_token_budget,
+  daily_ai_calls_per_user = EXCLUDED.daily_ai_calls_per_user,
+  link_ingestion_mode = EXCLUDED.link_ingestion_mode,
+  link_host_allowlist = EXCLUDED.link_host_allowlist,
   updated_by = EXCLUDED.updated_by,
   updated_at = NOW()
-RETURNING course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item, updated_by, updated_at
-`, courseID, allowed, s.StudentResetAllowed, maxInst, actorUserID).Scan(
-		&r.CourseID, &r.AllowedToolIDs, &r.StudentResetAllowed, &r.MaxInstancesPerItem, &updatedBy, &r.UpdatedAt,
+RETURNING course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item,
+          monthly_ai_token_budget, daily_ai_calls_per_user, link_ingestion_mode, link_host_allowlist,
+          updated_by, updated_at
+`, courseID, allowed, s.StudentResetAllowed, maxInst,
+		s.MonthlyAITokenBudget, daily, mode, allowlist, actorUserID).Scan(
+		&r.CourseID, &r.AllowedToolIDs, &r.StudentResetAllowed, &r.MaxInstancesPerItem,
+		&r.MonthlyAITokenBudget, &r.DailyAICallsPerUser, &r.LinkIngestionMode, &r.LinkHostAllowlist,
+		&updatedBy, &r.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
 	r.UpdatedBy = updatedBy
-	if r.AllowedToolIDs == nil {
-		r.AllowedToolIDs = []string{}
-	}
+	normalizeSettings(&r)
 	return &r, nil
 }
 

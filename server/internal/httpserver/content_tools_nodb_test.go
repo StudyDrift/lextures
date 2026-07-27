@@ -59,6 +59,10 @@ func TestContentTools_AuthoringRoutesRegistered_NoDB(t *testing.T) {
 		{http.MethodGet, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/usage"},
 		{http.MethodPost, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/submit"},
 		{http.MethodPost, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/actions/grade"},
+		{http.MethodGet, "/api/v1/courses/demo/content-tools/context/sources?itemId=00000000-0000-0000-0000-000000000001"},
+		{http.MethodPost, "/api/v1/courses/demo/content-tools/context/preview"},
+		{http.MethodPost, "/api/v1/courses/demo/content-tools/context/sources/00000000-0000-0000-0000-000000000001/reingest"},
+		{http.MethodPatch, "/api/v1/courses/demo/content-tools/context/sources/00000000-0000-0000-0000-000000000001"},
 	} {
 		req := httptest.NewRequest(path.method, path.url, nil)
 		rr := httptest.NewRecorder()

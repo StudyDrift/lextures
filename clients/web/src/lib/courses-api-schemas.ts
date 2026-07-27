@@ -1013,12 +1013,38 @@ export const adaptiveContentSettingsSchema = z.object({
   maxPrewarmVariants: z.number().optional(),
 })
 
-/** CT.1 — Content Tools course settings. */
+/** CT.1 / CT.6 — Content Tools course settings. */
 export const contentToolsSettingsSchema = z.object({
   allowedToolIds: z.array(z.string()),
   studentResetAllowed: z.boolean(),
   maxInstancesPerItem: z.number(),
+  monthlyAiTokenBudget: z.number().default(0),
+  dailyAiCallsPerUser: z.number().default(50),
+  linkIngestionMode: z.enum(['off', 'allowlist', 'public']).default('public'),
+  linkHostAllowlist: z.array(z.string()).default([]),
   updatedAt: z.string().optional(),
+})
+
+/** CT.6 — Instructor context sources. */
+export const contentToolsContextSourceSchema = z.object({
+  id: z.string(),
+  sourceId: z.string().optional().nullable(),
+  url: z.string(),
+  title: z.string().optional().default(''),
+  host: z.string().optional().default(''),
+  origin: z.string(),
+  status: z.string(),
+  error: z.string().optional().default(''),
+  fetchedAt: z.string().optional().nullable(),
+  byteSize: z.number().optional().nullable(),
+  excluded: z.boolean(),
+  extractedText: z.string().optional().default(''),
+  extractionQuality: z.string().optional().default(''),
+})
+
+export const contentToolsContextSourcesSchema = z.object({
+  items: z.array(contentToolsContextSourceSchema),
+  totalTokens: z.number(),
 })
 
 export const contentToolsCatalogToolSchema = z.object({

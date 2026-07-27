@@ -1,6 +1,6 @@
 # CT.6 — Content Tools: Grounded Context Service & Web-Link Ingestion
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) |
 | **Severity** | BLOCKER (for every AI-backed tool) |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | AI platform team |
 | **Depends on** | CT.1, CT.3 |
@@ -401,8 +401,8 @@ is a labelled dialog; citation links carry descriptive accessible names.
 - External standards: RFC 9309 (robots.txt), RFC 7232 (conditional requests), RFC 3986,
   OWASP SSRF Prevention Cheat Sheet, OWASP LLM Top 10 (LLM01 prompt injection).
 - Related plans: [CT.3](CT.3-student-runtime-and-state-persistence.md),
-  [CT.8](CT.8-governance-safety-privacy-accessibility.md),
-  [CT.10](CT.10-tool-ask-questions.md),
-  [AC.3 content generation](../../completed/adaptive/AC.3-content-generation-engine.md),
-  [S06 DPIA](../standards/S06-dpia-pia-algorithmic-impact.md),
-  [S13 EU AI Act](../standards/S13-eu-ai-act-high-risk.md).
+  [CT.8](../../plan/content_tools/CT.8-governance-safety-privacy-accessibility.md),
+  [CT.10](../../plan/content_tools/CT.10-tool-ask-questions.md),
+  [AC.3 content generation](../adaptive/AC.3-content-generation-engine.md),
+  [S06 DPIA](../../plan/standards/S06-dpia-pia-algorithmic-impact.md),
+  [S13 EU AI Act](../../plan/standards/S13-eu-ai-act-high-risk.md).

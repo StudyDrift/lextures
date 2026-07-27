@@ -48,6 +48,16 @@ WHERE id = $1 AND course_id = $2
 	return scanInstance(row)
 }
 
+// GetInstanceByID returns one instance by primary key (CT.6 context assembly).
+func GetInstanceByID(ctx context.Context, pool *pgxpool.Pool, instanceID uuid.UUID) (*InstanceRow, error) {
+	row := pool.QueryRow(ctx, `
+SELECT `+instanceCols+`
+FROM course.content_tool_instances
+WHERE id = $1
+`, instanceID)
+	return scanInstance(row)
+}
+
 // ListInstances returns instances for a course, optionally filtered by item/host/status.
 // A single query — no N+1 (AC-9).
 func ListInstances(

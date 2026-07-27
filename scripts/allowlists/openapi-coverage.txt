@@ -10,4 +10,4 @@
 #
 # Owner: TD.3 / backend platform. Related: make openapi-check, go test ./internal/openapi/
 
-min_documented_paths=252
+min_documented_paths=278

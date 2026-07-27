@@ -163,6 +163,7 @@ func KnownAIFeatureIDs() map[string]struct{} {
 		"ai_study_buddy":                 {},
 		"report_card_comment":            {},
 		"adaptive_content":               {},
+		"content_tool":                   {},
 	}
 }
 

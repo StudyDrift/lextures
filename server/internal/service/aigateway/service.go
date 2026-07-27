@@ -49,6 +49,8 @@ const (
 	FeatureReportCardComment          = "report_card_comment"
 	// FeatureAdaptiveContent is reserved for ACE generation (plan AC.1 / AC.3).
 	FeatureAdaptiveContent = "adaptive_content"
+	// FeatureContentTool is the shared AI feature id for Content Tools grounded calls (CT.6).
+	FeatureContentTool = "content_tool"
 )
 
 // BlockReason explains why a call was blocked.

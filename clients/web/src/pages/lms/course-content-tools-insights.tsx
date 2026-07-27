@@ -7,6 +7,7 @@ import {
   type ContentToolInstance,
 } from '../../lib/courses-api'
 import { ToolResponsesPanel } from '../../components/content-tools/instructor/tool-responses-panel'
+import { SourcesPanel } from '../../components/content-tools/instructor/sources-panel'
 
 type Row = ContentToolInstance & {
   learnersWithState: number
@@ -133,6 +134,13 @@ export default function CourseContentToolsInsights() {
           instanceId={openInstanceId}
           itemId={rows.find((r) => r.id === openInstanceId)?.structureItemId ?? undefined}
           onClose={() => setOpenInstanceId(null)}
+        />
+      ) : null}
+      {openInstanceId && rows.find((r) => r.id === openInstanceId)?.structureItemId ? (
+        <SourcesPanel
+          courseCode={courseCode}
+          itemId={rows.find((r) => r.id === openInstanceId)!.structureItemId!}
+          instanceId={openInstanceId}
         />
       ) : null}
     </div>
