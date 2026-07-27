@@ -11,5 +11,7 @@
 | **CT.7** | [Analytics, insights & gradebook bridge](CT.7-analytics-insights-and-gradebook.md) |
 | **CT.8** | [Governance, safety, privacy & accessibility](CT.8-governance-safety-privacy-accessibility.md) |
 | **CT.9** | [Tool marketplace & third-party tools](CT.9-tool-marketplace-and-third-party-tools.md) |
+| **CT.10** | [Ask Questions — grounded AI Q&A](CT.10-tool-ask-questions.md) |
+| **CT.11** | [Inline Questions — formative checks](CT.11-tool-inline-questions.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

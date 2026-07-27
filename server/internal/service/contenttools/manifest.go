@@ -171,9 +171,10 @@ type A11yDecl struct {
 
 // UIDecl is renderer metadata.
 type UIDecl struct {
-	Renderer string `json:"renderer"`
-	Icon     string `json:"icon"`
-	Group    string `json:"group"`
+	Renderer     string `json:"renderer"`
+	Icon         string `json:"icon"`
+	Group        string `json:"group"`
+	CustomEditor string `json:"customEditor,omitempty"`
 }
 
 // CompiledManifest is a validated manifest with compiled JSON Schemas.

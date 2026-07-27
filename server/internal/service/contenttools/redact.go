@@ -7,23 +7,23 @@ import (
 const sensitiveAnnotation = "x-lex-sensitive"
 
 // RedactSensitiveConfig strips config fields marked "x-lex-sensitive": true in
-// the manifest's configSchema (FR-10). The framework performs stripping; tools
-// must not be trusted to do it.
+// the manifest's configSchema (FR-10), including nested object/array properties.
+// The framework performs stripping; tools must not be trusted to do it.
 func RedactSensitiveConfig(configSchema json.RawMessage, config json.RawMessage) (json.RawMessage, error) {
 	if len(config) == 0 {
 		return json.RawMessage(`{}`), nil
 	}
-	var cfg map[string]any
+	var cfg any
 	if err := json.Unmarshal(config, &cfg); err != nil {
 		return nil, err
 	}
-	sensitive := sensitiveKeys(configSchema)
-	if len(sensitive) == 0 {
-		return config, nil
+	var schema any
+	if len(configSchema) > 0 {
+		if err := json.Unmarshal(configSchema, &schema); err != nil {
+			return nil, err
+		}
 	}
-	for k := range sensitive {
-		delete(cfg, k)
-	}
+	redactBySchema(schema, cfg)
 	out, err := json.Marshal(cfg)
 	if err != nil {
 		return nil, err
@@ -45,26 +45,42 @@ func StripSensitiveSchemaAnnotations(schema json.RawMessage) (json.RawMessage, e
 	return json.Marshal(doc)
 }
 
-func sensitiveKeys(configSchema json.RawMessage) map[string]struct{} {
-	out := map[string]struct{}{}
-	if len(configSchema) == 0 {
-		return out
+// redactBySchema walks schema + value together and deletes sensitive properties.
+func redactBySchema(schema, value any) {
+	sm, ok := schema.(map[string]any)
+	if !ok || value == nil {
+		return
 	}
-	var doc map[string]any
-	if err := json.Unmarshal(configSchema, &doc); err != nil {
-		return out
-	}
-	props, _ := doc["properties"].(map[string]any)
-	for name, prop := range props {
-		pm, ok := prop.(map[string]any)
-		if !ok {
-			continue
+	switch typed := value.(type) {
+	case map[string]any:
+		if props, ok := sm["properties"].(map[string]any); ok {
+			for name, propSchema := range props {
+				pm, ok := propSchema.(map[string]any)
+				if !ok {
+					continue
+				}
+				if flagged, _ := pm[sensitiveAnnotation].(bool); flagged {
+					delete(typed, name)
+					continue
+				}
+				if child, exists := typed[name]; exists {
+					redactBySchema(pm, child)
+				}
+			}
 		}
-		if flagged, _ := pm[sensitiveAnnotation].(bool); flagged {
-			out[name] = struct{}{}
+		// additionalProperties schema (object maps)
+		if add, ok := sm["additionalProperties"].(map[string]any); ok {
+			for _, child := range typed {
+				redactBySchema(add, child)
+			}
+		}
+	case []any:
+		if items, ok := sm["items"].(map[string]any); ok {
+			for _, child := range typed {
+				redactBySchema(items, child)
+			}
 		}
 	}
-	return out
 }
 
 func stripAnnotations(v any) {

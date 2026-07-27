@@ -210,8 +210,20 @@ func aggregateFacets(rows []SummaryRow, toolID string) []FacetDistribution {
 			if !ok || v == nil {
 				continue
 			}
-			key := facetValueKey(v)
-			counts[key]++
+			switch arr := v.(type) {
+			case []any:
+				for _, item := range arr {
+					key := facetValueKey(item)
+					counts[key]++
+				}
+			case []string:
+				for _, item := range arr {
+					counts[item]++
+				}
+			default:
+				key := facetValueKey(v)
+				counts[key]++
+			}
 		}
 		vals := make([]FacetValueCount, 0, len(counts))
 		for k, c := range counts {

@@ -10,6 +10,7 @@ import {
 import { SchemaForm } from './schema-form/schema-form'
 import { validateRequiredFields } from './schema-form/validate'
 import type { JsonSchema, SchemaFieldError } from './schema-form/types'
+import { resolveCustomEditor } from './editors/registry'
 
 export type ToolConfigPanelProps = {
   courseCode: string
@@ -100,6 +101,7 @@ export function ToolConfigPanel({
   const title = t(`contentTools.tools.${instance.toolId}.name`, {
     defaultValue: instance.title || instance.toolId,
   })
+  const CustomEditor = resolveCustomEditor(manifest?.ui?.customEditor)
 
   return (
     <div className="space-y-3" data-content-tool-config={instance.id}>
@@ -143,14 +145,23 @@ export function ToolConfigPanel({
             void save()
           }}
         >
-          <SchemaForm
-            schema={manifest.configSchema as JsonSchema}
-            value={config}
-            onChange={setConfig}
-            errors={errors}
-            disabled={disabled || saving}
-            idPrefix={`tool-config-${instance.id}`}
-          />
+          {CustomEditor ? (
+            <CustomEditor
+              value={config}
+              onChange={setConfig}
+              disabled={disabled || saving}
+              idPrefix={`tool-config-${instance.id}`}
+            />
+          ) : (
+            <SchemaForm
+              schema={manifest.configSchema as JsonSchema}
+              value={config}
+              onChange={setConfig}
+              errors={errors}
+              disabled={disabled || saving}
+              idPrefix={`tool-config-${instance.id}`}
+            />
+          )}
           {saveError ? (
             <p className="text-xs text-rose-600 dark:text-rose-400" role="alert">
               {saveError}

@@ -166,6 +166,25 @@ var (
 		Name:      "content_tool_ask_citations_dropped_total",
 		Help:      "Ask Questions citations dropped because they did not resolve to context segments (CT.10).",
 	})
+
+	inlineQuestionsSubmitsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_submits_total",
+		Help:      "Content tool submit action outcomes by tool_id and outcome (CT.11).",
+	}, []string{"tool_id", "outcome"})
+
+	inlineQuestionsCorrectTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_inline_questions_correct_total",
+		Help:      "Inline Questions correct submissions (CT.11).",
+	})
+
+	inlineQuestionsAttemptHistogram = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_inline_questions_attempt_count",
+		Help:      "Inline Questions attempt count at submit time (CT.11).",
+		Buckets:   []float64{1, 2, 3, 4, 5, 8, 12},
+	})
 )
 
 func registerMetrics() {
@@ -179,6 +198,7 @@ func registerMetrics() {
 			policyDenialsTotal, moderationActionsTotal, contentFilterFlagsTotal,
 			crisisEscalationsTotal, a11yGateFailuresTotal,
 			askQuestionsTurnsTotal, askCitationsDroppedTotal,
+			inlineQuestionsSubmitsTotal, inlineQuestionsCorrectTotal, inlineQuestionsAttemptHistogram,
 		)
 		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
 		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
@@ -190,6 +210,7 @@ func registerMetrics() {
 		contentFilterFlagsTotal.WithLabelValues("_reserved").Add(0)
 		a11yGateFailuresTotal.WithLabelValues("_reserved").Add(0)
 		askQuestionsTurnsTotal.WithLabelValues("_reserved").Add(0)
+		inlineQuestionsSubmitsTotal.WithLabelValues("inline_questions", "_reserved").Add(0)
 	})
 }
 
@@ -396,5 +417,29 @@ func ObserveAskCitationsDropped(n int) {
 		return
 	}
 	askCitationsDroppedTotal.Add(float64(n))
+}
+
+// ObserveInlineQuestionsSubmit increments lextures_content_tool_submits_total{tool_id,outcome}.
+func ObserveInlineQuestionsSubmit(outcome string) {
+	registerMetrics()
+	if outcome == "" {
+		outcome = "_unknown"
+	}
+	inlineQuestionsSubmitsTotal.WithLabelValues("inline_questions", outcome).Inc()
+}
+
+// ObserveInlineQuestionsCorrect increments lextures_content_tool_inline_questions_correct_total.
+func ObserveInlineQuestionsCorrect() {
+	registerMetrics()
+	inlineQuestionsCorrectTotal.Inc()
+}
+
+// ObserveInlineQuestionsAttemptCount observes attempt-count histogram.
+func ObserveInlineQuestionsAttemptCount(n int) {
+	registerMetrics()
+	if n < 0 {
+		return
+	}
+	inlineQuestionsAttemptHistogram.Observe(float64(n))
 }
 
