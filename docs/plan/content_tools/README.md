@@ -123,7 +123,7 @@ Content Tools without enabling, say, the code sandbox.
 
 | ID | Tool | Mechanism it exploits | Severity | Migration? |
 |---|---|---|---|---|
-| **CT.10** | [Ask Questions](CT.10-tool-ask-questions.md) — grounded AI Q&A about *this* activity | Question-asking / just-in-time explanation | BLOCKER | none |
+| **CT.10** | [Ask Questions](../../completed/content_tools/CT.10-tool-ask-questions.md) — grounded AI Q&A about *this* activity | Question-asking / just-in-time explanation | BLOCKER | none |
 | **CT.11** | [Inline Questions](CT.11-tool-inline-questions.md) — 1–2 question check with a correct answer | Retrieval practice + immediate feedback | BLOCKER | none |
 | **CT.12** | [Predict & Reveal](CT.12-tool-predict-and-reveal.md) — commit a prediction + confidence, *then* see the answer | Generation effect / hypercorrection | MAJOR | none |
 | **CT.13** | [Highlight & Annotate](CT.13-tool-highlight-and-annotate.md) — tag passages against a prompt; instructor heat map | Active reading / attention direction | MAJOR | none |

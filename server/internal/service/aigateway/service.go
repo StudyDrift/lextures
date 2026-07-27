@@ -51,6 +51,8 @@ const (
 	FeatureAdaptiveContent = "adaptive_content"
 	// FeatureContentTool is the shared AI feature id for Content Tools grounded calls (CT.6).
 	FeatureContentTool = "content_tool"
+	// FeatureContentToolAsk is the Ask Questions tool feature id (CT.10).
+	FeatureContentToolAsk = "content_tool_ask"
 )
 
 // BlockReason explains why a call was blocked.

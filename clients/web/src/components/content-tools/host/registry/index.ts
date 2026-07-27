@@ -4,6 +4,7 @@ import type { ContentToolRendererProps } from '../runtime-contract'
 type RendererComponent = ComponentType<ContentToolRendererProps>
 
 const RENDERERS: Record<string, LazyExoticComponent<RendererComponent>> = {
+  ask_questions: lazy(() => import('../../tools/ask_questions/renderer')),
   noop_probe: lazy(() => import('../../tools/noop_probe/renderer')),
 }
 

@@ -8,6 +8,10 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/lextures/lextures/server/internal/service/aigateway"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 // ActionContext is the server-side context passed to action handlers.
@@ -24,6 +28,14 @@ type ActionContext struct {
 	Status       string
 	Revision     int64
 	Input        json.RawMessage
+
+	// Optional AI runtime deps for AI-capable actions (CT.10+).
+	Pool         *pgxpool.Pool
+	OrgID        *uuid.UUID
+	Completer    aiprovider.Completer
+	GatewayCfg   aigateway.Config
+	Model        string
+	ReadingLevel string
 }
 
 // ActionResult is returned by an action handler.

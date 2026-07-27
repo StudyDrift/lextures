@@ -9,6 +9,7 @@ import (
 	ctmodel "github.com/lextures/lextures/server/internal/models/contenttools"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	ctanalytics "github.com/lextures/lextures/server/internal/service/contenttools/analytics"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/ask_questions"
 )
 
 const (
@@ -94,10 +95,55 @@ func (d Deps) buildInstanceAnalytics(ctx context.Context, courseID, instanceID u
 			Reason:       string(n.Reason),
 		})
 	}
+	if inst.ToolID == "ask_questions" && !agg.Suppressed {
+		d.attachAskQuestionsThemes(ctx, instanceID, &ia)
+	}
 	if suppressSmallN {
 		ctanalytics.DefaultCache().Set(cacheKey+":sup", ia)
 	} else {
 		ctanalytics.DefaultCache().Set(cacheKey+":full", ia)
 	}
 	return &ia, nil
+}
+
+func (d Deps) attachAskQuestionsThemes(ctx context.Context, instanceID uuid.UUID, ia *ctmodel.InstanceAnalytics) {
+	if ia == nil || d.Pool == nil {
+		return
+	}
+	themeKey := ctanalytics.CacheKeyInstance(instanceID.String()) + ":ask_themes"
+	if cached, ok := ctanalytics.DefaultCache().Get(themeKey); ok {
+		if themes, ok := cached.([]ctmodel.AskQuestionsTheme); ok {
+			ia.AskQuestionsThemes = themes
+			total := 0
+			for _, t := range themes {
+				total += t.Count
+			}
+			ia.TotalQuestions = &total
+			return
+		}
+	}
+	raws, err := ctrepo.ListEnrollmentStateJSONForInstance(ctx, d.Pool, instanceID)
+	if err != nil {
+		return
+	}
+	states := make([]ask_questions.State, 0, len(raws))
+	for _, raw := range raws {
+		states = append(states, ask_questions.ParseState(raw))
+	}
+	questions := ask_questions.CollectUserQuestions(states)
+	clusters := ask_questions.ClusterQuestions(questions, 8)
+	themes := make([]ctmodel.AskQuestionsTheme, 0, len(clusters))
+	total := 0
+	for _, c := range clusters {
+		total += c.Count
+		themes = append(themes, ctmodel.AskQuestionsTheme{
+			Theme:                  c.Theme,
+			Count:                  c.Count,
+			RepresentativeExamples: c.RepresentativeExamples,
+		})
+	}
+	ia.AskQuestionsThemes = themes
+	ia.TotalQuestions = &total
+	// Cache themes separately; AggregateCache TTL is ~60s which is within the 15m plan budget.
+	ctanalytics.DefaultCache().Set(themeKey, themes)
 }

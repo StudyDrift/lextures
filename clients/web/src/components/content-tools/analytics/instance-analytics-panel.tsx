@@ -130,6 +130,35 @@ export function InstanceAnalyticsPanel({
               </div>
             ) : null}
 
+            {!data.suppressed && data.askQuestionsThemes && data.askQuestionsThemes.length > 0 ? (
+              <div data-testid="ask-questions-themes">
+                <h3 className="mb-2 text-sm font-medium text-slate-800 dark:text-neutral-100">
+                  {t('contentTools.tools.ask_questions.themesTitle')}
+                  {typeof data.totalQuestions === 'number'
+                    ? ` (${data.totalQuestions})`
+                    : null}
+                </h3>
+                <ul className="space-y-2">
+                  {data.askQuestionsThemes.map((theme) => (
+                    <li
+                      key={theme.theme}
+                      className="rounded border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700"
+                    >
+                      <div className="font-medium text-slate-900 dark:text-neutral-100">
+                        {theme.theme}{' '}
+                        <span className="text-xs font-normal text-slate-500">×{theme.count}</span>
+                      </div>
+                      <ul className="mt-1 list-disc ps-4 text-xs text-slate-600 dark:text-neutral-300">
+                        {theme.representativeExamples.map((ex) => (
+                          <li key={ex}>{ex}</li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
             <div>
               <h3 className="mb-2 text-sm font-medium text-slate-800 dark:text-neutral-100">
                 {t('contentTools.analytics.needsAttention')}

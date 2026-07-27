@@ -175,6 +175,7 @@ func instanceToAPI(row ctrepo.InstanceRow, config json.RawMessage) ctmodel.ToolI
 		}
 		out.Deprecated = m.Deprecated
 		out.SunsetAt = m.SunsetAt
+		out.Capabilities = append([]string{}, m.Capabilities...)
 	} else if strings.Contains(row.ToolID, ".") {
 		// CT.9: third-party tools always mount in iframe (FR-10).
 		out.SandboxMode = ctsvc.SandboxIframe
