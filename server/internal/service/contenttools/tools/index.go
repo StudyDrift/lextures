@@ -7,6 +7,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/ask_questions"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_questions"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/noop_probe"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/predict_reveal"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/sandbox_probe"
 )
 
@@ -34,6 +35,11 @@ func All() []Entry {
 			ID:           noop_probe.ID,
 			ManifestJSON: noop_probe.ManifestJSON,
 			I18nEN:       noop_probe.I18nEN,
+		},
+		{
+			ID:           predict_reveal.ID,
+			ManifestJSON: predict_reveal.ManifestJSON,
+			I18nEN:       predict_reveal.I18nEN,
 		},
 		{
 			ID:           sandbox_probe.ID,

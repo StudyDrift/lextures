@@ -13,5 +13,6 @@
 | **CT.9** | [Tool marketplace & third-party tools](CT.9-tool-marketplace-and-third-party-tools.md) |
 | **CT.10** | [Ask Questions — grounded AI Q&A](CT.10-tool-ask-questions.md) |
 | **CT.11** | [Inline Questions — formative checks](CT.11-tool-inline-questions.md) |
+| **CT.12** | [Predict & Reveal — commit then reveal](CT.12-tool-predict-and-reveal.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

@@ -185,6 +185,25 @@ var (
 		Help:      "Inline Questions attempt count at submit time (CT.11).",
 		Buckets:   []float64{1, 2, 3, 4, 5, 8, 12},
 	})
+
+	predictRevealCommitsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_commits_total",
+		Help:      "Content tool commit action outcomes by tool_id and outcome (CT.12).",
+	}, []string{"tool_id", "outcome"})
+
+	predictRevealConfidentlyWrongTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_predict_reveal_confidently_wrong_total",
+		Help:      "Predict & Reveal commits that were confidently wrong (CT.12).",
+	})
+
+	predictRevealConfidenceHistogram = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_predict_reveal_confidence",
+		Help:      "Predict & Reveal normalized confidence at commit (CT.12).",
+		Buckets:   []float64{0, 0.25, 0.5, 0.75, 1},
+	})
 )
 
 func registerMetrics() {
@@ -199,6 +218,7 @@ func registerMetrics() {
 			crisisEscalationsTotal, a11yGateFailuresTotal,
 			askQuestionsTurnsTotal, askCitationsDroppedTotal,
 			inlineQuestionsSubmitsTotal, inlineQuestionsCorrectTotal, inlineQuestionsAttemptHistogram,
+			predictRevealCommitsTotal, predictRevealConfidentlyWrongTotal, predictRevealConfidenceHistogram,
 		)
 		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
 		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
@@ -211,6 +231,7 @@ func registerMetrics() {
 		a11yGateFailuresTotal.WithLabelValues("_reserved").Add(0)
 		askQuestionsTurnsTotal.WithLabelValues("_reserved").Add(0)
 		inlineQuestionsSubmitsTotal.WithLabelValues("inline_questions", "_reserved").Add(0)
+		predictRevealCommitsTotal.WithLabelValues("predict_reveal", "_reserved").Add(0)
 	})
 }
 
@@ -441,5 +462,26 @@ func ObserveInlineQuestionsAttemptCount(n int) {
 		return
 	}
 	inlineQuestionsAttemptHistogram.Observe(float64(n))
+}
+
+// ObservePredictRevealCommit increments lextures_content_tool_commits_total{tool_id,outcome}.
+func ObservePredictRevealCommit(outcome string) {
+	registerMetrics()
+	if outcome == "" {
+		outcome = "_unknown"
+	}
+	predictRevealCommitsTotal.WithLabelValues("predict_reveal", outcome).Inc()
+}
+
+// ObservePredictRevealConfidentlyWrong increments confidently-wrong counter.
+func ObservePredictRevealConfidentlyWrong() {
+	registerMetrics()
+	predictRevealConfidentlyWrongTotal.Inc()
+}
+
+// ObservePredictRevealConfidence observes normalized confidence histogram.
+func ObservePredictRevealConfidence(norm float64) {
+	registerMetrics()
+	predictRevealConfidenceHistogram.Observe(norm)
 }
 

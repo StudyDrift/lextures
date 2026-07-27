@@ -1,6 +1,6 @@
 # CT.12 — Tool: Predict & Reveal (commit a prediction, rate confidence, then see the answer)
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Assessment team |
 | **Depends on** | CT.1, CT.2, CT.3 |
@@ -258,6 +258,6 @@ and deferred.
   `server/internal/service/misconception/`, `clients/web/src/components/content-tools/`.
 - External standards: WCAG 2.1 AA; learning-science basis — generation effect, hypercorrection effect,
   predict-observe-explain (White & Gunstone).
-- Related plans: [CT.11](CT.11-tool-inline-questions.md), [CT.21](CT.21-tool-class-pulse.md),
+- Related plans: [CT.11](CT.11-tool-inline-questions.md), [CT.21](../../plan/content_tools/CT.21-tool-class-pulse.md),
   [CT.7](CT.7-analytics-insights-and-gradebook.md),
-  [1.10 misconception detection](../../completed/01-adaptive-learning-core/).
+  [1.10 misconception detection](../01-adaptive-learning-core/).

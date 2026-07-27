@@ -10,6 +10,7 @@ import (
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	ctanalytics "github.com/lextures/lextures/server/internal/service/contenttools/analytics"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/ask_questions"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/predict_reveal"
 )
 
 const (
@@ -98,6 +99,9 @@ func (d Deps) buildInstanceAnalytics(ctx context.Context, courseID, instanceID u
 	if inst.ToolID == "ask_questions" && !agg.Suppressed {
 		d.attachAskQuestionsThemes(ctx, instanceID, &ia)
 	}
+	if inst.ToolID == predict_reveal.ID && !agg.Suppressed {
+		d.attachPredictRevealCalibration(ctx, instanceID, &ia)
+	}
 	if suppressSmallN {
 		ctanalytics.DefaultCache().Set(cacheKey+":sup", ia)
 	} else {
@@ -146,4 +150,42 @@ func (d Deps) attachAskQuestionsThemes(ctx context.Context, instanceID uuid.UUID
 	ia.TotalQuestions = &total
 	// Cache themes separately; AggregateCache TTL is ~60s which is within the 15m plan budget.
 	ctanalytics.DefaultCache().Set(themeKey, themes)
+}
+
+func (d Deps) attachPredictRevealCalibration(ctx context.Context, instanceID uuid.UUID, ia *ctmodel.InstanceAnalytics) {
+	if ia == nil || d.Pool == nil {
+		return
+	}
+	raws, err := ctrepo.ListEnrollmentStateJSONForInstance(ctx, d.Pool, instanceID)
+	if err != nil {
+		return
+	}
+	rows := make([]struct {
+		Bucket  string
+		Correct bool
+	}, 0, len(raws))
+	for _, raw := range raws {
+		st := predict_reveal.ParseState(raw)
+		if !st.IsCommitted() || st.ConfidenceBucket == "" || st.Correct == nil {
+			continue
+		}
+		rows = append(rows, struct {
+			Bucket  string
+			Correct bool
+		}{Bucket: st.ConfidenceBucket, Correct: *st.Correct})
+	}
+	cells := predict_reveal.BuildCalibrationMatrix(rows)
+	if len(cells) == 0 {
+		return
+	}
+	out := make([]ctmodel.CalibrationCell, 0, len(cells))
+	for _, c := range cells {
+		out = append(out, ctmodel.CalibrationCell{
+			ConfidenceBucket: c.ConfidenceBucket,
+			Correct:          c.Correct,
+			Count:            c.Count,
+			Highlight:        c.Highlight,
+		})
+	}
+	ia.CalibrationMatrix = out
 }

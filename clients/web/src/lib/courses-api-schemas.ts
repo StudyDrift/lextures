@@ -1075,6 +1075,16 @@ export const contentToolInstanceAnalyticsSchema = z.object({
     )
     .optional(),
   totalQuestions: z.number().nullable().optional(),
+  calibrationMatrix: z
+    .array(
+      z.object({
+        confidenceBucket: z.string(),
+        correct: z.boolean(),
+        count: z.number(),
+        highlight: z.boolean(),
+      }),
+    )
+    .optional(),
 })
 
 export const contentToolPageAnalyticsSchema = z.object({

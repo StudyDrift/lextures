@@ -4545,6 +4545,33 @@
       }
     },
     {
+      "id": "CT.12",
+      "path": "docs/completed/content_tools/CT.12-tool-predict-and-reveal.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit→reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
+      "owner": "Assessment",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-predict-reveal.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); commit gate via CT.3 actions; calibration facets via CT.7; open-text filter via CT.8; reset via CT.4."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

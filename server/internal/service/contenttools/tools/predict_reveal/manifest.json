@@ -1,0 +1,164 @@
+{
+  "id": "predict_reveal",
+  "version": "1.0.0",
+  "name": "contentTools.tools.predict_reveal.name",
+  "category": "reflect",
+  "capabilities": ["state", "aggregate"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["question", "reveal"],
+    "properties": {
+      "question": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Prompt shown before the learner commits a prediction"
+      },
+      "mode": {
+        "type": "string",
+        "enum": ["choice", "open"],
+        "default": "choice"
+      },
+      "outcomes": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 8,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "text"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "text": { "type": "string", "minLength": 1 },
+            "correct": {
+              "type": "boolean",
+              "x-lex-sensitive": true
+            }
+          }
+        }
+      },
+      "openPlaceholder": { "type": "string" },
+      "confidenceScale": {
+        "type": "string",
+        "enum": ["none", "three", "five", "percent"],
+        "default": "three"
+      },
+      "confidenceRequired": {
+        "type": "boolean",
+        "default": true
+      },
+      "reveal": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["markdown"],
+        "x-lex-sensitive": true,
+        "properties": {
+          "markdown": { "type": "string", "minLength": 1 },
+          "imageUrl": { "type": "string" }
+        }
+      },
+      "reflectionPrompt": { "type": "string" },
+      "showPeerResults": {
+        "type": "boolean",
+        "default": false
+      },
+      "confidenceLabels": {
+        "type": "object",
+        "additionalProperties": { "type": "string" },
+        "description": "Optional instructor overrides for confidence radio labels"
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "prediction": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "outcomeId": { "type": "string" },
+          "text": { "type": "string" }
+        }
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "confidenceBucket": { "type": "string" },
+      "committedAt": { "type": "string" },
+      "revealedAt": { "type": "string" },
+      "correct": { "type": "boolean" },
+      "reflection": { "type": "string" },
+      "draft": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "outcomeId": { "type": "string" },
+          "text": { "type": "string" },
+          "confidence": { "type": "number" }
+        }
+      }
+    }
+  },
+  "scoring": { "mode": "none" },
+  "storage": { "maxStateBytes": 8000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "form",
+    "wcagNotes": "Prediction and confidence use fieldset/legend; reveal heading receives focus; announced politely; calibration matrix has a table alternative."
+  },
+  "dataSheet": {
+    "collects": {
+      "prediction": {
+        "purpose": "Learner prediction (choice outcome or free text) before reveal",
+        "retention": "life_of_enrollment"
+      },
+      "confidence": {
+        "purpose": "Normalized confidence rating for calibration analytics",
+        "retention": "life_of_enrollment"
+      },
+      "reflection": {
+        "purpose": "Optional post-reveal reflection text",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.predict_reveal",
+  "ui": {
+    "renderer": "predict_reveal",
+    "icon": "eye",
+    "group": "reflect",
+    "customEditor": "predict_reveal"
+  },
+  "actions": [
+    {
+      "name": "commit",
+      "rateLimitPerMin": 20,
+      "description": "Commit prediction and confidence, then return reveal content"
+    },
+    {
+      "name": "reflect",
+      "rateLimitPerMin": 20,
+      "description": "Store optional post-reveal reflection"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

@@ -468,6 +468,8 @@ type InstanceAnalytics struct {
 	// AskQuestionsThemes is the CT.10 clustered question themes (anonymized).
 	AskQuestionsThemes []AskQuestionsTheme `json:"askQuestionsThemes,omitempty"`
 	TotalQuestions     *int                `json:"totalQuestions,omitempty"`
+	// CalibrationMatrix is the CT.12 confidence × correctness matrix.
+	CalibrationMatrix []CalibrationCell `json:"calibrationMatrix,omitempty"`
 }
 
 // AskQuestionsTheme is one anonymized question cluster for instructor insights (CT.10 FR-11).
@@ -475,6 +477,14 @@ type AskQuestionsTheme struct {
 	Theme                  string   `json:"theme"`
 	Count                  int      `json:"count"`
 	RepresentativeExamples []string `json:"representativeExamples"`
+}
+
+// CalibrationCell is one confidence × correctness cell (CT.12 FR-8).
+type CalibrationCell struct {
+	ConfidenceBucket string `json:"confidenceBucket"`
+	Correct          bool   `json:"correct"`
+	Count            int    `json:"count"`
+	Highlight        bool   `json:"highlight"`
 }
 
 // PageToolsOverview is GET .../content-tools/analytics?itemId=.

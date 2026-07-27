@@ -7,6 +7,7 @@ const RENDERERS: Record<string, LazyExoticComponent<RendererComponent>> = {
   ask_questions: lazy(() => import('../../tools/ask_questions/renderer')),
   inline_questions: lazy(() => import('../../tools/inline_questions/renderer')),
   noop_probe: lazy(() => import('../../tools/noop_probe/renderer')),
+  predict_reveal: lazy(() => import('../../tools/predict_reveal/renderer')),
 }
 
 export function resolveRenderer(
