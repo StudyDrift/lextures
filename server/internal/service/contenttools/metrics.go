@@ -226,7 +226,7 @@ var (
 	sortSequenceChecksTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "lextures",
 		Name:      "content_tool_checks_total",
-		Help:      "Content tool check action outcomes by tool_id, mode, and outcome (CT.14).",
+		Help:      "Content tool check action outcomes by tool_id, mode, and outcome (CT.14/CT.15).",
 	}, []string{"tool_id", "mode", "outcome"})
 
 	sortSequenceAttemptHistogram = prometheus.NewHistogram(prometheus.HistogramOpts{
@@ -235,6 +235,12 @@ var (
 		Help:      "Sort & Sequence attempt count at check time (CT.14).",
 		Buckets:   []float64{1, 2, 3, 4, 5, 8, 12},
 	})
+
+	diagramHotspotListModeTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_diagram_hotspot_list_mode_total",
+		Help:      "Diagram & Hotspot checks that used list mode (CT.15).",
+	}, []string{"tool_id"})
 )
 
 func registerMetrics() {
@@ -252,6 +258,7 @@ func registerMetrics() {
 			predictRevealCommitsTotal, predictRevealConfidentlyWrongTotal, predictRevealConfidenceHistogram,
 			highlightAnnotateAnnotationsTotal, highlightAnnotateOrphansTotal, highlightAnnotateFilterTotal,
 			sortSequenceChecksTotal, sortSequenceAttemptHistogram,
+			diagramHotspotListModeTotal,
 		)
 		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
 		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
@@ -268,6 +275,8 @@ func registerMetrics() {
 		highlightAnnotateAnnotationsTotal.WithLabelValues("highlight_annotate", "_reserved").Add(0)
 		highlightAnnotateFilterTotal.WithLabelValues("highlight_annotate", "_reserved").Add(0)
 		sortSequenceChecksTotal.WithLabelValues("sort_sequence", "_reserved", "_reserved").Add(0)
+		sortSequenceChecksTotal.WithLabelValues("diagram_hotspot", "_reserved", "_reserved").Add(0)
+		diagramHotspotListModeTotal.WithLabelValues("diagram_hotspot").Add(0)
 	})
 }
 
@@ -567,5 +576,23 @@ func ObserveSortSequenceAttemptCount(n int) {
 		return
 	}
 	sortSequenceAttemptHistogram.Observe(float64(n))
+}
+
+// ObserveDiagramHotspotCheck increments lextures_content_tool_checks_total{tool_id="diagram_hotspot",mode,outcome}.
+func ObserveDiagramHotspotCheck(mode, outcome string) {
+	registerMetrics()
+	if mode == "" {
+		mode = "_unknown"
+	}
+	if outcome == "" {
+		outcome = "_unknown"
+	}
+	sortSequenceChecksTotal.WithLabelValues("diagram_hotspot", mode, outcome).Inc()
+}
+
+// ObserveDiagramHotspotListMode increments list-mode usage counter (CT.15).
+func ObserveDiagramHotspotListMode() {
+	registerMetrics()
+	diagramHotspotListModeTotal.WithLabelValues("diagram_hotspot").Inc()
 }
 

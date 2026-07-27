@@ -152,6 +152,12 @@ func init() {
 		{Key: "placedIn", Label: "contentTools.analytics.facets.placedIn", Type: "string"},
 		{Key: "correct", Label: "contentTools.analytics.facets.correct", Type: "boolean"},
 	})
+	RegisterProjector("diagram_hotspot", projectDiagramHotspot, []FacetSchema{
+		{Key: "regionId", Label: "contentTools.analytics.facets.regionId", Type: "string"},
+		{Key: "assignedTo", Label: "contentTools.analytics.facets.assignedTo", Type: "string"},
+		{Key: "correct", Label: "contentTools.analytics.facets.correct", Type: "boolean"},
+		{Key: "gridCell", Label: "contentTools.analytics.facets.gridCell", Type: "string"},
+	})
 }
 
 func projectNoopProbe(in ProjectInput) Summary {
@@ -392,4 +398,63 @@ func appendUnique(list []string, v string) []string {
 		}
 	}
 	return append(list, v)
+}
+
+func projectDiagramHotspot(in ProjectInput) Summary {
+	s := defaultProject(in)
+	var st struct {
+		Assignments map[string]*string `json:"assignments"`
+		Attempts    []struct {
+			CorrectIDs  []string          `json:"correctIds"`
+			ScorePct    float64           `json:"scorePct"`
+			Assignments map[string]string `json:"assignments"`
+			HeatCells   []string          `json:"heatCells"`
+		} `json:"attempts"`
+		LastPerItem  map[string]bool `json:"lastPerItem"`
+		UsedListMode bool            `json:"usedListMode"`
+		CompletedAt  string          `json:"completedAt"`
+	}
+	_ = json.Unmarshal(in.StateJSON, &st)
+	if len(st.Attempts) > 0 || len(st.Assignments) > 0 {
+		s.Engaged = true
+	}
+	if st.CompletedAt != "" || in.Status == "completed" || in.Status == "submitted" {
+		s.Completed = true
+	}
+
+	regionIDs := make([]string, 0)
+	assignedTo := make([]string, 0)
+	gridCells := make([]string, 0)
+
+	var lastAssignments map[string]string
+	if len(st.Attempts) > 0 {
+		last := st.Attempts[len(st.Attempts)-1]
+		lastAssignments = last.Assignments
+		for _, cell := range last.HeatCells {
+			gridCells = appendUnique(gridCells, cell)
+		}
+		s.Facets["correct"] = last.ScorePct >= 100
+		pct := last.ScorePct
+		s.ScorePct = &pct
+	} else {
+		lastAssignments = map[string]string{}
+		for itemID, regionPtr := range st.Assignments {
+			if regionPtr != nil && *regionPtr != "" {
+				lastAssignments[itemID] = *regionPtr
+			}
+		}
+	}
+
+	for itemID, regionID := range lastAssignments {
+		regionIDs = appendUnique(regionIDs, regionID)
+		assignedTo = appendUnique(assignedTo, itemID+":"+regionID)
+	}
+
+	s.Facets["regionId"] = regionIDs
+	s.Facets["assignedTo"] = assignedTo
+	s.Facets["gridCell"] = gridCells
+	if st.UsedListMode {
+		s.Facets["usedListMode"] = true
+	}
+	return s
 }

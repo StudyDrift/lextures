@@ -1479,6 +1479,41 @@ export function defaultContentToolConfig(toolId: string): Record<string, unknown
       shuffleItems: true,
     }
   }
+  if (toolId === 'diagram_hotspot') {
+    return {
+      mode: 'label',
+      prompt: 'Place each label on the correct region of the diagram.',
+      image: {
+        url: '',
+        alt: '',
+        naturalWidth: 800,
+        naturalHeight: 600,
+      },
+      regions: [
+        {
+          id: 'region_a',
+          label: 'Region A',
+          description: 'Describe this region for learners who cannot see the image.',
+          shape: { kind: 'rect', x: 0.1, y: 0.1, w: 0.3, h: 0.25 },
+        },
+        {
+          id: 'region_b',
+          label: 'Region B',
+          description: 'Describe this second region with enough detail to identify it.',
+          shape: { kind: 'circle', cx: 0.7, cy: 0.5, r: 0.15 },
+        },
+      ],
+      labels: [
+        { id: 'label_a', text: 'Label A' },
+        { id: 'label_b', text: 'Label B' },
+      ],
+      correctRegionByLabel: { label_a: 'region_a', label_b: 'region_b' },
+      attempts: 3,
+      lockCorrect: true,
+      showPerItemCorrectness: true,
+      showRegionOutlines: 'on_focus',
+    }
+  }
   return {}
 }
 

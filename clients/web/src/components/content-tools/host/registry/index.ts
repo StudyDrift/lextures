@@ -5,6 +5,7 @@ type RendererComponent = ComponentType<ContentToolRendererProps>
 
 const RENDERERS: Record<string, LazyExoticComponent<RendererComponent>> = {
   ask_questions: lazy(() => import('../../tools/ask_questions/renderer')),
+  diagram_hotspot: lazy(() => import('../../tools/diagram_hotspot/renderer')),
   highlight_annotate: lazy(() => import('../../tools/highlight_annotate/renderer')),
   inline_questions: lazy(() => import('../../tools/inline_questions/renderer')),
   noop_probe: lazy(() => import('../../tools/noop_probe/renderer')),
