@@ -505,7 +505,8 @@ jobs:
       E2E_WEB_MODE: preview
       E2E_SKIP_DEPS: "1"
       E2E_HEALTH_POLL_SECS: "1"
-      E2E_HEALTH_MAX_ATTEMPTS: "45"
+      # Cold migrate of ~450+ SQL files often exceeds 45s on GitHub runners.
+      E2E_HEALTH_MAX_ATTEMPTS: "90"
       E2E_ADMIN_EMAIL: admin@e2e.test
       CI: "true"
       PAGE_URL: http://localhost:5173/
@@ -647,7 +648,8 @@ jobs:
       E2E_WEB_MODE: preview
       E2E_SKIP_DEPS: "1"
       E2E_HEALTH_POLL_SECS: "1"
-      E2E_HEALTH_MAX_ATTEMPTS: "45"
+      # Cold migrate of ~450+ SQL files often exceeds 45s on GitHub runners.
+      E2E_HEALTH_MAX_ATTEMPTS: "90"
       E2E_ADMIN_EMAIL: admin@e2e.test
       RTL_ENABLED: "true"
       CI: "true"
