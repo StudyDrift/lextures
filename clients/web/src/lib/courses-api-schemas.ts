@@ -1086,6 +1086,11 @@ export const contentToolInstanceSchema = z.object({
   updatedAt: z.string(),
   /** Present when listed with `withState=1`. */
   state: contentToolStateSchema.optional().nullable(),
+  sandboxMode: z.enum(['inprocess', 'iframe']).optional(),
+  contract: z.number().optional(),
+  breakerOpen: z.boolean().optional(),
+  deprecated: z.boolean().optional(),
+  sunsetAt: z.string().optional(),
 })
 
 export const contentToolInstancesListSchema = z.object({

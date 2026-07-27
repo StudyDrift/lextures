@@ -1,0 +1,61 @@
+{
+  "id": "sandbox_probe",
+  "version": "1.0.0",
+  "name": "contentTools.tools.sandbox_probe.name",
+  "category": "assess",
+  "capabilities": ["state", "scoring"],
+  "sandbox": "iframe",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1,
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["prompt"],
+    "properties": {
+      "prompt": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Student-visible prompt"
+      },
+      "answerKey": {
+        "type": "string",
+        "description": "Instructor-only expected answer",
+        "x-lex-sensitive": true
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "response": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "auto", "maxScore": 1 },
+  "storage": { "maxStateBytes": 4096 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "form",
+    "wcagNotes": "CT.5 sandbox canary; iframe isolation probe."
+  },
+  "i18nNamespace": "contentTools.tools.sandbox_probe",
+  "ui": {
+    "renderer": "sandbox_probe",
+    "icon": "shield",
+    "group": "assess"
+  },
+  "actions": [
+    {
+      "name": "grade",
+      "rateLimitPerMin": 30,
+      "description": "Server-side grade against answerKey"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true
+}

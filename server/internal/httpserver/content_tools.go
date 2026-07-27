@@ -103,7 +103,7 @@ func instanceToAPI(row ctrepo.InstanceRow, config json.RawMessage) ctmodel.ToolI
 	if len(config) == 0 {
 		config = json.RawMessage(`{}`)
 	}
-	return ctmodel.ToolInstance{
+	out := ctmodel.ToolInstance{
 		ID:              row.ID,
 		ToolID:          row.ToolID,
 		ToolVersion:     row.ToolVersion,
@@ -114,7 +114,20 @@ func instanceToAPI(row ctrepo.InstanceRow, config json.RawMessage) ctmodel.ToolI
 		Config:          config,
 		Status:          row.Status,
 		UpdatedAt:       row.UpdatedAt,
+		SandboxMode:     ctsvc.SandboxInProcess,
+		Contract:        ctsvc.ContractVersion,
 	}
+	if m := ctsvc.MustDefault().Get(row.ToolID); m != nil {
+		out.SandboxMode = ctsvc.EffectiveSandboxMode(m.Sandbox)
+		out.Contract = m.Contract
+		if out.Contract <= 0 {
+			out.Contract = ctsvc.ContractVersion
+		}
+		out.Deprecated = m.Deprecated
+		out.SunsetAt = m.SunsetAt
+	}
+	out.BreakerOpen = ctsvc.DefaultBreaker().IsOpen(row.ToolID)
+	return out
 }
 
 func (d Deps) handleContentToolsCatalog() http.HandlerFunc {

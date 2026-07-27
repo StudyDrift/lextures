@@ -232,6 +232,7 @@ export default function App() {
             <Route path="/admin/integrations" element={<Pages.IntegrationsAdminPage />} />
             <Route path="/admin/webhooks" element={<Pages.WebhooksAdminPage />} />
             <Route path="/admin/scheduled-jobs" element={<Pages.ScheduledJobsAdminPage />} />
+            <Route path="/admin/content-tools" element={<Pages.ContentToolsAdminPage />} />
             <Route path="/admin/banners" element={<Pages.AdminBanners />} />
             <Route path="/admin/transcripts" element={<Pages.AdminTranscripts />} />
             <Route path="/admin/diplomas" element={<Pages.AdminDiplomas />} />

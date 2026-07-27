@@ -78,7 +78,7 @@ func UpsertState(
 	stateJSON json.RawMessage,
 	expectedRevision int64,
 ) (*StateRow, error) {
-	return UpsertStateWithStatus(ctx, pool, instanceID, enrollmentID, userID, stateJSON, expectedRevision, "in_progress")
+	return UpsertStateWithStatus(ctx, pool, instanceID, enrollmentID, userID, stateJSON, expectedRevision, "in_progress", 0)
 }
 
 // UpsertPreviewState writes instructor preview-as-student state (scope=preview).
@@ -89,7 +89,7 @@ func UpsertPreviewState(
 	stateJSON json.RawMessage,
 	expectedRevision int64,
 ) (*StateRow, error) {
-	return UpsertPreviewStateWithStatus(ctx, pool, instanceID, enrollmentID, userID, stateJSON, expectedRevision, "in_progress")
+	return UpsertPreviewStateWithStatus(ctx, pool, instanceID, enrollmentID, userID, stateJSON, expectedRevision, "in_progress", 0)
 }
 
 // CountInstanceUsage returns distinct enrollments with real state, completed count, and last interaction.

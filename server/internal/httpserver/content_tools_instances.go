@@ -80,7 +80,7 @@ func (d Deps) handleContentToolsInstancesList() http.HandlerFunc {
 				}
 				for i := range out {
 					if st, ok := states[out[i].ID]; ok && st != nil {
-						env := contentToolsStateEnvelope(out[i].ID, st)
+						env := d.contentToolsStateEnvelopeMigrated(r.Context(), out[i].ToolID, out[i].ID, st)
 						out[i].State = &env
 					} else {
 						env := contentToolsEmptyEnvelope(out[i].ID, ctrepo.ScopeEnrollment)

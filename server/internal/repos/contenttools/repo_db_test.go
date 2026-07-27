@@ -302,18 +302,18 @@ func TestDB_StateRevisionConflictAndIdempotency(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	st, err := UpsertStateWithStatus(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"a"}`), 0, "in_progress")
+	st, err := UpsertStateWithStatus(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"a"}`), 0, "in_progress", 0)
 	if err != nil || st == nil {
 		t.Fatalf("first upsert: %v %#v", err, st)
 	}
-	conflict, err := UpsertStateWithStatus(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"b"}`), 0, "in_progress")
+	conflict, err := UpsertStateWithStatus(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"b"}`), 0, "in_progress", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if conflict != nil {
 		t.Fatal("expected revision conflict (nil row)")
 	}
-	ok, err := UpsertStateWithStatus(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"c"}`), st.Revision, "in_progress")
+	ok, err := UpsertStateWithStatus(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"c"}`), st.Revision, "in_progress", 0)
 	if err != nil || ok == nil {
 		t.Fatalf("second upsert: %v %#v", err, ok)
 	}

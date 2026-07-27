@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; frame-ancestors *;"
+    />
+    <title>Sandbox probe</title>
+    <style>
+      :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+      body { margin: 0; padding: 12px; }
+      label { display: block; font-size: 12px; margin-bottom: 4px; }
+      textarea { width: 100%; box-sizing: border-box; min-height: 72px; }
+      button { margin-top: 8px; }
+      .status { font-size: 12px; margin-top: 8px; }
+      .probe-results { font-size: 11px; margin-top: 12px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <p id="prompt"></p>
+      <label for="response">Your answer</label>
+      <textarea id="response"></textarea>
+      <button type="button" id="grade">Check answer</button>
+      <div class="status" id="status" role="status"></div>
+      <pre class="probe-results" id="hostile" data-testid="hostile-results" hidden></pre>
+    </div>
+    <script>
+      const params = new URLSearchParams(location.search)
+      const hostile = params.get('hostile') === '1'
+      let revision = 0
+      let readOnly = false
+      let parentOrigin = '*'
+
+      function post(msg) {
+        parent.postMessage(msg, parentOrigin === 'null' ? '*' : parentOrigin)
+      }
+
+      function resize() {
+        const height = Math.max(document.documentElement.scrollHeight, 120)
+        post({ t: 'resize', v: 1, height })
+      }
+
+      function runHostileProbes() {
+        const results = {}
+        try {
+          results.cookie = String(document.cookie || '')
+        } catch (e) {
+          results.cookie = 'threw:' + (e && e.message)
+        }
+        try {
+          results.parentType = typeof window.parent
+          results.parentAccess = window.parent === window ? 'self' : 'other'
+          // Touching parent DOM should fail without allow-same-origin for opaque sandbox.
+          try {
+            void window.parent.document.body
+            results.parentDom = 'accessible'
+          } catch (e) {
+            results.parentDom = 'blocked'
+          }
+        } catch (e) {
+          results.parent = 'threw'
+        }
+        try {
+          results.localStorage = typeof localStorage
+          localStorage.setItem('ct5', '1')
+          results.localStorageWrite = 'ok'
+        } catch (e) {
+          results.localStorageWrite = 'blocked'
+        }
+        fetch('https://example.com/ct5-disallowed')
+          .then(() => { results.fetch = 'ok' })
+          .catch(() => { results.fetch = 'blocked' })
+          .finally(() => {
+            const el = document.getElementById('hostile')
+            el.hidden = false
+            el.textContent = JSON.stringify(results)
+            el.dataset.cookie = results.cookie === '' || String(results.cookie).startsWith('threw') ? 'blocked' : 'leaked'
+            el.dataset.parentDom = results.parentDom || 'unknown'
+            el.dataset.storage = results.localStorageWrite || 'unknown'
+            el.dataset.fetch = results.fetch || 'pending'
+            post({ t: 'announce', v: 1, message: 'hostile probe complete' })
+            resize()
+          })
+      }
+
+      window.addEventListener('message', (event) => {
+        const msg = event.data
+        if (!msg || msg.v !== 1 || typeof msg.t !== 'string') return
+        if (msg.t === 'init') {
+          parentOrigin = event.origin || 'null'
+          revision = msg.revision || 0
+          readOnly = !!msg.readOnly
+          document.getElementById('prompt').textContent =
+            (msg.config && msg.config.prompt) || 'Sandbox probe'
+          const response = (msg.state && msg.state.response) || ''
+          document.getElementById('response').value = response
+          document.getElementById('response').disabled = readOnly
+          document.getElementById('grade').disabled = readOnly
+          post({ t: 'ready', v: 1, contract: '1' })
+          resize()
+          if (hostile) runHostileProbes()
+        }
+        if (msg.t === 'stateAccepted') {
+          revision = msg.revision
+          document.getElementById('status').textContent = 'Saved'
+        }
+        if (msg.t === 'actionResult') {
+          const correct = msg.result && msg.result.correct
+          document.getElementById('status').textContent = correct ? 'Correct' : 'Try again'
+          document.getElementById('status').dataset.correct = correct ? 'true' : 'false'
+        }
+        if (msg.t === 'error') {
+          document.getElementById('status').textContent = msg.message || 'Error'
+        }
+      })
+
+      document.getElementById('response').addEventListener('input', (e) => {
+        if (readOnly) return
+        post({ t: 'save', v: 1, state: { response: e.target.value }, revision })
+      })
+      document.getElementById('grade').addEventListener('click', () => {
+        if (readOnly) return
+        const id = 'a_' + Math.random().toString(36).slice(2)
+        const response = document.getElementById('response').value
+        post({ t: 'runAction', v: 1, id, action: 'grade', input: { response } })
+      })
+
+      // Announce readiness wait; host sends init.
+      post({ t: 'ready', v: 1, contract: '1' })
+    </script>
+  </body>
+</html>

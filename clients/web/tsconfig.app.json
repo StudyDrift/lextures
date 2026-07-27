@@ -19,7 +19,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "@lextures/tool-sdk": ["./src/lib/tool-sdk/index.ts"],
+      "@lextures/tool-sdk/*": ["./src/lib/tool-sdk/*"]
+    }
   },
   "include": ["src"]
 }

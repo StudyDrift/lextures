@@ -213,6 +213,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAdminRoutes(r)
 	d.registerAdminJobRoutes(r)
 	d.registerAdminSchedulerRoutes(r)
+	d.registerAdminContentToolsRoutes(r)
 	d.registerSCIMRoutes(r)
 	r.Route("/api/v1", func(s chi.Router) { d.registerAccommodationRoutes(s) })
 	d.registerAttendanceRoutes(r)

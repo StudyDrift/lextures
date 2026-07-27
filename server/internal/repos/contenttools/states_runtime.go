@@ -47,6 +47,7 @@ WHERE enrollment_id = $1
 
 // UpsertStateWithStatus is like UpsertState but also applies a target status when provided.
 // expectedRevision is the client's known revision; mismatch returns nil,nil for 409.
+// stateSchemaVersion: when > 0, persisted on insert/update (CT.5 lazy migration); 0 keeps default/existing.
 func UpsertStateWithStatus(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -54,6 +55,7 @@ func UpsertStateWithStatus(
 	stateJSON json.RawMessage,
 	expectedRevision int64,
 	status string,
+	stateSchemaVersion int,
 ) (*StateRow, error) {
 	if len(stateJSON) == 0 {
 		stateJSON = json.RawMessage(`{}`)
@@ -63,16 +65,20 @@ func UpsertStateWithStatus(
 	}
 	row := pool.QueryRow(ctx, `
 INSERT INTO course.content_tool_states (
-  instance_id, enrollment_id, user_id, scope, state_json, revision, status,
+  instance_id, enrollment_id, user_id, scope, state_json, state_schema_version, revision, status,
   interaction_count, first_interacted_at, last_interacted_at,
   completed_at
 ) VALUES (
-  $1, $2, $3, 'enrollment', $4::jsonb, 1, $6,
+  $1, $2, $3, 'enrollment', $4::jsonb, CASE WHEN $7 > 0 THEN $7 ELSE 1 END, 1, $6,
   1, NOW(), NOW(),
   CASE WHEN $6 IN ('submitted', 'completed') THEN NOW() ELSE NULL END
 )
 ON CONFLICT (instance_id, enrollment_id) WHERE (scope = 'enrollment') DO UPDATE SET
   state_json = EXCLUDED.state_json,
+  state_schema_version = CASE
+    WHEN $7 > 0 THEN $7
+    ELSE course.content_tool_states.state_schema_version
+  END,
   revision = course.content_tool_states.revision + 1,
   status = EXCLUDED.status,
   interaction_count = course.content_tool_states.interaction_count + 1,
@@ -86,7 +92,7 @@ ON CONFLICT (instance_id, enrollment_id) WHERE (scope = 'enrollment') DO UPDATE 
   updated_at = NOW()
 WHERE course.content_tool_states.revision = $5
 RETURNING `+stateCols+`
-`, instanceID, enrollmentID, userID, stateJSON, expectedRevision, status)
+`, instanceID, enrollmentID, userID, stateJSON, expectedRevision, status, stateSchemaVersion)
 	return scanState(row)
 }
 
@@ -98,6 +104,7 @@ func UpsertPreviewStateWithStatus(
 	stateJSON json.RawMessage,
 	expectedRevision int64,
 	status string,
+	stateSchemaVersion int,
 ) (*StateRow, error) {
 	if len(stateJSON) == 0 {
 		stateJSON = json.RawMessage(`{}`)
@@ -109,27 +116,36 @@ func UpsertPreviewStateWithStatus(
 	if err != nil {
 		return nil, err
 	}
+	schemaVer := 1
+	if stateSchemaVersion > 0 {
+		schemaVer = stateSchemaVersion
+	}
 	if existing == nil {
 		row := pool.QueryRow(ctx, `
 INSERT INTO course.content_tool_states (
-  instance_id, enrollment_id, user_id, scope, state_json, revision, status,
+  instance_id, enrollment_id, user_id, scope, state_json, state_schema_version, revision, status,
   interaction_count, first_interacted_at, last_interacted_at, completed_at
 ) VALUES (
-  $1, $2, $3, 'preview', $4::jsonb, 1, $5,
+  $1, $2, $3, 'preview', $4::jsonb, $6, 1, $5,
   1, NOW(), NOW(),
   CASE WHEN $5 IN ('submitted', 'completed') THEN NOW() ELSE NULL END
 )
 RETURNING `+stateCols+`
-`, instanceID, enrollmentID, userID, stateJSON, status)
+`, instanceID, enrollmentID, userID, stateJSON, status, schemaVer)
 		return scanState(row)
 	}
 	if existing.Revision != expectedRevision {
 		return nil, nil
 	}
+	keepSchema := existing.StateSchemaVersion
+	if stateSchemaVersion > 0 {
+		keepSchema = stateSchemaVersion
+	}
 	row := pool.QueryRow(ctx, `
 UPDATE course.content_tool_states
 SET
   state_json = $2::jsonb,
+  state_schema_version = $5,
   revision = revision + 1,
   status = $4,
   interaction_count = interaction_count + 1,
@@ -142,7 +158,7 @@ SET
   updated_at = NOW()
 WHERE id = $1 AND revision = $3
 RETURNING `+stateCols+`
-`, existing.ID, stateJSON, expectedRevision, status)
+`, existing.ID, stateJSON, expectedRevision, status, keepSchema)
 	return scanState(row)
 }
 

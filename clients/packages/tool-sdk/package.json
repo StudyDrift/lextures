@@ -1,0 +1,16 @@
+{
+  "name": "@lextures/tool-sdk",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Content Tools SDK. Source lives at clients/web/src/lib/tool-sdk (imported as @lextures/tool-sdk).",
+  "main": "../../web/src/lib/tool-sdk/index.ts",
+  "types": "../../web/src/lib/tool-sdk/index.ts",
+  "exports": {
+    ".": "../../web/src/lib/tool-sdk/index.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

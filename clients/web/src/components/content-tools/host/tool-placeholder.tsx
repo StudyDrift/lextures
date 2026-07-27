@@ -8,6 +8,9 @@ export type ToolPlaceholderReason =
   | 'readOnlyPreview'
   | 'loading'
   | 'error'
+  | 'maintenance'
+  | 'recovery'
+  | 'updateRequired'
 
 export type ToolPlaceholderProps = {
   reason: ToolPlaceholderReason

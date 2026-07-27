@@ -57,6 +57,13 @@ type ToolManifestPublic struct {
 	AutosaveMs      int             `json:"autosaveMs,omitempty"`
 	RespectsDueDate bool            `json:"respectsDueDate,omitempty"`
 	AllowsSelfReset bool            `json:"allowsSelfReset,omitempty"`
+	// CT.5
+	Sandbox             string `json:"sandbox,omitempty"`
+	Deprecated          bool   `json:"deprecated,omitempty"`
+	SunsetAt            string `json:"sunsetAt,omitempty"`
+	Contract            int    `json:"contract,omitempty"`
+	StateSchemaVersion  int    `json:"stateSchemaVersion,omitempty"`
+	ConfigSchemaVersion int    `json:"configSchemaVersion,omitempty"`
 }
 
 // RosterStateRow is one learner on GET .../instances/{id}/states (CT.4).
@@ -212,6 +219,12 @@ type ToolInstance struct {
 	Status          string             `json:"status"`
 	UpdatedAt       time.Time          `json:"updatedAt"`
 	State           *ToolStateEnvelope `json:"state,omitempty"`
+	// CT.5 mount metadata (derived from registry + platform flag).
+	SandboxMode string `json:"sandboxMode,omitempty"`
+	Contract    int    `json:"contract,omitempty"`
+	BreakerOpen bool   `json:"breakerOpen,omitempty"`
+	Deprecated  bool   `json:"deprecated,omitempty"`
+	SunsetAt    string `json:"sunsetAt,omitempty"`
 }
 
 // ToolStateEnvelope is the CT.3 learner state contract.
@@ -227,6 +240,9 @@ type ToolStateEnvelope struct {
 	// Backward-compatible aliases for CT.1/CT.2 clients.
 	StateJSON json.RawMessage `json:"stateJson,omitempty"`
 	Scope     string          `json:"scope,omitempty"`
+	// CT.5
+	StateSchemaVersion int  `json:"stateSchemaVersion,omitempty"`
+	Quarantined        bool `json:"quarantined,omitempty"`
 }
 
 // ToolScore is the optional scored outcome on a state row.
