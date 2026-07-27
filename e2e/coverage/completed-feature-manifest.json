@@ -4707,6 +4707,33 @@
       }
     },
     {
+      "id": "ct-18-worked-example",
+      "path": "docs/completed/content_tools/CT.18-tool-step-through-worked-example.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers sensitive-field redaction, sequential lock, wrong→hint→algebraic normalisation correct, attempt exhaustion→reveal_step, locale numeric input, analytics facets, and UI mount.",
+      "owner": "Assessment",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-worked-example.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); state + prepare/check_step/hint/reveal_step via CT.3; step funnel facets via CT.7; free-text filter via CT.8; reset via CT.4."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
