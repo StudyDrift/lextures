@@ -4653,6 +4653,33 @@
       }
     },
     {
+      "id": "ct-16-parameter-explorer",
+      "path": "docs/completed/content_tools/CT.16-tool-parameter-explorer.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers forged checkpoint rejection, server-validated unlock, noticing-prompt submit/complete, self-reset, reset_defaults, and checkpointId/promptAnswered analytics facets.",
+      "owner": "Web platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-parameter-explorer.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); state + checkpoint/submit_answer actions via CT.3; coverage facets via CT.7; free-text filter via CT.8; reset via CT.4; sandbox HTML canary for CT.5."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

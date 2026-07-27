@@ -115,6 +115,14 @@ func ExtractFreeTextFromState(state json.RawMessage) string {
 			}
 		}
 	}
+	// CT.16 noticing prompt answers (map promptId → text).
+	if answers, ok := obj["answers"].(map[string]any); ok {
+		for _, v := range answers {
+			if s, ok := v.(string); ok && strings.TrimSpace(s) != "" {
+				parts = append(parts, s)
+			}
+		}
+	}
 	return strings.Join(parts, "\n")
 }
 

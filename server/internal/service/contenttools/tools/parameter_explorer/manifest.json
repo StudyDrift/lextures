@@ -1,0 +1,238 @@
+{
+  "id": "parameter_explorer",
+  "version": "1.0.0",
+  "name": "contentTools.tools.parameter_explorer.name",
+  "category": "explore",
+  "capabilities": ["state", "aggregate"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["prompt", "parameters", "model", "outputs"],
+    "properties": {
+      "prompt": { "type": "string", "minLength": 1 },
+      "hint": { "type": "string" },
+      "parameters": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 6,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "kind", "label", "default"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "kind": { "type": "string", "enum": ["number", "boolean", "choice"] },
+            "label": { "type": "string", "minLength": 1 },
+            "unit": { "type": "string" },
+            "min": { "type": "number" },
+            "max": { "type": "number" },
+            "step": { "type": "number", "exclusiveMinimum": 0 },
+            "default": {},
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["value", "label"],
+                "properties": {
+                  "value": { "type": "string" },
+                  "label": { "type": "string" }
+                }
+              }
+            },
+            "description": { "type": "string" }
+          }
+        }
+      },
+      "model": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["preset", "expression"] },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "linear",
+              "quadratic",
+              "exponential",
+              "logistic",
+              "projectile",
+              "supply_demand",
+              "normal",
+              "compound_interest"
+            ]
+          },
+          "bind": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "expression": { "type": "string" },
+          "sweep": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["paramId", "from", "to", "points"],
+            "properties": {
+              "paramId": { "type": "string" },
+              "from": { "type": "number" },
+              "to": { "type": "number" },
+              "points": { "type": "integer", "minimum": 2, "maximum": 500 }
+            }
+          }
+        }
+      },
+      "outputs": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 6,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "label"],
+          "properties": {
+            "kind": { "type": "string", "enum": ["plot", "readout", "table"] },
+            "label": { "type": "string", "minLength": 1 },
+            "yLabel": { "type": "string" },
+            "xLabel": { "type": "string" }
+          }
+        }
+      },
+      "noticingPrompts": {
+        "type": "array",
+        "maxItems": 20,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "text", "kind"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "text": { "type": "string", "minLength": 1 },
+            "kind": { "type": "string", "enum": ["text", "choice"] },
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["value", "label"],
+                "properties": {
+                  "value": { "type": "string" },
+                  "label": { "type": "string" }
+                }
+              }
+            },
+            "required": { "type": "boolean" },
+            "unlockWhen": { "type": "string" }
+          }
+        }
+      },
+      "requireAllCheckpoints": { "type": "boolean" }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "params": {
+        "type": "object",
+        "additionalProperties": {
+          "type": ["number", "boolean", "string"]
+        }
+      },
+      "trace": {
+        "type": "array",
+        "maxItems": 200,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["at", "params"],
+          "properties": {
+            "at": { "type": "string" },
+            "params": {
+              "type": "object",
+              "additionalProperties": {
+                "type": ["number", "boolean", "string"]
+              }
+            }
+          }
+        }
+      },
+      "checkpoints": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      },
+      "answers": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      },
+      "completedAt": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "none" },
+  "storage": { "maxStateBytes": 48000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "application",
+    "wcagNotes": "Native range inputs with paired numeric fields; plot has table equivalent and throttled live announcements; prefers-reduced-motion honored."
+  },
+  "dataSheet": {
+    "collects": {
+      "params": {
+        "purpose": "Current parameter values for the live model",
+        "retention": "life_of_enrollment"
+      },
+      "trace": {
+        "purpose": "Downsampled exploration configurations visited (capped)",
+        "retention": "life_of_enrollment"
+      },
+      "checkpoints": {
+        "purpose": "First-hit timestamps for unlock predicates",
+        "retention": "life_of_enrollment"
+      },
+      "answers": {
+        "purpose": "Responses to guided noticing prompts",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "Complex multi-series plots may need author-written trend guidance; table view is the non-visual equivalent.",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.parameter_explorer",
+  "ui": {
+    "renderer": "parameter_explorer",
+    "icon": "sliders",
+    "group": "explore",
+    "customEditor": "parameter_explorer"
+  },
+  "actions": [
+    {
+      "name": "checkpoint",
+      "rateLimitPerMin": 60,
+      "description": "Validate unlock predicate server-side and record first hit"
+    },
+    {
+      "name": "submit_answer",
+      "rateLimitPerMin": 30,
+      "description": "Screen and store a noticing-prompt answer; may mark complete"
+    },
+    {
+      "name": "reset_defaults",
+      "rateLimitPerMin": 30,
+      "description": "Restore default parameters and clear trace, checkpoints, and answers"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1200,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

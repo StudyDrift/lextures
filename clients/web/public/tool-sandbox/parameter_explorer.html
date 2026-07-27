@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; frame-ancestors *;"
+    />
+    <title>Parameter Explorer</title>
+    <style>
+      :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+      body { margin: 0; padding: 12px; }
+      label { display: block; font-size: 12px; margin: 8px 0 4px; }
+      input[type=range] { width: 100%; }
+      .row { display: flex; gap: 8px; align-items: center; }
+      .row input[type=number] { width: 72px; }
+      table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+      th, td { border: 1px solid #8884; padding: 4px 6px; text-align: left; }
+      .status { font-size: 12px; margin-top: 8px; }
+      button { margin-top: 8px; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <p id="prompt"></p>
+      <div id="controls"></div>
+      <button type="button" id="reset">Reset to defaults</button>
+      <p id="summary" class="status" role="status"></p>
+      <table>
+        <caption class="sr-only" style="position:absolute;left:-9999px">Plot data</caption>
+        <thead><tr><th>x</th><th>y</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div id="prompts"></div>
+      <div class="status" id="status"></div>
+    </div>
+    <script>
+      let revision = 0
+      let readOnly = false
+      let parentOrigin = '*'
+      let config = { prompt: '', parameters: [], model: { kind: 'preset', preset: 'quadratic', bind: {} }, noticingPrompts: [] }
+      let state = { v: 1, params: {}, trace: [], checkpoints: {}, answers: {} }
+
+      function post(msg) {
+        parent.postMessage(msg, parentOrigin === 'null' ? '*' : parentOrigin)
+      }
+      function resize() {
+        post({ t: 'resize', v: 1, height: Math.max(document.documentElement.scrollHeight, 160) })
+      }
+
+      // Minimal safe eval (subset) for sandbox canary
+      function evalExpr(expr, vars) {
+        const allowed = /^[0-9a-zA-Z_+\-*/%^().,\s><=!&|]+$/
+        if (!allowed.test(expr)) throw new Error('disallowed')
+        // Use Function is banned; use recursive descent lite via new Function is also banned.
+        // For canary: only support a*x^2+b*x+c style via preset path below.
+        throw new Error('use preset')
+      }
+
+      function quadratic(a, b, c, x) { return a * x * x + b * x + c }
+
+      function computePoints() {
+        const a = Number(state.params.a ?? 1)
+        const b = Number(state.params.b ?? 0)
+        const c = Number(state.params.c ?? 0)
+        const pts = []
+        for (let i = 0; i <= 40; i++) {
+          const x = -10 + (20 * i) / 40
+          pts.push({ x, y: quadratic(a, b, c, x) })
+        }
+        return pts
+      }
+
+      function render() {
+        document.getElementById('prompt').textContent = config.prompt || ''
+        const controls = document.getElementById('controls')
+        controls.innerHTML = ''
+        ;(config.parameters || []).forEach((p) => {
+          if (p.kind !== 'number') return
+          const wrap = document.createElement('div')
+          const lab = document.createElement('label')
+          lab.textContent = p.label + (p.unit ? ' (' + p.unit + ')' : '')
+          lab.htmlFor = 'r-' + p.id
+          const row = document.createElement('div')
+          row.className = 'row'
+          const range = document.createElement('input')
+          range.type = 'range'
+          range.id = 'r-' + p.id
+          range.min = p.min; range.max = p.max; range.step = p.step
+          range.value = state.params[p.id] ?? p.default
+          range.disabled = readOnly
+          const num = document.createElement('input')
+          num.type = 'number'
+          num.min = p.min; num.max = p.max; num.step = p.step
+          num.value = range.value
+          num.disabled = readOnly
+          function setVal(v) {
+            const n = Math.min(p.max, Math.max(p.min, Number(v)))
+            state.params[p.id] = n
+            range.value = n
+            num.value = n
+            persist()
+            renderTable()
+            post({ t: 'announce', v: 1, message: p.label + ' is now ' + n })
+            checkUnlocks()
+          }
+          range.addEventListener('input', () => setVal(range.value))
+          num.addEventListener('change', () => setVal(num.value))
+          row.appendChild(range); row.appendChild(num)
+          wrap.appendChild(lab); wrap.appendChild(row)
+          controls.appendChild(wrap)
+        })
+        renderTable()
+        renderPrompts()
+        resize()
+      }
+
+      function renderTable() {
+        const pts = computePoints()
+        const tb = document.getElementById('tbody')
+        tb.innerHTML = ''
+        pts.filter((_, i) => i % 4 === 0).forEach((p) => {
+          const tr = document.createElement('tr')
+          tr.innerHTML = '<td>' + p.x.toFixed(2) + '</td><td>' + p.y.toFixed(3) + '</td>'
+          tb.appendChild(tr)
+        })
+        const first = pts[0], last = pts[pts.length - 1]
+        document.getElementById('summary').textContent =
+          'From x=' + first.x + ' to x=' + last.x + ', y goes from ' + first.y.toFixed(2) + ' to ' + last.y.toFixed(2)
+      }
+
+      function renderPrompts() {
+        const root = document.getElementById('prompts')
+        root.innerHTML = ''
+        ;(config.noticingPrompts || []).forEach((p) => {
+          const locked = p.unlockWhen && !state.checkpoints[p.id]
+          const fs = document.createElement('fieldset')
+          fs.disabled = readOnly || locked
+          const leg = document.createElement('legend')
+          leg.textContent = (locked ? '[Locked] ' : '') + p.text
+          fs.appendChild(leg)
+          const ta = document.createElement('textarea')
+          ta.value = state.answers[p.id] || ''
+          const btn = document.createElement('button')
+          btn.type = 'button'
+          btn.textContent = 'Save answer'
+          btn.addEventListener('click', () => {
+            const id = 'ans-' + Date.now()
+            post({ t: 'runAction', v: 1, id, action: 'submit_answer', input: { promptId: p.id, answer: ta.value, params: state.params } })
+          })
+          fs.appendChild(ta); fs.appendChild(btn)
+          root.appendChild(fs)
+        })
+      }
+
+      function checkUnlocks() {
+        ;(config.noticingPrompts || []).forEach((p) => {
+          if (!p.unlockWhen || state.checkpoints[p.id]) return
+          // only support "a > N" pattern in canary
+          const m = /^a\s*>\s*([0-9.]+)$/.exec(p.unlockWhen.trim())
+          if (!m) return
+          if (Number(state.params.a) > Number(m[1])) {
+            const id = 'cp-' + Date.now()
+            post({ t: 'runAction', v: 1, id, action: 'checkpoint', input: { promptId: p.id, params: state.params } })
+          }
+        })
+      }
+
+      function persist() {
+        post({ t: 'save', v: 1, state: { v: 1, params: state.params, trace: state.trace || [], checkpoints: state.checkpoints || {}, answers: state.answers || {} } })
+      }
+
+      document.getElementById('reset').addEventListener('click', () => {
+        const id = 'rst-' + Date.now()
+        post({ t: 'runAction', v: 1, id, action: 'reset_defaults', input: {} })
+      })
+
+      window.addEventListener('message', (ev) => {
+        const msg = ev.data
+        if (!msg || msg.v !== 1) return
+        if (msg.t === 'init' || msg.t === 'props') {
+          parentOrigin = ev.origin || '*'
+          config = msg.config || config
+          state = Object.assign({ v: 1, params: {}, trace: [], checkpoints: {}, answers: {} }, msg.state || {})
+          readOnly = !!msg.readOnly
+          revision = msg.revision || 0
+          if (!Object.keys(state.params || {}).length) {
+            state.params = {}
+            ;(config.parameters || []).forEach((p) => { state.params[p.id] = p.default })
+          }
+          render()
+          if (msg.t === 'init') post({ t: 'ready', v: 1 })
+        } else if (msg.t === 'actionResult') {
+          if (msg.result && msg.result.unlocked && msg.result.promptId) {
+            state.checkpoints[msg.result.promptId] = msg.result.hitAt || new Date().toISOString()
+            post({ t: 'announce', v: 1, message: 'Checkpoint reached' })
+            render()
+          }
+          if (msg.result && msg.result.ok && msg.result.completed) {
+            document.getElementById('status').textContent = 'Complete'
+          }
+          if (msg.result && msg.result.ok && !msg.result.promptId) {
+            // reset
+            state = { v: 1, params: {}, trace: [], checkpoints: {}, answers: {} }
+            ;(config.parameters || []).forEach((p) => { state.params[p.id] = p.default })
+            render()
+          }
+        } else if (msg.t === 'stateAccepted') {
+          revision = msg.revision || revision
+        }
+      })
+
+      post({ t: 'ready', v: 1 })
+      resize()
+    </script>
+  </body>
+</html>
