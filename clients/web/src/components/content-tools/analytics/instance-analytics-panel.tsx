@@ -9,6 +9,8 @@ import { GradeLinkDialog } from './grade-link-dialog'
 import { NeedsAttentionList } from './needs-attention-list'
 import { AnnotationHeatmap } from './annotation-heatmap'
 import { CalibrationMatrix } from './calibration-matrix'
+import { SortConfusionView } from './sort-confusion-view'
+import { buildConfusionRows } from './build-confusion-rows'
 
 export type InstanceAnalyticsPanelProps = {
   open: boolean
@@ -182,6 +184,20 @@ export function InstanceAnalyticsPanel({
                     .filter((u) => Number.isFinite(u.unitIndex))
                     .sort((a, b) => a.unitIndex - b.unitIndex)
                   return <AnnotationHeatmap units={units} />
+                })()
+              : null}
+
+            {!data.suppressed && data.toolId === 'sort_sequence'
+              ? (() => {
+                  const placedFacet = data.facets.find((f) => f.key === 'placedIn')
+                  if (!placedFacet?.values?.length) return null
+                  const itemFacet = data.facets.find((f) => f.key === 'itemId')
+                  const labels: Record<string, string> = {}
+                  for (const v of itemFacet?.values ?? []) {
+                    labels[v.value] = v.value
+                  }
+                  const rows = buildConfusionRows(placedFacet.values, labels)
+                  return <SortConfusionView rows={rows} />
                 })()
               : null}
 

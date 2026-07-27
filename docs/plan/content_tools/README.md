@@ -127,7 +127,7 @@ Content Tools without enabling, say, the code sandbox.
 | **CT.11** | [Inline Questions](../../completed/content_tools/CT.11-tool-inline-questions.md) — 1–2 question check with a correct answer | Retrieval practice + immediate feedback | BLOCKER | none |
 | **CT.12** | [Predict & Reveal](../../completed/content_tools/CT.12-tool-predict-and-reveal.md) — commit a prediction + confidence, *then* see the answer | Generation effect / hypercorrection | MAJOR | none |
 | **CT.13** | [Highlight & Annotate](../../completed/content_tools/CT.13-tool-highlight-and-annotate.md) — tag passages against a prompt; instructor heat map | Active reading / attention direction | MAJOR | none |
-| **CT.14** | [Sort & Sequence](CT.14-tool-sort-and-sequence.md) — drag items into categories or into order | Schema building / procedural fluency | MAJOR | none |
+| **CT.14** | [Sort & Sequence](../../completed/content_tools/CT.14-tool-sort-and-sequence.md) — drag items into categories or into order | Schema building / procedural fluency | MAJOR | none |
 | **CT.15** | [Labeled Diagram & Hotspot](CT.15-tool-labeled-diagram-and-hotspot.md) — click/drag labels onto an image | Dual coding / spatial recall | MAJOR | none |
 | **CT.16** | [Parameter Explorer](CT.16-tool-parameter-explorer.md) — sliders drive a live model + guided noticing prompts | Inquiry / variable isolation | MAJOR | none |
 | **CT.17** | [Code Sandbox](CT.17-tool-code-sandbox.md) — runnable cell with instructor tests | Deliberate practice with feedback | MAJOR | none |

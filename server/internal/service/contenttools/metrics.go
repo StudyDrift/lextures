@@ -222,6 +222,19 @@ var (
 		Name:      "content_tool_annotation_filter_total",
 		Help:      "Highlight & Annotate filterNote outcomes (CT.13).",
 	}, []string{"tool_id", "outcome"})
+
+	sortSequenceChecksTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_checks_total",
+		Help:      "Content tool check action outcomes by tool_id, mode, and outcome (CT.14).",
+	}, []string{"tool_id", "mode", "outcome"})
+
+	sortSequenceAttemptHistogram = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_sort_sequence_attempt_count",
+		Help:      "Sort & Sequence attempt count at check time (CT.14).",
+		Buckets:   []float64{1, 2, 3, 4, 5, 8, 12},
+	})
 )
 
 func registerMetrics() {
@@ -238,6 +251,7 @@ func registerMetrics() {
 			inlineQuestionsSubmitsTotal, inlineQuestionsCorrectTotal, inlineQuestionsAttemptHistogram,
 			predictRevealCommitsTotal, predictRevealConfidentlyWrongTotal, predictRevealConfidenceHistogram,
 			highlightAnnotateAnnotationsTotal, highlightAnnotateOrphansTotal, highlightAnnotateFilterTotal,
+			sortSequenceChecksTotal, sortSequenceAttemptHistogram,
 		)
 		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
 		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
@@ -253,6 +267,7 @@ func registerMetrics() {
 		predictRevealCommitsTotal.WithLabelValues("predict_reveal", "_reserved").Add(0)
 		highlightAnnotateAnnotationsTotal.WithLabelValues("highlight_annotate", "_reserved").Add(0)
 		highlightAnnotateFilterTotal.WithLabelValues("highlight_annotate", "_reserved").Add(0)
+		sortSequenceChecksTotal.WithLabelValues("sort_sequence", "_reserved", "_reserved").Add(0)
 	})
 }
 
@@ -531,5 +546,26 @@ func ObserveHighlightAnnotateFilter(outcome string) {
 		outcome = "_unknown"
 	}
 	highlightAnnotateFilterTotal.WithLabelValues("highlight_annotate", outcome).Inc()
+}
+
+// ObserveSortSequenceCheck increments lextures_content_tool_checks_total{tool_id,mode,outcome}.
+func ObserveSortSequenceCheck(mode, outcome string) {
+	registerMetrics()
+	if mode == "" {
+		mode = "_unknown"
+	}
+	if outcome == "" {
+		outcome = "_unknown"
+	}
+	sortSequenceChecksTotal.WithLabelValues("sort_sequence", mode, outcome).Inc()
+}
+
+// ObserveSortSequenceAttemptCount observes attempt-count histogram.
+func ObserveSortSequenceAttemptCount(n int) {
+	registerMetrics()
+	if n < 0 {
+		return
+	}
+	sortSequenceAttemptHistogram.Observe(float64(n))
 }
 

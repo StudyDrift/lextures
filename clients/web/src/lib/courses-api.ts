@@ -1459,6 +1459,26 @@ export function defaultContentToolConfig(toolId: string): Record<string, unknown
   if (toolId === 'noop_probe') {
     return { prompt: 'New prompt', maxAttempts: 3 }
   }
+  if (toolId === 'sort_sequence') {
+    return {
+      mode: 'categorize',
+      prompt: 'Sort these items into the correct categories.',
+      items: [
+        { id: 'item_a', text: 'Item A' },
+        { id: 'item_b', text: 'Item B' },
+      ],
+      buckets: [
+        { id: 'bucket_a', label: 'Category A' },
+        { id: 'bucket_b', label: 'Category B' },
+      ],
+      correctBucketByItem: { item_a: 'bucket_a', item_b: 'bucket_b' },
+      attempts: 3,
+      showPerItemCorrectness: true,
+      lockCorrect: true,
+      scoreMode: 'per_item',
+      shuffleItems: true,
+    }
+  }
   return {}
 }
 
