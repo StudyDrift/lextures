@@ -354,7 +354,9 @@ func (s Service) ResolveForOrg(ctx context.Context, orgID uuid.UUID, toolID stri
 		DisplayName:   tool.DisplayName,
 		SandboxForced: ctsvc.SandboxIframe,
 	}
-	defer ObserveBundleLoad(toolID, time.Since(start).Seconds())
+	defer func() {
+		ObserveBundleLoad(toolID, time.Since(start).Seconds())
+	}()
 	if ins.Status != toolmarket.InstallActive {
 		out.Tombstone = true
 		return out, nil

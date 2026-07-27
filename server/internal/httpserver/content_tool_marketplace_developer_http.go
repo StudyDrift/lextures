@@ -144,9 +144,10 @@ func (d Deps) handleDeveloperCreateRelease() http.HandlerFunc {
 		if err != nil {
 			msg := err.Error()
 			code := http.StatusBadRequest
-			if msg == "tool not found" {
+			switch msg {
+			case "tool not found":
 				code = http.StatusNotFound
-			} else if msg == "forbidden" {
+			case "forbidden":
 				code = http.StatusForbidden
 			}
 			apierr.WriteJSON(w, code, apierr.CodeInvalidInput, msg)
@@ -179,9 +180,10 @@ func (d Deps) handleDeveloperSubmitRelease() http.HandlerFunc {
 			}
 			msg := err.Error()
 			code := http.StatusBadRequest
-			if msg == "tool not found" || msg == "release not found" {
+			switch msg {
+			case "tool not found", "release not found":
 				code = http.StatusNotFound
-			} else if msg == "forbidden" {
+			case "forbidden":
 				code = http.StatusForbidden
 			}
 			apierr.WriteJSON(w, code, apierr.CodeInvalidInput, msg)
@@ -211,9 +213,10 @@ func (d Deps) handleDeveloperToolAnalytics() http.HandlerFunc {
 		if err != nil {
 			msg := err.Error()
 			code := http.StatusBadRequest
-			if msg == "tool not found" {
+			switch msg {
+			case "tool not found":
 				code = http.StatusNotFound
-			} else if msg == "forbidden" {
+			case "forbidden":
 				code = http.StatusForbidden
 			}
 			apierr.WriteJSON(w, code, apierr.CodeInvalidInput, msg)

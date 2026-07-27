@@ -433,6 +433,26 @@
     "fetchContentFilterSettings",
     "patchContentFilterSettings"
   ],
+  "content-tool-marketplace-api.ts": [
+    "ConsentCapability",
+    "DeveloperTool",
+    "InstallPreview",
+    "MarketplaceToolListing",
+    "ToolInstallation",
+    "ToolReview",
+    "browseToolMarketplace",
+    "createDeveloperRelease",
+    "createDeveloperTool",
+    "decideToolReview",
+    "fetchDeveloperAnalytics",
+    "fetchInstallPreview",
+    "installTool",
+    "listDeveloperTools",
+    "listOrgToolInstallations",
+    "listToolReviews",
+    "revokeToolInstallation",
+    "submitDeveloperRelease"
+  ],
   "content-tools-admin-api.ts": [
     "ContentToolMigrationJob",
     "ContentToolQuarantineItem",
