@@ -6,6 +6,9 @@
  *   [x] Hostile probes (cookie / parent DOM / storage / disallowed fetch) stay contained
  *   [x] Admin migration dry-run reports counts without mutating
  */
+import { execSync } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { test, expect, injectToken } from '../fixtures/test.js'
 import {
   apiCreateContentPage,
@@ -15,7 +18,42 @@ import {
 } from '../fixtures/api.js'
 import { withCourseFeatureRestore } from '../lib/course-feature-matrix-helpers.js'
 
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
+const PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? 'E2eTestPass1!'
+
+function databaseUrl(): string {
+  return (
+    process.env.DATABASE_URL ??
+    process.env.E2E_DATABASE_URL ??
+    'postgres://studydrift:studydrift@localhost:5432/studydrift?sslmode=disable'
+  )
+}
+
+async function signupAndBootstrapAdmin(): Promise<string> {
+  const email = `e2e-ct5-admin-${Date.now()}-${Math.random().toString(36).slice(2, 10)}@test.invalid`
+  const signup = await fetch(`${apiBase}/api/v1/auth/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: PASSWORD, display_name: 'CT5 Admin' }),
+  })
+  if (!signup.ok && signup.status !== 409) {
+    throw new Error(`signup failed: ${await signup.text()}`)
+  }
+  execSync(`go run ./cmd/bootstrap-admin -email=${email}`, {
+    cwd: path.join(repoRoot, 'server'),
+    env: { ...process.env, DATABASE_URL: databaseUrl() },
+    stdio: 'pipe',
+  })
+  const login = await fetch(`${apiBase}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: PASSWORD }),
+  })
+  if (!login.ok) throw new Error(`login failed: ${await login.text()}`)
+  const body = (await login.json()) as { access_token: string }
+  return body.access_token
+}
 
 async function putSettings(
   token: string,
@@ -138,13 +176,8 @@ test.describe('Content Tools SDK / sandbox (CT.5)', () => {
     })
   })
 
-  test('admin migration dry-run reports counts and mutates nothing', async ({
-    page,
-    seededCourse,
-  }) => {
-    const { instructorToken, courseCode } = seededCourse
-    // Platform admin routes need global RBAC; the seeded instructor may also be bootstrap admin.
-    const token = instructorToken
+  test('admin migration dry-run reports counts and mutates nothing', async () => {
+    const token = await signupAndBootstrapAdmin()
 
     const create = await fetch(`${apiBase}/api/v1/admin/content-tools/migrations`, {
       method: 'POST',
@@ -159,11 +192,6 @@ test.describe('Content Tools SDK / sandbox (CT.5)', () => {
         dryRun: true,
       }),
     })
-    // If the seeded user lacks platform admin, skip gracefully with a clear assertion path.
-    if (create.status === 401 || create.status === 403) {
-      test.skip(true, 'seeded instructor lacks platform admin for CT.5 admin routes')
-      return
-    }
     expect(create.status).toBe(202)
     const job = (await create.json()) as {
       dryRun: boolean
@@ -174,8 +202,5 @@ test.describe('Content Tools SDK / sandbox (CT.5)', () => {
     }
     expect(job.dryRun).toBe(true)
     expect(['succeeded', 'running', 'queued', 'failed']).toContain(job.status)
-    // Dry-run must not require a UI course flag.
-    void courseCode
-    void page
   })
 })
