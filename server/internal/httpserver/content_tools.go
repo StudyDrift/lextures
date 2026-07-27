@@ -262,9 +262,10 @@ func (d Deps) handleContentToolsCatalog() http.HandlerFunc {
 						Capabilities:  caps,
 						I18nNamespace: m.I18nNamespace,
 						UI: ctmodel.ToolUI{
-							Renderer: m.UI.Renderer,
-							Icon:     m.UI.Icon,
-							Group:    m.UI.Group,
+							Renderer:     m.UI.Renderer,
+							Icon:         m.UI.Icon,
+							Group:        m.UI.Group,
+							CustomEditor: m.UI.CustomEditor,
 						},
 					})
 				}

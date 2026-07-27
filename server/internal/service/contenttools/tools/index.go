@@ -5,6 +5,7 @@ package tools
 
 import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/ask_questions"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_questions"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/noop_probe"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/sandbox_probe"
 )
@@ -23,6 +24,11 @@ func All() []Entry {
 			ID:           ask_questions.ID,
 			ManifestJSON: ask_questions.ManifestJSON,
 			I18nEN:       ask_questions.I18nEN,
+		},
+		{
+			ID:           inline_questions.ID,
+			ManifestJSON: inline_questions.ManifestJSON,
+			I18nEN:       inline_questions.I18nEN,
 		},
 		{
 			ID:           noop_probe.ID,

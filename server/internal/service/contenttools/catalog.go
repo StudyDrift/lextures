@@ -39,9 +39,10 @@ func FilterCatalog(reg *Registry, allowedToolIDs []string, interactRole string, 
 			Capabilities:  caps,
 			I18nNamespace: m.I18nNamespace,
 			UI: ctmodel.ToolUI{
-				Renderer: m.UI.Renderer,
-				Icon:     m.UI.Icon,
-				Group:    m.UI.Group,
+				Renderer:     m.UI.Renderer,
+				Icon:         m.UI.Icon,
+				Group:        m.UI.Group,
+				CustomEditor: m.UI.CustomEditor,
 			},
 		})
 	}
@@ -93,9 +94,10 @@ func ManifestToPublic(m *CompiledManifest) (ctmodel.ToolManifestPublic, error) {
 		},
 		I18nNamespace:   m.I18nNamespace,
 		UI: ctmodel.ToolUI{
-			Renderer: m.UI.Renderer,
-			Icon:     m.UI.Icon,
-			Group:    m.UI.Group,
+			Renderer:     m.UI.Renderer,
+			Icon:         m.UI.Icon,
+			Group:        m.UI.Group,
+			CustomEditor: m.UI.CustomEditor,
 		},
 		ConflictPolicy:  EffectiveConflictPolicy(m),
 		AutosaveMs:      EffectiveAutosaveMs(m),

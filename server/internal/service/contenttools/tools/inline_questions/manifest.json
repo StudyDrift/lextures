@@ -1,0 +1,200 @@
+{
+  "id": "inline_questions",
+  "version": "1.0.0",
+  "name": "contentTools.tools.inline_questions.name",
+  "category": "assess",
+  "capabilities": ["state", "scoring"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["questions"],
+    "properties": {
+      "label": {
+        "type": "string",
+        "description": "Optional heading shown above the check"
+      },
+      "questions": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 3,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "prompt"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "type": {
+              "type": "string",
+              "enum": ["single", "multi", "true_false", "short_text", "numeric"]
+            },
+            "prompt": { "type": "string", "minLength": 1 },
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "text"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "text": { "type": "string" },
+                  "correct": {
+                    "type": "boolean",
+                    "x-lex-sensitive": true
+                  },
+                  "feedback": {
+                    "type": "string",
+                    "x-lex-sensitive": true
+                  }
+                }
+              }
+            },
+            "acceptedAnswers": {
+              "type": "array",
+              "items": { "type": "string" },
+              "x-lex-sensitive": true
+            },
+            "caseSensitive": { "type": "boolean", "default": false },
+            "normalizePunctuation": { "type": "boolean", "default": false },
+            "correctValue": {
+              "type": "number",
+              "x-lex-sensitive": true
+            },
+            "tolerance": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "value"],
+              "properties": {
+                "kind": { "type": "string", "enum": ["absolute", "relative"] },
+                "value": { "type": "number", "minimum": 0 }
+              }
+            },
+            "unit": { "type": "string" },
+            "explanation": {
+              "type": "string",
+              "x-lex-sensitive": true
+            },
+            "outcomeId": { "type": "string" },
+            "points": { "type": "number", "minimum": 0, "default": 1 },
+            "partialCredit": { "type": "boolean", "default": false }
+          }
+        }
+      },
+      "attempts": {
+        "default": 2,
+        "description": "Attempts per question (1-5) or unlimited",
+        "oneOf": [
+          { "type": "integer", "minimum": 1, "maximum": 5 },
+          { "type": "string", "const": "unlimited" }
+        ]
+      },
+      "revealCorrectAfter": {
+        "type": "string",
+        "enum": ["first_attempt", "last_attempt", "never"],
+        "default": "last_attempt"
+      },
+      "shuffleOptions": { "type": "boolean", "default": false },
+      "sequential": { "type": "boolean", "default": false },
+      "scorePolicy": {
+        "type": "string",
+        "enum": ["last", "best", "first"],
+        "default": "last"
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "answers": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "attempts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["value", "correct", "at"],
+                "properties": {
+                  "value": {},
+                  "correct": { "type": "boolean" },
+                  "at": { "type": "string" },
+                  "points": { "type": "number" }
+                }
+              }
+            },
+            "revealed": { "type": "boolean" }
+          }
+        }
+      },
+      "drafts": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "scoreRaw": { "type": "number" },
+      "scoreMax": { "type": "number" },
+      "completedAt": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "auto" },
+  "storage": { "maxStateBytes": 16000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "form",
+    "wcagNotes": "Each question uses fieldset/legend; correctness conveyed by text and icon; results announced politely; sequential locks use aria-disabled plus explanatory text."
+  },
+  "dataSheet": {
+    "collects": {
+      "answers": {
+        "purpose": "Per-question attempt history with selected values and correctness",
+        "retention": "life_of_enrollment"
+      },
+      "drafts": {
+        "purpose": "Unsubmitted draft responses typed by the learner",
+        "retention": "life_of_enrollment"
+      },
+      "scoreRaw": {
+        "purpose": "Server-computed score for optional gradebook bridge",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.inline_questions",
+  "ui": {
+    "renderer": "inline_questions",
+    "icon": "circle-help",
+    "group": "assess",
+    "customEditor": "inline_questions"
+  },
+  "actions": [
+    {
+      "name": "submit",
+      "rateLimitPerMin": 30,
+      "description": "Score one question server-side"
+    },
+    {
+      "name": "reveal",
+      "rateLimitPerMin": 10,
+      "description": "Reveal correct answer when policy allows"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

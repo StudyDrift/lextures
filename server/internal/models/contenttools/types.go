@@ -108,9 +108,10 @@ type CatalogTool struct {
 
 // ToolUI is the manifest ui block exposed to clients.
 type ToolUI struct {
-	Renderer string `json:"renderer"`
-	Icon     string `json:"icon"`
-	Group    string `json:"group"`
+	Renderer     string `json:"renderer"`
+	Icon         string `json:"icon"`
+	Group        string `json:"group"`
+	CustomEditor string `json:"customEditor,omitempty"`
 }
 
 // ToolManifestPublic is a manifest returned by GET .../manifests/{tool_id}

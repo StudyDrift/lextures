@@ -85,9 +85,16 @@ func ExtractFreeTextFromState(state json.RawMessage) string {
 		return string(state)
 	}
 	parts := make([]string, 0, 4)
-	for _, key := range []string{"response", "text", "comment", "body", "message", "answer"} {
+	for _, key := range []string{"response", "text", "comment", "body", "message", "answer", "draft"} {
 		if v, ok := obj[key].(string); ok && strings.TrimSpace(v) != "" {
 			parts = append(parts, v)
+		}
+	}
+	if drafts, ok := obj["drafts"].(map[string]any); ok {
+		for _, v := range drafts {
+			if s, ok := v.(string); ok && strings.TrimSpace(s) != "" {
+				parts = append(parts, s)
+			}
 		}
 	}
 	if posts, ok := obj["posts"].([]any); ok {

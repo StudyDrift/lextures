@@ -1148,6 +1148,7 @@ export const contentToolsCatalogToolSchema = z.object({
     renderer: z.string(),
     icon: z.string(),
     group: z.string(),
+    customEditor: z.string().optional(),
   }),
 })
 

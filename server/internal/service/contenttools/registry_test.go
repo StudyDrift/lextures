@@ -121,6 +121,60 @@ func TestRedactSensitiveConfig(t *testing.T) {
 	}
 }
 
+func TestRedactSensitiveConfig_NestedInlineQuestions(t *testing.T) {
+	reg, err := BuildBuiltinRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := reg.Get("inline_questions")
+	if m == nil {
+		t.Fatal("inline_questions missing from registry")
+	}
+	raw := `{
+		"questions":[{
+			"id":"q1","type":"single","prompt":"Q?",
+			"options":[{"id":"a","text":"A","correct":true,"feedback":"yes"},{"id":"b","text":"B","correct":false,"feedback":"no"}],
+			"acceptedAnswers":["secret"],
+			"correctValue":3.14,
+			"explanation":"because"
+		}],
+		"attempts":2
+	}`
+	out, err := RedactSensitiveConfig(m.ConfigSchema, json.RawMessage(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cfg map[string]any
+	if err := json.Unmarshal(out, &cfg); err != nil {
+		t.Fatal(err)
+	}
+	qs := cfg["questions"].([]any)
+	q0 := qs[0].(map[string]any)
+	if _, ok := q0["acceptedAnswers"]; ok {
+		t.Fatal("acceptedAnswers should be stripped")
+	}
+	if _, ok := q0["correctValue"]; ok {
+		t.Fatal("correctValue should be stripped")
+	}
+	if _, ok := q0["explanation"]; ok {
+		t.Fatal("explanation should be stripped")
+	}
+	opts := q0["options"].([]any)
+	o0 := opts[0].(map[string]any)
+	if _, ok := o0["correct"]; ok {
+		t.Fatal("option.correct should be stripped")
+	}
+	if _, ok := o0["feedback"]; ok {
+		t.Fatal("option.feedback should be stripped")
+	}
+	if o0["text"] != "A" || o0["id"] != "a" {
+		t.Fatalf("student-visible option fields missing: %#v", o0)
+	}
+	if q0["prompt"] != "Q?" {
+		t.Fatalf("prompt = %v", q0["prompt"])
+	}
+}
+
 func TestValidateStateJSON_TooLarge(t *testing.T) {
 	reg, err := BuildBuiltinRegistry()
 	if err != nil {
@@ -137,6 +191,31 @@ func TestValidateStateJSON_TooLarge(t *testing.T) {
 	}
 }
 
+func TestValidateConfigJSON_InlineQuestions(t *testing.T) {
+	reg, err := BuildBuiltinRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := reg.Get("inline_questions")
+	if m == nil {
+		t.Fatal("missing inline_questions")
+	}
+	raw := json.RawMessage(`{
+		"attempts":2,
+		"revealCorrectAfter":"last_attempt",
+		"questions":[{
+			"id":"q1","type":"single","prompt":"Q?",
+			"options":[{"id":"a","text":"A","correct":true},{"id":"b","text":"B","correct":false}]
+		}]
+	}`)
+	if err := ValidateConfigJSON(m, raw); err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateConfigJSON(m, json.RawMessage(`{"questions":[]}`)); err == nil {
+		t.Fatal("empty questions should fail")
+	}
+}
+
 func TestFilterCatalog_Allowlist(t *testing.T) {
 	reg, err := BuildBuiltinRegistry()
 	if err != nil {
@@ -146,7 +225,7 @@ func TestFilterCatalog_Allowlist(t *testing.T) {
 	if len(all) < 1 {
 		t.Fatal("expected tools")
 	}
-	filtered := FilterCatalog(reg, []string{"inline_questions"}, "", nil)
+	filtered := FilterCatalog(reg, []string{"not_a_real_tool_xyz"}, "", nil)
 	if len(filtered) != 0 {
 		t.Fatalf("allowlist with unknown id should return empty, got %d", len(filtered))
 	}

@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | BLOCKER (one of the two reference tools that prove the framework) |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Assessment team |
 | **Depends on** | CT.1, CT.2, CT.3 |

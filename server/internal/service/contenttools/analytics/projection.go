@@ -132,6 +132,11 @@ func init() {
 		{Key: "questionCount", Label: "contentTools.analytics.facets.questionCount", Type: "number"},
 		{Key: "hasConversation", Label: "contentTools.analytics.facets.hasConversation", Type: "boolean"},
 	})
+	RegisterProjector("inline_questions", projectInlineQuestions, []FacetSchema{
+		{Key: "questionId", Label: "contentTools.analytics.facets.questionId", Type: "string"},
+		{Key: "optionId", Label: "contentTools.analytics.facets.optionId", Type: "string"},
+		{Key: "correct", Label: "contentTools.analytics.facets.correct", Type: "boolean"},
+	})
 }
 
 func projectNoopProbe(in ProjectInput) Summary {
@@ -171,5 +176,54 @@ func projectAskQuestions(in ProjectInput) Summary {
 	}
 	s.Facets["questionCount"] = qCount
 	s.Facets["hasConversation"] = qCount > 0
+	return s
+}
+
+func projectInlineQuestions(in ProjectInput) Summary {
+	s := defaultProject(in)
+	var st struct {
+		Answers map[string]struct {
+			Attempts []struct {
+				Value   any  `json:"value"`
+				Correct bool `json:"correct"`
+			} `json:"attempts"`
+		} `json:"answers"`
+		ScoreRaw *float64 `json:"scoreRaw"`
+		ScoreMax *float64 `json:"scoreMax"`
+	}
+	_ = json.Unmarshal(in.StateJSON, &st)
+	questionIDs := make([]string, 0, len(st.Answers))
+	optionIDs := make([]string, 0, len(st.Answers))
+	anyCorrect := false
+	answered := 0
+	for qid, ans := range st.Answers {
+		if len(ans.Attempts) == 0 {
+			continue
+		}
+		answered++
+		questionIDs = append(questionIDs, qid)
+		last := ans.Attempts[len(ans.Attempts)-1]
+		if last.Correct {
+			anyCorrect = true
+		}
+		switch v := last.Value.(type) {
+		case string:
+			optionIDs = append(optionIDs, qid+":"+v)
+		case []any:
+			for _, item := range v {
+				if s, ok := item.(string); ok {
+					optionIDs = append(optionIDs, qid+":"+s)
+				}
+			}
+		}
+	}
+	if answered > 0 {
+		s.Engaged = true
+	}
+	s.Facets["questionId"] = questionIDs
+	s.Facets["optionId"] = optionIDs
+	if answered > 0 {
+		s.Facets["correct"] = anyCorrect && in.ScoreRaw != nil && in.ScoreMax != nil && *in.ScoreMax > 0 && *in.ScoreRaw >= *in.ScoreMax
+	}
 	return s
 }
