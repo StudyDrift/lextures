@@ -105,18 +105,14 @@ test.describe('Content Tools SDK / sandbox (CT.5)', () => {
         mod.id,
         'CT5 page',
       )
-      const inst = await createSandboxInstance(
-        instructorToken,
-        courseCode,
-        contentPage.structureItemId,
-      )
+      const inst = await createSandboxInstance(instructorToken, courseCode, contentPage.id)
       await apiPatchContentPage(instructorToken, courseCode, contentPage.id, {
-        bodyMarkdown: fenceMarkdown(inst.id),
+        markdown: fenceMarkdown(inst.id),
       })
 
       await injectToken(page, studentToken)
       await page.goto(
-        `/courses/${encodeURIComponent(courseCode)}/modules/items/${contentPage.structureItemId}?ct5Hostile=1`,
+        `/courses/${encodeURIComponent(courseCode)}/modules/content/${contentPage.id}?ct5Hostile=1`,
       )
 
       const host = page.locator('[data-content-tool="sandbox_probe"][data-sandbox="iframe"]')
