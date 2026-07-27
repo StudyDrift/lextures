@@ -1,12 +1,12 @@
 # Completed feature E2E coverage report
 
-Total stories: **535**
+Total stories: **537**
 
 ## Coverage levels
 
 | Level | Count |
 |---|---:|
-| journey | 99 |
+| journey | 101 |
 | smoke | 178 |
 | api-contract | 1 |
 | covered-by-parent | 11 |
@@ -22,13 +22,13 @@ Total stories: **535**
 | docs | 17 |
 | mobile | 92 |
 | ops | 16 |
-| web | 362 |
+| web | 364 |
 
 ## By market tag
 
 | Market | Count |
 |---|---:|
-| ALL | 488 |
+| ALL | 490 |
 | HE | 15 |
 | HS | 19 |
 | K12 | 13 |
@@ -156,7 +156,7 @@ Total stories: **535**
 | animations | 0 | 4 | 0 | 0 | 0 | 0 | 3 |
 | badges | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | cli | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
-| content_tools | 13 | 1 | 0 | 0 | 0 | 0 | 0 |
+| content_tools | 15 | 1 | 0 | 0 | 0 | 0 | 0 |
 | e2e | 3 | 0 | 1 | 0 | 0 | 0 | 0 |
 | emails | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 | feedback | 0 | 5 | 0 | 0 | 0 | 0 | 0 |
