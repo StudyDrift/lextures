@@ -1164,6 +1164,12 @@ export type ContentToolInstanceAnalytics = {
     representativeExamples: string[]
   }>
   totalQuestions?: number | null
+  calibrationMatrix?: Array<{
+    confidenceBucket: string
+    correct: boolean
+    count: number
+    highlight: boolean
+  }>
 }
 
 export type ContentToolStudentProgress = {

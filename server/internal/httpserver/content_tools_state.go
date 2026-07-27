@@ -397,6 +397,12 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load state.")
 			return
 		}
+		if current != nil {
+			if blocked, msg := ctsvc.GuardPredictRevealStatePut(inst.ToolID, current.StateJSON); blocked {
+				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, msg)
+				return
+			}
+		}
 		curStatus := ctsvc.StatusNotStarted
 		if current != nil {
 			curStatus = current.Status

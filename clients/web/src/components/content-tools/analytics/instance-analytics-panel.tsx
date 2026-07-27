@@ -7,6 +7,7 @@ import {
 import { FacetDistributionChart } from './facet-distribution-chart'
 import { GradeLinkDialog } from './grade-link-dialog'
 import { NeedsAttentionList } from './needs-attention-list'
+import { CalibrationMatrix } from './calibration-matrix'
 
 export type InstanceAnalyticsPanelProps = {
   open: boolean
@@ -157,6 +158,12 @@ export function InstanceAnalyticsPanel({
                   ))}
                 </ul>
               </div>
+            ) : null}
+
+            {!data.suppressed &&
+            data.calibrationMatrix &&
+            data.calibrationMatrix.length > 0 ? (
+              <CalibrationMatrix cells={data.calibrationMatrix} />
             ) : null}
 
             <div>

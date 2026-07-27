@@ -137,6 +137,11 @@ func init() {
 		{Key: "optionId", Label: "contentTools.analytics.facets.optionId", Type: "string"},
 		{Key: "correct", Label: "contentTools.analytics.facets.correct", Type: "boolean"},
 	})
+	RegisterProjector("predict_reveal", projectPredictReveal, []FacetSchema{
+		{Key: "outcomeId", Label: "contentTools.analytics.facets.outcomeId", Type: "string"},
+		{Key: "confidenceBucket", Label: "contentTools.analytics.facets.confidenceBucket", Type: "string"},
+		{Key: "correct", Label: "contentTools.analytics.facets.correct", Type: "boolean"},
+	})
 }
 
 func projectNoopProbe(in ProjectInput) Summary {
@@ -224,6 +229,43 @@ func projectInlineQuestions(in ProjectInput) Summary {
 	s.Facets["optionId"] = optionIDs
 	if answered > 0 {
 		s.Facets["correct"] = anyCorrect && in.ScoreRaw != nil && in.ScoreMax != nil && *in.ScoreMax > 0 && *in.ScoreRaw >= *in.ScoreMax
+	}
+	return s
+}
+
+func projectPredictReveal(in ProjectInput) Summary {
+	s := defaultProject(in)
+	var st struct {
+		Prediction *struct {
+			OutcomeID string `json:"outcomeId"`
+			Text      string `json:"text"`
+		} `json:"prediction"`
+		ConfidenceBucket string `json:"confidenceBucket"`
+		CommittedAt      string `json:"committedAt"`
+		Correct          *bool  `json:"correct"`
+		RevealedAt       string `json:"revealedAt"`
+	}
+	_ = json.Unmarshal(in.StateJSON, &st)
+	if st.CommittedAt != "" {
+		s.Engaged = true
+		s.Completed = true
+	}
+	if st.Prediction != nil && st.Prediction.OutcomeID != "" {
+		s.Facets["outcomeId"] = st.Prediction.OutcomeID
+	}
+	if st.ConfidenceBucket != "" {
+		s.Facets["confidenceBucket"] = st.ConfidenceBucket
+	}
+	if st.Correct != nil {
+		s.Facets["correct"] = *st.Correct
+	}
+	if st.CommittedAt != "" && st.RevealedAt != "" {
+		if start, err1 := time.Parse(time.RFC3339, st.CommittedAt); err1 == nil {
+			if end, err2 := time.Parse(time.RFC3339, st.RevealedAt); err2 == nil && !end.Before(start) {
+				d := int(end.Sub(start).Milliseconds())
+				s.DurationMs = &d
+			}
+		}
 	}
 	return s
 }
