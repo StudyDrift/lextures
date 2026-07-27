@@ -235,7 +235,7 @@ func handleParameterExplorerResetDefaults(ctx ActionContext) (*ActionResult, err
 	return &ActionResult{
 		Result:     map[string]any{"ok": true},
 		StatePatch: mustJSON(st),
-		Status:     StatusNotStarted,
+		// Status stays as-is: actions are forward-only; CT.4 self-reset clears status.
 	}, nil
 }
 
