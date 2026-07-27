@@ -24,6 +24,8 @@ const (
 	JobTypeAdaptiveContentFairness         = "scheduled.adaptive_content_fairness"
 	JobTypeContentToolPreviewPurge         = "scheduled.content_tool_preview_purge"
 	JobTypeContentToolResetPurge           = "scheduled.content_tool_reset_purge"
+	JobTypeContentToolDailyRollups         = "scheduled.content_tool_daily_rollups"
+	JobTypeContentToolSummaryRebuild       = "scheduled.content_tool_summary_rebuild"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -193,6 +195,20 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "20 4 * * *", // daily 04:20 UTC
 			JobType:        JobTypeContentToolResetPurge,
 			Description:    "Purge expired Content Tool reset snapshots past org retention (CT.4).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "content_tool_daily_rollups",
+			Spec:           "30 4 * * *", // daily 04:30 UTC
+			JobType:        JobTypeContentToolDailyRollups,
+			Description:    "Materialise Content Tool cross-course daily telemetry rollups (CT.7).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "content_tool_summary_rebuild",
+			Spec:           "0 */6 * * *", // every 6 hours
+			JobType:        JobTypeContentToolSummaryRebuild,
+			Description:    "Rebuild Content Tool state summaries when projection versions lag (CT.7).",
 			DefaultEnabled: true,
 		},
 	}

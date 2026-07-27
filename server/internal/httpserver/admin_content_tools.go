@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/lextures/lextures/server/internal/apierr"
+	ctmodel "github.com/lextures/lextures/server/internal/models/contenttools"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
@@ -20,6 +21,7 @@ func (d Deps) registerAdminContentToolsRoutes(r chi.Router) {
 	r.Post("/api/v1/admin/content-tools/migrations", d.handleAdminContentToolsMigrationCreate())
 	r.Get("/api/v1/admin/content-tools/migrations/{job_id}", d.handleAdminContentToolsMigrationGet())
 	r.Get("/api/v1/admin/content-tools/quarantine", d.handleAdminContentToolsQuarantineList())
+	r.Get("/api/v1/admin/content-tools/telemetry", d.handleAdminContentToolsTelemetry())
 }
 
 func (d Deps) handleAdminContentToolsVersionsList() http.HandlerFunc {
@@ -292,5 +294,66 @@ func migrationJobJSON(job *ctrepo.MigrationJobRow) map[string]any {
 		"error":        job.Error,
 		"createdAt":    job.CreatedAt,
 		"finishedAt":   job.FinishedAt,
+	}
+}
+
+func (d Deps) handleAdminContentToolsTelemetry() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			jobsMethodNotAllowed(w, http.MethodGet)
+			return
+		}
+		if _, ok := d.adminRbacUser(w, r); !ok {
+			return
+		}
+		if d.Pool == nil {
+			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeInternal, "Database not configured.")
+			return
+		}
+		to := time.Now().UTC()
+		from := to.AddDate(0, 0, -30)
+		if s := strings.TrimSpace(r.URL.Query().Get("from")); s != "" {
+			if t, err := time.Parse("2006-01-02", s); err == nil {
+				from = t
+			}
+		}
+		if s := strings.TrimSpace(r.URL.Query().Get("to")); s != "" {
+			if t, err := time.Parse("2006-01-02", s); err == nil {
+				to = t
+			}
+		}
+		rows, err := ctrepo.ListDailyRollups(r.Context(), d.Pool, from, to, nil)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load telemetry.")
+			return
+		}
+		byTool := map[string]*ctmodel.AdminToolTelemetryRow{}
+		for _, row := range rows {
+			rt, ok := byTool[row.ToolID]
+			if !ok {
+				rt = &ctmodel.AdminToolTelemetryRow{ToolID: row.ToolID}
+				byTool[row.ToolID] = rt
+			}
+			rt.Instances += row.Instances
+			rt.Learners += row.Learners
+			rt.Engagements += row.Engagements
+			rt.Completions += row.Completions
+			rt.AITokens += row.AITokens
+			rt.AICostUSD += row.AICostUSD
+			rt.RenderErrors += row.RenderErrors
+			if row.MeanScorePct != nil {
+				rt.MeanScorePct = row.MeanScorePct
+			}
+		}
+		out := ctmodel.AdminToolTelemetry{
+			From:  from.Format("2006-01-02"),
+			To:    to.Format("2006-01-02"),
+			Tools: make([]ctmodel.AdminToolTelemetryRow, 0, len(byTool)),
+		}
+		for _, rt := range byTool {
+			// AC-11: payload is counts only — never include free-text student work.
+			out.Tools = append(out.Tools, *rt)
+		}
+		writeJSON(w, http.StatusOK, out)
 	}
 }

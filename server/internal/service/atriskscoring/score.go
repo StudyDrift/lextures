@@ -12,6 +12,9 @@ type SignalInputs struct {
 	QuizAvg      *float32
 	DaysInactive int
 	GradeTrend   float32 // positive = declining (worse)
+	// ToolDisengagePct is 0–100 percent of content-tool instances with no engagement (CT.7 FR-12).
+	// Applied only when Config.WeightTool > 0 (default 0 — plumbing shipped disabled).
+	ToolDisengagePct float32
 }
 
 // ComponentScores are per-signal 0–100 subscores.
@@ -20,6 +23,7 @@ type ComponentScores struct {
 	Quiz      float32
 	Inactive  float32
 	Trend     float32
+	Tool      float32
 	TopFactor string
 }
 
@@ -29,7 +33,8 @@ func ComputeWeightedScore(in SignalInputs, cfg atrisk.Config) (float32, Componen
 	total := comp.Missing*cfg.WeightMissing +
 		comp.Quiz*cfg.WeightQuiz +
 		comp.Inactive*cfg.WeightInactive +
-		comp.Trend*cfg.WeightTrend
+		comp.Trend*cfg.WeightTrend +
+		comp.Tool*cfg.WeightTool
 	score := float32(math.Round(float64(total)*10) / 10)
 	if score < 0 {
 		score = 0
@@ -45,6 +50,7 @@ func componentScores(in SignalInputs, cfg atrisk.Config) ComponentScores {
 	quiz := quizComponent(in.QuizAvg, cfg.QuizAvgThreshold)
 	inactive := inactiveComponent(in.DaysInactive, cfg.InactiveDaysThreshold)
 	trend := clamp100(in.GradeTrend)
+	tool := clamp100(in.ToolDisengagePct)
 
 	top := "missing"
 	topVal := missing * cfg.WeightMissing
@@ -58,6 +64,10 @@ func componentScores(in SignalInputs, cfg atrisk.Config) ComponentScores {
 	}
 	if trend*cfg.WeightTrend > topVal {
 		top = "trend"
+		topVal = trend * cfg.WeightTrend
+	}
+	if cfg.WeightTool > 0 && tool*cfg.WeightTool > topVal {
+		top = "tool"
 	}
 
 	return ComponentScores{
@@ -65,6 +75,7 @@ func componentScores(in SignalInputs, cfg atrisk.Config) ComponentScores {
 		Quiz:      quiz,
 		Inactive:  inactive,
 		Trend:     trend,
+		Tool:      tool,
 		TopFactor: top,
 	}
 }

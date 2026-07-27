@@ -30,6 +30,10 @@ import {
   contentToolManifestSchema,
   toolInstanceUsageSchema,
   contentToolStateSchema,
+  contentToolInstanceAnalyticsSchema,
+  contentToolPageAnalyticsSchema,
+  contentToolStudentProgressSchema,
+  contentToolGradeLinkSchema,
   contentToolValidationErrorBodySchema,
   contentToolSchemaInvalidBodySchema,
   contentToolRevisionConflictBodySchema,
@@ -1119,7 +1123,7 @@ export async function fetchAdaptiveContentSettings(
   return parseApiResponse('fetchAdaptiveContentSettings', adaptiveContentSettingsSchema, raw)
 }
 
-/** CT.1 / CT.6 — Content Tools course settings. */
+/** CT.1 / CT.6 / CT.7 — Content Tools course settings. */
 export type ContentToolsSettings = {
   allowedToolIds: string[]
   studentResetAllowed: boolean
@@ -1128,7 +1132,57 @@ export type ContentToolsSettings = {
   dailyAiCallsPerUser: number
   linkIngestionMode: 'off' | 'allowlist' | 'public'
   linkHostAllowlist: string[]
+  gradeLinksAllowed?: boolean
   updatedAt?: string
+}
+
+/** CT.7 — Instance analytics. */
+export type ContentToolInstanceAnalytics = {
+  instanceId: string
+  toolId: string
+  title?: string | null
+  learners: number
+  engaged: number
+  completed: number
+  suppressed: boolean
+  score?: {
+    mean: number
+    median: number
+    distribution: Array<{ bucket: string; count: number }>
+  } | null
+  medianDurationMs?: number | null
+  facets: Array<{
+    key: string
+    label: string
+    values: Array<{ value: string; count: number; correct?: boolean | null }>
+  }>
+  needsAttention: Array<{ enrollmentId: string; displayName: string; reason: string }>
+  countsForGrade: boolean
+}
+
+export type ContentToolStudentProgress = {
+  itemId: string
+  completed: number
+  total: number
+  tools: Array<{
+    instanceId: string
+    toolId: string
+    title?: string | null
+    engaged: boolean
+    completed: boolean
+    scorePct?: number | null
+    countsForGrade: boolean
+  }>
+}
+
+export type ContentToolGradeLink = {
+  instanceId: string
+  assignmentItemId?: string | null
+  outcomeId?: string | null
+  pointsPossible?: number | null
+  countsForGrade: boolean
+  latePolicy: string
+  enabledAt?: string | null
 }
 
 export type ContentToolsContextSource = {
@@ -1848,6 +1902,103 @@ export async function postContentToolSelfReset(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return parseApiResponse('postContentToolSelfReset', contentToolResetResponseSchema, raw)
+}
+
+/** CT.7 — Instance analytics for instructors. */
+export async function fetchContentToolInstanceAnalytics(
+  courseCode: string,
+  instanceId: string,
+): Promise<ContentToolInstanceAnalytics> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/analytics`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse(
+    'fetchContentToolInstanceAnalytics',
+    contentToolInstanceAnalyticsSchema,
+    raw,
+  )
+}
+
+export async function fetchContentToolPageAnalytics(
+  courseCode: string,
+  itemId: string,
+): Promise<{
+  itemId: string
+  instances: ContentToolInstanceAnalytics[]
+  totals: { instances: number; learners: number; engaged: number; completed: number }
+}> {
+  const qs = new URLSearchParams({ itemId })
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/analytics?${qs}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchContentToolPageAnalytics', contentToolPageAnalyticsSchema, raw)
+}
+
+export async function fetchContentToolMyProgress(
+  courseCode: string,
+  itemId: string,
+): Promise<ContentToolStudentProgress> {
+  const qs = new URLSearchParams({ itemId })
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/my-progress?${qs}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchContentToolMyProgress', contentToolStudentProgressSchema, raw)
+}
+
+export async function fetchContentToolGradeLink(
+  courseCode: string,
+  instanceId: string,
+): Promise<ContentToolGradeLink> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/grade-link`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchContentToolGradeLink', contentToolGradeLinkSchema, raw)
+}
+
+export async function putContentToolGradeLink(
+  courseCode: string,
+  instanceId: string,
+  body: {
+    assignmentItemId?: string | null
+    outcomeId?: string | null
+    pointsPossible?: number | null
+    countsForGrade: boolean
+    latePolicy?: string
+  },
+): Promise<ContentToolGradeLink> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/grade-link`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('putContentToolGradeLink', contentToolGradeLinkSchema, raw)
+}
+
+export async function deleteContentToolGradeLink(
+  courseCode: string,
+  instanceId: string,
+): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/grade-link`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
 }
 
 export async function putAdaptiveContentSettings(

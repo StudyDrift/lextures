@@ -95,6 +95,7 @@ func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource) {
 	RegisterAdaptiveContentFairnessJobs(r, pool, cfgSrc, nil)
 	RegisterContentToolsPreviewJobs(r, pool)
 	RegisterContentToolsMigrationJobs(r, pool)
+	RegisterContentToolsAnalyticsJobs(r, pool)
 	registerScheduledJobs(r, pool, cfgSrc)
 }
 

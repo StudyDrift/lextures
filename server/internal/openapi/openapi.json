@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "StudyDrift API",
-    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features — use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for ≥1 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure).",
+    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features \u2014 use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for \u22651 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure).",
     "version": "0.2.1"
   },
   "tags": [
@@ -48,7 +48,7 @@
     },
     {
       "name": "transcripts",
-      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01–T06)"
+      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01\u2013T06)"
     },
     {
       "name": "content-tools",
@@ -2547,7 +2547,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Sign in with Apple (AuthenticationServices identity token → Lextures tokens)",
+        "summary": "Native Sign in with Apple (AuthenticationServices identity token \u2192 Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -2600,7 +2600,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Google Sign-In (Credential Manager ID token → Lextures tokens)",
+        "summary": "Native Google Sign-In (Credential Manager ID token \u2192 Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -3352,7 +3352,7 @@
         ],
         "responses": {
           "200": {
-            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } — no owned field"
+            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } \u2014 no owned field"
           },
           "400": {
             "description": "Invalid filter"
@@ -3532,7 +3532,7 @@
             "description": "Sign in required"
           },
           "402": {
-            "description": "Paid course — use checkout; body includes checkoutHint"
+            "description": "Paid course \u2014 use checkout; body includes checkoutHint"
           },
           "404": {
             "description": "Not listed or feature disabled"
@@ -3569,7 +3569,7 @@
             "description": "{ checkoutUrl, sessionId } or { alreadyOwned, courseCode, courseId }"
           },
           "400": {
-            "description": "Free course — use claim instead"
+            "description": "Free course \u2014 use claim instead"
           },
           "401": {
             "description": "Sign in required"
@@ -4294,7 +4294,7 @@
         "tags": [
           "accommodations"
         ],
-        "summary": "List a learner’s accommodation records (coordinator perm)",
+        "summary": "List a learner\u2019s accommodation records (coordinator perm)",
         "security": [
           {
             "bearerAuth": []
@@ -4461,7 +4461,7 @@
           "accommodations",
           "me"
         ],
-        "summary": "List this learner’s active (by date range) accommodation summary entries",
+        "summary": "List this learner\u2019s active (by date range) accommodation summary entries",
         "security": [
           {
             "bearerAuth": []
@@ -4482,7 +4482,7 @@
         "tags": [
           "admin"
         ],
-        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with ≥200 responses; optional conceptId scopes to one concept",
+        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with \u2265200 responses; optional conceptId scopes to one concept",
         "security": [
           {
             "bearerAuth": []
@@ -7740,7 +7740,7 @@
         "tags": [
           "courses"
         ],
-        "summary": "Force-rename a player (plan IQ.9); empty body → Player N",
+        "summary": "Force-rename a player (plan IQ.9); empty body \u2192 Player N",
         "security": [
           {
             "bearerAuth": []
@@ -8943,7 +8943,7 @@
           "courses"
         ],
         "summary": "Board realtime WebSocket (plan VC.4)",
-        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"…\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
+        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"\u2026\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
         "parameters": [
           {
             "name": "course_code",
@@ -13561,6 +13561,357 @@
           }
         }
       }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/analytics": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Instance analytics aggregates (CT.7)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolInstanceAnalytics"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/analytics": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Page-level tools analytics (CT.7)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/analytics/course": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Course-level tools analytics (CT.7)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/analytics/export": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Export analytics CSV/JSON (CT.7)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "csv",
+                "json"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/my-progress": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Student tool progress on a page (CT.7)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolStudentProgress"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/grade-link": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Get gradebook link (CT.7; course members, for student badge)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolGradeLink"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Enable/update gradebook link (CT.7)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolGradeLink"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Remove gradebook link (CT.7)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content-tools/telemetry": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Admin cross-course tool telemetry (CT.7, internal)",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminContentToolTelemetry"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -13923,7 +14274,7 @@
           },
           "sourceRef": {
             "type": "object",
-            "description": "topic/passage text or contentId — never student data",
+            "description": "topic/passage text or contentId \u2014 never student data",
             "properties": {
               "topic": {
                 "type": "string"
@@ -15527,6 +15878,9 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "gradeLinksAllowed": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -16397,6 +16751,204 @@
         "required": [
           "excluded"
         ]
+      },
+      "ContentToolInstanceAnalytics": {
+        "type": "object",
+        "required": [
+          "instanceId",
+          "toolId",
+          "learners",
+          "engaged",
+          "completed",
+          "suppressed",
+          "facets",
+          "needsAttention",
+          "countsForGrade"
+        ],
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toolId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "learners": {
+            "type": "integer"
+          },
+          "engaged": {
+            "type": "integer"
+          },
+          "completed": {
+            "type": "integer"
+          },
+          "suppressed": {
+            "type": "boolean"
+          },
+          "score": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "mean": {
+                "type": "number"
+              },
+              "median": {
+                "type": "number"
+              },
+              "distribution": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "bucket": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "medianDurationMs": {
+            "type": "integer",
+            "nullable": true
+          },
+          "facets": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "needsAttention": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "countsForGrade": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ContentToolGradeLink": {
+        "type": "object",
+        "required": [
+          "instanceId",
+          "countsForGrade",
+          "latePolicy"
+        ],
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignmentItemId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "outcomeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "pointsPossible": {
+            "type": "number",
+            "nullable": true
+          },
+          "countsForGrade": {
+            "type": "boolean"
+          },
+          "latePolicy": {
+            "type": "string"
+          },
+          "enabledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ContentToolStudentProgress": {
+        "type": "object",
+        "required": [
+          "itemId",
+          "completed",
+          "total",
+          "tools"
+        ],
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "completed": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "AdminContentToolTelemetry": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "tools"
+        ],
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "toolId": {
+                  "type": "string"
+                },
+                "instances": {
+                  "type": "integer"
+                },
+                "learners": {
+                  "type": "integer"
+                },
+                "engagements": {
+                  "type": "integer"
+                },
+                "completions": {
+                  "type": "integer"
+                },
+                "aiTokens": {
+                  "type": "integer"
+                },
+                "aiCostUsd": {
+                  "type": "number"
+                },
+                "renderErrors": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

@@ -4067,7 +4067,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2–AC.6 gaps."
+        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2\u2013AC.6 gaps."
       }
     },
     {
@@ -4154,7 +4154,7 @@
       "risk": "critical",
       "client": "web",
       "coverage": "smoke",
-      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre→serve→post causal journey remains backlog.",
+      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre\u2192serve\u2192post causal journey remains backlog.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4259,7 +4259,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2–CT.3."
+        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2\u2013CT.3."
       }
     },
     {
@@ -4361,7 +4361,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers sandbox_probe iframe mount, interact→save→grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
+      "rationale": "Playwright covers sandbox_probe iframe mount, interact\u2192save\u2192grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4407,6 +4407,33 @@
         "dependency": true,
         "rollback": true,
         "notes": "Depends on CT.1/CT.3. Link ingestion mode off|allowlist|public; CONTENT_TOOLS_LINK_INGEST_KILL_SWITCH; AI entry only via tool actions / mediated call rails."
+      }
+    },
+    {
+      "id": "CT.7",
+      "path": "docs/completed/content_tools/CT.7-analytics-insights-and-gradebook.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers instance analytics after state write, my-progress totals, grade-link enable, insights panel UI, and student graded badge.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-analytics.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Inherits content_tools_enabled (CT.1). Grade bridge per-instance opt-in via content_tool_grade_links; small-n suppression default 5."
       }
     },
     {
@@ -8830,7 +8857,7 @@
       "risk": "minor",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright journey selects across paragraphs on a content page and asserts ⌘/Ctrl+C copies every paragraph.",
+      "rationale": "Playwright journey selects across paragraphs on a content page and asserts \u2318/Ctrl+C copies every paragraph.",
       "owner": "Web Platform",
       "specs": [
         {

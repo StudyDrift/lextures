@@ -59,7 +59,7 @@ func TestSummarizeStateNoopProbe(t *testing.T) {
 
 func TestClassifyGradeEffectStub(t *testing.T) {
 	id := uuid.New()
-	g := ClassifyGradeEffect(id, "auto", true)
+	g := ClassifyGradeEffect(id, "auto", true, false) // unlinked → unchanged
 	if g.Action != "unchanged" || g.EnrollmentID != id {
 		t.Fatalf("unexpected %+v", g)
 	}

@@ -268,6 +268,11 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 			"revision": st.Revision,
 			"status":   st.Status,
 		})
+		verb := "answered"
+		if st.Status == "completed" || st.Status == "submitted" {
+			verb = "completed"
+		}
+		d.afterContentToolsStateWrite(r.Context(), courseID, courseCode, inst.ToolID, scope, st, verb)
 		ctsvc.DefaultBreaker().RecordSuccess(inst.ToolID)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)

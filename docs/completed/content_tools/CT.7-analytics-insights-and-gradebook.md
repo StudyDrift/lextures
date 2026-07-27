@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Analytics team |
 | **Depends on** | CT.3, CT.4 |
@@ -218,6 +218,7 @@ CREATE TABLE IF NOT EXISTS course.content_tool_grade_links (
 | `GET` | `.../content-tools/analytics/course` | instructor |
 | `GET` | `.../content-tools/analytics/export?itemId=&format=csv\|json` | instructor |
 | `GET` | `.../content-tools/my-progress?itemId=` | student |
+| `GET` | `.../content-tools/instances/{instance_id}/grade-link` | course member (student badge) |
 | `PUT` | `.../content-tools/instances/{instance_id}/grade-link` | instructor |
 | `DELETE` | `.../content-tools/instances/{instance_id}/grade-link` | instructor |
 | `GET` | `/api/v1/admin/content-tools/telemetry?from=&to=` | platform admin |

@@ -1022,7 +1022,87 @@ export const contentToolsSettingsSchema = z.object({
   dailyAiCallsPerUser: z.number().default(50),
   linkIngestionMode: z.enum(['off', 'allowlist', 'public']).default('public'),
   linkHostAllowlist: z.array(z.string()).default([]),
+  gradeLinksAllowed: z.boolean().default(true),
   updatedAt: z.string().optional(),
+})
+
+/** CT.7 — Instance analytics. */
+export const contentToolInstanceAnalyticsSchema = z.object({
+  instanceId: z.string(),
+  toolId: z.string(),
+  title: z.string().nullable().optional(),
+  learners: z.number(),
+  engaged: z.number(),
+  completed: z.number(),
+  suppressed: z.boolean(),
+  score: z
+    .object({
+      mean: z.number(),
+      median: z.number(),
+      distribution: z.array(z.object({ bucket: z.string(), count: z.number() })),
+    })
+    .nullable()
+    .optional(),
+  medianDurationMs: z.number().nullable().optional(),
+  facets: z.array(
+    z.object({
+      key: z.string(),
+      label: z.string(),
+      values: z.array(
+        z.object({
+          value: z.string(),
+          count: z.number(),
+          correct: z.boolean().optional().nullable(),
+        }),
+      ),
+    }),
+  ),
+  needsAttention: z.array(
+    z.object({
+      enrollmentId: z.string(),
+      displayName: z.string(),
+      reason: z.string(),
+    }),
+  ),
+  countsForGrade: z.boolean().default(false),
+})
+
+export const contentToolPageAnalyticsSchema = z.object({
+  itemId: z.string(),
+  instances: z.array(contentToolInstanceAnalyticsSchema),
+  totals: z.object({
+    instances: z.number(),
+    learners: z.number(),
+    engaged: z.number(),
+    completed: z.number(),
+  }),
+})
+
+export const contentToolStudentProgressSchema = z.object({
+  itemId: z.string(),
+  completed: z.number(),
+  total: z.number(),
+  tools: z.array(
+    z.object({
+      instanceId: z.string(),
+      toolId: z.string(),
+      title: z.string().nullable().optional(),
+      engaged: z.boolean(),
+      completed: z.boolean(),
+      scorePct: z.number().optional().nullable(),
+      countsForGrade: z.boolean().default(false),
+    }),
+  ),
+})
+
+export const contentToolGradeLinkSchema = z.object({
+  instanceId: z.string(),
+  assignmentItemId: z.string().nullable().optional(),
+  outcomeId: z.string().nullable().optional(),
+  pointsPossible: z.number().nullable().optional(),
+  countsForGrade: z.boolean(),
+  latePolicy: z.string(),
+  enabledAt: z.string().nullable().optional(),
 })
 
 /** CT.6 — Instructor context sources. */

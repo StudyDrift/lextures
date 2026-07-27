@@ -14,6 +14,7 @@ import (
 
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	"github.com/lextures/lextures/server/internal/service/adminaudit"
+	ctanalytics "github.com/lextures/lextures/server/internal/service/contenttools/analytics"
 	ferpaservice "github.com/lextures/lextures/server/internal/service/ferpa"
 	"github.com/lextures/lextures/server/internal/service/notifications"
 )
@@ -126,11 +127,12 @@ func SummarizeState(toolID string, state json.RawMessage, status string, scoreRa
 	return strings.Join(parts, "; ")
 }
 
-// ClassifyGradeEffect stubs CT.7 gradebook bridge: scores are unchanged until passback exists.
-func ClassifyGradeEffect(enrollmentID uuid.UUID, scoringMode string, hadScore bool) GradeEffect {
+// ClassifyGradeEffect reports gradebook side-effects for a reset (CT.7 FR-10).
+// Pass linked=true when the instance has an enabled grade link.
+func ClassifyGradeEffect(enrollmentID uuid.UUID, scoringMode string, hadScore bool, linked bool) GradeEffect {
 	_ = scoringMode
-	_ = hadScore
-	return GradeEffect{EnrollmentID: enrollmentID, Action: "unchanged"}
+	action := ctanalytics.ClassifyBridgedGradeEffect(enrollmentID, linked, hadScore)
+	return GradeEffect{EnrollmentID: enrollmentID, Action: action}
 }
 
 // ExecuteReset performs dry-run or real reset (sync path). Caller handles async enqueue when Async is set.
@@ -156,6 +158,13 @@ func ExecuteReset(ctx context.Context, pool *pgxpool.Pool, req ResetRequest) (*R
 		return nil, err
 	}
 
+	linked := false
+	if req.InstanceID != nil {
+		if gl, err := ctrepo.GetGradeLink(ctx, pool, *req.InstanceID); err == nil && gl != nil && gl.CountsForGrade && gl.AssignmentItemID != nil {
+			linked = true
+		}
+	}
+
 	sample := make([]ResetSample, 0, min(10, len(affected)))
 	gradeEffects := make([]GradeEffect, 0, len(affected))
 	for i, a := range affected {
@@ -171,7 +180,13 @@ func ExecuteReset(ctx context.Context, pool *pgxpool.Pool, req ResetRequest) (*R
 				Score:        score,
 			})
 		}
-		gradeEffects = append(gradeEffects, ClassifyGradeEffect(a.EnrollmentID, "", a.State.ScoreRaw != nil))
+		instLinked := linked
+		if !instLinked {
+			if gl, err := ctrepo.GetGradeLink(ctx, pool, a.InstanceID); err == nil && gl != nil && gl.CountsForGrade && gl.AssignmentItemID != nil {
+				instLinked = true
+			}
+		}
+		gradeEffects = append(gradeEffects, ClassifyGradeEffect(a.EnrollmentID, "", a.State.ScoreRaw != nil, instLinked))
 	}
 
 	result := &ResetResult{
@@ -261,15 +276,26 @@ func applyResetBatch(
 				_ = tx.Rollback(ctx)
 				return err
 			}
-			if _, err := ctrepo.ClearStateForReset(ctx, tx, a.State.ID, initial, req.ActorID); err != nil {
+			cleared, err := ctrepo.ClearStateForReset(ctx, tx, a.State.ID, initial, req.ActorID)
+			if err != nil {
 				_ = tx.Rollback(ctx)
 				return err
 			}
+			// CT.7 FR-10: revert gradebook in the same transaction when bridged.
+			if a.State.ScoreRaw != nil {
+				if gl, gerr := ctrepo.GetGradeLink(ctx, pool, a.InstanceID); gerr == nil && gl != nil && gl.CountsForGrade && gl.AssignmentItemID != nil {
+					if err := ctanalytics.RevertGrade(ctx, tx, nil, req.CourseID, a.UserID, *gl.AssignmentItemID); err != nil {
+						_ = tx.Rollback(ctx)
+						return err
+					}
+				}
+			}
+			_ = cleared
 		}
 		if err := tx.Commit(ctx); err != nil {
 			return err
 		}
-		// Events + notifications outside the short transaction.
+		// Events + notifications + summary sync outside the short transaction.
 		for _, a := range chunk {
 			enr := a.EnrollmentID
 			actor := req.ActorID
@@ -281,6 +307,12 @@ func applyResetBatch(
 				"notify":    req.Notify,
 				"actorRole": req.ActorRole,
 			})
+			if st, err := ctrepo.GetState(ctx, pool, a.InstanceID, a.EnrollmentID); err == nil && st != nil {
+				ctanalytics.SyncSummaryAfterReset(ctx, pool, st, req.CourseID, a.ToolID)
+			} else {
+				_ = ctrepo.ResetStateSummary(ctx, pool, a.State.ID)
+				ctanalytics.InvalidateForInstance(a.InstanceID.String(), req.CourseID.String(), "")
+			}
 			if req.Notify && a.UserID != req.ActorID {
 				title := "Activity reset"
 				body := "Your instructor reset your work on this activity. You can start again."
