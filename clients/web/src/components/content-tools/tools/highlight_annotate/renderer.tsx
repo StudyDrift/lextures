@@ -265,7 +265,7 @@ export default function HighlightAnnotateRenderer({
         <p data-testid="ha-progress">
           {t('contentTools.tools.highlight_annotate.progress', {
             count: progress,
-            min: minAnnotations,
+            required: minAnnotations,
           })}
         </p>
         {!readOnly ? (

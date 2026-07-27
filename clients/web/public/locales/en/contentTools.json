@@ -129,7 +129,7 @@
   "contentTools.tools.highlight_annotate.name": "Highlight & Annotate",
   "contentTools.tools.highlight_annotate.description": "Tag and annotate a passage against a prompt; instructors see a class heat map.",
   "contentTools.tools.highlight_annotate.tagLegend": "Annotation tags",
-  "contentTools.tools.highlight_annotate.progress": "{{count}} of {{min}} required annotations.",
+  "contentTools.tools.highlight_annotate.progress": "{{count}} of {{required}} required annotations.",
   "contentTools.tools.highlight_annotate.unitMode": "Tap units to annotate (recommended on touch)",
   "contentTools.tools.highlight_annotate.emptyHint": "Select a sentence with the keyboard (arrow keys, then Enter) or tap a unit to apply a tag. You can also select text with a pointer.",
   "contentTools.tools.highlight_annotate.unitLabel": "Unit {{n}} of {{total}}. Tags: {{tags}}",
