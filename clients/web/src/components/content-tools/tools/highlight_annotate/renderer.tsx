@@ -264,7 +264,7 @@ export default function HighlightAnnotateRenderer({
       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-neutral-300">
         <p data-testid="ha-progress">
           {t('contentTools.tools.highlight_annotate.progress', {
-            count: progress,
+            done: progress,
             required: minAnnotations,
           })}
         </p>
