@@ -9,6 +9,7 @@ const RENDERERS: Record<string, LazyExoticComponent<RendererComponent>> = {
   diagram_hotspot: lazy(() => import('../../tools/diagram_hotspot/renderer')),
   highlight_annotate: lazy(() => import('../../tools/highlight_annotate/renderer')),
   inline_questions: lazy(() => import('../../tools/inline_questions/renderer')),
+  media_checkpoints: lazy(() => import('../../tools/media_checkpoints/renderer')),
   noop_probe: lazy(() => import('../../tools/noop_probe/renderer')),
   parameter_explorer: lazy(() => import('../../tools/parameter_explorer/renderer')),
   predict_reveal: lazy(() => import('../../tools/predict_reveal/renderer')),

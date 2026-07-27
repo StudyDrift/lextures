@@ -19,5 +19,7 @@
 | **CT.15** | [Labeled Diagram & Hotspot](CT.15-tool-labeled-diagram-and-hotspot.md) |
 | **CT.16** | [Parameter Explorer](CT.16-tool-parameter-explorer.md) |
 | **CT.17** | [Code Sandbox](CT.17-tool-code-sandbox.md) |
+| **CT.18** | [Step-Through Worked Example](CT.18-tool-step-through-worked-example.md) |
+| **CT.19** | [Media Checkpoints](CT.19-tool-media-checkpoints.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

@@ -4734,6 +4734,33 @@
       }
     },
     {
+      "id": "ct-19-media-checkpoints",
+      "path": "docs/completed/content_tools/CT.19-tool-media-checkpoints.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers sensitive-field redaction, server-side answer_checkpoint grading, watch progress that cannot forge a score, transcript-only completion, analytics facets, and UI mount with transcript-only fallback.",
+      "owner": "Assessment",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-media-checkpoints.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); state + answer_checkpoint/record_progress via CT.3; checkpoint/watched-bin facets via CT.7; short_text filter via CT.8; reset via CT.4; transcript-only non-timed alternative."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

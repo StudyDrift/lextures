@@ -1,6 +1,6 @@
 # CT.19 — Tool: Media Checkpoints (questions injected at timestamps in a video or audio clip)
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | SHIPPED |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Media / web platform team |
 | **Depends on** | CT.1, CT.2, CT.3; shipped `service/video`, `service/captions` |

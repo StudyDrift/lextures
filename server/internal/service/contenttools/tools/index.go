@@ -9,6 +9,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/diagram_hotspot"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/highlight_annotate"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_questions"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/media_checkpoints"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/noop_probe"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/parameter_explorer"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/predict_reveal"
@@ -51,6 +52,11 @@ func All() []Entry {
 			ID:           inline_questions.ID,
 			ManifestJSON: inline_questions.ManifestJSON,
 			I18nEN:       inline_questions.I18nEN,
+		},
+		{
+			ID:           media_checkpoints.ID,
+			ManifestJSON: media_checkpoints.ManifestJSON,
+			I18nEN:       media_checkpoints.I18nEN,
 		},
 		{
 			ID:           noop_probe.ID,
