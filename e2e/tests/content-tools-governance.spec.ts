@@ -207,7 +207,13 @@ test.describe('CT.8 Content Tools governance', () => {
       expect(list.items.some((i) => i.action === 'removed')).toBeTruthy()
 
       await injectToken(page, studentToken)
-      await page.goto(`/courses/${encodeURIComponent(courseCode)}/pages/${content.id}`)
+      await page.goto(
+        `/courses/${encodeURIComponent(courseCode)}/modules/content/${content.id}`,
+      )
+      const ack = page.getByRole('button', { name: /I acknowledge/i })
+      if (await ack.isVisible().catch(() => false)) {
+        await ack.click()
+      }
       await expect(page.getByTestId('content-tool-report')).toBeVisible({ timeout: 20000 })
     })
   })
