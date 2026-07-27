@@ -13,6 +13,10 @@ import {
 } from '../editors/highlight-annotate-editor'
 import { InlineQuestionsEditor, type InlineQuestionsEditorProps } from '../editors/inline-questions-editor'
 import {
+  MediaCheckpointsEditor,
+  type MediaCheckpointsEditorProps,
+} from '../editors/media-checkpoints-editor'
+import {
   ParameterExplorerEditor,
   type ParameterExplorerEditorProps,
 } from '../editors/parameter-explorer-editor'
@@ -32,12 +36,14 @@ export type CustomEditorProps =
   | ParameterExplorerEditorProps
   | CodeSandboxEditorProps
   | WorkedExampleEditorProps
+  | MediaCheckpointsEditorProps
 
 const EDITORS: Record<string, ComponentType<CustomEditorProps>> = {
   code_sandbox: CodeSandboxEditor as ComponentType<CustomEditorProps>,
   diagram_hotspot: DiagramHotspotEditor as ComponentType<CustomEditorProps>,
   highlight_annotate: HighlightAnnotateEditor as ComponentType<CustomEditorProps>,
   inline_questions: InlineQuestionsEditor,
+  media_checkpoints: MediaCheckpointsEditor as ComponentType<CustomEditorProps>,
   parameter_explorer: ParameterExplorerEditor as ComponentType<CustomEditorProps>,
   predict_reveal: PredictRevealEditor,
   sort_sequence: SortSequenceEditor as ComponentType<CustomEditorProps>,

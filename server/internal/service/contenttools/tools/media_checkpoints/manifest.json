@@ -1,0 +1,232 @@
+{
+  "id": "media_checkpoints",
+  "version": "1.0.0",
+  "name": "contentTools.tools.media_checkpoints.name",
+  "category": "practice",
+  "capabilities": ["state", "scoring", "media"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["media", "checkpoints"],
+    "properties": {
+      "media": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "fileId", "kind", "durationSec"],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": ["course_file", "external"],
+            "default": "course_file",
+            "description": "external is reserved for a future privacy-reviewed proxy"
+          },
+          "fileId": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "enum": ["video", "audio"] },
+          "durationSec": { "type": "number", "minimum": 1 },
+          "url": {
+            "type": "string",
+            "description": "Optional resolved playback URL stored at authoring time"
+          },
+          "captionUrl": {
+            "type": "string",
+            "description": "Optional WebVTT caption track URL"
+          }
+        }
+      },
+      "captionsTrackId": { "type": "string" },
+      "transcriptSource": {
+        "type": "string",
+        "enum": ["captions", "inline"],
+        "default": "inline"
+      },
+      "transcriptMarkdown": { "type": "string" },
+      "checkpoints": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 40,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "atSec", "question"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "atSec": { "type": "number", "minimum": 0 },
+            "question": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "prompt"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["single", "multi", "true_false", "short_text", "numeric"]
+                },
+                "prompt": { "type": "string", "minLength": 1 },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["id", "text"],
+                    "properties": {
+                      "id": { "type": "string", "minLength": 1 },
+                      "text": { "type": "string" },
+                      "correct": {
+                        "type": "boolean",
+                        "x-lex-sensitive": true
+                      },
+                      "feedback": {
+                        "type": "string",
+                        "x-lex-sensitive": true
+                      }
+                    }
+                  }
+                },
+                "acceptedAnswers": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "x-lex-sensitive": true
+                },
+                "correctValue": {
+                  "type": "number",
+                  "x-lex-sensitive": true
+                },
+                "tolerance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["kind", "value"],
+                  "properties": {
+                    "kind": { "type": "string", "enum": ["absolute", "relative"] },
+                    "value": { "type": "number", "minimum": 0 }
+                  }
+                }
+              }
+            },
+            "required": { "type": "boolean", "default": true },
+            "attempts": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 2
+            },
+            "showFeedback": { "type": "boolean", "default": true }
+          }
+        }
+      },
+      "preventSkipPastUnanswered": { "type": "boolean", "default": false },
+      "practiceOnly": { "type": "boolean", "default": true },
+      "requireCaptionsWhenPolicy": { "type": "boolean", "default": false }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "answers": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "attempts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["value", "correct", "at"],
+                "properties": {
+                  "value": {},
+                  "correct": { "type": "boolean" },
+                  "at": { "type": "string" }
+                }
+              }
+            },
+            "done": { "type": "boolean" }
+          }
+        }
+      },
+      "watchedSegments": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number" }
+        }
+      },
+      "furthestSec": { "type": "number", "minimum": 0 },
+      "usedTranscriptOnly": { "type": "boolean" },
+      "scoreRaw": { "type": "number" },
+      "scoreMax": { "type": "number" },
+      "completedAt": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "auto" },
+  "storage": { "maxStateBytes": 32000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "application",
+    "wcagNotes": "Timed media with checkpoint questions; native media element semantics preserved; captions when available; fully equivalent non-timed transcript-only path; keyboard play/pause/seek/captions/speed; focus moves to question on pause; checkpoint markers exposed as a list."
+  },
+  "dataSheet": {
+    "collects": {
+      "answers": {
+        "purpose": "Per-checkpoint attempt history with selected values and correctness",
+        "retention": "life_of_enrollment"
+      },
+      "watchedSegments": {
+        "purpose": "Coarse played time ranges (≥5s) for drop-off insights; not attention detection or attendance proof",
+        "retention": "life_of_enrollment"
+      },
+      "furthestSec": {
+        "purpose": "Furthest playback position reached",
+        "retention": "life_of_enrollment"
+      },
+      "usedTranscriptOnly": {
+        "purpose": "Whether the learner completed via the transcript-only path",
+        "retention": "life_of_enrollment"
+      },
+      "scoreRaw": {
+        "purpose": "Server-computed score for optional gradebook bridge",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "Watch data records segments played only and must not be used as attendance evidence. Audio description is recommended when the asset provides it but not required in v1.",
+    "keyboardAlternative": true,
+    "nonTimedAlternative": true,
+    "captionsProvided": true
+  },
+  "i18nNamespace": "contentTools.tools.media_checkpoints",
+  "ui": {
+    "renderer": "media_checkpoints",
+    "icon": "clapperboard",
+    "group": "practice",
+    "customEditor": "media_checkpoints"
+  },
+  "actions": [
+    {
+      "name": "answer_checkpoint",
+      "rateLimitPerMin": 30,
+      "description": "Score one media checkpoint server-side"
+    },
+    {
+      "name": "record_progress",
+      "rateLimitPerMin": 12,
+      "description": "Merge watched segments and furthest position (throttled)"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 10000,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}
