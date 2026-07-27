@@ -4464,6 +4464,33 @@
       }
     },
     {
+      "id": "CT.9",
+      "path": "docs/completed/content_tools/CT.9-tool-marketplace-and-third-party-tools.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright/API lifecycle covers publish checks, review gate, org install consent, course allowlist opt-in, revoke, aggregate analytics, and marketplace UI smoke.",
+      "owner": "Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-marketplace.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Platform flag ffContentToolMarketplace; depends on CT.5 sandbox/versioning and CT.8 conformance bar."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
