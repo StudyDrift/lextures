@@ -49,7 +49,7 @@ func RunMigrationJob(ctx context.Context, pool *pgxpool.Pool, jobID uuid.UUID) e
 		return err
 	}
 
-	var cursor *uuid.UUID = job.CursorStateID
+	cursor := job.CursorStateID
 	for {
 		batch, err := ctrepo.ListStatesForMigration(ctx, pool, job.ToolID, job.FromVersion, job.ToVersion, cursor, migrationBatchSize)
 		if err != nil {
