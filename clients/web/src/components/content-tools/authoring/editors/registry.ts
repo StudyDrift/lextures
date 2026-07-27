@@ -1,5 +1,9 @@
 import type { ComponentType } from 'react'
 import {
+  DiagramHotspotEditor,
+  type DiagramHotspotEditorProps,
+} from '../editors/diagram-hotspot-editor'
+import {
   HighlightAnnotateEditor,
   type HighlightAnnotateEditorProps,
 } from '../editors/highlight-annotate-editor'
@@ -12,8 +16,10 @@ export type CustomEditorProps =
   | PredictRevealEditorProps
   | HighlightAnnotateEditorProps
   | SortSequenceEditorProps
+  | DiagramHotspotEditorProps
 
 const EDITORS: Record<string, ComponentType<CustomEditorProps>> = {
+  diagram_hotspot: DiagramHotspotEditor as ComponentType<CustomEditorProps>,
   highlight_annotate: HighlightAnnotateEditor as ComponentType<CustomEditorProps>,
   inline_questions: InlineQuestionsEditor,
   predict_reveal: PredictRevealEditor,

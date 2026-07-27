@@ -1,0 +1,233 @@
+{
+  "id": "diagram_hotspot",
+  "version": "1.0.0",
+  "name": "contentTools.tools.diagram_hotspot.name",
+  "category": "practice",
+  "capabilities": ["state", "scoring", "media"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["mode", "prompt", "image", "regions"],
+    "properties": {
+      "mode": {
+        "type": "string",
+        "enum": ["label", "hotspot"],
+        "default": "label"
+      },
+      "prompt": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Task prompt shown above the diagram"
+      },
+      "image": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "alt", "naturalWidth", "naturalHeight"],
+        "properties": {
+          "url": { "type": "string", "minLength": 1 },
+          "alt": { "type": "string", "minLength": 1 },
+          "naturalWidth": { "type": "integer", "minimum": 1 },
+          "naturalHeight": { "type": "integer", "minimum": 1 }
+        }
+      },
+      "regions": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 40,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label", "description", "shape"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "label": { "type": "string", "minLength": 1 },
+            "description": { "type": "string", "minLength": 1 },
+            "shape": {
+              "type": "object",
+              "required": ["kind"],
+              "properties": {
+                "kind": { "type": "string", "enum": ["rect", "circle", "polygon"] },
+                "x": { "type": "number" },
+                "y": { "type": "number" },
+                "w": { "type": "number" },
+                "h": { "type": "number" },
+                "cx": { "type": "number" },
+                "cy": { "type": "number" },
+                "r": { "type": "number" },
+                "points": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "labels": {
+        "type": "array",
+        "maxItems": 40,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "text"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "text": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "correctRegionByLabel": {
+        "type": "object",
+        "x-lex-sensitive": true,
+        "additionalProperties": { "type": "string", "minLength": 1 }
+      },
+      "prompts": {
+        "type": "array",
+        "maxItems": 20,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "text"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "text": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "correctRegionByPrompt": {
+        "type": "object",
+        "x-lex-sensitive": true,
+        "additionalProperties": { "type": "string", "minLength": 1 }
+      },
+      "feedbackByRegion": {
+        "type": "object",
+        "x-lex-sensitive": true,
+        "additionalProperties": { "type": "string" }
+      },
+      "attempts": {
+        "oneOf": [
+          { "type": "integer", "minimum": 1, "maximum": 5 },
+          { "type": "string", "const": "unlimited" }
+        ],
+        "default": 3
+      },
+      "lockCorrect": {
+        "type": "boolean",
+        "default": true
+      },
+      "showPerItemCorrectness": {
+        "type": "boolean",
+        "default": true
+      },
+      "showRegionOutlines": {
+        "type": "string",
+        "enum": ["always", "on_focus", "after_check"],
+        "default": "on_focus"
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "assignments": {
+        "type": "object",
+        "additionalProperties": { "type": ["string", "null"] }
+      },
+      "attempts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["at", "correctIds", "scorePct"],
+          "properties": {
+            "at": { "type": "string" },
+            "correctIds": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "scorePct": { "type": "number" },
+            "assignments": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            },
+            "heatCells": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      },
+      "lockedIds": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "lastPerItem": {
+        "type": "object",
+        "additionalProperties": { "type": "boolean" }
+      },
+      "usedListMode": { "type": "boolean" },
+      "completedAt": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "auto" },
+  "storage": { "maxStateBytes": 24000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "application",
+    "wcagNotes": "Full keyboard pick-up/cycle/place; always-visible list mode with region descriptions; required alt text and region descriptions. Known limitation: non-visual learners rely on author-written descriptions."
+  },
+  "dataSheet": {
+    "collects": {
+      "assignments": {
+        "purpose": "Learner label/prompt to region assignments including drafts and checked attempts",
+        "retention": "life_of_enrollment"
+      },
+      "attempts": {
+        "purpose": "Per-check correctness, score, and coarse heat-map cells for attempt accounting",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "Static image only — no media playback. Learners who cannot perceive the image rely on author-written region descriptions.",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.diagram_hotspot",
+  "ui": {
+    "renderer": "diagram_hotspot",
+    "icon": "map-pin",
+    "group": "practice",
+    "customEditor": "diagram_hotspot"
+  },
+  "actions": [
+    {
+      "name": "check",
+      "rateLimitPerMin": 30,
+      "description": "Grade current assignments server-side and record an attempt"
+    },
+    {
+      "name": "reset_attempt",
+      "rateLimitPerMin": 30,
+      "description": "Return unlocked labels/prompts to the tray within the same attempt budget"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

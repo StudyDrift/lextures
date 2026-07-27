@@ -15,5 +15,7 @@
 | **CT.11** | [Inline Questions — formative checks](CT.11-tool-inline-questions.md) |
 | **CT.12** | [Predict & Reveal — commit then reveal](CT.12-tool-predict-and-reveal.md) |
 | **CT.13** | [Highlight & Annotate — prompted close reading](CT.13-tool-highlight-and-annotate.md) |
+| **CT.14** | [Sort & Sequence — categorize / order](CT.14-tool-sort-and-sequence.md) |
+| **CT.15** | [Labeled Diagram & Hotspot](CT.15-tool-labeled-diagram-and-hotspot.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

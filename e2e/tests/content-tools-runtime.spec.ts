@@ -122,14 +122,20 @@ test.describe('Content Tools runtime (CT.3)', () => {
       await expect(page.locator('pre code.language-lex-tool')).toHaveCount(0)
 
       const answer = page.getByLabel(/your answer/i).first()
+      await expect(answer).toBeVisible({ timeout: 20_000 })
+      await expect(answer).toBeEditable()
       const statePut = page.waitForResponse(
         (res) =>
           res.request().method() === 'PUT' &&
           res.url().includes(`/content-tools/instances/${inst.id}/state`) &&
           res.ok(),
-        { timeout: 20_000 },
+        { timeout: 45_000 },
       )
-      await answer.fill('paris')
+      // Prefer sequential key events so controlled React inputs fire onChange under load.
+      await answer.click()
+      await answer.fill('')
+      await answer.pressSequentially('paris', { delay: 20 })
+      await answer.blur()
       // Autosave debounce is 1.5s; wait for state PUT + sync chip (not a flaky toast).
       await statePut
       await expect(

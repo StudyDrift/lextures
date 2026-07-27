@@ -4626,6 +4626,33 @@
       }
     },
     {
+      "id": "ct-15-diagram-hotspot",
+      "path": "docs/completed/content_tools/CT.15-tool-labeled-diagram-and-hotspot.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers answer-key redaction, label-mode check with lockCorrect, list-mode equivalence, hotspot mode, attempt exhaustion, reset_attempt / self-reset, and regionId/assignedTo/gridCell analytics facets.",
+      "owner": "Web platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-diagram-hotspot.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); draft state + check actions via CT.3; heat-map facets via CT.7; list/keyboard a11y via CT.8; placement engine from CT.14; reset via CT.4."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

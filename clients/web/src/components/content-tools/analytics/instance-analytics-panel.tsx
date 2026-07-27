@@ -9,6 +9,7 @@ import { GradeLinkDialog } from './grade-link-dialog'
 import { NeedsAttentionList } from './needs-attention-list'
 import { AnnotationHeatmap } from './annotation-heatmap'
 import { CalibrationMatrix } from './calibration-matrix'
+import { DiagramHeatmap } from './diagram-heatmap'
 import { SortConfusionView } from './sort-confusion-view'
 import { buildConfusionRows } from './build-confusion-rows'
 
@@ -198,6 +199,28 @@ export function InstanceAnalyticsPanel({
                   }
                   const rows = buildConfusionRows(placedFacet.values, labels)
                   return <SortConfusionView rows={rows} />
+                })()
+              : null}
+
+            {!data.suppressed && data.toolId === 'diagram_hotspot'
+              ? (() => {
+                  const regionFacet = data.facets.find((f) => f.key === 'regionId')
+                  const gridFacet = data.facets.find((f) => f.key === 'gridCell')
+                  const assignedFacet = data.facets.find((f) => f.key === 'assignedTo')
+                  if (!regionFacet?.values?.length && !gridFacet?.values?.length) return null
+                  const cells = (gridFacet?.values ?? []).map((v) => ({
+                    cell: v.value,
+                    count: v.count,
+                  }))
+                  const regions = (regionFacet?.values ?? []).map((v) => ({
+                    regionId: v.value,
+                    label: v.value,
+                    count: v.count,
+                  }))
+                  const swaps = (assignedFacet?.values ?? [])
+                    .map((v) => ({ pair: v.value, count: v.count }))
+                    .sort((a, b) => b.count - a.count)
+                  return <DiagramHeatmap cells={cells} regions={regions} swaps={swaps} />
                 })()
               : null}
 
