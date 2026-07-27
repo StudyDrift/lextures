@@ -95,6 +95,11 @@ GET	/api/v1/admin/consortium/agreements	anonymous
 POST	/api/v1/admin/consortium/agreements	anonymous
 PATCH	/api/v1/admin/consortium/agreements/{id}	anonymous
 GET	/api/v1/admin/consortium/enrollment-report	anonymous
+POST	/api/v1/admin/content-tools/migrations	session
+GET	/api/v1/admin/content-tools/migrations/{job_id}	session
+GET	/api/v1/admin/content-tools/quarantine	session
+GET	/api/v1/admin/content-tools/versions	session
+PATCH	/api/v1/admin/content-tools/versions/{tool_id}/{version}	session
 GET	/api/v1/admin/courses	session
 GET	/api/v1/admin/courses/stats	session
 POST	/api/v1/admin/courses/{courseId}/access	session

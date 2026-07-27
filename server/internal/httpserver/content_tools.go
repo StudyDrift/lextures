@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
@@ -99,11 +100,39 @@ func contentToolsSettingsToAPI(r ctrepo.SettingsRow) ctmodel.Settings {
 	}
 }
 
+// resolveContentToolVersion pins an instance to the newest published version
+// within the registry major (CT.5 FR-9 / AC-10).
+func resolveContentToolVersion(ctx context.Context, pool *pgxpool.Pool, m *ctsvc.CompiledManifest) string {
+	if m == nil {
+		return "0.0.0"
+	}
+	published, err := ctrepo.ListPublishedVersionsForTool(ctx, pool, m.ID)
+	if err != nil || len(published) == 0 {
+		published = []string{m.Version}
+	} else {
+		found := false
+		for _, v := range published {
+			if v == m.Version {
+				found = true
+				break
+			}
+		}
+		if !found {
+			published = append(published, m.Version)
+		}
+	}
+	resolved, err := ctsvc.ResolveWithinMajor(m.Version, published)
+	if err != nil {
+		return m.Version
+	}
+	return resolved
+}
+
 func instanceToAPI(row ctrepo.InstanceRow, config json.RawMessage) ctmodel.ToolInstance {
 	if len(config) == 0 {
 		config = json.RawMessage(`{}`)
 	}
-	return ctmodel.ToolInstance{
+	out := ctmodel.ToolInstance{
 		ID:              row.ID,
 		ToolID:          row.ToolID,
 		ToolVersion:     row.ToolVersion,
@@ -114,7 +143,20 @@ func instanceToAPI(row ctrepo.InstanceRow, config json.RawMessage) ctmodel.ToolI
 		Config:          config,
 		Status:          row.Status,
 		UpdatedAt:       row.UpdatedAt,
+		SandboxMode:     ctsvc.SandboxInProcess,
+		Contract:        ctsvc.ContractVersion,
 	}
+	if m := ctsvc.MustDefault().Get(row.ToolID); m != nil {
+		out.SandboxMode = ctsvc.EffectiveSandboxMode(m.Sandbox)
+		out.Contract = m.Contract
+		if out.Contract <= 0 {
+			out.Contract = ctsvc.ContractVersion
+		}
+		out.Deprecated = m.Deprecated
+		out.SunsetAt = m.SunsetAt
+	}
+	out.BreakerOpen = ctsvc.DefaultBreaker().IsOpen(row.ToolID)
+	return out
 }
 
 func (d Deps) handleContentToolsCatalog() http.HandlerFunc {

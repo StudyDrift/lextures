@@ -4067,7 +4067,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2\u2013AC.6 gaps."
+        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2–AC.6 gaps."
       }
     },
     {
@@ -4154,7 +4154,7 @@
       "risk": "critical",
       "client": "web",
       "coverage": "smoke",
-      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre\u2192serve\u2192post causal journey remains backlog.",
+      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre→serve→post causal journey remains backlog.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4259,7 +4259,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2\u2013CT.3."
+        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2–CT.3."
       }
     },
     {
@@ -4350,6 +4350,36 @@
         "dependency": true,
         "rollback": true,
         "notes": "Inherits content_tools_enabled (CT.1). studentResetAllowed + allowsSelfReset gate self-reset; async threshold via CONTENT_TOOLS_ASYNC_RESET_THRESHOLD."
+      }
+    },
+    {
+      "id": "CT.5",
+      "path": "docs/completed/content_tools/CT.5-tool-sdk-sandboxing-and-versioning.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers sandbox_probe iframe mount, interact→save→grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-sdk-sandbox.spec.ts"
+        },
+        {
+          "path": "e2e/tests/content-tools-runtime.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Depends on CT.1/CT.3. CONTENT_TOOLS_SANDBOX_MODE=off|optin|required; breaker + quarantine admin paths under /api/v1/admin/content-tools."
       }
     },
     {
@@ -8773,7 +8803,7 @@
       "risk": "minor",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright journey selects across paragraphs on a content page and asserts \u2318/Ctrl+C copies every paragraph.",
+      "rationale": "Playwright journey selects across paragraphs on a content page and asserts ⌘/Ctrl+C copies every paragraph.",
       "owner": "Web Platform",
       "specs": [
         {

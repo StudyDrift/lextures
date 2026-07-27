@@ -61,20 +61,51 @@ func contentToolsStateEnvelope(instanceID uuid.UUID, st *ctrepo.StateRow) ctmode
 	if len(state) == 0 {
 		state = json.RawMessage(`{}`)
 	}
+	schemaVer := st.StateSchemaVersion
+	if schemaVer <= 0 {
+		schemaVer = 1
+	}
 	env := ctmodel.ToolStateEnvelope{
-		InstanceID:  instanceID,
-		Revision:    st.Revision,
-		Status:      st.Status,
-		State:       state,
-		UpdatedAt:   &st.UpdatedAt,
-		ResetCount:  st.ResetCount,
-		LastResetAt: st.LastResetAt,
-		StateJSON:   state,
-		Scope:       st.Scope,
+		InstanceID:         instanceID,
+		Revision:           st.Revision,
+		Status:             st.Status,
+		State:              state,
+		UpdatedAt:          &st.UpdatedAt,
+		ResetCount:         st.ResetCount,
+		LastResetAt:        st.LastResetAt,
+		StateJSON:          state,
+		Scope:              st.Scope,
+		StateSchemaVersion: schemaVer,
 	}
 	if st.ScoreRaw != nil && st.ScoreMax != nil {
 		env.Score = &ctmodel.ToolScore{Raw: *st.ScoreRaw, Max: *st.ScoreMax}
 	}
+	return env
+}
+
+// contentToolsStateEnvelopeMigrated applies lazy migration (CT.5) before serving.
+func (d Deps) contentToolsStateEnvelopeMigrated(
+	ctx context.Context,
+	toolID string,
+	instanceID uuid.UUID,
+	st *ctrepo.StateRow,
+) ctmodel.ToolStateEnvelope {
+	if st == nil {
+		return contentToolsEmptyEnvelope(instanceID, ctrepo.ScopeEnrollment)
+	}
+	env := contentToolsStateEnvelope(instanceID, st)
+	doc, ver, quarantined, err := ctsvc.LazyMigrateState(ctx, d.Pool, toolID, st)
+	if err != nil {
+		env.Quarantined = true
+		return env
+	}
+	if quarantined {
+		env.Quarantined = true
+		return env
+	}
+	env.State = json.RawMessage(doc)
+	env.StateJSON = env.State
+	env.StateSchemaVersion = ver
 	return env
 }
 
@@ -258,7 +289,7 @@ func (d Deps) handleContentToolsStateGet() http.HandlerFunc {
 		}
 		env := contentToolsEmptyEnvelope(instanceID, scope)
 		if st != nil {
-			env = contentToolsStateEnvelope(instanceID, st)
+			env = d.contentToolsStateEnvelopeMigrated(r.Context(), inst.ToolID, instanceID, st)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(env)
@@ -369,17 +400,18 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			return
 		}
 
+		schemaVer := ctsvc.DefaultMigrations().CurrentStateSchemaVersion(inst.ToolID)
 		var st *ctrepo.StateRow
 		if scope == ctrepo.ScopePreview {
-			if nextStatus == ctsvc.StatusInProgress {
+			if nextStatus == ctsvc.StatusInProgress && schemaVer <= 1 {
 				st, err = ctrepo.UpsertPreviewState(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision)
 			} else {
-				st, err = ctrepo.UpsertPreviewStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus)
+				st, err = ctrepo.UpsertPreviewStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus, schemaVer)
 			}
-		} else if nextStatus == ctsvc.StatusInProgress {
+		} else if nextStatus == ctsvc.StatusInProgress && schemaVer <= 1 {
 			st, err = ctrepo.UpsertState(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision)
 		} else {
-			st, err = ctrepo.UpsertStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus)
+			st, err = ctrepo.UpsertStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus, schemaVer)
 		}
 		if err != nil {
 			if ctrepo.IsConfigSizeViolation(err) {
@@ -399,15 +431,16 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			} else {
 				latest, _ = ctrepo.GetState(r.Context(), d.Pool, instanceID, enrollID)
 			}
-			writeContentToolsRevisionConflict(w, contentToolsStateEnvelope(instanceID, latest))
+			writeContentToolsRevisionConflict(w, d.contentToolsStateEnvelopeMigrated(r.Context(), inst.ToolID, instanceID, latest))
 			return
 		}
 		ctsvc.IncStateSave(inst.ToolID, "ok")
 		actor := viewer
 		_ = ctrepo.InsertEvent(r.Context(), d.Pool, courseID, &instanceID, &enrollID, &actor, inst.ToolID, ctsvc.EventStateSaved, map[string]any{
-			"revision": st.Revision,
-			"status":   st.Status,
-			"scope":    scope,
+			"revision":           st.Revision,
+			"status":             st.Status,
+			"scope":              scope,
+			"stateSchemaVersion": st.StateSchemaVersion,
 		})
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(contentToolsStateEnvelope(instanceID, st))
@@ -502,11 +535,12 @@ func (d Deps) handleContentToolsStateSubmit() http.HandlerFunc {
 			return
 		}
 
+		schemaVer := ctsvc.DefaultMigrations().CurrentStateSchemaVersion(inst.ToolID)
 		var st *ctrepo.StateRow
 		if scope == ctrepo.ScopePreview {
-			st, err = ctrepo.UpsertPreviewStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus)
+			st, err = ctrepo.UpsertPreviewStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus, schemaVer)
 		} else {
-			st, err = ctrepo.UpsertStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus)
+			st, err = ctrepo.UpsertStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus, schemaVer)
 		}
 		if err != nil {
 			if ctrepo.IsConfigSizeViolation(err) {
@@ -524,7 +558,7 @@ func (d Deps) handleContentToolsStateSubmit() http.HandlerFunc {
 			} else {
 				latest, _ = ctrepo.GetState(r.Context(), d.Pool, instanceID, enrollID)
 			}
-			writeContentToolsRevisionConflict(w, contentToolsStateEnvelope(instanceID, latest))
+			writeContentToolsRevisionConflict(w, d.contentToolsStateEnvelopeMigrated(r.Context(), inst.ToolID, instanceID, latest))
 			return
 		}
 		ctsvc.IncStateSave(inst.ToolID, "submitted")

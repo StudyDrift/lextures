@@ -433,6 +433,17 @@
     "fetchContentFilterSettings",
     "patchContentFilterSettings"
   ],
+  "content-tools-admin-api.ts": [
+    "ContentToolMigrationJob",
+    "ContentToolQuarantineItem",
+    "ContentToolVersionRow",
+    "ContentToolsVersionsResponse",
+    "createContentToolMigration",
+    "fetchContentToolMigration",
+    "fetchContentToolQuarantine",
+    "fetchContentToolVersions",
+    "patchContentToolVersion"
+  ],
   "course-attendance-api.ts": [
     "ATTENDANCE_STATUS_OPTIONS",
     "AttendanceRecord",

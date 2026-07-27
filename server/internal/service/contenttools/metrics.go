@@ -100,6 +100,30 @@ var (
 		Help:      "Async content tool reset job duration.",
 		Buckets:   []float64{0.1, 0.5, 1, 2.5, 5, 10, 30, 60},
 	})
+
+	bridgeMessagesTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_bridge_messages_total",
+		Help:      "Sandbox postMessage bridge outcomes by tool_id, type, and outcome.",
+	}, []string{"tool_id", "type", "outcome"})
+
+	migrationDocsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_migration_docs_total",
+		Help:      "Content tool state migration document outcomes.",
+	}, []string{"tool_id", "from", "to", "outcome"})
+
+	breakerState = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_breaker_state",
+		Help:      "1 when the per-tool circuit breaker is open, else 0.",
+	}, []string{"tool_id"})
+
+	bundleBytes = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_bundle_bytes",
+		Help:      "Gzipped renderer bundle size in bytes by tool_id.",
+	}, []string{"tool_id"})
 )
 
 func registerMetrics() {
@@ -109,10 +133,13 @@ func registerMetrics() {
 			registrySize, killSwitchEngaged,
 			stateSavesTotal, stateConflictsTotal, actionLatency, renderErrorsTotal, offlineReplaysTotal,
 			resetsTotal, resetRowsTotal, resetRestoresTotal, resetJobDuration,
+			bridgeMessagesTotal, migrationDocsTotal, breakerState, bundleBytes,
 		)
 		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
 		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
 		offlineReplaysTotal.WithLabelValues("_reserved").Add(0)
+		bridgeMessagesTotal.WithLabelValues("_reserved", "_reserved", "_reserved").Add(0)
+		migrationDocsTotal.WithLabelValues("_reserved", "0", "0", "_reserved").Add(0)
 	})
 }
 
@@ -214,5 +241,50 @@ func IncResetRestores() {
 func ObserveResetJobDuration(seconds float64) {
 	registerMetrics()
 	resetJobDuration.Observe(seconds)
+}
+
+// IncBridgeMessage increments lextures_content_tool_bridge_messages_total.
+func IncBridgeMessage(toolID, msgType, outcome string) {
+	registerMetrics()
+	if toolID == "" {
+		toolID = "_unknown"
+	}
+	if msgType == "" {
+		msgType = "_unknown"
+	}
+	if outcome == "" {
+		outcome = "ok"
+	}
+	bridgeMessagesTotal.WithLabelValues(toolID, msgType, outcome).Inc()
+}
+
+// IncMigrationDocs increments lextures_content_tool_migration_docs_total.
+func IncMigrationDocs(toolID, from, to, outcome string) {
+	registerMetrics()
+	if toolID == "" {
+		toolID = "_unknown"
+	}
+	if outcome == "" {
+		outcome = "ok"
+	}
+	migrationDocsTotal.WithLabelValues(toolID, from, to, outcome).Inc()
+}
+
+// SetBreakerStateGauge sets lextures_content_tool_breaker_state{tool_id}.
+func SetBreakerStateGauge(toolID string, open float64) {
+	registerMetrics()
+	if toolID == "" {
+		return
+	}
+	breakerState.WithLabelValues(toolID).Set(open)
+}
+
+// SetBundleBytesGauge sets lextures_content_tool_bundle_bytes{tool_id}.
+func SetBundleBytesGauge(toolID string, bytes float64) {
+	registerMetrics()
+	if toolID == "" {
+		return
+	}
+	bundleBytes.WithLabelValues(toolID).Set(bytes)
 }
 

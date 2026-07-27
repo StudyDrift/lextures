@@ -1204,6 +1204,8 @@ export type ContentToolState = {
   lastResetAt?: string | null
   stateJson: Record<string, unknown>
   scope?: string
+  stateSchemaVersion?: number
+  quarantined?: boolean
 }
 
 export type ContentToolInstance = {
@@ -1219,6 +1221,11 @@ export type ContentToolInstance = {
   updatedAt: string
   /** Present when listed with `withState=1`. */
   state?: ContentToolState | null
+  sandboxMode?: 'inprocess' | 'iframe'
+  contract?: number
+  breakerOpen?: boolean
+  deprecated?: boolean
+  sunsetAt?: string
 }
 
 export type ContentToolManifest = {

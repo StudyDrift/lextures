@@ -12,6 +12,10 @@ func FilterCatalog(reg *Registry, allowedToolIDs []string, interactRole string, 
 	}
 	out := make([]ctmodel.CatalogTool, 0)
 	for _, m := range reg.List() {
+		// FR-16 / AC-11: deprecated tools are hidden from the authoring palette.
+		if m.Deprecated {
+			continue
+		}
 		if !ToolAllowedByAllowlist(allowedToolIDs, m.ID) {
 			continue
 		}
@@ -97,6 +101,25 @@ func ManifestToPublic(m *CompiledManifest) (ctmodel.ToolManifestPublic, error) {
 		AutosaveMs:      EffectiveAutosaveMs(m),
 		RespectsDueDate: m.RespectsDueDate,
 		AllowsSelfReset: m.AllowsSelfReset,
+		Deprecated:          m.Deprecated,
+		SunsetAt:            m.SunsetAt,
+		Contract:            m.Contract,
+		StateSchemaVersion:  m.StateSchemaVersion,
+		ConfigSchemaVersion: m.ConfigSchemaVersion,
+	}
+	if m.Sandbox == "" {
+		out.Sandbox = SandboxInProcess
+	} else {
+		out.Sandbox = m.Sandbox
+	}
+	if out.Contract <= 0 {
+		out.Contract = ContractVersion
+	}
+	if out.StateSchemaVersion <= 0 {
+		out.StateSchemaVersion = 1
+	}
+	if out.ConfigSchemaVersion <= 0 {
+		out.ConfigSchemaVersion = 1
 	}
 	if len(m.Actions) > 0 {
 		out.Actions = make([]ctmodel.ActionPublic, 0, len(m.Actions))

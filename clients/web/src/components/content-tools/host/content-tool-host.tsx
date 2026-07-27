@@ -1,4 +1,5 @@
 import { Suspense, useState } from 'react'
+import { TOOL_SDK_CONTRACT_VERSION } from '@lextures/tool-sdk'
 import { useTranslation } from 'react-i18next'
 import { usePermissions } from '../../../context/use-permissions'
 import { parseFencePayload } from '../../../lib/content-tools/lex-tool-fence'
@@ -6,6 +7,7 @@ import { permCourseItemCreate } from '../../../lib/rbac-api'
 import { ToolResponsesPanel } from '../instructor/tool-responses-panel'
 import { useContentToolsPage } from './content-tools-page-context'
 import { isRendererRegistered, resolveRenderer } from './registry'
+import { SandboxIframeHost } from './sandbox/sandbox-iframe-host'
 import { ToolErrorBoundary } from './tool-error-boundary'
 import { ToolFrame } from './tool-frame'
 import { useAnnounce } from './tool-live-region'
@@ -25,7 +27,7 @@ function ContentToolHostMounted({
   instanceId: string
   toolId: string
 }) {
-  const { t } = useTranslation('contentTools')
+  const { t, i18n } = useTranslation('contentTools')
   const announce = useAnnounce()
   const page = useContentToolsPage()
   const { allows, loading: permLoading } = usePermissions()
@@ -80,6 +82,34 @@ function ContentToolHostMounted({
     )
   }
 
+  if (instance.breakerOpen) {
+    return (
+      <ToolPlaceholder
+        reason="maintenance"
+        message={t('contentTools.sdk.maintenance')}
+      />
+    )
+  }
+
+  const contract = instance.contract ?? TOOL_SDK_CONTRACT_VERSION
+  if (contract !== TOOL_SDK_CONTRACT_VERSION) {
+    return (
+      <ToolPlaceholder
+        reason="updateRequired"
+        message={t('contentTools.sdk.updateRequired')}
+      />
+    )
+  }
+
+  if (instance.state?.quarantined) {
+    return (
+      <ToolPlaceholder
+        reason="recovery"
+        message={t('contentTools.sdk.recovery')}
+      />
+    )
+  }
+
   if (archived) {
     return (
       <ToolPlaceholder
@@ -89,7 +119,10 @@ function ContentToolHostMounted({
     )
   }
 
-  if (!Renderer || !isRendererRegistered(toolId)) {
+  const sandboxMode = instance.sandboxMode ?? 'inprocess'
+  const useIframe = sandboxMode === 'iframe'
+
+  if (!useIframe && (!Renderer || !isRendererRegistered(toolId))) {
     return (
       <ToolPlaceholder
         reason="unavailable"
@@ -97,6 +130,15 @@ function ContentToolHostMounted({
       />
     )
   }
+
+  const deprecatedNotice =
+    instance.deprecated || instance.sunsetAt ? (
+      <p className="mb-2 text-xs text-amber-800 dark:text-amber-200" role="status">
+        {instance.sunsetAt
+          ? t('contentTools.sdk.sunsetNotice', { date: instance.sunsetAt })
+          : t('contentTools.sdk.deprecatedNotice')}
+      </p>
+    ) : null
 
   return (
     <>
@@ -114,32 +156,62 @@ function ContentToolHostMounted({
         responsesLabel={canManage ? t('contentTools.instructor.responses') : undefined}
         onResponsesClick={canManage ? () => setResponsesOpen(true) : undefined}
       >
+        {deprecatedNotice}
         <ToolErrorBoundary
           title={t('contentTools.runtime.errorTitle')}
           retryLabel={t('contentTools.runtime.retry')}
         >
-          <Suspense
-            fallback={
-              <ToolPlaceholder reason="loading" message={t('contentTools.runtime.loading')} />
-            }
-          >
-            <Renderer
-              instanceId={instanceId}
+          {useIframe ? (
+            <SandboxIframeHost
               toolId={toolId}
+              instanceId={instanceId}
               config={instance.config}
               state={toolState.state}
-              status={toolState.status}
+              revision={toolState.revision}
               readOnly={readOnly}
+              locale={i18n.language || 'en'}
+              dir={i18n.dir() === 'rtl' ? 'rtl' : 'ltr'}
               save={toolState.save}
-              submit={toolState.submit}
-              runAction={async (name, input) => {
+              runAction={async (name: string, input: Record<string, unknown>) => {
                 const res = await action.runAction(name, input)
                 return res.result
               }}
-              t={(key, options) => t(key, options)}
               announce={announce}
+              hostile={
+                typeof window !== 'undefined' &&
+                new URLSearchParams(window.location.search).get('ct5Hostile') === '1'
+              }
+              title={label}
             />
-          </Suspense>
+          ) : Renderer ? (
+            <Suspense
+              fallback={
+                <ToolPlaceholder reason="loading" message={t('contentTools.runtime.loading')} />
+              }
+            >
+              <Renderer
+                instanceId={instanceId}
+                toolId={toolId}
+                config={instance.config}
+                state={toolState.state}
+                status={toolState.status}
+                readOnly={readOnly}
+                save={toolState.save}
+                submit={toolState.submit}
+                runAction={async (name: string, input: Record<string, unknown>) => {
+                  const res = await action.runAction(name, input)
+                  return res.result
+                }}
+                t={(key: string, options?: Record<string, unknown>) => t(key, options)}
+                announce={announce}
+              />
+            </Suspense>
+          ) : (
+            <ToolPlaceholder
+              reason="unavailable"
+              message={t('contentTools.runtime.unavailable')}
+            />
+          )}
         </ToolErrorBoundary>
         {toolState.score ? (
           <p className="mt-2 text-xs text-slate-600 dark:text-neutral-300">

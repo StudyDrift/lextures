@@ -18,6 +18,11 @@ const tauriDevHost = process.env.TAURI_DEV_HOST
 export default defineConfig({
   clearScreen: false,
   envPrefix: ['VITE_', 'TAURI_ENV_'],
+  resolve: {
+    alias: {
+      '@lextures/tool-sdk': resolve(__dirname, 'src/lib/tool-sdk/index.ts'),
+    },
+  },
   define: {
     __APP_RELEASE_VERSION__: JSON.stringify(process.env.VITE_APP_RELEASE_VERSION ?? packageVersion),
   },

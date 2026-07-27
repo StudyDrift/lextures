@@ -5,6 +5,7 @@ package tools
 
 import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/noop_probe"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/sandbox_probe"
 )
 
 // Entry is one built-in tool's embeddable assets.
@@ -21,6 +22,11 @@ func All() []Entry {
 			ID:           noop_probe.ID,
 			ManifestJSON: noop_probe.ManifestJSON,
 			I18nEN:       noop_probe.I18nEN,
+		},
+		{
+			ID:           sandbox_probe.ID,
+			ManifestJSON: sandbox_probe.ManifestJSON,
+			I18nEN:       sandbox_probe.I18nEN,
 		},
 	}
 }

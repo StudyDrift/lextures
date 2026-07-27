@@ -51,6 +51,7 @@ import (
 	learnerprofilederivers "github.com/lextures/lextures/server/internal/service/learnerprofile/derivers"
 	marketplacecoursesservice "github.com/lextures/lextures/server/internal/service/marketplacecourses"
 	acsvc "github.com/lextures/lextures/server/internal/service/adaptivecontent"
+	"github.com/lextures/lextures/server/internal/service/contenttools"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
@@ -175,6 +176,12 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	// BACKGROUND_JOBS_ENABLED; safe to start on every instance — workers claim
 	// rows with SELECT ... FOR UPDATE SKIP LOCKED so they coordinate via Postgres.
 	jobRegistry := background.StartJobQueueWorker(ctx, pool, platform)
+	// CT.5: mirror in-process Content Tools registry into content_tool_versions.
+	if pool != nil {
+		if err := contenttools.SyncRegistryMirror(ctx, pool, contenttools.MustDefault()); err != nil {
+			slog.Warn("contenttools.registry_mirror_sync_failed", "err", err)
+		}
+	}
 	// AC.4: dedicated adaptive content generation pipeline (Postgres SKIP LOCKED).
 	background.StartAdaptiveContentPipelineWorker(ctx, pool, merged)
 

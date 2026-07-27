@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "StudyDrift API",
-    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features \u2014 use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for \u22651 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure).",
+    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features — use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for ≥1 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure).",
     "version": "0.2.1"
   },
   "tags": [
@@ -48,7 +48,7 @@
     },
     {
       "name": "transcripts",
-      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01\u2013T06)"
+      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01–T06)"
     },
     {
       "name": "content-tools",
@@ -2547,7 +2547,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Sign in with Apple (AuthenticationServices identity token \u2192 Lextures tokens)",
+        "summary": "Native Sign in with Apple (AuthenticationServices identity token → Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -2600,7 +2600,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Google Sign-In (Credential Manager ID token \u2192 Lextures tokens)",
+        "summary": "Native Google Sign-In (Credential Manager ID token → Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -3352,7 +3352,7 @@
         ],
         "responses": {
           "200": {
-            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } \u2014 no owned field"
+            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } — no owned field"
           },
           "400": {
             "description": "Invalid filter"
@@ -3532,7 +3532,7 @@
             "description": "Sign in required"
           },
           "402": {
-            "description": "Paid course \u2014 use checkout; body includes checkoutHint"
+            "description": "Paid course — use checkout; body includes checkoutHint"
           },
           "404": {
             "description": "Not listed or feature disabled"
@@ -3569,7 +3569,7 @@
             "description": "{ checkoutUrl, sessionId } or { alreadyOwned, courseCode, courseId }"
           },
           "400": {
-            "description": "Free course \u2014 use claim instead"
+            "description": "Free course — use claim instead"
           },
           "401": {
             "description": "Sign in required"
@@ -4294,7 +4294,7 @@
         "tags": [
           "accommodations"
         ],
-        "summary": "List a learner\u2019s accommodation records (coordinator perm)",
+        "summary": "List a learner’s accommodation records (coordinator perm)",
         "security": [
           {
             "bearerAuth": []
@@ -4461,7 +4461,7 @@
           "accommodations",
           "me"
         ],
-        "summary": "List this learner\u2019s active (by date range) accommodation summary entries",
+        "summary": "List this learner’s active (by date range) accommodation summary entries",
         "security": [
           {
             "bearerAuth": []
@@ -4482,7 +4482,7 @@
         "tags": [
           "admin"
         ],
-        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with \u2265200 responses; optional conceptId scopes to one concept",
+        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with ≥200 responses; optional conceptId scopes to one concept",
         "security": [
           {
             "bearerAuth": []
@@ -7740,7 +7740,7 @@
         "tags": [
           "courses"
         ],
-        "summary": "Force-rename a player (plan IQ.9); empty body \u2192 Player N",
+        "summary": "Force-rename a player (plan IQ.9); empty body → Player N",
         "security": [
           {
             "bearerAuth": []
@@ -8943,7 +8943,7 @@
           "courses"
         ],
         "summary": "Board realtime WebSocket (plan VC.4)",
-        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"\u2026\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
+        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"…\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
         "parameters": [
           {
             "name": "course_code",
@@ -13235,6 +13235,138 @@
           }
         }
       }
+    },
+    "/api/v1/admin/content-tools/versions": {
+      "get": {
+        "tags": [
+          "admin",
+          "content-tools"
+        ],
+        "summary": "List Content Tool versions (CT.5)",
+        "operationId": "adminContentToolsVersionsList",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content-tools/versions/{tool_id}/{version}": {
+      "patch": {
+        "tags": [
+          "admin",
+          "content-tools"
+        ],
+        "summary": "Patch Content Tool version status/breaker (CT.5)",
+        "operationId": "adminContentToolsVersionPatch",
+        "parameters": [
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content-tools/migrations": {
+      "post": {
+        "tags": [
+          "admin",
+          "content-tools"
+        ],
+        "summary": "Create Content Tool migration job (CT.5)",
+        "operationId": "adminContentToolsMigrationCreate",
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content-tools/migrations/{job_id}": {
+      "get": {
+        "tags": [
+          "admin",
+          "content-tools"
+        ],
+        "summary": "Get Content Tool migration job (CT.5)",
+        "operationId": "adminContentToolsMigrationGet",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content-tools/quarantine": {
+      "get": {
+        "tags": [
+          "admin",
+          "content-tools"
+        ],
+        "summary": "List quarantined Content Tool states (CT.5)",
+        "operationId": "adminContentToolsQuarantineList",
+        "parameters": [
+          {
+            "name": "toolId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -13597,7 +13729,7 @@
           },
           "sourceRef": {
             "type": "object",
-            "description": "topic/passage text or contentId \u2014 never student data",
+            "description": "topic/passage text or contentId — never student data",
             "properties": {
               "topic": {
                 "type": "string"

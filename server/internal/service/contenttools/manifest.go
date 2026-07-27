@@ -44,6 +44,11 @@ var AllowedConflictPolicies = map[string]struct{}{
 	ConflictServerWins: {}, ConflictClientWins: {}, ConflictMerge: {},
 }
 
+// AllowedSandboxModes is the closed set of mount isolation modes (CT.5).
+var AllowedSandboxModes = map[string]struct{}{
+	SandboxInProcess: {}, SandboxIframe: {},
+}
+
 // Manifest is the declarative contract every Content Tool obeys (FR-3).
 type Manifest struct {
 	ID              string          `json:"id"`
@@ -66,6 +71,14 @@ type Manifest struct {
 	AutosaveMs      int             `json:"autosaveMs,omitempty"`
 	RespectsDueDate bool            `json:"respectsDueDate,omitempty"`
 	AllowsSelfReset bool            `json:"allowsSelfReset,omitempty"`
+	// CT.5 fields
+	Sandbox              string `json:"sandbox,omitempty"` // inprocess | iframe
+	Deprecated           bool   `json:"deprecated,omitempty"`
+	SunsetAt             string `json:"sunsetAt,omitempty"` // RFC3339 date
+	Contract             int    `json:"contract,omitempty"`
+	StateSchemaVersion   int    `json:"stateSchemaVersion,omitempty"`
+	ConfigSchemaVersion  int    `json:"configSchemaVersion,omitempty"`
+	MaxBundleBytesGzip   int    `json:"maxBundleBytesGzip,omitempty"`
 }
 
 // ActionDecl declares a server-side action a tool may invoke (CT.3).
@@ -243,6 +256,17 @@ func ValidateManifest(m Manifest, i18n map[string]string) error {
 		if a.RateLimitPerMin < 0 {
 			return fmt.Errorf("tool %s: action %s rateLimitPerMin must be >= 0", m.ID, name)
 		}
+	}
+	if m.Sandbox != "" {
+		if _, ok := AllowedSandboxModes[m.Sandbox]; !ok {
+			return fmt.Errorf("tool %s: unknown sandbox mode %q", m.ID, m.Sandbox)
+		}
+	}
+	if m.Contract != 0 && !ContractSupported(m.Contract) {
+		return fmt.Errorf("tool %s: unsupported contract %d (supported %d–%d)", m.ID, m.Contract, SupportedContractMin, SupportedContractMax)
+	}
+	if m.StateSchemaVersion < 0 || m.ConfigSchemaVersion < 0 {
+		return fmt.Errorf("tool %s: schema versions must be >= 0", m.ID)
 	}
 	return nil
 }
