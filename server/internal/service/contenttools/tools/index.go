@@ -4,6 +4,7 @@
 package tools
 
 import (
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/ask_questions"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/noop_probe"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/sandbox_probe"
 )
@@ -18,6 +19,11 @@ type Entry struct {
 // All returns every first-party tool. Keep sorted by id.
 func All() []Entry {
 	return []Entry{
+		{
+			ID:           ask_questions.ID,
+			ManifestJSON: ask_questions.ManifestJSON,
+			I18nEN:       ask_questions.I18nEN,
+		},
 		{
 			ID:           noop_probe.ID,
 			ManifestJSON: noop_probe.ManifestJSON,

@@ -1158,6 +1158,12 @@ export type ContentToolInstanceAnalytics = {
   }>
   needsAttention: Array<{ enrollmentId: string; displayName: string; reason: string }>
   countsForGrade: boolean
+  askQuestionsThemes?: Array<{
+    theme: string
+    count: number
+    representativeExamples: string[]
+  }>
+  totalQuestions?: number | null
 }
 
 export type ContentToolStudentProgress = {
@@ -1353,6 +1359,7 @@ export type ContentToolInstance = {
   deprecated?: boolean
   sunsetAt?: string
   tombstone?: boolean
+  capabilities?: string[]
 }
 
 export type ContentToolManifest = {

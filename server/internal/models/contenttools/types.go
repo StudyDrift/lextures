@@ -304,6 +304,8 @@ type ToolInstance struct {
 	BreakerOpen bool   `json:"breakerOpen,omitempty"`
 	Deprecated  bool   `json:"deprecated,omitempty"`
 	SunsetAt    string `json:"sunsetAt,omitempty"`
+	// Capabilities copied from the registered manifest for host gating (e.g. AI disclosure).
+	Capabilities []string `json:"capabilities,omitempty"`
 	// CT.9: true when the org installation was revoked (read-only tombstone).
 	Tombstone bool `json:"tombstone,omitempty"`
 }
@@ -462,6 +464,16 @@ type InstanceAnalytics struct {
 	Facets           []FacetAggregate    `json:"facets"`
 	NeedsAttention   []NeedsAttention    `json:"needsAttention"`
 	CountsForGrade   bool                `json:"countsForGrade"`
+	// AskQuestionsThemes is the CT.10 clustered question themes (anonymized).
+	AskQuestionsThemes []AskQuestionsTheme `json:"askQuestionsThemes,omitempty"`
+	TotalQuestions     *int                `json:"totalQuestions,omitempty"`
+}
+
+// AskQuestionsTheme is one anonymized question cluster for instructor insights (CT.10 FR-11).
+type AskQuestionsTheme struct {
+	Theme                  string   `json:"theme"`
+	Count                  int      `json:"count"`
+	RepresentativeExamples []string `json:"representativeExamples"`
 }
 
 // PageToolsOverview is GET .../content-tools/analytics?itemId=.

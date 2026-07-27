@@ -154,6 +154,18 @@ var (
 		Name:      "content_tool_a11y_gate_failures_total",
 		Help:      "Content tool accessibility conformance gate failures by tool_id (CT.8).",
 	}, []string{"tool_id"})
+
+	askQuestionsTurnsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_ask_questions_turns_total",
+		Help:      "Ask Questions turn outcomes by outcome (CT.10).",
+	}, []string{"outcome"})
+
+	askCitationsDroppedTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_ask_citations_dropped_total",
+		Help:      "Ask Questions citations dropped because they did not resolve to context segments (CT.10).",
+	})
 )
 
 func registerMetrics() {
@@ -166,6 +178,7 @@ func registerMetrics() {
 			bridgeMessagesTotal, migrationDocsTotal, breakerState, bundleBytes,
 			policyDenialsTotal, moderationActionsTotal, contentFilterFlagsTotal,
 			crisisEscalationsTotal, a11yGateFailuresTotal,
+			askQuestionsTurnsTotal, askCitationsDroppedTotal,
 		)
 		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
 		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
@@ -176,6 +189,7 @@ func registerMetrics() {
 		moderationActionsTotal.WithLabelValues("_reserved").Add(0)
 		contentFilterFlagsTotal.WithLabelValues("_reserved").Add(0)
 		a11yGateFailuresTotal.WithLabelValues("_reserved").Add(0)
+		askQuestionsTurnsTotal.WithLabelValues("_reserved").Add(0)
 	})
 }
 
@@ -364,5 +378,23 @@ func IncA11yGateFailure(toolID string) {
 		toolID = "_unknown"
 	}
 	a11yGateFailuresTotal.WithLabelValues(toolID).Inc()
+}
+
+// ObserveAskQuestionsTurn increments lextures_content_tool_ask_questions_turns_total{outcome}.
+func ObserveAskQuestionsTurn(outcome string) {
+	registerMetrics()
+	if outcome == "" {
+		outcome = "_unknown"
+	}
+	askQuestionsTurnsTotal.WithLabelValues(outcome).Inc()
+}
+
+// ObserveAskCitationsDropped increments lextures_content_tool_ask_citations_dropped_total.
+func ObserveAskCitationsDropped(n int) {
+	registerMetrics()
+	if n <= 0 {
+		return
+	}
+	askCitationsDroppedTotal.Add(float64(n))
 }
 

@@ -1065,6 +1065,16 @@ export const contentToolInstanceAnalyticsSchema = z.object({
     }),
   ),
   countsForGrade: z.boolean().default(false),
+  askQuestionsThemes: z
+    .array(
+      z.object({
+        theme: z.string(),
+        count: z.number(),
+        representativeExamples: z.array(z.string()),
+      }),
+    )
+    .optional(),
+  totalQuestions: z.number().nullable().optional(),
 })
 
 export const contentToolPageAnalyticsSchema = z.object({
@@ -1198,6 +1208,7 @@ export const contentToolInstanceSchema = z.object({
   tombstone: z.boolean().optional(),
   deprecated: z.boolean().optional(),
   sunsetAt: z.string().optional(),
+  capabilities: z.array(z.string()).optional(),
 })
 
 export const contentToolInstancesListSchema = z.object({

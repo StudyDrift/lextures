@@ -17,6 +17,7 @@ import (
 	ctmodel "github.com/lextures/lextures/server/internal/models/contenttools"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	"github.com/lextures/lextures/server/internal/ratelimit"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
 
@@ -160,7 +161,8 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 		}
 
 		start := time.Now()
-		result, err := ctsvc.DispatchAction(m, actionName, ctsvc.ActionContext{
+		orgID, _ := ctrepo.CourseOrgID(r.Context(), d.Pool, courseID)
+		actionCtx := ctsvc.ActionContext{
 			Ctx:          r.Context(),
 			CourseID:     courseID,
 			CourseCode:   courseCode,
@@ -173,7 +175,27 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 			Status:       status,
 			Revision:     revision,
 			Input:        body.Input,
-		})
+			Pool:         d.Pool,
+			OrgID:        orgID,
+			GatewayCfg:   d.aiGatewayConfig(),
+		}
+		if decl.RequiresAI || (m.AI != nil && m.AI.Required) {
+			actionCtx.Model = "dry-run"
+			if d.aiConfigured(r.Context(), orgID) {
+				actionCtx.Completer = d.aiProviderResolver()
+				actionCtx.Model = ""
+			} else if strings.EqualFold(d.effectiveConfig().AppEnv, "local") || strings.EqualFold(d.effectiveConfig().AppEnv, "test") {
+				// Local/e2e without provider keys: exercise CT.6 rails via dry-run.
+				actionCtx.Completer = aiprovider.DryRunToolCallingCompleter{}
+				gw := d.aiGatewayConfig()
+				gw.DisclosureEnabled = false
+				actionCtx.GatewayCfg = gw
+			} else {
+				apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeServiceUnavailable, aiNotConfiguredMsg)
+				return
+			}
+		}
+		result, err := ctsvc.DispatchAction(m, actionName, actionCtx)
 		ctsvc.ObserveActionLatency(inst.ToolID, actionName, time.Since(start).Seconds())
 		if err != nil {
 			ctsvc.DefaultBreaker().RecordFailure(inst.ToolID, err.Error(), time.Now().UTC())

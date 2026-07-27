@@ -128,6 +128,10 @@ func init() {
 		{Key: "hasResponse", Label: "contentTools.analytics.facets.hasResponse", Type: "boolean"},
 	})
 	RegisterProjector("sandbox_probe", defaultProject, nil)
+	RegisterProjector("ask_questions", projectAskQuestions, []FacetSchema{
+		{Key: "questionCount", Label: "contentTools.analytics.facets.questionCount", Type: "number"},
+		{Key: "hasConversation", Label: "contentTools.analytics.facets.hasConversation", Type: "boolean"},
+	})
 }
 
 func projectNoopProbe(in ProjectInput) Summary {
@@ -145,5 +149,27 @@ func projectNoopProbe(in ProjectInput) Summary {
 	s.Facets["hasResponse"] = hasResp
 	correct := in.ScoreRaw != nil && in.ScoreMax != nil && *in.ScoreMax > 0 && *in.ScoreRaw >= *in.ScoreMax
 	s.Facets["correct"] = correct
+	return s
+}
+
+func projectAskQuestions(in ProjectInput) Summary {
+	s := defaultProject(in)
+	var st struct {
+		Turns []struct {
+			Role string `json:"role"`
+		} `json:"turns"`
+	}
+	_ = json.Unmarshal(in.StateJSON, &st)
+	qCount := 0
+	for _, t := range st.Turns {
+		if t.Role == "user" {
+			qCount++
+		}
+	}
+	if qCount > 0 {
+		s.Engaged = true
+	}
+	s.Facets["questionCount"] = qCount
+	s.Facets["hasConversation"] = qCount > 0
 	return s
 }

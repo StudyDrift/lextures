@@ -47,8 +47,8 @@ function ContentToolHostMounted({
   const [reportBusy, setReportBusy] = useState(false)
   const canManage =
     Boolean(courseCode) && !permLoading && allows(permCourseItemCreate(courseCode))
-  // Probes are non-AI; real AI tools declare the capability in their manifest.
-  const requiresAI = false
+  // AI tools declare the `ai` capability on their manifest (surfaced on the instance).
+  const requiresAI = Boolean(instance?.capabilities?.includes('ai'))
 
   const archived = instance?.status === 'archived'
   const readOnly = archived

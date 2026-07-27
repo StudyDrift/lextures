@@ -1,0 +1,174 @@
+{
+  "id": "ask_questions",
+  "version": "1.0.0",
+  "name": "contentTools.tools.ask_questions.name",
+  "category": "read",
+  "capabilities": ["state", "ai", "network"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "intro": {
+        "type": "string",
+        "description": "Markdown intro shown above the conversation"
+      },
+      "placeholder": {
+        "type": "string",
+        "description": "Input placeholder text"
+      },
+      "stance": {
+        "type": "string",
+        "enum": ["explain", "socratic", "hint_only"],
+        "default": "explain",
+        "description": "Teaching stance for answers"
+      },
+      "groundingNotes": {
+        "type": "string",
+        "description": "Instructor-only grounding notes (not shown to students)",
+        "x-lex-sensitive": true
+      },
+      "extraSourceUrls": {
+        "type": "array",
+        "items": { "type": "string", "format": "uri" },
+        "maxItems": 20,
+        "description": "Extra source URLs beyond those in the activity body"
+      },
+      "offTopicPolicy": {
+        "type": "string",
+        "enum": ["redirect", "answer"],
+        "default": "redirect"
+      },
+      "maxQuestionsPerDay": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20
+      },
+      "maxTurns": {
+        "type": "integer",
+        "minimum": 4,
+        "maximum": 200,
+        "default": 40
+      },
+      "showCitations": {
+        "type": "boolean",
+        "default": true
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "turns": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "role", "text", "createdAt"],
+          "properties": {
+            "id": { "type": "string" },
+            "role": { "type": "string", "enum": ["user", "assistant"] },
+            "text": { "type": "string" },
+            "citations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind", "id", "title"],
+                "properties": {
+                  "kind": { "type": "string", "enum": ["section", "file", "link"] },
+                  "id": { "type": "string" },
+                  "title": { "type": "string" },
+                  "url": { "type": "string" }
+                }
+              }
+            },
+            "createdAt": { "type": "string" },
+            "tokens": { "type": "integer", "minimum": 0 },
+            "error": {
+              "type": "string",
+              "enum": ["provider_unavailable", "filtered", "budget"]
+            }
+          }
+        }
+      },
+      "summary": { "type": "string" },
+      "askedToday": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "date": { "type": "string" },
+          "count": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "draft": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "none" },
+  "ai": { "featureId": "content_tool_ask", "required": true },
+  "storage": { "maxStateBytes": 64000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "log",
+    "wcagNotes": "Message list uses role=log with polite live updates; citations are named links; focus stays in the input after submit."
+  },
+  "dataSheet": {
+    "collects": {
+      "turns": {
+        "purpose": "Conversation transcript of student questions and grounded AI answers",
+        "retention": "life_of_enrollment"
+      },
+      "summary": {
+        "purpose": "Rolling summary of trimmed turns for continuity",
+        "retention": "life_of_enrollment"
+      },
+      "askedToday": {
+        "purpose": "Per-day question counting for rate limits",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": true,
+    "processors": ["aigateway", "aiprovider"],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "Streaming answers announce once at completion to avoid live-region flooding.",
+    "keyboardAlternative": true,
+    "aiTransparency": {
+      "purpose": "Answer student questions about this activity using grounded course sources",
+      "modelFamily": "course-configured chat model via aiprovider",
+      "humanOversight": "Instructors can review transcripts, reset conversations, and see clustered themes",
+      "limitations": "Answers may be incomplete when sources are pending; the tool refuses graded-work completion"
+    }
+  },
+  "i18nNamespace": "contentTools.tools.ask_questions",
+  "ui": {
+    "renderer": "ask_questions",
+    "icon": "message-circle-question",
+    "group": "read"
+  },
+  "actions": [
+    {
+      "name": "ask",
+      "rateLimitPerMin": 20,
+      "requiresAi": true,
+      "description": "Ask a grounded question about this activity"
+    },
+    {
+      "name": "clear",
+      "rateLimitPerMin": 10,
+      "description": "Clear the conversation when self-reset is allowed"
+    }
+  ],
+  "conflictPolicy": "merge",
+  "autosaveMs": 2000,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

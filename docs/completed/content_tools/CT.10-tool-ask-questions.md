@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | BLOCKER (one of the two reference tools that prove the framework) |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | AI platform team |
 | **Depends on** | CT.1, CT.2, CT.3, CT.6 (grounding), CT.8 (AI governance) |
