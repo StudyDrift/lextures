@@ -144,17 +144,32 @@ test.describe('Content Tools authoring (CT.2)', () => {
       await configPanel.getByRole('button', { name: /^save$/i }).click()
 
       // Page-level Save in the content page header (indigo primary).
+      // Do not match generic "Saved" from tool sync chips — wait for PATCH + "Page saved".
+      const pageSave = page.waitForResponse(
+        (res) =>
+          res.request().method() === 'PATCH' &&
+          res.url().includes(`/content-pages/${contentPage.id}`) &&
+          res.ok(),
+        { timeout: 20_000 },
+      )
       await page.locator('button.bg-indigo-600').filter({ hasText: /^Save$/ }).click()
-      await expect(page.getByText(/page saved|saved|updated/i).first()).toBeVisible({
+      await pageSave
+      await expect(page.getByText(/^Page saved$/i).first()).toBeVisible({
         timeout: 12_000,
       })
 
+      await expect
+        .poll(
+          async () =>
+            fetchContentPageMarkdown(instructorToken, courseCode, contentPage.id),
+          { timeout: 15_000, message: 'content page markdown includes lex-tool fence' },
+        )
+        .toMatch(/```lex-tool/)
       const markdown = await fetchContentPageMarkdown(
         instructorToken,
         courseCode,
         contentPage.id,
       )
-      expect(markdown).toMatch(/```lex-tool/)
       expect(markdown).toMatch(/"toolId":"noop_probe"/)
 
       await page.reload()

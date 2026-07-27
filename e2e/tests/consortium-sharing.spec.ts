@@ -5,6 +5,7 @@ import { execSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { test, expect } from '@playwright/test'
+import { withPlatformBooleanRestore } from '../lib/platform-feature-matrix-helpers.js'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -144,58 +145,72 @@ async function enableFeatures(adminToken: string) {
   expect(res.ok).toBeTruthy()
 }
 
-test('Consortium: unauthenticated endpoints return 401', async () => {
-  const adminToken = await getAdminToken()
-  await enableFeatures(adminToken)
-  const orgId = (await getAdminOrgId(adminToken)) ?? DEFAULT_ORG_ID
+test.describe('Consortium platform flag tests', () => {
+  // Global platform mutations race with E2E.2 / PP.1; serialize behind the shared lock.
+  test.describe.configure({ mode: 'serial', timeout: 180_000 })
 
-  const paths = [
-    '/api/v1/consortium/courses',
-    `/api/v1/admin/consortium/agreements?orgId=${encodeURIComponent(orgId)}`,
-  ]
-  for (const path of paths) {
-    const res = await fetch(`${API_BASE}${path}`)
-    expect(res.status).toBe(401)
-  }
-})
+  test('Consortium: unauthenticated endpoints return 401', async () => {
+    const adminToken = await getAdminToken()
+    await withPlatformBooleanRestore(adminToken, async () => {
+      await enableFeatures(adminToken)
+      const orgId = (await getAdminOrgId(adminToken)) ?? DEFAULT_ORG_ID
 
-test('Consortium: feature off returns 404', async () => {
-  const adminToken = await getAdminToken()
-  await fetch(`${API_BASE}/api/v1/settings/platform`, {
-    method: 'PUT',
-    headers: authHeaders(adminToken),
-    body: JSON.stringify({ ffConsortiumSharing: false, updateMask: ['ffConsortiumSharing'] }),
+      const paths = [
+        '/api/v1/consortium/courses',
+        `/api/v1/admin/consortium/agreements?orgId=${encodeURIComponent(orgId)}`,
+      ]
+      for (const path of paths) {
+        const res = await fetch(`${API_BASE}${path}`)
+        expect(res.status).toBe(401)
+      }
+    })
   })
-  const res = await fetch(`${API_BASE}/api/v1/consortium/courses`, {
-    headers: authHeaders(adminToken),
+
+  test('Consortium: feature off returns 404', async () => {
+    const adminToken = await getAdminToken()
+    await withPlatformBooleanRestore(adminToken, async () => {
+      await fetch(`${API_BASE}/api/v1/settings/platform`, {
+        method: 'PUT',
+        headers: authHeaders(adminToken),
+        body: JSON.stringify({
+          ffConsortiumSharing: false,
+          updateMask: ['ffConsortiumSharing'],
+        }),
+      })
+      const res = await fetch(`${API_BASE}/api/v1/consortium/courses`, {
+        headers: authHeaders(adminToken),
+      })
+      expect(res.status).toBe(404)
+    })
   })
-  expect(res.status).toBe(404)
-})
 
-test('Consortium: admin can create agreement when feature enabled', async () => {
-  const adminToken = await getAdminToken()
-  await enableFeatures(adminToken)
+  test('Consortium: admin can create agreement when feature enabled', async () => {
+    const adminToken = await getAdminToken()
+    await withPlatformBooleanRestore(adminToken, async () => {
+      await enableFeatures(adminToken)
 
-  const hostOrgId = (await getAdminOrgId(adminToken)) ?? DEFAULT_ORG_ID
-  expect(hostOrgId).toBeTruthy()
-  const adminId = await getAdminUserId(adminToken)
-  if (adminId) await grantOrgAdmin(adminToken, hostOrgId, adminId)
+      const hostOrgId = (await getAdminOrgId(adminToken)) ?? DEFAULT_ORG_ID
+      expect(hostOrgId).toBeTruthy()
+      const adminId = await getAdminUserId(adminToken)
+      if (adminId) await grantOrgAdmin(adminToken, hostOrgId, adminId)
 
-  const guestOrgId = await createGuestOrgViaProvisioner()
-  expect(guestOrgId).toBeTruthy()
+      const guestOrgId = await createGuestOrgViaProvisioner()
+      expect(guestOrgId).toBeTruthy()
 
-  const createAgreement = await fetch(`${API_BASE}/api/v1/admin/consortium/agreements`, {
-    method: 'POST',
-    headers: authHeaders(adminToken),
-    body: JSON.stringify({ hostOrgId, guestOrgId, status: 'active' }),
+      const createAgreement = await fetch(`${API_BASE}/api/v1/admin/consortium/agreements`, {
+        method: 'POST',
+        headers: authHeaders(adminToken),
+        body: JSON.stringify({ hostOrgId, guestOrgId, status: 'active' }),
+      })
+      expect(createAgreement.status).toBe(201)
+
+      const list = await fetch(
+        `${API_BASE}/api/v1/admin/consortium/agreements?orgId=${encodeURIComponent(hostOrgId)}`,
+        { headers: authHeaders(adminToken) },
+      )
+      expect(list.ok).toBeTruthy()
+      const data = (await list.json()) as { agreements?: { guestOrgId: string }[] }
+      expect(data.agreements?.some((a) => a.guestOrgId === guestOrgId)).toBe(true)
+    })
   })
-  expect(createAgreement.status).toBe(201)
-
-  const list = await fetch(
-    `${API_BASE}/api/v1/admin/consortium/agreements?orgId=${encodeURIComponent(hostOrgId)}`,
-    { headers: authHeaders(adminToken) },
-  )
-  expect(list.ok).toBeTruthy()
-  const data = (await list.json()) as { agreements?: { guestOrgId: string }[] }
-  expect(data.agreements?.some((a) => a.guestOrgId === guestOrgId)).toBe(true)
 })

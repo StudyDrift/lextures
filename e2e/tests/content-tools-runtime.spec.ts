@@ -122,9 +122,19 @@ test.describe('Content Tools runtime (CT.3)', () => {
       await expect(page.locator('pre code.language-lex-tool')).toHaveCount(0)
 
       const answer = page.getByLabel(/your answer/i).first()
+      const statePut = page.waitForResponse(
+        (res) =>
+          res.request().method() === 'PUT' &&
+          res.url().includes(`/content-tools/instances/${inst.id}/state`) &&
+          res.ok(),
+        { timeout: 20_000 },
+      )
       await answer.fill('paris')
-      // Autosave debounce is 1.5s; wait for Saved chip / announcement affordance.
-      await expect(page.getByText(/^Saved$/i).first()).toBeVisible({ timeout: 8_000 })
+      // Autosave debounce is 1.5s; wait for state PUT + sync chip (not a flaky toast).
+      await statePut
+      await expect(
+        page.locator('[data-content-tool-frame] [data-sync-status="saved"]').first(),
+      ).toBeVisible({ timeout: 12_000 })
 
       await page.reload()
       await expect(page.locator('[data-content-tool="noop_probe"]').first()).toBeVisible({
