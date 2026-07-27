@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -30,6 +31,7 @@ func (d Deps) registerContentToolsRoutes(r chi.Router) {
 	d.registerContentToolsStateRoutes(r)
 	d.registerContentToolsActionRoutes(r)
 	d.registerContentToolsInstructorRoutes(r)
+	d.registerContentToolsContextRoutes(r)
 }
 
 func writeContentToolsUnavailable(w http.ResponseWriter) {
@@ -92,11 +94,27 @@ func contentToolsSettingsToAPI(r ctrepo.SettingsRow) ctmodel.Settings {
 	if maxInst <= 0 {
 		maxInst = 50
 	}
+	allowlist := r.LinkHostAllowlist
+	if allowlist == nil {
+		allowlist = []string{}
+	}
+	mode := r.LinkIngestionMode
+	if mode == "" {
+		mode = "public"
+	}
+	daily := r.DailyAICallsPerUser
+	if daily <= 0 {
+		daily = 50
+	}
 	return ctmodel.Settings{
-		AllowedToolIDs:      ids,
-		StudentResetAllowed: r.StudentResetAllowed,
-		MaxInstancesPerItem: maxInst,
-		UpdatedAt:           r.UpdatedAt,
+		AllowedToolIDs:       ids,
+		StudentResetAllowed:  r.StudentResetAllowed,
+		MaxInstancesPerItem:  maxInst,
+		MonthlyAITokenBudget: r.MonthlyAITokenBudget,
+		DailyAICallsPerUser:  daily,
+		LinkIngestionMode:    mode,
+		LinkHostAllowlist:    allowlist,
+		UpdatedAt:            r.UpdatedAt,
 	}
 }
 
@@ -287,11 +305,40 @@ func (d Deps) handleContentToolsSettingsPut() http.HandlerFunc {
 		if body.AllowedToolIDs == nil {
 			body.AllowedToolIDs = []string{}
 		}
+		mode := strings.TrimSpace(body.LinkIngestionMode)
+		if mode == "" {
+			mode = "public"
+		}
+		switch mode {
+		case "off", "allowlist", "public":
+		default:
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "linkIngestionMode must be off, allowlist, or public.")
+			return
+		}
+		if body.LinkHostAllowlist == nil {
+			body.LinkHostAllowlist = []string{}
+		}
+		daily := body.DailyAICallsPerUser
+		if daily <= 0 {
+			daily = 50
+		}
+		if daily > 10000 {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "dailyAiCallsPerUser is too large.")
+			return
+		}
+		if body.MonthlyAITokenBudget < 0 {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "monthlyAiTokenBudget must be >= 0.")
+			return
+		}
 		row, err := ctrepo.UpsertSettings(r.Context(), d.Pool, courseID, ctrepo.SettingsRow{
-			CourseID:            courseID,
-			AllowedToolIDs:      body.AllowedToolIDs,
-			StudentResetAllowed: body.StudentResetAllowed,
-			MaxInstancesPerItem: body.MaxInstancesPerItem,
+			CourseID:             courseID,
+			AllowedToolIDs:       body.AllowedToolIDs,
+			StudentResetAllowed:  body.StudentResetAllowed,
+			MaxInstancesPerItem:  body.MaxInstancesPerItem,
+			MonthlyAITokenBudget: body.MonthlyAITokenBudget,
+			DailyAICallsPerUser:  daily,
+			LinkIngestionMode:    mode,
+			LinkHostAllowlist:    body.LinkHostAllowlist,
 		}, viewer)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save settings.")
@@ -299,9 +346,13 @@ func (d Deps) handleContentToolsSettingsPut() http.HandlerFunc {
 		}
 		actor := viewer
 		_ = ctrepo.InsertEvent(r.Context(), d.Pool, courseID, nil, nil, &actor, "_settings", ctsvc.EventSettingsUpdated, map[string]any{
-			"allowedToolIds":      body.AllowedToolIDs,
-			"studentResetAllowed": body.StudentResetAllowed,
-			"maxInstancesPerItem": body.MaxInstancesPerItem,
+			"allowedToolIds":       body.AllowedToolIDs,
+			"studentResetAllowed":  body.StudentResetAllowed,
+			"maxInstancesPerItem":  body.MaxInstancesPerItem,
+			"monthlyAiTokenBudget": body.MonthlyAITokenBudget,
+			"dailyAiCallsPerUser":  daily,
+			"linkIngestionMode":    mode,
+			"linkHostAllowlist":    body.LinkHostAllowlist,
 		})
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(contentToolsSettingsToAPI(*row))

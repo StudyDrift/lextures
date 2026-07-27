@@ -4383,6 +4383,33 @@
       }
     },
     {
+      "id": "CT.6",
+      "path": "docs/completed/content_tools/CT.6-grounded-context-and-link-ingestion.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers context pack preview (section-first), private/metadata URL blocked messaging, instructor exclude via PATCH, and Sources panel on insights.",
+      "owner": "Learning Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-context-sources.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Depends on CT.1/CT.3. Link ingestion mode off|allowlist|public; CONTENT_TOOLS_LINK_INGEST_KILL_SWITCH; AI entry only via tool actions / mediated call rails."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

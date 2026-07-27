@@ -10,10 +10,88 @@ import (
 
 // Settings is the course-scoped Content Tools configuration.
 type Settings struct {
-	AllowedToolIDs      []string  `json:"allowedToolIds"`
-	StudentResetAllowed bool      `json:"studentResetAllowed"`
-	MaxInstancesPerItem int16     `json:"maxInstancesPerItem"`
-	UpdatedAt           time.Time `json:"updatedAt,omitempty"`
+	AllowedToolIDs       []string  `json:"allowedToolIds"`
+	StudentResetAllowed  bool      `json:"studentResetAllowed"`
+	MaxInstancesPerItem  int16     `json:"maxInstancesPerItem"`
+	MonthlyAITokenBudget int64     `json:"monthlyAiTokenBudget"`
+	DailyAICallsPerUser  int       `json:"dailyAiCallsPerUser"`
+	LinkIngestionMode    string    `json:"linkIngestionMode"`
+	LinkHostAllowlist    []string  `json:"linkHostAllowlist"`
+	UpdatedAt            time.Time `json:"updatedAt,omitempty"`
+}
+
+// ContextSegment is one grounded pack segment (CT.6).
+type ContextSegment struct {
+	Kind   string `json:"kind"`
+	ID     string `json:"id"`
+	Title  string `json:"title"`
+	URL    string `json:"url,omitempty"`
+	Lang   string `json:"lang,omitempty"`
+	Text   string `json:"text"`
+	Tokens int    `json:"tokens"`
+}
+
+// ContextPendingSource is a discovered source not yet ready.
+type ContextPendingSource struct {
+	URL    string `json:"url"`
+	Status string `json:"status"`
+	Reason string `json:"reason,omitempty"`
+}
+
+// ContextPack is the instructor preview / dry-run pack (CT.6).
+type ContextPack struct {
+	InstanceID     uuid.UUID              `json:"instanceId"`
+	Segments       []ContextSegment       `json:"segments"`
+	PendingSources []ContextPendingSource `json:"pendingSources"`
+	TotalTokens    int                    `json:"totalTokens"`
+	VariantID      *uuid.UUID             `json:"variantId,omitempty"`
+	// Optional dry-run AI fields when preview includes a query (CT.6 rails).
+	DryRunAnswer    string          `json:"dryRunAnswer,omitempty"`
+	DryRunCitations []CitationPublic `json:"dryRunCitations,omitempty"`
+	RedactedQuery   string          `json:"redactedQuery,omitempty"`
+}
+
+// CitationPublic is a footnote handle returned to clients.
+type CitationPublic struct {
+	Kind  string `json:"kind"`
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	URL   string `json:"url,omitempty"`
+	Loc   string `json:"loc,omitempty"`
+}
+
+// ContextSource is one instructor-visible corpus row (CT.6).
+type ContextSource struct {
+	ID                uuid.UUID  `json:"id"`
+	SourceID          *uuid.UUID `json:"sourceId,omitempty"`
+	URL               string     `json:"url"`
+	Title             string     `json:"title,omitempty"`
+	Host              string     `json:"host,omitempty"`
+	Origin            string     `json:"origin"`
+	Status            string     `json:"status"`
+	Error             string     `json:"error,omitempty"`
+	FetchedAt         *time.Time `json:"fetchedAt,omitempty"`
+	ByteSize          *int       `json:"byteSize,omitempty"`
+	Excluded          bool       `json:"excluded"`
+	ExtractedText     string     `json:"extractedText,omitempty"`
+	ExtractionQuality string     `json:"extractionQuality,omitempty"`
+}
+
+// ContextSourcesResponse lists activity sources.
+type ContextSourcesResponse struct {
+	Items       []ContextSource `json:"items"`
+	TotalTokens int             `json:"totalTokens"`
+}
+
+// ContextPreviewRequest is POST .../context/preview.
+type ContextPreviewRequest struct {
+	InstanceID uuid.UUID `json:"instanceId"`
+	Query      string    `json:"query,omitempty"`
+}
+
+// ContextSourcePatch is PATCH .../context/sources/{id}.
+type ContextSourcePatch struct {
+	Excluded *bool `json:"excluded"`
 }
 
 // CatalogTool is one tool available in a course after flag/allowlist/role filtering.

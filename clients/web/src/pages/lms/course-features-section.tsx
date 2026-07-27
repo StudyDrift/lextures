@@ -153,6 +153,10 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
             allowedToolIds: [],
             studentResetAllowed: false,
             maxInstancesPerItem: 50,
+            monthlyAiTokenBudget: 0,
+            dailyAiCallsPerUser: 50,
+            linkIngestionMode: 'public',
+            linkHostAllowlist: [],
           })
           setCtCatalog([])
         }
@@ -845,6 +849,77 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                   })
                 }
                 aria-describedby="content-tools-settings-help"
+              />
+            </label>
+            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+              {t('course.features.contentTools.linkIngestionMode')}
+              <select
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                value={ctSettings.linkIngestionMode}
+                onChange={(e) =>
+                  setCtSettings({
+                    ...ctSettings,
+                    linkIngestionMode: e.target.value as ContentToolsSettings['linkIngestionMode'],
+                  })
+                }
+                data-testid="ct-link-ingestion-mode"
+              >
+                <option value="public">{t('course.features.contentTools.linkIngestionPublic')}</option>
+                <option value="allowlist">
+                  {t('course.features.contentTools.linkIngestionAllowlist')}
+                </option>
+                <option value="off">{t('course.features.contentTools.linkIngestionOff')}</option>
+              </select>
+            </label>
+            {ctSettings.linkIngestionMode === 'allowlist' ? (
+              <label className="flex max-w-lg flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+                {t('course.features.contentTools.linkHostAllowlist')}
+                <input
+                  type="text"
+                  className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                  value={ctSettings.linkHostAllowlist.join(', ')}
+                  onChange={(e) =>
+                    setCtSettings({
+                      ...ctSettings,
+                      linkHostAllowlist: e.target.value
+                        .split(',')
+                        .map((s) => s.trim())
+                        .filter(Boolean),
+                    })
+                  }
+                  placeholder="example.com, docs.example.org"
+                />
+              </label>
+            ) : null}
+            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+              {t('course.features.contentTools.dailyAiCallsPerUser')}
+              <input
+                type="number"
+                min={1}
+                max={10000}
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                value={ctSettings.dailyAiCallsPerUser}
+                onChange={(e) =>
+                  setCtSettings({
+                    ...ctSettings,
+                    dailyAiCallsPerUser: Number(e.target.value),
+                  })
+                }
+              />
+            </label>
+            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+              {t('course.features.contentTools.monthlyAiTokenBudget')}
+              <input
+                type="number"
+                min={0}
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                value={ctSettings.monthlyAiTokenBudget}
+                onChange={(e) =>
+                  setCtSettings({
+                    ...ctSettings,
+                    monthlyAiTokenBudget: Number(e.target.value),
+                  })
+                }
               />
             </label>
             <div>

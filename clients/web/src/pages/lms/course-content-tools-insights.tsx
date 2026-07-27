@@ -7,6 +7,7 @@ import {
   type ContentToolInstance,
 } from '../../lib/courses-api'
 import { ToolResponsesPanel } from '../../components/content-tools/instructor/tool-responses-panel'
+import { SourcesPanel } from '../../components/content-tools/instructor/sources-panel'
 
 type Row = ContentToolInstance & {
   learnersWithState: number
@@ -112,13 +113,23 @@ export default function CourseContentToolsInsights() {
                   <td className="px-3 py-2">{row.learnersWithState}</td>
                   <td className="px-3 py-2">{row.learnersCompleted}</td>
                   <td className="px-3 py-2">
-                    <button
-                      type="button"
-                      className="text-xs font-medium text-sky-700 underline dark:text-sky-300"
-                      onClick={() => setOpenInstanceId(row.id)}
-                    >
-                      {t('contentTools.instructor.openResponses')}
-                    </button>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        className="text-xs font-medium text-sky-700 underline dark:text-sky-300"
+                        onClick={() => setOpenInstanceId(row.id)}
+                      >
+                        {t('contentTools.instructor.openResponses')}
+                      </button>
+                      <button
+                        type="button"
+                        className="text-xs font-medium text-sky-700 underline dark:text-sky-300"
+                        data-testid={`ct-open-sources-${row.id}`}
+                        onClick={() => setOpenInstanceId(row.id)}
+                      >
+                        {t('contentTools.context.sourcesTitle')}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -133,6 +144,13 @@ export default function CourseContentToolsInsights() {
           instanceId={openInstanceId}
           itemId={rows.find((r) => r.id === openInstanceId)?.structureItemId ?? undefined}
           onClose={() => setOpenInstanceId(null)}
+        />
+      ) : null}
+      {openInstanceId && rows.find((r) => r.id === openInstanceId)?.structureItemId ? (
+        <SourcesPanel
+          courseCode={courseCode}
+          itemId={rows.find((r) => r.id === openInstanceId)!.structureItemId!}
+          instanceId={openInstanceId}
         />
       ) : null}
     </div>

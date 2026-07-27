@@ -34,15 +34,15 @@ func notSupported(capability string) error {
 func Capabilities(name ProviderName) CapabilitySet {
 	switch name {
 	case ProviderOpenRouter:
-		return CapabilitySet{Complete: true, Stream: true, Vision: true, Embed: false, Image: true}
+		return CapabilitySet{Complete: true, Stream: true, Vision: true, Embed: false, Image: true, ToolCalling: true}
 	case ProviderAnthropic:
-		return CapabilitySet{Complete: true, Stream: false, Vision: true, Embed: false, Image: false}
+		return CapabilitySet{Complete: true, Stream: false, Vision: true, Embed: false, Image: false, ToolCalling: true}
 	case ProviderOpenAI, ProviderAzureOpenAI:
-		return CapabilitySet{Complete: true, Stream: true, Vision: true, Embed: true, Image: false}
+		return CapabilitySet{Complete: true, Stream: true, Vision: true, Embed: true, Image: false, ToolCalling: true}
 	case ProviderBedrock, ProviderVertex:
 		return CapabilitySet{Complete: true, Stream: false, Vision: false, Embed: false, Image: false}
 	case ProviderDryRun:
-		return CapabilitySet{Complete: true, Stream: true, Vision: true, Embed: true, Image: true}
+		return CapabilitySet{Complete: true, Stream: true, Vision: true, Embed: true, Image: true, ToolCalling: true}
 	default:
 		return CapabilitySet{}
 	}

@@ -22,6 +22,8 @@ import {
   courseSchema,
   adaptiveContentSettingsSchema,
   contentToolsSettingsSchema,
+  contentToolsContextSourceSchema,
+  contentToolsContextSourcesSchema,
   contentToolsCatalogSchema,
   contentToolInstanceSchema,
   contentToolInstancesListSchema,
@@ -1117,12 +1119,32 @@ export async function fetchAdaptiveContentSettings(
   return parseApiResponse('fetchAdaptiveContentSettings', adaptiveContentSettingsSchema, raw)
 }
 
-/** CT.1 — Content Tools course settings. */
+/** CT.1 / CT.6 — Content Tools course settings. */
 export type ContentToolsSettings = {
   allowedToolIds: string[]
   studentResetAllowed: boolean
   maxInstancesPerItem: number
+  monthlyAiTokenBudget: number
+  dailyAiCallsPerUser: number
+  linkIngestionMode: 'off' | 'allowlist' | 'public'
+  linkHostAllowlist: string[]
   updatedAt?: string
+}
+
+export type ContentToolsContextSource = {
+  id: string
+  sourceId?: string | null
+  url: string
+  title?: string
+  host?: string
+  origin: string
+  status: string
+  error?: string
+  fetchedAt?: string | null
+  byteSize?: number | null
+  excluded: boolean
+  extractedText?: string
+  extractionQuality?: string
 }
 
 export type ContentToolsCatalogTool = {
@@ -1159,12 +1181,62 @@ export async function putContentToolsSettings(
         allowedToolIds: settings.allowedToolIds,
         studentResetAllowed: settings.studentResetAllowed,
         maxInstancesPerItem: settings.maxInstancesPerItem,
+        monthlyAiTokenBudget: settings.monthlyAiTokenBudget ?? 0,
+        dailyAiCallsPerUser: settings.dailyAiCallsPerUser ?? 50,
+        linkIngestionMode: settings.linkIngestionMode ?? 'public',
+        linkHostAllowlist: settings.linkHostAllowlist ?? [],
       }),
     },
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return parseApiResponse('putContentToolsSettings', contentToolsSettingsSchema, raw)
+}
+
+export async function fetchContentToolsContextSources(
+  courseCode: string,
+  itemId: string,
+  instanceId?: string,
+): Promise<{ items: ContentToolsContextSource[]; totalTokens: number }> {
+  const qs = new URLSearchParams({ itemId })
+  if (instanceId) qs.set('instanceId', instanceId)
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/context/sources?${qs}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchContentToolsContextSources', contentToolsContextSourcesSchema, raw)
+}
+
+export async function reingestContentToolsContextSource(
+  courseCode: string,
+  sourceId: string,
+): Promise<ContentToolsContextSource> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/context/sources/${encodeURIComponent(sourceId)}/reingest`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('reingestContentToolsContextSource', contentToolsContextSourceSchema, raw)
+}
+
+export async function patchContentToolsContextSource(
+  courseCode: string,
+  sourceId: string,
+  excluded: boolean,
+): Promise<ContentToolsContextSource> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/context/sources/${encodeURIComponent(sourceId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ excluded }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('patchContentToolsContextSource', contentToolsContextSourceSchema, raw)
 }
 
 export async function fetchContentToolsCatalog(

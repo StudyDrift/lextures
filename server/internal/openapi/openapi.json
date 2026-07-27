@@ -12129,6 +12129,200 @@
         }
       }
     },
+    "/api/v1/courses/{course_code}/content-tools/context/sources": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "List Content Tools context sources for an activity (CT.6)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "instanceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolsContextSourcesResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/context/sources/{source_id}/reingest": {
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Force re-ingest a context source (CT.6)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated source",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolsContextSource"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/context/sources/{source_id}": {
+      "patch": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Exclude or include a context source (CT.6)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentToolsContextSourcePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated source",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolsContextSource"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/context/preview": {
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Dry-run build a grounded context pack (CT.6)",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentToolsContextPreviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Context pack",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentToolsContextPack"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
     "/api/v1/courses/{course_code}/content-tools/instances": {
       "get": {
         "tags": [
@@ -15309,6 +15503,27 @@
           "maxInstancesPerItem": {
             "type": "integer"
           },
+          "monthlyAiTokenBudget": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dailyAiCallsPerUser": {
+            "type": "integer"
+          },
+          "linkIngestionMode": {
+            "type": "string",
+            "enum": [
+              "off",
+              "allowlist",
+              "public"
+            ]
+          },
+          "linkHostAllowlist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "updatedAt": {
             "type": "string",
             "format": "date-time"
@@ -15317,7 +15532,11 @@
         "required": [
           "allowedToolIds",
           "studentResetAllowed",
-          "maxInstancesPerItem"
+          "maxInstancesPerItem",
+          "monthlyAiTokenBudget",
+          "dailyAiCallsPerUser",
+          "linkIngestionMode",
+          "linkHostAllowlist"
         ]
       },
       "ContentToolCatalogTool": {
@@ -16042,6 +16261,142 @@
             "format": "date-time"
           }
         }
+      },
+      "ContentToolsContextSource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "url": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "byteSize": {
+            "type": "integer",
+            "nullable": true
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "extractedText": {
+            "type": "string"
+          },
+          "extractionQuality": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "origin",
+          "status",
+          "excluded"
+        ]
+      },
+      "ContentToolsContextSourcesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentToolsContextSource"
+            }
+          },
+          "totalTokens": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "totalTokens"
+        ]
+      },
+      "ContentToolsContextPack": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "pendingSources": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "totalTokens": {
+            "type": "integer"
+          },
+          "variantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "instanceId",
+          "segments",
+          "pendingSources",
+          "totalTokens"
+        ]
+      },
+      "ContentToolsContextPreviewRequest": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "instanceId"
+        ]
+      },
+      "ContentToolsContextSourcePatch": {
+        "type": "object",
+        "properties": {
+          "excluded": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "excluded"
+        ]
       }
     }
   }
