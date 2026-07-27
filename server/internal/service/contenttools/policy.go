@@ -82,26 +82,28 @@ func syncDurableKills(ctx context.Context, pool *pgxpool.Pool, force bool) {
 	if err != nil {
 		return
 	}
-	next := &killCache{
-		loaded: time.Now().UTC(),
-		tools:  map[string]struct{}{},
-		caps:   map[string]struct{}{},
-		inst:   map[string]struct{}{},
-	}
+	tools := map[string]struct{}{}
+	caps := map[string]struct{}{}
+	inst := map[string]struct{}{}
+	allAI := false
 	for _, r := range rows {
 		switch r.Scope {
 		case "all_ai":
-			next.allAI = true
+			allAI = true
 		case "tool":
-			next.tools[r.Target] = struct{}{}
+			tools[r.Target] = struct{}{}
 		case "capability":
-			next.caps[r.Target] = struct{}{}
+			caps[r.Target] = struct{}{}
 		case "instance":
-			next.inst[r.Target] = struct{}{}
+			inst[r.Target] = struct{}{}
 		}
 	}
 	durableKills.mu.Lock()
-	*durableKills = *next
+	durableKills.loaded = time.Now().UTC()
+	durableKills.allAI = allAI
+	durableKills.tools = tools
+	durableKills.caps = caps
+	durableKills.inst = inst
 	durableKills.mu.Unlock()
 }
 
