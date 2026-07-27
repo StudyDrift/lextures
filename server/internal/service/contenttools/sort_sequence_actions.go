@@ -162,17 +162,13 @@ func handleSortSequenceResetAttempt(ctx ActionContext) (*ActionResult, error) {
 		return nil, err
 	}
 	ObserveSortSequenceCheck(string(cfg.Mode), "reset_attempt")
-	status := StatusInProgress
-	if len(st.Attempts) == 0 && (len(st.Placement) == 0 || string(st.Placement) == "{}" || string(st.Placement) == "[]") {
-		status = StatusNotStarted
-	}
+	// Do not demote lifecycle status — CT.4 owns resets; this only clears unlocked placement.
 	return &ActionResult{
 		Result: map[string]any{
 			"ok":                true,
 			"attemptsRemaining": sort_sequence.AttemptsRemaining(cfg, st),
 		},
 		StatePatch: patch,
-		Status:     status,
 	}, nil
 }
 
