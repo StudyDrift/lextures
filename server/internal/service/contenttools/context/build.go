@@ -60,7 +60,7 @@ func Build(ctx stdctx.Context, pool *pgxpool.Pool, instanceID uuid.UUID, opts Bu
 	}
 
 	markdown := opts.ServeVariantText
-	var variantID *uuid.UUID = opts.ServeVariantID
+	variantID := opts.ServeVariantID
 	if markdown == "" && itemID != uuid.Nil {
 		page, err := coursemodulecontent.GetForCourseItem(ctx, pool, inst.CourseID, itemID)
 		if err != nil {

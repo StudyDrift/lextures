@@ -191,7 +191,7 @@ func ContextEnvelope(pack *ContextPack) string {
 		return b.String()
 	}
 	for _, seg := range pack.Segments {
-		b.WriteString(fmt.Sprintf("### SOURCE kind=%s id=%s title=%q\n", seg.Kind, seg.ID, seg.Title))
+		fmt.Fprintf(&b, "### SOURCE kind=%s id=%s title=%q\n", seg.Kind, seg.ID, seg.Title)
 		if seg.URL != "" {
 			b.WriteString("url: " + seg.URL + "\n")
 		}
@@ -201,7 +201,7 @@ func ContextEnvelope(pack *ContextPack) string {
 	if len(pack.PendingSources) > 0 {
 		b.WriteString("Unavailable sources:\n")
 		for _, p := range pack.PendingSources {
-			b.WriteString(fmt.Sprintf("- %s (%s", p.URL, p.Status))
+			fmt.Fprintf(&b, "- %s (%s", p.URL, p.Status)
 			if p.Reason != "" {
 				b.WriteString(": " + p.Reason)
 			}

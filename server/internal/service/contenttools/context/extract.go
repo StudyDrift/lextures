@@ -152,22 +152,13 @@ func qualityOf(text string) string {
 func extractPDFText(body []byte) string {
 	var b strings.Builder
 	run := 0
-	flush := func() {
-		if run >= 4 {
-			// already written
-		}
-		run = 0
-	}
-	_ = flush
 	for i := 0; i < len(body); i++ {
 		c := body[i]
 		if c >= 32 && c < 127 && (unicode.IsLetter(rune(c)) || unicode.IsDigit(rune(c)) || unicode.IsSpace(rune(c)) || strings.ContainsRune(".,;:!?()-_'\"/", rune(c))) {
 			b.WriteByte(c)
 			run++
-		} else {
-			if run > 0 {
-				b.WriteByte(' ')
-			}
+		} else if run > 0 {
+			b.WriteByte(' ')
 			run = 0
 		}
 	}

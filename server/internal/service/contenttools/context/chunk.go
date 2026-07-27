@@ -69,7 +69,7 @@ func LexicalScore(query, chunk string) int {
 func tokenize(s string) map[string]struct{} {
 	s = strings.ToLower(s)
 	fields := strings.FieldsFunc(s, func(r rune) bool {
-		return !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9'))
+		return (r < 'a' || r > 'z') && (r < '0' || r > '9')
 	})
 	out := make(map[string]struct{}, len(fields))
 	for _, f := range fields {

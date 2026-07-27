@@ -26,12 +26,6 @@ func TestValidateFetchURL_blocksPrivateAndLiteralForms(t *testing.T) {
 		if err == nil {
 			t.Fatalf("expected block for %s", u)
 		}
-		if !errors.Is(err, ErrSSRFBlocked) && u != "ftp://example.com/" && u != "http://user:pass@example.com/" {
-			// Still blocked with wrapped ErrSSRFBlocked for private cases.
-			if !errors.Is(err, ErrSSRFBlocked) {
-				// userinfo and scheme also wrap ErrSSRFBlocked
-			}
-		}
 		if !errors.Is(err, ErrSSRFBlocked) {
 			t.Fatalf("%s: want ErrSSRFBlocked, got %v", u, err)
 		}
