@@ -10,7 +10,7 @@ import {
 import { SchemaForm } from './schema-form/schema-form'
 import { validateRequiredFields } from './schema-form/validate'
 import type { JsonSchema, SchemaFieldError } from './schema-form/types'
-import { resolveCustomEditor } from './editors/registry'
+import { resolveCustomEditor, type CustomEditorProps } from './editors/registry'
 
 export type ToolConfigPanelProps = {
   courseCode: string
@@ -146,11 +146,16 @@ export function ToolConfigPanel({
           }}
         >
           {CustomEditor ? (
+            // Optional courseCode/instanceId are used by editors that need server actions (CT.17).
             <CustomEditor
-              value={config}
-              onChange={setConfig}
-              disabled={disabled || saving}
-              idPrefix={`tool-config-${instance.id}`}
+              {...({
+                value: config,
+                onChange: setConfig,
+                disabled: disabled || saving,
+                idPrefix: `tool-config-${instance.id}`,
+                courseCode,
+                instanceId: instance.id,
+              } as CustomEditorProps)}
             />
           ) : (
             <SchemaForm

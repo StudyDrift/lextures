@@ -130,7 +130,6 @@ Content Tools without enabling, say, the code sandbox.
 | **CT.14** | [Sort & Sequence](../../completed/content_tools/CT.14-tool-sort-and-sequence.md) — drag items into categories or into order | Schema building / procedural fluency | MAJOR | none |
 | **CT.15** | [Labeled Diagram & Hotspot](../../completed/content_tools/CT.15-tool-labeled-diagram-and-hotspot.md) — click/drag labels onto an image | Dual coding / spatial recall | MAJOR | none |
 | **CT.16** | [Parameter Explorer](../../completed/content_tools/CT.16-tool-parameter-explorer.md) — sliders drive a live model + guided noticing prompts | Inquiry / variable isolation | DONE | none |
-| **CT.17** | [Code Sandbox](CT.17-tool-code-sandbox.md) — runnable cell with instructor tests | Deliberate practice with feedback | MAJOR | none |
 | **CT.18** | [Step-Through Worked Example](CT.18-tool-step-through-worked-example.md) — enter one step at a time, checked, with hints | Worked-example effect / faded scaffolding | MAJOR | none |
 | **CT.19** | [Media Checkpoints](CT.19-tool-media-checkpoints.md) — questions injected at timestamps in a video/audio | Segmenting / interpolated testing | MAJOR | none |
 | **CT.20** | [Explain It Back](CT.20-tool-explain-it-back.md) — free-text self-explanation with AI formative feedback | Self-explanation / elaborative interrogation | MAJOR | none |

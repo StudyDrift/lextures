@@ -18,5 +18,6 @@
 | **CT.14** | [Sort & Sequence — categorize / order](CT.14-tool-sort-and-sequence.md) |
 | **CT.15** | [Labeled Diagram & Hotspot](CT.15-tool-labeled-diagram-and-hotspot.md) |
 | **CT.16** | [Parameter Explorer](CT.16-tool-parameter-explorer.md) |
+| **CT.17** | [Code Sandbox](CT.17-tool-code-sandbox.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

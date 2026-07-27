@@ -162,22 +162,24 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 
 		start := time.Now()
 		orgID, _ := ctrepo.CourseOrgID(r.Context(), d.Pool, courseID)
+		codeExecOn := d.effectiveConfig().CodeExecutionEnabled
 		actionCtx := ctsvc.ActionContext{
-			Ctx:          r.Context(),
-			CourseID:     courseID,
-			CourseCode:   courseCode,
-			InstanceID:   instanceID,
-			EnrollmentID: enrollID,
-			PrincipalID:  viewer,
-			ToolID:       inst.ToolID,
-			ConfigJSON:   inst.ConfigJSON,
-			StateJSON:    stateJSON,
-			Status:       status,
-			Revision:     revision,
-			Input:        body.Input,
-			Pool:         d.Pool,
-			OrgID:        orgID,
-			GatewayCfg:   d.aiGatewayConfig(),
+			Ctx:                  r.Context(),
+			CourseID:             courseID,
+			CourseCode:           courseCode,
+			InstanceID:           instanceID,
+			EnrollmentID:         enrollID,
+			PrincipalID:          viewer,
+			ToolID:               inst.ToolID,
+			ConfigJSON:           inst.ConfigJSON,
+			StateJSON:            stateJSON,
+			Status:               status,
+			Revision:             revision,
+			Input:                body.Input,
+			Pool:                 d.Pool,
+			OrgID:                orgID,
+			GatewayCfg:           d.aiGatewayConfig(),
+			CodeExecutionEnabled: &codeExecOn,
 		}
 		if decl.RequiresAI || (m.AI != nil && m.AI.Required) {
 			actionCtx.Model = "dry-run"

@@ -1,0 +1,237 @@
+{
+  "id": "code_sandbox",
+  "version": "1.0.0",
+  "name": "contentTools.tools.code_sandbox.name",
+  "category": "practice",
+  "capabilities": ["state", "scoring", "code_execution"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["language", "prompt", "starterCode"],
+    "properties": {
+      "language": {
+        "type": "string",
+        "enum": ["python", "javascript"],
+        "default": "python"
+      },
+      "prompt": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Markdown prompt shown above the editor"
+      },
+      "starterCode": {
+        "type": "string",
+        "description": "Initial code loaded into the editor"
+      },
+      "prefixCode": {
+        "type": "string",
+        "description": "Read-only code prepended at run time"
+      },
+      "suffixCode": {
+        "type": "string",
+        "description": "Read-only code appended at run time"
+      },
+      "sampleInput": {
+        "type": "string",
+        "description": "Default stdin for Run (learner may edit for Run only)"
+      },
+      "tests": {
+        "type": "array",
+        "maxItems": 10,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "name", "input", "expectedOutput", "hidden"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "name": { "type": "string", "minLength": 1 },
+            "input": {
+              "type": "string",
+              "x-lex-sensitive": true
+            },
+            "expectedOutput": {
+              "type": "string",
+              "x-lex-sensitive": true
+            },
+            "hidden": { "type": "boolean" },
+            "feedback": {
+              "type": "string",
+              "x-lex-sensitive": true
+            }
+          }
+        }
+      },
+      "runLimitPerHour": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 120,
+        "default": 30
+      },
+      "checkLimitPerHour": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 120,
+        "default": 20
+      },
+      "editorMode": {
+        "type": "string",
+        "enum": ["rich", "plain", "user_choice"],
+        "default": "user_choice"
+      },
+      "scoringMode": {
+        "type": "string",
+        "enum": ["auto", "none"],
+        "default": "auto"
+      },
+      "errorHints": {
+        "type": "array",
+        "maxItems": 20,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["match", "hint"],
+          "properties": {
+            "match": { "type": "string", "minLength": 1 },
+            "hint": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "outputLimitBytes": {
+        "type": "integer",
+        "minimum": 256,
+        "maximum": 65536,
+        "default": 8192
+      },
+      "maxRunHistory": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 50,
+        "default": 10
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "code": { "type": "string" },
+      "runs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["at", "action", "status"],
+          "properties": {
+            "at": { "type": "string" },
+            "action": { "type": "string", "enum": ["run", "check"] },
+            "status": {
+              "type": "string",
+              "enum": ["ok", "compile_error", "runtime_error", "timeout", "memory", "error"]
+            },
+            "stdout": { "type": "string" },
+            "stderr": { "type": "string" },
+            "tests": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "passed"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "passed": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "best": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["passed", "total", "at"],
+        "properties": {
+          "passed": { "type": "integer" },
+          "total": { "type": "integer" },
+          "at": { "type": "string" }
+        }
+      },
+      "completedAt": { "type": "string" },
+      "rate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["hourKey", "runs", "checks"],
+        "properties": {
+          "hourKey": { "type": "string" },
+          "runs": { "type": "integer" },
+          "checks": { "type": "integer" }
+        }
+      },
+      "editorMode": { "type": "string", "enum": ["rich", "plain"] }
+    }
+  },
+  "scoring": { "mode": "auto" },
+  "storage": { "maxStateBytes": 128000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "application",
+    "wcagNotes": "Plain-textarea editor is first-class and discoverable. Esc then Tab exits the rich editor without trapping focus. Results and errors are announced politely with line-associated text."
+  },
+  "dataSheet": {
+    "collects": {
+      "code": {
+        "purpose": "Learner source code drafts and submissions for formative practice",
+        "retention": "life_of_enrollment"
+      },
+      "runs": {
+        "purpose": "Truncated run/check history for progress and instructor intervention",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "Rich code editors are historically poor with screen readers; enable plain-textarea mode for full keyboard and SR access.",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.code_sandbox",
+  "ui": {
+    "renderer": "code_sandbox",
+    "icon": "code",
+    "group": "practice",
+    "customEditor": "code_sandbox"
+  },
+  "actions": [
+    {
+      "name": "run",
+      "rateLimitPerMin": 10,
+      "description": "Execute code with sample stdin and return stdout/stderr"
+    },
+    {
+      "name": "check",
+      "rateLimitPerMin": 10,
+      "description": "Run all instructor tests and return pass/fail without hidden secrets"
+    },
+    {
+      "name": "reset_code",
+      "rateLimitPerMin": 30,
+      "description": "Restore starter code without clearing run history"
+    },
+    {
+      "name": "try_reference",
+      "rateLimitPerMin": 10,
+      "description": "Authoring: run reference solution against configured tests"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

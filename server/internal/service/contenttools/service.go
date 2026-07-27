@@ -19,7 +19,8 @@ const (
 	// DefaultMaxConfigBytes matches the DB CHECK on config_json.
 	DefaultMaxConfigBytes = 256 * 1024
 
-	// DefaultMaxStateBytes matches the DB CHECK on state_json.
+	// DefaultMaxStateBytes is the fallback when a tool omits storage.maxStateBytes.
+	// Tools may raise up to PlatformMaxStateBytes (CT.17 code_sandbox uses 128 KB).
 	DefaultMaxStateBytes = 64 * 1024
 
 	// DefaultAutosaveDebounceMs is the host default when a tool does not override.
@@ -155,4 +156,20 @@ func NextStatusOnSave(current string, requested string) (string, error) {
 		return "", ErrInvalidStateStatus
 	}
 	return requested, nil
+}
+
+// EffectiveMaxStateBytes returns the state size budget for a compiled manifest.
+// Tools may raise above DefaultMaxStateBytes up to PlatformMaxStateBytes (CT.17).
+func EffectiveMaxStateBytes(m *CompiledManifest) int {
+	maxBytes := DefaultMaxStateBytes
+	if m != nil && m.Storage.MaxStateBytes > 0 {
+		maxBytes = m.Storage.MaxStateBytes
+	}
+	if maxBytes > PlatformMaxStateBytes {
+		maxBytes = PlatformMaxStateBytes
+	}
+	if maxBytes <= 0 {
+		maxBytes = DefaultMaxStateBytes
+	}
+	return maxBytes
 }

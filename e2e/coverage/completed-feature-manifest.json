@@ -4499,7 +4499,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers ask → cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
+      "rationale": "Playwright covers ask \u2192 cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
       "owner": "AI Platform",
       "specs": [
         {
@@ -4526,7 +4526,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers answer-key redaction, wrong→retry→correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
+      "rationale": "Playwright covers answer-key redaction, wrong\u2192retry\u2192correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4553,7 +4553,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit→reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
+      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit\u2192reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4677,6 +4677,33 @@
         "dependency": true,
         "rollback": true,
         "notes": "Course allowlist + content_tools_enabled (CT.1); state + checkpoint/submit_answer actions via CT.3; coverage facets via CT.7; free-text filter via CT.8; reset via CT.4; sandbox HTML canary for CT.5."
+      }
+    },
+    {
+      "id": "ct-17-code-sandbox",
+      "path": "docs/completed/content_tools/CT.17-tool-code-sandbox.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers sensitive-test redaction, run stdout, check pass/fail without hidden secrets, hourly rate-limit typed error, reset_code preserving history, and testId/passed analytics facets.",
+      "owner": "Web platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-code-sandbox.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); platform codeExecutionEnabled; state + run/check/reset_code via CT.3; facets via CT.7; code_execution capability via CT.8; reset via CT.4; sandbox HTML canary for CT.5."
       }
     },
     {

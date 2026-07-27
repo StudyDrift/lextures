@@ -141,11 +141,7 @@ func writeContentToolsRevisionConflict(w http.ResponseWriter, current ctmodel.To
 }
 
 func contentToolsMaxStateBytes(m *ctsvc.CompiledManifest) int {
-	maxBytes := ctsvc.DefaultMaxStateBytes
-	if m != nil && m.Storage.MaxStateBytes > 0 && m.Storage.MaxStateBytes < maxBytes {
-		maxBytes = m.Storage.MaxStateBytes
-	}
-	return maxBytes
+	return ctsvc.EffectiveMaxStateBytes(m)
 }
 
 // contentToolsInteractRole maps enrollment roles to manifest interact roles.

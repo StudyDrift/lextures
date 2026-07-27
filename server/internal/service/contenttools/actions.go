@@ -36,6 +36,9 @@ type ActionContext struct {
 	GatewayCfg   aigateway.Config
 	Model        string
 	ReadingLevel string
+
+	// CodeExecutionEnabled gates CT.17 run/check when set; nil means enabled (unit tests).
+	CodeExecutionEnabled *bool
 }
 
 // ActionResult is returned by an action handler.

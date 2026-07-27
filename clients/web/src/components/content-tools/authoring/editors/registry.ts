@@ -1,5 +1,9 @@
 import type { ComponentType } from 'react'
 import {
+  CodeSandboxEditor,
+  type CodeSandboxEditorProps,
+} from '../editors/code-sandbox-editor'
+import {
   DiagramHotspotEditor,
   type DiagramHotspotEditorProps,
 } from '../editors/diagram-hotspot-editor'
@@ -22,8 +26,10 @@ export type CustomEditorProps =
   | SortSequenceEditorProps
   | DiagramHotspotEditorProps
   | ParameterExplorerEditorProps
+  | CodeSandboxEditorProps
 
 const EDITORS: Record<string, ComponentType<CustomEditorProps>> = {
+  code_sandbox: CodeSandboxEditor as ComponentType<CustomEditorProps>,
   diagram_hotspot: DiagramHotspotEditor as ComponentType<CustomEditorProps>,
   highlight_annotate: HighlightAnnotateEditor as ComponentType<CustomEditorProps>,
   inline_questions: InlineQuestionsEditor,

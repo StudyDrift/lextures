@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MAJOR |
 | **Markets** | HE / K12 (CS) / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | SHIPPED |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Assessment / platform team |
 | **Depends on** | CT.1, CT.2, CT.3; shipped `service/codeexecution` |
