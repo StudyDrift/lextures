@@ -4572,6 +4572,33 @@
       }
     },
     {
+      "id": "ct-13-highlight-annotate",
+      "path": "docs/completed/content_tools/CT.13-tool-highlight-and-annotate.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers expectedRegions redaction, min-annotation completion, filterNote preserveInput, analytics tagId/unitIndex facets, CT.4 reset, and keyboard unit annotation in the host.",
+      "owner": "Web platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-highlight-annotate.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); state merge via CT.3; heat-map facets via CT.7; note filter via CT.8; reset via CT.4."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

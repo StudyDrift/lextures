@@ -298,5 +298,5 @@ in scope.
 - External standards: WCAG 2.1 AA; K-12 safeguarding practice; COPPA constraints on peer-visible
   content for under-13 users (see CT.8 / S08).
 - Related plans: [CT.8](CT.8-governance-safety-privacy-accessibility.md),
-  [CT.21](CT.21-tool-class-pulse.md), [CT.13](CT.13-tool-highlight-and-annotate.md),
+  [CT.21](CT.21-tool-class-pulse.md), [CT.13](../../completed/content_tools/CT.13-tool-highlight-and-annotate.md),
   [S08 children's privacy](../standards/S08-childrens-privacy-age-assurance-design-codes.md).

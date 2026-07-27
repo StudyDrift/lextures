@@ -204,6 +204,24 @@ var (
 		Help:      "Predict & Reveal normalized confidence at commit (CT.12).",
 		Buckets:   []float64{0, 0.25, 0.5, 0.75, 1},
 	})
+
+	highlightAnnotateAnnotationsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_annotations_total",
+		Help:      "Highlight & Annotate annotation events by tool_id and outcome (CT.13).",
+	}, []string{"tool_id", "outcome"})
+
+	highlightAnnotateOrphansTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_annotation_orphans_total",
+		Help:      "Highlight & Annotate orphaned anchors observed on normalize (CT.13).",
+	}, []string{"tool_id"})
+
+	highlightAnnotateFilterTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_annotation_filter_total",
+		Help:      "Highlight & Annotate filterNote outcomes (CT.13).",
+	}, []string{"tool_id", "outcome"})
 )
 
 func registerMetrics() {
@@ -219,6 +237,7 @@ func registerMetrics() {
 			askQuestionsTurnsTotal, askCitationsDroppedTotal,
 			inlineQuestionsSubmitsTotal, inlineQuestionsCorrectTotal, inlineQuestionsAttemptHistogram,
 			predictRevealCommitsTotal, predictRevealConfidentlyWrongTotal, predictRevealConfidenceHistogram,
+			highlightAnnotateAnnotationsTotal, highlightAnnotateOrphansTotal, highlightAnnotateFilterTotal,
 		)
 		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
 		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
@@ -232,6 +251,8 @@ func registerMetrics() {
 		askQuestionsTurnsTotal.WithLabelValues("_reserved").Add(0)
 		inlineQuestionsSubmitsTotal.WithLabelValues("inline_questions", "_reserved").Add(0)
 		predictRevealCommitsTotal.WithLabelValues("predict_reveal", "_reserved").Add(0)
+		highlightAnnotateAnnotationsTotal.WithLabelValues("highlight_annotate", "_reserved").Add(0)
+		highlightAnnotateFilterTotal.WithLabelValues("highlight_annotate", "_reserved").Add(0)
 	})
 }
 
@@ -483,5 +504,32 @@ func ObservePredictRevealConfidentlyWrong() {
 func ObservePredictRevealConfidence(norm float64) {
 	registerMetrics()
 	predictRevealConfidenceHistogram.Observe(norm)
+}
+
+// ObserveHighlightAnnotateAnnotation increments annotation counter (CT.13).
+func ObserveHighlightAnnotateAnnotation(outcome string) {
+	registerMetrics()
+	if outcome == "" {
+		outcome = "_unknown"
+	}
+	highlightAnnotateAnnotationsTotal.WithLabelValues("highlight_annotate", outcome).Inc()
+}
+
+// ObserveHighlightAnnotateOrphans increments orphan counter by count (CT.13).
+func ObserveHighlightAnnotateOrphans(n int) {
+	registerMetrics()
+	if n <= 0 {
+		return
+	}
+	highlightAnnotateOrphansTotal.WithLabelValues("highlight_annotate").Add(float64(n))
+}
+
+// ObserveHighlightAnnotateFilter increments filterNote outcome counter (CT.13).
+func ObserveHighlightAnnotateFilter(outcome string) {
+	registerMetrics()
+	if outcome == "" {
+		outcome = "_unknown"
+	}
+	highlightAnnotateFilterTotal.WithLabelValues("highlight_annotate", outcome).Inc()
 }
 

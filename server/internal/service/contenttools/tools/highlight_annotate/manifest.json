@@ -1,0 +1,163 @@
+{
+  "id": "highlight_annotate",
+  "version": "1.0.0",
+  "name": "contentTools.tools.highlight_annotate.name",
+  "category": "practice",
+  "capabilities": ["state", "aggregate"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["prompt", "tags"],
+    "properties": {
+      "prompt": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Directed close-reading prompt shown to learners"
+      },
+      "passageSource": {
+        "type": "string",
+        "enum": ["preceding_block", "inline", "section_anchor"],
+        "default": "inline"
+      },
+      "passageMarkdown": {
+        "type": "string",
+        "description": "Target passage when passageSource is inline"
+      },
+      "sectionAnchor": {
+        "type": "string",
+        "description": "Named section anchor when passageSource is section_anchor"
+      },
+      "unitGranularity": {
+        "type": "string",
+        "enum": ["sentence", "paragraph", "line"],
+        "default": "sentence"
+      },
+      "tags": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 6,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label", "color"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "label": { "type": "string", "minLength": 1 },
+            "color": { "type": "string", "minLength": 1 },
+            "description": { "type": "string" }
+          }
+        }
+      },
+      "minAnnotations": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 50,
+        "default": 1
+      },
+      "maxAnnotations": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 50,
+        "default": 20
+      },
+      "requireNote": {
+        "type": "boolean",
+        "default": false
+      },
+      "expectedRegions": {
+        "type": "array",
+        "x-lex-sensitive": true,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tagId", "quote"],
+          "properties": {
+            "tagId": { "type": "string", "minLength": 1 },
+            "quote": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "annotations": {
+        "type": "array",
+        "maxItems": 50,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "tagId", "quote", "anchor", "createdAt"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "tagId": { "type": "string", "minLength": 1 },
+            "quote": { "type": "string" },
+            "anchor": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["prefix", "suffix", "approxOffset"],
+              "properties": {
+                "prefix": { "type": "string" },
+                "suffix": { "type": "string" },
+                "approxOffset": { "type": "integer", "minimum": 0 },
+                "unitIndex": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "note": { "type": "string" },
+            "createdAt": { "type": "string" },
+            "orphaned": { "type": "boolean" }
+          }
+        }
+      },
+      "completedAt": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "none" },
+  "storage": { "maxStateBytes": 48000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "application",
+    "wcagNotes": "Passage units are focusable with arrow-key navigation and a tag menu; colour is paired with label and underline style; heat map has a table alternative. Precise sub-sentence selection is pointer-only."
+  },
+  "dataSheet": {
+    "collects": {
+      "annotations": {
+        "purpose": "Prompted passage annotations with tag, quote, anchor, and optional note",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "Precise sub-sentence selection is pointer-only; authors should prefer sentence-level tasks when keyboard equivalence is required.",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.highlight_annotate",
+  "ui": {
+    "renderer": "highlight_annotate",
+    "icon": "highlighter",
+    "group": "practice",
+    "customEditor": "highlight_annotate"
+  },
+  "actions": [
+    {
+      "name": "filter_note",
+      "rateLimitPerMin": 30,
+      "description": "Screen an annotation note through the CT.8 content filter before save"
+    }
+  ],
+  "conflictPolicy": "merge",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

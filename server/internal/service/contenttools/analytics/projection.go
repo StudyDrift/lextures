@@ -3,6 +3,7 @@ package analytics
 import (
 	"encoding/json"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -142,6 +143,10 @@ func init() {
 		{Key: "confidenceBucket", Label: "contentTools.analytics.facets.confidenceBucket", Type: "string"},
 		{Key: "correct", Label: "contentTools.analytics.facets.correct", Type: "boolean"},
 	})
+	RegisterProjector("highlight_annotate", projectHighlightAnnotate, []FacetSchema{
+		{Key: "tagId", Label: "contentTools.analytics.facets.tagId", Type: "string"},
+		{Key: "unitIndex", Label: "contentTools.analytics.facets.unitIndex", Type: "string"},
+	})
 }
 
 func projectNoopProbe(in ProjectInput) Summary {
@@ -267,5 +272,39 @@ func projectPredictReveal(in ProjectInput) Summary {
 			}
 		}
 	}
+	return s
+}
+
+func projectHighlightAnnotate(in ProjectInput) Summary {
+	s := defaultProject(in)
+	var st struct {
+		Annotations []struct {
+			TagID   string `json:"tagId"`
+			Orphaned bool  `json:"orphaned"`
+			Anchor  struct {
+				UnitIndex *int `json:"unitIndex"`
+			} `json:"anchor"`
+		} `json:"annotations"`
+		CompletedAt string `json:"completedAt"`
+	}
+	_ = json.Unmarshal(in.StateJSON, &st)
+	tagIDs := make([]string, 0, len(st.Annotations))
+	unitIndexes := make([]string, 0, len(st.Annotations))
+	for _, a := range st.Annotations {
+		if a.TagID != "" {
+			tagIDs = append(tagIDs, a.TagID)
+		}
+		if a.Anchor.UnitIndex != nil {
+			unitIndexes = append(unitIndexes, strconv.Itoa(*a.Anchor.UnitIndex))
+		}
+	}
+	if len(st.Annotations) > 0 {
+		s.Engaged = true
+	}
+	if st.CompletedAt != "" || in.Status == "completed" {
+		s.Completed = true
+	}
+	s.Facets["tagId"] = tagIDs
+	s.Facets["unitIndex"] = unitIndexes
 	return s
 }

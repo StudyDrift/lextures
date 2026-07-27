@@ -1,6 +1,6 @@
 # CT.13 — Tool: Highlight & Annotate (prompted close reading with a class heat map)
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Web platform team |
 | **Depends on** | CT.1, CT.2, CT.3 |
@@ -168,7 +168,7 @@ type HighlightAnnotateState = {
 **No new routes.**
 
 - `PUT .../state` — annotation add/edit/delete (merge policy).
-- `POST .../actions/filterNote` — runs the CT.8 filter server-side before accepting a note.
+- `POST .../actions/filter_note` — runs the CT.8 filter server-side before accepting a note.
 - Heat map via `GET .../instances/{id}/analytics` (CT.7) with facets `tagId`, `unitIndex`.
 
 ## 10. UI / UX
@@ -277,4 +277,4 @@ explicitly out of v1 because the heat map already delivers most of the instructi
 - External standards: W3C Web Annotation Data Model (anchor design informed by TextQuoteSelector);
   WCAG 2.1 AA.
 - Related plans: [CT.7](CT.7-analytics-insights-and-gradebook.md),
-  [CT.8](CT.8-governance-safety-privacy-accessibility.md), [CT.22](CT.22-tool-inline-discussion.md).
+  [CT.8](CT.8-governance-safety-privacy-accessibility.md), [CT.22](../../plan/content_tools/CT.22-tool-inline-discussion.md).
