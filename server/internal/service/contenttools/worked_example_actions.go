@@ -41,12 +41,25 @@ func handleWorkedExamplePrepare(ctx ActionContext) (*ActionResult, error) {
 			"currentStepId":  st.CurrentStepID,
 		},
 		StatePatch: patch,
-		Status:     StatusInProgress,
+		Status:     workedExampleStatus(ctx.Status, false),
 	}, nil
 }
 
 func workedExampleBlanked(cfg worked_example.Config, enrollmentID string) map[string]bool {
 	return worked_example.ResolveBlanked(cfg, worked_example.EnrollmentSeed(enrollmentID))
+}
+
+// workedExampleStatus advances status without downgrading (CT.3 transitions are monotonic).
+func workedExampleStatus(current string, complete bool) string {
+	if complete {
+		return StatusCompleted
+	}
+	switch current {
+	case StatusSubmitted, StatusCompleted, StatusInProgress:
+		return "" // keep current; empty means no status change in the HTTP layer
+	default:
+		return StatusInProgress
+	}
 }
 
 func handleWorkedExampleCheckStep(ctx ActionContext) (*ActionResult, error) {
@@ -165,12 +178,9 @@ func handleWorkedExampleCheckStep(ctx ActionContext) (*ActionResult, error) {
 	st.ScoreRaw = &raw
 	st.ScoreMax = &max
 
-	status := StatusInProgress
-	if worked_example.AllBlankedComplete(cfg, st, blanked) {
-		status = StatusCompleted
+	complete := worked_example.AllBlankedComplete(cfg, st, blanked)
+	if complete {
 		st.CompletedAt = worked_example.NowRFC3339()
-	} else if len(st.Steps) > 0 {
-		status = StatusSubmitted
 	}
 
 	attemptsLeft := worked_example.AttemptsRemaining(cfg, st, in.StepID)
@@ -199,7 +209,7 @@ func handleWorkedExampleCheckStep(ctx ActionContext) (*ActionResult, error) {
 	out := &ActionResult{
 		Result:     result,
 		StatePatch: patch,
-		Status:     status,
+		Status:     workedExampleStatus(ctx.Status, complete),
 	}
 	if !cfg.PracticeOnly {
 		out.ScoreRaw = &raw
@@ -272,7 +282,7 @@ func handleWorkedExampleHint(ctx ActionContext) (*ActionResult, error) {
 			"stepId":         in.StepID,
 		},
 		StatePatch: patch,
-		Status:     StatusInProgress,
+		Status:     workedExampleStatus(ctx.Status, false),
 	}, nil
 }
 
@@ -332,9 +342,8 @@ func handleWorkedExampleRevealStep(ctx ActionContext) (*ActionResult, error) {
 	st.ScoreRaw = &raw
 	st.ScoreMax = &max
 
-	status := StatusInProgress
-	if worked_example.AllBlankedComplete(cfg, st, blanked) {
-		status = StatusCompleted
+	complete := worked_example.AllBlankedComplete(cfg, st, blanked)
+	if complete {
 		st.CompletedAt = worked_example.NowRFC3339()
 	}
 
@@ -355,7 +364,7 @@ func handleWorkedExampleRevealStep(ctx ActionContext) (*ActionResult, error) {
 	out := &ActionResult{
 		Result:     result,
 		StatePatch: patch,
-		Status:     status,
+		Status:     workedExampleStatus(ctx.Status, complete),
 	}
 	if !cfg.PracticeOnly {
 		out.ScoreRaw = &raw

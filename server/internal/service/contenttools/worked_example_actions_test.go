@@ -228,6 +228,46 @@ func TestWorkedExampleSequentialLock(t *testing.T) {
 	}
 }
 
+func TestWorkedExampleHintAfterCheckKeepsMonotonicStatus(t *testing.T) {
+	reg, err := contenttools.BuildBuiltinRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := reg.Get(worked_example.ID)
+	cfgJSON, _ := json.Marshal(sampleWorkedExampleConfig())
+	stJSON, _ := json.Marshal(worked_example.EmptyState())
+	enroll := uuid.New()
+
+	wrong, _ := json.Marshal(map[string]any{"stepId": "s1", "value": "3x+5"})
+	res, err := contenttools.DispatchAction(m, "check_step", contenttools.ActionContext{
+		ConfigJSON:   cfgJSON,
+		StateJSON:    stJSON,
+		Input:        wrong,
+		EnrollmentID: enroll,
+		Status:       contenttools.StatusInProgress,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	hin, _ := json.Marshal(map[string]any{"stepId": "s1"})
+	hres, err := contenttools.DispatchAction(m, "hint", contenttools.ActionContext{
+		ConfigJSON:   cfgJSON,
+		StateJSON:    res.StatePatch,
+		Input:        hin,
+		EnrollmentID: enroll,
+		Status:       contenttools.StatusSubmitted,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if hres.Status != "" && !contenttools.CanTransitionStateStatus(contenttools.StatusSubmitted, hres.Status) {
+		t.Fatalf("hint status %q cannot follow submitted", hres.Status)
+	}
+	if hres.Result["hint"] == nil || hres.Result["hint"] == "" {
+		t.Fatalf("expected hint body: %#v", hres.Result)
+	}
+}
+
 func TestWorkedExampleVerify(t *testing.T) {
 	reg, err := contenttools.BuildBuiltinRegistry()
 	if err != nil {

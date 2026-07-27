@@ -238,7 +238,8 @@ test.describe('Content Tools Worked Example (CT.18)', () => {
         { stepId: 's1' },
         'we-hint-1',
       )
-      expect((hint.body.result as Record<string, unknown>).hint).toBeTruthy()
+      expect(hint.status, JSON.stringify(hint.body)).toBe(200)
+      expect((hint.body.result as Record<string, unknown> | undefined)?.hint).toBeTruthy()
 
       const ok = await runAction(
         studentToken,
