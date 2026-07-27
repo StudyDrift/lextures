@@ -122,12 +122,15 @@ test.describe('Content Tools analytics (CT.7)', () => {
       const inst = await createInstance(instructorToken, courseCode, content.id)
 
       await apiPatchContentPage(instructorToken, courseCode, content.id, {
-        bodyMarkdown: [
+        markdown: [
+          '# CT7 page',
+          '',
           'Intro',
           '',
           '```lex-tool',
           JSON.stringify({ instanceId: inst.id, toolId: 'noop_probe', v: 1 }),
           '```',
+          '',
         ].join('\n'),
       })
 
