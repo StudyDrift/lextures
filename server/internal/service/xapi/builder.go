@@ -12,11 +12,13 @@ const (
 	VerbLaunched    = "http://adlnet.gov/expapi/verbs/launched"
 	VerbExperienced = "http://adlnet.gov/expapi/verbs/experienced"
 	VerbAnswered    = "http://adlnet.gov/expapi/verbs/answered"
+	VerbInteracted  = "http://adlnet.gov/expapi/verbs/interacted"
 	VerbPassed      = "http://adlnet.gov/expapi/verbs/passed"
 	VerbFailed      = "http://adlnet.gov/expapi/verbs/failed"
 	VerbCompleted   = "http://adlnet.gov/expapi/verbs/completed"
 	VerbSubmitted   = "http://adlnet.gov/expapi/verbs/submitted"
 	VerbReceived    = "http://adlnet.gov/expapi/verbs/received"
+	VerbScored      = "http://adlnet.gov/expapi/verbs/scored"
 )
 
 // BuildInput is the data needed to construct a standards-shaped xAPI 1.0.3 statement.

@@ -14,6 +14,11 @@ export type ToolFrameProps = {
   /** CT.4 instructor Responses affordance. */
   responsesLabel?: string
   onResponsesClick?: () => void
+  /** CT.7 instructor Insights affordance. */
+  insightsLabel?: string
+  onInsightsClick?: () => void
+  /** CT.7 graded badge for students when grade link enabled. */
+  gradedBadgeLabel?: string
 }
 
 function statusChipClass(status: string): string {
@@ -41,6 +46,9 @@ export function ToolFrame({
   busy = false,
   responsesLabel,
   onResponsesClick,
+  insightsLabel,
+  onInsightsClick,
+  gradedBadgeLabel,
 }: ToolFrameProps) {
   const syncLabel =
     syncStatus === 'saving'
@@ -63,6 +71,16 @@ export function ToolFrame({
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 px-3 py-2 dark:border-neutral-700">
         <p className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">{label}</p>
         <div className="flex flex-wrap items-center gap-1.5">
+          {insightsLabel && onInsightsClick ? (
+            <button
+              type="button"
+              data-testid="tool-insights-button"
+              className="rounded px-1.5 py-0.5 text-[11px] font-medium text-sky-700 underline dark:text-sky-300"
+              onClick={onInsightsClick}
+            >
+              {insightsLabel}
+            </button>
+          ) : null}
           {responsesLabel && onResponsesClick ? (
             <button
               type="button"
@@ -72,6 +90,14 @@ export function ToolFrame({
             >
               {responsesLabel}
             </button>
+          ) : null}
+          {gradedBadgeLabel ? (
+            <span
+              data-testid="tool-graded-badge"
+              className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+            >
+              {gradedBadgeLabel}
+            </span>
           ) : null}
           <span
             className={`rounded px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide ${statusChipClass(status)}`}

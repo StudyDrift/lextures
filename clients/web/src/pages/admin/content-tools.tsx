@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AdminToolTelemetry } from '../../components/content-tools/analytics/admin-tool-telemetry'
 import {
   createContentToolMigration,
   fetchContentToolQuarantine,
@@ -194,6 +195,9 @@ export default function ContentToolsAdminPage() {
           ))}
         </ul>
       ) : null}
+      <div className="mt-8 border-t border-slate-200 pt-6 dark:border-neutral-700">
+        <AdminToolTelemetry />
+      </div>
     </div>
   )
 }

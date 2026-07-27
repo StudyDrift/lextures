@@ -98,6 +98,7 @@ GET	/api/v1/admin/consortium/enrollment-report	anonymous
 POST	/api/v1/admin/content-tools/migrations	session
 GET	/api/v1/admin/content-tools/migrations/{job_id}	session
 GET	/api/v1/admin/content-tools/quarantine	session
+GET	/api/v1/admin/content-tools/telemetry	session
 GET	/api/v1/admin/content-tools/versions	session
 PATCH	/api/v1/admin/content-tools/versions/{tool_id}/{version}	session
 GET	/api/v1/admin/courses	session
@@ -678,6 +679,9 @@ POST	/api/v1/courses/{course_code}/content-pages/{item_id}/build-with-ai	session
 GET	/api/v1/courses/{course_code}/content-pages/{item_id}/markups	anonymous
 POST	/api/v1/courses/{course_code}/content-pages/{item_id}/markups	anonymous
 DELETE	/api/v1/courses/{course_code}/content-pages/{item_id}/markups/{markup_id}	anonymous
+GET	/api/v1/courses/{course_code}/content-tools/analytics	session
+GET	/api/v1/courses/{course_code}/content-tools/analytics/course	session
+GET	/api/v1/courses/{course_code}/content-tools/analytics/export	session
 GET	/api/v1/courses/{course_code}/content-tools/catalog	session
 POST	/api/v1/courses/{course_code}/content-tools/context/preview	session
 GET	/api/v1/courses/{course_code}/content-tools/context/sources	session
@@ -688,7 +692,11 @@ POST	/api/v1/courses/{course_code}/content-tools/instances	session
 DELETE	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	session
 PATCH	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	session
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/actions/{action}	session
+GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/analytics	session
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/duplicate	session
+DELETE	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/grade-link	session
+GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/grade-link	session
+PUT	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/grade-link	session
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/self-reset	session
 GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/state	session
 PUT	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/state	session
@@ -698,6 +706,7 @@ GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/states/{
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/submit	session
 GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/usage	session
 GET	/api/v1/courses/{course_code}/content-tools/manifests/{tool_id}	session
+GET	/api/v1/courses/{course_code}/content-tools/my-progress	session
 GET	/api/v1/courses/{course_code}/content-tools/reset-jobs/{job_id}	session
 GET	/api/v1/courses/{course_code}/content-tools/settings	session
 PUT	/api/v1/courses/{course_code}/content-tools/settings	session

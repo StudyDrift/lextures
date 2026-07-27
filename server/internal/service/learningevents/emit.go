@@ -263,6 +263,85 @@ func (e Emitter) QuizAttemptGraded(ctx context.Context, orgID uuid.UUID, courseI
 	})
 }
 
+// ContentToolInteracted emits xAPI interacted for a content tool (CT.7 FR-7).
+func (e Emitter) ContentToolInteracted(ctx context.Context, orgID, courseID uuid.UUID, courseCode, email, displayName, objectPath, title string) {
+	base := e.baseIRI()
+	e.emit(ctx, emitParams{
+		ActorEmail:    email,
+		ActorName:     displayName,
+		VerbID:        xapi.VerbInteracted,
+		ObjectID:      base + "/courses/" + courseCode + "/" + objectPath,
+		ObjectType:    "Activity",
+		ObjectTitle:   title,
+		CourseID:      &courseID,
+		CourseCode:    courseCode,
+		CaliperType:   "ToolUseEvent",
+		CaliperAction: caliper.ActionNavigatedTo,
+		OrgID:         orgID,
+	})
+}
+
+// ContentToolAnswered emits xAPI answered for a content tool.
+func (e Emitter) ContentToolAnswered(ctx context.Context, orgID, courseID uuid.UUID, courseCode, email, displayName, objectPath, title string) {
+	base := e.baseIRI()
+	e.emit(ctx, emitParams{
+		ActorEmail:    email,
+		ActorName:     displayName,
+		VerbID:        xapi.VerbAnswered,
+		ObjectID:      base + "/courses/" + courseCode + "/" + objectPath,
+		ObjectType:    "Activity",
+		ObjectTitle:   title,
+		CourseID:      &courseID,
+		CourseCode:    courseCode,
+		CaliperType:   "AssessmentItemEvent",
+		CaliperAction: caliper.ActionSubmitted,
+		OrgID:         orgID,
+	})
+}
+
+// ContentToolCompleted emits xAPI completed for a content tool.
+func (e Emitter) ContentToolCompleted(ctx context.Context, orgID, courseID uuid.UUID, courseCode, email, displayName, objectPath, title string) {
+	base := e.baseIRI()
+	e.emit(ctx, emitParams{
+		ActorEmail:    email,
+		ActorName:     displayName,
+		VerbID:        xapi.VerbCompleted,
+		ObjectID:      base + "/courses/" + courseCode + "/" + objectPath,
+		ObjectType:    "Activity",
+		ObjectTitle:   title,
+		CourseID:      &courseID,
+		CourseCode:    courseCode,
+		CaliperType:   "AssessmentEvent",
+		CaliperAction: caliper.ActionCompleted,
+		OrgID:         orgID,
+	})
+}
+
+// ContentToolScored emits xAPI scored for a content tool.
+func (e Emitter) ContentToolScored(ctx context.Context, orgID, courseID uuid.UUID, courseCode, email, displayName, objectPath, title string, scaled float64) {
+	base := e.baseIRI()
+	if scaled > 1 {
+		scaled = 1
+	}
+	if scaled < 0 {
+		scaled = 0
+	}
+	e.emit(ctx, emitParams{
+		ActorEmail:    email,
+		ActorName:     displayName,
+		VerbID:        xapi.VerbScored,
+		ObjectID:      base + "/courses/" + courseCode + "/" + objectPath,
+		ObjectType:    "Activity",
+		ObjectTitle:   title,
+		CourseID:      &courseID,
+		CourseCode:    courseCode,
+		CaliperType:   "GradeEvent",
+		CaliperAction: caliper.ActionGraded,
+		Score:         &scaled,
+		OrgID:         orgID,
+	})
+}
+
 // StoreExternalStatement stores a received xAPI statement (e.g. H5P) in the internal LRS.
 func (e Emitter) StoreExternalStatement(ctx context.Context, orgID uuid.UUID, courseID *uuid.UUID, actorEmail, actorName string, verbID, objectID, objectTitle string, rawStatement json.RawMessage) error {
 	if !e.enabled() || e.Pool == nil {

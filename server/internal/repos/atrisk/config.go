@@ -22,6 +22,9 @@ type Config struct {
 	WeightQuiz            float32
 	WeightInactive        float32
 	WeightTrend           float32
+	// WeightTool is CT.7 formative tool-disengagement weight. Not persisted yet;
+	// defaults to 0 so existing weight sums remain unchanged (open Q3).
+	WeightTool            float32
 	QuizAvgThreshold      float32
 	InactiveDaysThreshold int
 	MissingPctThreshold   float32

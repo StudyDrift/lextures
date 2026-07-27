@@ -442,6 +442,7 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			"scope":              scope,
 			"stateSchemaVersion": st.StateSchemaVersion,
 		})
+		d.afterContentToolsStateWrite(r.Context(), courseID, courseCode, inst.ToolID, scope, st, "interacted")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(contentToolsStateEnvelope(instanceID, st))
 	}
@@ -567,6 +568,7 @@ func (d Deps) handleContentToolsStateSubmit() http.HandlerFunc {
 			"revision": st.Revision,
 			"status":   st.Status,
 		})
+		d.afterContentToolsStateWrite(r.Context(), courseID, courseCode, inst.ToolID, scope, st, "completed")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(contentToolsStateEnvelope(instanceID, st))
 	}

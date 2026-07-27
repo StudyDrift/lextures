@@ -6,6 +6,7 @@ import {
   fetchContentToolsInstances,
   type ContentToolInstance,
 } from '../../lib/courses-api'
+import { InstanceAnalyticsPanel } from '../../components/content-tools/analytics/instance-analytics-panel'
 import { ToolResponsesPanel } from '../../components/content-tools/instructor/tool-responses-panel'
 import { SourcesPanel } from '../../components/content-tools/instructor/sources-panel'
 
@@ -21,6 +22,7 @@ export default function CourseContentToolsInsights() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [openInstanceId, setOpenInstanceId] = useState<string | null>(null)
+  const [insightsInstanceId, setInsightsInstanceId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!courseCode) return
@@ -117,6 +119,14 @@ export default function CourseContentToolsInsights() {
                       <button
                         type="button"
                         className="text-xs font-medium text-sky-700 underline dark:text-sky-300"
+                        data-testid={`ct-open-insights-${row.id}`}
+                        onClick={() => setInsightsInstanceId(row.id)}
+                      >
+                        {t('contentTools.analytics.insights')}
+                      </button>
+                      <button
+                        type="button"
+                        className="text-xs font-medium text-sky-700 underline dark:text-sky-300"
                         onClick={() => setOpenInstanceId(row.id)}
                       >
                         {t('contentTools.instructor.openResponses')}
@@ -136,6 +146,18 @@ export default function CourseContentToolsInsights() {
             </tbody>
           </table>
         </div>
+      ) : null}
+      {insightsInstanceId ? (
+        <InstanceAnalyticsPanel
+          open
+          courseCode={courseCode}
+          instanceId={insightsInstanceId}
+          onClose={() => setInsightsInstanceId(null)}
+          onOpenRoster={() => {
+            setOpenInstanceId(insightsInstanceId)
+            setInsightsInstanceId(null)
+          }}
+        />
       ) : null}
       {openInstanceId ? (
         <ToolResponsesPanel

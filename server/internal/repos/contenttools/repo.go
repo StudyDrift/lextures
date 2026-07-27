@@ -21,6 +21,7 @@ type SettingsRow struct {
 	DailyAICallsPerUser  int
 	LinkIngestionMode    string
 	LinkHostAllowlist    []string
+	GradeLinksAllowed    bool
 	UpdatedBy            *uuid.UUID
 	UpdatedAt            time.Time
 }
@@ -83,6 +84,7 @@ func DefaultSettings(courseID uuid.UUID) SettingsRow {
 		DailyAICallsPerUser:  50,
 		LinkIngestionMode:    "public",
 		LinkHostAllowlist:    []string{},
+		GradeLinksAllowed:    true,
 		UpdatedAt:            time.Now().UTC(),
 	}
 }
@@ -112,12 +114,14 @@ func GetSettings(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (*
 	err := pool.QueryRow(ctx, `
 SELECT course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item,
        monthly_ai_token_budget, daily_ai_calls_per_user, link_ingestion_mode, link_host_allowlist,
+       COALESCE(grade_links_allowed, TRUE),
        updated_by, updated_at
 FROM course.content_tool_settings
 WHERE course_id = $1
 `, courseID).Scan(
 		&r.CourseID, &r.AllowedToolIDs, &r.StudentResetAllowed, &r.MaxInstancesPerItem,
 		&r.MonthlyAITokenBudget, &r.DailyAICallsPerUser, &r.LinkIngestionMode, &r.LinkHostAllowlist,
+		&r.GradeLinksAllowed,
 		&updatedBy, &r.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -145,8 +149,9 @@ func UpsertSettings(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID,
 INSERT INTO course.content_tool_settings (
   course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item,
   monthly_ai_token_budget, daily_ai_calls_per_user, link_ingestion_mode, link_host_allowlist,
+  grade_links_allowed,
   updated_by, updated_at
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, TRUE, $9, NOW())
 ON CONFLICT (course_id) DO UPDATE SET
   allowed_tool_ids = EXCLUDED.allowed_tool_ids,
   student_reset_allowed = EXCLUDED.student_reset_allowed,
@@ -159,11 +164,13 @@ ON CONFLICT (course_id) DO UPDATE SET
   updated_at = NOW()
 RETURNING course_id, allowed_tool_ids, student_reset_allowed, max_instances_per_item,
           monthly_ai_token_budget, daily_ai_calls_per_user, link_ingestion_mode, link_host_allowlist,
+          COALESCE(grade_links_allowed, TRUE),
           updated_by, updated_at
 `, courseID, allowed, s.StudentResetAllowed, maxInst,
 		s.MonthlyAITokenBudget, daily, mode, allowlist, actorUserID).Scan(
 		&r.CourseID, &r.AllowedToolIDs, &r.StudentResetAllowed, &r.MaxInstancesPerItem,
 		&r.MonthlyAITokenBudget, &r.DailyAICallsPerUser, &r.LinkIngestionMode, &r.LinkHostAllowlist,
+		&r.GradeLinksAllowed,
 		&updatedBy, &r.UpdatedAt,
 	)
 	if err != nil {

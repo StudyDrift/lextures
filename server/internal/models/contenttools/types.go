@@ -17,6 +17,7 @@ type Settings struct {
 	DailyAICallsPerUser  int       `json:"dailyAiCallsPerUser"`
 	LinkIngestionMode    string    `json:"linkIngestionMode"`
 	LinkHostAllowlist    []string  `json:"linkHostAllowlist"`
+	GradeLinksAllowed    bool      `json:"gradeLinksAllowed"`
 	UpdatedAt            time.Time `json:"updatedAt,omitempty"`
 }
 
@@ -407,4 +408,146 @@ type ValidationErrorBody struct {
 		Message string       `json:"message"`
 		Errors  []FieldError `json:"errors"`
 	} `json:"error"`
+}
+
+// --- CT.7 analytics / gradebook ---
+
+// ScoreDistributionBucket is one histogram bin for scores.
+type ScoreDistributionBucket struct {
+	Bucket string `json:"bucket"`
+	Count  int    `json:"count"`
+}
+
+// FacetValue is one facet value with its count.
+type FacetValue struct {
+	Value   string `json:"value"`
+	Count   int    `json:"count"`
+	Correct *bool  `json:"correct,omitempty"`
+}
+
+// FacetAggregate is aggregated facet counts for one key.
+type FacetAggregate struct {
+	Key    string       `json:"key"`
+	Label  string       `json:"label"`
+	Values []FacetValue `json:"values"`
+}
+
+// NeedsAttention is one learner flagged for instructor follow-up.
+type NeedsAttention struct {
+	EnrollmentID string `json:"enrollmentId"`
+	DisplayName  string `json:"displayName"`
+	Reason       string `json:"reason"`
+}
+
+// InstanceScoreStats is optional score aggregate block.
+type InstanceScoreStats struct {
+	Mean         float64                   `json:"mean"`
+	Median       float64                   `json:"median"`
+	Distribution []ScoreDistributionBucket `json:"distribution"`
+}
+
+// InstanceAnalytics is GET .../instances/{id}/analytics (CT.7).
+type InstanceAnalytics struct {
+	InstanceID       uuid.UUID           `json:"instanceId"`
+	ToolID           string              `json:"toolId"`
+	Title            *string             `json:"title"`
+	Learners         int                 `json:"learners"`
+	Engaged          int                 `json:"engaged"`
+	Completed        int                 `json:"completed"`
+	Suppressed       bool                `json:"suppressed"`
+	Score            *InstanceScoreStats `json:"score"`
+	MedianDurationMs *int                `json:"medianDurationMs"`
+	Facets           []FacetAggregate    `json:"facets"`
+	NeedsAttention   []NeedsAttention    `json:"needsAttention"`
+	CountsForGrade   bool                `json:"countsForGrade"`
+}
+
+// PageToolsOverview is GET .../content-tools/analytics?itemId=.
+type PageToolsOverview struct {
+	ItemID    uuid.UUID               `json:"itemId"`
+	Instances []InstanceAnalytics     `json:"instances"`
+	Totals    PageToolsOverviewTotals `json:"totals"`
+}
+
+// PageToolsOverviewTotals rolls up instance counts on a page.
+type PageToolsOverviewTotals struct {
+	Instances int `json:"instances"`
+	Learners  int `json:"learners"`
+	Engaged   int `json:"engaged"`
+	Completed int `json:"completed"`
+}
+
+// CourseToolsAnalytics is GET .../content-tools/analytics/course.
+type CourseToolsAnalytics struct {
+	CourseID  string                       `json:"courseId"`
+	ByTool    []CourseToolRollup           `json:"byTool"`
+	Instances []InstanceAnalytics          `json:"instances"`
+}
+
+// CourseToolRollup is per-tool_id rollup within a course.
+type CourseToolRollup struct {
+	ToolID    string `json:"toolId"`
+	Instances int    `json:"instances"`
+	Learners  int    `json:"learners"`
+	Engaged   int    `json:"engaged"`
+	Completed int    `json:"completed"`
+}
+
+// StudentToolProgress is GET .../content-tools/my-progress?itemId=.
+type StudentToolProgress struct {
+	ItemID    uuid.UUID                `json:"itemId"`
+	Completed int                      `json:"completed"`
+	Total     int                      `json:"total"`
+	Tools     []StudentToolProgressRow `json:"tools"`
+}
+
+// StudentToolProgressRow is one tool on the student's progress strip.
+type StudentToolProgressRow struct {
+	InstanceID     uuid.UUID `json:"instanceId"`
+	ToolID         string    `json:"toolId"`
+	Title          *string   `json:"title"`
+	Engaged        bool      `json:"engaged"`
+	Completed      bool      `json:"completed"`
+	ScorePct       *float64  `json:"scorePct,omitempty"`
+	CountsForGrade bool      `json:"countsForGrade"`
+}
+
+// GradeLink is PUT/GET .../instances/{id}/grade-link.
+type GradeLink struct {
+	InstanceID       uuid.UUID  `json:"instanceId"`
+	AssignmentItemID *uuid.UUID `json:"assignmentItemId,omitempty"`
+	OutcomeID        *uuid.UUID `json:"outcomeId,omitempty"`
+	PointsPossible   *float64   `json:"pointsPossible,omitempty"`
+	CountsForGrade   bool       `json:"countsForGrade"`
+	LatePolicy       string     `json:"latePolicy"`
+	EnabledAt        *time.Time `json:"enabledAt,omitempty"`
+}
+
+// GradeLinkPutRequest is PUT .../grade-link body.
+type GradeLinkPutRequest struct {
+	AssignmentItemID *uuid.UUID `json:"assignmentItemId"`
+	OutcomeID        *uuid.UUID `json:"outcomeId"`
+	PointsPossible   *float64   `json:"pointsPossible"`
+	CountsForGrade   bool       `json:"countsForGrade"`
+	LatePolicy       string     `json:"latePolicy"`
+}
+
+// AdminToolTelemetry is GET /api/v1/admin/content-tools/telemetry.
+type AdminToolTelemetry struct {
+	From  string                    `json:"from"`
+	To    string                    `json:"to"`
+	Tools []AdminToolTelemetryRow   `json:"tools"`
+}
+
+// AdminToolTelemetryRow is one tool's cross-course telemetry (no free-text).
+type AdminToolTelemetryRow struct {
+	ToolID       string   `json:"toolId"`
+	Instances    int      `json:"instances"`
+	Learners     int      `json:"learners"`
+	Engagements  int      `json:"engagements"`
+	Completions  int      `json:"completions"`
+	MeanScorePct *float64 `json:"meanScorePct,omitempty"`
+	AITokens     int64    `json:"aiTokens"`
+	AICostUSD    float64  `json:"aiCostUsd"`
+	RenderErrors int      `json:"renderErrors"`
 }

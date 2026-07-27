@@ -32,6 +32,7 @@ func (d Deps) registerContentToolsRoutes(r chi.Router) {
 	d.registerContentToolsActionRoutes(r)
 	d.registerContentToolsInstructorRoutes(r)
 	d.registerContentToolsContextRoutes(r)
+	d.registerContentToolsAnalyticsRoutes(r)
 }
 
 func writeContentToolsUnavailable(w http.ResponseWriter) {
@@ -114,6 +115,7 @@ func contentToolsSettingsToAPI(r ctrepo.SettingsRow) ctmodel.Settings {
 		DailyAICallsPerUser:  daily,
 		LinkIngestionMode:    mode,
 		LinkHostAllowlist:    allowlist,
+		GradeLinksAllowed:    r.GradeLinksAllowed,
 		UpdatedAt:            r.UpdatedAt,
 	}
 }

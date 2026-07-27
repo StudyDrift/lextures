@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Analytics team |
 | **Depends on** | CT.3, CT.4 |

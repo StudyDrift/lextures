@@ -1,9 +1,11 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { TOOL_SDK_CONTRACT_VERSION } from '@lextures/tool-sdk'
 import { useTranslation } from 'react-i18next'
 import { usePermissions } from '../../../context/use-permissions'
 import { parseFencePayload } from '../../../lib/content-tools/lex-tool-fence'
+import { fetchContentToolGradeLink } from '../../../lib/courses-api'
 import { permCourseItemCreate } from '../../../lib/rbac-api'
+import { InstanceAnalyticsPanel } from '../analytics/instance-analytics-panel'
 import { ToolResponsesPanel } from '../instructor/tool-responses-panel'
 import { useContentToolsPage } from './content-tools-page-context'
 import { isRendererRegistered, resolveRenderer } from './registry'
@@ -35,6 +37,8 @@ function ContentToolHostMounted({
   const instance = page?.getInstance(instanceId)
   const Renderer = resolveRenderer(toolId)
   const [responsesOpen, setResponsesOpen] = useState(false)
+  const [insightsOpen, setInsightsOpen] = useState(false)
+  const [countsForGrade, setCountsForGrade] = useState(false)
   const canManage =
     Boolean(courseCode) && !permLoading && allows(permCourseItemCreate(courseCode))
 
@@ -53,6 +57,21 @@ function ContentToolHostMounted({
     instanceId,
     onState: toolState.applyEnvelope,
   })
+
+  useEffect(() => {
+    if (!courseCode || !instanceId) return
+    let cancelled = false
+    void fetchContentToolGradeLink(courseCode, instanceId)
+      .then((g) => {
+        if (!cancelled) setCountsForGrade(Boolean(g.countsForGrade))
+      })
+      .catch(() => {
+        if (!cancelled) setCountsForGrade(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode, instanceId])
 
   const label = t(`contentTools.tools.${toolId}.name`, {
     defaultValue: instance?.title || toolId,
@@ -155,6 +174,9 @@ function ContentToolHostMounted({
         busy={action.busy}
         responsesLabel={canManage ? t('contentTools.instructor.responses') : undefined}
         onResponsesClick={canManage ? () => setResponsesOpen(true) : undefined}
+        insightsLabel={canManage ? t('contentTools.analytics.insights') : undefined}
+        onInsightsClick={canManage ? () => setInsightsOpen(true) : undefined}
+        gradedBadgeLabel={countsForGrade ? t('contentTools.grading.countsBadge') : undefined}
       >
         {deprecatedNotice}
         <ToolErrorBoundary
@@ -231,6 +253,18 @@ function ContentToolHostMounted({
           instanceId={instanceId}
           itemId={page?.itemId}
           onClose={() => setResponsesOpen(false)}
+        />
+      ) : null}
+      {canManage ? (
+        <InstanceAnalyticsPanel
+          open={insightsOpen}
+          courseCode={courseCode}
+          instanceId={instanceId}
+          onClose={() => setInsightsOpen(false)}
+          onOpenRoster={() => {
+            setInsightsOpen(false)
+            setResponsesOpen(true)
+          }}
         />
       ) : null}
     </>

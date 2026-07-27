@@ -73,6 +73,31 @@ export async function patchContentToolVersion(
   return parseJSON(res)
 }
 
+/** CT.7 — Platform admin cross-course telemetry (counts only). */
+export type ContentToolTelemetryRow = {
+  toolId: string
+  instances: number
+  learners: number
+  engagements: number
+  completions: number
+  meanScorePct?: number | null
+  aiTokens: number
+  aiCostUsd: number
+  renderErrors: number
+}
+
+export async function fetchContentToolTelemetry(opts?: {
+  from?: string
+  to?: string
+}): Promise<{ from: string; to: string; tools: ContentToolTelemetryRow[] }> {
+  const qs = new URLSearchParams()
+  if (opts?.from) qs.set('from', opts.from)
+  if (opts?.to) qs.set('to', opts.to)
+  const suffix = qs.toString() ? `?${qs}` : ''
+  const res = await authorizedFetch(`/api/v1/admin/content-tools/telemetry${suffix}`)
+  return parseJSON(res)
+}
+
 export async function createContentToolMigration(body: {
   toolId: string
   fromVersion?: number
