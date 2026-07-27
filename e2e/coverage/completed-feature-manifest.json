@@ -4491,6 +4491,33 @@
       }
     },
     {
+      "id": "CT.10",
+      "path": "docs/completed/content_tools/CT.10-tool-ask-questions.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers ask → cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
+      "owner": "AI Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-ask-questions.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); AI rails via CT.6 dry-run locally; org AI policy/COPPA via CT.8/aigateway."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
