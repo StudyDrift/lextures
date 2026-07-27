@@ -7,6 +7,7 @@ import {
 import { FacetDistributionChart } from './facet-distribution-chart'
 import { GradeLinkDialog } from './grade-link-dialog'
 import { NeedsAttentionList } from './needs-attention-list'
+import { AnnotationHeatmap } from './annotation-heatmap'
 import { CalibrationMatrix } from './calibration-matrix'
 
 export type InstanceAnalyticsPanelProps = {
@@ -165,6 +166,24 @@ export function InstanceAnalyticsPanel({
             data.calibrationMatrix.length > 0 ? (
               <CalibrationMatrix cells={data.calibrationMatrix} />
             ) : null}
+
+            {!data.suppressed && data.toolId === 'highlight_annotate'
+              ? (() => {
+                  const unitFacet = data.facets.find((f) => f.key === 'unitIndex')
+                  if (!unitFacet?.values?.length) return null
+                  const units = unitFacet.values
+                    .map((v) => ({
+                      unitIndex: Number(v.value),
+                      label: t('contentTools.tools.highlight_annotate.heatmap.unitFallback', {
+                        n: Number(v.value) + 1,
+                      }),
+                      count: v.count,
+                    }))
+                    .filter((u) => Number.isFinite(u.unitIndex))
+                    .sort((a, b) => a.unitIndex - b.unitIndex)
+                  return <AnnotationHeatmap units={units} />
+                })()
+              : null}
 
             <div>
               <h3 className="mb-2 text-sm font-medium text-slate-800 dark:text-neutral-100">

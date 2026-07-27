@@ -106,6 +106,15 @@ func ExtractFreeTextFromState(state json.RawMessage) string {
 			}
 		}
 	}
+	if annotations, ok := obj["annotations"].([]any); ok {
+		for _, a := range annotations {
+			if m, ok := a.(map[string]any); ok {
+				if note, ok := m["note"].(string); ok && strings.TrimSpace(note) != "" {
+					parts = append(parts, note)
+				}
+			}
+		}
+	}
 	return strings.Join(parts, "\n")
 }
 

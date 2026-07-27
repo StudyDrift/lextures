@@ -412,6 +412,15 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, ctsvc.ErrInvalidStateStatus.Error())
 			return
 		}
+		if normalized, ok := ctsvc.NormalizeHighlightAnnotateState(inst.ToolID, inst.ConfigJSON, body.State); ok {
+			body.State = normalized
+		}
+		if derived := ctsvc.DeriveHighlightAnnotateStatus(inst.ToolID, inst.ConfigJSON, body.State, nextStatus); derived != "" {
+			if ctsvc.CanTransitionStateStatus(nextStatus, derived) || derived == nextStatus {
+				nextStatus = derived
+			}
+			ctsvc.ObserveHighlightAnnotateAnnotation("save")
+		}
 
 		schemaVer := ctsvc.DefaultMigrations().CurrentStateSchemaVersion(inst.ToolID)
 		var st *ctrepo.StateRow

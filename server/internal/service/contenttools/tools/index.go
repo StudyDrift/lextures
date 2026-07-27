@@ -5,6 +5,7 @@ package tools
 
 import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/ask_questions"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/highlight_annotate"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_questions"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/noop_probe"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/predict_reveal"
@@ -25,6 +26,11 @@ func All() []Entry {
 			ID:           ask_questions.ID,
 			ManifestJSON: ask_questions.ManifestJSON,
 			I18nEN:       ask_questions.I18nEN,
+		},
+		{
+			ID:           highlight_annotate.ID,
+			ManifestJSON: highlight_annotate.ManifestJSON,
+			I18nEN:       highlight_annotate.I18nEN,
 		},
 		{
 			ID:           inline_questions.ID,

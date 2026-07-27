@@ -20,6 +20,7 @@ import { ToolPlaceholder } from './tool-placeholder'
 import { ToolTombstone } from './tool-tombstone'
 import { useToolAction } from './use-tool-action'
 import { useToolState } from './use-tool-state'
+import { highlightAnnotateMergeReducer } from '../tools/highlight_annotate/merge'
 
 export type ContentToolHostProps = {
   /** Raw JSON body from a ```lex-tool fence. */
@@ -52,11 +53,15 @@ function ContentToolHostMounted({
 
   const archived = instance?.status === 'archived'
   const readOnly = archived
+  const conflictPolicy =
+    toolId === 'highlight_annotate' ? 'merge' : ('server_wins' as const)
   const toolState = useToolState({
     courseCode,
     instanceId,
     initialEnvelope: instance?.state ?? null,
     readOnly,
+    conflictPolicy,
+    mergeFn: toolId === 'highlight_annotate' ? highlightAnnotateMergeReducer : undefined,
     announce,
     savedAnnouncement: t('contentTools.runtime.saved'),
   })
