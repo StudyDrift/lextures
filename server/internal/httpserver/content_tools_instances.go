@@ -177,6 +177,14 @@ func (d Deps) handleContentToolsInstancesCreate() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
+		// CT.5: apply any registered config migrations from v1 toward current.
+		if table := ctsvc.DefaultMigrations().Get(body.ToolID); table != nil {
+			res := ctsvc.ApplyConfigMigrations(table, 1, body.Config)
+			if !res.Quarantine && !res.Unchanged {
+				body.Config = res.Doc
+			}
+			_ = ctsvc.MigrationFromVersions(table.Config)
+		}
 		actor := viewer
 		created, err := ctrepo.CreateInstance(r.Context(), d.Pool, ctrepo.InstanceRow{
 			CourseID:        courseID,
@@ -184,7 +192,7 @@ func (d Deps) handleContentToolsInstancesCreate() http.HandlerFunc {
 			HostKind:        body.HostKind,
 			SectionKey:      body.SectionKey,
 			ToolID:          body.ToolID,
-			ToolVersion:     m.Version,
+			ToolVersion:     resolveContentToolVersion(r.Context(), d.Pool, m),
 			Title:           body.Title,
 			ConfigJSON:      body.Config,
 			CreatedBy:       &actor,

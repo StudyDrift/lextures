@@ -62,6 +62,10 @@ func SyncRegistryMirror(ctx context.Context, pool *pgxpool.Pool, reg *Registry) 
 			DefaultBreaker().Open(m.ID, *existing.BreakerOpenAt)
 		}
 	}
+	for _, m := range reg.List() {
+		IncBridgeMessage(m.ID, "_reserved", "ok")
+		SetBundleBytesGauge(m.ID, 0)
+	}
 	slog.Info("contenttools.registry_mirror_synced", "tools", reg.Size())
 	return nil
 }

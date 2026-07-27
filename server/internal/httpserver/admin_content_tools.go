@@ -60,10 +60,19 @@ func (d Deps) handleAdminContentToolsVersionsList() http.HandlerFunc {
 			}
 			items = append(items, item)
 		}
+		// Surface in-memory breaker snapshot for operators (CT.5 FR-15).
+		for i := range items {
+			toolID, _ := items[i]["toolId"].(string)
+			st := ctsvc.DefaultBreaker().State(toolID)
+			items[i]["breakerFailures"] = st.Failures
+			if st.Open {
+				items[i]["breakerOpen"] = true
+			}
+		}
 		writeJSON(w, http.StatusOK, map[string]any{
-			"versions":           items,
-			"sandboxMode":        ctsvc.PlatformSandboxMode(),
-			"contractSupported":  []int{ctsvc.SupportedContractMin, ctsvc.SupportedContractMax},
+			"versions":          items,
+			"sandboxMode":       ctsvc.PlatformSandboxMode(),
+			"contractSupported": []int{ctsvc.SupportedContractMin, ctsvc.SupportedContractMax},
 		})
 	}
 }

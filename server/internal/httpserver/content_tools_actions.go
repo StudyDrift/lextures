@@ -172,6 +172,7 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 		})
 		ctsvc.ObserveActionLatency(inst.ToolID, actionName, time.Since(start).Seconds())
 		if err != nil {
+			ctsvc.DefaultBreaker().RecordFailure(inst.ToolID, err.Error(), time.Now().UTC())
 			if errors.Is(err, ctsvc.ErrActionUnknown) {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Action not found.")
 				return
@@ -267,6 +268,7 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 			"revision": st.Revision,
 			"status":   st.Status,
 		})
+		ctsvc.DefaultBreaker().RecordSuccess(inst.ToolID)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)
 	}

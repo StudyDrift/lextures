@@ -28,6 +28,11 @@ func LazyMigrateState(
 	table := DefaultMigrations().Get(toolID)
 	target := DefaultMigrations().CurrentStateSchemaVersion(toolID)
 	if from >= target {
+		if pool != nil && st.ID != uuid.Nil {
+			if open, _ := ctrepo.HasOpenQuarantine(ctx, pool, st.ID); open {
+				return st.StateJSON, from, true, nil
+			}
+		}
 		return st.StateJSON, from, false, nil
 	}
 	res := ApplyStateMigrations(table, from, st.StateJSON)

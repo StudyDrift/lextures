@@ -23,16 +23,10 @@ func ResolveWithinMajor(pinned string, published []string) (string, error) {
 		if err != nil {
 			continue
 		}
-		if sv.Major != pin.Major {
+		if !SameMajor(pinned, p) {
 			continue
 		}
-		// Compatible: same major and >= pinned (or any 1.x when pinned to 1.4.0 → newest 1.x).
-		if CompareSemVer(sv, pin) < 0 {
-			// Still allow older patches within major only if nothing newer exists;
-			// prefer versions >= pinned first.
-			candidates = append(candidates, cand{raw: p, v: sv})
-			continue
-		}
+		// Compatible: same major; collect all then prefer newest >= pinned.
 		candidates = append(candidates, cand{raw: p, v: sv})
 	}
 	if len(candidates) == 0 {

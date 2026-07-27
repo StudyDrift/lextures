@@ -403,7 +403,13 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 		schemaVer := ctsvc.DefaultMigrations().CurrentStateSchemaVersion(inst.ToolID)
 		var st *ctrepo.StateRow
 		if scope == ctrepo.ScopePreview {
-			st, err = ctrepo.UpsertPreviewStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus, schemaVer)
+			if nextStatus == ctsvc.StatusInProgress && schemaVer <= 1 {
+				st, err = ctrepo.UpsertPreviewState(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision)
+			} else {
+				st, err = ctrepo.UpsertPreviewStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus, schemaVer)
+			}
+		} else if nextStatus == ctsvc.StatusInProgress && schemaVer <= 1 {
+			st, err = ctrepo.UpsertState(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision)
 		} else {
 			st, err = ctrepo.UpsertStateWithStatus(r.Context(), d.Pool, instanceID, enrollID, viewer, body.State, body.Revision, nextStatus, schemaVer)
 		}
