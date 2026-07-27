@@ -518,6 +518,18 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     gatedSurface: null,
   },
   {
+    key: 'ffContentToolMarketplace',
+    label: 'Content tool marketplace',
+    category: 'integration',
+    ownershipSource: 'database',
+    sourceKey: null,
+    runtimeKey: 'ffContentToolMarketplace',
+    settingsOnlyRationale: null,
+    secretSensitive: false,
+    uiSample: false,
+    gatedSurface: null,
+  },
+  {
     key: 'ffCourseReviews',
     label: 'Course reviews',
     category: 'learner',

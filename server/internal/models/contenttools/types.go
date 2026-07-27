@@ -304,6 +304,8 @@ type ToolInstance struct {
 	BreakerOpen bool   `json:"breakerOpen,omitempty"`
 	Deprecated  bool   `json:"deprecated,omitempty"`
 	SunsetAt    string `json:"sunsetAt,omitempty"`
+	// CT.9: true when the org installation was revoked (read-only tombstone).
+	Tombstone bool `json:"tombstone,omitempty"`
 }
 
 // ToolStateEnvelope is the CT.3 learner state contract.

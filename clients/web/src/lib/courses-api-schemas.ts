@@ -1195,6 +1195,7 @@ export const contentToolInstanceSchema = z.object({
   sandboxMode: z.enum(['inprocess', 'iframe']).optional(),
   contract: z.number().optional(),
   breakerOpen: z.boolean().optional(),
+  tombstone: z.boolean().optional(),
   deprecated: z.boolean().optional(),
   sunsetAt: z.string().optional(),
 })

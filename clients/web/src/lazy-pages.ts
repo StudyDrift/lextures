@@ -187,3 +187,11 @@ export const MarketplaceCoursePage = lazy(() => import('./pages/marketplace/mark
 export const MarketplacePurchaseActionPage = lazy(
   () => import('./pages/marketplace/marketplace-purchase-action-page'),
 )
+export const ToolMarketplacePage = lazy(
+  () => import('./pages/tool-marketplace/tool-marketplace-page'),
+)
+export const ToolMarketplaceDetailPage = lazy(
+  () => import('./pages/tool-marketplace/tool-marketplace-detail-page'),
+)
+export const DeveloperToolsPage = lazy(() => import('./pages/developer/developer-tools-page'))
+export const ToolReviewsPage = lazy(() => import('./pages/admin/tool-reviews-page'))

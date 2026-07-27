@@ -108,6 +108,7 @@ type platformFeaturesJSON struct {
 	FFSelfPacedMode                    bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                    bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                bool `json:"ffCourseMarketplace"`
+	FFContentToolMarketplace           bool `json:"ffContentToolMarketplace"`
 	FFFeedback                         bool `json:"ffFeedback"`
 	FFVisualBoards                     bool `json:"ffVisualBoards"`
 	FFBoardsRealtime                   bool `json:"ffBoardsRealtime"`
@@ -274,6 +275,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFSelfPacedMode:                    cfg.FFSelfPacedMode,
 		FFPublicCatalog:                    cfg.FFPublicCatalog,
 		FFCourseMarketplace:                cfg.FFCourseMarketplace,
+		FFContentToolMarketplace:           cfg.FFContentToolMarketplace,
 		FFFeedback:                         cfg.FFFeedback,
 		FFVisualBoards:                     cfg.FFVisualBoards,
 		FFBoardsRealtime:                   cfg.FFBoardsRealtime,

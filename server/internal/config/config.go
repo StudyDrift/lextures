@@ -658,6 +658,9 @@ type Config struct {
 	// FFMarketplace enables the marketplace / plugin system with OAuth 2.1 app authorization (plan 16.9).
 	// Managed in Settings → Global platform (not process env).
 	FFMarketplace bool
+	// FFContentToolMarketplace enables the Content Tools third-party marketplace (CT.9).
+	// Managed in Settings → Global platform (not process env).
+	FFContentToolMarketplace bool
 
 	// StripeSecretKey is the Stripe API secret key (sk_live_… or sk_test_…).
 	StripeSecretKey string

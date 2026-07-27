@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Platform / ecosystem team |
 | **Depends on** | CT.5 (sandbox + versioning), CT.8 (conformance bar) |

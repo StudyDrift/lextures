@@ -164,6 +164,7 @@ type platformSettingsJSON struct {
 	FFSelfPacedMode                    bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                    bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                bool `json:"ffCourseMarketplace"`
+	FFContentToolMarketplace           bool `json:"ffContentToolMarketplace"`
 	FFFeedback                         bool `json:"ffFeedback"`
 	FFVisualBoards                     bool `json:"ffVisualBoards"`
 	FFBoardsRealtime                   bool `json:"ffBoardsRealtime"`
@@ -439,6 +440,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFSelfPacedMode:                    merged.FFSelfPacedMode,
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
+			FFContentToolMarketplace:           merged.FFContentToolMarketplace,
 			FFFeedback:                         merged.FFFeedback,
 			FFVisualBoards:                     merged.FFVisualBoards,
 			FFBoardsRealtime:                   merged.FFBoardsRealtime,
@@ -686,6 +688,7 @@ type putPlatformBody struct {
 	FFSelfPacedMode                    *bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                    *bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                *bool `json:"ffCourseMarketplace"`
+	FFContentToolMarketplace           *bool `json:"ffContentToolMarketplace"`
 	FFFeedback                         *bool `json:"ffFeedback"`
 	FFVisualBoards                     *bool `json:"ffVisualBoards"`
 	FFBoardsRealtime                   *bool `json:"ffBoardsRealtime"`
@@ -1142,6 +1145,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffselfpacedmode", body.FFSelfPacedMode, func(v bool) { wr.FFSelfPacedMode = &v })
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffcoursemarketplace", body.FFCourseMarketplace, func(v bool) { wr.FFCourseMarketplace = &v })
+		setBool("ffcontenttoolmarketplace", body.FFContentToolMarketplace, func(v bool) { wr.FFContentToolMarketplace = &v })
 		// ffFeedback, mobile parity flags, ffVisualBoards / ffInteractiveQuizzes, and collapsed
 		// IQ mode flags are always-on at platform level; ignore PUT writes (Merge hard-wires).
 		setBool("ffboardsrealtime", body.FFBoardsRealtime, func(v bool) { wr.FFBoardsRealtime = &v })
@@ -1377,6 +1381,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFSelfPacedMode:                    merged.FFSelfPacedMode,
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
+			FFContentToolMarketplace:           merged.FFContentToolMarketplace,
 			FFFeedback:                         merged.FFFeedback,
 			FFVisualBoards:                     merged.FFVisualBoards,
 			FFBoardsRealtime:                   merged.FFBoardsRealtime,
