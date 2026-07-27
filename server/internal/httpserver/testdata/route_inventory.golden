@@ -273,6 +273,9 @@ POST	/api/v1/admin/students/{uid}/ccr/achievements	session
 GET	/api/v1/admin/tokens	session
 POST	/api/v1/admin/tokens	session
 DELETE	/api/v1/admin/tokens/{id}	session
+GET	/api/v1/admin/tool-reviews	anonymous
+POST	/api/v1/admin/tool-reviews/auto-updates	anonymous
+POST	/api/v1/admin/tool-reviews/{release_id}/decision	anonymous
 POST	/api/v1/admin/transactions/{id}/refund	session
 GET	/api/v1/admin/transcripts/config	anonymous
 PUT	/api/v1/admin/transcripts/config	anonymous
@@ -1085,6 +1088,13 @@ GET	/api/v1/credentials/{id}/verify	anonymous
 DELETE	/api/v1/curves/{curve_id}	anonymous
 GET	/api/v1/developer/apps	anonymous
 POST	/api/v1/developer/apps	anonymous
+GET	/api/v1/developer/tools	anonymous
+POST	/api/v1/developer/tools	anonymous
+POST	/api/v1/developer/tools/{tool_id}/access-grants	anonymous
+GET	/api/v1/developer/tools/{tool_id}/analytics	anonymous
+POST	/api/v1/developer/tools/{tool_id}/releases	anonymous
+POST	/api/v1/developer/tools/{tool_id}/releases/{version}/submit	anonymous
+POST	/api/v1/developer/tools/{tool_id}/sunset	anonymous
 POST	/api/v1/diagnostic-attempts/{attemptID}/respond	session
 GET	/api/v1/enrollments/{enrollmentID}/accommodation-summary	session
 GET	/api/v1/enrollments/{enrollmentID}/diagnostic	session
@@ -1359,6 +1369,11 @@ POST	/api/v1/orgs/{orgId}/terms	anonymous
 POST	/api/v1/orgs/{orgId}/terms/ensure	anonymous
 DELETE	/api/v1/orgs/{orgId}/terms/{tid}	anonymous
 PATCH	/api/v1/orgs/{orgId}/terms/{tid}	anonymous
+GET	/api/v1/orgs/{orgId}/tool-installations	anonymous
+POST	/api/v1/orgs/{orgId}/tool-installations	anonymous
+GET	/api/v1/orgs/{orgId}/tool-installations/preview	anonymous
+DELETE	/api/v1/orgs/{orgId}/tool-installations/{id}	anonymous
+PATCH	/api/v1/orgs/{orgId}/tool-installations/{id}	anonymous
 GET	/api/v1/orgs/{orgId}/users	anonymous
 GET	/api/v1/parent/children	session
 GET	/api/v1/parent/conference-teachers	anonymous
@@ -1496,6 +1511,8 @@ GET	/api/v1/surveys/{id}/results	session
 POST	/api/v1/teachers/{teacherId}/conference-availability	anonymous
 GET	/api/v1/teachers/{teacherId}/conference-slots	anonymous
 GET	/api/v1/timezones	anonymous
+GET	/api/v1/tool-marketplace/tools	anonymous
+GET	/api/v1/tool-marketplace/tools/{tool_id}	anonymous
 GET	/api/v1/transcripts/config	anonymous
 GET	/api/v1/transcripts/documents	anonymous
 POST	/api/v1/transcripts/documents	anonymous

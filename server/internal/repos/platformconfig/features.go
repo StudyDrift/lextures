@@ -155,6 +155,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFPublicCatalog = mergeBool(db.FFPublicCatalog, false)
 	// Course marketplace defaults ON (exception to the usual default-off convention; plan MKT1).
 	out.FFCourseMarketplace = mergeBool(db.FFCourseMarketplace, true)
+	out.FFContentToolMarketplace = mergeBool(db.FFContentToolMarketplace, false)
 	out.FFFeedback = true
 	// Collaboration boards are course-scoped only; platform master switch removed.
 	out.FFVisualBoards = true

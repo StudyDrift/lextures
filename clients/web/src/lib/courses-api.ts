@@ -1352,6 +1352,7 @@ export type ContentToolInstance = {
   breakerOpen?: boolean
   deprecated?: boolean
   sunsetAt?: string
+  tombstone?: boolean
 }
 
 export type ContentToolManifest = {

@@ -59,7 +59,9 @@ func (d Deps) handleContentToolsInstancesList() http.HandlerFunc {
 					}
 				}
 			}
-			out = append(out, instanceToAPI(row, cfg))
+			inst := instanceToAPI(row, cfg)
+			d.enrichInstanceMarketplace(r.Context(), courseCode, &inst)
+			out = append(out, inst)
 		}
 
 		if withState && len(out) > 0 {

@@ -53,6 +53,10 @@
     {
       "name": "content-tools",
       "description": "Interactive Content Tools inside section bodies (plan CT.1)"
+    },
+    {
+      "name": "Content Tools Marketplace",
+      "description": "CT.9 third-party content tool marketplace"
     }
   ],
   "paths": {
@@ -14232,6 +14236,470 @@
           },
           "403": {
             "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/tool-marketplace/tools": {
+      "get": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Browse content tool marketplace listings (CT.9)",
+        "operationId": "listToolMarketplaceTools",
+        "parameters": [
+          {
+            "name": "subject",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "grade",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/tool-marketplace/tools/{tool_id}": {
+      "get": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Get a marketplace tool listing (CT.9)",
+        "operationId": "getToolMarketplaceTool",
+        "parameters": [
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing detail"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/developer/tools": {
+      "get": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "List developer-owned content tools (CT.9)",
+        "operationId": "listDeveloperContentTools",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Create a draft content tool (CT.9)",
+        "operationId": "createDeveloperContentTool",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Invalid"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/developer/tools/{tool_id}/releases": {
+      "post": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Upload a content tool release (CT.9)",
+        "operationId": "createDeveloperContentToolRelease",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/developer/tools/{tool_id}/releases/{version}/submit": {
+      "post": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Submit a release for review (CT.9)",
+        "operationId": "submitDeveloperContentToolRelease",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Submitted"
+          },
+          "422": {
+            "description": "Automated checks failed"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/developer/tools/{tool_id}/analytics": {
+      "get": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Aggregate install/usage analytics for a developer tool (CT.9)",
+        "operationId": "getDeveloperContentToolAnalytics",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Aggregate analytics only"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/orgs/{orgId}/tool-installations": {
+      "get": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "List org content tool installations (CT.9)",
+        "operationId": "listOrgToolInstallations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Install a content tool with admin consent (CT.9)",
+        "operationId": "installOrgTool",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Installed"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/orgs/{orgId}/tool-installations/{id}": {
+      "patch": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Update or re-consent a content tool installation (CT.9)",
+        "operationId": "patchOrgToolInstallation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Revoke a content tool installation (CT.9)",
+        "operationId": "revokeOrgToolInstallation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revoked"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tool-reviews": {
+      "get": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "List content tool review queue (CT.9)",
+        "operationId": "listContentToolReviews",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tool-reviews/{release_id}/decision": {
+      "post": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Approve or reject a content tool release (CT.9)",
+        "operationId": "decideContentToolReview",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "release_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decided"
+          },
+          "501": {
+            "description": "Feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tool-reviews/auto-updates": {
+      "post": {
+        "tags": [
+          "Content Tools Marketplace"
+        ],
+        "summary": "Apply soaked minor/patch auto-updates (CT.9)",
+        "operationId": "applyContentToolAutoUpdates",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated count"
+          },
+          "501": {
+            "description": "Feature disabled"
           }
         }
       }

@@ -51,6 +51,7 @@ const (
 	EventContentToolPolicyChange     = "content_tool_policy_change"
 	EventContentToolModeration       = "content_tool_moderation"
 	EventContentToolKill             = "content_tool_kill"
+	EventContentToolMarketplace      = "content_tool_marketplace"
 )
 
 const EventPlatformSettingsChange = "platform_settings_change"

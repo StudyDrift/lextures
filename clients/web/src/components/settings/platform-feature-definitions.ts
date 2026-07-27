@@ -681,6 +681,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'marketplace',
   },
   {
+    key: 'ffContentToolMarketplace',
+    label: 'Content tool marketplace',
+    description:
+      'Allow third-party interactive Content Tools to be published, reviewed, and installed at the organization level (CT.9).',
+    pack: 'marketplace',
+  },
+  {
     key: 'ffIqPublicKitCatalog',
     label: 'Live quiz public kit catalog',
     description:

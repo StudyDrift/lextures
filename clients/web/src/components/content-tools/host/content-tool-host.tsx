@@ -17,6 +17,7 @@ import { ToolErrorBoundary } from './tool-error-boundary'
 import { ToolFrame } from './tool-frame'
 import { useAnnounce } from './tool-live-region'
 import { ToolPlaceholder } from './tool-placeholder'
+import { ToolTombstone } from './tool-tombstone'
 import { useToolAction } from './use-tool-action'
 import { useToolState } from './use-tool-state'
 
@@ -106,6 +107,10 @@ function ContentToolHostMounted({
         message={t('contentTools.runtime.unavailable')}
       />
     )
+  }
+
+  if (instance.tombstone) {
+    return <ToolTombstone toolName={instance.title || toolId} />
   }
 
   if (instance.breakerOpen) {

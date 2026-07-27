@@ -119,6 +119,7 @@ export type PlatformFeatures = {
   ffRevenueShare: boolean
   ffTaxCollection: boolean
   ffCourseMarketplace?: boolean
+  ffContentToolMarketplace?: boolean
   ffLearningPaths: boolean
   ffConditionalRelease: boolean
   ffPeerReview: boolean
@@ -265,6 +266,7 @@ const defaultFeatures: PlatformFeatures = {
   ffRevenueShare: false,
   ffTaxCollection: false,
   ffCourseMarketplace: true,
+  ffContentToolMarketplace: false,
   ffLearningPaths: false,
   ffConditionalRelease: true,
   ffPeerReview: true,
@@ -409,6 +411,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffRevenueShare: false,
   ffTaxCollection: false,
   ffCourseMarketplace: true,
+  ffContentToolMarketplace: false,
   ffLearningPaths: false,
   ffConditionalRelease: true,
   ffPeerReview: true,
@@ -560,6 +563,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffRevenueShare: data.ffRevenueShare === true,
           ffTaxCollection: data.ffTaxCollection === true,
           ffCourseMarketplace: data.ffCourseMarketplace !== false,
+          ffContentToolMarketplace: data.ffContentToolMarketplace === true,
           ffLearningPaths: data.ffLearningPaths === true,
           ffConditionalRelease: data.ffConditionalRelease === true,
           ffPeerReview: data.ffPeerReview === true,
@@ -668,6 +672,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffRevenueShare: next.ffRevenueShare === true,
           ffTaxCollection: next.ffTaxCollection === true,
           ffCourseMarketplace: next.ffCourseMarketplace !== false,
+          ffContentToolMarketplace: next.ffContentToolMarketplace === true,
           ffLearningPaths: next.ffLearningPaths === true,
           ffConditionalRelease: next.ffConditionalRelease === true,
           ffPeerReview: next.ffPeerReview === true,

@@ -26,6 +26,15 @@ const (
 	EventGradeCurveApplied   EventType = "grade.curve.applied"
 	EventAnnouncementCreated EventType = "announcement.created"
 	EventQuizCompleted       EventType = "quiz.completed"
+
+	// Content Tools marketplace lifecycle (CT.9).
+	EventToolSubmitted EventType = "tool.submitted"
+	EventToolApproved  EventType = "tool.approved"
+	EventToolRejected  EventType = "tool.rejected"
+	EventToolInstalled EventType = "tool.installed"
+	EventToolUpdated   EventType = "tool.updated"
+	EventToolRevoked   EventType = "tool.revoked"
+	EventToolSunset    EventType = "tool.sunset"
 )
 
 // AllEventTypes returns the supported event type strings sorted.
@@ -40,6 +49,13 @@ func AllEventTypes() []string {
 		EventGradeCurveApplied,
 		EventAnnouncementCreated,
 		EventQuizCompleted,
+		EventToolSubmitted,
+		EventToolApproved,
+		EventToolRejected,
+		EventToolInstalled,
+		EventToolUpdated,
+		EventToolRevoked,
+		EventToolSunset,
 	}
 	out := make([]string, 0, len(types))
 	for _, t := range types {
@@ -127,5 +143,9 @@ func EventGroups() []EventGroup {
 		{Domain: "Assignments", Types: []string{string(EventAssignmentSubmitted), string(EventAssignmentCreated), string(EventAssignmentDueSoon)}},
 		{Domain: "Announcements", Types: []string{string(EventAnnouncementCreated)}},
 		{Domain: "Quizzes", Types: []string{string(EventQuizCompleted)}},
+		{Domain: "Content Tools", Types: []string{
+			string(EventToolSubmitted), string(EventToolApproved), string(EventToolRejected),
+			string(EventToolInstalled), string(EventToolUpdated), string(EventToolRevoked), string(EventToolSunset),
+		}},
 	}
 }

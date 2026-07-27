@@ -175,9 +175,34 @@ func instanceToAPI(row ctrepo.InstanceRow, config json.RawMessage) ctmodel.ToolI
 		}
 		out.Deprecated = m.Deprecated
 		out.SunsetAt = m.SunsetAt
+	} else if strings.Contains(row.ToolID, ".") {
+		// CT.9: third-party tools always mount in iframe (FR-10).
+		out.SandboxMode = ctsvc.SandboxIframe
 	}
 	out.BreakerOpen = ctsvc.DefaultBreaker().IsOpen(row.ToolID)
 	return out
+}
+
+func (d Deps) enrichInstanceMarketplace(ctx context.Context, courseCode string, inst *ctmodel.ToolInstance) {
+	if inst == nil || !d.effectiveConfig().FFContentToolMarketplace || !strings.Contains(inst.ToolID, ".") {
+		return
+	}
+	orgID, err := course.CourseOrgID(ctx, d.Pool, courseCode)
+	if err != nil || orgID == nil {
+		return
+	}
+	resolved, err := d.toolMarketService().ResolveForOrg(ctx, *orgID, inst.ToolID)
+	if err != nil || resolved == nil {
+		inst.Tombstone = true
+		return
+	}
+	inst.SandboxMode = ctsvc.SandboxIframe
+	if resolved.Tombstone {
+		inst.Tombstone = true
+	}
+	if resolved.Version != "" {
+		inst.ToolVersion = resolved.Version
+	}
 }
 
 func (d Deps) handleContentToolsCatalog() http.HandlerFunc {
@@ -203,6 +228,47 @@ func (d Deps) handleContentToolsCatalog() http.HandlerFunc {
 		ctsvc.SyncDurableKillsFromDB(r.Context(), d.Pool)
 		denied := ctsvc.OrgPolicyDeniedSet(d.loadContentToolsOrgPolicy(r, courseCode), reg)
 		tools := ctsvc.FilterCatalog(reg, allowed, "", denied)
+		// CT.9: merge org-installed third-party tools that are on the course allowlist (FR-7 / AC-3).
+		if d.effectiveConfig().FFContentToolMarketplace {
+			if orgID, err := course.CourseOrgID(r.Context(), d.Pool, courseCode); err == nil && orgID != nil {
+				installs, _ := d.toolMarketService().ListActiveToolIDsForOrg(r.Context(), *orgID)
+				for _, ins := range installs {
+					if denied != nil {
+						if _, isDenied := denied[ins.ToolID]; isDenied {
+							continue
+						}
+					}
+					if !ctsvc.ToolAllowedByAllowlist(allowed, ins.ToolID) {
+						continue
+					}
+					resolved, err := d.toolMarketService().ResolveForOrg(r.Context(), *orgID, ins.ToolID)
+					if err != nil || resolved == nil || resolved.Tombstone {
+						continue
+					}
+					var m ctsvc.Manifest
+					if err := json.Unmarshal(resolved.ManifestJSON, &m); err != nil {
+						continue
+					}
+					caps := m.Capabilities
+					if caps == nil {
+						caps = []string{}
+					}
+					tools = append(tools, ctmodel.CatalogTool{
+						ID:            resolved.ToolID,
+						Version:       resolved.Version,
+						Name:          resolved.DisplayName,
+						Category:      m.Category,
+						Capabilities:  caps,
+						I18nNamespace: m.I18nNamespace,
+						UI: ctmodel.ToolUI{
+							Renderer: m.UI.Renderer,
+							Icon:     m.UI.Icon,
+							Group:    m.UI.Group,
+						},
+					})
+				}
+			}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"tools": tools})
 	}
@@ -214,23 +280,56 @@ func (d Deps) handleContentToolsManifestGet() http.HandlerFunc {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		_, _, _, ok := d.requireContentToolsCourse(w, r)
+		courseCode, _, _, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
 		}
 		toolID := chi.URLParam(r, "tool_id")
 		m := ctsvc.MustDefault().Get(toolID)
-		if m == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Tool not found.")
+		if m != nil {
+			pub, err := ctsvc.ManifestToPublic(m)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load manifest.")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(pub)
 			return
 		}
-		pub, err := ctsvc.ManifestToPublic(m)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load manifest.")
-			return
+		// CT.9 third-party manifest federation.
+		if d.effectiveConfig().FFContentToolMarketplace {
+			if orgID, err := course.CourseOrgID(r.Context(), d.Pool, courseCode); err == nil && orgID != nil {
+				resolved, err := d.toolMarketService().ResolveForOrg(r.Context(), *orgID, toolID)
+				if err == nil && resolved != nil {
+					if resolved.Tombstone {
+						writeJSON(w, http.StatusOK, map[string]any{
+							"id":                   resolved.ToolID,
+							"version":              resolved.Version,
+							"name":                 resolved.DisplayName,
+							"tombstone":            true,
+							"sandbox":              "iframe",
+							"status":               resolved.Status,
+							"consentedHosts":       resolved.Hosts,
+							"providedByThirdParty": true,
+						})
+						return
+					}
+					var man ctsvc.Manifest
+					if err := json.Unmarshal(resolved.ManifestJSON, &man); err == nil {
+						man.Sandbox = "iframe"
+						if compiled, err := ctsvc.CompileManifest(man, map[string]string{"title": resolved.DisplayName}); err == nil {
+							pub, err := ctsvc.ManifestToPublic(compiled)
+							if err == nil {
+								w.Header().Set("Content-Type", "application/json; charset=utf-8")
+								_ = json.NewEncoder(w).Encode(pub)
+								return
+							}
+						}
+					}
+				}
+			}
 		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(pub)
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Tool not found.")
 	}
 }
 

@@ -277,6 +277,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerBotRoutes(r)
 	d.registerMarketplaceRoutes(r)
 	d.registerMarketplaceCourseRoutes(r)
+	d.registerContentToolMarketplaceRoutes(r)
 	d.registerLegalRoutes(r)
 	d.registerTrustRoutes(r)
 	d.registerFERPARoutes(r)

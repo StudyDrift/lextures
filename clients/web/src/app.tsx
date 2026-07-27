@@ -209,6 +209,10 @@ export default function App() {
               path="/marketplace/:slug/checkout"
               element={<Pages.MarketplacePurchaseActionPage />}
             />
+            <Route path="/tool-marketplace" element={<Pages.ToolMarketplacePage />} />
+            <Route path="/tool-marketplace/:toolId" element={<Pages.ToolMarketplaceDetailPage />} />
+            <Route path="/developer/tools" element={<Pages.DeveloperToolsPage />} />
+            <Route path="/admin/tool-reviews" element={<Pages.ToolReviewsPage />} />
             <Route path="/portfolios" element={<Pages.MyPortfoliosPage />} />
             <Route path="/portfolios/:pid/content/:aid" element={<Pages.PortfolioArtifactContentPage />} />
             <Route path="/portfolios/:pid" element={<Pages.PortfolioEditorPage />} />

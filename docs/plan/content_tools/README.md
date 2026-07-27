@@ -45,7 +45,7 @@ in its **manifest**. That is the whole extensibility contract:
 > **Adding a tool = a manifest + a renderer bundle + (optionally) an action handler.
 > No migration. No new table. No new route.**
 
-Which is what makes hundreds of tools — and eventually a [tool marketplace](CT.9-tool-marketplace-and-third-party-tools.md) — tractable.
+Which is what makes hundreds of tools — and eventually a [tool marketplace](../../completed/content_tools/CT.9-tool-marketplace-and-third-party-tools.md) — tractable.
 
 ```
 ┌──────────────────────── section editor ────────────────────────┐
@@ -118,7 +118,7 @@ Content Tools without enabling, say, the code sandbox.
 | **CT.5** | [Tool SDK, sandboxing, versioning & migration](../../completed/content_tools/CT.5-tool-sdk-sandboxing-and-versioning.md) | DONE | M | CT.1, CT.3 | `@lextures/tool-sdk`, iframe sandbox + postMessage bridge, semver pinning, state migrations, bundle budgets |
 | **CT.6** | [Grounded context service & web-link ingestion](../../completed/content_tools/CT.6-grounded-context-and-link-ingestion.md) | DONE | M | CT.1 | Context packs from the activity, SSRF-safe link fetch/extract/cache, `fetch_link` tool-calling for AI tools |
 | **CT.7** | [Analytics, insights & gradebook bridge](../../completed/content_tools/CT.7-analytics-insights-and-gradebook.md) | DONE | M | CT.3 | Per-tool instructor insights, struggle detection, xAPI/Caliper emission, optional score passback |
-| **CT.9** | [Tool marketplace & third-party tools](CT.9-tool-marketplace-and-third-party-tools.md) | MAJOR | L | CT.5,
+| **CT.9** | [Tool marketplace & third-party tools](../../completed/content_tools/CT.9-tool-marketplace-and-third-party-tools.md) | DONE | L | CT.5,
 ### The shelf — tools an author can drop into a section
 
 | ID | Tool | Mechanism it exploits | Severity | Migration? |
