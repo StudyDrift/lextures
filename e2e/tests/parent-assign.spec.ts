@@ -85,6 +85,10 @@ async function ensureGlobalAdmin(): Promise<string> {
 }
 
 test.describe('PP.1 parent-assign API', () => {
+  // Platform settings are global; lock wait can exceed the default 30s when other
+  // workers hold /tmp/lextures-platform-settings.lock (E2E.2 matrix specs).
+  test.describe.configure({ mode: 'serial', timeout: 180_000 })
+
   test('feature off returns 404 on parent-assign and invite consume', async () => {
     const gaToken = await ensureGlobalAdmin()
     await withPlatformBooleanRestore(gaToken, async () => {
