@@ -311,7 +311,7 @@ test.describe('Content Tools Highlight & Annotate (CT.13)', () => {
       expect((tagFacet?.values?.length ?? 0) > 0).toBe(true)
       expect(unitFacet).toBeTruthy()
 
-      // UI: host mounts; keyboard path tags a unit after reset.
+      // AC-9: reset clears annotations.
       const rosterRes = await fetch(
         `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${inst.id}/states?page=1&pageSize=50`,
         { headers: { Authorization: `Bearer ${instructorToken}` } },
@@ -326,18 +326,38 @@ test.describe('Content Tools Highlight & Annotate (CT.13)', () => {
         await resetEnrollment(instructorToken, courseCode, inst.id, started!.enrollmentId),
       ).toBe(200)
 
+      const clearedRes = await fetch(
+        `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${inst.id}/state`,
+        { headers: { Authorization: `Bearer ${studentToken}` } },
+      )
+      expect(clearedRes.status).toBe(200)
+      const cleared = (await clearedRes.json()) as {
+        status: string
+        state?: { annotations?: unknown[] }
+      }
+      expect(cleared.status).toBe('not_started')
+      expect(cleared.state?.annotations?.length ?? 0).toBe(0)
+
+      // Fresh instance for UI keyboard path (avoids stale host state after API reset).
+      const uiInst = await createInstance(instructorToken, courseCode, contentPage.id)
+      await apiPatchContentPage(instructorToken, courseCode, contentPage.id, {
+        markdown: fenceMarkdown(uiInst.id),
+      })
+
       await injectToken(page, studentToken)
       await page.goto(`/courses/${courseCode}/modules/content/${contentPage.id}`)
       const tool = page.locator('[data-content-tool="highlight_annotate"]').first()
       await expect(tool).toBeVisible({ timeout: 20_000 })
       await expect(page.getByText('Highlight every unsupported claim.')).toBeVisible()
+      await expect(page.getByTestId('ha-progress')).toContainText(/0 of 2/i)
 
       const unit0 = page.locator('[data-testid="ha-unit-0"]').first()
       await unit0.focus()
       await unit0.press('Enter')
       await expect(page.locator('[data-testid="ha-tag-menu"]')).toBeVisible()
       await page.locator('[data-testid="ha-tag-claim"]').click()
-      await expect(page.getByText(/1 of 2 required annotations/i)).toBeVisible({ timeout: 10_000 })
+      await expect(page.getByTestId('ha-progress')).toContainText(/1 of 2/i, { timeout: 10_000 })
+      await expect(page.locator('[data-testid="ha-tag-menu"]')).toHaveCount(0)
     })
   })
 })
