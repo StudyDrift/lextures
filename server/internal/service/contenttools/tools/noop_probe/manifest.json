@@ -45,6 +45,24 @@
     "srPattern": "form",
     "wcagNotes": "Test probe only; not shown to learners in production curricula."
   },
+  "dataSheet": {
+    "collects": {
+      "response": {
+        "purpose": "Learner free-text answer for formative check",
+        "retention": "life_of_enrollment"
+      },
+      "attempts": {
+        "purpose": "Attempt count for scoring",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "Test probe only; not shown to learners in production curricula.",
+    "keyboardAlternative": true
+  },
   "i18nNamespace": "contentTools.tools.noop_probe",
   "ui": {
     "renderer": "noop_probe",

@@ -22,6 +22,22 @@ var AllowedCategories = map[string]struct{}{
 // AllowedCapabilities is the closed set of capability tokens.
 var AllowedCapabilities = map[string]struct{}{
 	"state": {}, "scoring": {}, "ai": {}, "network": {}, "media": {}, "realtime": {}, "aggregate": {},
+	"peer_visible": {}, "code_execution": {}, "media_capture": {},
+}
+
+// PolicyCapabilityClasses are org-policy capability classes (CT.8 FR-3).
+var PolicyCapabilityClasses = map[string]struct{}{
+	"ai": {}, "peer_visible": {}, "network": {}, "media_capture": {}, "code_execution": {},
+}
+
+// AllowedDataSheetVisibility is the closed set for Tool Data Sheet visibility.
+var AllowedDataSheetVisibility = map[string]struct{}{
+	"self": {}, "instructor": {}, "peers": {}, "public": {},
+}
+
+// AllowedWCAGLevels is the closed set of declared WCAG conformance levels.
+var AllowedWCAGLevels = map[string]struct{}{
+	"A": {}, "AA": {}, "AAA": {},
 }
 
 // AllowedScoringModes is the closed set of scoring modes.
@@ -79,6 +95,36 @@ type Manifest struct {
 	StateSchemaVersion   int    `json:"stateSchemaVersion,omitempty"`
 	ConfigSchemaVersion  int    `json:"configSchemaVersion,omitempty"`
 	MaxBundleBytesGzip   int    `json:"maxBundleBytesGzip,omitempty"`
+	// CT.8 — Tool Data Sheet (FR-1); required for registration.
+	DataSheet *DataSheetDecl `json:"dataSheet,omitempty"`
+}
+
+// DataSheetDecl is the shipping-gate privacy/accessibility declaration (CT.8 FR-1).
+type DataSheetDecl struct {
+	Collects         map[string]DataSheetCollect `json:"collects"`
+	LeavesPlatform   bool                        `json:"leavesPlatform"`
+	Processors       []string                    `json:"processors"`
+	Visibility       string                      `json:"visibility"`
+	WCAGLevel        string                      `json:"wcagLevel"`
+	A11yLimitations  string                      `json:"a11yLimitations,omitempty"`
+	AITransparency   *AITransparencyDecl         `json:"aiTransparency,omitempty"`
+	KeyboardAlt      bool                        `json:"keyboardAlternative,omitempty"`
+	NonTimedAlt      bool                        `json:"nonTimedAlternative,omitempty"`
+	CaptionsProvided bool                        `json:"captionsProvided,omitempty"`
+}
+
+// DataSheetCollect describes one collected field.
+type DataSheetCollect struct {
+	Purpose   string `json:"purpose"`
+	Retention string `json:"retention"`
+}
+
+// AITransparencyDecl satisfies EU AI Act transparency duties (CT.8 FR-13).
+type AITransparencyDecl struct {
+	Purpose        string `json:"purpose"`
+	ModelFamily    string `json:"modelFamily"`
+	HumanOversight string `json:"humanOversight"`
+	Limitations    string `json:"limitations"`
 }
 
 // ActionDecl declares a server-side action a tool may invoke (CT.3).
@@ -218,6 +264,9 @@ func ValidateManifest(m Manifest, i18n map[string]string) error {
 	if strings.TrimSpace(m.A11y.SRPattern) == "" {
 		return fmt.Errorf("tool %s: a11y.srPattern is required", m.ID)
 	}
+	if err := ValidateDataSheet(m); err != nil {
+		return err
+	}
 	if strings.TrimSpace(m.I18nNamespace) == "" {
 		return fmt.Errorf("tool %s: i18nNamespace is required", m.ID)
 	}
@@ -270,6 +319,100 @@ func ValidateManifest(m Manifest, i18n map[string]string) error {
 		return fmt.Errorf("tool %s: schema versions must be >= 0", m.ID)
 	}
 	return nil
+}
+
+// ValidateDataSheet enforces CT.8 FR-1 / FR-14 / FR-15 shipping-gate declarations.
+func ValidateDataSheet(m Manifest) error {
+	if m.DataSheet == nil {
+		return fmt.Errorf("tool %s: dataSheet is required (CT.8)", m.ID)
+	}
+	ds := m.DataSheet
+	if _, ok := AllowedDataSheetVisibility[ds.Visibility]; !ok {
+		return fmt.Errorf("tool %s: dataSheet.visibility %q is invalid", m.ID, ds.Visibility)
+	}
+	level := strings.TrimSpace(ds.WCAGLevel)
+	if level == "" {
+		level = "AA"
+	}
+	if _, ok := AllowedWCAGLevels[level]; !ok {
+		return fmt.Errorf("tool %s: dataSheet.wcagLevel %q is invalid", m.ID, ds.WCAGLevel)
+	}
+	if ds.Collects == nil {
+		return fmt.Errorf("tool %s: dataSheet.collects is required", m.ID)
+	}
+	if hasCapability(m.Capabilities, "ai") && ds.AITransparency == nil {
+		return fmt.Errorf("tool %s: dataSheet.aiTransparency is required for AI tools", m.ID)
+	}
+	if ds.AITransparency != nil {
+		if strings.TrimSpace(ds.AITransparency.Purpose) == "" ||
+			strings.TrimSpace(ds.AITransparency.ModelFamily) == "" ||
+			strings.TrimSpace(ds.AITransparency.HumanOversight) == "" {
+			return fmt.Errorf("tool %s: dataSheet.aiTransparency purpose, modelFamily, and humanOversight are required", m.ID)
+		}
+	}
+	// FR-15: drag/timed/media tools need declared alternatives.
+	notes := strings.ToLower(m.A11y.WCAGNotes + " " + ds.A11yLimitations)
+	if strings.Contains(notes, "drag") && !ds.KeyboardAlt && !m.A11y.KeyboardOperable {
+		return fmt.Errorf("tool %s: drag-based tools must declare a keyboard alternative", m.ID)
+	}
+	if strings.Contains(notes, "timed") && !ds.NonTimedAlt {
+		return fmt.Errorf("tool %s: timing-based tools must declare a non-timed alternative", m.ID)
+	}
+	if hasCapability(m.Capabilities, "media") || hasCapability(m.Capabilities, "media_capture") {
+		if !ds.CaptionsProvided && !strings.Contains(notes, "no media playback") {
+			return fmt.Errorf("tool %s: media tools must declare captionsProvided or document no media playback", m.ID)
+		}
+	}
+	return nil
+}
+
+// CapabilityClassesForManifest maps manifest capabilities to org-policy classes.
+func CapabilityClassesForManifest(m *CompiledManifest) []string {
+	if m == nil {
+		return nil
+	}
+	seen := map[string]struct{}{}
+	var out []string
+	add := func(c string) {
+		if _, ok := seen[c]; ok {
+			return
+		}
+		seen[c] = struct{}{}
+		out = append(out, c)
+	}
+	for _, c := range m.Capabilities {
+		switch c {
+		case "ai":
+			add("ai")
+		case "network":
+			add("network")
+		case "media", "media_capture":
+			add("media_capture")
+		case "peer_visible":
+			add("peer_visible")
+		case "code_execution":
+			add("code_execution")
+		}
+	}
+	if m.AI != nil {
+		add("ai")
+	}
+	if m.Network != nil {
+		add("network")
+	}
+	if m.Category == "discuss" {
+		add("peer_visible")
+	}
+	return out
+}
+
+func hasCapability(caps []string, want string) bool {
+	for _, c := range caps {
+		if c == want {
+			return true
+		}
+	}
+	return false
 }
 
 // EffectiveConflictPolicy returns the tool's policy or server_wins default.

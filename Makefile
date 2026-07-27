@@ -1,4 +1,4 @@
-.PHONY: dev desktop e2e e2e-run e2e-teardown e2e-coverage-check lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www lint-structure lint-structure-report intro-course-validate marketplace-courses-validate iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-build-ios-test mobile-test-ios mobile-test-ios-fast ios-xcodebuild android ios server web cli www route-inventory route-inventory-update openapi-check
+.PHONY: dev desktop e2e e2e-run e2e-teardown e2e-coverage-check lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www lint-structure lint-structure-report intro-course-validate marketplace-courses-validate iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-build-ios-test mobile-test-ios mobile-test-ios-fast ios-xcodebuild android ios server web cli www route-inventory route-inventory-update openapi-check tools-conformance
 
 # Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
 # When no app filter is given, also runs TD.2 structural convention checks.
@@ -156,6 +156,10 @@ route-inventory-update:
 # TD.3 — OpenAPI validity, $ref resolution, and documentation coverage ratchet.
 openapi-check:
 	bash scripts/check-openapi-coverage.sh
+
+# CT.8 — Content Tools shipping-gate (data sheet, projection, i18n, a11y).
+tools-conformance:
+	bash scripts/check-content-tools-conformance.sh
 
 lint-server:
 	$(MAKE) -C server lint

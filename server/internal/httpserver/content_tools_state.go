@@ -348,6 +348,10 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Tool no longer registered.")
 			return
 		}
+		instID := instanceID
+		if !d.ensureContentToolsPolicyAllowed(w, r, courseCode, m, &instID) {
+			return
+		}
 		enrollID, _, readOnly, ok := d.resolveContentToolsStateActor(w, r, courseCode, viewer, courseID, scope, m)
 		if !ok {
 			return
@@ -363,6 +367,9 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 		body, err := decodeContentToolsSaveBody(r)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		if blocked := d.screenContentToolsFreeText(w, r, courseCode, courseID, instanceID, viewer, inst.ToolID, body.State); blocked {
 			return
 		}
 		if err := ctsvc.ValidateStateJSON(m, body.State); err != nil {

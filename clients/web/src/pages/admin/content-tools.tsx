@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AdminToolTelemetry } from '../../components/content-tools/analytics/admin-tool-telemetry'
+import { DataSheetsPanel } from '../../components/content-tools/governance/data-sheets-panel'
 import {
   createContentToolMigration,
   fetchContentToolQuarantine,
@@ -10,6 +11,10 @@ import {
   type ContentToolQuarantineItem,
   type ContentToolVersionRow,
 } from '../../lib/content-tools-admin-api'
+import {
+  fetchContentToolConformance,
+  postContentToolKill,
+} from '../../lib/content-tools-governance-api'
 
 export default function ContentToolsAdminPage() {
   const { t } = useTranslation('contentTools')
@@ -195,6 +200,56 @@ export default function ContentToolsAdminPage() {
           ))}
         </ul>
       ) : null}
+      <div className="mt-8 border-t border-slate-200 pt-6 dark:border-neutral-700">
+        <h2 className="text-lg font-semibold">{t('contentTools.governance.killTitle')}</h2>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          {t('contentTools.governance.killHelp')}
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="rounded border border-rose-400 px-3 py-1.5 text-sm text-rose-800 dark:text-rose-200"
+            data-testid="content-tools-kill-all-ai"
+            disabled={busy !== null}
+            onClick={() =>
+              void run('kill-ai', async () => {
+                await postContentToolKill({
+                  scope: 'all_ai',
+                  target: '',
+                  engaged: true,
+                  reason: 'admin UI',
+                })
+              })
+            }
+          >
+            {t('contentTools.governance.killAllAI')}
+          </button>
+          <button
+            type="button"
+            className="rounded border px-3 py-1.5 text-sm"
+            data-testid="content-tools-conformance"
+            disabled={busy !== null}
+            onClick={() =>
+              void run('conformance', async () => {
+                const rep = await fetchContentToolConformance()
+                if (!rep.ok) {
+                  throw new Error(
+                    rep.tools
+                      .filter((x) => !x.ok)
+                      .map((x) => `${x.toolId}: ${(x.errors ?? []).join('; ')}`)
+                      .join(' | ') || 'Conformance failed',
+                  )
+                }
+              })
+            }
+          >
+            {t('contentTools.governance.runConformance')}
+          </button>
+        </div>
+      </div>
+      <div className="mt-8 border-t border-slate-200 pt-6 dark:border-neutral-700">
+        <DataSheetsPanel />
+      </div>
       <div className="mt-8 border-t border-slate-200 pt-6 dark:border-neutral-700">
         <AdminToolTelemetry />
       </div>

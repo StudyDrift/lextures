@@ -9,5 +9,6 @@
 | **CT.5** | [Tool SDK, sandboxing, versioning & migration](CT.5-tool-sdk-sandboxing-and-versioning.md) |
 | **CT.6** | [Grounded context service & web-link ingestion](CT.6-grounded-context-and-link-ingestion.md) |
 | **CT.7** | [Analytics, insights & gradebook bridge](CT.7-analytics-insights-and-gradebook.md) |
+| **CT.8** | [Governance, safety, privacy & accessibility](CT.8-governance-safety-privacy-accessibility.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

@@ -6,7 +6,10 @@ import { parseFencePayload } from '../../../lib/content-tools/lex-tool-fence'
 import { fetchContentToolGradeLink } from '../../../lib/courses-api'
 import { permCourseItemCreate } from '../../../lib/rbac-api'
 import { InstanceAnalyticsPanel } from '../analytics/instance-analytics-panel'
+import { AIDisclosureBanner } from '../governance/ai-disclosure-banner'
+import { ModerationQueue } from '../governance/moderation-queue'
 import { ToolResponsesPanel } from '../instructor/tool-responses-panel'
+import { reportContentToolContent } from '../../../lib/content-tools-governance-api'
 import { useContentToolsPage } from './content-tools-page-context'
 import { isRendererRegistered, resolveRenderer } from './registry'
 import { SandboxIframeHost } from './sandbox/sandbox-iframe-host'
@@ -39,8 +42,12 @@ function ContentToolHostMounted({
   const [responsesOpen, setResponsesOpen] = useState(false)
   const [insightsOpen, setInsightsOpen] = useState(false)
   const [countsForGrade, setCountsForGrade] = useState(false)
+  const [aiOptedOut, setAiOptedOut] = useState(false)
+  const [reportBusy, setReportBusy] = useState(false)
   const canManage =
     Boolean(courseCode) && !permLoading && allows(permCourseItemCreate(courseCode))
+  // Probes are non-AI; real AI tools declare the capability in their manifest.
+  const requiresAI = false
 
   const archived = instance?.status === 'archived'
   const readOnly = archived
@@ -179,6 +186,17 @@ function ContentToolHostMounted({
         gradedBadgeLabel={countsForGrade ? t('contentTools.grading.countsBadge') : undefined}
       >
         {deprecatedNotice}
+        <AIDisclosureBanner
+          courseCode={courseCode}
+          toolId={toolId}
+          requiresAI={requiresAI && !aiOptedOut}
+          onOptOut={() => setAiOptedOut(true)}
+        />
+        {aiOptedOut ? (
+          <p className="mb-2 text-sm text-slate-600 dark:text-slate-300" role="status">
+            {t('contentTools.governance.nonAiPath')}
+          </p>
+        ) : null}
         <ToolErrorBoundary
           title={t('contentTools.runtime.errorTitle')}
           retryLabel={t('contentTools.runtime.retry')}
@@ -244,6 +262,27 @@ function ContentToolHostMounted({
           <p className="mt-2 text-xs text-rose-700 dark:text-rose-300" role="status">
             {toolState.error || action.error}
           </p>
+        ) : null}
+        {!canManage && !readOnly ? (
+          <button
+            type="button"
+            className="mt-2 text-xs text-slate-600 underline dark:text-slate-300"
+            disabled={reportBusy}
+            data-testid="content-tool-report"
+            onClick={() => {
+              setReportBusy(true)
+              void reportContentToolContent(courseCode, instanceId, { category: 'other' })
+                .catch(() => {
+                  /* non-fatal */
+                })
+                .finally(() => setReportBusy(false))
+            }}
+          >
+            {t('contentTools.safety.report')}
+          </button>
+        ) : null}
+        {canManage && insightsOpen ? (
+          <ModerationQueue courseCode={courseCode} instanceId={instanceId} />
         ) : null}
       </ToolFrame>
       {canManage ? (

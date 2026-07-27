@@ -33,6 +33,7 @@ func (d Deps) registerContentToolsRoutes(r chi.Router) {
 	d.registerContentToolsInstructorRoutes(r)
 	d.registerContentToolsContextRoutes(r)
 	d.registerContentToolsAnalyticsRoutes(r)
+	d.registerContentToolsGovernanceRoutes(r)
 }
 
 func writeContentToolsUnavailable(w http.ResponseWriter) {
@@ -185,7 +186,7 @@ func (d Deps) handleContentToolsCatalog() http.HandlerFunc {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		_, _, courseID, ok := d.requireContentToolsCourse(w, r)
+		courseCode, _, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
 		}
@@ -199,7 +200,9 @@ func (d Deps) handleContentToolsCatalog() http.HandlerFunc {
 			allowed = settings.AllowedToolIDs
 		}
 		reg := ctsvc.MustDefault()
-		tools := ctsvc.FilterCatalog(reg, allowed, "", nil)
+		ctsvc.SyncDurableKillsFromDB(r.Context(), d.Pool)
+		denied := ctsvc.OrgPolicyDeniedSet(d.loadContentToolsOrgPolicy(r, courseCode), reg)
+		tools := ctsvc.FilterCatalog(reg, allowed, "", denied)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"tools": tools})
 	}

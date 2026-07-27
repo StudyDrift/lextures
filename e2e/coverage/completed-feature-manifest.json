@@ -4437,6 +4437,33 @@
       }
     },
     {
+      "id": "CT.8",
+      "path": "docs/completed/content_tools/CT.8-governance-safety-privacy-accessibility.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "critical",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers data sheets, AI consent opt-out, free-text block when org policy writable, student report + instructor remove, and report affordance in the student runtime.",
+      "owner": "Trust & Safety",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-governance.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Org policy + kill path + conformance gate; inherits content_tools_enabled (CT.1). Depends on CT.3 and CT.6."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
