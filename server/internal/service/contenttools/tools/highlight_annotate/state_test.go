@@ -49,41 +49,27 @@ func TestDeriveStatus(t *testing.T) {
 	}
 }
 
-func TestMergeAnnotationsByID(t *testing.T) {
-	server := []Annotation{
-		{ID: "a", TagID: "t1", Quote: "s", CreatedAt: "2026-01-01T00:00:00Z"},
-		{ID: "b", TagID: "t1", Quote: "s2", CreatedAt: "2026-01-01T00:00:01Z"},
-	}
-	client := []Annotation{
-		{ID: "b", TagID: "t2", Quote: "edited", CreatedAt: "2026-01-01T00:00:02Z"},
-		{ID: "c", TagID: "t1", Quote: "new", CreatedAt: "2026-01-01T00:00:03Z"},
-	}
-	merged := MergeAnnotationsByID(client, server)
-	if len(merged) != 3 {
-		t.Fatalf("len=%d", len(merged))
-	}
-	byID := map[string]Annotation{}
-	for _, a := range merged {
-		byID[a.ID] = a
-	}
-	if byID["b"].Quote != "edited" {
-		t.Fatalf("b quote=%s", byID["b"].Quote)
-	}
-	if byID["c"].Quote != "new" {
-		t.Fatalf("missing c")
-	}
-	if byID["a"].Quote != "s" {
-		t.Fatalf("missing a")
-	}
-}
-
 func TestCapAnnotations(t *testing.T) {
 	st := EmptyState()
 	for i := 0; i < 5; i++ {
-		st.Annotations = append(st.Annotations, Annotation{ID: string(rune('a' + i))})
+		st.Annotations = append(st.Annotations, Annotation{ID: string(rune('a' + i)), TagID: "t"})
 	}
 	st = CapAnnotations(st, 3)
 	if len(st.Annotations) != 3 {
 		t.Fatalf("len=%d", len(st.Annotations))
+	}
+}
+
+func TestDropUnknownTags(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.Tags = []Tag{{ID: "claim", Label: "Claim", Color: "#000"}}
+	st := EmptyState()
+	st.Annotations = []Annotation{
+		{ID: "a", TagID: "claim", Quote: "q"},
+		{ID: "b", TagID: "gone", Quote: "q2"},
+	}
+	st = DropUnknownTags(cfg, st)
+	if len(st.Annotations) != 1 || st.Annotations[0].ID != "a" {
+		t.Fatalf("got %#v", st.Annotations)
 	}
 }

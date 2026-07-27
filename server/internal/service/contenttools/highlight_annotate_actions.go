@@ -79,6 +79,7 @@ func DeriveHighlightAnnotateStatus(toolID string, configJSON, stateJSON json.Raw
 	}
 	cfg := highlight_annotate.ParseConfig(configJSON)
 	st := highlight_annotate.ParseState(stateJSON)
+	st = highlight_annotate.DropUnknownTags(cfg, st)
 	st = highlight_annotate.CapAnnotations(st, cfg.MaxAnnotations)
 	derived := highlight_annotate.DeriveStatus(cfg, st, current)
 	if derived == "" {

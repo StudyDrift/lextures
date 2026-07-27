@@ -94,76 +94,9 @@ func ParseState(raw json.RawMessage) State {
 	return st
 }
 
-// FindTag returns a tag by id.
-func FindTag(cfg Config, id string) *Tag {
-	id = strings.TrimSpace(id)
-	for i := range cfg.Tags {
-		if cfg.Tags[i].ID == id {
-			return &cfg.Tags[i]
-		}
-	}
-	return nil
-}
-
 // NowRFC3339 returns UTC now for timestamps.
 func NowRFC3339() string {
 	return time.Now().UTC().Format(time.RFC3339)
-}
-
-// MergeAnnotationsByID merges client and server annotation arrays by id.
-// Prefer the newer createdAt when both exist; otherwise keep both sides' unique ids.
-func MergeAnnotationsByID(client, server []Annotation) []Annotation {
-	byID := map[string]Annotation{}
-	order := make([]string, 0, len(client)+len(server))
-	seen := map[string]bool{}
-
-	add := func(a Annotation) {
-		id := strings.TrimSpace(a.ID)
-		if id == "" {
-			return
-		}
-		if existing, ok := byID[id]; ok {
-			if a.CreatedAt > existing.CreatedAt {
-				byID[id] = a
-			} else if a.CreatedAt == existing.CreatedAt {
-				// Prefer client when timestamps tie ( fresher local edit).
-				byID[id] = a
-			}
-			return
-		}
-		byID[id] = a
-		if !seen[id] {
-			order = append(order, id)
-			seen[id] = true
-		}
-	}
-	for _, a := range server {
-		add(a)
-	}
-	for _, a := range client {
-		id := strings.TrimSpace(a.ID)
-		if id == "" {
-			continue
-		}
-		if existing, ok := byID[id]; ok {
-			// Client wins on same id (edit/delete semantics: omit = delete handled by full replace).
-			_ = existing
-			byID[id] = a
-		} else {
-			byID[id] = a
-			if !seen[id] {
-				order = append(order, id)
-				seen[id] = true
-			}
-		}
-	}
-	out := make([]Annotation, 0, len(order))
-	for _, id := range order {
-		if a, ok := byID[id]; ok {
-			out = append(out, a)
-		}
-	}
-	return out
 }
 
 // DeriveStatus returns the lifecycle status for the given state/config.
@@ -191,5 +124,27 @@ func CapAnnotations(st State, max int) State {
 	if len(st.Annotations) > max {
 		st.Annotations = st.Annotations[:max]
 	}
+	return st
+}
+
+// DropUnknownTags removes annotations whose tagId is not in config (author edited tags).
+func DropUnknownTags(cfg Config, st State) State {
+	if len(cfg.Tags) == 0 || len(st.Annotations) == 0 {
+		return st
+	}
+	allowed := make(map[string]struct{}, len(cfg.Tags))
+	for _, tag := range cfg.Tags {
+		id := strings.TrimSpace(tag.ID)
+		if id != "" {
+			allowed[id] = struct{}{}
+		}
+	}
+	kept := make([]Annotation, 0, len(st.Annotations))
+	for _, a := range st.Annotations {
+		if _, ok := allowed[strings.TrimSpace(a.TagID)]; ok {
+			kept = append(kept, a)
+		}
+	}
+	st.Annotations = kept
 	return st
 }
