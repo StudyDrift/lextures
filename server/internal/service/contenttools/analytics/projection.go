@@ -137,10 +137,7 @@ func projectNoopProbe(in ProjectInput) Summary {
 	}
 	s.Facets["attempts"] = st.Attempts
 	s.Facets["hasResponse"] = hasResp
-	correct := false
-	if in.ScoreRaw != nil && in.ScoreMax != nil && *in.ScoreMax > 0 && *in.ScoreRaw >= *in.ScoreMax {
-		correct = true
-	}
+	correct := in.ScoreRaw != nil && in.ScoreMax != nil && *in.ScoreMax > 0 && *in.ScoreRaw >= *in.ScoreMax
 	s.Facets["correct"] = correct
 	return s
 }
