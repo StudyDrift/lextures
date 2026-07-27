@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | SHIPPED |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Assessment team |
 | **Depends on** | CT.1, CT.2, CT.3; shipped `service/hintservice` |
@@ -188,10 +188,13 @@ type WorkedExampleState = {
 
 **No new routes.**
 
-- `POST .../actions/checkStep` — `{stepId, value, idempotencyKey}` →
+- `POST .../actions/check_step` — `{stepId, value, idempotencyKey}` →
   `{result, feedback?, attemptsRemaining, nextStep?, state}`.
 - `POST .../actions/hint` — `{stepId}` → `{hint, hintsRemaining, state}`.
-- `POST .../actions/revealStep` — `{stepId}` → `{explanation, expectedDisplay, state}`.
+- `POST .../actions/reveal_step` — `{stepId}` → `{explanation, expectedDisplay, state}`.
+- `POST .../actions/prepare` — resolves blanked steps for the enrollment.
+- `POST .../actions/reveal_all` — when author allows; reveals full solution.
+- `POST .../actions/verify` — authoring: run expected answers through the checker.
 - `PUT .../state` — draft input per step.
 - Funnel via CT.7 facets `stepId`, `result`, `hintsUsed`, `revealed`.
 
