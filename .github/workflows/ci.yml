@@ -72,6 +72,11 @@ jobs:
           go test ./internal/openapi/ -count=1 -timeout=1m
           bash ../scripts/check-openapi-coverage.sh
 
+      # CT.8 — Content Tools shipping-gate (data sheet, projection, i18n, a11y).
+      - name: Content Tools conformance (CT.8)
+        working-directory: .
+        run: bash scripts/check-content-tools-conformance.sh
+
       # Aggregate coverage of all ./internal/... is low while most packages lack tests. The true
       # total is ~11–12% but `go tool cover -func` prints one decimal, so values like 10.9% can
       # appear; use a 10.5% floor to avoid flaky CI while still catching large drops.

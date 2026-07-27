@@ -42,6 +42,20 @@
     "srPattern": "form",
     "wcagNotes": "CT.5 sandbox canary; iframe isolation probe."
   },
+  "dataSheet": {
+    "collects": {
+      "response": {
+        "purpose": "Learner free-text answer for sandbox canary",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "CT.5 sandbox canary; iframe isolation probe.",
+    "keyboardAlternative": true
+  },
   "i18nNamespace": "contentTools.tools.sandbox_probe",
   "ui": {
     "renderer": "sandbox_probe",

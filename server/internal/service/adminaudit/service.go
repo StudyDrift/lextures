@@ -48,6 +48,9 @@ const (
 	EventFeedbackAdminUpdate         = "feedback_admin_update"
 	EventContentToolStateReset       = "content_tool_state_reset"
 	EventContentToolStateRestore     = "content_tool_state_restore"
+	EventContentToolPolicyChange     = "content_tool_policy_change"
+	EventContentToolModeration       = "content_tool_moderation"
+	EventContentToolKill             = "content_tool_kill"
 )
 
 const EventPlatformSettingsChange = "platform_settings_change"

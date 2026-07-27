@@ -118,9 +118,7 @@ Content Tools without enabling, say, the code sandbox.
 | **CT.5** | [Tool SDK, sandboxing, versioning & migration](../../completed/content_tools/CT.5-tool-sdk-sandboxing-and-versioning.md) | DONE | M | CT.1, CT.3 | `@lextures/tool-sdk`, iframe sandbox + postMessage bridge, semver pinning, state migrations, bundle budgets |
 | **CT.6** | [Grounded context service & web-link ingestion](../../completed/content_tools/CT.6-grounded-context-and-link-ingestion.md) | DONE | M | CT.1 | Context packs from the activity, SSRF-safe link fetch/extract/cache, `fetch_link` tool-calling for AI tools |
 | **CT.7** | [Analytics, insights & gradebook bridge](../../completed/content_tools/CT.7-analytics-insights-and-gradebook.md) | DONE | M | CT.3 | Per-tool instructor insights, struggle detection, xAPI/Caliper emission, optional score passback |
-| **CT.8** | [Governance, safety, privacy & accessibility](CT.8-governance-safety-privacy-accessibility.md) | BLOCKER | M | CT.3, CT.6 | AI disclosure, FERPA/COPPA/EU-AI-Act, moderation, DSAR/retention of tool state, WCAG 2.1 AA conformance gate |
-| **CT.9** | [Tool marketplace & third-party tools](CT.9-tool-marketplace-and-third-party-tools.md) | MAJOR | L | CT.5, CT.8 | Publish/review/install lifecycle, org allowlists, versioned distribution, revenue-ready listing model |
-
+| **CT.9** | [Tool marketplace & third-party tools](CT.9-tool-marketplace-and-third-party-tools.md) | MAJOR | L | CT.5,
 ### The shelf — tools an author can drop into a section
 
 | ID | Tool | Mechanism it exploits | Severity | Migration? |
@@ -147,8 +145,7 @@ CT.1 Foundations ─┬─► CT.2 Authoring ──┬─► CT.3 Runtime ──
                   │                    │                  ├─► CT.7 Analytics / gradebook
                   ├─► CT.6 Context ────┘                  ├─► CT.5 SDK / sandbox ──► CT.9 Marketplace
                   │      (grounding)                      │
-                  └────────────────────────────────────────┴─► CT.8 Governance  ── GATES GA
-
+                  └────────────────────────────────────────┴─►
            Tools CT.10 … CT.23 depend only on { CT.1, CT.2, CT.3 } (+ CT.6 for AI tools).
            They ship in parallel, in any order, by any number of teams.
 ```
@@ -184,8 +181,7 @@ taxonomy. Each is one manifest + one renderer under the CT.1–CT.3 contract.
   inventing a second developer portal.
 - **[`../standards/`](../standards/README.md)** — tools capture student work and (for AI tools)
   send it to a model, so **S01/S02** (DSAR, retention), **S06** (DPIA), **S08** (children's privacy),
-  **S13** (EU AI Act) and **S20** (accessibility law) all attach. **CT.8** is the single owner that
-  discharges those obligations for this feature and links back to each standard.
+  **S13** (EU AI Act) and **S20** (accessibility law) all attach.  discharges those obligations for this feature and links back to each standard.
 - **[`../tech_debt/`](../tech_debt/README.md)** — CT.1–CT.3 add code to `internal/httpserver`, which
   TD.6 is decomposing. New Content Tools handlers MUST land in the new package layout if TD.6 has
   merged; if not, they land as `content_tools_*.go` files with no additions to `Deps` beyond one

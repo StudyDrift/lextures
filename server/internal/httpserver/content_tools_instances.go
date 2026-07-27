@@ -129,6 +129,9 @@ func (d Deps) handleContentToolsInstancesCreate() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Unknown toolId.")
 			return
 		}
+		if !d.ensureContentToolsPolicyAllowed(w, r, courseCode, m, nil) {
+			return
+		}
 		settings, err := ctrepo.GetSettings(r.Context(), d.Pool, courseID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load settings.")

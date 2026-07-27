@@ -71,6 +71,12 @@ func FacetsForTool(toolID string) []FacetSchema {
 	return []FacetSchema{}
 }
 
+// HasProjector reports whether a tool registered an explicit summary projection (CT.8 gate).
+func HasProjector(toolID string) bool {
+	_, ok := projectors[toolID]
+	return ok
+}
+
 // Project computes a Summary for the given tool state.
 func Project(in ProjectInput) Summary {
 	if p, ok := projectors[in.ToolID]; ok {

@@ -177,10 +177,20 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	// rows with SELECT ... FOR UPDATE SKIP LOCKED so they coordinate via Postgres.
 	jobRegistry := background.StartJobQueueWorker(ctx, pool, platform)
 	// CT.5: mirror in-process Content Tools registry into content_tool_versions.
+	// CT.8: sync data sheets, durable kill cache, and enforce conformance gate.
 	if pool != nil {
-		if err := contenttools.SyncRegistryMirror(ctx, pool, contenttools.MustDefault()); err != nil {
+		reg := contenttools.MustDefault()
+		if err := contenttools.MustConformanceOK(reg); err != nil {
+			slog.Error("contenttools.conformance_gate_failed", "err", err)
+			return fmt.Errorf("app: content tools conformance: %w", err)
+		}
+		if err := contenttools.SyncRegistryMirror(ctx, pool, reg); err != nil {
 			slog.Warn("contenttools.registry_mirror_sync_failed", "err", err)
 		}
+		if err := contenttools.SyncDataSheets(ctx, pool, reg); err != nil {
+			slog.Warn("contenttools.data_sheet_sync_failed", "err", err)
+		}
+		contenttools.SyncDurableKillsFromDB(ctx, pool)
 	}
 	// AC.4: dedicated adaptive content generation pipeline (Postgres SKIP LOCKED).
 	background.StartAdaptiveContentPipelineWorker(ctx, pool, merged)

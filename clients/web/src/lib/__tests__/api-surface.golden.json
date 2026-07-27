@@ -446,6 +446,21 @@
     "fetchContentToolVersions",
     "patchContentToolVersion"
   ],
+  "content-tools-governance-api.ts": [
+    "ContentToolDataSheet",
+    "ContentToolModerationAction",
+    "ContentToolOrgPolicy",
+    "fetchContentToolAIConsent",
+    "fetchContentToolConformance",
+    "fetchContentToolDataSheets",
+    "fetchContentToolModeration",
+    "fetchContentToolOrgPolicy",
+    "moderateContentToolContent",
+    "postContentToolAIConsent",
+    "postContentToolKill",
+    "putContentToolOrgPolicy",
+    "reportContentToolContent"
+  ],
   "course-attendance-api.ts": [
     "ATTENDANCE_STATUS_OPTIONS",
     "AttendanceRecord",

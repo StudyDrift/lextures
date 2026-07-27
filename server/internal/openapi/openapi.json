@@ -13912,6 +13912,329 @@
           }
         }
       }
+    },
+    "/api/v1/orgs/{orgId}/content-tool-policy": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Get org Content Tools policy (CT.8)",
+        "operationId": "getOrgContentToolPolicy",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Update org Content Tools policy (CT.8)",
+        "operationId": "putOrgContentToolPolicy",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/content-tools/data-sheets": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "List Content Tool data sheets (CT.8 trust centre)",
+        "operationId": "listContentToolDataSheets",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/content-tools/conformance": {
+      "get": {
+        "tags": [
+          "admin",
+          "content-tools"
+        ],
+        "summary": "Content Tools conformance report (CT.8)",
+        "operationId": "contentToolsConformance",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/ai-consent": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Get AI consent / disclosure state (CT.8)",
+        "operationId": "getContentToolAIConsent",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "toolId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Record AI consent or opt-out (CT.8)",
+        "operationId": "postContentToolAIConsent",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/report": {
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Report peer-visible content tool content (CT.8)",
+        "operationId": "reportContentToolContent",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/moderate": {
+      "post": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "Moderate content tool content (CT.8)",
+        "operationId": "moderateContentToolContent",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/moderation": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "List moderation actions (CT.8)",
+        "operationId": "listContentToolModeration",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/filter-flags": {
+      "get": {
+        "tags": [
+          "content-tools"
+        ],
+        "summary": "List aggregate content-filter flags (CT.8)",
+        "operationId": "listContentToolFilterFlags",
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content-tools/kill": {
+      "post": {
+        "tags": [
+          "admin",
+          "content-tools"
+        ],
+        "summary": "Engage or clear Content Tools kill path (CT.8, internal)",
+        "operationId": "adminContentToolsKill",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content-tools/kills": {
+      "get": {
+        "tags": [
+          "admin",
+          "content-tools"
+        ],
+        "summary": "List active Content Tools kill paths (CT.8)",
+        "operationId": "adminContentToolsKillsList",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
     }
   },
   "components": {

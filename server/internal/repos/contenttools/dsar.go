@@ -9,19 +9,25 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// UserContentToolsExport is the DSAR export slice for Content Tools artifacts (CT.1/CT.4).
+// UserContentToolsExport is the DSAR export slice for Content Tools artifacts (CT.1/CT.4/CT.8).
 type UserContentToolsExport struct {
-	States []map[string]any `json:"states"`
-	Events []map[string]any `json:"events"`
-	Resets []map[string]any `json:"resets"`
+	States      []map[string]any `json:"states"`
+	Events      []map[string]any `json:"events"`
+	Resets      []map[string]any `json:"resets"`
+	AIConsents  []map[string]any `json:"aiConsents"`
+	Moderation  []map[string]any `json:"moderation"`
+	FilterFlags []map[string]any `json:"filterFlags"`
 }
 
 // ExportUserContent collects a user's content tool states and related events.
 func ExportUserContent(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (UserContentToolsExport, error) {
 	out := UserContentToolsExport{
-		States: []map[string]any{},
-		Events: []map[string]any{},
-		Resets: []map[string]any{},
+		States:      []map[string]any{},
+		Events:      []map[string]any{},
+		Resets:      []map[string]any{},
+		AIConsents:  []map[string]any{},
+		Moderation:  []map[string]any{},
+		FilterFlags: []map[string]any{},
 	}
 	if pool == nil {
 		return out, nil
@@ -186,7 +192,109 @@ ORDER BY r.reset_at ASC
 		}
 		out.Resets = append(out.Resets, row)
 	}
-	return out, rrows.Err()
+	if err := rrows.Err(); err != nil {
+		return out, err
+	}
+
+	crows, err := pool.Query(ctx, `
+SELECT id, course_id, tool_id, decision, decided_at
+FROM course.content_tool_ai_consents
+WHERE user_id = $1
+ORDER BY decided_at ASC
+`, userID)
+	if err != nil {
+		return out, err
+	}
+	defer crows.Close()
+	for crows.Next() {
+		var id uuid.UUID
+		var courseID *uuid.UUID
+		var toolID *string
+		var decision string
+		var decidedAt time.Time
+		if err := crows.Scan(&id, &courseID, &toolID, &decision, &decidedAt); err != nil {
+			return out, err
+		}
+		row := map[string]any{
+			"id":        id.String(),
+			"decision":  decision,
+			"decidedAt": decidedAt.UTC().Format(time.RFC3339),
+		}
+		if courseID != nil {
+			row["courseId"] = courseID.String()
+		}
+		if toolID != nil {
+			row["toolId"] = *toolID
+		}
+		out.AIConsents = append(out.AIConsents, row)
+	}
+	if err := crows.Err(); err != nil {
+		return out, err
+	}
+
+	mrows, err := pool.Query(ctx, `
+SELECT id, instance_id, action, category, reason, created_at
+FROM course.content_tool_moderation
+WHERE actor_user_id = $1 OR subject_user_id = $1
+ORDER BY created_at ASC
+`, userID)
+	if err != nil {
+		return out, err
+	}
+	defer mrows.Close()
+	for mrows.Next() {
+		var id, instanceID uuid.UUID
+		var action string
+		var category, reason *string
+		var createdAt time.Time
+		if err := mrows.Scan(&id, &instanceID, &action, &category, &reason, &createdAt); err != nil {
+			return out, err
+		}
+		row := map[string]any{
+			"id":         id.String(),
+			"instanceId": instanceID.String(),
+			"action":     action,
+			"createdAt":  createdAt.UTC().Format(time.RFC3339),
+		}
+		if category != nil {
+			row["category"] = *category
+		}
+		if reason != nil {
+			row["reason"] = *reason
+		}
+		out.Moderation = append(out.Moderation, row)
+	}
+	if err := mrows.Err(); err != nil {
+		return out, err
+	}
+
+	frows, err := pool.Query(ctx, `
+SELECT id, instance_id, course_id, category, action, created_at
+FROM course.content_tool_filter_flags
+WHERE user_id = $1
+ORDER BY created_at ASC
+`, userID)
+	if err != nil {
+		return out, err
+	}
+	defer frows.Close()
+	for frows.Next() {
+		var id, instanceID, courseID uuid.UUID
+		var category, action string
+		var createdAt time.Time
+		if err := frows.Scan(&id, &instanceID, &courseID, &category, &action, &createdAt); err != nil {
+			return out, err
+		}
+		out.FilterFlags = append(out.FilterFlags, map[string]any{
+			"id":         id.String(),
+			"instanceId": instanceID.String(),
+			"courseId":   courseID.String(),
+			"category":   category,
+			"action":     action,
+			"createdAt":  createdAt.UTC().Format(time.RFC3339),
+		})
+	}
+	return out, frows.Err()
 }
 
 // EraseUserContent deletes content tool states and nulls event actor for a user.
@@ -198,6 +306,22 @@ func EraseUserContent(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID)
 DELETE FROM course.content_tool_state_resets r
 USING course.course_enrollments ce
 WHERE r.enrollment_id = ce.id AND ce.user_id = $1
+`, userID); err != nil {
+		return err
+	}
+	if _, err := pool.Exec(ctx, `DELETE FROM course.content_tool_filter_flags WHERE user_id = $1`, userID); err != nil {
+		return err
+	}
+	if _, err := pool.Exec(ctx, `DELETE FROM course.content_tool_ai_consents WHERE user_id = $1`, userID); err != nil {
+		return err
+	}
+	if _, err := pool.Exec(ctx, `
+UPDATE course.content_tool_moderation SET actor_user_id = NULL WHERE actor_user_id = $1
+`, userID); err != nil {
+		return err
+	}
+	if _, err := pool.Exec(ctx, `
+UPDATE course.content_tool_moderation SET subject_user_id = NULL WHERE subject_user_id = $1
 `, userID); err != nil {
 		return err
 	}
@@ -227,9 +351,14 @@ UPDATE course.content_tool_state_resets SET restored_by = NULL WHERE restored_by
 	return nil
 }
 
-// CountUserContentRows returns remaining state rows for a user (erasure verification).
+// CountUserContentRows returns remaining state/consent/filter rows for a user (erasure verification).
 func CountUserContentRows(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (int64, error) {
 	var n int64
-	err := pool.QueryRow(ctx, `SELECT COUNT(*) FROM course.content_tool_states WHERE user_id = $1`, userID).Scan(&n)
+	err := pool.QueryRow(ctx, `
+SELECT
+  (SELECT COUNT(*) FROM course.content_tool_states WHERE user_id = $1) +
+  (SELECT COUNT(*) FROM course.content_tool_ai_consents WHERE user_id = $1) +
+  (SELECT COUNT(*) FROM course.content_tool_filter_flags WHERE user_id = $1)
+`, userID).Scan(&n)
 	return n, err
 }

@@ -124,6 +124,36 @@ var (
 		Name:      "content_tool_bundle_bytes",
 		Help:      "Gzipped renderer bundle size in bytes by tool_id.",
 	}, []string{"tool_id"})
+
+	policyDenialsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_policy_denials_total",
+		Help:      "Content tool policy denials by reason (CT.8).",
+	}, []string{"reason"})
+
+	moderationActionsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_moderation_actions_total",
+		Help:      "Content tool moderation actions by action (CT.8).",
+	}, []string{"action"})
+
+	contentFilterFlagsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_content_filter_flags_total",
+		Help:      "Content tool free-text filter flags by category (CT.8).",
+	}, []string{"category"})
+
+	crisisEscalationsTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_crisis_escalations_total",
+		Help:      "Content tool crisis-signal escalations (CT.8).",
+	})
+
+	a11yGateFailuresTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_a11y_gate_failures_total",
+		Help:      "Content tool accessibility conformance gate failures by tool_id (CT.8).",
+	}, []string{"tool_id"})
 )
 
 func registerMetrics() {
@@ -134,12 +164,18 @@ func registerMetrics() {
 			stateSavesTotal, stateConflictsTotal, actionLatency, renderErrorsTotal, offlineReplaysTotal,
 			resetsTotal, resetRowsTotal, resetRestoresTotal, resetJobDuration,
 			bridgeMessagesTotal, migrationDocsTotal, breakerState, bundleBytes,
+			policyDenialsTotal, moderationActionsTotal, contentFilterFlagsTotal,
+			crisisEscalationsTotal, a11yGateFailuresTotal,
 		)
 		// Ensure reserved series exist for scrapers/alerts before client ingest lands.
 		renderErrorsTotal.WithLabelValues("_reserved").Add(0)
 		offlineReplaysTotal.WithLabelValues("_reserved").Add(0)
 		bridgeMessagesTotal.WithLabelValues("_reserved", "_reserved", "_reserved").Add(0)
 		migrationDocsTotal.WithLabelValues("_reserved", "0", "0", "_reserved").Add(0)
+		policyDenialsTotal.WithLabelValues("_reserved").Add(0)
+		moderationActionsTotal.WithLabelValues("_reserved").Add(0)
+		contentFilterFlagsTotal.WithLabelValues("_reserved").Add(0)
+		a11yGateFailuresTotal.WithLabelValues("_reserved").Add(0)
 	})
 }
 
@@ -286,5 +322,47 @@ func SetBundleBytesGauge(toolID string, bytes float64) {
 		return
 	}
 	bundleBytes.WithLabelValues(toolID).Set(bytes)
+}
+
+// IncPolicyDenial increments lextures_content_tool_policy_denials_total{reason}.
+func IncPolicyDenial(reason string) {
+	registerMetrics()
+	if reason == "" {
+		reason = "_unknown"
+	}
+	policyDenialsTotal.WithLabelValues(reason).Inc()
+}
+
+// IncModerationAction increments lextures_content_tool_moderation_actions_total{action}.
+func IncModerationAction(action string) {
+	registerMetrics()
+	if action == "" {
+		action = "_unknown"
+	}
+	moderationActionsTotal.WithLabelValues(action).Inc()
+}
+
+// IncContentFilterFlag increments lextures_content_tool_content_filter_flags_total{category}.
+func IncContentFilterFlag(category string) {
+	registerMetrics()
+	if category == "" {
+		category = "_unknown"
+	}
+	contentFilterFlagsTotal.WithLabelValues(category).Inc()
+}
+
+// IncCrisisEscalation increments lextures_content_tool_crisis_escalations_total.
+func IncCrisisEscalation() {
+	registerMetrics()
+	crisisEscalationsTotal.Inc()
+}
+
+// IncA11yGateFailure increments lextures_content_tool_a11y_gate_failures_total{tool_id}.
+func IncA11yGateFailure(toolID string) {
+	registerMetrics()
+	if toolID == "" {
+		toolID = "_unknown"
+	}
+	a11yGateFailuresTotal.WithLabelValues(toolID).Inc()
 }
 

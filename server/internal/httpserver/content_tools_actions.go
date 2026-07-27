@@ -91,6 +91,10 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Tool no longer registered.")
 			return
 		}
+		instID := instanceID
+		if !d.ensureContentToolsPolicyAllowed(w, r, courseCode, m, &instID) {
+			return
+		}
 		decl := ctsvc.FindAction(m, actionName)
 		if decl == nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Action not found.")

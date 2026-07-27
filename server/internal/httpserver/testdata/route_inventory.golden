@@ -95,6 +95,8 @@ GET	/api/v1/admin/consortium/agreements	anonymous
 POST	/api/v1/admin/consortium/agreements	anonymous
 PATCH	/api/v1/admin/consortium/agreements/{id}	anonymous
 GET	/api/v1/admin/consortium/enrollment-report	anonymous
+POST	/api/v1/admin/content-tools/kill	session
+GET	/api/v1/admin/content-tools/kills	session
 POST	/api/v1/admin/content-tools/migrations	session
 GET	/api/v1/admin/content-tools/migrations/{job_id}	session
 GET	/api/v1/admin/content-tools/quarantine	session
@@ -469,6 +471,8 @@ GET	/api/v1/conference-slots/{slotId}/ical	anonymous
 GET	/api/v1/consortium/courses	anonymous
 POST	/api/v1/consortium/courses/{id}/enroll	anonymous
 POST	/api/v1/content-filter/activity	anonymous
+GET	/api/v1/content-tools/conformance	session
+GET	/api/v1/content-tools/data-sheets	session
 GET	/api/v1/courses	session
 POST	/api/v1/courses	session
 PUT	/api/v1/courses/catalog-hidden	session
@@ -679,6 +683,8 @@ POST	/api/v1/courses/{course_code}/content-pages/{item_id}/build-with-ai	session
 GET	/api/v1/courses/{course_code}/content-pages/{item_id}/markups	anonymous
 POST	/api/v1/courses/{course_code}/content-pages/{item_id}/markups	anonymous
 DELETE	/api/v1/courses/{course_code}/content-pages/{item_id}/markups/{markup_id}	anonymous
+GET	/api/v1/courses/{course_code}/content-tools/ai-consent	session
+POST	/api/v1/courses/{course_code}/content-tools/ai-consent	session
 GET	/api/v1/courses/{course_code}/content-tools/analytics	session
 GET	/api/v1/courses/{course_code}/content-tools/analytics/course	session
 GET	/api/v1/courses/{course_code}/content-tools/analytics/export	session
@@ -694,9 +700,13 @@ PATCH	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	sessio
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/actions/{action}	session
 GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/analytics	session
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/duplicate	session
+GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/filter-flags	session
 DELETE	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/grade-link	session
 GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/grade-link	session
 PUT	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/grade-link	session
+POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/moderate	session
+GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/moderation	session
+POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/report	session
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/self-reset	session
 GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/state	session
 PUT	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/state	session
@@ -1313,6 +1323,8 @@ POST	/api/v1/orgs/{orgId}/broadcasts	anonymous
 GET	/api/v1/orgs/{orgId}/broadcasts/{broadcastId}/delivery-report	anonymous
 GET	/api/v1/orgs/{orgId}/calendar/events	session
 GET	/api/v1/orgs/{orgId}/calendar/terms/{termId}/ical	session
+GET	/api/v1/orgs/{orgId}/content-tool-policy	anonymous
+PUT	/api/v1/orgs/{orgId}/content-tool-policy	anonymous
 GET	/api/v1/orgs/{orgId}/courses	session
 GET	/api/v1/orgs/{orgId}/cross-list-groups	anonymous
 POST	/api/v1/orgs/{orgId}/cross-list-groups	anonymous
