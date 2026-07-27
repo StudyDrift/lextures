@@ -4518,6 +4518,33 @@
       }
     },
     {
+      "id": "CT.11",
+      "path": "docs/completed/content_tools/CT.11-tool-inline-questions.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers answer-key redaction, wrong→retry→correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
+      "owner": "Assessment",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-inline-questions.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); scoring via CT.3 actions; facets/grade bridge via CT.7; short_text filter via CT.8."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
