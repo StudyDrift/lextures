@@ -1,0 +1,230 @@
+{
+  "id": "sort_sequence",
+  "version": "1.0.0",
+  "name": "contentTools.tools.sort_sequence.name",
+  "category": "practice",
+  "capabilities": ["state", "scoring"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["mode", "prompt", "items"],
+    "properties": {
+      "mode": {
+        "type": "string",
+        "enum": ["categorize", "order"],
+        "default": "categorize"
+      },
+      "prompt": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Task prompt shown above the placement surface"
+      },
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 30,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "text"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "text": { "type": "string", "minLength": 1 },
+            "imageUrl": { "type": "string" },
+            "imageAlt": { "type": "string" }
+          }
+        }
+      },
+      "buckets": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 6,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "label": { "type": "string", "minLength": 1 },
+            "description": { "type": "string" }
+          }
+        }
+      },
+      "correctBucketByItem": {
+        "type": "object",
+        "x-lex-sensitive": true,
+        "additionalProperties": {
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          ]
+        }
+      },
+      "correctOrder": {
+        "type": "array",
+        "x-lex-sensitive": true,
+        "items": { "type": "string", "minLength": 1 }
+      },
+      "tieGroups": {
+        "type": "array",
+        "x-lex-sensitive": true,
+        "items": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "itemFeedback": {
+        "type": "object",
+        "x-lex-sensitive": true,
+        "additionalProperties": { "type": "string" }
+      },
+      "attempts": {
+        "oneOf": [
+          { "type": "integer", "minimum": 1, "maximum": 5 },
+          { "type": "string", "const": "unlimited" }
+        ],
+        "default": 3
+      },
+      "showPerItemCorrectness": {
+        "type": "boolean",
+        "default": true
+      },
+      "lockCorrect": {
+        "type": "boolean",
+        "default": true
+      },
+      "scoreMode": {
+        "type": "string",
+        "enum": ["per_item", "all_or_nothing"],
+        "default": "per_item"
+      },
+      "shuffleItems": {
+        "type": "boolean",
+        "default": true
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "placement": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": {
+              "type": ["string", "null"]
+            }
+          },
+          {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        ]
+      },
+      "attempts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["at", "correctItemIds", "scorePct"],
+          "properties": {
+            "at": { "type": "string" },
+            "correctItemIds": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "scorePct": { "type": "number" },
+            "placement": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": ["string", "null"]
+                  }
+                },
+                {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "lockedItemIds": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "trayOrder": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "lastPerItem": {
+        "type": "object",
+        "additionalProperties": { "type": "boolean" }
+      },
+      "completedAt": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "auto" },
+  "storage": { "maxStateBytes": 24000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "application",
+    "wcagNotes": "Full keyboard pick-up/move/drop with live announcements; tap-to-place alternative for touch; prefers-reduced-motion disables drag animations. No known keyboard limitations."
+  },
+  "dataSheet": {
+    "collects": {
+      "placement": {
+        "purpose": "Learner item placements (bucket assignments or sequence order) including drafts and checked attempts",
+        "retention": "life_of_enrollment"
+      },
+      "attempts": {
+        "purpose": "Per-check correctness and score for attempt accounting",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.sort_sequence",
+  "ui": {
+    "renderer": "sort_sequence",
+    "icon": "layers",
+    "group": "practice",
+    "customEditor": "sort_sequence"
+  },
+  "actions": [
+    {
+      "name": "check",
+      "rateLimitPerMin": 30,
+      "description": "Grade current placement server-side and record an attempt"
+    },
+    {
+      "name": "reset_attempt",
+      "rateLimitPerMin": 30,
+      "description": "Return unlocked items to the tray within the same attempt budget"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

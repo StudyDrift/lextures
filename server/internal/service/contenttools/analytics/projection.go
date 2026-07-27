@@ -147,6 +147,11 @@ func init() {
 		{Key: "tagId", Label: "contentTools.analytics.facets.tagId", Type: "string"},
 		{Key: "unitIndex", Label: "contentTools.analytics.facets.unitIndex", Type: "string"},
 	})
+	RegisterProjector("sort_sequence", projectSortSequence, []FacetSchema{
+		{Key: "itemId", Label: "contentTools.analytics.facets.itemId", Type: "string"},
+		{Key: "placedIn", Label: "contentTools.analytics.facets.placedIn", Type: "string"},
+		{Key: "correct", Label: "contentTools.analytics.facets.correct", Type: "boolean"},
+	})
 }
 
 func projectNoopProbe(in ProjectInput) Summary {
@@ -279,9 +284,9 @@ func projectHighlightAnnotate(in ProjectInput) Summary {
 	s := defaultProject(in)
 	var st struct {
 		Annotations []struct {
-			TagID   string `json:"tagId"`
-			Orphaned bool  `json:"orphaned"`
-			Anchor  struct {
+			TagID    string `json:"tagId"`
+			Orphaned bool   `json:"orphaned"`
+			Anchor   struct {
 				UnitIndex *int `json:"unitIndex"`
 			} `json:"anchor"`
 		} `json:"annotations"`
@@ -307,4 +312,84 @@ func projectHighlightAnnotate(in ProjectInput) Summary {
 	s.Facets["tagId"] = tagIDs
 	s.Facets["unitIndex"] = unitIndexes
 	return s
+}
+
+func projectSortSequence(in ProjectInput) Summary {
+	s := defaultProject(in)
+	var st struct {
+		Placement json.RawMessage `json:"placement"`
+		Attempts  []struct {
+			CorrectItemIDs []string        `json:"correctItemIds"`
+			ScorePct       float64         `json:"scorePct"`
+			Placement      json.RawMessage `json:"placement"`
+		} `json:"attempts"`
+		LastPerItem map[string]bool `json:"lastPerItem"`
+		CompletedAt string          `json:"completedAt"`
+	}
+	_ = json.Unmarshal(in.StateJSON, &st)
+	if len(st.Attempts) > 0 || len(st.Placement) > 0 {
+		s.Engaged = true
+	}
+	if st.CompletedAt != "" || in.Status == "completed" || in.Status == "submitted" {
+		s.Completed = true
+	}
+	itemIDs := make([]string, 0)
+	placedIn := make([]string, 0)
+	var lastPlacement json.RawMessage
+	if len(st.Attempts) > 0 {
+		last := st.Attempts[len(st.Attempts)-1]
+		lastPlacement = last.Placement
+		if len(lastPlacement) == 0 {
+			lastPlacement = st.Placement
+		}
+		if st.LastPerItem != nil {
+			for id := range st.LastPerItem {
+				itemIDs = append(itemIDs, id)
+			}
+		} else {
+			itemIDs = append(itemIDs, last.CorrectItemIDs...)
+		}
+	} else {
+		lastPlacement = st.Placement
+	}
+	// Categorize: object map; order: array.
+	var asMap map[string]any
+	if err := json.Unmarshal(lastPlacement, &asMap); err == nil && asMap != nil {
+		for itemID, bucket := range asMap {
+			itemIDs = appendUnique(itemIDs, itemID)
+			if bucket == nil {
+				placedIn = append(placedIn, itemID+":tray")
+				continue
+			}
+			if s, ok := bucket.(string); ok {
+				placedIn = append(placedIn, itemID+":"+s)
+			}
+		}
+	} else {
+		var asOrder []string
+		if err := json.Unmarshal(lastPlacement, &asOrder); err == nil {
+			for i, itemID := range asOrder {
+				itemIDs = appendUnique(itemIDs, itemID)
+				placedIn = append(placedIn, itemID+":"+strconv.Itoa(i))
+			}
+		}
+	}
+	s.Facets["itemId"] = itemIDs
+	s.Facets["placedIn"] = placedIn
+	if len(st.Attempts) > 0 {
+		last := st.Attempts[len(st.Attempts)-1]
+		s.Facets["correct"] = last.ScorePct >= 100
+		pct := last.ScorePct
+		s.ScorePct = &pct
+	}
+	return s
+}
+
+func appendUnique(list []string, v string) []string {
+	for _, x := range list {
+		if x == v {
+			return list
+		}
+	}
+	return append(list, v)
 }

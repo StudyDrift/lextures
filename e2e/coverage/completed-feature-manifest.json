@@ -4599,6 +4599,33 @@
       }
     },
     {
+      "id": "ct-14-sort-sequence",
+      "path": "docs/completed/content_tools/CT.14-tool-sort-and-sequence.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers answer-key redaction, categorize check with per-item feedback and lockCorrect, order-mode tie groups, attempt exhaustion, reset_attempt / self-reset, and placedIn analytics facets.",
+      "owner": "Web platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-sort-sequence.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); draft state + check actions via CT.3; confusion facets via CT.7; keyboard/tap placement a11y via CT.8; reset via CT.4."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

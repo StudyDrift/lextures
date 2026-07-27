@@ -281,6 +281,6 @@ require author confirmation; (b) auto-detection of regions in common diagram typ
 - Precedents: quiz `hotspot` question type (`server/migrations/075_question_bank.sql`); alt-text
   enforcement (`clients/web/src/components/editor/block-editor/alt-text-*`).
 - External standards: WCAG 2.1 AA — 1.1.1 Non-text Content, 1.4.11 Non-text Contrast, 2.1.1, 2.5.7.
-- Related plans: [CT.14](CT.14-tool-sort-and-sequence.md),
+- Related plans: [CT.14](../../completed/content_tools/CT.14-tool-sort-and-sequence.md),
   [CT.8](CT.8-governance-safety-privacy-accessibility.md),
   [CT.7](CT.7-analytics-insights-and-gradebook.md).
