@@ -290,7 +290,9 @@ func (d Deps) handleContentToolsMyProgress() http.HandlerFunc {
 
 func (d Deps) handleContentToolsGradeLinkGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, _, courseID, ok := d.requireContentToolsGradeRead(w, r)
+		// Course members (including students) may read the link so FR-9 can show
+		// the "counts for a grade" badge before interaction. Mutations stay gated.
+		_, _, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
 		}

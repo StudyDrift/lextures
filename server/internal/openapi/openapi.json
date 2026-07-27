@@ -13761,7 +13761,7 @@
         "tags": [
           "content-tools"
         ],
-        "summary": "Get gradebook link (CT.7)",
+        "summary": "Get gradebook link (CT.7; course members, for student badge)",
         "parameters": [
           {
             "name": "course_code",

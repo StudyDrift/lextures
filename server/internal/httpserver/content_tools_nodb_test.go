@@ -67,6 +67,7 @@ func TestContentTools_AuthoringRoutesRegistered_NoDB(t *testing.T) {
 		{http.MethodGet, "/api/v1/courses/demo/content-tools/analytics?itemId=00000000-0000-0000-0000-000000000001"},
 		{http.MethodGet, "/api/v1/courses/demo/content-tools/analytics/course"},
 		{http.MethodGet, "/api/v1/courses/demo/content-tools/my-progress?itemId=00000000-0000-0000-0000-000000000001"},
+		{http.MethodGet, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/grade-link"},
 		{http.MethodPut, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/grade-link"},
 		{http.MethodDelete, "/api/v1/courses/demo/content-tools/instances/00000000-0000-0000-0000-000000000001/grade-link"},
 	} {

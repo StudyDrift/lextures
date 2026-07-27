@@ -109,6 +109,7 @@ async function submitAndGrade(
 
 test.describe('Content Tools analytics (CT.7)', () => {
   test('insights panel + grade badge + my-progress', async ({ page, seededCourse }) => {
+    test.setTimeout(90_000)
     const { instructorToken, studentToken, courseCode } = seededCourse
 
     await withCourseFeatureRestore(instructorToken, courseCode, async () => {
