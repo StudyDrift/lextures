@@ -102,6 +102,7 @@ func NormalizeHighlightAnnotateState(toolID string, configJSON, stateJSON json.R
 	}
 	cfg := highlight_annotate.ParseConfig(configJSON)
 	st := highlight_annotate.ParseState(stateJSON)
+	st = highlight_annotate.DropUnknownTags(cfg, st)
 	before := len(st.Annotations)
 	st = highlight_annotate.CapAnnotations(st, cfg.MaxAnnotations)
 	orphaned := 0
