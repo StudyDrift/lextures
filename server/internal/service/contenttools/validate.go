@@ -56,10 +56,7 @@ func ValidateStateJSON(m *CompiledManifest, raw json.RawMessage) error {
 	if len(raw) == 0 {
 		raw = json.RawMessage(`{}`)
 	}
-	maxBytes := DefaultMaxStateBytes
-	if m.Storage.MaxStateBytes > 0 && m.Storage.MaxStateBytes < maxBytes {
-		maxBytes = m.Storage.MaxStateBytes
-	}
+	maxBytes := EffectiveMaxStateBytes(m)
 	if len(raw) > maxBytes {
 		return ErrStateTooLarge
 	}
