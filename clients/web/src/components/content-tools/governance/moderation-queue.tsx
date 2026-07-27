@@ -75,7 +75,7 @@ export function ModerationQueue({ courseCode, instanceId }: Props) {
                 <span>
                   <strong>{item.action}</strong>
                   {item.category ? ` · ${item.category}` : ''}
-                  <span className="ml-2 text-xs text-slate-500">{item.createdAt}</span>
+                  <span className="ms-2 text-xs text-slate-500">{item.createdAt}</span>
                 </span>
                 {item.action === 'reported' ? (
                   <span className="flex gap-1">
