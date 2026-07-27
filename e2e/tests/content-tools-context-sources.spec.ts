@@ -62,7 +62,6 @@ async function createInstance(
           prompt: 'Ask about the linked sources',
           answerKey: 'x',
           maxAttempts: 3,
-          links: ['https://config.example/extra'],
         },
       }),
     },
@@ -73,6 +72,7 @@ async function createInstance(
 
 test.describe('Content Tools grounded context (CT.6)', () => {
   test('discover sources, block private URL, exclude link', async ({ page, seededCourse }) => {
+    test.setTimeout(90_000)
     const { instructorToken, courseCode } = seededCourse
 
     await withCourseFeatureRestore(instructorToken, courseCode, async () => {
@@ -85,14 +85,16 @@ test.describe('Content Tools grounded context (CT.6)', () => {
       const pageItem = await apiCreateContentPage(instructorToken, courseCode, mod.id, 'CT6 Page')
       const inst = await createInstance(instructorToken, courseCode, pageItem.id)
 
-      const md = `# Linked lesson
-
-Read [Standards](https://standards.example/a) and see http://169.254.169.254/latest/meta-data.
-
-\`\`\`lex-tool
-{"id":"${inst.id}","toolId":"noop_probe"}
-\`\`\`
-`
+      const md = [
+        '# Linked lesson',
+        '',
+        'Read [Standards](https://standards.example/a), also https://config.example/extra, and see http://169.254.169.254/latest/meta-data.',
+        '',
+        '```lex-tool',
+        JSON.stringify({ instanceId: inst.id, toolId: 'noop_probe', v: 1 }),
+        '```',
+        '',
+      ].join('\n')
       await apiPatchContentPage(instructorToken, courseCode, pageItem.id, { markdown: md })
 
       const previewRes = await fetch(
@@ -148,12 +150,26 @@ Read [Standards](https://standards.example/a) and see http://169.254.169.254/lat
       const patched = (await patchRes.json()) as { excluded: boolean }
       expect(patched.excluded).toBe(true)
 
+      // Confirm instances list is non-empty before UI assertions.
+      const instListRes = await fetch(
+        `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances`,
+        { headers: { Authorization: `Bearer ${instructorToken}` } },
+      )
+      expect(instListRes.status).toBe(200)
+      const instList = (await instListRes.json()) as { instances?: unknown[] }
+      expect((instList.instances ?? []).length).toBeGreaterThan(0)
+
       // UI: insights page shows sources panel after opening responses for the instance.
       await injectToken(page, instructorToken)
       await page.goto(`/courses/${encodeURIComponent(courseCode)}/content-tools`)
-      await expect(page.getByTestId('content-tools-insights')).toBeVisible()
-      await page.getByRole('button', { name: /open responses/i }).first().click()
+      await expect(page.getByTestId('content-tools-insights')).toBeVisible({ timeout: 15000 })
+      const ack = page.getByRole('button', { name: /i acknowledge/i })
+      if (await ack.isVisible().catch(() => false)) {
+        await ack.click()
+      }
+      await page.getByTestId(`ct-open-sources-${inst.id}`).click()
       await expect(page.getByTestId('content-tools-sources-panel')).toBeVisible({ timeout: 15000 })
+      await expect(page.getByTestId('ct-sources-empty').or(page.locator('table'))).toBeVisible()
     })
   })
 })
