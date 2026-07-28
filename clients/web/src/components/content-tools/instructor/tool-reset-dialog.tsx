@@ -36,6 +36,7 @@ export function ToolResetDialog({
   const [scope, setScope] = useState<ContentToolResetScope>(defaultScope)
   const [reason, setReason] = useState('')
   const [notify, setNotify] = useState(true)
+  const [postHandling, setPostHandling] = useState<'keep' | 'remove'>('keep')
   const [preview, setPreview] = useState<ContentToolResetResponse | null>(null)
   const [confirmText, setConfirmText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -47,6 +48,7 @@ export function ToolResetDialog({
     setScope(enrollmentId ? 'instance_enrollment' : defaultScope)
     setReason('')
     setNotify(true)
+    setPostHandling('keep')
     setPreview(null)
     setConfirmText('')
     setError(null)
@@ -63,6 +65,7 @@ export function ToolResetDialog({
       instanceId,
       dryRun: true,
       notify,
+      postHandling,
       ...(itemId ? { itemId } : {}),
       ...(enrollmentId &&
       (scope === 'instance_enrollment' ||
@@ -85,7 +88,7 @@ export function ToolResetDialog({
     return () => {
       cancelled = true
     }
-  }, [open, courseCode, instanceId, itemId, enrollmentId, scope, notify, reason])
+  }, [open, courseCode, instanceId, itemId, enrollmentId, scope, notify, reason, postHandling])
 
   if (!open) return null
 
@@ -102,6 +105,7 @@ export function ToolResetDialog({
         instanceId,
         dryRun: false,
         notify,
+        postHandling,
         idempotencyKey: crypto.randomUUID(),
         ...(itemId ? { itemId } : {}),
         ...(enrollmentId &&
@@ -186,6 +190,29 @@ export function ToolResetDialog({
             />
             {t('contentTools.reset.notifyLabel')}
           </label>
+          <fieldset className="space-y-1 text-sm">
+            <legend className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+              {t('contentTools.reset.postHandlingLabel')}
+            </legend>
+            <label className="flex items-start gap-2 text-slate-800 dark:text-neutral-200">
+              <input
+                type="radio"
+                name="postHandling"
+                checked={postHandling === 'keep'}
+                onChange={() => setPostHandling('keep')}
+              />
+              <span>{t('contentTools.reset.postHandlingKeep')}</span>
+            </label>
+            <label className="flex items-start gap-2 text-slate-800 dark:text-neutral-200">
+              <input
+                type="radio"
+                name="postHandling"
+                checked={postHandling === 'remove'}
+                onChange={() => setPostHandling('remove')}
+              />
+              <span>{t('contentTools.reset.postHandlingRemove')}</span>
+            </label>
+          </fieldset>
           {preview ? (
             <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:bg-amber-950/40 dark:text-amber-100">
               {t('contentTools.reset.dryRunPreview', { count: affected })}

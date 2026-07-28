@@ -10,6 +10,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/diagram_hotspot"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/explain_it_back"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/highlight_annotate"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_discussion"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_questions"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/media_checkpoints"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/noop_probe"
@@ -59,6 +60,11 @@ func All() []Entry {
 			ID:           highlight_annotate.ID,
 			ManifestJSON: highlight_annotate.ManifestJSON,
 			I18nEN:       highlight_annotate.I18nEN,
+		},
+		{
+			ID:           inline_discussion.ID,
+			ManifestJSON: inline_discussion.ManifestJSON,
+			I18nEN:       inline_discussion.I18nEN,
 		},
 		{
 			ID:           inline_questions.ID,

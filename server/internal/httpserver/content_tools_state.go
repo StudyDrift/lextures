@@ -14,9 +14,9 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/config"
 	ctmodel "github.com/lextures/lextures/server/internal/models/contenttools"
+	"github.com/lextures/lextures/server/internal/ratelimit"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
-	"github.com/lextures/lextures/server/internal/ratelimit"
 	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
 
@@ -394,11 +394,7 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 			return
 		}
 		if current != nil {
-			if blocked, msg := ctsvc.GuardPredictRevealStatePut(inst.ToolID, current.StateJSON); blocked {
-				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, msg)
-				return
-			}
-			if blocked, msg := ctsvc.GuardClassPulseStatePut(inst.ToolID, current.StateJSON, body.State); blocked {
+			if blocked, msg := contentToolsGuardStatePut(inst.ToolID, current.StateJSON, body.State); blocked {
 				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, msg)
 				return
 			}

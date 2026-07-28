@@ -21,5 +21,8 @@
 | **CT.17** | [Code Sandbox](CT.17-tool-code-sandbox.md) |
 | **CT.18** | [Step-Through Worked Example](CT.18-tool-step-through-worked-example.md) |
 | **CT.19** | [Media Checkpoints](CT.19-tool-media-checkpoints.md) |
+| **CT.20** | [Explain It Back](CT.20-tool-explain-it-back.md) |
+| **CT.21** | [Class Pulse](CT.21-tool-class-pulse.md) |
+| **CT.22** | [Inline Discussion](CT.22-tool-inline-discussion.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

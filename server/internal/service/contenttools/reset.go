@@ -56,6 +56,8 @@ type ResetRequest struct {
 	InitialState   json.RawMessage // default {}
 	ToolID         string          // for metrics; optional
 	ActivityTitle  string          // for notifications
+	// PostHandling is CT.22: "keep" (default) or "remove" soft-deletes the learner's discussion posts.
+	PostHandling string
 }
 
 // GradeEffect describes gradebook side-effects for one enrollment (CT.7 stub).
@@ -122,6 +124,19 @@ func SummarizeState(toolID string, state json.RawMessage, status string, scoreRa
 				resp = resp[:80] + "…"
 			}
 			parts = append(parts, fmt.Sprintf("response=%q attempts=%d", resp, s.Attempts))
+		}
+	}
+	if toolID == "inline_discussion" && len(state) > 0 {
+		var s struct {
+			MyPostIDs  []string `json:"myPostIds"`
+			MyReplyIDs []string `json:"myReplyIds"`
+			LastReadAt string   `json:"lastReadAt"`
+		}
+		if json.Unmarshal(state, &s) == nil {
+			parts = append(parts, fmt.Sprintf("posts=%d replies=%d", len(s.MyPostIDs), len(s.MyReplyIDs)))
+			if s.LastReadAt == "" && len(s.MyPostIDs) == 0 {
+				parts = append(parts, "read=nothing")
+			}
 		}
 	}
 	return strings.Join(parts, "; ")
@@ -294,6 +309,15 @@ func applyResetBatch(
 		}
 		if err := tx.Commit(ctx); err != nil {
 			return err
+		}
+		// CT.22: optional soft-delete of discussion posts after state clear.
+		if strings.EqualFold(strings.TrimSpace(req.PostHandling), "remove") {
+			for _, a := range chunk {
+				if a.ToolID != "inline_discussion" {
+					continue
+				}
+				_ = SoftDeleteInlineDiscussionPosts(ctx, pool, req.CourseID, a.InstanceID, a.UserID)
+			}
 		}
 		// Events + notifications + summary sync outside the short transaction.
 		for _, a := range chunk {

@@ -1,6 +1,6 @@
 # CT.22 — Tool: Inline Discussion (a scoped thread anchored to this part of the page)
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Collaboration team |
 | **Depends on** | CT.1, CT.2, CT.3, CT.8 (moderation is mandatory here) |
@@ -298,5 +298,5 @@ in scope.
 - External standards: WCAG 2.1 AA; K-12 safeguarding practice; COPPA constraints on peer-visible
   content for under-13 users (see CT.8 / S08).
 - Related plans: [CT.8](CT.8-governance-safety-privacy-accessibility.md),
-  [CT.21](CT.21-tool-class-pulse.md), [CT.13](../../completed/content_tools/CT.13-tool-highlight-and-annotate.md),
-  [S08 children's privacy](../standards/S08-childrens-privacy-age-assurance-design-codes.md).
+  [CT.21](CT.21-tool-class-pulse.md), [CT.13](CT.13-tool-highlight-and-annotate.md),
+  [S08 children's privacy](../../plan/standards/S08-childrens-privacy-age-assurance-design-codes.md).

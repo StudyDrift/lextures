@@ -1,0 +1,174 @@
+{
+  "id": "inline_discussion",
+  "version": "1.0.0",
+  "name": "contentTools.tools.inline_discussion.name",
+  "category": "discuss",
+  "capabilities": ["state", "peer_visible"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["prompt"],
+    "properties": {
+      "prompt": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Discussion prompt shown above the thread"
+      },
+      "postBeforeYouSee": {
+        "type": "boolean",
+        "default": true,
+        "description": "Require the learner to post before peer replies are visible"
+      },
+      "allowReplies": {
+        "type": "boolean",
+        "default": true
+      },
+      "requiredPosts": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 20,
+        "default": 1
+      },
+      "requiredReplies": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 20,
+        "default": 0
+      },
+      "anonymity": {
+        "type": "string",
+        "enum": ["named", "anonymous_to_peers"],
+        "default": "named",
+        "description": "Peer anonymity; instructors always see identity"
+      },
+      "editWindowMinutes": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1440,
+        "default": 5
+      },
+      "allowDelete": {
+        "type": "boolean",
+        "default": true
+      },
+      "sort": {
+        "type": "string",
+        "enum": ["newest", "oldest"],
+        "default": "oldest"
+      },
+      "pageSize": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "threadId": { "type": "string" },
+      "myPostIds": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "myReplyIds": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "lastReadAt": { "type": "string" },
+      "completedAt": { "type": "string" },
+      "draft": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "none" },
+  "storage": { "maxStateBytes": 8000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "list",
+    "wcagNotes": "Thread is an ordered list of articles; composer is a labelled textarea; new posts announced politely; endorsement and moderation states conveyed in text."
+  },
+  "dataSheet": {
+    "collects": {
+      "posts": {
+        "purpose": "Peer-visible discussion posts and replies anchored to this content section",
+        "retention": "life_of_course"
+      },
+      "participation": {
+        "purpose": "Per-enrollment post/reply ids, read markers, and completion",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "peers",
+    "wcagLevel": "AA",
+    "a11yLimitations": "",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.inline_discussion",
+  "ui": {
+    "renderer": "inline_discussion",
+    "icon": "chat",
+    "group": "discuss"
+  },
+  "actions": [
+    {
+      "name": "post",
+      "rateLimitPerMin": 20,
+      "description": "Create a root post or reply; creates the backing thread lazily"
+    },
+    {
+      "name": "thread",
+      "rateLimitPerMin": 60,
+      "description": "List prompt and posts with post-before-you-see and anonymity enforced"
+    },
+    {
+      "name": "edit",
+      "rateLimitPerMin": 20,
+      "description": "Edit own post within the configured window"
+    },
+    {
+      "name": "delete",
+      "rateLimitPerMin": 20,
+      "description": "Soft-delete own post (visible to instructors as a tombstone)"
+    },
+    {
+      "name": "upvote",
+      "rateLimitPerMin": 60,
+      "description": "Upvote a visible post"
+    },
+    {
+      "name": "endorse",
+      "rateLimitPerMin": 30,
+      "description": "Instructor endorsement pins a post"
+    },
+    {
+      "name": "report",
+      "rateLimitPerMin": 10,
+      "description": "Report a post for moderation (CT.8)"
+    },
+    {
+      "name": "moderate",
+      "rateLimitPerMin": 30,
+      "description": "Instructor hide/remove/restore/warn for a post (CT.8)"
+    },
+    {
+      "name": "get_post",
+      "rateLimitPerMin": 60,
+      "description": "Fetch a single post by id (404 when removed for non-staff)"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}
