@@ -47,7 +47,8 @@ func BuildPeerResults(stateBlobs []json.RawMessage, mode Mode) PeerResults {
 		}
 	}
 	out := PeerResults{Learners: learners}
-	if learners < analytics.DefaultSmallN {
+	// Shared small-n gate with CT.21 Class Pulse (aggregateWithSuppression).
+	if learners < analytics.ClampMinRespondents(analytics.DefaultSmallN) {
 		out.Suppressed = true
 		out.Reason = "small_n"
 		return out

@@ -5,6 +5,7 @@ package tools
 
 import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/ask_questions"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/class_pulse"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/code_sandbox"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/diagram_hotspot"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/explain_it_back"
@@ -33,6 +34,11 @@ func All() []Entry {
 			ID:           ask_questions.ID,
 			ManifestJSON: ask_questions.ManifestJSON,
 			I18nEN:       ask_questions.I18nEN,
+		},
+		{
+			ID:           class_pulse.ID,
+			ManifestJSON: class_pulse.ManifestJSON,
+			I18nEN:       class_pulse.I18nEN,
 		},
 		{
 			ID:           code_sandbox.ID,

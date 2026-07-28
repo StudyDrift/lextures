@@ -398,6 +398,10 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, msg)
 				return
 			}
+			if blocked, msg := ctsvc.GuardClassPulseStatePut(inst.ToolID, current.StateJSON, body.State); blocked {
+				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, msg)
+				return
+			}
 		}
 		curStatus := ctsvc.StatusNotStarted
 		if current != nil {
