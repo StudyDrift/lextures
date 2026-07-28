@@ -16,8 +16,24 @@ import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
 import { test, expect } from '../fixtures/test.js'
 
+async function dismissBlockingDialogs(page: Page) {
+  // Research participation / consent prompts can stack under the palette and
+  // break bare getByRole('dialog') assertions (strict-mode + Escape).
+  const consent = page.getByRole('dialog', { name: /research participation/i })
+  if (await consent.isVisible().catch(() => false)) {
+    const dismiss = consent.getByRole('button', { name: /remind me later|no, i decline/i })
+    if (await dismiss.isVisible().catch(() => false)) {
+      await dismiss.click()
+    } else {
+      await page.keyboard.press('Escape')
+    }
+    await expect(consent).not.toBeVisible({ timeout: 5000 })
+  }
+}
+
 async function openCommandPalette(page: Page) {
   await expect(page.getByRole('navigation', { name: /main/i })).toBeVisible({ timeout: 15000 })
+  await dismissBlockingDialogs(page)
   const trigger = page.locator('[data-command-palette-anchor="sidebar"]')
   await expect(trigger).toBeVisible({ timeout: 5000 })
   await trigger.click()
@@ -116,9 +132,10 @@ test.describe('CommandPaletteDialog — ARIA structure', () => {
 
   test('Escape closes dialog', async ({ authedPage: page }) => {
     await openCommandPalette(page)
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 })
+    const dialog = page.getByRole('dialog', { name: /command palette/i })
+    await expect(dialog).toBeVisible({ timeout: 5000 })
     await page.keyboard.press('Escape')
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 })
+    await expect(dialog).not.toBeVisible({ timeout: 5000 })
   })
 
   test('command palette has no axe Critical/Serious violations while open', async ({
@@ -127,7 +144,7 @@ test.describe('CommandPaletteDialog — ARIA structure', () => {
     await openCommandPalette(page)
 
     const results = await new AxeBuilder({ page })
-      .include('[role="dialog"]')
+      .include('[role="dialog"][aria-label="Command Palette"]')
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze()
 
