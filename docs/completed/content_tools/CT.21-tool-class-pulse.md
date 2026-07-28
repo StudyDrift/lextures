@@ -1,6 +1,6 @@
 # CT.21 — Tool: Class Pulse (vote, then see how the class answered)
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Web platform team |
 | **Depends on** | CT.1, CT.2, CT.3, CT.7 (aggregates) |
@@ -196,9 +196,9 @@ recommend first to a cautious district.
 
 ## 12. Integration Points
 
-- **Internal** — `service/contenttools/tools/classpulse/` (vote enforcement, aggregate with
+- **Internal** — `service/contenttools/tools/class_pulse/` (vote enforcement, aggregate with
   suppression), CT.7 summaries as the aggregate source, `courseroles` (role exclusion, section scoping),
-  `clients/web/src/components/content-tools/tools/class-pulse/`.
+  `clients/web/src/components/content-tools/tools/class_pulse/`.
 - **Shared helper** — `aggregateWithSuppression` reused by CT.12 peer results and any future
   distribution-showing tool.
 
@@ -268,4 +268,4 @@ recommend first to a cautious district.
 - External standards: WCAG 2.1 AA; learning-science basis — peer instruction (Mazur).
 - Related plans: [CT.12](CT.12-tool-predict-and-reveal.md),
   [CT.7](CT.7-analytics-insights-and-gradebook.md),
-  [CT.22](CT.22-tool-inline-discussion.md).
+  [CT.22](../plan/content_tools/CT.22-tool-inline-discussion.md).

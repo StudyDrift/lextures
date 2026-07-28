@@ -4067,7 +4067,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2\u2013AC.6 gaps."
+        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2–AC.6 gaps."
       }
     },
     {
@@ -4154,7 +4154,7 @@
       "risk": "critical",
       "client": "web",
       "coverage": "smoke",
-      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre\u2192serve\u2192post causal journey remains backlog.",
+      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre→serve→post causal journey remains backlog.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4259,7 +4259,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2\u2013CT.3."
+        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2–CT.3."
       }
     },
     {
@@ -4361,7 +4361,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers sandbox_probe iframe mount, interact\u2192save\u2192grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
+      "rationale": "Playwright covers sandbox_probe iframe mount, interact→save→grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4499,7 +4499,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers ask \u2192 cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
+      "rationale": "Playwright covers ask → cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
       "owner": "AI Platform",
       "specs": [
         {
@@ -4526,7 +4526,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers answer-key redaction, wrong\u2192retry\u2192correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
+      "rationale": "Playwright covers answer-key redaction, wrong→retry→correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4553,7 +4553,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit\u2192reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
+      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit→reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4785,6 +4785,33 @@
         "dependency": true,
         "rollback": true,
         "notes": "Course allowlist + content_tools_enabled (CT.1); optional AI via content_tool_explain_back (CT.6/CT.8); state + submit/instructor_note/test_sample via CT.3; keyPointId/covered/attemptCount facets + representatives via CT.7; free-text filter + crisis path via CT.8; reset via CT.4."
+      }
+    },
+    {
+      "id": "ct-21-tool-class-pulse",
+      "path": "docs/completed/content_tools/CT.21-tool-class-pulse.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers correctOptionId/explanation redaction, vote-before-aggregate gate, small-n suppression, vote-once enforcement, after_revote reveal, dual-round persistence, host render, and CT.4 reset clearing votes.",
+      "owner": "Web platform",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-class-pulse.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); vote/aggregate via CT.3 actions; AggregateWithSuppression shared with CT.12; facets via CT.7; reset via CT.4."
       }
     },
     {
@@ -9208,7 +9235,7 @@
       "risk": "minor",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright journey selects across paragraphs on a content page and asserts \u2318/Ctrl+C copies every paragraph.",
+      "rationale": "Playwright journey selects across paragraphs on a content page and asserts ⌘/Ctrl+C copies every paragraph.",
       "owner": "Web Platform",
       "specs": [
         {

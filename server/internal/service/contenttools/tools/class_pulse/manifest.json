@@ -1,0 +1,148 @@
+{
+  "id": "class_pulse",
+  "version": "1.0.0",
+  "name": "contentTools.tools.class_pulse.name",
+  "category": "reflect",
+  "capabilities": ["state", "aggregate"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["question", "options"],
+    "properties": {
+      "question": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Poll question shown to learners"
+      },
+      "options": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 8,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "text"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "text": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "correctOptionId": {
+        "type": "string",
+        "description": "Optional correct option for concept polls",
+        "x-lex-sensitive": true
+      },
+      "explanation": {
+        "type": "string",
+        "description": "Optional explanation revealed with correctness",
+        "x-lex-sensitive": true
+      },
+      "allowSecondVote": {
+        "type": "boolean",
+        "default": false,
+        "description": "Enable peer-instruction revote after seeing the distribution"
+      },
+      "revealCorrect": {
+        "type": "string",
+        "enum": ["after_vote", "after_revote", "never"],
+        "default": "never"
+      },
+      "minRespondents": {
+        "type": "integer",
+        "minimum": 3,
+        "default": 5,
+        "description": "Suppress peer distribution until this many learners have voted"
+      },
+      "scopeToSection": {
+        "type": "boolean",
+        "default": true,
+        "description": "When the course uses sections, aggregate within the learner's section"
+      },
+      "showPercentages": {
+        "type": "boolean",
+        "default": true
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "votes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["round", "optionId", "at"],
+          "properties": {
+            "round": { "type": "integer", "enum": [1, 2] },
+            "optionId": { "type": "string" },
+            "at": { "type": "string" }
+          }
+        }
+      },
+      "sawAggregateAt": { "type": "string" },
+      "completedAt": { "type": "string" },
+      "correct": { "type": "boolean" },
+      "draft": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "optionId": { "type": "string" },
+          "round": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "scoring": { "mode": "none" },
+  "storage": { "maxStateBytes": 4000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "form",
+    "wcagNotes": "Options use fieldset/legend radio group; results are a table plus bars with text labels; result arrival announced politely."
+  },
+  "dataSheet": {
+    "collects": {
+      "votes": {
+        "purpose": "Learner poll votes per round for class distribution and peer instruction",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.class_pulse",
+  "ui": {
+    "renderer": "class_pulse",
+    "icon": "chart",
+    "group": "reflect"
+  },
+  "actions": [
+    {
+      "name": "vote",
+      "rateLimitPerMin": 20,
+      "description": "Submit a vote for a round and return the class aggregate (or suppression)"
+    },
+    {
+      "name": "aggregate",
+      "rateLimitPerMin": 60,
+      "description": "Refresh the anonymised class aggregate (no side effects; cached)"
+    }
+  ],
+  "conflictPolicy": "server_wins",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

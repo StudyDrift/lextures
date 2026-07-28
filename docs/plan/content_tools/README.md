@@ -133,7 +133,7 @@ Content Tools without enabling, say, the code sandbox.
 | **CT.18** | [Step-Through Worked Example](../../completed/content_tools/CT.18-tool-step-through-worked-example.md) — enter one step at a time, checked, with hints | Worked-example effect / faded scaffolding | MAJOR | SHIPPED |
 | **CT.19** | [Media Checkpoints](../../completed/content_tools/CT.19-tool-media-checkpoints.md) — questions injected at timestamps in a video/audio | Segmenting / interpolated testing | MAJOR | SHIPPED |
 | **CT.20** | [Explain It Back](../../completed/content_tools/CT.20-tool-explain-it-back.md) — free-text self-explanation with AI formative feedback | Self-explanation / elaborative interrogation | DONE | none |
-| **CT.21** | [Class Pulse](CT.21-tool-class-pulse.md) — vote, then see the anonymised class distribution | Peer instruction / social proof | MINOR | none |
+| **CT.21** | [Class Pulse](../../completed/content_tools/CT.21-tool-class-pulse.md) — vote, then see the anonymised class distribution | Peer instruction / social proof | DONE | none |
 | **CT.22** | [Inline Discussion](CT.22-tool-inline-discussion.md) — a scoped thread anchored to this paragraph | Collaborative elaboration | MINOR | none |
 | **CT.23** | [Flashcards & Spaced Recall](CT.23-tool-flashcards-and-spaced-recall.md) — inline deck that feeds the shipped SRS | Spacing + retrieval | MINOR | none |
 
