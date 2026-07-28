@@ -111,6 +111,9 @@ func TestFlashcardsSessionAndRateWithoutSRS(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		if err := contenttools.ValidateStateJSON(m, merged); err != nil {
+			t.Fatalf("merged state schema invalid after rate %d: %v\npatch=%s\nmerged=%s", rated+1, err, res.StatePatch, merged)
+		}
 		stateJSON = merged
 		rated++
 		if res.Result["sessionComplete"] == true {

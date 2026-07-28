@@ -89,7 +89,7 @@
         }
       },
       "activeSession": {
-        "type": "object",
+        "type": ["object", "null"],
         "additionalProperties": false,
         "properties": {
           "startedAt": { "type": "string" },
