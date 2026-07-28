@@ -26,10 +26,12 @@ import {
   ContentToolAuthoringProvider,
   type ContentToolAuthoringContextValue,
 } from '../content-tools/authoring/content-tool-authoring-context'
+import { AddSectionDropdown } from '../content-tools/authoring/add-section-dropdown'
 import { ToolsDropdown } from '../content-tools/authoring/tools-dropdown'
 import { ToolConfigPanel } from '../content-tools/authoring/tool-config-panel'
 import { ToolPreviewModal } from '../content-tools/authoring/tool-preview-modal'
 import { ToolDeleteDialog } from '../content-tools/authoring/tool-delete-dialog'
+import { serializeLexToolFenceBlock } from '../../lib/content-tools/lex-tool-fence'
 import { sectionsToMarkdown, markdownToSectionsForEditor } from './syllabus-section-markdown'
 import { isSectionHeadingEnterToContentKey } from './section-heading-enter'
 import TurndownService from 'turndown'
@@ -435,42 +437,86 @@ function SyllabusSidebar({
   )
 }
 
-/** Slim gap between two cards. Keeps its height so revealing the button never reflows. */
-function SectionDivider({ onAdd, disabled }: { onAdd: () => void; disabled?: boolean }) {
+type SectionInsertProps = {
+  disabled?: boolean
+  onAddContent: () => void
+  /** When set with content tools on, the control becomes Content | Tool. */
+  contentTools?: {
+    tools: ContentToolsCatalogTool[]
+    loading?: boolean
+    emptyCatalog?: boolean
+    atMaxInstances?: boolean
+    settingsHref?: string
+    onAddTool: (toolId: string) => void
+  }
+}
+
+/** Equal gap above/below the insert control. Fixed height so revealing the button never reflows. */
+function SectionDivider({ disabled, onAddContent, contentTools }: SectionInsertProps) {
   return (
     <div
-      className="group/divider relative flex h-8 items-center justify-center"
+      className="group/divider relative flex items-center justify-center py-2"
       onClick={(e) => e.stopPropagation()}
     >
       <span
         className="absolute inset-x-0 top-1/2 h-px bg-slate-200 opacity-0 motion-safe:transition-opacity group-hover/divider:opacity-100 group-focus-within/divider:opacity-100 dark:bg-neutral-700"
         aria-hidden
       />
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={onAdd}
-        className="pointer-events-none relative z-10 flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 opacity-0 shadow-sm hover:text-slate-900 disabled:cursor-not-allowed motion-safe:transition-opacity group-hover/divider:pointer-events-auto group-hover/divider:opacity-100 group-focus-within/divider:pointer-events-auto group-focus-within/divider:opacity-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-50"
-      >
-        <Plus className="h-3.5 w-3.5" aria-hidden />
-        Add section here
-      </button>
+      {contentTools ? (
+        <AddSectionDropdown
+          variant="divider"
+          label="Add section here"
+          disabled={disabled}
+          onAddContent={onAddContent}
+          onAddTool={contentTools.onAddTool}
+          tools={contentTools.tools}
+          loading={contentTools.loading}
+          emptyCatalog={contentTools.emptyCatalog}
+          atMaxInstances={contentTools.atMaxInstances}
+          settingsHref={contentTools.settingsHref}
+        />
+      ) : (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={onAddContent}
+          className="pointer-events-none relative z-10 flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 opacity-0 shadow-sm hover:text-slate-900 disabled:cursor-not-allowed motion-safe:transition-opacity group-hover/divider:pointer-events-auto group-hover/divider:opacity-100 group-focus-within/divider:pointer-events-auto group-focus-within/divider:opacity-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-50"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden />
+          Add section here
+        </button>
+      )}
     </div>
   )
 }
 
-function BlockInsertionRow({ onAdd, disabled }: { onAdd: () => void; disabled?: boolean }) {
+function BlockInsertionRow({ disabled, onAddContent, contentTools }: SectionInsertProps) {
   return (
-    <div className="pt-2" onClick={(e) => e.stopPropagation()}>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={onAdd}
-        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 px-4 py-4 text-sm font-medium text-slate-600 motion-safe:transition-[background-color,color,border-color] hover:border-indigo-400 hover:bg-white hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-indigo-500 dark:hover:bg-neutral-900 dark:hover:text-indigo-400"
-      >
-        <Plus className="h-4 w-4" aria-hidden />
-        Add a section
-      </button>
+    <div className="pt-3" onClick={(e) => e.stopPropagation()}>
+      {contentTools ? (
+        <AddSectionDropdown
+          variant="row"
+          label="Add a section"
+          disabled={disabled}
+          onAddContent={onAddContent}
+          onAddTool={contentTools.onAddTool}
+          tools={contentTools.tools}
+          loading={contentTools.loading}
+          emptyCatalog={contentTools.emptyCatalog}
+          atMaxInstances={contentTools.atMaxInstances}
+          settingsHref={contentTools.settingsHref}
+        />
+      ) : (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={onAddContent}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 px-4 py-4 text-sm font-medium text-slate-600 motion-safe:transition-[background-color,color,border-color] hover:border-indigo-400 hover:bg-white hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-indigo-500 dark:hover:bg-neutral-900 dark:hover:text-indigo-400"
+        >
+          <Plus className="h-4 w-4" aria-hidden />
+          Add a section
+        </button>
+      )}
     </div>
   )
 }
@@ -881,6 +927,52 @@ function SyllabusBlockEditorInner({
     setSelectedId(section.id)
   }
 
+  /** New section seeded with a content tool fence (Content Tools add-section flow). */
+  async function addToolSectionAt(index: number, toolId: string) {
+    if (!courseCode) return
+    setCtInsertError(null)
+    try {
+      const sectionId = newLocalId()
+      const created = await createContentToolInstance(courseCode, {
+        toolId,
+        hostKind,
+        structureItemId: hostKind === 'syllabus' ? null : structureItemId ?? null,
+        sectionKey: sectionId,
+        config: defaultContentToolConfig(toolId),
+      })
+      setCtInstances((prev) => ({ ...prev, [created.id]: created }))
+      const section: SyllabusSection = {
+        id: sectionId,
+        heading: '',
+        markdown: serializeLexToolFenceBlock({
+          instanceId: created.id,
+          toolId: created.toolId,
+          v: 1,
+        }),
+      }
+      const next = [...sections]
+      next.splice(index, 0, section)
+      onChange(next)
+      setSelectedId(section.id)
+      setActiveField({ blockId: section.id, field: 'markdown' })
+      setConfigureInstanceId(created.id)
+    } catch (err) {
+      setCtInsertError(err instanceof Error ? err.message : String(err))
+      toastMutationError(err instanceof Error ? err.message : 'Could not insert tool.')
+    }
+  }
+
+  const sectionInsertToolsBase =
+    courseCode && contentToolsEnabled
+      ? {
+          tools: ctCatalog,
+          loading: ctCatalogLoading,
+          emptyCatalog: !ctCatalogLoading && ctCatalog.length === 0,
+          atMaxInstances,
+          settingsHref: `/courses/${encodeURIComponent(courseCode)}/settings`,
+        }
+      : null
+
   function applyMarkdownForSection(sectionId: string, kind: MarkdownEditKind) {
     const editor = editorRefs.current[sectionId]
     if (!editor) return
@@ -1210,7 +1302,22 @@ function SyllabusBlockEditorInner({
           const writing = showMarkdownToolbar && selectedId === section.id
           return (
           <div key={section.id}>
-            {index > 0 && <SectionDivider onAdd={() => addSectionAt(index)} disabled={disabled} />}
+            {index > 0 && (
+              <SectionDivider
+                disabled={disabled}
+                onAddContent={() => addSectionAt(index)}
+                contentTools={
+                  sectionInsertToolsBase
+                    ? {
+                        ...sectionInsertToolsBase,
+                        onAddTool: (toolId) => {
+                          void addToolSectionAt(index, toolId)
+                        },
+                      }
+                    : undefined
+                }
+              />
+            )}
             <BlockFrame
               blockId={section.id}
               positionLabel={`Section ${index + 1} of ${sections.length}`}
@@ -1314,7 +1421,20 @@ function SyllabusBlockEditorInner({
           )
         })}
 
-        <BlockInsertionRow onAdd={() => addSectionAt(sections.length)} disabled={disabled} />
+        <BlockInsertionRow
+          disabled={disabled}
+          onAddContent={() => addSectionAt(sections.length)}
+          contentTools={
+            sectionInsertToolsBase
+              ? {
+                  ...sectionInsertToolsBase,
+                  onAddTool: (toolId) => {
+                    void addToolSectionAt(sections.length, toolId)
+                  },
+                }
+              : undefined
+          }
+        />
       </BlockCanvas>
     </BlockEditorShell>
     {courseCode ? (

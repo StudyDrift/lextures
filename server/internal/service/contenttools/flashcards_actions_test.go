@@ -106,7 +106,15 @@ func TestFlashcardsSessionAndRateWithoutSRS(t *testing.T) {
 		if res.Result["error"] != nil {
 			t.Fatalf("rate error: %#v", res.Result)
 		}
-		stateJSON = res.StatePatch
+		// Production merges StatePatch into prior state_json (not replace).
+		merged, err := contenttools.MergeStateJSON(stateJSON, res.StatePatch)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := contenttools.ValidateStateJSON(m, merged); err != nil {
+			t.Fatalf("merged state schema invalid after rate %d: %v\npatch=%s\nmerged=%s", rated+1, err, res.StatePatch, merged)
+		}
+		stateJSON = merged
 		rated++
 		if res.Result["sessionComplete"] == true {
 			break
@@ -119,8 +127,48 @@ func TestFlashcardsSessionAndRateWithoutSRS(t *testing.T) {
 	if st.FirstPassCompletedAt == "" {
 		t.Fatal("expected first pass complete")
 	}
+	if st.ActiveSession != nil {
+		t.Fatalf("active session must clear after final rate (merge), got %#v", st.ActiveSession)
+	}
 	if len(st.Cards) != 6 {
 		t.Fatalf("cards progress: %#v", st.Cards)
+	}
+
+	// status must not resurrect a current card after the session ends
+	status, err := contenttools.DispatchAction(m, "status", contenttools.ActionContext{
+		ConfigJSON:         cfgJSON,
+		StateJSON:          stateJSON,
+		InteractRole:       "student",
+		SRSPracticeEnabled: &off,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cur, _ := status.Result["current"].(map[string]any); len(cur) > 0 {
+		t.Fatalf("expected no current card after session end, got %#v", status.Result["current"])
+	}
+
+	// Second start after completed must not 500 on completed→in_progress.
+	started2, err := contenttools.DispatchAction(m, "start_session", contenttools.ActionContext{
+		ConfigJSON:         cfgJSON,
+		StateJSON:          stateJSON,
+		Status:             contenttools.StatusCompleted,
+		InteractRole:       "student",
+		EnrollmentID:       uuid.MustParse("22222222-2222-2222-2222-222222222222"),
+		InstanceID:         uuid.MustParse("33333333-3333-3333-3333-333333333333"),
+		SRSPracticeEnabled: &off,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if started2.Status != "" {
+		t.Fatalf("expected empty enrollment status on restart after completed, got %q", started2.Status)
+	}
+	if started2.Result["caughtUp"] == true {
+		t.Fatal("expected a practice queue after first pass when SRS is off")
+	}
+	if started2.Result["current"] == nil {
+		t.Fatal("expected current card on restart")
 	}
 }
 

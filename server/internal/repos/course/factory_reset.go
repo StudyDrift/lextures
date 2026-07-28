@@ -127,7 +127,7 @@ func FactoryResetCourse(ctx context.Context, pool *pgxpool.Pool, courseCode stri
 			hint_scaffolding_enabled = false,
 			misconception_detection_enabled = false,
 			adaptive_content_enabled = false,
-			content_tools_enabled = false,
+			content_tools_enabled = true,
 			discussions_enabled = false,
 			collab_docs_enabled = false,
 			attendance_enabled = false,

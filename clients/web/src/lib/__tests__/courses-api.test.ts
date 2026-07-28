@@ -4,11 +4,55 @@ import {
   courseGradebookViewPermission,
   courseItemCreatePermission,
   courseItemsCreatePermission,
+  defaultContentToolConfig,
   viewerIsCourseStaffEnrollment,
   viewerIsLearnerOnlyCourseEnrollment,
   viewerShouldHideCourseEnrollmentsNav,
   viewerShouldShowMyGradesNav,
 } from '../courses-api'
+
+describe('defaultContentToolConfig', () => {
+  const toolsWithRequiredFields = [
+    'noop_probe',
+    'sandbox_probe',
+    'ask_questions',
+    'inline_discussion',
+    'inline_questions',
+    'flashcards',
+    'class_pulse',
+    'predict_reveal',
+    'explain_it_back',
+    'highlight_annotate',
+    'sort_sequence',
+    'diagram_hotspot',
+    'code_sandbox',
+    'worked_example',
+    'parameter_explorer',
+    'media_checkpoints',
+  ] as const
+
+  it('returns non-empty starter config for shipped tools with required fields', () => {
+    for (const toolId of toolsWithRequiredFields) {
+      const cfg = defaultContentToolConfig(toolId)
+      expect(Object.keys(cfg).length, toolId).toBeGreaterThan(0)
+    }
+  })
+
+  it('includes schema-required top-level keys for common tools', () => {
+    expect(defaultContentToolConfig('flashcards')).toHaveProperty('cards')
+    expect(defaultContentToolConfig('inline_questions')).toHaveProperty('questions')
+    expect(defaultContentToolConfig('predict_reveal')).toHaveProperty('reveal')
+    expect(defaultContentToolConfig('diagram_hotspot')).toMatchObject({
+      image: expect.objectContaining({ url: expect.any(String) }),
+    })
+    const cards = defaultContentToolConfig('flashcards').cards as unknown[]
+    expect(cards.length).toBeGreaterThanOrEqual(3)
+  })
+
+  it('returns empty object only for unknown tool ids', () => {
+    expect(defaultContentToolConfig('not_a_real_tool')).toEqual({})
+  })
+})
 
 describe('courseItemCreatePermission', () => {
   it('builds the server-aligned permission string from course code', () => {

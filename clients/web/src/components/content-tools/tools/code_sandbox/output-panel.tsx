@@ -26,24 +26,41 @@ export function OutputPanel({
   t,
 }: Props) {
   const hasTests = Array.isArray(tests) && tests.length > 0
+  const showTestsTab = hasTests || Boolean(total)
+
   return (
-    <div className="mt-3 space-y-2" data-testid="code-sandbox-output">
-      <div role="tablist" className="flex gap-2 text-xs" aria-label={t('contentTools.tools.code_sandbox.outputTabs')}>
+    <div
+      className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-950/60"
+      data-testid="code-sandbox-output"
+    >
+      <div
+        role="tablist"
+        className="flex gap-1 border-b border-slate-200 bg-slate-50/80 p-1.5 dark:border-neutral-700 dark:bg-neutral-900/80"
+        aria-label={t('contentTools.tools.code_sandbox.outputTabs')}
+      >
         <button
           type="button"
           role="tab"
           aria-selected={tab === 'output'}
-          className={`rounded px-2 py-1 ${tab === 'output' ? 'bg-slate-800 text-white dark:bg-neutral-200 dark:text-neutral-900' : 'bg-slate-100 dark:bg-neutral-800'}`}
+          className={
+            tab === 'output'
+              ? 'rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm dark:bg-neutral-800 dark:text-neutral-50'
+              : 'rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-white/70 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-neutral-800/80 dark:hover:text-neutral-100'
+          }
           onClick={() => onTab('output')}
         >
           {t('contentTools.tools.code_sandbox.outputTab')}
         </button>
-        {hasTests || total ? (
+        {showTestsTab ? (
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'tests'}
-            className={`rounded px-2 py-1 ${tab === 'tests' ? 'bg-slate-800 text-white dark:bg-neutral-200 dark:text-neutral-900' : 'bg-slate-100 dark:bg-neutral-800'}`}
+            className={
+              tab === 'tests'
+                ? 'rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm dark:bg-neutral-800 dark:text-neutral-50'
+                : 'rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-white/70 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-neutral-800/80 dark:hover:text-neutral-100'
+            }
             onClick={() => onTab('tests')}
           >
             {t('contentTools.tools.code_sandbox.testsTab')}
@@ -52,15 +69,18 @@ export function OutputPanel({
       </div>
 
       {tab === 'output' ? (
-        <div className="space-y-2" role="tabpanel">
+        <div className="space-y-2.5 p-3" role="tabpanel">
           {status ? (
-            <p className="text-xs text-slate-600 dark:text-neutral-400" data-testid="code-sandbox-status">
+            <p
+              className="text-xs font-medium text-slate-600 dark:text-neutral-300"
+              data-testid="code-sandbox-status"
+            >
               {t(`contentTools.tools.code_sandbox.status.${status}`)}
             </p>
           ) : null}
           {stdout ? (
             <pre
-              className="max-h-48 overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2 font-mono text-xs dark:bg-neutral-900"
+              className="max-h-48 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-100 bg-slate-50 p-3 font-mono text-xs text-slate-800 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
               data-testid="code-sandbox-stdout"
             >
               {stdout}
@@ -68,45 +88,63 @@ export function OutputPanel({
           ) : null}
           {stderr ? (
             <pre
-              className="max-h-48 overflow-auto whitespace-pre-wrap rounded border border-rose-200 bg-rose-50 p-2 font-mono text-xs text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100"
+              className="max-h-48 overflow-auto whitespace-pre-wrap rounded-lg border border-rose-200 bg-rose-50 p-3 font-mono text-xs text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-100"
               data-testid="code-sandbox-stderr"
             >
               {stderr}
             </pre>
           ) : null}
           {hint ? (
-            <p className="text-sm text-amber-800 dark:text-amber-200" data-testid="code-sandbox-hint">
+            <p
+              className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100"
+              data-testid="code-sandbox-hint"
+            >
               {hint}
             </p>
           ) : null}
           {!stdout && !stderr && !status ? (
-            <p className="text-xs text-slate-500">{t('contentTools.tools.code_sandbox.outputEmpty')}</p>
+            <p className="text-xs text-slate-500 dark:text-neutral-400">
+              {t('contentTools.tools.code_sandbox.outputEmpty')}
+            </p>
           ) : null}
         </div>
       ) : (
-        <div className="space-y-2" role="tabpanel" data-testid="code-sandbox-tests">
+        <div className="space-y-2.5 p-3" role="tabpanel" data-testid="code-sandbox-tests">
           {typeof passed === 'number' && typeof total === 'number' ? (
-            <p className="text-sm font-medium">
+            <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
               {t('contentTools.tools.code_sandbox.testsSummary', { passed, total })}
             </p>
           ) : null}
-          <ul className="space-y-1">
+          <ul className="space-y-1.5">
             {(tests ?? []).map((tr) => (
               <li
                 key={tr.id}
-                className="flex flex-wrap items-baseline gap-2 rounded border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700"
+                className={`flex flex-wrap items-baseline gap-2 rounded-lg border px-3 py-2 text-sm ${
+                  tr.passed
+                    ? 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-900/40 dark:bg-emerald-950/20'
+                    : 'border-rose-200 bg-rose-50/70 dark:border-rose-900/40 dark:bg-rose-950/20'
+                }`}
                 data-testid={`code-sandbox-test-${tr.id}`}
                 data-passed={tr.passed ? 'true' : 'false'}
               >
-                <span aria-hidden="true">{tr.passed ? '✓' : '✗'}</span>
+                <span
+                  className={
+                    tr.passed
+                      ? 'font-semibold text-emerald-700 dark:text-emerald-300'
+                      : 'font-semibold text-rose-700 dark:text-rose-300'
+                  }
+                  aria-hidden="true"
+                >
+                  {tr.passed ? '✓' : '✗'}
+                </span>
                 <span className="sr-only">
                   {tr.passed
                     ? t('contentTools.tools.code_sandbox.testPassed')
                     : t('contentTools.tools.code_sandbox.testFailed')}
                 </span>
-                <span className="font-medium">{tr.name}</span>
+                <span className="font-medium text-slate-900 dark:text-neutral-100">{tr.name}</span>
                 {tr.hidden ? (
-                  <span className="text-xs text-slate-500">
+                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
                     {t('contentTools.tools.code_sandbox.hiddenTest')}
                   </span>
                 ) : null}

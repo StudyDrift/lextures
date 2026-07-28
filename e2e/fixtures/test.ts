@@ -104,6 +104,7 @@ export const test = base.extend<TestFixtures>({
         collabDocsEnabled: true,
         groupSpacesEnabled: true,
         sectionsEnabled: true,
+        contentToolsEnabled: true,
       }).catch(() => {})
 
       await use({

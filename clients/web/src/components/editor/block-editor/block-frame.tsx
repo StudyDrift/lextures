@@ -58,7 +58,7 @@ export function BlockFrame({
   return (
     <div
       className={[
-        '@container group relative mb-3 rounded-xl border bg-white motion-safe:transition-[border-color,box-shadow] dark:bg-neutral-900',
+        '@container group relative rounded-xl border bg-white motion-safe:transition-[border-color,box-shadow] dark:bg-neutral-900',
         selected
           ? 'border-indigo-400 shadow-sm shadow-indigo-900/10 ring-1 ring-indigo-400/25 dark:border-indigo-500 dark:ring-indigo-500/25'
           : 'border-slate-200 hover:border-slate-300 dark:border-neutral-700 dark:hover:border-neutral-600',
