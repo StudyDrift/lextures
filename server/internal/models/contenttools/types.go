@@ -470,6 +470,15 @@ type InstanceAnalytics struct {
 	TotalQuestions     *int                `json:"totalQuestions,omitempty"`
 	// CalibrationMatrix is the CT.12 confidence × correctness matrix.
 	CalibrationMatrix []CalibrationCell `json:"calibrationMatrix,omitempty"`
+	// ExplainItBackRepresentatives is CT.20 anonymised sample explanations.
+	ExplainItBackRepresentatives []ExplainItBackRepresentative `json:"explainItBackRepresentatives,omitempty"`
+}
+
+// ExplainItBackRepresentative is one anonymised explanation for class insights (CT.20 FR-9).
+type ExplainItBackRepresentative struct {
+	Text         string   `json:"text"`
+	CoveredCount int      `json:"coveredCount"`
+	CoveredIDs   []string `json:"coveredIds"`
 }
 
 // AskQuestionsTheme is one anonymized question cluster for instructor insights (CT.10 FR-11).

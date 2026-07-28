@@ -8,6 +8,10 @@ import {
   type DiagramHotspotEditorProps,
 } from '../editors/diagram-hotspot-editor'
 import {
+  ExplainItBackEditor,
+  type ExplainItBackEditorProps,
+} from '../editors/explain-it-back-editor'
+import {
   HighlightAnnotateEditor,
   type HighlightAnnotateEditorProps,
 } from '../editors/highlight-annotate-editor'
@@ -37,10 +41,12 @@ export type CustomEditorProps =
   | CodeSandboxEditorProps
   | WorkedExampleEditorProps
   | MediaCheckpointsEditorProps
+  | ExplainItBackEditorProps
 
 const EDITORS: Record<string, ComponentType<CustomEditorProps>> = {
   code_sandbox: CodeSandboxEditor as ComponentType<CustomEditorProps>,
   diagram_hotspot: DiagramHotspotEditor as ComponentType<CustomEditorProps>,
+  explain_it_back: ExplainItBackEditor as ComponentType<CustomEditorProps>,
   highlight_annotate: HighlightAnnotateEditor as ComponentType<CustomEditorProps>,
   inline_questions: InlineQuestionsEditor,
   media_checkpoints: MediaCheckpointsEditor as ComponentType<CustomEditorProps>,

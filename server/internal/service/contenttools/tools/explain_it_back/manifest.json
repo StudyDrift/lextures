@@ -1,0 +1,211 @@
+{
+  "id": "explain_it_back",
+  "version": "1.0.0",
+  "name": "contentTools.tools.explain_it_back.name",
+  "category": "practice",
+  "capabilities": ["state", "ai"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["prompt", "keyPoints"],
+    "properties": {
+      "prompt": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Markdown prompt asking the learner to explain in their own words"
+      },
+      "minWords": {
+        "type": "integer",
+        "minimum": 5,
+        "maximum": 500,
+        "default": 25
+      },
+      "maxWords": {
+        "type": "integer",
+        "minimum": 10,
+        "maximum": 1000,
+        "default": 150
+      },
+      "keyPoints": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 6,
+        "x-lex-sensitive": true,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label", "description"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "label": { "type": "string", "minLength": 1, "maxLength": 80 },
+            "description": { "type": "string", "minLength": 1, "maxLength": 400 }
+          }
+        }
+      },
+      "revealKeyPointsAfterSubmit": {
+        "type": "boolean",
+        "default": true
+      },
+      "aiFeedback": {
+        "type": "boolean",
+        "default": true
+      },
+      "feedbackStyle": {
+        "type": "string",
+        "enum": ["encouraging", "neutral", "socratic"],
+        "default": "encouraging"
+      },
+      "attempts": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "default": 3
+      },
+      "includeProbeQuestion": {
+        "type": "boolean",
+        "default": true
+      },
+      "allowInstructorNote": {
+        "type": "boolean",
+        "default": true
+      },
+      "maxSubmissionsPerDay": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 50,
+        "default": 10
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "draft": { "type": "string" },
+      "attempts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["at", "text"],
+          "properties": {
+            "at": { "type": "string" },
+            "text": { "type": "string" },
+            "feedback": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["covered", "missing", "strength", "suggestion", "mode"],
+              "properties": {
+                "covered": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "missing": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "strength": { "type": "string" },
+                "suggestion": { "type": "string" },
+                "probe": { "type": "string" },
+                "mode": { "type": "string", "enum": ["ai", "review"] }
+              }
+            }
+          }
+        }
+      },
+      "instructorNote": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text", "at", "by"],
+        "properties": {
+          "text": { "type": "string" },
+          "at": { "type": "string" },
+          "by": { "type": "string" }
+        }
+      },
+      "submittedToday": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "date": { "type": "string" },
+          "count": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "completedAt": { "type": "string" },
+      "crisisAcknowledged": { "type": "boolean" }
+    }
+  },
+  "scoring": { "mode": "none" },
+  "ai": { "featureId": "content_tool_explain_back", "required": false },
+  "storage": { "maxStateBytes": 48000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "application",
+    "wcagNotes": "Textarea labelled with the prompt; word count is polite live and throttled; feedback region announced once on arrival; focus stays in the textarea after submit."
+  },
+  "dataSheet": {
+    "collects": {
+      "attempts": {
+        "purpose": "Learner explanations and formative feedback for practice revisions",
+        "retention": "life_of_enrollment"
+      },
+      "instructorNote": {
+        "purpose": "Short instructor note visible to the learner",
+        "retention": "life_of_enrollment"
+      },
+      "submittedToday": {
+        "purpose": "Per-day submission counting for rate limits",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": true,
+    "processors": ["aigateway", "aiprovider", "contentfilter"],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "Feedback announces once at completion to avoid live-region flooding.",
+    "keyboardAlternative": true,
+    "aiTransparency": {
+      "purpose": "Give formative feedback on a short self-explanation grounded in this activity",
+      "modelFamily": "course-configured chat model via aiprovider",
+      "humanOversight": "Instructors can read explanations, leave notes, and run the activity in review mode without AI",
+      "limitations": "Feedback is practice only — not a grade; key points stay hidden until after the first submission when configured"
+    }
+  },
+  "i18nNamespace": "contentTools.tools.explain_it_back",
+  "ui": {
+    "renderer": "explain_it_back",
+    "icon": "message-square-quote",
+    "group": "practice",
+    "customEditor": "explain_it_back"
+  },
+  "actions": [
+    {
+      "name": "submit",
+      "rateLimitPerMin": 20,
+      "requiresAi": true,
+      "description": "Submit an explanation for formative feedback or instructor review"
+    },
+    {
+      "name": "instructor_note",
+      "rateLimitPerMin": 30,
+      "description": "Leave a short instructor note on a learner explanation"
+    },
+    {
+      "name": "test_sample",
+      "rateLimitPerMin": 10,
+      "requiresAi": true,
+      "description": "Authoring-only: run feedback against a sample answer without storing learner state"
+    }
+  ],
+  "conflictPolicy": "merge",
+  "autosaveMs": 2000,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

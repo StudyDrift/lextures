@@ -102,7 +102,7 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 			return
 		}
 
-		enrollID, _, readOnly, ok := d.resolveContentToolsStateActor(w, r, courseCode, viewer, courseID, scope, m)
+		enrollID, interactRole, readOnly, ok := d.resolveContentToolsStateActor(w, r, courseCode, viewer, courseID, scope, m)
 		if !ok {
 			return
 		}
@@ -176,6 +176,7 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 			Status:               status,
 			Revision:             revision,
 			Input:                body.Input,
+			InteractRole:         interactRole,
 			Pool:                 d.Pool,
 			OrgID:                orgID,
 			GatewayCfg:           d.aiGatewayConfig(),
@@ -192,6 +193,10 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 				gw := d.aiGatewayConfig()
 				gw.DisclosureEnabled = false
 				actionCtx.GatewayCfg = gw
+			} else if m.AI != nil && !m.AI.Required {
+				// Optional AI tools (CT.20): proceed without a completer so the tool can
+				// fall back to non-AI review mode instead of blocking the learner.
+				actionCtx.Completer = nil
 			} else {
 				apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeServiceUnavailable, aiNotConfiguredMsg)
 				return

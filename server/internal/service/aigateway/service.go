@@ -53,6 +53,8 @@ const (
 	FeatureContentTool = "content_tool"
 	// FeatureContentToolAsk is the Ask Questions tool feature id (CT.10).
 	FeatureContentToolAsk = "content_tool_ask"
+	// FeatureContentToolExplainBack is the Explain It Back tool feature id (CT.20).
+	FeatureContentToolExplainBack = "content_tool_explain_back"
 )
 
 // BlockReason explains why a call was blocked.
