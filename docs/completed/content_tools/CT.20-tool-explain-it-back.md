@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | SHIPPED |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | AI platform team |
 | **Depends on** | CT.1, CT.2, CT.3, CT.6, CT.8 |

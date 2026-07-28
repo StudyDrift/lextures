@@ -10,6 +10,7 @@ import (
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	ctanalytics "github.com/lextures/lextures/server/internal/service/contenttools/analytics"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/ask_questions"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/explain_it_back"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/predict_reveal"
 )
 
@@ -102,6 +103,9 @@ func (d Deps) buildInstanceAnalytics(ctx context.Context, courseID, instanceID u
 	if inst.ToolID == predict_reveal.ID && !agg.Suppressed {
 		d.attachPredictRevealCalibration(ctx, instanceID, &ia)
 	}
+	if inst.ToolID == explain_it_back.ID && !agg.Suppressed {
+		d.attachExplainItBackRepresentatives(ctx, instanceID, &ia)
+	}
 	if suppressSmallN {
 		ctanalytics.DefaultCache().Set(cacheKey+":sup", ia)
 	} else {
@@ -188,4 +192,36 @@ func (d Deps) attachPredictRevealCalibration(ctx context.Context, instanceID uui
 		})
 	}
 	ia.CalibrationMatrix = out
+}
+
+func (d Deps) attachExplainItBackRepresentatives(ctx context.Context, instanceID uuid.UUID, ia *ctmodel.InstanceAnalytics) {
+	if ia == nil || d.Pool == nil {
+		return
+	}
+	cacheKey := ctanalytics.CacheKeyInstance(instanceID.String()) + ":explain_reps"
+	if cached, ok := ctanalytics.DefaultCache().Get(cacheKey); ok {
+		if reps, ok := cached.([]ctmodel.ExplainItBackRepresentative); ok {
+			ia.ExplainItBackRepresentatives = reps
+			return
+		}
+	}
+	raws, err := ctrepo.ListEnrollmentStateJSONForInstance(ctx, d.Pool, instanceID)
+	if err != nil {
+		return
+	}
+	states := make([]explain_it_back.State, 0, len(raws))
+	for _, raw := range raws {
+		states = append(states, explain_it_back.ParseState(raw))
+	}
+	selected := explain_it_back.SelectRepresentatives(states, 5)
+	reps := make([]ctmodel.ExplainItBackRepresentative, 0, len(selected))
+	for _, r := range selected {
+		reps = append(reps, ctmodel.ExplainItBackRepresentative{
+			Text:         r.Text,
+			CoveredCount: r.CoveredCount,
+			CoveredIDs:   r.CoveredIDs,
+		})
+	}
+	ia.ExplainItBackRepresentatives = reps
+	ctanalytics.DefaultCache().Set(cacheKey, reps)
 }

@@ -4761,6 +4761,33 @@
       }
     },
     {
+      "id": "ct-20-explain-it-back",
+      "path": "docs/completed/content_tools/CT.20-tool-explain-it-back.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers key-point redaction from student config, dry-run AI feedback submit + revise persistence, review-mode when aiFeedback is false, instructor reset clearing attempts, analytics key-point facets and anonymised representatives, and UI mount of the feedback card.",
+      "owner": "Assessment",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-explain-it-back.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); optional AI via content_tool_explain_back (CT.6/CT.8); state + submit/instructor_note/test_sample via CT.3; keyPointId/covered/attemptCount facets + representatives via CT.7; free-text filter + crisis path via CT.8; reset via CT.4."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

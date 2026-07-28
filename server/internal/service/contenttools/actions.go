@@ -28,6 +28,8 @@ type ActionContext struct {
 	Status       string
 	Revision     int64
 	Input        json.RawMessage
+	// InteractRole is the caller's content-tools interact role (student|instructor|ta).
+	InteractRole string
 
 	// Optional AI runtime deps for AI-capable actions (CT.10+).
 	Pool         *pgxpool.Pool

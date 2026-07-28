@@ -7,6 +7,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/ask_questions"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/code_sandbox"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/diagram_hotspot"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/explain_it_back"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/highlight_annotate"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_questions"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/media_checkpoints"
@@ -42,6 +43,11 @@ func All() []Entry {
 			ID:           diagram_hotspot.ID,
 			ManifestJSON: diagram_hotspot.ManifestJSON,
 			I18nEN:       diagram_hotspot.I18nEN,
+		},
+		{
+			ID:           explain_it_back.ID,
+			ManifestJSON: explain_it_back.ManifestJSON,
+			I18nEN:       explain_it_back.I18nEN,
 		},
 		{
 			ID:           highlight_annotate.ID,
