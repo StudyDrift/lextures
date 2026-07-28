@@ -184,6 +184,8 @@ type ResetRequest struct {
 	Notify         *bool       `json:"notify"`
 	DryRun         bool        `json:"dryRun"`
 	IdempotencyKey *string     `json:"idempotencyKey"`
+	// PostHandling is CT.22: keep (default) or remove learner discussion posts.
+	PostHandling *string `json:"postHandling,omitempty"`
 }
 
 // ResetSampleLearner is one sample row in a reset response.

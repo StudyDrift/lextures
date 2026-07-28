@@ -101,6 +101,9 @@ func (d Deps) handleContentToolsStateReset() http.HandlerFunc {
 			ToolID:         toolID,
 			ActivityTitle:  activityTitle,
 		}
+		if body.PostHandling != nil {
+			req.PostHandling = strings.TrimSpace(*body.PostHandling)
+		}
 		if len(taSections) > 0 {
 			req.ActorRole = "ta"
 		}

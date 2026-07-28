@@ -1806,6 +1806,8 @@ export type ContentToolResetRequest = {
   notify?: boolean
   dryRun?: boolean
   idempotencyKey?: string
+  /** CT.22: keep (default) or remove learner discussion posts on reset. */
+  postHandling?: 'keep' | 'remove'
 }
 
 export type ContentToolResetResponse = {

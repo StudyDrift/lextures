@@ -4815,6 +4815,33 @@
       }
     },
     {
+      "id": "ct-22-tool-inline-discussion",
+      "path": "docs/completed/content_tools/CT.22-tool-inline-discussion.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers post-before-you-see lock, filter block with preserveInput, post unlocking peers, anonymous_to_peers payload stripping authorId, reply completion, instructor endorse, report+remove 404 on get_post, and host render with anonymity note.",
+      "owner": "Collaboration",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-inline-discussion.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); peer_visible capability (CT.8); posts in discussion tables; filter/report/moderate via CT.8; participation facets via CT.7; reset postHandling via CT.4."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

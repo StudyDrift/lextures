@@ -60,6 +60,10 @@ func (d Deps) handleDiscussionForumsList() http.HandlerFunc {
 		}
 		out := make([]forum, 0, len(rows))
 		for _, x := range rows {
+			// CT.22: hide content-tool backed inline discussion forums from the course index.
+			if discussions.IsContentToolForumName(x.Name) {
+				continue
+			}
 			out = append(out, forum{
 				ID:          x.ID.String(),
 				Name:        x.Name,
