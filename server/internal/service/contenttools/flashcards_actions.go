@@ -86,6 +86,11 @@ func handleFlashcardsStartSession(ctx ActionContext) (*ActionResult, error) {
 		return nil, err
 	}
 	ObserveFlashcardsSession("started")
+	// Enrollment status is forward-only: do not regress completed → in_progress (HTTP 500).
+	enrollmentStatus := ""
+	if ctx.Status == "" || ctx.Status == StatusNotStarted {
+		enrollmentStatus = StatusInProgress
+	}
 	return &ActionResult{
 		Result: map[string]any{
 			"caughtUp":   false,
@@ -96,7 +101,7 @@ func handleFlashcardsStartSession(ctx ActionContext) (*ActionResult, error) {
 			"state":      flashcardsStateView(st),
 		},
 		StatePatch: patch,
-		Status:     StatusInProgress,
+		Status:     enrollmentStatus,
 	}, nil
 }
 

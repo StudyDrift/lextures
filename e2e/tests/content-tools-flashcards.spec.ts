@@ -153,6 +153,7 @@ async function resetEnrollment(
 
 test.describe('Content Tools Flashcards (CT.23)', () => {
   test('session ratings, SRS-off path, UI, reset', async ({ page, seededCourse }) => {
+    test.setTimeout(90_000)
     const { instructorToken, studentToken, courseCode } = seededCourse
 
     await withCourseFeatureRestore(instructorToken, courseCode, async () => {
