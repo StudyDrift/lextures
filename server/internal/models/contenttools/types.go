@@ -186,6 +186,8 @@ type ResetRequest struct {
 	IdempotencyKey *string     `json:"idempotencyKey"`
 	// PostHandling is CT.22: keep (default) or remove learner discussion posts.
 	PostHandling *string `json:"postHandling,omitempty"`
+	// SchedulingHandling is CT.23: keep (default) or clear SRS scheduling for flashcard decks.
+	SchedulingHandling *string `json:"schedulingHandling,omitempty"`
 }
 
 // ResetSampleLearner is one sample row in a reset response.

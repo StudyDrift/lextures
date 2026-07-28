@@ -37,6 +37,7 @@ export function ToolResetDialog({
   const [reason, setReason] = useState('')
   const [notify, setNotify] = useState(true)
   const [postHandling, setPostHandling] = useState<'keep' | 'remove'>('keep')
+  const [schedulingHandling, setSchedulingHandling] = useState<'keep' | 'clear'>('keep')
   const [preview, setPreview] = useState<ContentToolResetResponse | null>(null)
   const [confirmText, setConfirmText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -49,6 +50,7 @@ export function ToolResetDialog({
     setReason('')
     setNotify(true)
     setPostHandling('keep')
+    setSchedulingHandling('keep')
     setPreview(null)
     setConfirmText('')
     setError(null)
@@ -66,6 +68,7 @@ export function ToolResetDialog({
       dryRun: true,
       notify,
       postHandling,
+      schedulingHandling,
       ...(itemId ? { itemId } : {}),
       ...(enrollmentId &&
       (scope === 'instance_enrollment' ||
@@ -88,7 +91,7 @@ export function ToolResetDialog({
     return () => {
       cancelled = true
     }
-  }, [open, courseCode, instanceId, itemId, enrollmentId, scope, notify, reason, postHandling])
+  }, [open, courseCode, instanceId, itemId, enrollmentId, scope, notify, reason, postHandling, schedulingHandling])
 
   if (!open) return null
 
@@ -106,6 +109,7 @@ export function ToolResetDialog({
         dryRun: false,
         notify,
         postHandling,
+        schedulingHandling,
         idempotencyKey: crypto.randomUUID(),
         ...(itemId ? { itemId } : {}),
         ...(enrollmentId &&
@@ -211,6 +215,29 @@ export function ToolResetDialog({
                 onChange={() => setPostHandling('remove')}
               />
               <span>{t('contentTools.reset.postHandlingRemove')}</span>
+            </label>
+          </fieldset>
+          <fieldset className="space-y-2 text-xs">
+            <legend className="font-medium text-slate-700 dark:text-neutral-300">
+              {t('contentTools.reset.schedulingHandlingLabel')}
+            </legend>
+            <label className="flex items-start gap-2 text-slate-800 dark:text-neutral-200">
+              <input
+                type="radio"
+                name="schedulingHandling"
+                checked={schedulingHandling === 'keep'}
+                onChange={() => setSchedulingHandling('keep')}
+              />
+              <span>{t('contentTools.reset.schedulingHandlingKeep')}</span>
+            </label>
+            <label className="flex items-start gap-2 text-slate-800 dark:text-neutral-200">
+              <input
+                type="radio"
+                name="schedulingHandling"
+                checked={schedulingHandling === 'clear'}
+                onChange={() => setSchedulingHandling('clear')}
+              />
+              <span>{t('contentTools.reset.schedulingHandlingClear')}</span>
             </label>
           </fieldset>
           {preview ? (

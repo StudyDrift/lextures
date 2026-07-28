@@ -58,6 +58,8 @@ type ResetRequest struct {
 	ActivityTitle  string          // for notifications
 	// PostHandling is CT.22: "keep" (default) or "remove" soft-deletes the learner's discussion posts.
 	PostHandling string
+	// SchedulingHandling is CT.23: "keep" (default) or "clear" deletes SRS scheduling for flashcard deck items.
+	SchedulingHandling string
 }
 
 // GradeEffect describes gradebook side-effects for one enrollment (CT.7 stub).
@@ -136,6 +138,27 @@ func SummarizeState(toolID string, state json.RawMessage, status string, scoreRa
 			parts = append(parts, fmt.Sprintf("posts=%d replies=%d", len(s.MyPostIDs), len(s.MyReplyIDs)))
 			if s.LastReadAt == "" && len(s.MyPostIDs) == 0 {
 				parts = append(parts, "read=nothing")
+			}
+		}
+	}
+	if toolID == "flashcards" && len(state) > 0 {
+		var s struct {
+			Cards map[string]struct {
+				Seen int `json:"seen"`
+			} `json:"cards"`
+			FirstPassCompletedAt string `json:"firstPassCompletedAt"`
+			Sessions             []any  `json:"sessions"`
+		}
+		if json.Unmarshal(state, &s) == nil {
+			rated := 0
+			for _, c := range s.Cards {
+				if c.Seen > 0 {
+					rated++
+				}
+			}
+			parts = append(parts, fmt.Sprintf("rated=%d/%d sessions=%d", rated, len(s.Cards), len(s.Sessions)))
+			if s.FirstPassCompletedAt != "" {
+				parts = append(parts, "firstPass=done")
 			}
 		}
 	}
@@ -317,6 +340,15 @@ func applyResetBatch(
 					continue
 				}
 				_ = SoftDeleteInlineDiscussionPosts(ctx, pool, req.CourseID, a.InstanceID, a.UserID)
+			}
+		}
+		// CT.23: optional clear of SRS scheduling for flashcard deck cards.
+		if strings.EqualFold(strings.TrimSpace(req.SchedulingHandling), "clear") {
+			for _, a := range chunk {
+				if a.ToolID != "flashcards" {
+					continue
+				}
+				_ = ClearFlashcardsSchedulingForReset(ctx, pool, req.CourseID, a.InstanceID, a.UserID)
 			}
 		}
 		// Events + notifications + summary sync outside the short transaction.

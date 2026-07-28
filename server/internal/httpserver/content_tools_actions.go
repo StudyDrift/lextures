@@ -163,6 +163,7 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 		start := time.Now()
 		orgID, _ := ctrepo.CourseOrgID(r.Context(), d.Pool, courseID)
 		codeExecOn := d.effectiveConfig().CodeExecutionEnabled
+		srsPracticeOn := d.effectiveConfig().SRSPracticeEnabled
 		actionCtx := ctsvc.ActionContext{
 			Ctx:                  r.Context(),
 			CourseID:             courseID,
@@ -181,6 +182,7 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 			OrgID:                orgID,
 			GatewayCfg:           d.aiGatewayConfig(),
 			CodeExecutionEnabled: &codeExecOn,
+			SRSPracticeEnabled:   &srsPracticeOn,
 		}
 		if decl.RequiresAI || (m.AI != nil && m.AI.Required) {
 			actionCtx.Model = "dry-run"

@@ -24,5 +24,6 @@
 | **CT.20** | [Explain It Back](CT.20-tool-explain-it-back.md) |
 | **CT.21** | [Class Pulse](CT.21-tool-class-pulse.md) |
 | **CT.22** | [Inline Discussion](CT.22-tool-inline-discussion.md) |
+| **CT.23** | [Flashcards & Spaced Recall](CT.23-tool-flashcards-and-spaced-recall.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

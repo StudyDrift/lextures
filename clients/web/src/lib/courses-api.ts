@@ -1808,6 +1808,8 @@ export type ContentToolResetRequest = {
   idempotencyKey?: string
   /** CT.22: keep (default) or remove learner discussion posts on reset. */
   postHandling?: 'keep' | 'remove'
+  /** CT.23: keep (default) or clear SRS scheduling for flashcard decks. */
+  schedulingHandling?: 'keep' | 'clear'
 }
 
 export type ContentToolResetResponse = {

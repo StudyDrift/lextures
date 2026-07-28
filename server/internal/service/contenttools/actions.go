@@ -41,6 +41,9 @@ type ActionContext struct {
 
 	// CodeExecutionEnabled gates CT.17 run/check when set; nil means enabled (unit tests).
 	CodeExecutionEnabled *bool
+
+	// SRSPracticeEnabled gates CT.23 SRS writes when set; nil means enabled (unit tests).
+	SRSPracticeEnabled *bool
 }
 
 // ActionResult is returned by an action handler.
