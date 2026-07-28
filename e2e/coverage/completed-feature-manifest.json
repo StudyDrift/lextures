@@ -4842,6 +4842,33 @@
       }
     },
     {
+      "id": "ct-23-tool-flashcards-and-spaced-recall",
+      "path": "docs/completed/content_tools/CT.23-tool-flashcards-and-spaced-recall.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Playwright covers start_session queueing, six ratings with first-pass completion, SRS-off srsEnabled=false, host render with SRS-off banner, reveal/rate UI, and CT.4 reset clearing tool state.",
+      "owner": "Adaptive learning",
+      "specs": [
+        {
+          "path": "e2e/tests/content-tools-flashcards.spec.ts"
+        }
+      ],
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Course allowlist + content_tools_enabled (CT.1); rates via CT.3 actions; synthetic questions feed service/srs when srsEnabled; facets via CT.7; reset schedulingHandling via CT.4."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

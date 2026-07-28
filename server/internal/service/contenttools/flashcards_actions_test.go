@@ -82,22 +82,6 @@ func TestFlashcardsSessionAndRateWithoutSRS(t *testing.T) {
 	stateJSON := started.StatePatch
 	rated := 0
 	for rated < 6 {
-		var cur map[string]any
-		rawCur, _ := json.Marshal(started.Result["current"])
-		if rated > 0 {
-			// reload current from last rate
-		}
-		_ = json.Unmarshal(rawCur, &cur)
-
-		// get current from status of last result
-		var last *contenttools.ActionResult
-		if rated == 0 {
-			last = started
-		} else {
-			last = nil
-		}
-		_ = last
-
 		st := flashcards.ParseState(stateJSON)
 		if st.ActiveSession == nil || st.ActiveSession.Index >= len(st.ActiveSession.Queue) {
 			break

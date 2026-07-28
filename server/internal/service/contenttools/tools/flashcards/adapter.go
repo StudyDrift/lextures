@@ -211,7 +211,4 @@ WHERE user_id = $1 AND question_id = ANY($2::uuid[])
 	return nil
 }
 
-// GradeToQuality exposes the shipped SM-2 mapping for unit tests.
-func GradeToQuality(grade string) (float64, bool) {
-	return srs.GradeToQuality(grade)
-}
+// Grade mapping lives in service/srs; adapter only submits reviews.

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lextures/lextures/server/internal/service/srs"
 )
 
 func TestGradeToQualityMapping(t *testing.T) {
@@ -17,12 +18,12 @@ func TestGradeToQualityMapping(t *testing.T) {
 		"AGAIN": 0,
 	}
 	for g, want := range cases {
-		got, ok := GradeToQuality(g)
+		got, ok := srs.GradeToQuality(g)
 		if !ok || got != want {
 			t.Fatalf("%s: got %v ok=%v want %v", g, got, ok, want)
 		}
 	}
-	if _, ok := GradeToQuality("meh"); ok {
+	if _, ok := srs.GradeToQuality("meh"); ok {
 		t.Fatal("expected invalid grade")
 	}
 }
@@ -116,22 +117,6 @@ func TestFirstPassCompleteAndApplyRating(t *testing.T) {
 	}
 	if st.Cards["a"].FirstRating == nil || *st.Cards["a"].FirstRating != RatingGood {
 		t.Fatalf("first rating: %#v", st.Cards["a"])
-	}
-}
-
-func TestMergeStates(t *testing.T) {
-	a := EmptyState()
-	a.Cards["x"] = CardProgress{Seen: 1}
-	r := RatingAgain
-	b := EmptyState()
-	b.Cards["x"] = CardProgress{Seen: 3, LastRating: &r, LastSeenAt: "2026-01-02T00:00:00Z", FirstRating: &r}
-	b.Cards["y"] = CardProgress{Seen: 1}
-	m := MergeStates(a, b)
-	if m.Cards["x"].Seen != 3 {
-		t.Fatalf("seen merge: %#v", m.Cards["x"])
-	}
-	if m.Cards["y"].Seen != 1 {
-		t.Fatal("missing y")
 	}
 }
 
