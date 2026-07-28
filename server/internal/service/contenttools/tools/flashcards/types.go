@@ -67,7 +67,10 @@ type State struct {
 	V                    int                      `json:"v"`
 	Cards                map[string]CardProgress  `json:"cards,omitempty"`
 	Sessions             []SessionRecord          `json:"sessions,omitempty"`
-	ActiveSession        *ActiveSession           `json:"activeSession,omitempty"`
+	// ActiveSession must not use omitempty: session end sets it to nil, and
+	// MergeStateJSON only clears keys present in the patch. Omitting the field
+	// left a stale active session after the final rate (E2E Start button gone).
+	ActiveSession        *ActiveSession           `json:"activeSession"`
 	FirstPassCompletedAt string                   `json:"firstPassCompletedAt,omitempty"`
 }
 

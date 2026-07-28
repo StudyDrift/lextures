@@ -106,7 +106,12 @@ func TestFlashcardsSessionAndRateWithoutSRS(t *testing.T) {
 		if res.Result["error"] != nil {
 			t.Fatalf("rate error: %#v", res.Result)
 		}
-		stateJSON = res.StatePatch
+		// Production merges StatePatch into prior state_json (not replace).
+		merged, err := contenttools.MergeStateJSON(stateJSON, res.StatePatch)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stateJSON = merged
 		rated++
 		if res.Result["sessionComplete"] == true {
 			break
@@ -119,8 +124,25 @@ func TestFlashcardsSessionAndRateWithoutSRS(t *testing.T) {
 	if st.FirstPassCompletedAt == "" {
 		t.Fatal("expected first pass complete")
 	}
+	if st.ActiveSession != nil {
+		t.Fatalf("active session must clear after final rate (merge), got %#v", st.ActiveSession)
+	}
 	if len(st.Cards) != 6 {
 		t.Fatalf("cards progress: %#v", st.Cards)
+	}
+
+	// status must not resurrect a current card after the session ends
+	status, err := contenttools.DispatchAction(m, "status", contenttools.ActionContext{
+		ConfigJSON:         cfgJSON,
+		StateJSON:          stateJSON,
+		InteractRole:       "student",
+		SRSPracticeEnabled: &off,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cur, _ := status.Result["current"].(map[string]any); len(cur) > 0 {
+		t.Fatalf("expected no current card after session end, got %#v", status.Result["current"])
 	}
 }
 
