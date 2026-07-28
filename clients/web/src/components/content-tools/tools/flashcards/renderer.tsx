@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { ContentToolRendererProps } from '../../host/runtime-contract'
 
 type Rating = 'again' | 'hard' | 'good' | 'easy'
@@ -53,7 +53,7 @@ const RATINGS: Array<{ id: Rating; shortcut: string }> = [
 
 export default function FlashcardsRenderer({
   config,
-  state,
+  state: _state,
   readOnly,
   runAction,
   t,
@@ -80,10 +80,15 @@ export default function FlashcardsRenderer({
   const [error, setError] = useState<string | null>(null)
   const [showHelp, setShowHelp] = useState(false)
   const inSession = Boolean(current) && !sessionSummary
+  // Host passes a fresh runAction closure each render; keep a ref so the mount
+  // status fetch is not cancelled by identity churn (and setBusy re-renders).
+  const runActionRef = useRef(runAction)
+  runActionRef.current = runAction
 
   useEffect(() => {
     let cancelled = false
-    void runAction('status', {})
+    void runActionRef
+      .current('status', {})
       .then((raw) => {
         if (cancelled) return
         const res = raw as ActionResult
@@ -100,7 +105,10 @@ export default function FlashcardsRenderer({
     return () => {
       cancelled = true
     }
-  }, [runAction, state])
+    // Mount-only: start/rate responses already carry deck status + srsEnabled.
+    // Re-running on `state`/`runAction` identity caused a cancel loop when status
+    // applied envelope state and host re-created runAction.
+  }, [])
 
   useEffect(() => {
     if (!inSession) return

@@ -40,7 +40,10 @@ export function useToolAction(opts: UseToolActionOptions): UseToolActionResult {
     input: Record<string, unknown>,
     actionOpts?: { idempotencyKey?: string },
   ): Promise<ContentToolActionResponse> {
-    setBusy(true)
+    // Read-only status probes should not flip busy — that re-renders the host and
+    // used to cancel in-flight mount fetches when tools depended on runAction identity.
+    const trackBusy = name !== 'status'
+    if (trackBusy) setBusy(true)
     setError(null)
     try {
       const res = await runContentToolAction(courseCode, instanceId, name, {
@@ -54,7 +57,7 @@ export function useToolAction(opts: UseToolActionOptions): UseToolActionResult {
       setError(message)
       throw e
     } finally {
-      setBusy(false)
+      if (trackBusy) setBusy(false)
     }
   }
 

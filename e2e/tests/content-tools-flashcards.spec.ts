@@ -241,12 +241,18 @@ test.describe('Content Tools Flashcards (CT.23)', () => {
       await page.goto(`/courses/${courseCode}/modules/content/${contentPage.id}`)
       const tool = page.locator('[data-content-tool="flashcards"]').first()
       await expect(tool).toBeVisible({ timeout: 20_000 })
-      await expect(page.getByTestId('flashcards-srs-off')).toBeVisible()
+      // Status fetch populates srsEnabled; wait past the "6 cards" fallback chips.
+      await expect(page.getByTestId('flashcards-srs-off')).toBeVisible({ timeout: 20_000 })
       await page.getByTestId('flashcards-start').click()
       await expect(page.getByTestId('flashcards-card')).toBeVisible({ timeout: 15_000 })
       await page.getByTestId('flashcards-reveal').click()
       await expect(page.getByTestId('flashcards-answer')).toBeVisible()
+      const rateDone = page.waitForResponse(
+        (r) =>
+          r.url().includes(`/content-tools/instances/${inst.id}/actions/rate`) && r.ok(),
+      )
       await page.getByTestId('flashcards-rate-good').click()
+      await rateDone
 
       const rosterRes = await fetch(
         `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${inst.id}/states?page=1&pageSize=50`,
