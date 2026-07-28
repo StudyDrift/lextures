@@ -9,6 +9,7 @@ const RENDERERS: Record<string, LazyExoticComponent<RendererComponent>> = {
   code_sandbox: lazy(() => import('../../tools/code_sandbox/renderer')),
   diagram_hotspot: lazy(() => import('../../tools/diagram_hotspot/renderer')),
   explain_it_back: lazy(() => import('../../tools/explain_it_back/renderer')),
+  flashcards: lazy(() => import('../../tools/flashcards/renderer')),
   highlight_annotate: lazy(() => import('../../tools/highlight_annotate/renderer')),
   inline_discussion: lazy(() => import('../../tools/inline_discussion/renderer')),
   inline_questions: lazy(() => import('../../tools/inline_questions/renderer')),

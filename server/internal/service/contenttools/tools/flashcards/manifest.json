@@ -1,0 +1,174 @@
+{
+  "id": "flashcards",
+  "version": "1.0.0",
+  "name": "contentTools.tools.flashcards.name",
+  "category": "practice",
+  "capabilities": ["state"],
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["cards"],
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "Optional deck title shown above the session"
+      },
+      "cards": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 20,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "front", "back"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "front": { "type": "string", "minLength": 1 },
+            "back": { "type": "string", "minLength": 1 },
+            "frontLang": { "type": "string" },
+            "backLang": { "type": "string" },
+            "imageUrl": { "type": "string" },
+            "imageAlt": { "type": "string" },
+            "hint": { "type": "string" }
+          }
+        }
+      },
+      "reversePractice": {
+        "type": "boolean",
+        "default": false,
+        "description": "Schedule back→front as independent SRS items"
+      },
+      "sessionCap": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 20,
+        "default": 20
+      },
+      "shuffle": {
+        "type": "boolean",
+        "default": true
+      },
+      "requireFirstPass": {
+        "type": "boolean",
+        "default": true,
+        "description": "Completion = every card rated at least once"
+      }
+    }
+  },
+  "stateSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "v": { "type": "integer", "const": 1 },
+      "cards": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "seen": { "type": "integer", "minimum": 0 },
+            "lastRating": { "type": "string", "enum": ["again", "hard", "good", "easy"] },
+            "lastSeenAt": { "type": "string" },
+            "firstRating": { "type": "string", "enum": ["again", "hard", "good", "easy"] }
+          }
+        }
+      },
+      "sessions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["startedAt", "reviewed"],
+          "properties": {
+            "startedAt": { "type": "string" },
+            "endedAt": { "type": "string" },
+            "reviewed": { "type": "integer", "minimum": 0 }
+          }
+        }
+      },
+      "activeSession": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "startedAt": { "type": "string" },
+          "queue": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cardId", "side"],
+              "properties": {
+                "cardId": { "type": "string" },
+                "side": { "type": "string", "enum": ["forward", "reverse"] }
+              }
+            }
+          },
+          "index": { "type": "integer", "minimum": 0 },
+          "reviewed": { "type": "integer", "minimum": 0 },
+          "revealed": { "type": "boolean" }
+        }
+      },
+      "firstPassCompletedAt": { "type": "string" }
+    }
+  },
+  "scoring": { "mode": "none" },
+  "storage": { "maxStateBytes": 16000 },
+  "roles": { "interact": ["student", "instructor"] },
+  "a11y": {
+    "keyboardOperable": true,
+    "srPattern": "region",
+    "wcagNotes": "Card is a labelled region; reveal and ratings are named buttons; Space/1–4/Esc documented and never the only path; prefers-reduced-motion disables flip; lang set per side when authored."
+  },
+  "dataSheet": {
+    "collects": {
+      "ratings": {
+        "purpose": "Self-rated recall and session progress for this deck; schedules live in SRS tables when enabled",
+        "retention": "life_of_enrollment"
+      }
+    },
+    "leavesPlatform": false,
+    "processors": [],
+    "visibility": "instructor",
+    "wcagLevel": "AA",
+    "a11yLimitations": "",
+    "keyboardAlternative": true
+  },
+  "i18nNamespace": "contentTools.tools.flashcards",
+  "ui": {
+    "renderer": "flashcards",
+    "customEditor": "flashcards",
+    "icon": "cards",
+    "group": "practice"
+  },
+  "actions": [
+    {
+      "name": "start_session",
+      "rateLimitPerMin": 30,
+      "description": "Select new + due cards (capped) and open a session"
+    },
+    {
+      "name": "rate",
+      "rateLimitPerMin": 120,
+      "description": "Reveal-complete rating; submits to SRS when enabled"
+    },
+    {
+      "name": "end_session",
+      "rateLimitPerMin": 30,
+      "description": "Close the active session and return a summary"
+    },
+    {
+      "name": "status",
+      "rateLimitPerMin": 60,
+      "description": "Deck status chips and next due date (no side effects)"
+    }
+  ],
+  "conflictPolicy": "merge",
+  "autosaveMs": 1500,
+  "allowsSelfReset": true,
+  "sandbox": "inprocess",
+  "contract": 1,
+  "stateSchemaVersion": 1,
+  "configSchemaVersion": 1
+}

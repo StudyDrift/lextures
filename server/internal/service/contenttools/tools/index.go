@@ -9,6 +9,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/code_sandbox"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/diagram_hotspot"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/explain_it_back"
+	"github.com/lextures/lextures/server/internal/service/contenttools/tools/flashcards"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/highlight_annotate"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_discussion"
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_questions"
@@ -55,6 +56,11 @@ func All() []Entry {
 			ID:           explain_it_back.ID,
 			ManifestJSON: explain_it_back.ManifestJSON,
 			I18nEN:       explain_it_back.I18nEN,
+		},
+		{
+			ID:           flashcards.ID,
+			ManifestJSON: flashcards.ManifestJSON,
+			I18nEN:       flashcards.I18nEN,
 		},
 		{
 			ID:           highlight_annotate.ID,

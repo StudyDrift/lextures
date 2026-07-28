@@ -410,6 +410,7 @@ const KEYWORD_SPEC: Array<{ keywords: string[]; specs: string[]; level?: Coverag
   { keywords: ['h5p'], specs: ['h5p'] },
   { keywords: ['equation'], specs: ['equation-editor'] },
   { keywords: ['notebook', 'flashcard'], specs: ['notebook-flashcards'] },
+  { keywords: ['ct.23', 'flashcards', 'spaced recall'], specs: ['content-tools-flashcards'] },
   { keywords: ['feed'], specs: ['feed'] },
   { keywords: ['syllabus'], specs: ['syllabus'] },
   { keywords: ['blueprint'], specs: ['blueprint-settings'] },

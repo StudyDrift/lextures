@@ -104,6 +104,9 @@ func (d Deps) handleContentToolsStateReset() http.HandlerFunc {
 		if body.PostHandling != nil {
 			req.PostHandling = strings.TrimSpace(*body.PostHandling)
 		}
+		if body.SchedulingHandling != nil {
+			req.SchedulingHandling = strings.TrimSpace(*body.SchedulingHandling)
+		}
 		if len(taSections) > 0 {
 			req.ActorRole = "ta"
 		}

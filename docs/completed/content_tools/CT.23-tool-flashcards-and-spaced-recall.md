@@ -1,6 +1,6 @@
 # CT.23 — Tool: Flashcards & Spaced Recall (an inline deck that feeds the shipped SRS)
 
-> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](README.md).
+> Implementation plan. Source: new capability — interactive tools inside content sections. Folder overview: [README](../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — tool shelf |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Adaptive learning team |
 | **Depends on** | CT.1, CT.2, CT.3; shipped SRS (`service/srs`, `course.srs_item_states`) |

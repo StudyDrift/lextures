@@ -135,7 +135,7 @@ Content Tools without enabling, say, the code sandbox.
 | **CT.20** | [Explain It Back](../../completed/content_tools/CT.20-tool-explain-it-back.md) — free-text self-explanation with AI formative feedback | Self-explanation / elaborative interrogation | DONE | none |
 | **CT.21** | [Class Pulse](../../completed/content_tools/CT.21-tool-class-pulse.md) — vote, then see the anonymised class distribution | Peer instruction / social proof | DONE | none |
 | **CT.22** | [Inline Discussion](../../completed/content_tools/CT.22-tool-inline-discussion.md) — a scoped thread anchored to this paragraph | Collaborative elaboration | DONE | none |
-| **CT.23** | [Flashcards & Spaced Recall](CT.23-tool-flashcards-and-spaced-recall.md) — inline deck that feeds the shipped SRS | Spacing + retrieval | MINOR | none |
+| **CT.23** | [Flashcards & Spaced Recall](../../completed/content_tools/CT.23-tool-flashcards-and-spaced-recall.md) — inline deck that feeds the shipped SRS | Spacing + retrieval | DONE | none |
 
 ## Sequencing at a glance
 
