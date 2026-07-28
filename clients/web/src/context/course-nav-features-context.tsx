@@ -78,7 +78,7 @@ const defaultFeatures: CourseNavFeatures = {
   visualBoardsEnabled: false,
   interactiveQuizzesEnabled: false,
   screenShareEnabled: false,
-  contentToolsEnabled: false,
+  contentToolsEnabled: true,
   loading: false,
   refresh: async () => {},
 }
@@ -112,7 +112,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
   const [visualBoardsEnabled, setVisualBoardsEnabled] = useState(false)
   const [interactiveQuizzesEnabled, setInteractiveQuizzesEnabled] = useState(false)
   const [screenShareEnabled, setScreenShareEnabled] = useState(false)
-  const [contentToolsEnabled, setContentToolsEnabled] = useState(false)
+  const [contentToolsEnabled, setContentToolsEnabled] = useState(true)
   const [loading, setLoading] = useState(!!courseCode)
 
   useEffect(() => {
@@ -142,7 +142,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setVisualBoardsEnabled(false)
       setInteractiveQuizzesEnabled(false)
       setScreenShareEnabled(false)
-      setContentToolsEnabled(false)
+      setContentToolsEnabled(true)
       setLoading(false)
       return
     }
@@ -170,7 +170,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setVisualBoardsEnabled(c.visualBoardsEnabled === true)
       setInteractiveQuizzesEnabled(c.interactiveQuizzesEnabled === true)
       setScreenShareEnabled(c.screenShareEnabled === true)
-      setContentToolsEnabled(c.contentToolsEnabled === true)
+      setContentToolsEnabled(c.contentToolsEnabled !== false)
     } catch {
       setNotebookEnabled(true)
       setFeedEnabled(true)
@@ -193,7 +193,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setVisualBoardsEnabled(false)
       setInteractiveQuizzesEnabled(false)
       setScreenShareEnabled(false)
-      setContentToolsEnabled(false)
+      setContentToolsEnabled(true)
     } finally {
       setLoading(false)
     }

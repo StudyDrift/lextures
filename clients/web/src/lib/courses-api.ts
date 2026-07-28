@@ -1454,67 +1454,278 @@ export type PatchContentToolInstanceBody = {
   status?: 'active' | 'archived' | string
 }
 
-/** Default config for create — server validates required fields. */
+/**
+ * Starter config for POST .../content-tools/instances.
+ * Must satisfy each tool's manifest `configSchema` required fields so insert
+ * does not 422 before the instructor can open the editor.
+ */
 export function defaultContentToolConfig(toolId: string): Record<string, unknown> {
-  if (toolId === 'noop_probe') {
-    return { prompt: 'New prompt', maxAttempts: 3 }
-  }
-  if (toolId === 'sort_sequence') {
-    return {
-      mode: 'categorize',
-      prompt: 'Sort these items into the correct categories.',
-      items: [
-        { id: 'item_a', text: 'Item A' },
-        { id: 'item_b', text: 'Item B' },
-      ],
-      buckets: [
-        { id: 'bucket_a', label: 'Category A' },
-        { id: 'bucket_b', label: 'Category B' },
-      ],
-      correctBucketByItem: { item_a: 'bucket_a', item_b: 'bucket_b' },
-      attempts: 3,
-      showPerItemCorrectness: true,
-      lockCorrect: true,
-      scoreMode: 'per_item',
-      shuffleItems: true,
-    }
-  }
-  if (toolId === 'diagram_hotspot') {
-    return {
-      mode: 'label',
-      prompt: 'Place each label on the correct region of the diagram.',
-      image: {
-        url: '',
-        alt: '',
-        naturalWidth: 800,
-        naturalHeight: 600,
-      },
-      regions: [
-        {
-          id: 'region_a',
-          label: 'Region A',
-          description: 'Describe this region for learners who cannot see the image.',
-          shape: { kind: 'rect', x: 0.1, y: 0.1, w: 0.3, h: 0.25 },
+  switch (toolId) {
+    case 'noop_probe':
+      return { prompt: 'New prompt', maxAttempts: 3 }
+
+    case 'sandbox_probe':
+      return { prompt: 'New prompt' }
+
+    case 'ask_questions':
+      return {
+        intro: 'Ask a question about this section.',
+        placeholder: 'Type your question…',
+      }
+
+    case 'inline_discussion':
+      return {
+        prompt: 'What stands out to you in this section?',
+        postBeforeYouSee: true,
+        allowReplies: true,
+        requiredPosts: 1,
+        requiredReplies: 0,
+        anonymity: 'named',
+        sort: 'oldest',
+        pageSize: 20,
+      }
+
+    case 'inline_questions':
+      return {
+        label: 'Quick check',
+        attempts: 2,
+        revealCorrectAfter: 'last_attempt',
+        sequential: true,
+        shuffleOptions: false,
+        scorePolicy: 'best',
+        questions: [
+          {
+            id: 'q1',
+            type: 'single',
+            prompt: 'Replace this sample question with your own.',
+            options: [
+              { id: 'a', text: 'Option A', correct: true },
+              { id: 'b', text: 'Option B', correct: false },
+            ],
+            points: 1,
+          },
+        ],
+      }
+
+    case 'flashcards':
+      return {
+        title: 'New deck',
+        cards: [
+          { id: 'c1', front: 'Front of card 1', back: 'Back of card 1' },
+          { id: 'c2', front: 'Front of card 2', back: 'Back of card 2' },
+          { id: 'c3', front: 'Front of card 3', back: 'Back of card 3' },
+        ],
+        reversePractice: false,
+        sessionCap: 20,
+        shuffle: true,
+        requireFirstPass: true,
+      }
+
+    case 'class_pulse':
+      return {
+        question: 'Which option best matches the idea?',
+        options: [
+          { id: 'a', text: 'Option A' },
+          { id: 'b', text: 'Option B' },
+        ],
+        allowSecondVote: false,
+        revealCorrect: 'never',
+        showPercentages: true,
+      }
+
+    case 'predict_reveal':
+      return {
+        question: 'What do you predict will happen?',
+        mode: 'choice',
+        confidenceScale: 'three',
+        confidenceRequired: true,
+        showPeerResults: true,
+        outcomes: [
+          { id: 'o1', text: 'Outcome A', correct: true },
+          { id: 'o2', text: 'Outcome B', correct: false },
+        ],
+        reveal: {
+          markdown: 'Edit this reveal text with the explanation students see after predicting.',
         },
-        {
-          id: 'region_b',
-          label: 'Region B',
-          description: 'Describe this second region with enough detail to identify it.',
-          shape: { kind: 'circle', cx: 0.7, cy: 0.5, r: 0.15 },
+      }
+
+    case 'explain_it_back':
+      return {
+        prompt: 'In your own words, explain the main idea from this section.',
+        minWords: 10,
+        maxWords: 200,
+        keyPoints: [
+          { id: 'kp1', label: 'Idea 1', description: 'First concept the response should cover' },
+          { id: 'kp2', label: 'Idea 2', description: 'Second concept the response should cover' },
+        ],
+        revealKeyPointsAfterSubmit: true,
+        aiFeedback: true,
+        feedbackStyle: 'encouraging',
+        attempts: 3,
+      }
+
+    case 'highlight_annotate':
+      return {
+        prompt: 'Highlight the key ideas in the passage.',
+        passageSource: 'inline',
+        passageMarkdown:
+          'Replace this sample passage with the text students should annotate.',
+        unitGranularity: 'sentence',
+        tags: [
+          { id: 'key', label: 'Key idea', color: '#0f766e' },
+          { id: 'question', label: 'Question', color: '#b45309' },
+        ],
+        minAnnotations: 1,
+        maxAnnotations: 10,
+        requireNote: false,
+      }
+
+    case 'sort_sequence':
+      return {
+        mode: 'categorize',
+        prompt: 'Sort these items into the correct categories.',
+        items: [
+          { id: 'item_a', text: 'Item A' },
+          { id: 'item_b', text: 'Item B' },
+        ],
+        buckets: [
+          { id: 'bucket_a', label: 'Category A' },
+          { id: 'bucket_b', label: 'Category B' },
+        ],
+        correctBucketByItem: { item_a: 'bucket_a', item_b: 'bucket_b' },
+        attempts: 3,
+        showPerItemCorrectness: true,
+        lockCorrect: true,
+        scoreMode: 'per_item',
+        shuffleItems: true,
+      }
+
+    case 'diagram_hotspot':
+      return {
+        mode: 'label',
+        prompt: 'Place each label on the correct region of the diagram.',
+        image: {
+          // Schema requires non-empty url/alt; instructor replaces with a real image.
+          url: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600"%3E%3Crect fill="%23e2e8f0" width="800" height="600"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle" fill="%2364748b" font-family="sans-serif" font-size="28"%3EUpload a diagram%3C/text%3E%3C/svg%3E',
+          alt: 'Placeholder diagram — replace with your image',
+          naturalWidth: 800,
+          naturalHeight: 600,
         },
-      ],
-      labels: [
-        { id: 'label_a', text: 'Label A' },
-        { id: 'label_b', text: 'Label B' },
-      ],
-      correctRegionByLabel: { label_a: 'region_a', label_b: 'region_b' },
-      attempts: 3,
-      lockCorrect: true,
-      showPerItemCorrectness: true,
-      showRegionOutlines: 'on_focus',
-    }
+        regions: [
+          {
+            id: 'region_a',
+            label: 'Region A',
+            description: 'Describe this region for learners who cannot see the image.',
+            shape: { kind: 'rect', x: 0.1, y: 0.1, w: 0.3, h: 0.25 },
+          },
+          {
+            id: 'region_b',
+            label: 'Region B',
+            description: 'Describe this second region with enough detail to identify it.',
+            shape: { kind: 'circle', cx: 0.7, cy: 0.5, r: 0.15 },
+          },
+        ],
+        labels: [
+          { id: 'label_a', text: 'Label A' },
+          { id: 'label_b', text: 'Label B' },
+        ],
+        correctRegionByLabel: { label_a: 'region_a', label_b: 'region_b' },
+        attempts: 3,
+        lockCorrect: true,
+        showPerItemCorrectness: true,
+        showRegionOutlines: 'on_focus',
+      }
+
+    case 'code_sandbox':
+      return {
+        language: 'python',
+        prompt: 'Write a short program that solves the task below.',
+        starterCode: '# Write your solution here\nprint("hello")\n',
+        sampleInput: '',
+        tests: [],
+        runLimitPerHour: 30,
+        checkLimitPerHour: 20,
+        editorMode: 'plain',
+        scoringMode: 'auto',
+      }
+
+    case 'worked_example':
+      return {
+        title: 'Worked example',
+        problem: 'Replace with the problem statement students will work through.',
+        variables: [],
+        blankPolicy: 'author',
+        attemptsPerStep: 3,
+        practiceOnly: true,
+        showAllSteps: false,
+        steps: [
+          {
+            id: 's1',
+            label: 'Step 1',
+            text: 'Describe the first step.',
+            blank: {
+              type: 'text',
+              acceptedAnswers: ['answer'],
+            },
+          },
+        ],
+      }
+
+    case 'parameter_explorer':
+      return {
+        prompt: 'Explore how changing parameters affects the model.',
+        parameters: [
+          { id: 'a', kind: 'number', label: 'a', min: -3, max: 3, step: 0.1, default: 1 },
+          { id: 'b', kind: 'number', label: 'b', min: -5, max: 5, step: 0.1, default: 0 },
+          { id: 'c', kind: 'number', label: 'c', min: -5, max: 5, step: 0.1, default: 0 },
+        ],
+        model: {
+          kind: 'preset',
+          preset: 'quadratic',
+          bind: { a: 'a', b: 'b', c: 'c' },
+        },
+        outputs: [
+          { kind: 'plot', label: 'Curve', xLabel: 'x', yLabel: 'y' },
+          { kind: 'readout', label: 'Values' },
+        ],
+        noticingPrompts: [],
+        requireAllCheckpoints: false,
+      }
+
+    case 'media_checkpoints':
+      return {
+        media: {
+          source: 'course_file',
+          fileId: 'replace-with-course-file-id',
+          kind: 'video',
+          durationSec: 60,
+        },
+        transcriptSource: 'inline',
+        transcriptMarkdown: 'Replace with a transcript or caption text for accessibility.',
+        preventSkipPastUnanswered: false,
+        practiceOnly: true,
+        checkpoints: [
+          {
+            id: 'c1',
+            atSec: 15,
+            required: true,
+            attempts: 2,
+            showFeedback: true,
+            question: {
+              type: 'single',
+              prompt: 'What is the main idea so far?',
+              options: [
+                { id: 'a', text: 'Option A', correct: true },
+                { id: 'b', text: 'Option B', correct: false },
+              ],
+            },
+          },
+        ],
+      }
+
+    default:
+      return {}
   }
-  return {}
 }
 
 function throwContentToolsConfigError(raw: unknown): never {

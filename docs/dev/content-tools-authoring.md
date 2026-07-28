@@ -25,8 +25,9 @@ unknown `ai.featureId`).
    The framework strips those fields for non-instructors — do not rely on the
    renderer to hide them.
 4. Add a client renderer under `clients/web/src/components/content-tools/tools/`
-   (CT.2 authoring UI / CT.3 student runtime). CT.2 ships the Tools dropdown and
-   generic config form; student rendering lands in CT.3.
+   (CT.2 authoring UI / CT.3 student runtime). CT.2 ships the section toolbar
+   Tools dropdown, the add-section Content | Tool menu, and the generic config
+   form; student rendering lands in CT.3.
 5. Run `go test ./internal/service/contenttools -run TestRegistryContract`.
 
 ## Immutability
@@ -37,6 +38,7 @@ repurposing an existing one. Version bumps use semver in the manifest;
 
 ## Course flag
 
-Tools are inert until an instructor sets `contentToolsEnabled` on the course.
+Tools are on by default for new courses (`content_tools_enabled` DEFAULT TRUE).
+Instructors can disable `contentToolsEnabled` per course in Features settings.
 Ops may engage `CONTENT_TOOLS_KILL_SWITCH=on` to force every `/content-tools/*`
 route to HTTP 404 without flipping individual courses.

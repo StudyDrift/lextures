@@ -86,7 +86,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const interactiveQuizzesEnabled = course.interactiveQuizzesEnabled === true
   const screenShareEnabled = course.screenShareEnabled === true
   const adaptiveContentEnabled = course.adaptiveContentEnabled === true
-  const contentToolsEnabled = course.contentToolsEnabled === true
+  const contentToolsEnabled = course.contentToolsEnabled !== false
   const canvasGradeSyncEnabled = course.canvasGradeSyncEnabled === true
 
   const [aceSettings, setAceSettings] = useState<AdaptiveContentSettings | null>(null)

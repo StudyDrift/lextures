@@ -93,6 +93,7 @@ export const SEEDED_COURSE_FEATURE_BASELINE: Partial<Record<CourseFeatureKey, bo
   collabDocsEnabled: true,
   groupSpacesEnabled: true,
   sectionsEnabled: true,
+  contentToolsEnabled: true,
 }
 
 export const COURSE_FEATURE_MATRIX: readonly CourseFeatureMatrixEntry[] = [
@@ -105,7 +106,7 @@ export const COURSE_FEATURE_MATRIX: readonly CourseFeatureMatrixEntry[] = [
   {
     key: 'contentToolsEnabled',
     uiLabel: 'Content Tools',
-    uiDefaultOn: false,
+    uiDefaultOn: true,
     uiShard: 'a',
   },
   {

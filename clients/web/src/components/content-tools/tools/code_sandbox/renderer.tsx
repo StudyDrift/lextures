@@ -45,10 +45,11 @@ export default function CodeSandboxRenderer({
   const [unavailable, setUnavailable] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
 
+  // Prefer CodeMirror (rich) unless the author forced plain or the learner opted into plain.
   const effectiveEditorMode: 'rich' | 'plain' = useMemo(() => {
     if (authorEditorMode === 'plain') return 'plain'
-    if (authorEditorMode === 'rich') return st.editorMode === 'plain' ? 'plain' : 'rich'
-    return st.editorMode === 'rich' ? 'rich' : 'plain'
+    if (st.editorMode === 'plain') return 'plain'
+    return 'rich'
   }, [authorEditorMode, st.editorMode])
 
   useEffect(() => {
@@ -193,20 +194,31 @@ export default function CodeSandboxRenderer({
   const runsLeft = Math.max(0, (cfg.runLimitPerHour ?? 30) - (st.rate?.runs ?? 0))
   const checksLeft = Math.max(0, (cfg.checkLimitPerHour ?? 20) - (st.rate?.checks ?? 0))
 
+  const secondaryBtn =
+    'rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
+  const primaryBtn =
+    'rounded-lg bg-indigo-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400'
+  const checkBtn =
+    'rounded-lg bg-emerald-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-500 dark:hover:bg-emerald-400'
+
   return (
-    <div className="space-y-3" data-content-tool="code_sandbox" data-testid="code-sandbox">
+    <div className="space-y-4" data-content-tool="code_sandbox" data-testid="code-sandbox">
       {prompt ? (
-        <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">{prompt}</div>
+        <div className="text-[15px] leading-relaxed text-slate-800 whitespace-pre-wrap dark:text-neutral-100">
+          {prompt}
+        </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-neutral-400">
-        <span className="rounded bg-slate-100 px-2 py-0.5 font-mono uppercase dark:bg-neutral-800">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wide text-slate-700 dark:bg-neutral-800 dark:text-neutral-200">
           {language}
         </span>
-        <span>{t('contentTools.tools.code_sandbox.lineCount', { count: lineCount(code) })}</span>
+        <span className="text-slate-500 dark:text-neutral-400">
+          {t('contentTools.tools.code_sandbox.lineCount', { count: lineCount(code) })}
+        </span>
         <button
           type="button"
-          className="underline"
+          className="rounded-md px-1.5 py-0.5 font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
           onClick={() => setHelpOpen((v) => !v)}
           aria-expanded={helpOpen}
           aria-controls={helpId}
@@ -215,7 +227,10 @@ export default function CodeSandboxRenderer({
         </button>
       </div>
       {helpOpen ? (
-        <p id={helpId} className="text-xs text-slate-600 dark:text-neutral-400">
+        <p
+          id={helpId}
+          className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+        >
           {t('contentTools.tools.code_sandbox.keyboardHelpBody')}
         </p>
       ) : null}
@@ -230,12 +245,12 @@ export default function CodeSandboxRenderer({
         describedBy={helpOpen ? helpId : undefined}
       />
 
-      <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+      <label className="block space-y-1.5">
+        <span className="text-xs font-semibold text-slate-700 dark:text-neutral-300">
           {t('contentTools.tools.code_sandbox.stdin')}
         </span>
         <textarea
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 shadow-sm outline-none focus-visible:border-indigo-400 focus-visible:ring-2 focus-visible:ring-indigo-500/30 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus-visible:border-indigo-500"
           rows={2}
           disabled={readOnly || busy}
           value={stdin}
@@ -248,7 +263,7 @@ export default function CodeSandboxRenderer({
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          className="rounded bg-sky-700 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+          className={primaryBtn}
           disabled={busy || readOnly || unavailable}
           onClick={() => void doRun()}
           data-testid="code-sandbox-run"
@@ -258,7 +273,7 @@ export default function CodeSandboxRenderer({
         {hasTests ? (
           <button
             type="button"
-            className="rounded bg-emerald-700 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            className={checkBtn}
             disabled={busy || readOnly || unavailable}
             onClick={() => void doCheck()}
             data-testid="code-sandbox-check"
@@ -268,7 +283,7 @@ export default function CodeSandboxRenderer({
         ) : null}
         <button
           type="button"
-          className="rounded border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+          className={secondaryBtn}
           disabled={busy || readOnly}
           onClick={() => void doResetCode()}
           data-testid="code-sandbox-reset"
@@ -278,7 +293,7 @@ export default function CodeSandboxRenderer({
         {authorEditorMode === 'user_choice' || authorEditorMode === 'rich' ? (
           <button
             type="button"
-            className="rounded border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+            className={secondaryBtn}
             disabled={readOnly}
             onClick={toggleEditorMode}
             data-testid="code-sandbox-editor-mode"
@@ -288,18 +303,29 @@ export default function CodeSandboxRenderer({
               : t('contentTools.tools.code_sandbox.usePlainEditor')}
           </button>
         ) : null}
-        <span className="text-xs text-slate-500" data-testid="code-sandbox-limits">
+        <span
+          className="text-xs text-slate-500 dark:text-neutral-400"
+          data-testid="code-sandbox-limits"
+        >
           {t('contentTools.tools.code_sandbox.remaining', { runs: runsLeft, checks: checksLeft })}
         </span>
       </div>
 
       {rateMessage ? (
-        <p className="text-sm text-amber-800 dark:text-amber-200" role="status" data-testid="code-sandbox-rate-limit">
+        <p
+          className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100"
+          role="status"
+          data-testid="code-sandbox-rate-limit"
+        >
           {rateMessage}
         </p>
       ) : null}
       {unavailable ? (
-        <p className="text-sm text-rose-700 dark:text-rose-300" role="status" data-testid="code-sandbox-unavailable">
+        <p
+          className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-200"
+          role="status"
+          data-testid="code-sandbox-unavailable"
+        >
           {t('contentTools.tools.code_sandbox.runnerUnavailable')}
         </p>
       ) : null}
@@ -317,9 +343,9 @@ export default function CodeSandboxRenderer({
         t={t}
       />
 
-      <footer className="flex flex-wrap gap-3 text-xs text-slate-500 dark:text-neutral-500">
+      <footer className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-neutral-800 dark:text-neutral-500">
         {st.best ? (
-          <span data-testid="code-sandbox-best">
+          <span className="font-medium text-slate-600 dark:text-neutral-300" data-testid="code-sandbox-best">
             {t('contentTools.tools.code_sandbox.best', {
               passed: st.best.passed,
               total: st.best.total,
