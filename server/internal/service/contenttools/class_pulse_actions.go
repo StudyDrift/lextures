@@ -3,10 +3,13 @@ package contenttools
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus"
 
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
@@ -335,10 +338,89 @@ func cloneMap(in map[string]any) map[string]any {
 	return out
 }
 
-// GuardClassPulseStatePut refuses vote mutations via PUT (AC-4 / FR-8).
+// GuardStatePut refuses vote mutations via PUT (AC-4 / FR-8).
 func GuardClassPulseStatePut(toolID string, current, next json.RawMessage) (blocked bool, message string) {
 	if toolID != class_pulse.ID {
 		return false, ""
 	}
 	return class_pulse.GuardStatePut(current, next)
+}
+
+var (
+	classPulseMetricsOnce sync.Once
+
+	classPulseVotesTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_votes_total",
+		Help:      "Class Pulse vote outcomes by round and outcome (CT.21).",
+	}, []string{"round", "outcome"})
+
+	classPulseSuppressionHitsTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_class_pulse_suppression_hits_total",
+		Help:      "Class Pulse aggregate responses withheld for small-n (CT.21).",
+	})
+
+	classPulseAggregateCacheHitsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_class_pulse_aggregate_cache_total",
+		Help:      "Class Pulse aggregate cache hits/misses (CT.21).",
+	}, []string{"result"})
+
+	classPulseRevoteShiftMagnitude = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: "lextures",
+		Name:      "content_tool_class_pulse_revote_shift_magnitude",
+		Help:      "Fraction of round-2 voters who changed option (CT.21).",
+		Buckets:   []float64{0, 0.1, 0.25, 0.5, 0.75, 1},
+	})
+)
+
+func registerClassPulseMetrics() {
+	classPulseMetricsOnce.Do(func() {
+		prometheus.MustRegister(
+			classPulseVotesTotal,
+			classPulseSuppressionHitsTotal,
+			classPulseAggregateCacheHitsTotal,
+			classPulseRevoteShiftMagnitude,
+		)
+		classPulseVotesTotal.WithLabelValues("1", "_reserved").Add(0)
+		classPulseAggregateCacheHitsTotal.WithLabelValues("_reserved").Add(0)
+	})
+}
+
+// ObserveClassPulseVote increments lextures_content_tool_votes_total{round,outcome}.
+func ObserveClassPulseVote(round int, outcome string) {
+	registerClassPulseMetrics()
+	if outcome == "" {
+		outcome = "_unknown"
+	}
+	classPulseVotesTotal.WithLabelValues(strconv.Itoa(round), outcome).Inc()
+}
+
+// ObserveClassPulseSuppressionHit increments small-n suppression counter.
+func ObserveClassPulseSuppressionHit() {
+	registerClassPulseMetrics()
+	classPulseSuppressionHitsTotal.Inc()
+}
+
+// ObserveClassPulseAggregateCache records cache hit/miss.
+func ObserveClassPulseAggregateCache(hit bool) {
+	registerClassPulseMetrics()
+	if hit {
+		classPulseAggregateCacheHitsTotal.WithLabelValues("hit").Inc()
+	} else {
+		classPulseAggregateCacheHitsTotal.WithLabelValues("miss").Inc()
+	}
+}
+
+// ObserveClassPulseRevoteShift records the fraction of revoters who changed option.
+func ObserveClassPulseRevoteShift(magnitude float64) {
+	registerClassPulseMetrics()
+	if magnitude < 0 {
+		magnitude = 0
+	}
+	if magnitude > 1 {
+		magnitude = 1
+	}
+	classPulseRevoteShiftMagnitude.Observe(magnitude)
 }

@@ -1,8 +1,6 @@
 package class_pulse
 
 import (
-	"encoding/json"
-
 	"github.com/google/uuid"
 
 	"github.com/lextures/lextures/server/internal/service/contenttools/analytics"
@@ -88,14 +86,4 @@ func BuildShift(rows []VoteRow, sectionFilter *uuid.UUID) []ShiftCell {
 		out = append(out, ShiftCell{From: k.from, To: k.to, Count: n})
 	}
 	return out
-}
-
-// RowsFromStateBlobs adapts raw state JSON (+ metadata) into VoteRows.
-func RowsFromStateBlobs(enrollmentID uuid.UUID, role string, sectionID *uuid.UUID, stateJSON json.RawMessage) VoteRow {
-	return VoteRow{
-		EnrollmentID: enrollmentID,
-		Role:         role,
-		SectionID:    sectionID,
-		State:        ParseState(stateJSON),
-	}
 }
