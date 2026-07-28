@@ -78,7 +78,6 @@ func TestInlineDiscussionFilterBlockPreservesDraft(t *testing.T) {
 	m := reg.Get(inline_discussion.ID)
 	cfg, _ := json.Marshal(map[string]any{"prompt": "Discuss."})
 	st, _ := json.Marshal(inline_discussion.EmptyState())
-	// boardfilter blocks common profanity; use a term known to Match.
 	in, _ := json.Marshal(map[string]any{"text": "this is fucking awful", "idempotencyKey": "k1"})
 	res, err := contenttools.DispatchAction(m, "post", contenttools.ActionContext{
 		ConfigJSON:   cfg,
@@ -90,18 +89,13 @@ func TestInlineDiscussionFilterBlockPreservesDraft(t *testing.T) {
 		t.Fatal(err)
 	}
 	if res.Result["error"] != "filtered" {
-		// Without pool, filtered returns before DB; if filter didn't match, we get DB error.
-		if res.Result["error"] == nil && err == nil {
-			// Post may have failed for DB — either filtered or error from handler.
-		}
+		t.Fatalf("want filtered, got %#v", res.Result)
 	}
-	if res.Result["error"] == "filtered" {
-		if res.Result["preserveInput"] != true {
-			t.Fatalf("preserveInput: %#v", res.Result)
-		}
-		if res.StatePatch != nil {
-			t.Fatal("blocked post must not write state")
-		}
+	if res.Result["preserveInput"] != true {
+		t.Fatalf("preserveInput: %#v", res.Result)
+	}
+	if res.StatePatch != nil {
+		t.Fatal("blocked post must not write state")
 	}
 }
 
