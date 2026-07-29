@@ -1,0 +1,155 @@
+package courseexportimport
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/google/uuid"
+
+	modelcourse "github.com/lextures/lextures/server/internal/models/course"
+	"github.com/lextures/lextures/server/internal/models/courseexport"
+	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursemoduleexternallinks"
+	"github.com/lextures/lextures/server/internal/repos/coursestructure"
+)
+
+func validateExportPayload(ex *Bundle) error {
+	if ex.FormatVersion != exportFormatVersion {
+		return InvalidInput("Unsupported export formatVersion (expected 1).")
+	}
+	if strings.TrimSpace(ex.CourseCode) == "" {
+		return InvalidInput("Export is missing courseCode.")
+	}
+	scaleOK := false
+	for _, s := range modelcourse.GradingScales {
+		if s == strings.TrimSpace(ex.Grading.GradingScale) {
+			scaleOK = true
+			break
+		}
+	}
+	if !scaleOK {
+		return InvalidInput("Invalid grading scale in export.")
+	}
+	for _, g := range ex.Grading.AssignmentGroups {
+		if strings.TrimSpace(g.Name) == "" {
+			return InvalidInput("Each assignment group in the export needs a name.")
+		}
+	}
+	if err := validateSyllabusSections(toRepoSyllabus(ex.Syllabus)); err != nil {
+		return err
+	}
+	if err := validateStructureExport(ex.Structure); err != nil {
+		return err
+	}
+	for id, body := range ex.ContentPages {
+		if len(body.Markdown) > maxModuleContentMarkdownLen {
+			return InvalidInput(fmt.Sprintf("Content page %s markdown is too long.", id))
+		}
+	}
+	for id, body := range ex.Assignments {
+		if len(body.Markdown) > maxModuleContentMarkdownLen {
+			return InvalidInput(fmt.Sprintf("Assignment %s markdown is too long.", id))
+		}
+	}
+	for id, body := range ex.Quizzes {
+		if len(body.Markdown) > maxModuleContentMarkdownLen {
+			return InvalidInput(fmt.Sprintf("Quiz %s markdown is too long.", id))
+		}
+	}
+	for _, it := range ex.Structure {
+		if it.Kind != "external_link" {
+			continue
+		}
+		if it.ExternalURL == nil {
+			continue
+		}
+		t := strings.TrimSpace(*it.ExternalURL)
+		if t == "" {
+			continue
+		}
+		if _, err := coursemoduleexternallinks.ValidateExternalHTTPURL(t); err != nil {
+			return InvalidInput(err.Error())
+		}
+	}
+	return validateExportEnrollments(ex.Enrollments)
+}
+
+func validateSyllabusSections(sections []course.SyllabusSection) error {
+	if len(sections) > maxSyllabusSections {
+		return InvalidInput(fmt.Sprintf("Too many sections (max %d).", maxSyllabusSections))
+	}
+	for _, s := range sections {
+		if strings.TrimSpace(s.ID) == "" {
+			return InvalidInput("Each section needs an id.")
+		}
+		if len(s.Heading) > maxSyllabusHeadingLen {
+			return InvalidInput("Section heading is too long.")
+		}
+		if len(s.Markdown) > maxSyllabusMarkdownLen {
+			return InvalidInput("Section content is too long.")
+		}
+	}
+	return nil
+}
+
+func validateStructureExport(items []coursestructure.ItemResponse) error {
+	allowed := map[string]struct{}{
+		"module": {}, "heading": {}, "content_page": {}, "assignment": {}, "quiz": {}, "external_link": {},
+	}
+	seen := map[uuid.UUID]struct{}{}
+	for _, it := range items {
+		if _, ok := allowed[it.Kind]; !ok {
+			return InvalidInput(fmt.Sprintf("Unsupported structure kind: %s.", it.Kind))
+		}
+		id, err := uuid.Parse(it.ID)
+		if err != nil {
+			return InvalidInput("Invalid structure item id.")
+		}
+		if it.ParentID != nil && *it.ParentID != "" {
+			pid, err := uuid.Parse(*it.ParentID)
+			if err != nil {
+				return InvalidInput("Invalid structure parent id.")
+			}
+			if _, ok := seen[pid]; !ok {
+				return InvalidInput("Structure items must be ordered so each parent appears before its children.")
+			}
+		} else if it.Kind != "module" {
+			return InvalidInput("Only modules may have a null parent.")
+		}
+		if _, ok := seen[id]; ok {
+			return InvalidInput("Duplicate structure item id.")
+		}
+		seen[id] = struct{}{}
+	}
+	return nil
+}
+
+func validateExportEnrollments(rows []courseexport.ExportedCourseEnrollment) error {
+	if len(rows) > maxExportEnrollments {
+		return InvalidInput(fmt.Sprintf("Too many enrollments in export (max %d).", maxExportEnrollments))
+	}
+	for _, row := range rows {
+		e := strings.ToLower(strings.TrimSpace(row.Email))
+		if e == "" || !strings.Contains(e, "@") || len(e) > maxEnrollmentEmailLen {
+			return InvalidInput("Each enrollment needs a valid email address.")
+		}
+		role := strings.TrimSpace(row.Role)
+		if role != "student" && role != "instructor" && role != "teacher" && role != "ta" &&
+			role != "designer" && role != "observer" && role != "auditor" && role != "librarian" && role != "owner" {
+			return InvalidInput(fmt.Sprintf("Invalid enrollment role `%s`.", role))
+		}
+		if row.InstructorGrantRole != nil {
+			g := strings.TrimSpace(*row.InstructorGrantRole)
+			if g != "" && g != "Teacher" && g != "TA" {
+				return InvalidInput("instructorGrantRole must be Teacher or TA when set.")
+			}
+			if g != "" && role != "instructor" {
+				return InvalidInput("instructorGrantRole may only be set when role is instructor.")
+			}
+		}
+		if row.DisplayName != nil && len(*row.DisplayName) > maxEnrollmentDisplayNameLen {
+			return InvalidInput(fmt.Sprintf("Enrollment display name is too long (max %d).", maxEnrollmentDisplayNameLen))
+		}
+	}
+	return nil
+}

@@ -40,7 +40,7 @@ func (e ValidationError) Error() string {
 }
 
 var (
-	keyPattern = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
+	keyPattern   = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
 	reservedKeys = map[string]struct{}{
 		"email": {}, "first_name": {}, "last_name": {}, "role": {}, "external_id": {},
 		"id": {}, "org_id": {}, "created_at": {}, "updated_at": {}, "status": {},
@@ -410,19 +410,6 @@ func (s *Service) SetCourseValues(ctx context.Context, orgID, courseID uuid.UUID
 		return nil, nil, err
 	}
 	return merged, nil, nil
-}
-
-// GetCourseValues returns filtered custom fields for a course.
-func (s *Service) GetCourseValues(ctx context.Context, orgID, courseID uuid.UUID, audience Audience, includeDeleted bool) (map[string]any, error) {
-	raw, err := cfrepo.GetCourseCustomFields(ctx, s.pool, orgID, courseID)
-	if err != nil {
-		return nil, err
-	}
-	defs, err := cfrepo.ListDefinitions(ctx, s.pool, orgID, cfrepo.EntityCourse, includeDeleted)
-	if err != nil {
-		return nil, err
-	}
-	return FilterValues(raw, defs, audience, includeDeleted), nil
 }
 
 // SetEnrollmentValues validates and stores enrollment custom fields.

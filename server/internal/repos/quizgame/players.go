@@ -535,26 +535,6 @@ func KickPlayer(ctx context.Context, pool *pgxpool.Pool, sessionID, playerID str
 	return BanPlayer(ctx, pool, sessionID, playerID)
 }
 
-// AddPlayerScore increments total_score and optionally streak.
-func AddPlayerScore(ctx context.Context, tx pgx.Tx, playerID string, points int, correct bool) error {
-	id, err := uuid.Parse(playerID)
-	if err != nil {
-		return err
-	}
-	if correct {
-		_, err = tx.Exec(ctx, `
-			UPDATE quizgame.session_players
-			SET total_score = total_score + $2, streak = streak + 1
-			WHERE id = $1`, id, points)
-	} else {
-		_, err = tx.Exec(ctx, `
-			UPDATE quizgame.session_players
-			SET total_score = total_score + $2, streak = 0
-			WHERE id = $1`, id, points)
-	}
-	return err
-}
-
 // SetPlayerScoreAndStreak adds points and sets the absolute streak (IQ.5 / shield).
 func SetPlayerScoreAndStreak(ctx context.Context, tx pgx.Tx, playerID string, points, streakAfter int) error {
 	id, err := uuid.Parse(playerID)

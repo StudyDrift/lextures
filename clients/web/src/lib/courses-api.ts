@@ -1867,6 +1867,45 @@ export async function fetchContentToolInstanceUsage(
   return parseApiResponse('fetchContentToolInstanceUsage', toolInstanceUsageSchema, raw)
 }
 
+/** Draft question shape returned by Inline Questions Build with AI (not persisted until config save). */
+export type DraftInlineQuestion = {
+  id: string
+  type: string
+  prompt: string
+  options?: Array<{ id: string; text: string; correct?: boolean; feedback?: string }>
+  acceptedAnswers?: string[]
+  correctValue?: number
+  tolerance?: { kind: 'absolute' | 'relative'; value: number }
+  unit?: string
+  explanation?: string
+  points?: number
+}
+
+/** POST `.../content-tools/instances/{instanceId}/build-with-ai` — draft Inline Questions from host page content. */
+export async function buildInlineQuestionsWithAI(
+  courseCode: string,
+  instanceId: string,
+  body?: { pageMarkdown?: string; questionCount?: number },
+): Promise<{ label?: string; questions: DraftInlineQuestion[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/content-tools/instances/${encodeURIComponent(instanceId)}/build-with-ai`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...(body?.pageMarkdown !== undefined ? { pageMarkdown: body.pageMarkdown } : {}),
+        ...(body?.questionCount !== undefined ? { questionCount: body.questionCount } : {}),
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = raw as { label?: unknown; questions?: unknown }
+  const questions = Array.isArray(o.questions) ? (o.questions as DraftInlineQuestion[]) : []
+  const label = typeof o.label === 'string' && o.label.trim() ? o.label.trim() : undefined
+  return { label, questions }
+}
+
 export async function fetchContentToolManifest(
   courseCode: string,
   toolId: string,

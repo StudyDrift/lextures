@@ -19,10 +19,10 @@ import (
 const (
 	GeneratedBy = "lextures-ai"
 
-	ComponentLessonPlan       = "lesson_plan"
-	ComponentQuiz             = "quiz"
-	ComponentRubric           = "rubric"
-	ComponentActivityPrefix   = "activity_"
+	ComponentLessonPlan     = "lesson_plan"
+	ComponentQuiz           = "quiz"
+	ComponentRubric         = "rubric"
+	ComponentActivityPrefix = "activity_"
 )
 
 var validDifferentiationLevels = map[string]bool{
@@ -108,10 +108,10 @@ type Prompts struct {
 
 // GenerateOptions configures a full or partial generation run.
 type GenerateOptions struct {
-	ModelID    string
-	Prompts    Prompts
-	OnlyKeys   []string // empty = all components
-	ForceFail  map[string]error // test hook: force component failure
+	ModelID   string
+	Prompts   Prompts
+	OnlyKeys  []string         // empty = all components
+	ForceFail map[string]error // test hook: force component failure
 }
 
 // ValidateInput checks required fields on instructor input.
@@ -433,12 +433,6 @@ func chatJSON(ctx context.Context, client aiprovider.ScopedCompleter, model, sys
 	text = strings.TrimPrefix(text, "```")
 	text = strings.TrimSuffix(text, "```")
 	return strings.TrimSpace(text), nil
-}
-
-// RegenerateComponent re-runs a single component and merges it into the package.
-func RegenerateComponent(ctx context.Context, client aiprovider.ScopedCompleter, input InputParams, pkg PackageResult, componentKey string, opts GenerateOptions) (PackageResult, error) {
-	opts.OnlyKeys = []string{componentKey}
-	return Generate(ctx, client, input, pkg, opts), nil
 }
 
 // MarshalPackage serializes a package for DB storage.

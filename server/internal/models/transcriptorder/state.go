@@ -10,16 +10,16 @@ import (
 type OrderStatus string
 
 const (
-	OrderDraft           OrderStatus = "draft"
-	OrderPendingConsent  OrderStatus = "pending_consent"
-	OrderPendingPayment  OrderStatus = "pending_payment"
-	OrderInReview        OrderStatus = "in_review"
-	OrderOnHold          OrderStatus = "on_hold"
-	OrderProcessing      OrderStatus = "processing"
-	OrderCompleted       OrderStatus = "completed"
-	OrderCanceled        OrderStatus = "canceled"
-	OrderRejected        OrderStatus = "rejected"
-	OrderFailed          OrderStatus = "failed" // legacy terminal
+	OrderDraft          OrderStatus = "draft"
+	OrderPendingConsent OrderStatus = "pending_consent"
+	OrderPendingPayment OrderStatus = "pending_payment"
+	OrderInReview       OrderStatus = "in_review"
+	OrderOnHold         OrderStatus = "on_hold"
+	OrderProcessing     OrderStatus = "processing"
+	OrderCompleted      OrderStatus = "completed"
+	OrderCanceled       OrderStatus = "canceled"
+	OrderRejected       OrderStatus = "rejected"
+	OrderFailed         OrderStatus = "failed" // legacy terminal
 )
 
 // AllOrderStatuses is the closed set of order statuses.
@@ -90,17 +90,6 @@ func ParseOrderStatus(raw string) (OrderStatus, error) {
 		return OrderInReview, nil
 	default:
 		return "", fmt.Errorf("invalid order status %q", raw)
-	}
-}
-
-// ParseItemStatus validates and normalizes an item status string.
-func ParseItemStatus(raw string) (ItemStatus, error) {
-	s := ItemStatus(strings.ToLower(strings.TrimSpace(raw)))
-	switch s {
-	case ItemPending, ItemReady, ItemDelivering, ItemDelivered, ItemFailed, ItemCanceled:
-		return s, nil
-	default:
-		return "", fmt.Errorf("invalid item status %q", raw)
 	}
 }
 

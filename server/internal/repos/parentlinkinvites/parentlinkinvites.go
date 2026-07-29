@@ -105,27 +105,3 @@ WHERE id = $1 AND consumed_at IS NULL
 	}
 	return tag.RowsAffected() > 0, nil
 }
-
-// FindActiveByLinkID returns the unused invite for a link, or nil.
-func FindActiveByLinkID(ctx context.Context, pool *pgxpool.Pool, linkID uuid.UUID) (*Invite, error) {
-	var inv Invite
-	var invitedByOut *uuid.UUID
-	err := pool.QueryRow(ctx, `
-SELECT id, org_id, student_user_id, parent_user_id, link_id, email, invited_by, expires_at, consumed_at, created_at
-FROM "user".parent_link_invites
-WHERE link_id = $1 AND consumed_at IS NULL
-ORDER BY created_at DESC
-LIMIT 1
-`, linkID).Scan(
-		&inv.ID, &inv.OrgID, &inv.StudentUserID, &inv.ParentUserID, &inv.LinkID, &inv.Email,
-		&invitedByOut, &inv.ExpiresAt, &inv.ConsumedAt, &inv.CreatedAt,
-	)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	inv.InvitedBy = invitedByOut
-	return &inv, nil
-}

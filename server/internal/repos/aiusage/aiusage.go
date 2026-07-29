@@ -9,7 +9,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 const defaultProviderUnknown = "unknown"
@@ -62,27 +61,6 @@ INSERT INTO analytics.ai_usage_log
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 `, e.UserID, e.CourseID, feature, model, modelAlias, provider, e.PromptTokens, e.CompletionTokens, total, e.CostUSD, e.CostEstimated, e.Succeeded)
 	return err
-}
-
-// EntryFromUsage builds a log entry from an OpenRouter result (legacy helper).
-func EntryFromUsage(userID, courseID *uuid.UUID, feature, model string, usage openrouter.UsageInfo, succeeded bool) Entry {
-	return EntryFromProviderUsage(userID, courseID, feature, model, "openrouter", usage, succeeded)
-}
-
-// EntryFromProviderUsage builds a log entry with an explicit provider label.
-func EntryFromProviderUsage(userID, courseID *uuid.UUID, feature, model, provider string, usage openrouter.UsageInfo, succeeded bool) Entry {
-	return Entry{
-		UserID:           userID,
-		CourseID:         courseID,
-		Feature:          feature,
-		Model:            model,
-		Provider:         provider,
-		PromptTokens:     usage.PromptTokens,
-		CompletionTokens: usage.CompletionTokens,
-		TotalTokens:      usage.TotalTokens,
-		CostUSD:          usage.CostUSD,
-		Succeeded:        succeeded,
-	}
 }
 
 // EntryFromCallMeta builds a log entry from aiprovider CallMeta, applying cost estimation when needed (AP.6).

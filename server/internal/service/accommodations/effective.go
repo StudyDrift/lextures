@@ -53,22 +53,6 @@ func FromRow(r *studentaccommodations.Row) Effective {
 	}
 }
 
-// HasOperationalSettings is true if any non-default effect is in force.
-func (e Effective) HasOperationalSettings() bool {
-	return e.TimeMultiplier > 1.000001 ||
-		e.ExtraAttempts > 0 ||
-		e.HintsAlwaysEnabled ||
-		e.ReducedDistraction ||
-		e.HasDisplayAccommodations() ||
-		e.SeparateSetting ||
-		e.SpeechToTextEnabled
-}
-
-// HasDisplayAccommodations is true when any reading/display override is active.
-func (e Effective) HasDisplayAccommodations() bool {
-	return e.TTSEnabled || e.DyslexiaDisplay || e.HighContrast || e.ReducedMotion
-}
-
 // ResolveEffectiveForCourse prefers a course-specific row, else global, else zero defaults.
 func ResolveEffectiveForCourse(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID) (Effective, error) {
 	if r, err := studentaccommodations.FindActiveForCourse(ctx, pool, userID, courseID); err != nil {

@@ -64,24 +64,6 @@ func RationaleForModality(modality string) ProfileRationale {
 	}
 }
 
-// RationaleForHelpSeeking returns a profile rationale for tutor scaffolding adjustments.
-func RationaleForHelpSeeking(style string) ProfileRationale {
-	var text string
-	switch style {
-	case "early-reliance":
-		text = "Personalised because you often reach for hints early — I'll offer a nudge before a full hint"
-	case "independent":
-		text = "Personalised because you tend to work independently — I'll wait before offering hints"
-	default:
-		text = "Personalised because of how you seek help when stuck"
-	}
-	return ProfileRationale{
-		Text:       text,
-		FacetKey:   "learning_approach",
-		InsightKey: "help_seeking",
-	}
-}
-
 // MatchConcept returns the first concept name found in haystack (case-insensitive substring).
 func MatchConcept(haystack string, concepts []string) string {
 	lower := strings.ToLower(haystack)

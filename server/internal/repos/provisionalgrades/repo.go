@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -101,20 +100,4 @@ ON CONFLICT (submission_id, grader_id) DO UPDATE SET
 	updated_at = NOW()
 `, submissionID, graderID, score)
 	return err
-}
-
-// GetForSubmissionGrader returns one provisional grade row when present.
-func GetForSubmissionGrader(ctx context.Context, pool *pgxpool.Pool, submissionID, graderID uuid.UUID) (*ProvisionalGradeRow, error) {
-	if pool == nil {
-		return nil, errors.New("nil pool")
-	}
-	r, err := scanRow(pool.QueryRow(ctx, `
-SELECT id, submission_id, grader_id, score, rubric_data, submitted_at, created_at, updated_at
-FROM course.provisional_grades
-WHERE submission_id = $1 AND grader_id = $2
-`, submissionID, graderID))
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	return r, err
 }

@@ -143,38 +143,6 @@ LIMIT 1
 	return &t, nil
 }
 
-// EquivalentIDs returns all term IDs in the same org that share the selected term's name
-// (case-insensitive). Used so course filters still work if duplicate rows remain.
-func EquivalentIDs(ctx context.Context, pool *pgxpool.Pool, termID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := pool.Query(ctx, `
-SELECT t2.id
-FROM tenant.terms t1
-INNER JOIN tenant.terms t2
-  ON t2.org_id = t1.org_id
- AND lower(btrim(t2.name)) = lower(btrim(t1.name))
-WHERE t1.id = $1
-`, termID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		out = append(out, id)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	if len(out) == 0 {
-		return []uuid.UUID{termID}, nil
-	}
-	return out, nil
-}
-
 // Create inserts a term; status defaults to DeriveStatusFromDates when empty.
 // Returns ErrTermDuplicate when the org already has a term with the same name (case-insensitive).
 func Create(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, name, termType, startDate, endDate, status string) (*TermPublic, error) {

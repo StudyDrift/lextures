@@ -349,16 +349,3 @@ VALUES ($1, $2, '', $3)
 	}
 	return nil
 }
-
-// IsOfficialCourseID reports whether courseID is an official marketplace course.
-func IsOfficialCourseID(ctx context.Context, q interface {
-	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
-}, courseID uuid.UUID) (bool, error) {
-	var ok bool
-	err := q.QueryRow(ctx, `
-SELECT EXISTS (
-    SELECT 1 FROM course.courses WHERE id = $1 AND is_official = TRUE
-)
-`, courseID).Scan(&ok)
-	return ok, err
-}

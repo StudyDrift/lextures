@@ -248,11 +248,3 @@ SELECT org_id FROM tenant.licenses WHERE max_seats > 0`)
 func (s *Service) Reconcile(ctx context.Context) (int, error) {
 	return licenserepo.ReconcileAll(ctx, s.Pool)
 }
-
-// AfterSeatCountChange should be called after user activation changes when triggers are disabled in tests.
-func (s *Service) AfterSeatCountChange(ctx context.Context, orgID uuid.UUID) error {
-	if err := licenserepo.RefreshUsedSeats(ctx, s.Pool, orgID); err != nil {
-		return err
-	}
-	return s.MaybeSendUtilizationAlerts(ctx, orgID)
-}

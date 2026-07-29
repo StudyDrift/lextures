@@ -23,18 +23,6 @@ type MarketplaceListing struct {
 	PriceCurrency       string
 }
 
-// IsMarketplaceListed reports whether the course is opted into the in-app storefront.
-func IsMarketplaceListed(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (bool, error) {
-	var listed bool
-	err := pool.QueryRow(ctx, `
-SELECT marketplace_listed FROM course.courses WHERE id = $1
-`, courseID).Scan(&listed)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return false, nil
-	}
-	return listed, err
-}
-
 // IsStorefrontHeroReadable reports whether a course's hero image may be served without
 // enrollment — published courses that are marketplace-listed and/or publicly catalogued.
 func IsStorefrontHeroReadable(ctx context.Context, pool *pgxpool.Pool, courseCode string) (bool, error) {
@@ -112,30 +100,6 @@ SELECT hero_image_url FROM course.courses WHERE course_code = $1
 	want := strings.TrimSpace(*heroURL)
 	got := "/api/v1/courses/" + courseCode + "/course-files/" + fileID.String() + "/content"
 	return want == got, nil
-}
-
-// GetMarketplaceListing loads marketplace columns plus publish state and pricing.
-// Returns nil when the course does not exist.
-func GetMarketplaceListing(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (*MarketplaceListing, error) {
-	var m MarketplaceListing
-	err := pool.QueryRow(ctx, `
-SELECT id, marketplace_listed, marketplace_listed_at, published, price_cents, price_currency
-FROM course.courses WHERE id = $1
-`, courseID).Scan(
-		&m.CourseID,
-		&m.MarketplaceListed,
-		&m.MarketplaceListedAt,
-		&m.Published,
-		&m.PriceCents,
-		&m.PriceCurrency,
-	)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &m, nil
 }
 
 // IsMarketplaceListable reports whether the course may be listed (must be published).

@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/quizgame/engine"
 )
@@ -110,38 +109,6 @@ func ListTeams(ctx context.Context, pool *pgxpool.Pool, sessionID string) ([]Tea
 		out = append(out, t)
 	}
 	return out, rows.Err()
-}
-
-// AssignPlayerToTeam sets session_players.team_id.
-func AssignPlayerToTeam(ctx context.Context, pool *pgxpool.Pool, sessionID, playerID, teamID string) error {
-	sid, err := uuid.Parse(sessionID)
-	if err != nil {
-		return ErrSessionNotFound
-	}
-	pid, err := uuid.Parse(playerID)
-	if err != nil {
-		return ErrPlayerNotFound
-	}
-	tid, err := uuid.Parse(teamID)
-	if err != nil {
-		return ErrTeamNotFound
-	}
-	var ok bool
-	err = pool.QueryRow(ctx, `
-		SELECT EXISTS(SELECT 1 FROM quizgame.teams WHERE id = $1 AND session_id = $2)`, tid, sid).Scan(&ok)
-	if err != nil || !ok {
-		return ErrTeamNotFound
-	}
-	tag, err := pool.Exec(ctx, `
-		UPDATE quizgame.session_players SET team_id = $3
-		WHERE id = $1 AND session_id = $2 AND removed_at IS NULL`, pid, sid, tid)
-	if err != nil {
-		return err
-	}
-	if tag.RowsAffected() == 0 {
-		return ErrPlayerNotFound
-	}
-	return nil
 }
 
 // AssignPlayersInput is a bulk assign map playerId → teamId.
@@ -294,28 +261,4 @@ func TeamAlreadyAnswered(ctx context.Context, pool *pgxpool.Pool, sessionID, tea
 		WHERE r.session_id = $1 AND r.question_index = $2
 		  AND p.team_id = $3 AND p.removed_at IS NULL`, sid, questionIndex, tid).Scan(&n)
 	return n > 0, err
-}
-
-// GetTeam returns a team by id.
-func GetTeam(ctx context.Context, pool *pgxpool.Pool, teamID string) (*Team, error) {
-	id, err := uuid.Parse(teamID)
-	if err != nil {
-		return nil, ErrTeamNotFound
-	}
-	row := pool.QueryRow(ctx, `
-		SELECT id, session_id, name, color, total_score FROM quizgame.teams WHERE id = $1`, id)
-	var t Team
-	var tid, sid uuid.UUID
-	var color *string
-	err = row.Scan(&tid, &sid, &t.Name, &color, &t.TotalScore)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, ErrTeamNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	t.ID = tid.String()
-	t.SessionID = sid.String()
-	t.Color = color
-	return &t, nil
 }

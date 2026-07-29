@@ -50,14 +50,6 @@ DELETE FROM settings.device_push_tokens WHERE id = $1 AND user_id = $2
 	return err
 }
 
-// DeleteByToken removes a token string for the owner (logout deregister).
-func DeleteByToken(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, token string) error {
-	_, err := pool.Exec(ctx, `
-DELETE FROM settings.device_push_tokens WHERE user_id = $1 AND token = $2
-`, userID, token)
-	return err
-}
-
 // ListActiveForUser returns active tokens for push fan-out.
 func ListActiveForUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]Row, error) {
 	rows, err := pool.Query(ctx, `

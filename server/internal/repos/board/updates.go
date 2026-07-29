@@ -96,22 +96,6 @@ func getUpdatesSince(ctx context.Context, pool *pgxpool.Pool, boardID uuid.UUID,
 	return out, rows.Err()
 }
 
-// CountUpdatesSinceSnapshot returns how many updates exist after the latest snapshot.
-func CountUpdatesSinceSnapshot(ctx context.Context, pool *pgxpool.Pool, boardID uuid.UUID) (int, error) {
-	var n int
-	err := pool.QueryRow(ctx, `
-		SELECT COUNT(*)::int FROM board.board_updates u
-		WHERE u.board_id = $1
-		  AND (
-		    NOT EXISTS (SELECT 1 FROM board.board_snapshots s WHERE s.board_id = $1)
-		    OR u.created_at > (
-		      SELECT MAX(taken_at) FROM board.board_snapshots WHERE board_id = $1
-		    )
-		  )
-	`, boardID).Scan(&n)
-	return n, err
-}
-
 // ListBoardIDsNeedingCompaction returns boards with enough append-only updates to compact.
 func ListBoardIDsNeedingCompaction(ctx context.Context, pool *pgxpool.Pool, threshold, limit int) ([]uuid.UUID, error) {
 	if threshold < 1 {

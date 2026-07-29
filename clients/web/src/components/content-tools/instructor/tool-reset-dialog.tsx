@@ -44,6 +44,16 @@ export function ToolResetDialog({
   const [error, setError] = useState<string | null>(null)
   const [jobId, setJobId] = useState<string | null>(null)
 
+  const needsEnrollment =
+    scope === 'instance_enrollment' ||
+    scope === 'item_enrollment' ||
+    scope === 'course_enrollment'
+  const needsItem = scope === 'item_enrollment' || scope === 'item_all'
+  const scopeReady =
+    Boolean(instanceId) &&
+    (!needsEnrollment || Boolean(enrollmentId)) &&
+    (!needsItem || Boolean(itemId))
+
   useEffect(() => {
     if (!open) return
     setScope(enrollmentId ? 'instance_enrollment' : defaultScope)
@@ -60,6 +70,20 @@ export function ToolResetDialog({
   useEffect(() => {
     if (!open) return
     let cancelled = false
+    setPreview(null)
+    if (!scopeReady) {
+      setBusy(false)
+      if (needsEnrollment && !enrollmentId) {
+        setError(t('contentTools.reset.errors.enrollmentRequired'))
+      } else if (needsItem && !itemId) {
+        setError(t('contentTools.reset.errors.itemRequired'))
+      } else {
+        setError(null)
+      }
+      return () => {
+        cancelled = true
+      }
+    }
     setBusy(true)
     setError(null)
     const body: ContentToolResetRequest = {
@@ -70,12 +94,7 @@ export function ToolResetDialog({
       postHandling,
       schedulingHandling,
       ...(itemId ? { itemId } : {}),
-      ...(enrollmentId &&
-      (scope === 'instance_enrollment' ||
-        scope === 'item_enrollment' ||
-        scope === 'course_enrollment')
-        ? { enrollmentId }
-        : {}),
+      ...(enrollmentId && needsEnrollment ? { enrollmentId } : {}),
       ...(reason.trim() ? { reason: reason.trim() } : {}),
     }
     void postContentToolStateReset(courseCode, body)
@@ -91,7 +110,22 @@ export function ToolResetDialog({
     return () => {
       cancelled = true
     }
-  }, [open, courseCode, instanceId, itemId, enrollmentId, scope, notify, reason, postHandling, schedulingHandling])
+  }, [
+    open,
+    courseCode,
+    instanceId,
+    itemId,
+    enrollmentId,
+    scope,
+    notify,
+    reason,
+    postHandling,
+    schedulingHandling,
+    scopeReady,
+    needsEnrollment,
+    needsItem,
+    t,
+  ])
 
   if (!open) return null
 
@@ -100,6 +134,7 @@ export function ToolResetDialog({
   const confirmOk = !needsTypedConfirm || confirmText.trim().toUpperCase() === 'RESET'
 
   async function execute() {
+    if (!scopeReady || affected === 0) return
     setBusy(true)
     setError(null)
     try {
@@ -112,12 +147,7 @@ export function ToolResetDialog({
         schedulingHandling,
         idempotencyKey: crypto.randomUUID(),
         ...(itemId ? { itemId } : {}),
-        ...(enrollmentId &&
-        (scope === 'instance_enrollment' ||
-          scope === 'item_enrollment' ||
-          scope === 'course_enrollment')
-          ? { enrollmentId }
-          : {}),
+        ...(enrollmentId && needsEnrollment ? { enrollmentId } : {}),
         ...(reason.trim() ? { reason: reason.trim() } : {}),
       }
       const res = await postContentToolStateReset(courseCode, body)
@@ -173,6 +203,7 @@ export function ToolResetDialog({
             value={scope}
             onChange={setScope}
             allowItem={Boolean(itemId)}
+            allowEnrollment={Boolean(enrollmentId)}
             allowCourse
           />
           <label className="block text-sm">
@@ -242,7 +273,9 @@ export function ToolResetDialog({
           </fieldset>
           {preview ? (
             <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:bg-amber-950/40 dark:text-amber-100">
-              {t('contentTools.reset.dryRunPreview', { count: affected })}
+              {affected === 0
+                ? t('contentTools.reset.dryRunPreviewEmpty')
+                : t('contentTools.reset.dryRunPreview', { count: affected })}
             </p>
           ) : null}
           {needsTypedConfirm ? (
@@ -288,7 +321,12 @@ export function ToolResetDialog({
             <button
               type="button"
               className="rounded-md bg-rose-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
-              disabled={busy || !preview || !confirmOk || affected === 0}
+              disabled={busy || !scopeReady || !preview || !confirmOk || affected === 0}
+              title={
+                affected === 0 && preview
+                  ? t('contentTools.reset.dryRunPreviewEmpty')
+                  : undefined
+              }
               onClick={() => void execute()}
             >
               {t('contentTools.reset.confirm')}

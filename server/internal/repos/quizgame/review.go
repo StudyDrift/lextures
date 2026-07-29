@@ -62,42 +62,6 @@ func EnqueueCatalogSubmission(ctx context.Context, pool *pgxpool.Pool, kitID str
 	return &item, nil
 }
 
-// EnqueueReportedContent adds a reported-content review item.
-func EnqueueReportedContent(ctx context.Context, pool *pgxpool.Pool, kitID, sessionID *string, detail map[string]any) (*ModerationQueueItem, error) {
-	var kid, sid any
-	if kitID != nil {
-		id, err := uuid.Parse(*kitID)
-		if err != nil {
-			return nil, fmt.Errorf("quizgame: invalid kit id")
-		}
-		kid = id
-	}
-	if sessionID != nil {
-		id, err := uuid.Parse(*sessionID)
-		if err != nil {
-			return nil, fmt.Errorf("quizgame: invalid session id")
-		}
-		sid = id
-	}
-	if kid == nil && sid == nil {
-		return nil, fmt.Errorf("quizgame: kit or session required")
-	}
-	if detail == nil {
-		detail = map[string]any{}
-	}
-	raw, _ := json.Marshal(detail)
-	row := pool.QueryRow(ctx, `
-		INSERT INTO quizgame.review_queue (kind, kit_id, session_id, detail, status)
-		VALUES ($1, $2, $3, $4::jsonb, $5)
-		RETURNING id, kind, kit_id, session_id, detail, status, reviewer_id, reason, created_at, reviewed_at
-	`, ReviewKindReportedContent, kid, sid, raw, ReviewStatusPending)
-	item, err := scanModerationQueueItem(row)
-	if err != nil {
-		return nil, err
-	}
-	return &item, nil
-}
-
 // ListReviewQueue returns pending (or all) review items newest-first.
 func ListReviewQueue(ctx context.Context, pool *pgxpool.Pool, status string, limit int) ([]ModerationQueueItem, error) {
 	if limit <= 0 || limit > 200 {

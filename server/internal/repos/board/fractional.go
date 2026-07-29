@@ -45,14 +45,6 @@ func PrependSortIndex(minExisting *float64) float64 {
 	return *minExisting - defaultSortStep
 }
 
-// NeedsRenormalize reports whether the gap between neighbors is too small.
-func NeedsRenormalize(a, b float64) bool {
-	if b <= a {
-		return true
-	}
-	return b-a < sortGapFloor*2
-}
-
 // RenormalizeSortIndexes returns evenly spaced indexes 0, 1, 2, … for n items.
 func RenormalizeSortIndexes(n int) []float64 {
 	if n <= 0 {

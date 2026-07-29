@@ -282,15 +282,6 @@ LIMIT $1
 	return out, rows.Err()
 }
 
-// CountEngagementEvents counts engagement events for a user (signal probe for derivers).
-func CountEngagementEvents(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (int, error) {
-	var n int
-	err := pool.QueryRow(ctx, `
-SELECT count(*)::int FROM analytics.engagement_events WHERE user_id = $1
-`, userID).Scan(&n)
-	return n, err
-}
-
 // PurgeInactiveProfiles deletes learner profiles for users with no engagement
 // events within the retention window (LP08 / S02 alignment).
 func PurgeInactiveProfiles(ctx context.Context, pool *pgxpool.Pool, retentionDays int) (int64, error) {

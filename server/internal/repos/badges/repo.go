@@ -419,29 +419,6 @@ ORDER BY issued_at DESC
 	return out, rows.Err()
 }
 
-// ListAwardsByDefinition returns awards for a definition.
-func ListAwardsByDefinition(ctx context.Context, pool *pgxpool.Pool, defID uuid.UUID) ([]AwardedBadge, error) {
-	rows, err := pool.Query(ctx, `
-SELECT `+awardCols+`
-FROM badges.awarded_badges
-WHERE definition_id = $1
-ORDER BY issued_at DESC
-`, defID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []AwardedBadge
-	for rows.Next() {
-		a, err := scanAward(rows)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, *a)
-	}
-	return out, rows.Err()
-}
-
 // SetAwardPublic toggles per-badge public visibility.
 func SetAwardPublic(ctx context.Context, pool *pgxpool.Pool, awardID uuid.UUID, isPublic bool) (*AwardedBadge, error) {
 	a, err := scanAward(pool.QueryRow(ctx, `
@@ -804,16 +781,6 @@ SELECT EXISTS (
 		return false, err
 	}
 	return ok, nil
-}
-
-// CourseTitleByID loads a course title.
-func CourseTitleByID(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (string, error) {
-	var title string
-	err := pool.QueryRow(ctx, `SELECT title FROM course.courses WHERE id = $1`, courseID).Scan(&title)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return "", nil
-	}
-	return title, err
 }
 
 // CourseCodeByID loads course_code for authz checks.

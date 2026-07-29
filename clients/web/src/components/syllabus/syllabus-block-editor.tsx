@@ -31,7 +31,10 @@ import { ToolsDropdown } from '../content-tools/authoring/tools-dropdown'
 import { ToolConfigPanel } from '../content-tools/authoring/tool-config-panel'
 import { ToolPreviewModal } from '../content-tools/authoring/tool-preview-modal'
 import { ToolDeleteDialog } from '../content-tools/authoring/tool-delete-dialog'
-import { serializeLexToolFenceBlock } from '../../lib/content-tools/lex-tool-fence'
+import {
+  parseFencePayload,
+  serializeLexToolFenceBlock,
+} from '../../lib/content-tools/lex-tool-fence'
 import { sectionsToMarkdown, markdownToSectionsForEditor } from './syllabus-section-markdown'
 import { isSectionHeadingEnterToContentKey } from './section-heading-enter'
 import TurndownService from 'turndown'
@@ -82,6 +85,31 @@ function newLocalId(): string {
 }
 
 const MAX_SECTION_GENERATE_INSTRUCTIONS = 8000
+
+const LEX_TOOL_FENCE_RE = /```lex-tool\s*\n([\s\S]*?)```/g
+
+/** Instance IDs embedded in a section (TipTap nodes + markdown fences). */
+function collectContentToolInstanceIds(
+  section: SyllabusSection,
+  editor: Editor | null | undefined,
+): Set<string> {
+  const ids = new Set<string>()
+  if (editor) {
+    editor.state.doc.descendants((node) => {
+      if (node.type.name !== 'content_tool_block') return
+      const id = String(node.attrs.instanceId ?? '').trim()
+      if (id) ids.add(id)
+    })
+  }
+  const md = section.markdown ?? ''
+  LEX_TOOL_FENCE_RE.lastIndex = 0
+  let match: RegExpExecArray | null
+  while ((match = LEX_TOOL_FENCE_RE.exec(md)) !== null) {
+    const payload = parseFencePayload(match[1] ?? '')
+    if (payload?.instanceId) ids.add(payload.instanceId)
+  }
+  return ids
+}
 
 type SyllabusBlockEditorProps = {
   sections: SyllabusSection[]
@@ -837,6 +865,7 @@ function SyllabusBlockEditorInner({
       cacheManifest: (manifest) => {
         setCtManifests((prev) => ({ ...prev, [manifest.id]: manifest }))
       },
+      getHostMarkdown: () => sectionsToMarkdown(sections),
     }
   }, [
     courseCode,
@@ -852,6 +881,19 @@ function SyllabusBlockEditorInner({
 
   const configureInstance = configureInstanceId ? ctInstances[configureInstanceId] ?? null : null
   const previewInstance = previewInstanceId ? ctInstances[previewInstanceId] ?? null : null
+
+  // Drop stale configure/preview ids when the instance map no longer has them
+  // (e.g. section delete cleaned up tools, or external refresh).
+  useEffect(() => {
+    if (configureInstanceId && !ctInstances[configureInstanceId]) {
+      setConfigureInstanceId(null)
+    }
+  }, [configureInstanceId, ctInstances])
+  useEffect(() => {
+    if (previewInstanceId && !ctInstances[previewInstanceId]) {
+      setPreviewInstanceId(null)
+    }
+  }, [previewInstanceId, ctInstances])
 
   /** Ignore stale field state when another block is selected (no sync effect). */
   const activeFieldResolved = useMemo((): ActiveField | null => {
@@ -904,8 +946,47 @@ function SyllabusBlockEditorInner({
       if (!ok) return
     }
 
+    // Tools hosted in this section (editor nodes, fences, or sectionKey).
+    const toolIds = collectContentToolInstanceIds(section, editorRefs.current[section.id])
+    for (const inst of Object.values(ctInstances)) {
+      if (inst.sectionKey === section.id) toolIds.add(inst.id)
+    }
+
     onChange(sections.filter((_, i) => i !== index))
     setSelectedId(null)
+
+    // Dismiss tool config/preview/delete UI for removed tools (or any open
+    // config while deleting the selected section — avoids a stale sidebar).
+    const wasSelected = selectedId === section.id
+    if (
+      configureInstanceId &&
+      (toolIds.has(configureInstanceId) || wasSelected)
+    ) {
+      setConfigureInstanceId(null)
+    }
+    if (previewInstanceId && toolIds.has(previewInstanceId)) {
+      setPreviewInstanceId(null)
+    }
+    if (deleteInstanceId && toolIds.has(deleteInstanceId)) {
+      setDeleteInstanceId(null)
+    }
+
+    // Best-effort: drop local instances and permanently delete on the server so
+    // removed sections do not leave tools counting toward maxInstances.
+    if (toolIds.size > 0) {
+      setCtInstances((prev) => {
+        const next = { ...prev }
+        for (const id of toolIds) delete next[id]
+        return next
+      })
+      if (courseCode) {
+        for (const id of toolIds) {
+          void deleteContentToolInstance(courseCode, id, { permanent: true }).catch(() => {
+            /* section already removed; cleanup is best-effort */
+          })
+        }
+      }
+    }
   }
 
   function move(index: number, dir: -1 | 1) {

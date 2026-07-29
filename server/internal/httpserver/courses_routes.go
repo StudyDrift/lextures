@@ -444,6 +444,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/groups/{group_id}/feed/channels/{channel_id}/messages", d.handlePostGroupMessage())
 	r.Get("/api/v1/courses/{course_code}/feed/ws", d.handleFeedWS())
 	r.Get("/api/v1/courses/{course_code}/export", d.handleCourseExportGet())
+	r.Post("/api/v1/courses/{course_code}/import", d.handleCourseImportPost())
 	r.Post("/api/v1/courses/{course_code}/import/canvas", d.handleCourseImportCanvasPost())
 	r.Get("/api/v1/courses/{course_code}/import/canvas/ws", d.handleCourseImportCanvasWS())
 	// 9.3 Mastery Heatmap

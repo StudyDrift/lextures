@@ -200,6 +200,7 @@ func KnownAIFeatureIDs() map[string]struct{} {
 		"translation":                    {},
 		"quiz_generation":                {},
 		"assignment_rubric_generation":   {},
+		"inline_questions_generation":    {},
 		"live_quiz_kit_generation":       {},
 		"reading_level_simplification":   {},
 		"content_translation":            {},

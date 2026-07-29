@@ -148,23 +148,6 @@ func GetAttachment(ctx context.Context, pool *pgxpool.Pool, courseCode, boardID,
 	return &a, nil
 }
 
-// SetAttachmentScanStatus updates scan_status for an attachment.
-func SetAttachmentScanStatus(ctx context.Context, pool *pgxpool.Pool, attachmentID, status string) error {
-	aid, err := uuid.Parse(attachmentID)
-	if err != nil {
-		return fmt.Errorf("board: invalid attachment id")
-	}
-	switch status {
-	case ScanPending, ScanClean, ScanBlocked:
-	default:
-		return fmt.Errorf("board: invalid scan_status")
-	}
-	_, err = pool.Exec(ctx, `
-		UPDATE board.post_attachments SET scan_status = $2 WHERE id = $1
-	`, aid, status)
-	return err
-}
-
 // BlockedAttachmentRef identifies a post whose attachment was blocked (for moderation queue).
 type BlockedAttachmentRef struct {
 	BoardID    string

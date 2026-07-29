@@ -628,7 +628,7 @@ export default function CourseModuleContentPage() {
         </div>
       ) : null}
 
-      <div className="mx-auto w-full max-w-[72ch] min-w-0">
+      <div className="mx-auto w-full max-w-[96ch] min-w-0">
         {loadError && (
           <p className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
             {loadError}

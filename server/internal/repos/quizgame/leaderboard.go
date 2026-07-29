@@ -10,29 +10,29 @@ import (
 
 // LeaderboardEntry is one ranked row for fan-out / REST.
 type LeaderboardEntry struct {
-	Rank       int    `json:"rank"`
-	PlayerID   string `json:"playerId"`
-	Nickname   string `json:"nickname"`
+	Rank        int    `json:"rank"`
+	PlayerID    string `json:"playerId"`
+	Nickname    string `json:"nickname"`
 	DisplayName string `json:"displayName,omitempty"` // legal name when privacy=names and available
-	TotalScore int    `json:"totalScore"`
-	Streak     int    `json:"streak"`
-	Delta      *int   `json:"delta,omitempty"` // rank change vs prior snapshot (optional)
+	TotalScore  int    `json:"totalScore"`
+	Streak      int    `json:"streak"`
+	Delta       *int   `json:"delta,omitempty"` // rank change vs prior snapshot (optional)
 }
 
 // LeaderboardYou is the requesting player's standing (FR-6).
 type LeaderboardYou struct {
-	Rank       int `json:"rank"`
-	TotalScore int `json:"totalScore"`
-	Streak     int `json:"streak"`
+	Rank       int  `json:"rank"`
+	TotalScore int  `json:"totalScore"`
+	Streak     int  `json:"streak"`
 	Delta      *int `json:"delta,omitempty"`
 }
 
 // LeaderboardView is top-N + optional you payload.
 type LeaderboardView struct {
-	Top            []LeaderboardEntry `json:"top"`
-	You            *LeaderboardYou    `json:"you,omitempty"`
-	Privacy        string             `json:"privacy"`
-	PlayerCount    int                `json:"playerCount"`
+	Top         []LeaderboardEntry `json:"top"`
+	You         *LeaderboardYou    `json:"you,omitempty"`
+	Privacy     string             `json:"privacy"`
+	PlayerCount int                `json:"playerCount"`
 }
 
 // ComputeLeaderboard returns players ordered by total_score DESC, then fewer
@@ -166,22 +166,4 @@ func CountActivePlayers(ctx context.Context, pool *pgxpool.Pool, sessionID strin
 		SELECT COUNT(*) FROM quizgame.session_players
 		WHERE session_id = $1 AND removed_at IS NULL`, sid).Scan(&n)
 	return n, err
-}
-
-// LeaderboardRows is a thin wrapper kept for call sites that want Player structs.
-func LeaderboardRows(ctx context.Context, pool *pgxpool.Pool, sessionID string, limit int) ([]Player, error) {
-	entries, err := ComputeLeaderboard(ctx, pool, sessionID, limit)
-	if err != nil {
-		return nil, err
-	}
-	out := make([]Player, 0, len(entries))
-	for _, e := range entries {
-		out = append(out, Player{
-			ID:         e.PlayerID,
-			Nickname:   e.Nickname,
-			TotalScore: e.TotalScore,
-			Streak:      e.Streak,
-		})
-	}
-	return out, nil
 }

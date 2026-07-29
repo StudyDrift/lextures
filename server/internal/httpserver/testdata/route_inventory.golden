@@ -702,6 +702,7 @@ DELETE	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	sessi
 PATCH	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}	session
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/actions/{action}	session
 GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/analytics	session
+POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/build-with-ai	session
 POST	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/duplicate	session
 GET	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/filter-flags	session
 DELETE	/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/grade-link	session
@@ -832,6 +833,7 @@ GET	/api/v1/courses/{course_code}/h5p/{package_id}/completions	anonymous
 GET	/api/v1/courses/{course_code}/h5p/{package_id}/download	anonymous
 GET	/api/v1/courses/{course_code}/h5p/{package_id}/render	anonymous
 PUT	/api/v1/courses/{course_code}/hero-image	session
+POST	/api/v1/courses/{course_code}/import	session
 POST	/api/v1/courses/{course_code}/import/canvas	anonymous
 GET	/api/v1/courses/{course_code}/import/canvas/ws	anonymous
 GET	/api/v1/courses/{course_code}/inclusive-access	anonymous

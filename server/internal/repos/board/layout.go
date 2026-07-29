@@ -41,9 +41,3 @@ func NormalizeLayout(raw string) (string, error) {
 	}
 	return s, nil
 }
-
-// IsValidLayout reports whether s is a known layout mode.
-func IsValidLayout(s string) bool {
-	_, ok := validLayouts[strings.TrimSpace(strings.ToLower(s))]
-	return ok
-}
