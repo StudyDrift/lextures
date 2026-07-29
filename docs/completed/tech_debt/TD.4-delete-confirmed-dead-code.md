@@ -200,7 +200,7 @@ sed 's|/[^/]*\.go:.*||' /tmp/deadcode-now.txt | sort | uniq -c | sort -rn   # pe
 |---|---|
 | Triage table (all remaining findings classified) | [`docs/tech-debt/deadcode-triage.md`](../../tech-debt/deadcode-triage.md) |
 | Removed-symbols ledger (37 symbols) | [`docs/tech-debt/removed-symbols.md`](../../tech-debt/removed-symbols.md) |
-| Shrink-only baseline regenerated | `scripts/allowlists/deadcode-baseline.txt` (**197** entries; was 232) |
+| Shrink-only baseline regenerated | `scripts/allowlists/deadcode-baseline.txt` (**195** entries; was 232) |
 | Architecture conventions | §8 updated: delete unreachable code; ratchet enforces |
 | Deadcode ratchet (from TD.2) | `scripts/check-deadcode-baseline.sh` — still blocks growth |
 
@@ -219,7 +219,7 @@ sed 's|/[^/]*\.go:.*||' /tmp/deadcode-now.txt | sort | uniq -c | sort -rn   # pe
 |---|---|
 | AC-1 triage + DELETE sign-off | Met — triage doc + platform-td4 |
 | AC-2 tests / inventory | Go build green; baseline check green (suite run in CI) |
-| AC-3 count strictly below 223 | Met — **197** |
+| AC-3 count strictly below 223 | Met — **195** |
 | AC-4 ratchet fails on new dead code | Met — existing TD.2 script |
 | AC-5 specialist sign-off for security/obs DELETE | N/A — none deleted from those packages |
 | AC-6 removed-symbols ledger | Met |

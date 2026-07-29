@@ -136,8 +136,6 @@ internal/service/grading/service.go:Service.Health
 internal/service/gradingagent/workflow.go:ParseWorkflowGraph
 internal/service/hintservice/service.go:New
 internal/service/hintservice/service.go:Service.Health
-internal/service/inlinequestionsai/service.go:New
-internal/service/inlinequestionsai/service.go:Service.Health
 internal/service/integrations/lti.go:GenerateLTILaunchParams
 internal/service/integrations/lti.go:normalizeURL
 internal/service/integrations/lti.go:oauthEscape

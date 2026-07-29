@@ -9359,6 +9359,19 @@
         }
       ],
       "reviewed": true
+    },
+    {
+      "id": "TD.4",
+      "path": "docs/completed/tech_debt/TD.4-delete-confirmed-dead-code.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "none",
+      "client": "docs",
+      "coverage": "not-applicable",
+      "rationale": "Internal dead-code deletion and baseline ratchet. No user-facing journey; guarded by make lint-structure / deadcode CI, not Playwright.",
+      "owner": "Platform",
+      "reviewed": true
     }
   ]
 }

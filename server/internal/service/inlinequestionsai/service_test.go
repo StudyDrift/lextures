@@ -1,22 +1,10 @@
 package inlinequestionsai
 
 import (
-	"context"
 	"testing"
 
 	"github.com/lextures/lextures/server/internal/service/contenttools/tools/inline_questions"
 )
-
-func TestServiceHealth(t *testing.T) {
-	s := New()
-	if s.Name != "inlinequestionsai" {
-		t.Fatalf("name: %q", s.Name)
-	}
-	got, err := s.Health(context.Background())
-	if err != nil || got != "inlinequestionsai:ok" {
-		t.Fatalf("health: got %q err %v", got, err)
-	}
-}
 
 func TestParseModelJSON_NormalizesTypes(t *testing.T) {
 	raw := `{

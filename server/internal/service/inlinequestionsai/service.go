@@ -57,23 +57,6 @@ Rules:
 - Keep language clear and age-appropriate for the material.
 - If the content is empty or too thin to write fair questions, return {"questions":[]}.`
 
-// Service provides AI-backed Inline Questions drafting.
-type Service struct {
-	Name string
-}
-
-func New() Service {
-	return Service{Name: "inlinequestionsai"}
-}
-
-// Health returns a stable service heartbeat string for wiring/tests.
-func (s Service) Health(ctx context.Context) (string, error) {
-	if ctx == nil {
-		return "", fmt.Errorf("context is nil")
-	}
-	return s.Name + ":ok", nil
-}
-
 // GenerateInput is the host page context for a draft.
 type GenerateInput struct {
 	PageTitle    string
