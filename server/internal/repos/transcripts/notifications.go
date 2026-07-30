@@ -66,31 +66,6 @@ RETURNING id
 	return true, nil
 }
 
-// ListNotificationLog returns send audit rows for an order (newest first).
-func ListNotificationLog(ctx context.Context, pool *pgxpool.Pool, orderID uuid.UUID) ([]NotificationLogRow, error) {
-	rows, err := pool.Query(ctx, `
-SELECT id, order_id, item_id, event, channel, recipient, sent_at
-FROM transcripts.notification_log
-WHERE order_id = $1
-ORDER BY sent_at DESC
-`, orderID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []NotificationLogRow
-	for rows.Next() {
-		var r NotificationLogRow
-		var ch string
-		if err := rows.Scan(&r.ID, &r.OrderID, &r.ItemID, &r.Event, &ch, &r.Recipient, &r.SentAt); err != nil {
-			return nil, err
-		}
-		r.Channel = NotificationChannel(ch)
-		out = append(out, r)
-	}
-	return out, rows.Err()
-}
-
 // ListOrgAdminUserIDs returns active org_admin user ids for registrar exception fan-out.
 func ListOrgAdminUserIDs(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, limit int) ([]uuid.UUID, error) {
 	if pool == nil || orgID == uuid.Nil {

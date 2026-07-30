@@ -650,47 +650,6 @@ ORDER BY p.row_index ASC, p.sort_order ASC, p.updated_at ASC
 	return out, nil
 }
 
-// ListUserPinnedCourseSummaries returns pinned enrolled courses for sidebar shortcuts.
-func ListUserPinnedCourseSummaries(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]PinnedCourseSummary, error) {
-	rows, err := pool.Query(ctx, `
-SELECT
-    c.id,
-    c.course_code,
-    c.title,
-    c.hero_image_url,
-    c.hero_image_object_position,
-    n.nickname
-FROM course.user_course_catalog_pins p
-JOIN course.courses c ON c.id = p.course_id
-JOIN course.course_enrollments e ON e.course_id = c.id AND e.user_id = p.user_id
-LEFT JOIN course.user_course_catalog_nicknames n ON n.user_id = p.user_id AND n.course_id = c.id
-WHERE p.user_id = $1
-  AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
-  AND NOT c.archived
-ORDER BY p.row_index ASC, p.sort_order ASC, p.updated_at ASC
-`, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []PinnedCourseSummary
-	for rows.Next() {
-		var item PinnedCourseSummary
-		if err := rows.Scan(
-			&item.ID,
-			&item.CourseCode,
-			&item.Title,
-			&item.HeroImageURL,
-			&item.HeroImageObjectPosition,
-			&item.CatalogNickname,
-		); err != nil {
-			return nil, err
-		}
-		out = append(out, item)
-	}
-	return out, rows.Err()
-}
-
 // AttachUserCatalogMeta merges nicknames, kanban placement, and pin state onto listed courses.
 func AttachUserCatalogMeta(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, courses []CoursePublic) error {
 	if len(courses) == 0 {

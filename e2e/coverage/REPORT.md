@@ -1,17 +1,17 @@
 # Completed feature E2E coverage report
 
-Total stories: **543**
+Total stories: **545**
 
 ## Coverage levels
 
 | Level | Count |
 |---|---:|
-| journey | 107 |
+| journey | 108 |
 | smoke | 178 |
 | api-contract | 1 |
 | covered-by-parent | 11 |
 | manual | 8 |
-| not-applicable | 170 |
+| not-applicable | 171 |
 | missing | 68 |
 
 ## By client
@@ -19,16 +19,16 @@ Total stories: **543**
 | Client | Count |
 |---|---:|
 | cli | 48 |
-| docs | 17 |
+| docs | 18 |
 | mobile | 92 |
 | ops | 16 |
-| web | 370 |
+| web | 371 |
 
 ## By market tag
 
 | Market | Count |
 |---|---:|
-| ALL | 496 |
+| ALL | 498 |
 | HE | 15 |
 | HS | 19 |
 | K12 | 13 |
@@ -156,7 +156,7 @@ Total stories: **543**
 | animations | 0 | 4 | 0 | 0 | 0 | 0 | 3 |
 | badges | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | cli | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
-| content_tools | 21 | 1 | 0 | 0 | 0 | 0 | 0 |
+| content_tools | 22 | 1 | 0 | 0 | 0 | 0 | 0 |
 | e2e | 3 | 0 | 1 | 0 | 0 | 0 | 0 |
 | emails | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 | feedback | 0 | 5 | 0 | 0 | 0 | 0 | 0 |
@@ -172,7 +172,7 @@ Total stories: **543**
 | parent-portal | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | screenshare | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | settings | 0 | 0 | 0 | 0 | 0 | 3 | 4 |
-| tech_debt | 0 | 1 | 0 | 0 | 0 | 2 | 0 |
+| tech_debt | 0 | 1 | 0 | 0 | 0 | 3 | 0 |
 | transcripts | 2 | 7 | 0 | 3 | 0 | 0 | 0 |
 | visual-collaboration | 0 | 7 | 0 | 3 | 0 | 7 | 0 |
 | web | 6 | 2 | 0 | 0 | 0 | 0 | 1 |

@@ -137,6 +137,37 @@ Content Tools without enabling, say, the code sandbox.
 | **CT.22** | [Inline Discussion](../../completed/content_tools/CT.22-tool-inline-discussion.md) — a scoped thread anchored to this paragraph | Collaborative elaboration | DONE | none |
 | **CT.23** | [Flashcards & Spaced Recall](../../completed/content_tools/CT.23-tool-flashcards-and-spaced-recall.md) — inline deck that feeds the shipped SRS | Spacing + retrieval | DONE | none |
 
+### Mobile — the same content on iOS & Android
+
+Everything above ships on **web**. The native apps (`clients/ios`, `clients/android`) render none of
+it: they have no table renderer, no `lex-tool` handling, and no knowledge of `contentToolsEnabled`, so
+a placed tool currently leaks `{"instanceId":…,"toolId":…}` into the reader as a code block. The `CT.M*`
+series closes that gap and discharges [CT.3 §FR-17 / AC-12](../../completed/content_tools/CT.3-student-runtime-and-state-persistence.md)
+(mobile renders supported tools natively and shows a first-class placeholder for the rest). **No story
+in this series adds a migration or an endpoint** — mobile consumes the shipped API exactly as web does.
+
+| ID | Plan | Severity | Effort | Depends on | Delivers |
+|---|---|---|---|---|---|
+| **CT.M1** | [Mobile markdown engine: tables, code, math & media](CT.M1-mobile-markdown-engine-tables-code-math.md) | MAJOR | M | — | One parser/renderer per platform; GFM tables, fenced code, typeset math, inline formatting; `lex-tool` parsed and hidden |
+| **CT.M2** | [Rich content parity: assignments, quizzes, syllabus, discussions](CT.M2-mobile-rich-content-parity-assignments-quizzes.md) | MAJOR | S | CT.M1 | Every reader on one renderer; markdown in quiz prompts, **choices**, feedback and review; legacy renderers deleted |
+| **CT.M3** | [Content tool host & state persistence](CT.M3-mobile-content-tool-host-and-state.md) | BLOCKER | M | CT.M1, CT.M2 | Flag plumbing, batched instance fetch, `ToolFrame`, autosave + revision conflicts, submit, actions, offline outbox, a11y baseline |
+| **CT.M4** | [Sandboxed WebView tool host](CT.M4-mobile-sandboxed-webview-tool-host.md) | MAJOR | M | CT.M3 | CT.5 `postMessage` bridge in WKWebView/Android WebView — the long tail and marketplace tools without a mobile release per tool |
+| **CT.M5** | [Tool pack 1 — check & commit](CT.M5-mobile-tools-check-and-commit.md) | MAJOR | M | CT.M3 | `inline_questions`, `predict_reveal`, `class_pulse`, `flashcards` |
+| **CT.M6** | [Tool pack 2 — text & AI](CT.M6-mobile-tools-text-and-ai.md) | MAJOR | M | CT.M3 (+ CT.M9) | `ask_questions`, `explain_it_back`, `inline_discussion` |
+| **CT.M7** | [Tool pack 3 — direct manipulation](CT.M7-mobile-tools-manipulation.md) | MAJOR | M | CT.M3 | `sort_sequence`, `highlight_annotate`, `diagram_hotspot` — touch design + a non-drag path (WCAG §2.5.7) |
+| **CT.M8** | [Tool pack 4 — media & procedural](CT.M8-mobile-tools-media-and-procedural.md) | MINOR | M | CT.M3, CT.M4 | `media_checkpoints` (native player), `worked_example`, `parameter_explorer`, `code_sandbox` via the sandbox |
+| **CT.M9** | [Governance, safety, accessibility & telemetry](CT.M9-mobile-tools-governance-a11y-telemetry.md) | MAJOR | S | CT.M3 | Allowlist/kill-switch enforcement, AI disclosure & consent, report/moderate, conformance surfacing, content-free telemetry |
+
+```
+CT.M1 Markdown ──► CT.M2 Parity ──► CT.M3 Host ──┬─► CT.M4 Sandbox ──► (marketplace tools)
+                                                 ├─► CT.M9 Governance ──► (gates CT.M6's AI tools)
+                                                 └─► CT.M5 · CT.M6 · CT.M7 · CT.M8  (parallel packs)
+```
+
+**CT.M1 → CT.M2 → CT.M3 is the only serialised work.** CT.M1 alone fixes the two visible bugs (tables
+that render as pipe soup, and leaked tool JSON); CT.M3 alone makes every tool at least honest. After
+that the packs are independent, and CT.M9 is a hard gate on shipping the AI tools.
+
 ## Sequencing at a glance
 
 ```

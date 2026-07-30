@@ -18,6 +18,8 @@ export type ContentToolAuthoringContextValue = {
   upsertInstance: (instance: ContentToolInstance) => void
   removeInstance: (instanceId: string) => void
   cacheManifest: (manifest: ContentToolManifest) => void
+  /** Current host document markdown (assignment/content page/syllabus draft) for AI assist. */
+  getHostMarkdown?: () => string
 }
 
 const ContentToolAuthoringContext = createContext<ContentToolAuthoringContextValue | null>(null)

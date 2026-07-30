@@ -343,37 +343,6 @@ func GetPlayerResponse(ctx context.Context, pool *pgxpool.Pool, sessionID, playe
 	return &r, nil
 }
 
-// ListResponsesForQuestion returns all responses for scoring/reveal.
-func ListResponsesForQuestion(ctx context.Context, pool *pgxpool.Pool, sessionID string, questionIndex int) ([]Response, error) {
-	sid, err := uuid.Parse(sessionID)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := pool.Query(ctx, `
-		SELECT session_id, question_index, player_id, answer, is_correct, response_ms, points, points_breakdown, answered_at
-		FROM quizgame.session_responses
-		WHERE session_id = $1 AND question_index = $2`, sid, questionIndex)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []Response
-	for rows.Next() {
-		var r Response
-		var sidU, pid uuid.UUID
-		var answer, breakdown []byte
-		if err := rows.Scan(&sidU, &r.QuestionIndex, &pid, &answer, &r.IsCorrect, &r.ResponseMs, &r.Points, &breakdown, &r.AnsweredAt); err != nil {
-			return nil, err
-		}
-		r.SessionID = sidU.String()
-		r.PlayerID = pid.String()
-		r.Answer = answer
-		r.PointsBreakdown = breakdown
-		out = append(out, r)
-	}
-	return out, rows.Err()
-}
-
 // ListPlayerResponses returns all responses for a player with breakdowns (IQ.7 feed).
 func ListPlayerResponses(ctx context.Context, pool *pgxpool.Pool, sessionID, playerID string) ([]Response, error) {
 	sid, err := uuid.Parse(sessionID)

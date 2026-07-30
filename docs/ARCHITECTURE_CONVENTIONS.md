@@ -155,6 +155,10 @@ A PR that only moves files must leave TD.1 inventories unchanged.
 - Confirmed-unreachable Go functions are tracked by `scripts/check-deadcode-baseline.sh`.
 - Baseline list: `scripts/allowlists/deadcode-baseline.txt` (owner: **TD.4**).
 - The count of unreachable functions **must not grow**. Deletions lower the baseline.
+- **Unreachable code is deleted, not commented out.** The ratchet enforces this: new unreachable
+  functions fail CI. Prefer wiring a real call site or removing the symbol over leaving scaffolding.
+- Triage classes and decision dates for retained findings: [`docs/tech-debt/deadcode-triage.md`](tech-debt/deadcode-triage.md).
+- Symbols removed under TD.4 are recorded in [`docs/tech-debt/removed-symbols.md`](tech-debt/removed-symbols.md).
 
 ---
 

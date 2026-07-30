@@ -205,28 +205,6 @@ ORDER BY attempt_no ASC, created_at ASC
 	return out, rows.Err()
 }
 
-// GetDeliveryAttemptByIdempotency returns an attempt if the key already exists.
-func GetDeliveryAttemptByIdempotency(
-	ctx context.Context,
-	pool *pgxpool.Pool,
-	itemID uuid.UUID,
-	key string,
-) (*DeliveryAttempt, error) {
-	var a DeliveryAttempt
-	err := scanDeliveryAttempt(pool.QueryRow(ctx, `
-SELECT `+deliveryAttemptSelect+`
-FROM transcripts.delivery_attempts
-WHERE order_item_id = $1 AND idempotency_key = $2
-`, itemID, key), &a)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, ErrDeliveryAttemptNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &a, nil
-}
-
 // LoadDeliveryItemContext loads order, item, and document for delivery.
 func LoadDeliveryItemContext(ctx context.Context, pool *pgxpool.Pool, itemID uuid.UUID) (*DeliveryItemContext, error) {
 	var it OrderItem

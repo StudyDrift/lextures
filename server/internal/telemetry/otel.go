@@ -7,7 +7,6 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -113,9 +112,4 @@ func spanRouteName(r *http.Request) string {
 // service code (plan 17.7 FR-2: child spans for DB queries and external calls).
 func Tracer(name string) trace.Tracer {
 	return otel.Tracer(name)
-}
-
-// SpanAttr is a convenience for non-PII span attributes.
-func SpanAttr(key, value string) attribute.KeyValue {
-	return attribute.String(key, value)
 }

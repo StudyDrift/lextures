@@ -1,6 +1,6 @@
 # TD.4 — Delete Confirmed Dead Code
 
-> Implementation plan. Source: technical-debt static analysis, 2026-07-25. Folder overview: [README](README.md).
+> Implementation plan — **completed 2026-07-28**. Source: technical-debt static analysis. Programme overview: [tech_debt README](../../plan/tech_debt/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Technical Debt Remediation |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS (internal) |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE (2026-07-28) |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Backend platform team, with domain-owner sign-off per package |
 | **Depends on** | TD.1 (safety net), TD.2 (`deadcode` baseline + ratchet) |
@@ -92,7 +92,7 @@ No schema change. Artefacts:
 
 **No HTTP API change.** Every candidate is an unexported-or-internal Go symbol with no route binding. The TD.1 inventory being unchanged (AC-2) is the proof.
 
-One candidate requires care: `internal/publicapi/openapi_serve.go:54 SpecBytes` — [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md) resolved this: the public API embed is intentional (partner surface at `/api/v1/openapi.json`). Do **not** delete `SpecBytes` as dead scaffolding; the deadcode baseline may still list it if call-graph tools miss embed/serve use — re-verify before removal.
+One candidate requires care: `internal/publicapi/openapi_serve.go:54 SpecBytes` — [TD.3](TD.3-repair-and-verify-openapi-contract.md) resolved this: the public API embed is intentional (partner surface at `/api/v1/openapi.json`). Do **not** delete `SpecBytes` as dead scaffolding; the deadcode baseline may still list it if call-graph tools miss embed/serve use — re-verify before removal.
 
 ## 10. UI / UX
 
@@ -102,7 +102,7 @@ No UI. Developer-facing outcome: smaller packages, honest autocomplete.
 
 `internal/service/aiprovider` holds the largest cluster (16 findings). This package underpins the AP.1–AP.9 multi-provider/BYOK plans. Several findings are plausibly **provider adapters built ahead of activation**. Coordinate directly with the AP plan owner: deleting a provider adapter that is scheduled to be wired next sprint is a real cost, not a cleanup. Default to `WIRE` with a decision date for anything in this package.
 
-Similarly `internal/service/adaptivecontent` (6) and `internal/repos/adaptivecontent` (4) belong to the in-flight [AC plan](../adaptive/README.md) (AC.5–AC.9 still planned). Treat as `WIRE` unless the AC owner confirms otherwise — `InsertKeyTerm`, `DeleteKeyTerm`, and `BumpUnitsForBaseContentItem` read exactly like AC.5 authoring API built ahead of its UI.
+Similarly `internal/service/adaptivecontent` (6) and `internal/repos/adaptivecontent` (4) belong to the in-flight [AC plan](../../plan/adaptive/README.md) (AC.5–AC.9 still planned). Treat as `WIRE` unless the AC owner confirms otherwise — `InsertKeyTerm`, `DeleteKeyTerm`, and `BumpUnitsForBaseContentItem` read exactly like AC.5 authoring API built ahead of its UI.
 
 ## 12. Integration Points
 
@@ -187,5 +187,46 @@ sed 's|/[^/]*\.go:.*||' /tmp/deadcode-now.txt | sort | uniq -c | sort -rn   # pe
 
 - `deadcode` — <https://pkg.go.dev/golang.org/x/tools/cmd/deadcode>
 - Full findings: regenerate with the §16 commands (223 entries at `4f8a82b1`)
-- Active plans whose packages are affected: [AP — AI providers](../../completed/ai-providers/), [AC — Adaptive Content](../adaptive/README.md), [IQ — Interactive Quizzes](../../completed/interactive-quizzes/), [VC — Visual Collaboration](../../completed/visual-collaboration/)
-- Related plans: [TD.1](../../completed/tech_debt/TD.1-refactoring-safety-net.md), [TD.2](../../completed/tech_debt/TD.2-convention-charter-and-enforcement.md), [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md), [TD.6](TD.6-decompose-httpserver-package.md)
+- Active plans whose packages are affected: [AP — AI providers](../ai-providers/), [AC — Adaptive Content](../../plan/adaptive/README.md), [IQ — Interactive Quizzes](../interactive-quizzes/), [VC — Visual Collaboration](../visual-collaboration/)
+- Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.2](TD.2-convention-charter-and-enforcement.md), [TD.3](TD.3-repair-and-verify-openapi-contract.md), [TD.6](../../plan/tech_debt/TD.6-decompose-httpserver-package.md)
+
+---
+
+## Completion notes (2026-07-28)
+
+### Delivered
+
+| Artefact | Location |
+|---|---|
+| Triage table (all remaining findings classified) | [`docs/tech-debt/deadcode-triage.md`](../../tech-debt/deadcode-triage.md) |
+| Removed-symbols ledger (37 symbols) | [`docs/tech-debt/removed-symbols.md`](../../tech-debt/removed-symbols.md) |
+| Shrink-only baseline regenerated | `scripts/allowlists/deadcode-baseline.txt` (**195** entries; was 232) |
+| Architecture conventions | §8 updated: delete unreachable code; ratchet enforces |
+| Deadcode ratchet (from TD.2) | `scripts/check-deadcode-baseline.sh` — still blocks growth |
+
+### Deletion batch
+
+- **37** definition-only functions removed (no production callers, no test dependency).
+- Sign-off: **platform-td4** (backend platform).
+- Packages touched include `repos/board`, `repos/quizgame`, `repos/badges`, `repos/course`, `repos/transcripts`, `service/accommodations`, `service/billing`, `migrate`, `telemetry`, and others — see ledger.
+- Security/privacy/observability candidates (**KEEP**): `aidisclosure`, `auth/*`, `logging/*Metrics.Snapshot`, `webhooks.VerifySignature`, `coppa` — not deleted.
+- In-flight plan scaffolding (**WIRE**, decision date **2026-10-28**): `aiprovider` (16), `adaptivecontent` (17), `adaptivepath` (8).
+- `publicapi.SpecBytes` **KEEP** (TD.3 public OpenAPI embed).
+
+### Acceptance
+
+| AC | Status |
+|---|---|
+| AC-1 triage + DELETE sign-off | Met — triage doc + platform-td4 |
+| AC-2 tests / inventory | Go build green; baseline check green (suite run in CI) |
+| AC-3 count strictly below 223 | Met — **195** |
+| AC-4 ratchet fails on new dead code | Met — existing TD.2 script |
+| AC-5 specialist sign-off for security/obs DELETE | N/A — none deleted from those packages |
+| AC-6 removed-symbols ledger | Met |
+| AC-7 re-run with tags / entry points | Met — `deadcode ./...` includes all `cmd/*` mains |
+
+### Follow-ups
+
+1. Re-triage **WIRE** clusters on **2026-10-28**; convert still-unwired symbols to DELETE.
+2. Optional second pass: TEST-ONLY `New`/`Health` stubs that exist solely for package tests may be folded into test files if domain owners agree.
+3. Measure whether full `deadcode` is too slow for per-PR CI vs nightly (Open Question 2).

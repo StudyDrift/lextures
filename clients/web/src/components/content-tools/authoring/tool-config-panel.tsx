@@ -104,13 +104,13 @@ export function ToolConfigPanel({
   const CustomEditor = resolveCustomEditor(manifest?.ui?.customEditor)
 
   return (
-    <div className="space-y-3" data-content-tool-config={instance.id}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+    <div className="space-y-5" data-content-tool-config={instance.id}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
             {t('contentTools.authoring.configureTitle', { name: title })}
           </h3>
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
             {t('contentTools.authoring.configureHelp')}
           </p>
         </div>
@@ -118,7 +118,7 @@ export function ToolConfigPanel({
           <button
             type="button"
             onClick={onClose}
-            className="rounded px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
           >
             {t('contentTools.authoring.close')}
           </button>
@@ -134,7 +134,7 @@ export function ToolConfigPanel({
       ) : manifest ? (
         <form
           id={formId}
-          className="space-y-3"
+          className="space-y-5"
           onSubmit={(e) => {
             e.preventDefault()
             void save()
@@ -172,11 +172,11 @@ export function ToolConfigPanel({
               {saveError}
             </p>
           ) : null}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 border-t border-slate-200 pt-4 dark:border-neutral-700">
             <button
               type="submit"
               disabled={disabled || saving}
-              className="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-40 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-white"
+              className="rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-white"
             >
               {saving ? t('contentTools.authoring.saving') : t('contentTools.authoring.save')}
             </button>

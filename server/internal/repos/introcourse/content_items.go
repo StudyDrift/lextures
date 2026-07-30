@@ -68,24 +68,6 @@ ORDER BY slug
 	return out, rows.Err()
 }
 
-// LookupGradePolicy returns the stored grade_policy for slug, or empty when unset.
-func LookupGradePolicy(ctx context.Context, tx pgx.Tx, slug string) (string, error) {
-	var policy *string
-	err := tx.QueryRow(ctx, `
-SELECT grade_policy FROM settings.intro_course_items WHERE slug = $1
-`, slug).Scan(&policy)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return "", nil
-	}
-	if err != nil {
-		return "", err
-	}
-	if policy == nil {
-		return "", nil
-	}
-	return *policy, nil
-}
-
 // AssignmentGroupIDByName resolves an assignment group id by display name.
 func AssignmentGroupIDByName(ctx context.Context, tx pgx.Tx, courseID uuid.UUID, name string) (*uuid.UUID, error) {
 	var id uuid.UUID

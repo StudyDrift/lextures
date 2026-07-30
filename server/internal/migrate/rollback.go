@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // RollbackLatest applies the down.sql companion for the most recently applied migration.
@@ -34,14 +33,6 @@ func RollbackLatest(ctx context.Context, fsys fs.FS, dsn string) error {
 	}
 	defer func() { _ = conn.Close(ctx) }()
 	return rollbackLatestLocked(ctx, conn, fsys, "migrations")
-}
-
-// RollbackLatestFromPool is like RollbackLatest but uses an existing pool's DSN.
-func RollbackLatestFromPool(ctx context.Context, fsys fs.FS, pool *pgxpool.Pool) error {
-	if pool == nil {
-		return fmt.Errorf("migrate: nil pool")
-	}
-	return RollbackLatest(ctx, fsys, pool.Config().ConnString())
 }
 
 // ErrRollbackNotSupported is returned when the down.sql file is a documented stub.

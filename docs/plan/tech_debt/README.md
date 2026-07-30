@@ -21,7 +21,7 @@ The debt is **not sloppiness. It is structure.** Growth went into a small number
 | Route registration is one function | `registerCourseRoutes` = **455 lines**, **419** registrations |
 | Repos cannot be tested without a database | **2,199** `*pgxpool.Pool` params, **0** interface abstractions |
 | HTTP layer reaches past the repo layer into SQL | **58** files, **130** call sites |
-| Proven-unreachable Go functions | **223** (golang.org/x/tools `deadcode`) |
+| Proven-unreachable Go functions | **197** after TD.4 (was 223; golang.org/x/tools `deadcode`) |
 | Unreachable in-handler method dispatch | **261** `MethodOptions` checks, **776** `StatusMethodNotAllowed` sites, vs **3** method-agnostic routes |
 | `/api/openapi.json` serves **invalid JSON** | **fixed in TD.3** — see [`docs/completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md`](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md) |
 | API documented vs implemented | **252** documented paths vs **1,260** unique patterns (**20%**) post-TD.3; ratchet `scripts/allowlists/openapi-coverage.txt` |
@@ -49,7 +49,7 @@ Phases are ordered by dependency, not by appeal. **Phase 0 is not optional** —
 | ID | Plan | Effort | Depends on |
 |---|---|---|---|
 | TD.3 | [Repair and verify the OpenAPI contract](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md) → **done** | S | TD.1 |
-| TD.4 | [Delete confirmed dead code](TD.4-delete-confirmed-dead-code.md) | S | TD.1, TD.2 |
+| TD.4 | [Delete confirmed dead code](../../completed/tech_debt/TD.4-delete-confirmed-dead-code.md) → **done** | S | TD.1, TD.2 |
 | TD.5 | [Remove unreachable in-handler method dispatch](TD.5-remove-unreachable-method-dispatch.md) | S | TD.1 |
 
 ### Phase 2 — Backend architecture
@@ -98,7 +98,7 @@ graph TD
 
 1. **One seam per PR.** A PR that both moves files and changes logic is unreviewable — and this whole programme is about reviewability. Move, or change. Never both.
 2. **Pure moves must be provable.** For a file relocation, `git log --follow` must work and the diff must be import-path lines only. Reviewers should be able to verify "nothing changed" mechanically.
-3. **Deletions cite their evidence.** Every removed symbol names the tool and run that proved it dead (`deadcode`, coverage, route inventory). "I couldn't find a caller" is not evidence — see [TD.4 §6](TD.4-delete-confirmed-dead-code.md) for the reflection/codegen traps.
+3. **Deletions cite their evidence.** Every removed symbol names the tool and run that proved it dead (`deadcode`, coverage, route inventory). "I couldn't find a caller" is not evidence — see [TD.4 §6](../../completed/tech_debt/TD.4-delete-confirmed-dead-code.md) for the reflection/codegen traps.
 4. **The ratchet only tightens.** New budgets in [TD.2](../../completed/tech_debt/TD.2-convention-charter-and-enforcement.md) are enforced against *new and modified* code first; the backlog burns down per story. Never loosen a threshold to make CI pass.
 5. **Behaviour questions beat style questions.** If review time is finite, spend it on "can this change a response?" not on naming.
 
@@ -119,7 +119,7 @@ Go non-test files ................ 1,709      Go test files ............... 802
 TS/TSX files ..................... 1,324      Web test files .............. 262
 httpserver non-test LOC ....... 125,266      httpserver files (all) ...... 679
 Unique registered routes ......... 1,407      Documented OpenAPI paths .... 226
-Dead Go functions .................. 223      Repo pool params .......... 2,199
+Dead Go functions .................. 197      Repo pool params .......... 2,199
 Raw DB call sites in httpserver .... 130      Files affected ............... 58
 Web API client modules ............. 113      Duplicate apiJson impls ....... 6
 e2e specs .......................... 190      Shared web hooks .............. 16

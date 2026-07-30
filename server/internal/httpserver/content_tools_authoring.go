@@ -53,6 +53,7 @@ func checkContentToolsDuplicateRateLimit(userID uuid.UUID) bool {
 func (d Deps) registerContentToolsAuthoringRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/duplicate", d.handleContentToolsInstanceDuplicate())
 	r.Get("/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/usage", d.handleContentToolsInstanceUsage())
+	r.Post("/api/v1/courses/{course_code}/content-tools/instances/{instance_id}/build-with-ai", d.handleBuildInlineQuestionsWithAI())
 }
 
 // maybeReconcileContentToolMarkdown runs fence reconciliation when Content Tools is
