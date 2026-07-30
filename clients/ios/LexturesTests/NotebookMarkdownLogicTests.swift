@@ -99,7 +99,7 @@ final class NotebookMarkdownLogicTests: XCTestCase {
             let id = fixture["id"] as? String ?? "?"
             let markdown = fixture["markdown"] as? String ?? ""
             let expected = fixture["kinds"] as? [String] ?? []
-            let actual = NotebookMarkdown.parseBlocks(markdown).map(NotebookMarkdown.fixtureKindName)
+            let actual = NotebookMarkdown.parseBlocks(markdown).map { NotebookMarkdown.fixtureKindName($0.kind) }
             XCTAssertEqual(actual, expected, "fixture \(id)")
         }
     }
