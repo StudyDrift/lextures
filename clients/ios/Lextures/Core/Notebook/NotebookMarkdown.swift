@@ -1,5 +1,7 @@
 import Foundation
 
+// swiftlint:disable type_body_length
+
 /// A task parsed from a ```task fenced block (parity with web `notebook-task-markdown`).
 struct ParsedNotebookTask: Identifiable, Equatable {
     let id: String
@@ -242,52 +244,19 @@ enum NotebookMarkdown {
             if let table = MarkdownTableLogic.parseTable(in: lines, start: lineIndex) {
                 flushAll()
                 kinds.append(.table(align: table.align, header: table.header, rows: table.rows))
-                lineIndex = table.end
+                lineIndex = table.endIndex
                 continue
             }
-            if trimmed.hasPrefix("```drawing") {
+            if let fenceResult = consumeFenceBlock(
+                lines: lines,
+                lineIndex: &lineIndex,
+                trimmed: trimmed,
+                drawingIndex: &drawingIndex
+            ) {
                 flushAll()
-                var inner: [String] = []
-                lineIndex += 1
-                while lineIndex < lines.count, lines[lineIndex].trimmingCharacters(in: .whitespaces) != "```" {
-                    inner.append(lines[lineIndex])
-                    lineIndex += 1
+                if let fenceKind = fenceResult {
+                    kinds.append(fenceKind)
                 }
-                kinds.append(.drawing(index: drawingIndex, elementsJson: inner.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)))
-                drawingIndex += 1
-                lineIndex += 1
-                continue
-            }
-            if trimmed == "```task" || trimmed.hasPrefix("```task") {
-                flushAll()
-                var inner: [String] = []
-                lineIndex += 1
-                while lineIndex < lines.count, lines[lineIndex].trimmingCharacters(in: .whitespaces) != "```" {
-                    inner.append(lines[lineIndex])
-                    lineIndex += 1
-                }
-                if let task = parseTaskInner(inner.joined(separator: "\n")) {
-                    kinds.append(.task(task))
-                }
-                lineIndex += 1
-                continue
-            }
-            if trimmed.hasPrefix("```") {
-                flushAll()
-                let language = fenceLanguage(trimmed)
-                var inner: [String] = []
-                lineIndex += 1
-                while lineIndex < lines.count, !lines[lineIndex].trimmingCharacters(in: .whitespaces).hasPrefix("```") {
-                    inner.append(lines[lineIndex])
-                    lineIndex += 1
-                }
-                let source = inner.joined(separator: "\n")
-                if language == "lex-tool", let tool = parseLexToolFence(source) {
-                    kinds.append(.toolFence(instanceId: tool.instanceId, toolId: tool.toolId, version: tool.version))
-                } else {
-                    kinds.append(.code(language: language, source: source))
-                }
-                lineIndex += 1
                 continue
             }
             if let heading = parseHeading(trimmed) {
@@ -323,14 +292,61 @@ enum NotebookMarkdown {
         return kinds.enumerated().map { NotebookBlock(id: $0.offset, kind: $0.element) }
     }
 
+    /// Consume a fenced block (drawing / task / code / lex-tool). Advances `lineIndex` past the closer.
+    /// Returns `nil` when the line is not a fence; `.some(nil)` when the fence was skipped (e.g. bad task).
+    private static func consumeFenceBlock(
+        lines: [String],
+        lineIndex: inout Int,
+        trimmed: String,
+        drawingIndex: inout Int
+    ) -> NotebookBlockKind?? {
+        guard trimmed.hasPrefix("```") else { return nil }
+        if trimmed.hasPrefix("```drawing") {
+            let source = readFenceInner(lines: lines, lineIndex: &lineIndex)
+            let kind: NotebookBlockKind = .drawing(
+                index: drawingIndex,
+                elementsJson: source.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            drawingIndex += 1
+            return .some(kind)
+        }
+        if trimmed == "```task" || trimmed.hasPrefix("```task") {
+            let source = readFenceInner(lines: lines, lineIndex: &lineIndex)
+            return .some(parseTaskInner(source).map { .task($0) })
+        }
+        let language = fenceLanguage(trimmed)
+        let source = readFenceInner(lines: lines, lineIndex: &lineIndex)
+        if language == "lex-tool", let tool = parseLexToolFence(source) {
+            return .some(.toolFence(instanceId: tool.instanceId, toolId: tool.toolId, version: tool.version))
+        }
+        return .some(.code(language: language, source: source))
+    }
+
+    private static func readFenceInner(lines: [String], lineIndex: inout Int) -> String {
+        var inner: [String] = []
+        lineIndex += 1
+        while lineIndex < lines.count, !lines[lineIndex].trimmingCharacters(in: .whitespaces).hasPrefix("```") {
+            inner.append(lines[lineIndex])
+            lineIndex += 1
+        }
+        lineIndex += 1
+        return inner.joined(separator: "\n")
+    }
+
     private static func fenceLanguage(_ opener: String) -> String? {
         let rest = opener.dropFirst(3).trimmingCharacters(in: .whitespaces)
         if rest.isEmpty { return nil }
-        let lang = rest.split(whereSeparator: { $0.isWhitespace }).first.map(String.init)
-        return lang?.isEmpty == true ? nil : lang
+        let language = rest.split(whereSeparator: { $0.isWhitespace }).first.map(String.init)
+        return language?.isEmpty == true ? nil : language
     }
 
-    private static func parseLexToolFence(_ source: String) -> (instanceId: String, toolId: String, version: Int)? {
+    private struct LexToolFencePayload {
+        let instanceId: String
+        let toolId: String
+        let version: Int
+    }
+
+    private static func parseLexToolFence(_ source: String) -> LexToolFencePayload? {
         guard
             let data = source.trimmingCharacters(in: .whitespacesAndNewlines).data(using: .utf8),
             let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
@@ -338,18 +354,18 @@ enum NotebookMarkdown {
         let instanceId = (json["instanceId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let toolId = (json["toolId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let version: Int? = {
-            if let n = json["v"] as? Int { return n }
-            if let s = json["v"] as? String { return Int(s) }
+            if let intVersion = json["v"] as? Int { return intVersion }
+            if let stringVersion = json["v"] as? String { return Int(stringVersion) }
             return nil
         }()
         guard !instanceId.isEmpty, !toolId.isEmpty, version == 1 else { return nil }
-        return (instanceId, toolId, 1)
+        return LexToolFencePayload(instanceId: instanceId, toolId: toolId, version: 1)
     }
 
     private static func parseStandaloneMath(_ text: String) -> NotebookBlockKind? {
-        let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard t.hasPrefix("$$"), t.hasSuffix("$$"), t.count >= 4 else { return nil }
-        let inner = String(t.dropFirst(2).dropLast(2)).trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.hasPrefix("$$"), trimmed.hasSuffix("$$"), trimmed.count >= 4 else { return nil }
+        let inner = String(trimmed.dropFirst(2).dropLast(2)).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !inner.isEmpty, !inner.contains("$$") else { return nil }
         return .math(latex: inner, display: true)
     }

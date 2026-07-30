@@ -4869,6 +4869,28 @@
       }
     },
     {
+      "id": "ct-m1-mobile-markdown-engine-tables-code-math",
+      "path": "docs/completed/content_tools/CT.M1-mobile-markdown-engine-tables-code-math.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story with native unit suites (iOS/Android notebook markdown + shared fixtures); web Playwright suite is not the coverage surface.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": "n/a",
+        "authorization": "n/a",
+        "dependency": "n/a",
+        "rollback": true,
+        "notes": "Client flag ffMobileRichMarkdown (default on) gates the rich renderer path; unit fixtures cover table heal / lex-tool hide."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

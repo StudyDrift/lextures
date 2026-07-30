@@ -8,6 +8,15 @@ enum MarkdownTableAlign: String, Equatable, CaseIterable {
     case right
 }
 
+/// Result of parsing a GFM pipe table from a line slice.
+struct ParsedMarkdownTable: Equatable {
+    let align: [MarkdownTableAlign]
+    let header: [String]
+    let rows: [[String]]
+    /// Index of the first line after the table.
+    let endIndex: Int
+}
+
 /// Pure table detection / blank-line healing / cell split (parity with web `normalize-markdown-tables`).
 enum MarkdownTableLogic {
     /// Collapse blank lines inside GitHub-flavored markdown tables (web FR-3 parity).
@@ -15,34 +24,34 @@ enum MarkdownTableLogic {
         guard markdown.contains("|") else { return markdown }
         let lines = markdown.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n")
         var out: [String] = []
-        var i = 0
-        while i < lines.count {
-            let line = lines[i]
-            let sepIdx = nextNonEmptyIndex(lines, from: i + 1)
+        var index = 0
+        while index < lines.count {
+            let line = lines[index]
+            let separatorIndex = nextNonEmptyIndex(lines, from: index + 1)
             let looksLikeHeader =
                 isTableRowLine(line)
-                && sepIdx < lines.count
-                && isTableSeparatorLine(lines[sepIdx])
+                && separatorIndex < lines.count
+                && isTableSeparatorLine(lines[separatorIndex])
             if !looksLikeHeader {
                 out.append(line)
-                i += 1
+                index += 1
                 continue
             }
             var tableLines: [String] = [line]
-            i += 1
-            while i < lines.count {
-                let L = lines[i]
-                if L.trimmingCharacters(in: .whitespaces).isEmpty {
-                    let next = nextNonEmptyIndex(lines, from: i + 1)
-                    if next < lines.count && isTableRelatedLine(lines[next]) {
-                        i = next
+            index += 1
+            while index < lines.count {
+                let candidate = lines[index]
+                if candidate.trimmingCharacters(in: .whitespaces).isEmpty {
+                    let nextIndex = nextNonEmptyIndex(lines, from: index + 1)
+                    if nextIndex < lines.count && isTableRelatedLine(lines[nextIndex]) {
+                        index = nextIndex
                         continue
                     }
                     break
                 }
-                if !isTableRelatedLine(L) { break }
-                tableLines.append(L)
-                i += 1
+                if !isTableRelatedLine(candidate) { break }
+                tableLines.append(candidate)
+                index += 1
             }
             if tableLines.count >= 2 && isTableSeparatorLine(tableLines[1]) {
                 out.append(contentsOf: tableLines)
@@ -57,54 +66,51 @@ enum MarkdownTableLogic {
     }
 
     /// Try to parse a GFM table starting at `start`. Returns nil when not a valid table.
-    static func parseTable(
-        in lines: [String],
-        start: Int
-    ) -> (align: [MarkdownTableAlign], header: [String], rows: [[String]], end: Int)? {
+    static func parseTable(in lines: [String], start: Int) -> ParsedMarkdownTable? {
         guard start < lines.count, isTableRowLine(lines[start]) else { return nil }
-        let sepIdx = nextNonEmptyIndex(lines, from: start + 1)
-        guard sepIdx < lines.count, isTableSeparatorLine(lines[sepIdx]) else { return nil }
+        let separatorIndex = nextNonEmptyIndex(lines, from: start + 1)
+        guard separatorIndex < lines.count, isTableSeparatorLine(lines[separatorIndex]) else { return nil }
 
         let header = splitCells(lines[start])
-        let align = parseAlignments(lines[sepIdx], columnCount: header.count)
+        let align = parseAlignments(lines[separatorIndex], columnCount: header.count)
         var rows: [[String]] = []
-        var i = sepIdx + 1
-        while i < lines.count {
-            let trimmed = lines[i].trimmingCharacters(in: .whitespaces)
+        var index = separatorIndex + 1
+        while index < lines.count {
+            let trimmed = lines[index].trimmingCharacters(in: .whitespaces)
             if trimmed.isEmpty { break }
-            if !isTableRowLine(lines[i]) { break }
-            if isTableSeparatorLine(lines[i]) { break }
-            rows.append(padCells(splitCells(lines[i]), to: header.count))
-            i += 1
+            if !isTableRowLine(lines[index]) { break }
+            if isTableSeparatorLine(lines[index]) { break }
+            rows.append(padCells(splitCells(lines[index]), to: header.count))
+            index += 1
         }
-        return (align, header, rows, i)
+        return ParsedMarkdownTable(align: align, header: header, rows: rows, endIndex: index)
     }
 
     static func isTableRowLine(_ line: String) -> Bool {
-        let t = line.trimmingCharacters(in: .whitespaces)
-        guard t.contains("|") else { return false }
-        if t.range(of: #"^\|?[\s:|-]+$"#, options: .regularExpression) != nil && t.contains("-") {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        guard trimmed.contains("|") else { return false }
+        if trimmed.range(of: #"^\|?[\s:|-]+$"#, options: .regularExpression) != nil && trimmed.contains("-") {
             return false
         }
-        if t.count >= 2 {
-            let inner = t.dropFirst().dropLast()
+        if trimmed.count >= 2 {
+            let inner = trimmed.dropFirst().dropLast()
             if inner.contains("|") { return true }
         }
-        return t.hasPrefix("|") && t.hasSuffix("|")
+        return trimmed.hasPrefix("|") && trimmed.hasSuffix("|")
     }
 
     static func isTableSeparatorLine(_ line: String) -> Bool {
-        let t = line.trimmingCharacters(in: .whitespaces)
-        guard t.contains("-") else { return false }
-        let a = t.range(
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        guard trimmed.contains("-") else { return false }
+        let patternA = trimmed.range(
             of: #"^\|?(\s*:?-{3,}:?\s*\|)+\s*:?-{3,}:?\s*\|?$"#,
             options: .regularExpression
         ) != nil
-        let b = t.range(
+        let patternB = trimmed.range(
             of: #"^\|?(\s*:?-{3,}:?\s*\|?)+\s*$"#,
             options: .regularExpression
         ) != nil
-        return a || b
+        return patternA || patternB
     }
 
     static func isTableRelatedLine(_ line: String) -> Bool {
@@ -112,20 +118,20 @@ enum MarkdownTableLogic {
     }
 
     static func splitCells(_ line: String) -> [String] {
-        var t = line.trimmingCharacters(in: .whitespaces)
-        if t.hasPrefix("|") { t = String(t.dropFirst()) }
-        if t.hasSuffix("|") { t = String(t.dropLast()) }
-        return t.split(separator: "|", omittingEmptySubsequences: false)
+        var trimmed = line.trimmingCharacters(in: .whitespaces)
+        if trimmed.hasPrefix("|") { trimmed = String(trimmed.dropFirst()) }
+        if trimmed.hasSuffix("|") { trimmed = String(trimmed.dropLast()) }
+        return trimmed.split(separator: "|", omittingEmptySubsequences: false)
             .map { $0.trimmingCharacters(in: .whitespaces) }
     }
 
     static func parseAlignments(_ separator: String, columnCount: Int) -> [MarkdownTableAlign] {
         let cells = splitCells(separator)
         let parsed: [MarkdownTableAlign] = cells.map { cell in
-            let c = cell.trimmingCharacters(in: .whitespaces)
-            let left = c.hasPrefix(":")
-            let right = c.hasSuffix(":")
-            switch (left, right) {
+            let trimmed = cell.trimmingCharacters(in: .whitespaces)
+            let leftColon = trimmed.hasPrefix(":")
+            let rightColon = trimmed.hasSuffix(":")
+            switch (leftColon, rightColon) {
             case (true, true): return .center
             case (false, true): return .right
             case (true, false): return .left
@@ -142,11 +148,11 @@ enum MarkdownTableLogic {
     }
 
     static func nextNonEmptyIndex(_ lines: [String], from: Int) -> Int {
-        var j = from
-        while j < lines.count && lines[j].trimmingCharacters(in: .whitespaces).isEmpty {
-            j += 1
+        var cursor = from
+        while cursor < lines.count && lines[cursor].trimmingCharacters(in: .whitespaces).isEmpty {
+            cursor += 1
         }
-        return j
+        return cursor
     }
 
     /// Reconstruct pipe-table markdown (used when folding into the editor model).
@@ -154,15 +160,15 @@ enum MarkdownTableLogic {
         func row(_ cells: [String]) -> String {
             "| " + cells.joined(separator: " | ") + " |"
         }
-        let sep = align.map { a -> String in
-            switch a {
+        let separators = align.map { alignment -> String in
+            switch alignment {
             case .left: return ":---"
             case .center: return ":---:"
             case .right: return "---:"
             case .default: return "---"
             }
         }
-        var lines = [row(header), "| " + sep.joined(separator: " | ") + " |"]
+        var lines = [row(header), "| " + separators.joined(separator: " | ") + " |"]
         lines.append(contentsOf: rows.map(row))
         return lines.joined(separator: "\n")
     }
