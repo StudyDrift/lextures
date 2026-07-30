@@ -44,7 +44,7 @@ struct QuizIntroView: View {
                         if let markdown = detail?.markdown ?? quizPayload?.markdown,
                            !markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             LMSCard {
-                                CourseMarkdownContentView(markdown: markdown)
+                                CourseMarkdownContentView(markdown: markdown, compact: false)
                                     .lexturesReadableText()
                             }
                         }

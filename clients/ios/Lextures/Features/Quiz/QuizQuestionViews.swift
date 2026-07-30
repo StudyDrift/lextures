@@ -12,6 +12,8 @@ struct QuizQuestionView: View {
     let onChange: (QuizAnswerState) -> Void
     let isFlagged: Bool
     let onToggleFlag: () -> Void
+    /// CT.M2 FR-13: suppress copy / table expand / link taps during lockdown quizzes.
+    var suppressAffordances = false
 
     private var kind: QuizQuestionKind { QuizQuestionKind(raw: question.questionType) }
 
@@ -44,7 +46,10 @@ struct QuizQuestionView: View {
 
     @ViewBuilder
     private var promptView: some View {
-        CourseMarkdownContentView(markdown: question.prompt)
+        CourseMarkdownContentView(
+            markdown: question.prompt,
+            suppressAffordances: suppressAffordances
+        )
             .lexturesReadableText()
             .padding(.vertical, 4)
     }
@@ -155,18 +160,23 @@ struct QuizQuestionView: View {
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: uiMode.drawerIconPointSize))
                     .foregroundStyle(selected ? LexturesTheme.primary : LexturesTheme.textSecondary(for: colorScheme))
-                Text(label)
-                    .font(.system(size: uiMode.baseBodyPointSize))
-                    .multilineTextAlignment(.leading)
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    .accessibilityHidden(true)
+                InlineMarkdownText(
+                    markdown: label,
+                    suppressLinks: suppressAffordances,
+                    font: .system(size: uiMode.baseBodyPointSize)
+                )
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                 Spacer(minLength: 0)
             }
             .padding(uiMode.isYoung ? 16 : 12)
             .frame(minHeight: uiMode.choiceButtonMinHeight)
             .background(selected ? LexturesTheme.primary.opacity(0.12) : LexturesTheme.sceneBackground(for: colorScheme))
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(MarkdownRenderStyle.plainLabel(label))
     }
 
     private var numericInput: some View {
@@ -257,8 +267,7 @@ struct QuizQuestionView: View {
                     Text("\(index + 1).")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-                    Text(item)
-                        .font(.subheadline)
+                    InlineMarkdownText(markdown: item, suppressLinks: suppressAffordances)
                     Spacer()
                     VStack(spacing: 4) {
                         Button {
@@ -305,8 +314,11 @@ struct QuizQuestionView: View {
         return VStack(alignment: .leading, spacing: 10) {
             ForEach(pairs, id: \.leftId) { pair in
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(pair.left)
-                        .font(.subheadline.weight(.medium))
+                    InlineMarkdownText(
+                        markdown: pair.left,
+                        suppressLinks: suppressAffordances,
+                        font: .subheadline.weight(.medium)
+                    )
                     Picker(L.text("mobile.quiz.matchSelect"), selection: Binding(
                         get: { answer.matching?[pair.leftId] ?? "" },
                         set: { value in
@@ -323,7 +335,7 @@ struct QuizQuestionView: View {
                     )) {
                         Text(L.text("mobile.quiz.matchNone")).tag("")
                         ForEach(rights, id: \.self) { right in
-                            Text(right).tag(right)
+                            Text(MarkdownRenderStyle.plainLabel(right)).tag(right)
                         }
                     }
                     .pickerStyle(.menu)

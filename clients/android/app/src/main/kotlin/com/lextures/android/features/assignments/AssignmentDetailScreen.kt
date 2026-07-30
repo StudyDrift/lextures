@@ -80,7 +80,7 @@ import com.lextures.android.core.lms.SubmitAssignmentTextRequest
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.courses.detailRows
 import com.lextures.android.features.courses.ItemKind
-import com.lextures.android.features.courses.MarkdownText
+import com.lextures.android.features.notebooks.NotebookContentView
 import com.lextures.android.features.reader.ImmersiveReaderPreferencesSheet
 import com.lextures.android.features.reader.ReaderToolbarOrLegacy
 import com.lextures.android.features.reader.rememberImmersiveReaderState
@@ -408,7 +408,7 @@ fun AssignmentDetailScreen(
                             onOpenPreferences = readerState.onShowPreferences,
                             ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
                         )
-                        MarkdownText(markdown)
+                        NotebookContentView(markdown = markdown)
                     }
                 }
             }

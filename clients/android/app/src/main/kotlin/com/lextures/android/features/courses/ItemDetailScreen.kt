@@ -257,7 +257,7 @@ fun ItemDetailScreen(
                             onOpenPreferences = readerState.onShowPreferences,
                             ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
                         )
-                        MarkdownText(markdown)
+                        NotebookContentView(markdown = markdown)
                     }
                 }
             }
@@ -407,21 +407,6 @@ private fun lateLabel(policy: String, penalty: Int?): String = when (policy) {
 
 private fun titlecase(raw: String): String =
     raw.replace('_', ' ').replaceFirstChar { it.uppercase() }
-
-/**
- * CT.M1 shim: legacy call sites keep `MarkdownText(...)` while the rich engine
- * (`NotebookContentView`) renders tables/code/math/inline formatting.
- * `stripInline` is deleted — formatting is no longer stripped (FR-8).
- */
-@Composable
-fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
-    NotebookContentView(
-        markdown = markdown,
-        onToggleTask = {},
-        onEditTaskDue = {},
-        modifier = modifier,
-    )
-}
 
 /** Student view of their own submission status and released grade. */
 @Composable

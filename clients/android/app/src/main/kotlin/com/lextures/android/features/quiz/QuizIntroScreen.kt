@@ -51,6 +51,7 @@ import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.courses.RowHeader
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsErrorBanner
+import com.lextures.android.features.notebooks.NotebookContentView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -148,7 +149,7 @@ fun QuizIntroScreen(
                 val markdown = detail?.markdown ?: quiz?.markdown
                 if (!markdown.isNullOrBlank()) {
                     LmsCard {
-                        Text(markdown)
+                        NotebookContentView(markdown = markdown)
                     }
                 }
                 val timeLimit = detail?.timeLimitMinutes ?: quiz?.timeLimitMinutes
@@ -520,6 +521,8 @@ fun QuizTakerScreen(
                                     accessToken = token,
                                 )
                             },
+                            suppressAffordances = serverLockdown ||
+                                QuizLogic.requiresDeviceLockdown(lockdownMode = start.lockdownMode),
                         )
                     }
                     Row(

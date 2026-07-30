@@ -66,6 +66,7 @@ import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSkeletonList
+import com.lextures.android.features.notebooks.NotebookContentView
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -523,7 +524,7 @@ private fun FeedMessageBubble(
                 )
             }
             if (text.isNotEmpty()) {
-                Text(text, color = textPrimary())
+                NotebookContentView(markdown = text, compact = true)
             }
             imagePath?.let { path -> FeedImage(path = path, accessToken = accessToken) }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {

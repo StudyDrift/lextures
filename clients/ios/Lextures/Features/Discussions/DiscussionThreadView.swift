@@ -111,9 +111,7 @@ struct DiscussionThreadView: View {
                         contentId: thread.id,
                         contentType: "discussion_post"
                     )
-                    Text(thread.bodyPlainText)
-                        .font(.body)
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    CourseMarkdownContentView(markdown: thread.bodyPlainText, compact: true)
                         .textSelection(.enabled)
                         .lexturesReadableText()
                 }
@@ -140,9 +138,7 @@ struct DiscussionThreadView: View {
                     contentId: post.id,
                     contentType: "discussion_post"
                 )
-                Text(post.bodyPlainText)
-                    .font(.body)
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                CourseMarkdownContentView(markdown: post.bodyPlainText, compact: true)
                     .textSelection(.enabled)
                     .lexturesReadableText()
                     .padding(.leading, CGFloat(min(nested.depth, 6)) * 12)

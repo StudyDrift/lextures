@@ -35,7 +35,7 @@ import com.lextures.android.core.lms.FilePreviewTarget
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.PortfolioArtifact
 import com.lextures.android.core.lms.PortfolioLogic
-import com.lextures.android.features.courses.MarkdownText
+import com.lextures.android.features.notebooks.NotebookContentView
 import com.lextures.android.features.files.FilePreviewScreen
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsErrorBanner
@@ -161,7 +161,7 @@ fun ArtifactDetailScreen(
 
         if (PortfolioLogic.isContentPage(current) && current.textContent.isNotBlank()) {
             LmsCard {
-                MarkdownText(current.textContent)
+                NotebookContentView(markdown = current.textContent)
             }
         }
 

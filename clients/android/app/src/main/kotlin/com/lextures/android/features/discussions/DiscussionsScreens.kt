@@ -63,6 +63,7 @@ import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSegmentedChips
 import com.lextures.android.features.home.LmsSkeletonList
+import com.lextures.android.features.notebooks.NotebookContentView
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.encodeToString
@@ -371,7 +372,7 @@ fun DiscussionThreadScreen(
                                 onOpenPreferences = readerState.onShowPreferences,
                                 ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
                             )
-                            Text(detail.bodyPlainText, color = textPrimary())
+                            NotebookContentView(markdown = detail.bodyPlainText, compact = true)
                         }
                     }
                 }
@@ -411,7 +412,7 @@ fun DiscussionThreadScreen(
                                 onOpenPreferences = readerState.onShowPreferences,
                                 ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
                             )
-                            Text(post.bodyPlainText, color = textPrimary())
+                            NotebookContentView(markdown = post.bodyPlainText, compact = true)
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 TextButton(onClick = {
                                     scope.launch {

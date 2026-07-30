@@ -37,31 +37,70 @@ enum AccessibilitySupport {
         return sentences
     }
 
-    /// Strip lightweight markdown to plain text for read-aloud.
+    /// Plain-text projection for read-aloud (CT.M2 FR-12 / AC-10).
+    /// Uses the shared block parser so tables/code/math linearise without pipe/fence markup.
     static func plainText(fromMarkdown markdown: String) -> String {
-        var lines: [String] = []
-        for rawLine in markdown.split(whereSeparator: \.isNewline) {
-            var line = String(rawLine)
-            let inlineReplacements: [(String, String)] = [
-                (#"!\[[^\]]*\]\([^)]*\)"#, ""),
-                (#"\[([^\]]+)\]\([^)]*\)"#, "$1"),
-                (#"`{1,3}[^`]+`{1,3}"#, ""),
-                (#"\*\*([^*]+)\*\*"#, "$1"),
-                (#"\*([^*]+)\*"#, "$1"),
-                (#"__([^_]+)__"#, "$1"),
-                (#"_([^_]+)_"#, "$1"),
-            ]
-            for (pattern, template) in inlineReplacements {
-                line = line.replacingOccurrences(of: pattern, with: template, options: .regularExpression)
+        var parts: [String] = []
+        for block in NotebookMarkdown.parseBlocks(markdown) {
+            switch block.kind {
+            case .heading(_, let text), .paragraph(let text), .quote(let text):
+                appendStripped(text, into: &parts)
+            case .bulletItem(let text, _), .taskItem(_, let text, _), .orderedItem(_, let text, _):
+                appendStripped(text, into: &parts)
+            case .task(let task):
+                appendStripped(task.text, into: &parts)
+            case .code(_, let source):
+                let trimmed = source.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty { parts.append(trimmed) }
+            case .math(let latex, _):
+                let trimmed = latex.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty { parts.append(trimmed) }
+            case .table(_, let header, let rows):
+                let headerLine = header.map(stripInlineMarkdown).filter { !$0.isEmpty }.joined(separator: ", ")
+                if !headerLine.isEmpty { parts.append(headerLine) }
+                for row in rows {
+                    let rowLine = row.map(stripInlineMarkdown).filter { !$0.isEmpty }.joined(separator: ", ")
+                    if !rowLine.isEmpty { parts.append(rowLine) }
+                }
+            case .toolFence(_, let toolId, _):
+                if !toolId.isEmpty { parts.append(toolId) }
+            case .image(let alt, _):
+                if !alt.isEmpty { parts.append(alt) }
+            case .drawing:
+                parts.append("Drawing")
+            case .divider:
+                continue
             }
-            line = line.replacingOccurrences(of: #"^#{1,6}\s+"#, with: "", options: .regularExpression)
-            line = line.replacingOccurrences(of: #"^>\s?"#, with: "", options: .regularExpression)
-            line = line.replacingOccurrences(of: #"^[-*+]\s+"#, with: "", options: .regularExpression)
-            line = line.replacingOccurrences(of: #"^\d+\.\s+"#, with: "", options: .regularExpression)
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if !trimmed.isEmpty { lines.append(trimmed) }
         }
-        return lines.joined(separator: " ")
+        return parts.joined(separator: " ")
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func appendStripped(_ text: String, into parts: inout [String]) {
+        let stripped = stripInlineMarkdown(text)
+        if !stripped.isEmpty { parts.append(stripped) }
+    }
+
+    /// Strip lightweight inline markdown markers from a single run of text.
+    static func stripInlineMarkdown(_ text: String) -> String {
+        var line = text
+        let inlineReplacements: [(String, String)] = [
+            (#"!\[[^\]]*\]\([^)]*\)"#, ""),
+            (#"\[([^\]]+)\]\([^)]*\)"#, "$1"),
+            (#"`([^`]+)`"#, "$1"),
+            (#"\*\*([^*]+)\*\*"#, "$1"),
+            (#"\*([^*]+)\*"#, "$1"),
+            (#"__([^_]+)__"#, "$1"),
+            (#"_([^_]+)_"#, "$1"),
+            (#"~~([^~]+)~~"#, "$1"),
+            (#"\$\$([^$]+)\$\$"#, "$1"),
+            (#"\$([^$]+)\$"#, "$1"),
+        ]
+        for (pattern, template) in inlineReplacements {
+            line = line.replacingOccurrences(of: pattern, with: template, options: .regularExpression)
+        }
+        return line.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private static func relativeLuminance(_ color: ColorComponents) -> Double {

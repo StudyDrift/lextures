@@ -66,7 +66,7 @@ import com.lextures.android.core.lms.BoardReactionMode
 import com.lextures.android.core.lms.BoardSection
 import com.lextures.android.core.lms.BoardsLogic
 import com.lextures.android.core.lms.WhiteboardRenderer
-import com.lextures.android.features.courses.MarkdownText
+import com.lextures.android.features.notebooks.NotebookContentView
 import com.lextures.android.features.home.LmsCard
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 
@@ -221,7 +221,7 @@ fun BoardPostCard(
         when (known) {
             BoardContentType.Text -> {
                 val plain = BoardsLogic.bodyPlainText(post)
-                if (plain.isNotBlank()) MarkdownText(plain)
+                if (plain.isNotBlank()) NotebookContentView(markdown = plain, compact = true)
             }
             BoardContentType.Image -> MediaBlock(
                 post = post,

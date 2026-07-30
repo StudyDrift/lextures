@@ -149,7 +149,7 @@ in this series adds a migration or an endpoint** — mobile consumes the shipped
 | ID | Plan | Severity | Effort | Depends on | Delivers |
 |---|---|---|---|---|---|
 | **CT.M1** | [Mobile markdown engine: tables, code, math & media](../../completed/content_tools/CT.M1-mobile-markdown-engine-tables-code-math.md) | DONE | M | — | One parser/renderer per platform; GFM tables, fenced code, typeset math, inline formatting; `lex-tool` parsed and hidden |
-| **CT.M2** | [Rich content parity: assignments, quizzes, syllabus, discussions](CT.M2-mobile-rich-content-parity-assignments-quizzes.md) | MAJOR | S | CT.M1 | Every reader on one renderer; markdown in quiz prompts, **choices**, feedback and review; legacy renderers deleted |
+| **CT.M2** | [Rich content parity: assignments, quizzes, syllabus, discussions](../../completed/content_tools/CT.M2-mobile-rich-content-parity-assignments-quizzes.md) | DONE | S | CT.M1 | Every reader on one renderer; markdown in quiz prompts, **choices**, feedback and review; legacy renderers deleted |
 | **CT.M3** | [Content tool host & state persistence](CT.M3-mobile-content-tool-host-and-state.md) | BLOCKER | M | CT.M1, CT.M2 | Flag plumbing, batched instance fetch, `ToolFrame`, autosave + revision conflicts, submit, actions, offline outbox, a11y baseline |
 | **CT.M4** | [Sandboxed WebView tool host](CT.M4-mobile-sandboxed-webview-tool-host.md) | MAJOR | M | CT.M3 | CT.5 `postMessage` bridge in WKWebView/Android WebView — the long tail and marketplace tools without a mobile release per tool |
 | **CT.M5** | [Tool pack 1 — check & commit](CT.M5-mobile-tools-check-and-commit.md) | MAJOR | M | CT.M3 | `inline_questions`, `predict_reveal`, `class_pulse`, `flashcards` |

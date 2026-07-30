@@ -413,7 +413,8 @@ struct QuizTakerView: View {
                                     } else {
                                         model.flaggedIds.insert(question.id)
                                     }
-                                }
+                                },
+                                suppressAffordances: model.serverLockdown || deviceLockdownRequired
                             )
                         }
                         .padding(16)

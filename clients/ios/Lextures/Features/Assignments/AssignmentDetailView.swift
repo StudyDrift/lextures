@@ -169,7 +169,7 @@ struct AssignmentDetailView: View {
     private func instructionsCard(_ markdown: String) -> some View {
         LMSCard {
             readerToolbar(markdown: markdown)
-            MarkdownTextView(markdown: markdown)
+            CourseMarkdownContentView(markdown: markdown)
                 .lexturesReadableText()
         }
     }
@@ -255,9 +255,7 @@ struct AssignmentDetailView: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(LexturesTheme.coral)
             if let feedback = mySubmission?.revisionFeedback, !feedback.isEmpty {
-                Text(feedback)
-                    .font(.caption)
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                CourseMarkdownContentView(markdown: feedback, compact: true)
             }
             if let revisionDue = LMSDates.parse(mySubmission?.revisionDueAt) {
                 Text(L.format("mobile.assignment.revisionDue", revisionDue.formatted(date: .abbreviated, time: .shortened)))

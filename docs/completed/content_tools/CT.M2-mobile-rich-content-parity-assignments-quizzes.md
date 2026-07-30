@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — Mobile |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | THIN |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Mobile squad |
 | **Depends on** | CT.M1 |

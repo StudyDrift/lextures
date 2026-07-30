@@ -110,9 +110,9 @@ Access and refresh tokens are stored in the Keychain. MFA-required accounts show
 
 Notebooks are device-local (same model as the web app's localStorage notebooks, format v2), keyed per signed-in user.
 
-## Markdown engine (CT.M1)
+## Markdown engine (CT.M1 / CT.M2)
 
-Course and notebook readers share one parser (`Core/Notebook/NotebookMarkdown.swift` + `MarkdownTableLogic.swift`) and one renderer (`CourseMarkdownContentView`). The engine handles GFM tables (with blank-line healing parity to web `normalizeMarkdownTables`), fenced code (language + copy), `$`/`$$` math (monospace fallback with a11y labels), GFM task lists, and ` ```lex-tool ` placeholders (raw JSON never shown). Shared golden fixtures live in `clients/mobile/fixtures/markdown/corpus.json`. Unit coverage: `LexturesTests/NotebookMarkdownLogicTests.swift`. Feature flag: `ffMobileRichMarkdown` (default on).
+Course and notebook readers share one parser (`Core/Notebook/NotebookMarkdown.swift` + `MarkdownTableLogic.swift`) and **one** renderer (`CourseMarkdownContentView`). Assignments, quizzes (prompt/choices/review), syllabus, item detail, boards, portfolio, tutor, discussions, announcements, and grade feedback all use that renderer. Pass `compact: true` in chat/cards/list rows; pass `suppressAffordances: true` during lockdown quizzes so copy/table-expand/link taps stay closed. The legacy `MarkdownTextView` is deleted — CI enforces this via `scripts/check-mobile-markdown-renderer.sh`. Shared golden fixtures: `clients/mobile/fixtures/markdown/corpus.json`. Unit coverage: `LexturesTests/NotebookMarkdownLogicTests.swift`, `MarkdownRenderStyleTests.swift`. Feature flag: `ffMobileRichMarkdown` (default on).
 
 ## Realtime sockets
 

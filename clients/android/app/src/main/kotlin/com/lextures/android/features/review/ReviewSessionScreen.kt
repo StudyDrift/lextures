@@ -29,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,9 +50,12 @@ import com.lextures.android.core.lms.SrsGrade
 import com.lextures.android.core.lms.SrsReviewSubmitBody
 import com.lextures.android.core.notebook.NotebookStore
 import com.lextures.android.core.offline.OfflineService
+import com.lextures.android.features.courses.markdown.MarkdownRenderStyle
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsErrorBanner
+import com.lextures.android.features.notebooks.NotebookContentView
+import com.lextures.android.features.notebooks.inlineMarkdown
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -180,18 +185,33 @@ fun ReviewSessionScreen(
                             fontWeight = FontWeight.SemiBold,
                             color = textSecondary(),
                         )
-                        Text(item.stem, color = textPrimary())
+                        NotebookContentView(markdown = item.stem)
                         val quizQuestion = ReviewLogic.toQuizQuestion(item)
                         if (quizQuestion != null && !revealed) {
                             when (QuizQuestionKind.from(item.questionType)) {
                                 QuizQuestionKind.MultipleChoice, QuizQuestionKind.TrueFalse -> {
                                     QuizLogic.visibleChoices(quizQuestion).forEach { choice ->
-                                        Text("• $choice", color = textPrimary())
+                                        Text(
+                                            text = inlineMarkdown(choice),
+                                            color = textPrimary(),
+                                            modifier = Modifier.semantics {
+                                                contentDescription = MarkdownRenderStyle.plainLabel(choice)
+                                            },
+                                        )
                                     }
                                 }
                                 QuizQuestionKind.Ordering -> {
                                     QuizLogic.orderingItems(quizQuestion).forEachIndexed { index, label ->
-                                        Text("${index + 1}. $label", color = textPrimary())
+                                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Text("${index + 1}.", color = textPrimary())
+                                            Text(
+                                                text = inlineMarkdown(label),
+                                                color = textPrimary(),
+                                                modifier = Modifier.semantics {
+                                                    contentDescription = MarkdownRenderStyle.plainLabel(label)
+                                                },
+                                            )
+                                        }
                                     }
                                 }
                                 else -> Unit
@@ -215,7 +235,7 @@ fun ReviewSessionScreen(
                             )
                             Text(ReviewLogic.formatAnswerPreview(item.correctAnswer), color = textPrimary())
                             item.explanation?.takeIf { it.isNotBlank() }?.let {
-                                Text(it, fontSize = 12.sp, color = textSecondary())
+                                NotebookContentView(markdown = it, compact = true)
                             }
                         }
                     }

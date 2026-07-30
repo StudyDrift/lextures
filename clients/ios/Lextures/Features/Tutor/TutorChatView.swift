@@ -240,7 +240,7 @@ private struct TutorMessageBubble: View {
                         .font(.body)
                         .foregroundStyle(.white)
                 } else {
-                    CourseMarkdownContentView(markdown: message.content)
+                    CourseMarkdownContentView(markdown: message.content, compact: true)
                     if !message.citations.isEmpty {
                         TutorFlowLayout(spacing: 6) {
                             ForEach(message.citations, id: \.chunkId) { citation in

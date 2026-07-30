@@ -1,11 +1,13 @@
 import SwiftUI
 
 /// Inline GFM table with horizontal scroll and expand affordance (CT.M1 FR-5 / FR-6).
+/// `suppressExpand` hides the full-screen escape hatch during lockdown quizzes (CT.M2 FR-13).
 struct MarkdownTableView: View {
     @Environment(\.colorScheme) private var colorScheme
     let align: [MarkdownTableAlign]
     let header: [String]
     let rows: [[String]]
+    var suppressExpand = false
     @State private var showFullScreen = false
 
     private let minColumnWidth: CGFloat = 96
@@ -15,15 +17,17 @@ struct MarkdownTableView: View {
             ScrollView(.horizontal, showsIndicators: true) {
                 tableGrid(minWidth: minColumnWidth)
             }
-            Button {
-                showFullScreen = true
-            } label: {
-                Label(L.text("mobile.markdown.table.expand"), systemImage: "arrow.up.left.and.arrow.down.right")
-                    .font(.caption.weight(.semibold))
+            if MarkdownRenderStyle.allowsAffordances(suppressAffordances: suppressExpand) {
+                Button {
+                    showFullScreen = true
+                } label: {
+                    Label(L.text("mobile.markdown.table.expand"), systemImage: "arrow.up.left.and.arrow.down.right")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                .accessibilityHint(L.text("mobile.markdown.table.expandHint"))
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-            .accessibilityHint(L.text("mobile.markdown.table.expandHint"))
         }
         .fullScreenCover(isPresented: $showFullScreen) {
             MarkdownTableFullScreenView(align: align, header: header, rows: rows)

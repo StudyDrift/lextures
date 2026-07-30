@@ -1,10 +1,12 @@
 package com.lextures.android.features.quiz
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,6 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lextures.android.core.design.AuthPrimaryButton
@@ -26,7 +32,10 @@ import com.lextures.android.core.lms.QuizQuestionKind
 import com.lextures.android.core.lms.QuizResultsResponse
 import com.lextures.android.core.lms.QuizSaveState
 import com.lextures.android.features.courses.RowHeader
+import com.lextures.android.features.courses.markdown.MarkdownRenderStyle
 import com.lextures.android.features.home.LmsCard
+import com.lextures.android.features.notebooks.NotebookContentView
+import com.lextures.android.features.notebooks.inlineMarkdown
 
 @Composable
 fun QuizQuestionContent(
@@ -36,10 +45,14 @@ fun QuizQuestionContent(
     onChange: (QuizAnswerState) -> Unit,
     codeRunContext: CodeQuestionRunContext? = null,
     modifier: Modifier = Modifier,
+    suppressAffordances: Boolean = false,
 ) {
     val kind = QuizQuestionKind.from(question.questionType)
     LmsCard(modifier = modifier.padding(vertical = 8.dp)) {
-        Text(question.prompt, fontWeight = FontWeight.Medium)
+        NotebookContentView(
+            markdown = question.prompt,
+            suppressAffordances = suppressAffordances,
+        )
         when (saveState) {
             QuizSaveState.Saved -> Text(quizSavedLabel())
             QuizSaveState.Failed -> Text(quizSaveFailedLabel(), color = LexturesColors.Coral)
@@ -52,16 +65,12 @@ fun QuizQuestionContent(
         } else when (kind) {
             QuizQuestionKind.MultipleChoice, QuizQuestionKind.TrueFalse -> {
                 QuizLogic.visibleChoices(question).forEachIndexed { index, choice ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        RadioButton(
-                            selected = answer.choice == index,
-                            onClick = { onChange(answer.copy(choice = index)) },
-                        )
-                        Text(choice)
-                    }
+                    QuizChoiceRow(
+                        label = choice,
+                        selected = answer.choice == index,
+                        suppressLinks = suppressAffordances,
+                        onClick = { onChange(answer.copy(choice = index)) },
+                    )
                 }
             }
             QuizQuestionKind.Numeric, QuizQuestionKind.Formula, QuizQuestionKind.ShortAnswer,
@@ -83,11 +92,20 @@ fun QuizQuestionContent(
                 }
                 items.forEachIndexed { index, item ->
                     Row(
-                        Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .heightIn(min = 48.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text("${index + 1}. $item")
+                        Text("${index + 1}.", fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = inlineMarkdown(item, suppressLinks = suppressAffordances),
+                            modifier = Modifier.semantics {
+                                contentDescription = MarkdownRenderStyle.plainLabel(item)
+                            },
+                        )
                     }
                 }
             }
@@ -103,24 +121,53 @@ fun QuizQuestionContent(
                 val pairs = QuizLogic.matchingPairs(question)
                 val rights = QuizLogic.sortedRightOptions(pairs)
                 pairs.forEach { pair ->
-                    Text(pair.left, fontWeight = FontWeight.Medium)
+                    Text(
+                        text = inlineMarkdown(pair.left, suppressLinks = suppressAffordances),
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.semantics {
+                            contentDescription = MarkdownRenderStyle.plainLabel(pair.left)
+                        },
+                    )
                     rights.forEach { right ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(
-                                selected = answer.matching?.get(pair.leftId) == right,
-                                onClick = {
-                                    val map = (answer.matching ?: emptyMap()).toMutableMap()
-                                    map[pair.leftId] = right
-                                    onChange(answer.copy(matching = map))
-                                },
-                            )
-                            Text(right)
-                        }
+                        QuizChoiceRow(
+                            label = right,
+                            selected = answer.matching?.get(pair.leftId) == right,
+                            suppressLinks = suppressAffordances,
+                            onClick = {
+                                val map = (answer.matching ?: emptyMap()).toMutableMap()
+                                map[pair.leftId] = right
+                                onChange(answer.copy(matching = map))
+                            },
+                        )
                     }
                 }
             }
             else -> Text(quizOpenOnWebLabel())
         }
+    }
+}
+
+@Composable
+private fun QuizChoiceRow(
+    label: String,
+    selected: Boolean,
+    suppressLinks: Boolean,
+    onClick: () -> Unit,
+) {
+    val plain = MarkdownRenderStyle.plainLabel(label)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clickable(onClick = onClick)
+            .semantics(mergeDescendants = true) {
+                role = Role.RadioButton
+                contentDescription = plain
+            },
+    ) {
+        RadioButton(selected = selected, onClick = onClick)
+        Text(text = inlineMarkdown(label, suppressLinks = suppressLinks))
     }
 }
 
@@ -150,7 +197,9 @@ fun QuizResultsScreen(
             results.questions.orEmpty().forEach { question ->
                 LmsCard {
                     Text(quizQuestionNumberLabel(question.questionIndex + 1))
-                    question.promptSnapshot?.let { Text(it) }
+                    question.promptSnapshot?.let {
+                        NotebookContentView(markdown = it, compact = true)
+                    }
                     question.pointsAwarded?.let {
                         Text("$it / ${question.maxPoints} pts")
                     }
