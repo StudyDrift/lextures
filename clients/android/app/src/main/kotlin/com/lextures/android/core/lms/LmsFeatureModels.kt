@@ -446,6 +446,8 @@ data class PlatformFeatures(
     val ffMobileProfileDepth: Boolean? = null,
     val ffMobileLibraryEreserves: Boolean? = null,
     val ffMobileImmersiveReader: Boolean? = null,
+    /** CT.M1 rich markdown engine (tables/code/math/toolFence). Default on when unset. */
+    val ffMobileRichMarkdown: Boolean? = null,
     val ffMobileLiveMeetings: Boolean? = null,
     val readAloudEnabled: Boolean? = null,
     val ffReadAloud: Boolean? = null,

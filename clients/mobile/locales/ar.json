@@ -3686,7 +3686,18 @@
     "mobile.admin.courses.metric.archived.tableTitle": "Archived courses",
     "mobile.admin.courses.metric.archived.tableDescription": "Courses hidden from catalogs.",
     "mobile.admin.courses.metric.emptyTitle": "No courses in this segment",
-    "mobile.admin.courses.metric.emptyMessage": "Try another metric or search by code or title."
+    "mobile.admin.courses.metric.emptyMessage": "Try another metric or search by code or title.",
+    "mobile.markdown.table.expand": "توسيع الجدول",
+    "mobile.markdown.table.expandHint": "يفتح الجدول بملء الشاشة",
+    "mobile.markdown.table.close": "إغلاق",
+    "mobile.markdown.code.copy": "نسخ",
+    "mobile.markdown.code.copied": "تم النسخ",
+    "mobile.markdown.code.language": "%@",
+    "mobile.markdown.code.languageFallback": "رمز",
+    "mobile.markdown.code.block": "كتلة تعليمات برمجية",
+    "mobile.markdown.tool.placeholder": "أداة تفاعلية: %@",
+    "mobile.markdown.math.inline": "معادلة مضمنة: %@",
+    "mobile.markdown.math.display": "معادلة: %@"
   },
   "plurals": {
     "mobile.dashboard.dueThisWeek.count": {

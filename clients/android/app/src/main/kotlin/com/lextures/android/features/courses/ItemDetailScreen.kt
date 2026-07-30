@@ -76,6 +76,7 @@ import com.lextures.android.core.lms.SubmissionGrade
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsCoverTile
 import com.lextures.android.features.home.LmsErrorBanner
+import com.lextures.android.features.notebooks.NotebookContentView
 
 /** Shared icon/label mapping for course structure item kinds. */
 object ItemKind {
@@ -407,98 +408,19 @@ private fun lateLabel(policy: String, penalty: Int?): String = when (policy) {
 private fun titlecase(raw: String): String =
     raw.replace('_', ' ').replaceFirstChar { it.uppercase() }
 
-/** Lightweight block-level markdown renderer (headings, bullets, paragraphs). */
+/**
+ * CT.M1 shim: legacy call sites keep `MarkdownText(...)` while the rich engine
+ * (`NotebookContentView`) renders tables/code/math/inline formatting.
+ * `stripInline` is deleted — formatting is no longer stripped (FR-8).
+ */
 @Composable
 fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
-    val lines = remember(markdown) { parseMarkdownBlocks(markdown) }
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        lines.forEach { block ->
-            when (block) {
-                is MdBlock.Heading -> Text(
-                    text = block.text,
-                    style = LexturesType.display(if (block.level == 1) 21 else if (block.level == 2) 18 else 16),
-                    color = textPrimary(),
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-                is MdBlock.Bullet -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 7.dp)
-                            .size(5.dp)
-                            .clip(CircleShape)
-                            .background(accentColor()),
-                    )
-                    Text(text = block.text, fontSize = 14.sp, color = textPrimary())
-                }
-                is MdBlock.Numbered -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = block.index,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = accentColor(),
-                    )
-                    Text(text = block.text, fontSize = 14.sp, color = textPrimary())
-                }
-                is MdBlock.Paragraph -> Text(
-                    text = block.text,
-                    fontSize = 14.sp,
-                    lineHeight = 21.sp,
-                    color = textPrimary(),
-                )
-            }
-        }
-    }
-}
-
-private sealed interface MdBlock {
-    data class Heading(val level: Int, val text: String) : MdBlock
-    data class Bullet(val text: String) : MdBlock
-    data class Numbered(val index: String, val text: String) : MdBlock
-    data class Paragraph(val text: String) : MdBlock
-}
-
-private val numberedRegex = Regex("""^(\d+)\.\s+(.*)$""")
-
-private fun stripInline(text: String): String =
-    text.replace(Regex("""\*\*(.+?)\*\*"""), "$1")
-        .replace(Regex("""\*(.+?)\*"""), "$1")
-        .replace(Regex("""`(.+?)`"""), "$1")
-        .replace(Regex("""\[(.+?)]\(.+?\)"""), "$1")
-
-private fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
-    val out = mutableListOf<MdBlock>()
-    val paragraph = mutableListOf<String>()
-
-    fun flush() {
-        if (paragraph.isNotEmpty()) {
-            out.add(MdBlock.Paragraph(stripInline(paragraph.joinToString(" "))))
-            paragraph.clear()
-        }
-    }
-
-    markdown.lineSequence().forEach { raw ->
-        val line = raw.trim()
-        when {
-            line.isEmpty() -> flush()
-            line.startsWith("#") -> {
-                flush()
-                val level = line.takeWhile { it == '#' }.length.coerceAtMost(3)
-                out.add(MdBlock.Heading(level, stripInline(line.dropWhile { it == '#' }.trim())))
-            }
-            line.startsWith("- ") || line.startsWith("* ") -> {
-                flush()
-                out.add(MdBlock.Bullet(stripInline(line.drop(2))))
-            }
-            numberedRegex.matches(line) -> {
-                flush()
-                val match = numberedRegex.find(line)!!
-                out.add(MdBlock.Numbered("${match.groupValues[1]}.", stripInline(match.groupValues[2])))
-            }
-            else -> paragraph.add(line)
-        }
-    }
-    flush()
-    return out
+    NotebookContentView(
+        markdown = markdown,
+        onToggleTask = {},
+        onEditTaskDue = {},
+        modifier = modifier,
+    )
 }
 
 /** Student view of their own submission status and released grade. */

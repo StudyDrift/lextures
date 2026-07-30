@@ -2675,6 +2675,17 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_liveQuiz_play_yourRank">You are #%1$d with %2$d points</string>
     <string name="mobile_liveQuiz_results_load">View my results</string>
     <string name="mobile_liveQuiz_results_summary">Rank #%1$d · %2$d points · %3$d/%4$d correct</string>
+    <string name="mobile_markdown_code_block">bloc de code</string>
+    <string name="mobile_markdown_code_copied">Copié</string>
+    <string name="mobile_markdown_code_copy">Copier</string>
+    <string name="mobile_markdown_code_language">%1$s</string>
+    <string name="mobile_markdown_code_languageFallback">Code</string>
+    <string name="mobile_markdown_math_display">Équation : %1$s</string>
+    <string name="mobile_markdown_math_inline">Équation en ligne : %1$s</string>
+    <string name="mobile_markdown_table_close">Fermer</string>
+    <string name="mobile_markdown_table_expand">Agrandir le tableau</string>
+    <string name="mobile_markdown_table_expandHint">Ouvre le tableau en plein écran</string>
+    <string name="mobile_markdown_tool_placeholder">Outil interactif : %1$s</string>
     <string name="mobile_marketplace_aboutTitle">À propos</string>
     <string name="mobile_marketplace_buy">Acheter</string>
     <string name="mobile_marketplace_buyOnWeb">Acheter sur le web</string>

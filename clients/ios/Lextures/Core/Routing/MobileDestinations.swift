@@ -368,6 +368,8 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileProfileDepth = false
     var ffMobileLibraryEreserves = true
     var ffMobileImmersiveReader = true
+    /// CT.M1 rich markdown engine; default on when unset.
+    var ffMobileRichMarkdown = true
     var ffMobileLiveMeetings = true
     var readAloudEnabled = false
     var ffReadAloud = false
@@ -459,6 +461,7 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileProfileDepth: features?.ffMobileProfileDepth == true,
             ffMobileLibraryEreserves: features?.ffMobileLibraryEreserves != false,
             ffMobileImmersiveReader: features?.ffMobileImmersiveReader != false,
+            ffMobileRichMarkdown: features?.ffMobileRichMarkdown != false,
             ffMobileLiveMeetings: features?.ffMobileLiveMeetings != false,
             readAloudEnabled: features?.readAloudEnabled == true,
             ffReadAloud: features?.ffReadAloud == true,

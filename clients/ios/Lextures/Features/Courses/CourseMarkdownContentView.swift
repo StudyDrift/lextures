@@ -7,17 +7,23 @@ struct CourseMarkdownContentView: View {
     @Environment(\.colorScheme) private var colorScheme
     let markdown: String
     var captionsEnabled = false
-
-    private var blocks: [NotebookBlock] {
-        NotebookMarkdown.parseBlocks(markdown)
-    }
+    @State private var cachedMarkdown = ""
+    @State private var cachedBlocks: [NotebookBlock] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ForEach(blocks) { block in
+            ForEach(cachedBlocks) { block in
                 blockView(block)
             }
         }
+        .onAppear { refreshBlocksIfNeeded() }
+        .onChange(of: markdown) { _, _ in refreshBlocksIfNeeded() }
+    }
+
+    private func refreshBlocksIfNeeded() {
+        guard cachedMarkdown != markdown else { return }
+        cachedMarkdown = markdown
+        cachedBlocks = NotebookMarkdown.parseBlocks(markdown)
     }
 
     @ViewBuilder
@@ -38,7 +44,7 @@ struct CourseMarkdownContentView: View {
             } else {
                 mathAwareText(text)
             }
-        case .bulletItem(let text):
+        case .bulletItem(let text, let depth):
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Circle()
                     .fill(LexturesTheme.accent(for: colorScheme))
@@ -46,15 +52,26 @@ struct CourseMarkdownContentView: View {
                     .padding(.top, 6)
                 mathAwareText(text)
             }
-            .padding(.leading, 4)
-        case .orderedItem(let number, let text):
+            .padding(.leading, CGFloat(4 + depth * 16))
+        case .orderedItem(let number, let text, let depth):
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("\(number).")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(LexturesTheme.accent(for: colorScheme))
                 mathAwareText(text)
             }
-            .padding(.leading, 4)
+            .padding(.leading, CGFloat(4 + depth * 16))
+        case .taskItem(let checked, let text, let depth):
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: checked ? "checkmark.square.fill" : "square")
+                    .foregroundStyle(checked ? LexturesTheme.accent(for: colorScheme) : LexturesTheme.textSecondary(for: colorScheme))
+                    .accessibilityHidden(true)
+                mathAwareText(text)
+                    .strikethrough(checked)
+            }
+            .padding(.leading, CGFloat(4 + depth * 16))
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(checked ? "Completed" : "Not completed"): \(text)")
         case .quote(let text):
             HStack(alignment: .top, spacing: 10) {
                 RoundedRectangle(cornerRadius: 2, style: .continuous)
@@ -64,14 +81,25 @@ struct CourseMarkdownContentView: View {
                     .italic()
                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             }
-        case .code(let text):
-            Text(text)
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(LexturesTheme.sceneBackground(for: colorScheme))
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        case .code(let language, let source):
+            MarkdownCodeBlockView(language: language, source: source)
+        case .math(let latex, let display):
+            MathLatexView(latex: latex, displayMode: display)
+        case .table(let align, let header, let rows):
+            MarkdownTableView(align: align, header: header, rows: rows)
+        case .toolFence(_, let toolId, _):
+            Label {
+                Text(L.format("mobile.markdown.tool.placeholder", toolId))
+                    .font(.subheadline)
+            } icon: {
+                Image(systemName: "puzzlepiece.extension")
+            }
+            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(LexturesTheme.sceneBackground(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .accessibilityLabel(L.format("mobile.markdown.tool.placeholder", toolId))
         case .divider:
             Divider()
         case .task, .drawing:
@@ -90,6 +118,7 @@ struct CourseMarkdownContentView: View {
                 .lineSpacing(3)
                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
         } else {
+            // Flow inline math within a wrapping HStack of text runs.
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
                     switch segment {
@@ -124,7 +153,6 @@ enum ModuleContentMedia {
         guard text.contains("$") else { return [.text(text)] }
         var segments: [Segment] = []
         var index = text.startIndex
-        var inDisplay = false
         while index < text.endIndex {
             if text[index] == "$" {
                 let next = text.index(after: index)
@@ -137,15 +165,11 @@ enum ModuleContentMedia {
                 if let closeRange = text[openEnd...].range(of: closePattern) {
                     let latex = String(text[openEnd ..< closeRange.lowerBound])
                     segments.append(.math(latex, display: display))
-                    index = display
-                        ? text.index(closeRange.upperBound, offsetBy: 1, limitedBy: text.endIndex) ?? text.endIndex
-                        : closeRange.upperBound
+                    index = closeRange.upperBound
                 } else {
                     segments.append(.text(String(text[index...])))
                     return segments
                 }
-                inDisplay = display
-                _ = inDisplay
                 continue
             }
             index = text.index(after: index)
@@ -169,16 +193,35 @@ enum ModuleContentMedia {
     }
 }
 
+/// Typeset math with a safe monospace fallback (CT.M1 FR-10 / open question #1).
 struct MathLatexView: View {
     let latex: String
     let displayMode: Bool
 
     var body: some View {
-        Text(latex)
-            .font(.system(displayMode ? .body : .subheadline, design: .serif))
+        Text(prettyLatex)
+            .font(.system(displayMode ? .body : .subheadline, design: .monospaced))
             .foregroundStyle(.primary)
             .padding(.vertical, displayMode ? 4 : 0)
-            .accessibilityLabel(displayMode ? "Display equation: \(latex)" : "Inline equation: \(latex)")
+            .frame(maxWidth: displayMode ? .infinity : nil, alignment: displayMode ? .center : .leading)
+            .accessibilityLabel(accessibilityText)
+    }
+
+    /// Light prettification so common fractions read better without a native math library.
+    private var prettyLatex: String {
+        let trimmed = latex.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return latex }
+        // Keep source visible (never blank) — FR-10 fallback path.
+        return trimmed
+            .replacingOccurrences(of: "\\frac{", with: "(")
+            .replacingOccurrences(of: "}{", with: ")/(")
+            .replacingOccurrences(of: "\\cdot", with: "·")
+            .replacingOccurrences(of: "\\times", with: "×")
+    }
+
+    private var accessibilityText: String {
+        let key = displayMode ? "mobile.markdown.math.display" : "mobile.markdown.math.inline"
+        return L.format(key, latex)
     }
 }
 

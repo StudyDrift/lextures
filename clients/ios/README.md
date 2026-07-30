@@ -110,6 +110,10 @@ Access and refresh tokens are stored in the Keychain. MFA-required accounts show
 
 Notebooks are device-local (same model as the web app's localStorage notebooks, format v2), keyed per signed-in user.
 
+## Markdown engine (CT.M1)
+
+Course and notebook readers share one parser (`Core/Notebook/NotebookMarkdown.swift` + `MarkdownTableLogic.swift`) and one renderer (`CourseMarkdownContentView`). The engine handles GFM tables (with blank-line healing parity to web `normalizeMarkdownTables`), fenced code (language + copy), `$`/`$$` math (monospace fallback with a11y labels), GFM task lists, and ` ```lex-tool ` placeholders (raw JSON never shown). Shared golden fixtures live in `clients/mobile/fixtures/markdown/corpus.json`. Unit coverage: `LexturesTests/NotebookMarkdownLogicTests.swift`. Feature flag: `ffMobileRichMarkdown` (default on).
+
 ## Realtime sockets
 
 Per-screen sockets use `Core/Realtime/WebSocketClient` (JSON `{"authToken":…}` handshake, 2s reconnect):

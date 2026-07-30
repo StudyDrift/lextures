@@ -1,5 +1,13 @@
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { normalizeMarkdownTables } from '../normalize-markdown-tables'
+
+const fixturesPath = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '../../../../../mobile/fixtures/markdown/corpus.json',
+)
 
 const sample = `Traditional software works like a detailed recipe.
 
@@ -49,5 +57,17 @@ Done.
 
 Then write more.`
     expect(normalizeMarkdownTables(md)).toBe(md)
+  })
+
+  it('heals the shared mobile fixture table-blank-lines (CT.M1 FR-3)', () => {
+    const corpus = JSON.parse(readFileSync(fixturesPath, 'utf8')) as {
+      fixtures: Array<{ id: string; markdown: string }>
+    }
+    const fixture = corpus.fixtures.find((f) => f.id === 'table-blank-lines')
+    expect(fixture).toBeTruthy()
+    const out = normalizeMarkdownTables(fixture!.markdown)
+    expect(out).toContain('| A | B |\n| --- | --- |\n| 1 | 2 |\n| 3 | 4 |')
+    expect(out).toContain('After table')
+    expect(out).not.toMatch(/\|\s*\n\n\s*\|/)
   })
 })

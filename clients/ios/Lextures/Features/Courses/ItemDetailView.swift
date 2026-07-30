@@ -367,9 +367,24 @@ enum ItemKind {
     }
 }
 
-/// Lightweight block-level markdown renderer (headings, bullets, paragraphs;
-/// inline bold/italic/code via AttributedString).
+/// CT.M1 shim for legacy call sites. When `ffMobileRichMarkdown` is on (default),
+/// delegates to `CourseMarkdownContentView`; otherwise keeps the lightweight legacy path.
 struct MarkdownTextView: View {
+    @Environment(AppShellModel.self) private var shell
+    @Environment(\.colorScheme) private var colorScheme
+    let markdown: String
+
+    var body: some View {
+        if shell.platformFeatures.ffMobileRichMarkdown {
+            CourseMarkdownContentView(markdown: markdown)
+        } else {
+            LegacyMarkdownTextView(markdown: markdown)
+        }
+    }
+}
+
+/// Pre-CT.M1 lightweight renderer retained for feature-flag rollback.
+private struct LegacyMarkdownTextView: View {
     @Environment(\.colorScheme) private var colorScheme
     let markdown: String
 

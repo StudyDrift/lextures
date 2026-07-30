@@ -381,7 +381,7 @@ the server already stores.
 - Existing mobile infra: `clients/ios/Lextures/Core/Offline/{OfflineService,CacheStore,OfflineModels}.swift`,
   `clients/ios/Lextures/Features/Courses/WebItemView.swift` (`AuthenticatedWebView`),
   `clients/android/.../core/offline/*`, `.../features/courses/WebItemScreen.kt`.
-- Related plans: [CT.M1](CT.M1-mobile-markdown-engine-tables-code-math.md),
+- Related plans: [CT.M1](../../completed/content_tools/CT.M1-mobile-markdown-engine-tables-code-math.md),
   [CT.M2](CT.M2-mobile-rich-content-parity-assignments-quizzes.md),
   [CT.M4](CT.M4-mobile-sandboxed-webview-tool-host.md), [CT.M9](CT.M9-mobile-tools-governance-a11y-telemetry.md).
 - Standards: WCAG 2.1 AA §4.1.3 (status messages), §2.4.3 (focus order); S01/S02 (DSAR, retention).

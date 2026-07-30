@@ -17,14 +17,20 @@ struct NotebookSlashCommand: Identifiable, Equatable {
     let keywords: [String]
 }
 
-/// Renderable markdown block for the notebook reading view.
+/// Renderable markdown block for the notebook / course reading view (CT.M1).
 enum NotebookBlockKind: Equatable {
     case heading(level: Int, text: String)
     case paragraph(String)
-    case bulletItem(String)
-    case orderedItem(number: String, text: String)
+    case bulletItem(text: String, depth: Int)
+    case orderedItem(number: String, text: String, depth: Int)
+    /// GFM task-list item (`- [ ]` / `- [x]`), read-only in reader contexts.
+    case taskItem(checked: Bool, text: String, depth: Int)
     case quote(String)
-    case code(String)
+    case code(language: String?, source: String)
+    case math(latex: String, display: Bool)
+    case table(align: [MarkdownTableAlign], header: [String], rows: [[String]])
+    /// ` ```lex-tool ` pointer; raw JSON must never be shown to learners (CT.M3 hosts it).
+    case toolFence(instanceId: String, toolId: String, version: Int)
     case divider
     case task(ParsedNotebookTask)
     case image(alt: String, url: String)
@@ -176,15 +182,39 @@ enum NotebookMarkdown {
 
     // MARK: - Block parsing (reading view)
 
+    /// Kind labels used by the shared golden-fixture corpus (`clients/mobile/fixtures/markdown`).
+    static func fixtureKindName(_ kind: NotebookBlockKind) -> String {
+        switch kind {
+        case .heading: return "heading"
+        case .paragraph: return "paragraph"
+        case .bulletItem: return "bullet"
+        case .orderedItem: return "ordered"
+        case .taskItem: return "taskItem"
+        case .quote: return "quote"
+        case .code: return "code"
+        case .math: return "math"
+        case .table: return "table"
+        case .toolFence: return "toolFence"
+        case .divider: return "divider"
+        case .task: return "task"
+        case .image: return "image"
+        case .drawing: return "drawing"
+        }
+    }
+
     static func parseBlocks(_ contentMd: String) -> [NotebookBlock] {
         var kinds: [NotebookBlockKind] = []
         var paragraph: [String] = []
         var quote: [String] = []
 
         func flushParagraph() {
-            if !paragraph.isEmpty {
-                kinds.append(.paragraph(paragraph.joined(separator: "\n")))
-                paragraph = []
+            guard !paragraph.isEmpty else { return }
+            let text = paragraph.joined(separator: "\n")
+            paragraph = []
+            if let math = parseStandaloneMath(text) {
+                kinds.append(math)
+            } else {
+                kinds.append(.paragraph(text))
             }
         }
         func flushQuote() {
@@ -198,13 +228,23 @@ enum NotebookMarkdown {
             flushQuote()
         }
 
-        let lines = contentMd.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n")
+        let healed = MarkdownTableLogic.normalizeMarkdownTables(
+            contentMd.replacingOccurrences(of: "\r\n", with: "\n")
+        )
+        let lines = healed.components(separatedBy: "\n")
         var lineIndex = 0
         var drawingIndex = 0
         while lineIndex < lines.count {
             let line = lines[lineIndex]
             let trimmed = line.trimmingCharacters(in: .whitespaces)
+            let indent = listDepth(line)
 
+            if let table = MarkdownTableLogic.parseTable(in: lines, start: lineIndex) {
+                flushAll()
+                kinds.append(.table(align: table.align, header: table.header, rows: table.rows))
+                lineIndex = table.end
+                continue
+            }
             if trimmed.hasPrefix("```drawing") {
                 flushAll()
                 var inner: [String] = []
@@ -234,13 +274,19 @@ enum NotebookMarkdown {
             }
             if trimmed.hasPrefix("```") {
                 flushAll()
+                let language = fenceLanguage(trimmed)
                 var inner: [String] = []
                 lineIndex += 1
                 while lineIndex < lines.count, !lines[lineIndex].trimmingCharacters(in: .whitespaces).hasPrefix("```") {
                     inner.append(lines[lineIndex])
                     lineIndex += 1
                 }
-                kinds.append(.code(inner.joined(separator: "\n")))
+                let source = inner.joined(separator: "\n")
+                if language == "lex-tool", let tool = parseLexToolFence(source) {
+                    kinds.append(.toolFence(instanceId: tool.instanceId, toolId: tool.toolId, version: tool.version))
+                } else {
+                    kinds.append(.code(language: language, source: source))
+                }
                 lineIndex += 1
                 continue
             }
@@ -253,10 +299,13 @@ enum NotebookMarkdown {
             } else if let image = parseImage(trimmed) {
                 flushAll()
                 kinds.append(image)
+            } else if let taskItem = parseTaskListItem(trimmed) {
+                flushAll()
+                kinds.append(.taskItem(checked: taskItem.checked, text: taskItem.text, depth: min(indent, 3)))
             } else if trimmed.hasPrefix("- ") || trimmed.hasPrefix("* ") {
                 flushAll()
-                kinds.append(.bulletItem(String(trimmed.dropFirst(2))))
-            } else if let ordered = parseOrderedItem(trimmed) {
+                kinds.append(.bulletItem(text: String(trimmed.dropFirst(2)), depth: min(indent, 3)))
+            } else if let ordered = parseOrderedItem(trimmed, depth: min(indent, 3)) {
                 flushAll()
                 kinds.append(ordered)
             } else if trimmed.hasPrefix(">") {
@@ -274,6 +323,58 @@ enum NotebookMarkdown {
         return kinds.enumerated().map { NotebookBlock(id: $0.offset, kind: $0.element) }
     }
 
+    private static func fenceLanguage(_ opener: String) -> String? {
+        let rest = opener.dropFirst(3).trimmingCharacters(in: .whitespaces)
+        if rest.isEmpty { return nil }
+        let lang = rest.split(whereSeparator: { $0.isWhitespace }).first.map(String.init)
+        return lang?.isEmpty == true ? nil : lang
+    }
+
+    private static func parseLexToolFence(_ source: String) -> (instanceId: String, toolId: String, version: Int)? {
+        guard
+            let data = source.trimmingCharacters(in: .whitespacesAndNewlines).data(using: .utf8),
+            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return nil }
+        let instanceId = (json["instanceId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let toolId = (json["toolId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let version: Int? = {
+            if let n = json["v"] as? Int { return n }
+            if let s = json["v"] as? String { return Int(s) }
+            return nil
+        }()
+        guard !instanceId.isEmpty, !toolId.isEmpty, version == 1 else { return nil }
+        return (instanceId, toolId, 1)
+    }
+
+    private static func parseStandaloneMath(_ text: String) -> NotebookBlockKind? {
+        let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard t.hasPrefix("$$"), t.hasSuffix("$$"), t.count >= 4 else { return nil }
+        let inner = String(t.dropFirst(2).dropLast(2)).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !inner.isEmpty, !inner.contains("$$") else { return nil }
+        return .math(latex: inner, display: true)
+    }
+
+    private static func listDepth(_ line: String) -> Int {
+        var spaces = 0
+        for ch in line {
+            if ch == " " { spaces += 1 }
+            else if ch == "\t" { spaces += 2 }
+            else { break }
+        }
+        return min(spaces / 2, 3)
+    }
+
+    private static let taskListRegex = makeRegex("^[-*]\\s+\\[([ xX])\\]\\s+(.*)$")
+
+    private static func parseTaskListItem(_ line: String) -> (checked: Bool, text: String)? {
+        let ns = line as NSString
+        guard let match = taskListRegex.firstMatch(in: line, range: NSRange(location: 0, length: ns.length)) else {
+            return nil
+        }
+        let mark = ns.substring(with: match.range(at: 1)).lowercased()
+        return (mark == "x", ns.substring(with: match.range(at: 2)))
+    }
+
     private static func parseHeading(_ line: String) -> NotebookBlockKind? {
         guard line.hasPrefix("#") else { return nil }
         let hashes = line.prefix(while: { $0 == "#" })
@@ -285,12 +386,16 @@ enum NotebookMarkdown {
 
     private static let orderedItemRegex = makeRegex("^(\\d+)[.)] (.*)$")
 
-    private static func parseOrderedItem(_ line: String) -> NotebookBlockKind? {
+    private static func parseOrderedItem(_ line: String, depth: Int = 0) -> NotebookBlockKind? {
         let ns = line as NSString
         guard let match = orderedItemRegex.firstMatch(in: line, range: NSRange(location: 0, length: ns.length)) else {
             return nil
         }
-        return .orderedItem(number: ns.substring(with: match.range(at: 1)), text: ns.substring(with: match.range(at: 2)))
+        return .orderedItem(
+            number: ns.substring(with: match.range(at: 1)),
+            text: ns.substring(with: match.range(at: 2)),
+            depth: depth
+        )
     }
 
     private static let imageRegex = makeRegex("^!\\[([^\\]]*)\\]\\(([^)]+)\\)$")
@@ -315,16 +420,36 @@ enum NotebookMarkdown {
                 for line in text.components(separatedBy: "\n") {
                     out.append(NotebookEditBlock(kind: .paragraph, text: line))
                 }
-            case .bulletItem(let text):
+            case .bulletItem(let text, _):
                 out.append(NotebookEditBlock(kind: .bullet, text: text))
-            case .orderedItem(_, let text):
+            case .orderedItem(_, let text, _):
                 out.append(NotebookEditBlock(kind: .ordered, text: text))
+            case .taskItem(let checked, let text, _):
+                let mark = checked ? "x" : " "
+                out.append(NotebookEditBlock(kind: .bullet, text: "[\(mark)] \(text)"))
             case .quote(let text):
                 for line in text.components(separatedBy: "\n") {
                     out.append(NotebookEditBlock(kind: .quote, text: line))
                 }
-            case .code(let text):
-                out.append(NotebookEditBlock(kind: .code, text: text))
+            case .code(_, let source):
+                out.append(NotebookEditBlock(kind: .code, text: source))
+            case .math(let latex, let display):
+                out.append(NotebookEditBlock(
+                    kind: .paragraph,
+                    text: display ? "$$\(latex)$$" : "$\(latex)$"
+                ))
+            case .table(let align, let header, let rows):
+                for line in MarkdownTableLogic.serialize(align: align, header: header, rows: rows)
+                    .components(separatedBy: "\n")
+                {
+                    out.append(NotebookEditBlock(kind: .paragraph, text: line))
+                }
+            case .toolFence(let instanceId, let toolId, let version):
+                // Preserve pointer as a code fence body so editors do not drop the instance.
+                out.append(NotebookEditBlock(
+                    kind: .code,
+                    text: "{\"instanceId\":\"\(instanceId)\",\"toolId\":\"\(toolId)\",\"v\":\(version)}"
+                ))
             case .divider:
                 out.append(NotebookEditBlock(kind: .divider))
             case .task(let task):
@@ -423,14 +548,23 @@ enum NotebookMarkdown {
         var out: [String] = []
         for block in parseBlocks(contentMd) {
             switch block.kind {
-            case .heading(_, let text), .paragraph(let text), .bulletItem(let text), .quote(let text):
+            case .heading(_, let text), .paragraph(let text), .quote(let text):
                 out.append(text)
-            case .orderedItem(_, let text):
+            case .bulletItem(let text, _), .taskItem(_, let text, _), .orderedItem(_, let text, _):
                 out.append(text)
             case .task(let task):
                 out.append(task.text)
-            case .code(let text):
-                out.append(text)
+            case .code(_, let source):
+                out.append(source)
+            case .math(let latex, _):
+                out.append(latex)
+            case .table(_, let header, let rows):
+                out.append(header.joined(separator: " "))
+                for row in rows.prefix(3) {
+                    out.append(row.joined(separator: " "))
+                }
+            case .toolFence(_, let toolId, _):
+                out.append(toolId)
             case .image(let alt, _):
                 out.append(alt)
             case .drawing:

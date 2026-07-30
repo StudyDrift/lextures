@@ -185,6 +185,8 @@ data class MobilePlatformFeatures(
     val ffMobileProfileDepth: Boolean = false,
     val ffMobileLibraryEreserves: Boolean = true,
     val ffMobileImmersiveReader: Boolean = true,
+    /** CT.M1 rich markdown engine; default on when unset. */
+    val ffMobileRichMarkdown: Boolean = true,
     val ffMobileLiveMeetings: Boolean = true,
     val readAloudEnabled: Boolean = false,
     val ffReadAloud: Boolean = false,
@@ -294,6 +296,7 @@ data class MobilePlatformFeatures(
             ffMobileProfileDepth = features?.ffMobileProfileDepth == true,
             ffMobileLibraryEreserves = features?.ffMobileLibraryEreserves != false,
             ffMobileImmersiveReader = features?.ffMobileImmersiveReader != false,
+            ffMobileRichMarkdown = features?.ffMobileRichMarkdown != false,
             ffMobileLiveMeetings = features?.ffMobileLiveMeetings != false,
             readAloudEnabled = features?.readAloudEnabled == true,
             ffReadAloud = features?.ffReadAloud == true,
