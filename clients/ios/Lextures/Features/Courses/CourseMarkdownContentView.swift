@@ -220,8 +220,10 @@ struct MathLatexView: View {
     }
 
     private var accessibilityText: String {
-        let key = displayMode ? "mobile.markdown.math.display" : "mobile.markdown.math.inline"
-        return L.format(key, latex)
+        if displayMode {
+            return L.format("mobile.markdown.math.display", latex)
+        }
+        return L.format("mobile.markdown.math.inline", latex)
     }
 }
 
