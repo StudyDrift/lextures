@@ -15,6 +15,8 @@ struct PlatformFeatures: Decodable {
     var ffMobileProfileDepth: Bool?
     var ffMobileLibraryEreserves: Bool?
     var ffMobileImmersiveReader: Bool?
+    /// CT.M1 rich markdown engine (tables/code/math/toolFence). Default on when unset.
+    var ffMobileRichMarkdown: Bool?
     var ffMobileLiveMeetings: Bool?
     var readAloudEnabled: Bool?
     var ffReadAloud: Bool?

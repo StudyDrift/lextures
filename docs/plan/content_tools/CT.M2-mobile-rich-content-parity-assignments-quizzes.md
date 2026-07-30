@@ -1,6 +1,6 @@
 # CT.M2 — Mobile Rich Content Parity: Assignments, Quizzes, Syllabus & Discussions
 
-> Implementation plan. Source: mobile parity for authored rich content. Folder overview: [README](README.md). Consumes the engine from [CT.M1](CT.M1-mobile-markdown-engine-tables-code-math.md).
+> Implementation plan. Source: mobile parity for authored rich content. Folder overview: [README](README.md). Consumes the engine from [CT.M1](../../completed/content_tools/CT.M1-mobile-markdown-engine-tables-code-math.md).
 
 ## Metadata
 
@@ -279,6 +279,6 @@ lines — which is precisely why CT.M1's healing rule matters here.)
 - Web reference: `clients/web/src/components/quiz/quiz-response-display.tsx`,
   `clients/web/src/components/quiz/quiz-student-preview-modal.tsx`,
   `clients/web/src/components/content-page/content-page-reader.tsx`.
-- Related plans: [CT.M1](CT.M1-mobile-markdown-engine-tables-code-math.md),
+- Related plans: [CT.M1](../../completed/content_tools/CT.M1-mobile-markdown-engine-tables-code-math.md),
   [CT.M3](CT.M3-mobile-content-tool-host-and-state.md).
 - Standards: WCAG 2.1 AA §1.3.1, §2.5.5 (target size), §4.1.2 (name, role, value for choices).

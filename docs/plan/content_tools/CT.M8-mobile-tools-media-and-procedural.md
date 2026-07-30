@@ -344,6 +344,6 @@ verify the tool's declared capabilities at mount rather than assuming.
   (`ContentVideoPlayer`, `CaptionedPlayerView`), the Android player equivalents.
 - Related plans: [CT.M3](CT.M3-mobile-content-tool-host-and-state.md),
   [CT.M4](CT.M4-mobile-sandboxed-webview-tool-host.md),
-  [CT.M1](CT.M1-mobile-markdown-engine-tables-code-math.md).
+  [CT.M1](../../completed/content_tools/CT.M1-mobile-markdown-engine-tables-code-math.md).
 - Standards: WCAG 2.1 AA §1.2.2 (captions), §1.4.13, §4.1.2 (slider semantics), §2.2.2 (pause, stop,
   hide for auto-updating visualisations).

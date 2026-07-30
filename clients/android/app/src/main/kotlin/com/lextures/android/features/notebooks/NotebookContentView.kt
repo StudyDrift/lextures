@@ -34,12 +34,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.design.LexturesColors
@@ -59,6 +61,11 @@ import com.lextures.android.core.notebook.NotebookBlock
 import com.lextures.android.core.notebook.NotebookDrawing
 import com.lextures.android.core.notebook.NotebookMarkdown
 import com.lextures.android.core.notebook.ParsedNotebookTask
+import com.lextures.android.core.routing.ContentLinkRouter
+import com.lextures.android.features.courses.markdown.MarkdownCodeBlock
+import com.lextures.android.features.courses.markdown.MarkdownMath
+import com.lextures.android.features.courses.markdown.MarkdownTable
+import com.lextures.android.features.courses.markdown.MarkdownToolPlaceholder
 import com.lextures.android.features.reader.CaptionedPlayer
 import com.lextures.android.features.reader.ContentVideoPlayer
 import com.lextures.android.features.reader.ReaderLogic
@@ -78,8 +85,10 @@ fun NotebookContentView(
     captionsEnabled: Boolean = false,
     onEditDrawing: ((index: Int, elementsJson: String) -> Unit)? = null,
 ) {
+    // Memoised once per markdown body (CT.M1 NFR).
+    val blocks = remember(markdown) { NotebookMarkdown.parseBlocks(markdown) }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        NotebookMarkdown.parseBlocks(markdown).forEach { block ->
+        blocks.forEach { block ->
             when (block) {
                 is NotebookBlock.Heading -> Text(
                     text = inlineMarkdown(block.text),
@@ -95,26 +104,13 @@ fun NotebookContentView(
                             CaptionedPlayer(url = videoUrl, accessToken = accessToken)
                         videoUrl != null && accessToken != null ->
                             ContentVideoPlayer(url = videoUrl, accessToken = accessToken)
-                        videoUrl != null ->
-                            Text(
-                                text = inlineMarkdown(block.text),
-                                fontSize = 14.sp,
-                                lineHeight = 21.sp,
-                                color = textPrimary(),
-                            )
-                        else ->
-                            Text(
-                                text = inlineMarkdown(block.text),
-                                fontSize = 14.sp,
-                                lineHeight = 21.sp,
-                                color = textPrimary(),
-                            )
+                        else -> MathAwareParagraph(text = block.text)
                     }
                 }
 
                 is NotebookBlock.BulletItem -> Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.padding(start = 4.dp),
+                    modifier = Modifier.padding(start = (4 + block.depth * 16).dp),
                 ) {
                     Box(
                         Modifier
@@ -123,12 +119,12 @@ fun NotebookContentView(
                             .clip(CircleShape)
                             .background(accentColor()),
                     )
-                    Text(text = inlineMarkdown(block.text), fontSize = 14.sp, color = textPrimary())
+                    MathAwareParagraph(text = block.text)
                 }
 
                 is NotebookBlock.OrderedItem -> Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(start = 4.dp),
+                    modifier = Modifier.padding(start = (4 + block.depth * 16).dp),
                 ) {
                     Text(
                         text = "${block.number}.",
@@ -136,7 +132,25 @@ fun NotebookContentView(
                         fontWeight = FontWeight.SemiBold,
                         color = accentColor(),
                     )
-                    Text(text = inlineMarkdown(block.text), fontSize = 14.sp, color = textPrimary())
+                    MathAwareParagraph(text = block.text)
+                }
+
+                is NotebookBlock.TaskItem -> Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(start = (4 + block.depth * 16).dp),
+                ) {
+                    Icon(
+                        imageVector = if (block.checked) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank,
+                        contentDescription = if (block.checked) "Completed" else "Not completed",
+                        tint = if (block.checked) accentColor() else textSecondary(),
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        text = inlineMarkdown(block.text),
+                        fontSize = 14.sp,
+                        color = if (block.checked) textSecondary() else textPrimary(),
+                        textDecoration = if (block.checked) TextDecoration.LineThrough else TextDecoration.None,
+                    )
                 }
 
                 is NotebookBlock.Quote -> Row(
@@ -158,18 +172,17 @@ fun NotebookContentView(
                     )
                 }
 
-                is NotebookBlock.Code -> Text(
-                    text = block.text,
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = textPrimary(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (isDarkTheme()) sceneBackground() else LexturesColors.SceneBackground)
-                        .border(1.dp, fieldBorder(), RoundedCornerShape(10.dp))
-                        .padding(12.dp),
+                is NotebookBlock.Code -> MarkdownCodeBlock(source = block.text, language = block.language)
+
+                is NotebookBlock.Math -> MarkdownMath(latex = block.latex, display = block.display)
+
+                is NotebookBlock.Table -> MarkdownTable(
+                    align = block.align,
+                    header = block.header,
+                    rows = block.rows,
                 )
+
+                is NotebookBlock.ToolFence -> MarkdownToolPlaceholder(toolId = block.toolId)
 
                 NotebookBlock.Divider -> Box(
                     Modifier
@@ -198,6 +211,67 @@ fun NotebookContentView(
             }
         }
     }
+}
+
+@Composable
+private fun MathAwareParagraph(text: String) {
+    val segments = remember(text) { mathSegments(text) }
+    if (segments.size == 1 && segments[0] is MathSegment.Text) {
+        Text(
+            text = inlineMarkdown((segments[0] as MathSegment.Text).value),
+            fontSize = 14.sp,
+            lineHeight = 21.sp,
+            color = textPrimary(),
+        )
+        return
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        segments.forEach { segment ->
+            when (segment) {
+                is MathSegment.Text -> Text(
+                    text = inlineMarkdown(segment.value),
+                    fontSize = 14.sp,
+                    lineHeight = 21.sp,
+                    color = textPrimary(),
+                )
+                is MathSegment.Math -> MarkdownMath(latex = segment.latex, display = segment.display)
+            }
+        }
+    }
+}
+
+private sealed interface MathSegment {
+    data class Text(val value: String) : MathSegment
+    data class Math(val latex: String, val display: Boolean) : MathSegment
+}
+
+private fun mathSegments(text: String): List<MathSegment> {
+    if (!text.contains('$')) return listOf(MathSegment.Text(text))
+    val out = mutableListOf<MathSegment>()
+    var i = 0
+    var cursor = 0
+    while (i < text.length) {
+        if (text[i] != '$') {
+            i++
+            continue
+        }
+        val display = i + 1 < text.length && text[i + 1] == '$'
+        val openLen = if (display) 2 else 1
+        if (i > cursor) out.add(MathSegment.Text(text.substring(cursor, i)))
+        val openEnd = i + openLen
+        val closePat = if (display) "$$" else "$"
+        val close = text.indexOf(closePat, openEnd)
+        if (close < 0) {
+            out.add(MathSegment.Text(text.substring(i)))
+            return out
+        }
+        out.add(MathSegment.Math(latex = text.substring(openEnd, close), display = display))
+        i = close + closePat.length
+        cursor = i
+    }
+    if (cursor < text.length) out.add(MathSegment.Text(text.substring(cursor)))
+    if (out.isEmpty()) out.add(MathSegment.Text(text))
+    return out
 }
 
 /**
@@ -328,7 +402,9 @@ private fun NotebookTaskRow(
 private fun isPastDue(dueAt: String): Boolean =
     runCatching { Instant.parse(dueAt).isBefore(Instant.now()) }.getOrDefault(false)
 
-/** Minimal inline markdown: **bold**, *italic*, `code`. */
+private val linkRegex = Regex("""\[([^\]]+)]\(([^)]+)\)""")
+
+/** Inline markdown: **bold**, *italic*, ~~strike~~, `code`, [text](url). */
 fun inlineMarkdown(raw: String): AnnotatedString = buildAnnotatedString {
     var i = 0
     while (i < raw.length) {
@@ -337,6 +413,17 @@ fun inlineMarkdown(raw: String): AnnotatedString = buildAnnotatedString {
                 val end = raw.indexOf("**", i + 2)
                 if (end > i + 1) {
                     pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                    append(raw.substring(i + 2, end))
+                    pop()
+                    i = end + 2
+                } else {
+                    append(raw[i]); i++
+                }
+            }
+            raw.startsWith("~~", i) -> {
+                val end = raw.indexOf("~~", i + 2)
+                if (end > i + 1) {
+                    pushStyle(SpanStyle(textDecoration = TextDecoration.LineThrough))
                     append(raw.substring(i + 2, end))
                     pop()
                     i = end + 2
@@ -362,6 +449,31 @@ fun inlineMarkdown(raw: String): AnnotatedString = buildAnnotatedString {
                     append(raw.substring(i + 1, end))
                     pop()
                     i = end + 1
+                } else {
+                    append(raw[i]); i++
+                }
+            }
+            raw.startsWith("[", i) -> {
+                val match = linkRegex.matchAt(raw, i)
+                if (match != null && ContentLinkRouter.isAllowedHref(match.groupValues[2])) {
+                    val label = match.groupValues[1]
+                    val href = match.groupValues[2]
+                    val linkStyle = SpanStyle(
+                        color = LexturesColors.Primary,
+                        textDecoration = TextDecoration.Underline,
+                    )
+                    if (ContentLinkRouter.isExternalHref(href)) {
+                        withLink(LinkAnnotation.Url(href)) {
+                            pushStyle(linkStyle)
+                            append(label)
+                            pop()
+                        }
+                    } else {
+                        pushStyle(linkStyle)
+                        append(label)
+                        pop()
+                    }
+                    i = match.range.last + 1
                 } else {
                     append(raw[i]); i++
                 }

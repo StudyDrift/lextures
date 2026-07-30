@@ -84,6 +84,10 @@ Access and refresh tokens are stored in EncryptedSharedPreferences. MFA-required
 
 Notebooks are device-local (same model as the web app's localStorage notebooks, format v2), keyed per signed-in user.
 
+## Markdown engine (CT.M1)
+
+Course and notebook readers share one parser (`core/notebook/NotebookMarkdown.kt` + `MarkdownTableLogic.kt`) and one renderer (`NotebookContentView` plus `features/courses/markdown/*`). The engine handles GFM tables (blank-line healing parity to web `normalizeMarkdownTables`), fenced code (language + copy), `$`/`$$` math (monospace fallback with a11y labels), GFM task lists, inline formatting (bold/italic/strike/code/links — `stripInline` removed), and ` ```lex-tool ` placeholders. Shared golden fixtures: `clients/mobile/fixtures/markdown/corpus.json`. Unit coverage: `app/src/test/kotlin/.../core/notebook/*Test.kt`. Feature flag: `ffMobileRichMarkdown` (default on). Legacy `MarkdownText` is a thin shim over `NotebookContentView` for CT.M2 migration.
+
 ## Realtime sockets
 
 Per-screen sockets use `core/realtime/WebSocketClient` (JSON `{"authToken":…}` handshake, 2s reconnect):

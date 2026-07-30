@@ -300,7 +300,7 @@ is made from this pack. (AI-backed tools are CT.M6.)
   class_pulse,flashcards}/renderer.tsx`.
 - Server: `server/internal/service/contenttools/{inline_questions,predict_reveal,class_pulse,
   flashcards}_actions.go`; manifests under `server/internal/service/contenttools/tools/*/manifest.json`.
-- Related plans: [CT.M1](CT.M1-mobile-markdown-engine-tables-code-math.md),
+- Related plans: [CT.M1](../../completed/content_tools/CT.M1-mobile-markdown-engine-tables-code-math.md),
   [CT.M3](CT.M3-mobile-content-tool-host-and-state.md),
   [CT.M9](CT.M9-mobile-tools-governance-a11y-telemetry.md).
 - Standards: WCAG 2.1 AA §1.4.1 (use of colour), §2.5.1 (pointer gestures — flip must have a

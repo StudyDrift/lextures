@@ -1,0 +1,74 @@
+{
+  "fixtures": [
+    {
+      "id": "table-basic",
+      "markdown": "| Name | Score |\n| --- | ---: |\n| Ada | 98 |\n| Grace | 100 |",
+      "kinds": ["table"]
+    },
+    {
+      "id": "table-blank-lines",
+      "markdown": "| A | B |\n\n| --- | --- |\n\n| 1 | 2 |\n\n| 3 | 4 |\n\nAfter table",
+      "kinds": ["table", "paragraph"]
+    },
+    {
+      "id": "table-align",
+      "markdown": "| Left | Center | Right |\n| :--- | :---: | ---: |\n| a | b | c |",
+      "kinds": ["table"]
+    },
+    {
+      "id": "pipe-prose-not-table",
+      "markdown": "Use | as OR in boolean logic.",
+      "kinds": ["paragraph"]
+    },
+    {
+      "id": "code-python",
+      "markdown": "```python\ndef hi():\n    print(\"hi\")\n```",
+      "kinds": ["code"]
+    },
+    {
+      "id": "code-with-pipes",
+      "markdown": "```\n| not | a | table |\n```",
+      "kinds": ["code"]
+    },
+    {
+      "id": "lex-tool-fence",
+      "markdown": "```lex-tool\n{\"instanceId\":\"abc-123\",\"toolId\":\"inline_questions\",\"v\":1}\n```",
+      "kinds": ["toolFence"]
+    },
+    {
+      "id": "unknown-fence",
+      "markdown": "```ruby\nputs :hi\n```",
+      "kinds": ["code"]
+    },
+    {
+      "id": "math-display",
+      "markdown": "$$\\frac{a}{b}$$",
+      "kinds": ["math"]
+    },
+    {
+      "id": "math-inline-paragraph",
+      "markdown": "The ratio is $a/b$ in prose.",
+      "kinds": ["paragraph"]
+    },
+    {
+      "id": "task-list",
+      "markdown": "- [ ] Todo\n- [x] Done",
+      "kinds": ["taskItem", "taskItem"]
+    },
+    {
+      "id": "nested-lists",
+      "markdown": "- Parent\n  - Child\n    - Grandchild",
+      "kinds": ["bullet", "bullet", "bullet"]
+    },
+    {
+      "id": "mixed-body",
+      "markdown": "# Title\n\nIntro with **bold**.\n\n| Col |\n| --- |\n| Val |\n\n```js\nconsole.log(1)\n```\n\n$$E=mc^2$$\n\n```lex-tool\n{\"instanceId\":\"i1\",\"toolId\":\"flashcards\",\"v\":1}\n```",
+      "kinds": ["heading", "paragraph", "table", "code", "math", "toolFence"]
+    },
+    {
+      "id": "inline-formatting",
+      "markdown": "See **bold**, *italic*, ~~strike~~, `code`, and [link](https://example.com).",
+      "kinds": ["paragraph"]
+    }
+  ]
+}

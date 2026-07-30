@@ -26,14 +26,24 @@ data class NotebookSlashCommand(
     val keywords: List<String>,
 )
 
-/** Renderable markdown block for the notebook reading view. */
+/** Renderable markdown block for the notebook / course reading view (CT.M1). */
 sealed interface NotebookBlock {
     data class Heading(val level: Int, val text: String) : NotebookBlock
     data class Paragraph(val text: String) : NotebookBlock
-    data class BulletItem(val text: String) : NotebookBlock
-    data class OrderedItem(val number: String, val text: String) : NotebookBlock
+    data class BulletItem(val text: String, val depth: Int = 0) : NotebookBlock
+    data class OrderedItem(val number: String, val text: String, val depth: Int = 0) : NotebookBlock
+    /** GFM task-list item (`- [ ]` / `- [x]`), read-only in reader contexts. */
+    data class TaskItem(val checked: Boolean, val text: String, val depth: Int = 0) : NotebookBlock
     data class Quote(val text: String) : NotebookBlock
-    data class Code(val text: String) : NotebookBlock
+    data class Code(val text: String, val language: String? = null) : NotebookBlock
+    data class Math(val latex: String, val display: Boolean = true) : NotebookBlock
+    data class Table(
+        val align: List<MarkdownTableAlign>,
+        val header: List<String>,
+        val rows: List<List<String>>,
+    ) : NotebookBlock
+    /** ```lex-tool pointer; raw JSON must never be shown to learners (CT.M3 hosts it). */
+    data class ToolFence(val instanceId: String, val toolId: String, val version: Int) : NotebookBlock
     data object Divider : NotebookBlock
     data class TaskBlock(val task: ParsedNotebookTask) : NotebookBlock
     data class Image(val alt: String, val url: String) : NotebookBlock
@@ -72,6 +82,7 @@ data class NotebookEditBlock(
 object NotebookMarkdown {
     private val taskBlockRegex = Regex("```task[ \\t]*\\n([\\s\\S]*?)```")
     private val orderedItemRegex = Regex("^(\\d+)[.)] (.*)$")
+    private val taskListRegex = Regex("^[-*]\\s+\\[([ xX])]\\s+(.*)$")
     private val imageRegex = Regex("^!\\[([^\\]]*)]\\(([^)]+)\\)$")
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -126,6 +137,24 @@ object NotebookMarkdown {
     fun setTaskDueAt(contentMd: String, taskId: String, dueAt: String?): String =
         rewriteTask(contentMd, taskId) { it.checked to dueAt }
 
+    /** Kind labels used by the shared golden-fixture corpus (`clients/mobile/fixtures/markdown`). */
+    fun fixtureKindName(block: NotebookBlock): String = when (block) {
+        is NotebookBlock.Heading -> "heading"
+        is NotebookBlock.Paragraph -> "paragraph"
+        is NotebookBlock.BulletItem -> "bullet"
+        is NotebookBlock.OrderedItem -> "ordered"
+        is NotebookBlock.TaskItem -> "taskItem"
+        is NotebookBlock.Quote -> "quote"
+        is NotebookBlock.Code -> "code"
+        is NotebookBlock.Math -> "math"
+        is NotebookBlock.Table -> "table"
+        is NotebookBlock.ToolFence -> "toolFence"
+        NotebookBlock.Divider -> "divider"
+        is NotebookBlock.TaskBlock -> "task"
+        is NotebookBlock.Image -> "image"
+        is NotebookBlock.Drawing -> "drawing"
+    }
+
     // Block parsing (reading view)
 
     fun parseBlocks(contentMd: String): List<NotebookBlock> {
@@ -134,10 +163,10 @@ object NotebookMarkdown {
         val quote = mutableListOf<String>()
 
         fun flushParagraph() {
-            if (paragraph.isNotEmpty()) {
-                blocks.add(NotebookBlock.Paragraph(paragraph.joinToString("\n")))
-                paragraph.clear()
-            }
+            if (paragraph.isEmpty()) return
+            val text = paragraph.joinToString("\n")
+            paragraph.clear()
+            parseStandaloneMath(text)?.let { blocks.add(it) } ?: blocks.add(NotebookBlock.Paragraph(text))
         }
         fun flushQuote() {
             if (quote.isNotEmpty()) {
@@ -150,12 +179,20 @@ object NotebookMarkdown {
             flushQuote()
         }
 
-        val lines = contentMd.replace("\r\n", "\n").split("\n")
+        val lines = MarkdownTableLogic.normalizeMarkdownTables(contentMd.replace("\r\n", "\n")).split("\n")
         var i = 0
         var drawingIndex = 0
         while (i < lines.size) {
             val trimmed = lines[i].trim()
+            val depth = listDepth(lines[i]).coerceAtMost(3)
+            val table = MarkdownTableLogic.parseTable(lines, i)
             when {
+                table != null -> {
+                    flushAll()
+                    blocks.add(NotebookBlock.Table(align = table.align, header = table.header, rows = table.rows))
+                    i = table.end
+                    continue
+                }
                 trimmed.startsWith("```drawing") -> {
                     flushAll()
                     val inner = mutableListOf<String>()
@@ -179,13 +216,20 @@ object NotebookMarkdown {
                 }
                 trimmed.startsWith("```") -> {
                     flushAll()
+                    val language = fenceLanguage(trimmed)
                     val inner = mutableListOf<String>()
                     i++
                     while (i < lines.size && !lines[i].trim().startsWith("```")) {
                         inner.add(lines[i])
                         i++
                     }
-                    blocks.add(NotebookBlock.Code(inner.joinToString("\n")))
+                    val source = inner.joinToString("\n")
+                    val tool = if (language == "lex-tool") parseLexToolFence(source) else null
+                    if (tool != null) {
+                        blocks.add(tool)
+                    } else {
+                        blocks.add(NotebookBlock.Code(text = source, language = language))
+                    }
                 }
                 parseHeading(trimmed) != null -> {
                     flushAll()
@@ -200,14 +244,31 @@ object NotebookMarkdown {
                     val match = imageRegex.find(trimmed)!!
                     blocks.add(NotebookBlock.Image(alt = match.groupValues[1], url = match.groupValues[2]))
                 }
+                taskListRegex.matches(trimmed) -> {
+                    flushAll()
+                    val match = taskListRegex.find(trimmed)!!
+                    blocks.add(
+                        NotebookBlock.TaskItem(
+                            checked = match.groupValues[1].equals("x", ignoreCase = true),
+                            text = match.groupValues[2],
+                            depth = depth,
+                        ),
+                    )
+                }
                 trimmed.startsWith("- ") || trimmed.startsWith("* ") -> {
                     flushAll()
-                    blocks.add(NotebookBlock.BulletItem(trimmed.drop(2)))
+                    blocks.add(NotebookBlock.BulletItem(text = trimmed.drop(2), depth = depth))
                 }
                 orderedItemRegex.matches(trimmed) -> {
                     flushAll()
                     val match = orderedItemRegex.find(trimmed)!!
-                    blocks.add(NotebookBlock.OrderedItem(number = match.groupValues[1], text = match.groupValues[2]))
+                    blocks.add(
+                        NotebookBlock.OrderedItem(
+                            number = match.groupValues[1],
+                            text = match.groupValues[2],
+                            depth = depth,
+                        ),
+                    )
                 }
                 trimmed.startsWith(">") -> {
                     flushParagraph()
@@ -223,6 +284,46 @@ object NotebookMarkdown {
         }
         flushAll()
         return blocks
+    }
+
+    private fun fenceLanguage(opener: String): String? {
+        val rest = opener.removePrefix("```").trim()
+        if (rest.isEmpty()) return null
+        return rest.split(Regex("\\s+")).firstOrNull()?.takeIf { it.isNotEmpty() }
+    }
+
+    private fun parseLexToolFence(source: String): NotebookBlock.ToolFence? {
+        val obj = runCatching {
+            json.parseToJsonElement(source.trim()) as? JsonObject
+        }.getOrNull() ?: return null
+        val instanceId = (obj["instanceId"] as? JsonPrimitive)?.contentOrNull?.trim().orEmpty()
+        val toolId = (obj["toolId"] as? JsonPrimitive)?.contentOrNull?.trim().orEmpty()
+        val version = when (val v = obj["v"]) {
+            is JsonPrimitive -> v.contentOrNull?.toIntOrNull() ?: v.content.toIntOrNull()
+            else -> null
+        }
+        if (instanceId.isEmpty() || toolId.isEmpty() || version != 1) return null
+        return NotebookBlock.ToolFence(instanceId = instanceId, toolId = toolId, version = 1)
+    }
+
+    private fun parseStandaloneMath(text: String): NotebookBlock.Math? {
+        val t = text.trim()
+        if (!t.startsWith("$$") || !t.endsWith("$$") || t.length < 4) return null
+        val inner = t.removePrefix("$$").removeSuffix("$$").trim()
+        if (inner.isEmpty() || inner.contains("$$")) return null
+        return NotebookBlock.Math(latex = inner, display = true)
+    }
+
+    private fun listDepth(line: String): Int {
+        var spaces = 0
+        for (ch in line) {
+            when (ch) {
+                ' ' -> spaces++
+                '\t' -> spaces += 2
+                else -> break
+            }
+        }
+        return (spaces / 2).coerceAtMost(3)
     }
 
     private fun parseHeading(line: String): NotebookBlock.Heading? {
@@ -250,12 +351,34 @@ object NotebookMarkdown {
                     out.add(NotebookEditBlock(kind = NotebookEditBlock.Kind.Bullet, text = block.text))
                 is NotebookBlock.OrderedItem ->
                     out.add(NotebookEditBlock(kind = NotebookEditBlock.Kind.Ordered, text = block.text))
+                is NotebookBlock.TaskItem -> {
+                    val mark = if (block.checked) "x" else " "
+                    out.add(NotebookEditBlock(kind = NotebookEditBlock.Kind.Bullet, text = "[$mark] ${block.text}"))
+                }
                 is NotebookBlock.Quote ->
                     block.text.split("\n").forEach {
                         out.add(NotebookEditBlock(kind = NotebookEditBlock.Kind.Quote, text = it))
                     }
                 is NotebookBlock.Code ->
                     out.add(NotebookEditBlock(kind = NotebookEditBlock.Kind.Code, text = block.text))
+                is NotebookBlock.Math ->
+                    out.add(
+                        NotebookEditBlock(
+                            kind = NotebookEditBlock.Kind.Paragraph,
+                            text = if (block.display) "$$${block.latex}$$" else "$${block.latex}$",
+                        ),
+                    )
+                is NotebookBlock.Table ->
+                    MarkdownTableLogic.serialize(block.align, block.header, block.rows)
+                        .split("\n")
+                        .forEach { out.add(NotebookEditBlock(kind = NotebookEditBlock.Kind.Paragraph, text = it)) }
+                is NotebookBlock.ToolFence ->
+                    out.add(
+                        NotebookEditBlock(
+                            kind = NotebookEditBlock.Kind.Code,
+                            text = """{"instanceId":"${block.instanceId}","toolId":"${block.toolId}","v":${block.version}}""",
+                        ),
+                    )
                 NotebookBlock.Divider ->
                     out.add(NotebookEditBlock(kind = NotebookEditBlock.Kind.Divider))
                 is NotebookBlock.TaskBlock ->
@@ -381,8 +504,14 @@ object NotebookMarkdown {
                 is NotebookBlock.Paragraph -> block.text
                 is NotebookBlock.BulletItem -> block.text
                 is NotebookBlock.OrderedItem -> block.text
+                is NotebookBlock.TaskItem -> block.text
                 is NotebookBlock.Quote -> block.text
                 is NotebookBlock.Code -> block.text
+                is NotebookBlock.Math -> block.latex
+                is NotebookBlock.Table ->
+                    (listOf(block.header.joinToString(" ")) + block.rows.take(3).map { it.joinToString(" ") })
+                        .joinToString(" ")
+                is NotebookBlock.ToolFence -> block.toolId
                 is NotebookBlock.TaskBlock -> block.task.text
                 is NotebookBlock.Image -> block.alt
                 is NotebookBlock.Drawing -> "Drawing"
