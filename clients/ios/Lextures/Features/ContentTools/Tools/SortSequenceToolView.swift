@@ -20,7 +20,7 @@ struct SortSequenceToolView: View {
                 CourseMarkdownContentView(markdown: prompt, compact: true)
             }
 
-            if !propsExhausted && !props.readOnly {
+            if !attemptsExhausted && !props.readOnly {
                 DragOrTapAssignBar(
                     selectedLabel: selectedItemLabel,
                     helperText: L.text(
