@@ -236,8 +236,8 @@ private struct SandboxWKView: UIViewRepresentable {
                         }
                     }
                 },
-                onResize: { [weak self] h in
-                    self?.parent.height = CGFloat(h)
+                onResize: { [weak self] height in
+                    self?.parent.height = CGFloat(height)
                 },
                 onAnnounce: { [weak self] message, assertive in
                     self?.parent.announce(message, assertive)

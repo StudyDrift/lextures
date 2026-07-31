@@ -4935,6 +4935,28 @@
       }
     },
     {
+      "id": "ct-m4-mobile-sandboxed-webview-tool-host",
+      "path": "docs/completed/content_tools/CT.M4-mobile-sandboxed-webview-tool-host.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story: sandboxed WebView tool host (CT.5 bridge, opaque origin, native\u2192sandbox\u2192placeholder). Covered by native unit suites + shared bridge fixtures (AC-16); web Playwright is not the coverage surface.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": "n/a",
+        "authorization": "n/a",
+        "dependency": true,
+        "rollback": true,
+        "notes": "Client ffMobileContentToolsSandbox (default off), independent of CT.M3. Shared fixtures under clients/mobile/fixtures/content-tools/bridge/."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

@@ -54,7 +54,7 @@ final class ContentToolSandboxLogicTests: XCTestCase {
     }
 
     private func double(_ value: Any?, file: StaticString = #filePath, line: UInt = #line) throws -> Double {
-        if let d = value as? Double { return d }
+        if let doubleVal = value as? Double { return doubleVal }
         if let number = value as? NSNumber { return number.doubleValue }
         return try XCTUnwrap(value as? Double, file: file, line: line)
     }
@@ -64,14 +64,14 @@ final class ContentToolSandboxLogicTests: XCTestCase {
     }
 
     func testConstantsMatchFixture() throws {
-        let c = try object(try fixtureRoot()["constants"])
-        XCTAssertEqual(try int(c["bridgeVersion"]), ContentToolSandboxLogic.bridgeVersion)
-        XCTAssertEqual(try int(c["maxMessageBytes"]), ContentToolSandboxLogic.bridgeMaxMessageBytes)
-        XCTAssertEqual(try int(c["maxMessagesPerSec"]), ContentToolSandboxLogic.bridgeMaxMessagesPerSec)
-        XCTAssertEqual(try int(c["readyTimeoutMs"]), ContentToolSandboxLogic.readyTimeoutMs)
-        XCTAssertEqual(try double(c["minHeight"]), ContentToolSandboxLogic.minHeightPt)
-        XCTAssertEqual(try double(c["maxHeight"]), ContentToolSandboxLogic.maxHeightPt)
-        XCTAssertEqual(try int(c["maxLiveWebViews"]), ContentToolSandboxLogic.maxLiveWebViews)
+        let constants = try object(try fixtureRoot()["constants"])
+        XCTAssertEqual(try int(constants["bridgeVersion"]), ContentToolSandboxLogic.bridgeVersion)
+        XCTAssertEqual(try int(constants["maxMessageBytes"]), ContentToolSandboxLogic.bridgeMaxMessageBytes)
+        XCTAssertEqual(try int(constants["maxMessagesPerSec"]), ContentToolSandboxLogic.bridgeMaxMessagesPerSec)
+        XCTAssertEqual(try int(constants["readyTimeoutMs"]), ContentToolSandboxLogic.readyTimeoutMs)
+        XCTAssertEqual(try double(constants["minHeight"]), ContentToolSandboxLogic.minHeightPt)
+        XCTAssertEqual(try double(constants["maxHeight"]), ContentToolSandboxLogic.maxHeightPt)
+        XCTAssertEqual(try int(constants["maxLiveWebViews"]), ContentToolSandboxLogic.maxLiveWebViews)
     }
 
     func testValidationMatchesFixture() throws {

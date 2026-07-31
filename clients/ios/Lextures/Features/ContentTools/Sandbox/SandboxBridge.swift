@@ -144,12 +144,12 @@ final class SandboxBridge: NSObject, WKScriptMessageHandler {
     private func handleIngress(_ body: Any) {
         guard !disposed else { return }
         let raw: String
-        if let s = body as? String {
-            raw = s
+        if let bodyString = body as? String {
+            raw = bodyString
         } else if let dict = body as? [String: Any],
                   let data = try? JSONSerialization.data(withJSONObject: dict),
-                  let s = String(data: data, encoding: .utf8) {
-            raw = s
+                  let jsonString = String(data: data, encoding: .utf8) {
+            raw = jsonString
         } else {
             handlers.onInvalid(.malformed)
             handlers.onMetric("unknown", "malformed")
@@ -164,7 +164,7 @@ final class SandboxBridge: NSObject, WKScriptMessageHandler {
 
         guard let data = raw.data(using: .utf8),
               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let t = obj["t"] as? String else {
+              let messageType = obj["t"] as? String else {
             handlers.onInvalid(.malformed)
             handlers.onMetric("unknown", "malformed")
             return
@@ -177,8 +177,8 @@ final class SandboxBridge: NSObject, WKScriptMessageHandler {
             return
         }
 
-        handlers.onMetric(t, "ok")
-        switch t {
+        handlers.onMetric(messageType, "ok")
+        switch messageType {
         case "ready":
             let contract = obj["contract"] as? String ?? ""
             handlers.onReady(contract)
@@ -203,21 +203,21 @@ final class SandboxBridge: NSObject, WKScriptMessageHandler {
             }
         default:
             handlers.onInvalid(.unknownType)
-            handlers.onMetric(t, "unknown_type")
+            handlers.onMetric(messageType, "unknown_type")
         }
     }
 
     private func decodeJSONValue(_ any: Any?) -> JSONValue {
         guard let any else { return .object([:]) }
         if any is NSNull { return .null }
-        if let s = any as? String { return .string(s) }
-        if let b = any as? Bool { return .bool(b) }
-        if let n = any as? NSNumber {
+        if let stringValue = any as? String { return .string(stringValue) }
+        if let boolValue = any as? Bool { return .bool(boolValue) }
+        if let numberValue = any as? NSNumber {
             // Distinguish booleans encoded as NSNumber
-            if CFGetTypeID(n) == CFBooleanGetTypeID() {
-                return .bool(n.boolValue)
+            if CFGetTypeID(numberValue) == CFBooleanGetTypeID() {
+                return .bool(numberValue.boolValue)
             }
-            return .number(n.doubleValue)
+            return .number(numberValue.doubleValue)
         }
         if let arr = any as? [Any] {
             return .array(arr.map { decodeJSONValue($0) })

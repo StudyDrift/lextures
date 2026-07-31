@@ -97,7 +97,7 @@ enum ContentToolSandboxLogic {
     // MARK: - Protocol validation (FR-4, FR-6)
 
     private static func bridgeVersionMatches(_ value: Any?) -> Bool {
-        if let v = value as? Int { return v == bridgeVersion }
+        if let intValue = value as? Int { return intValue == bridgeVersion }
         if let num = value as? NSNumber { return num.intValue == bridgeVersion }
         return false
     }
@@ -105,15 +105,15 @@ enum ContentToolSandboxLogic {
     static func isBridgeFromTool(_ msg: Any?) -> Bool {
         guard let dict = msg as? [String: Any],
               bridgeVersionMatches(dict["v"]),
-              let t = dict["t"] as? String else { return false }
-        return fromToolTypes.contains(t)
+              let messageType = dict["t"] as? String else { return false }
+        return fromToolTypes.contains(messageType)
     }
 
     static func isBridgeToTool(_ msg: Any?) -> Bool {
         guard let dict = msg as? [String: Any],
               bridgeVersionMatches(dict["v"]),
-              let t = dict["t"] as? String else { return false }
-        return toToolTypes.contains(t)
+              let messageType = dict["t"] as? String else { return false }
+        return toToolTypes.contains(messageType)
     }
 
     static func measureMessageBytes(_ msg: Any?) -> Int {
@@ -158,13 +158,13 @@ enum ContentToolSandboxLogic {
     /// Matches web `opaqueParticipantId` (Java-style 32-bit string hash).
     static func opaqueParticipantId(_ instanceId: String, enrollmentHint: String? = nil) -> String {
         let raw = "\(instanceId):\(enrollmentHint ?? "anon")"
-        var h: Int32 = 0
+        var hash: Int32 = 0
         for scalar in raw.unicodeScalars {
             // Math.imul(31, h) + charCode | 0
-            let multiplied = Int32(truncatingIfNeeded: Int(h) &* 31)
-            h = multiplied &+ Int32(scalar.value)
+            let multiplied = Int32(truncatingIfNeeded: Int(hash) &* 31)
+            hash = multiplied &+ Int32(scalar.value)
         }
-        let unsigned = UInt32(bitPattern: h)
+        let unsigned = UInt32(bitPattern: hash)
         return "p_\(String(unsigned, radix: 16))"
     }
 
