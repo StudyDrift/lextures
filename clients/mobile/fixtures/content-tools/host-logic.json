@@ -1,0 +1,152 @@
+{
+  "description": "Shared CT.M3 host behaviour fixtures consumed by iOS/Android unit suites (and optionally web).",
+  "debounce": {
+    "defaultMs": 1500,
+    "minMs": 500,
+    "maxMs": 10000,
+    "cases": [
+      { "input": null, "expected": 1500 },
+      { "input": 100, "expected": 500 },
+      { "input": 1500, "expected": 1500 },
+      { "input": 20000, "expected": 10000 },
+      { "input": 750.4, "expected": 750 }
+    ]
+  },
+  "conflictPolicy": {
+    "cases": [
+      {
+        "policy": "server_wins",
+        "client": { "a": 1, "b": 2 },
+        "server": { "a": 9, "c": 3 },
+        "expected": { "a": 9, "c": 3 }
+      },
+      {
+        "policy": "client_wins",
+        "client": { "a": 1, "b": 2 },
+        "server": { "a": 9, "c": 3 },
+        "expected": { "a": 1, "b": 2 }
+      },
+      {
+        "policy": "merge",
+        "client": { "a": 1, "b": 2 },
+        "server": { "a": 9, "c": 3 },
+        "expected": { "a": 1, "b": 2, "c": 3 }
+      }
+    ]
+  },
+  "readOnlyPrecedence": [
+    {
+      "name": "tombstone_wins",
+      "input": {
+        "tombstone": true,
+        "breakerOpen": true,
+        "status": "archived",
+        "pastDue": true,
+        "respectsDueDate": true,
+        "observer": true
+      },
+      "expected": "tombstone"
+    },
+    {
+      "name": "breaker_before_archived",
+      "input": {
+        "tombstone": false,
+        "breakerOpen": true,
+        "status": "archived",
+        "pastDue": true,
+        "respectsDueDate": true,
+        "observer": false
+      },
+      "expected": "breaker"
+    },
+    {
+      "name": "archived",
+      "input": {
+        "tombstone": false,
+        "breakerOpen": false,
+        "status": "archived",
+        "pastDue": true,
+        "respectsDueDate": true,
+        "observer": false
+      },
+      "expected": "archived"
+    },
+    {
+      "name": "past_due",
+      "input": {
+        "tombstone": false,
+        "breakerOpen": false,
+        "status": "published",
+        "pastDue": true,
+        "respectsDueDate": true,
+        "observer": false
+      },
+      "expected": "past_due"
+    },
+    {
+      "name": "past_due_ignored_without_respects",
+      "input": {
+        "tombstone": false,
+        "breakerOpen": false,
+        "status": "published",
+        "pastDue": true,
+        "respectsDueDate": false,
+        "observer": false
+      },
+      "expected": null
+    },
+    {
+      "name": "observer",
+      "input": {
+        "tombstone": false,
+        "breakerOpen": false,
+        "status": "published",
+        "pastDue": false,
+        "respectsDueDate": true,
+        "observer": true
+      },
+      "expected": "observer"
+    }
+  ],
+  "contract": {
+    "supportedVersion": 1,
+    "cases": [
+      { "contract": 1, "supported": true },
+      { "contract": 0, "supported": false },
+      { "contract": 2, "supported": false }
+    ]
+  },
+  "fenceMapping": {
+    "instances": [
+      { "id": "aaa", "toolId": "noop_probe" },
+      { "id": "bbb", "toolId": "inline_questions" }
+    ],
+    "cases": [
+      { "instanceId": "aaa", "found": true },
+      { "instanceId": "missing", "found": false },
+      { "instanceId": "bbb", "found": true }
+    ]
+  },
+  "renderGate": {
+    "cases": [
+      {
+        "name": "client_flag_off_shows_legacy_placeholder",
+        "mobileContentToolsEnabled": false,
+        "contentToolsEnabled": true,
+        "expected": "legacy_placeholder"
+      },
+      {
+        "name": "course_flag_off_hides_fence",
+        "mobileContentToolsEnabled": true,
+        "contentToolsEnabled": false,
+        "expected": "hidden"
+      },
+      {
+        "name": "both_on_hosts",
+        "mobileContentToolsEnabled": true,
+        "contentToolsEnabled": true,
+        "expected": "host"
+      }
+    ]
+  }
+}

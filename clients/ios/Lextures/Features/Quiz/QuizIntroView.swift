@@ -3,6 +3,7 @@ import SwiftUI
 /// Quiz intro: rules, attempts, and Start / Resume (M4.1).
 struct QuizIntroView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
 
     let course: CourseSummary
@@ -44,8 +45,17 @@ struct QuizIntroView: View {
                         if let markdown = detail?.markdown ?? quizPayload?.markdown,
                            !markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             LMSCard {
-                                CourseMarkdownContentView(markdown: markdown, compact: false)
-                                    .lexturesReadableText()
+                                ContentToolsPageProvider(
+                                    context: ContentToolsPageContext(
+                                        courseCode: course.courseCode,
+                                        itemId: item.id,
+                                        contentToolsEnabled: course.isContentToolsEnabled,
+                                        mobileContentToolsEnabled: shell.platformFeatures.ffMobileContentTools
+                                    )
+                                ) {
+                                    CourseMarkdownContentView(markdown: markdown, compact: false)
+                                        .lexturesReadableText()
+                                }
                             }
                         }
                         rulesCard

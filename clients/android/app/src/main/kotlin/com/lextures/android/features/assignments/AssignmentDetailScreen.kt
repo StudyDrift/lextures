@@ -408,7 +408,22 @@ fun AssignmentDetailScreen(
                             onOpenPreferences = readerState.onShowPreferences,
                             ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
                         )
-                        NotebookContentView(markdown = markdown)
+                        var mobileContentToolsEnabled by remember { mutableStateOf(false) }
+                        LaunchedEffect(accessToken) {
+                            val token = accessToken ?: return@LaunchedEffect
+                            val features = runCatching { LmsApi.fetchPlatformFeatures(token) }.getOrNull()
+                            mobileContentToolsEnabled =
+                                com.lextures.android.core.navigation.MobilePlatformFeatures.from(features).ffMobileContentTools
+                        }
+                        com.lextures.android.features.contenttools.ContentToolsPageProvider(
+                            courseCode = courseCode,
+                            itemId = item.id,
+                            contentToolsEnabled = course.isContentToolsEnabled,
+                            mobileContentToolsEnabled = mobileContentToolsEnabled,
+                            accessToken = accessToken,
+                        ) {
+                            NotebookContentView(markdown = markdown)
+                        }
                     }
                 }
             }

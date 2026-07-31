@@ -239,8 +239,17 @@ struct ItemDetailView: View {
     private func contentCard(_ markdown: String) -> some View {
         LMSCard {
             readerToolbar(markdown: markdown)
-            CourseMarkdownContentView(markdown: markdown)
-                .lexturesReadableText()
+            ContentToolsPageProvider(
+                context: ContentToolsPageContext(
+                    courseCode: courseCode,
+                    itemId: item.id,
+                    contentToolsEnabled: course.isContentToolsEnabled,
+                    mobileContentToolsEnabled: shell.platformFeatures.ffMobileContentTools
+                )
+            ) {
+                CourseMarkdownContentView(markdown: markdown)
+                    .lexturesReadableText()
+            }
         }
         .accessibilityElement(children: .contain)
     }
