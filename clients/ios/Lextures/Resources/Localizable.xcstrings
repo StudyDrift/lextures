@@ -44133,6 +44133,210 @@
         }
       }
     },
+    "mobile.contentTools.sandbox.badge": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يعمل داخل بيئة معزولة آمنة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runs in a secure sandbox"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[!! Runs in a secure sandbox !!]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se ejecuta en un entorno aislado seguro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "S’exécute dans un bac à sable sécurisé"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.sandbox.capabilityPrompt": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يريد هذا النشاط استخدام %@. هل تسمح؟"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This activity wants to use %@. Allow?"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[!! This activity wants to use %@. Allow? !!]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta actividad quiere usar %@. ¿Permitir?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette activité souhaite utiliser %@. Autoriser ?"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.sandbox.crashed": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "توقف هذا النشاط بشكل غير متوقع. حاول مرة أخرى."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This activity stopped unexpectedly. Try again."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[!! This activity stopped unexpectedly. Try again. !!]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta actividad se detuvo inesperadamente. Inténtalo de nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette activité s’est arrêtée de façon inattendue. Réessayez."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.sandbox.needsConnection": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يحتاج هذا النشاط إلى اتصال."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This activity needs a connection."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[!! This activity needs a connection. !!]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta actividad necesita conexión."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette activité nécessite une connexion."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.sandbox.nonConformant": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قد لا يستوفي هذا النشاط إرشادات إمكانية الوصول."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This activity may not meet accessibility guidelines."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[!! This activity may not meet accessibility guidelines. !!]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es posible que esta actividad no cumpla las pautas de accesibilidad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette activité peut ne pas respecter les consignes d’accessibilité."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.sandbox.timeout": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استغرق هذا النشاط وقتًا طويلاً للتحميل. حاول مرة أخرى."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This activity took too long to load. Try again."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[!! This activity took too long to load. Try again. !!]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta actividad tardó demasiado en cargar. Inténtalo de nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette activité a mis trop de temps à se charger. Réessayez."
+          }
+        }
+      }
+    },
     "mobile.courseInvite.accept": {
       "localizations": {
         "ar": {

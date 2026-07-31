@@ -3724,7 +3724,13 @@
     "mobile.contentTools.runtime.status.submitted": "Enviado",
     "mobile.contentTools.runtime.status.completed": "Completado",
     "mobile.contentTools.runtime.stateTooLarge": "Tu respuesta es demasiado grande para guardar.",
-    "mobile.contentTools.runtime.schemaInvalid": "Algo en tu respuesta no se pudo guardar."
+    "mobile.contentTools.runtime.schemaInvalid": "Algo en tu respuesta no se pudo guardar.",
+    "mobile.contentTools.sandbox.badge": "Se ejecuta en un entorno aislado seguro",
+    "mobile.contentTools.sandbox.timeout": "Esta actividad tardó demasiado en cargar. Inténtalo de nuevo.",
+    "mobile.contentTools.sandbox.crashed": "Esta actividad se detuvo inesperadamente. Inténtalo de nuevo.",
+    "mobile.contentTools.sandbox.needsConnection": "Esta actividad necesita conexión.",
+    "mobile.contentTools.sandbox.capabilityPrompt": "Esta actividad quiere usar %@. ¿Permitir?",
+    "mobile.contentTools.sandbox.nonConformant": "Es posible que esta actividad no cumpla las pautas de accesibilidad."
   },
   "plurals": {
     "mobile.dashboard.dueThisWeek.count": {

@@ -112,12 +112,17 @@ Notebooks are device-local (same model as the web app's localStorage notebooks, 
 
 ## Markdown engine (CT.M1 / CT.M2)
 
-## Content Tools host (CT.M3)
+## Content Tools host (CT.M3 / CT.M4)
 
 Native Content Tool runtime: batched instance fetch, `ToolFrame`, debounced autosave with
 revision conflicts, offline state outbox, actions with idempotency, and a `noop_probe`
 renderer. Gated by course `contentToolsEnabled` plus client `ffMobileContentTools` (default off).
 Unsupported tools show an “Open in browser” placeholder instead of raw `lex-tool` JSON.
+
+CT.M4 adds a sandboxed WebView tool host (`Features/ContentTools/Sandbox/`) for long-tail and
+third-party tools: native document fetch → opaque-origin `WKWebView` → CT.5 bridge. Resolution
+order is native → sandbox → placeholder. Dark-launched via `ffMobileContentToolsSandbox`
+(default off). Shared bridge fixtures: `clients/mobile/fixtures/content-tools/bridge/`.
 
 
 Course and notebook readers share one parser (`Core/Notebook/NotebookMarkdown.swift` + `MarkdownTableLogic.swift`) and **one** renderer (`CourseMarkdownContentView`). Assignments, quizzes (prompt/choices/review), syllabus, item detail, boards, portfolio, tutor, discussions, announcements, and grade feedback all use that renderer. Pass `compact: true` in chat/cards/list rows; pass `suppressAffordances: true` during lockdown quizzes so copy/table-expand/link taps stay closed. The legacy `MarkdownTextView` is deleted — CI enforces this via `scripts/check-mobile-markdown-renderer.sh`. Shared golden fixtures: `clients/mobile/fixtures/markdown/corpus.json`. Unit coverage: `LexturesTests/NotebookMarkdownLogicTests.swift`, `MarkdownRenderStyleTests.swift`. Feature flag: `ffMobileRichMarkdown` (default on).

@@ -1300,6 +1300,12 @@ Bring a photo ID</string>
     <string name="mobile_contentTools_runtime_unavailable">هذا العنصر التفاعلي غير متاح.</string>
     <string name="mobile_contentTools_runtime_unsynced">محفوظ على هذا الجهاز — ستتم المزامنة</string>
     <string name="mobile_contentTools_runtime_yourAnswer">إجابتك</string>
+    <string name="mobile_contentTools_sandbox_badge">يعمل داخل بيئة معزولة آمنة</string>
+    <string name="mobile_contentTools_sandbox_capabilityPrompt">يريد هذا النشاط استخدام %1$s. هل تسمح؟</string>
+    <string name="mobile_contentTools_sandbox_crashed">توقف هذا النشاط بشكل غير متوقع. حاول مرة أخرى.</string>
+    <string name="mobile_contentTools_sandbox_needsConnection">يحتاج هذا النشاط إلى اتصال.</string>
+    <string name="mobile_contentTools_sandbox_nonConformant">قد لا يستوفي هذا النشاط إرشادات إمكانية الوصول.</string>
+    <string name="mobile_contentTools_sandbox_timeout">استغرق هذا النشاط وقتًا طويلاً للتحميل. حاول مرة أخرى.</string>
     <string name="mobile_courseInvite_accept">قبول الدعوة</string>
     <string name="mobile_courseInvite_body">اقبل الدعوة للانضمام ومشاهدة محتوى المقرر، أو ارفضها لإزالته من قائمتك.</string>
     <string name="mobile_courseInvite_decline">رفض</string>

@@ -3724,7 +3724,13 @@
     "mobile.contentTools.runtime.status.submitted": "مُرسل",
     "mobile.contentTools.runtime.status.completed": "مكتمل",
     "mobile.contentTools.runtime.stateTooLarge": "إجابتك كبيرة جدًا للحفظ.",
-    "mobile.contentTools.runtime.schemaInvalid": "تعذّر حفظ جزء من إجابتك."
+    "mobile.contentTools.runtime.schemaInvalid": "تعذّر حفظ جزء من إجابتك.",
+    "mobile.contentTools.sandbox.badge": "يعمل داخل بيئة معزولة آمنة",
+    "mobile.contentTools.sandbox.timeout": "استغرق هذا النشاط وقتًا طويلاً للتحميل. حاول مرة أخرى.",
+    "mobile.contentTools.sandbox.crashed": "توقف هذا النشاط بشكل غير متوقع. حاول مرة أخرى.",
+    "mobile.contentTools.sandbox.needsConnection": "يحتاج هذا النشاط إلى اتصال.",
+    "mobile.contentTools.sandbox.capabilityPrompt": "يريد هذا النشاط استخدام %@. هل تسمح؟",
+    "mobile.contentTools.sandbox.nonConformant": "قد لا يستوفي هذا النشاط إرشادات إمكانية الوصول."
   },
   "plurals": {
     "mobile.dashboard.dueThisWeek.count": {

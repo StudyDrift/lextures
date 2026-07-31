@@ -119,9 +119,13 @@ No secrets or signing config are required for the debug build.
 - Forgot password and magic link
 
 
-## Content Tools host (CT.M3)
+## Content Tools host (CT.M3 / CT.M4)
 
 Native Content Tool runtime under `features/contenttools/`: page provider batches instances,
 `ToolFrame` + placeholder/error cards, host logic for debounce/conflict/read-only, offline
 cache key `contentToolInstances`, and `noop_probe`. Dark-launched via `ffMobileContentTools`
 (default off) with course `contentToolsEnabled`.
+
+CT.M4 sandboxed WebView host lives under `features/contenttools/sandbox/` (opaque-origin WebView,
+WebMessageListener bridge, pool of ≤3). Resolution is native → sandbox → placeholder, gated by
+`ffMobileContentToolsSandbox` (default off). Shared fixtures: `clients/mobile/fixtures/content-tools/bridge/`.

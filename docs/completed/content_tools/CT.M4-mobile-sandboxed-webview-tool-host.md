@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — Mobile |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile squad + web platform (consult) |
 | **Depends on** | CT.M3 (web: CT.5, CT.9) |

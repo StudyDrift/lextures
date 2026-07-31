@@ -86,6 +86,7 @@ fun ContentPageScreen(
     var showReadingPrefs by remember { mutableStateOf(false) }
     var readerCapabilities by remember { mutableStateOf(ImmersiveReaderCapabilities()) }
     var mobileContentToolsEnabled by remember { mutableStateOf(false) }
+    var mobileContentToolsSandboxEnabled by remember { mutableStateOf(false) }
     val readingStore = LocalReadingPreferencesStore.current
 
     val markDoneLabel = moduleMarkDoneLabel()
@@ -100,6 +101,7 @@ fun ContentPageScreen(
         val mapped = MobilePlatformFeatures.from(features)
         readerCapabilities = mapped.immersiveReader
         mobileContentToolsEnabled = mapped.ffMobileContentTools
+        mobileContentToolsSandboxEnabled = mapped.ffMobileContentToolsSandbox
         readingStore.loadFromServer(token, readerCapabilities.preferencesEnabled)
     }
 
@@ -237,6 +239,7 @@ fun ContentPageScreen(
                                 contentToolsEnabled = course.isContentToolsEnabled,
                                 mobileContentToolsEnabled = mobileContentToolsEnabled,
                                 accessToken = accessToken,
+                                mobileContentToolsSandboxEnabled = mobileContentToolsSandboxEnabled,
                             ) {
                                 NotebookContentView(
                                     markdown = markdown,

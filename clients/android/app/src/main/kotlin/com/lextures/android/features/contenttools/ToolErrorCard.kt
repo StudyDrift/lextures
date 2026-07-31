@@ -28,9 +28,11 @@ import com.lextures.android.core.i18n.L
 fun ToolErrorCard(
     toolName: String,
     onRetry: () -> Unit,
+    message: String? = null,
     modifier: Modifier = Modifier,
 ) {
-    val title = L.text(R.string.mobile_contentTools_runtime_errorTitle)
+    val title = message?.takeIf { it.isNotBlank() }
+        ?: L.text(R.string.mobile_contentTools_runtime_errorTitle)
     Column(
         modifier = modifier
             .fillMaxWidth()
