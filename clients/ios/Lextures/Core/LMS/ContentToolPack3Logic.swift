@@ -78,10 +78,15 @@ enum ContentToolPack3Logic {
         var end: Int
     }
 
+    struct NormPoint: Equatable {
+        var x: Double
+        var y: Double
+    }
+
     enum RegionShape: Equatable {
         case rect(x: Double, y: Double, w: Double, h: Double)
         case circle(cx: Double, cy: Double, r: Double)
-        case polygon(points: [(Double, Double)])
+        case polygon(points: [NormPoint])
     }
 
     struct DiagramRegion: Equatable {
@@ -603,13 +608,13 @@ enum ContentToolPack3Logic {
         }
     }
 
-    private static func pointInPolygon(x: Double, y: Double, points: [(Double, Double)]) -> Bool {
+    private static func pointInPolygon(x: Double, y: Double, points: [NormPoint]) -> Bool {
         guard points.count >= 3 else { return false }
         var inside = false
         var j = points.count - 1
         for i in 0 ..< points.count {
-            let xi = points[i].0, yi = points[i].1
-            let xj = points[j].0, yj = points[j].1
+            let xi = points[i].x, yi = points[i].y
+            let xj = points[j].x, yj = points[j].y
             let intersect = (yi > y) != (yj > y)
                 && x < ((xj - xi) * (y - yi)) / (yj - yi + 1e-15) + xi
             if intersect { inside = !inside }
@@ -629,12 +634,12 @@ enum ContentToolPack3Logic {
         }
     }
 
-    private static func polygonArea(_ points: [(Double, Double)]) -> Double {
+    private static func polygonArea(_ points: [NormPoint]) -> Double {
         guard points.count >= 3 else { return 0 }
         var sum = 0.0
         var j = points.count - 1
         for i in 0 ..< points.count {
-            sum += (points[j].0 + points[i].0) * (points[j].1 - points[i].1)
+            sum += (points[j].x + points[i].x) * (points[j].y - points[i].y)
             j = i
         }
         return sum / 2
@@ -682,8 +687,8 @@ enum ContentToolPack3Logic {
             return (cx, cy, abs(r), abs(r))
         case .polygon(let points):
             guard !points.isEmpty else { return (0.5, 0.5, 0, 0) }
-            let xs = points.map(\.0)
-            let ys = points.map(\.1)
+            let xs = points.map(\.x)
+            let ys = points.map(\.y)
             let minX = xs.min() ?? 0
             let maxX = xs.max() ?? 0
             let minY = ys.min() ?? 0

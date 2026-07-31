@@ -388,8 +388,8 @@ struct DiagramHotspotToolView: View {
             nx = cx; ny = cy
         case .polygon(let points):
             if points.isEmpty { return CGPoint(x: size.width / 2, y: size.height / 2) }
-            nx = points.map(\.0).reduce(0, +) / Double(points.count)
-            ny = points.map(\.1).reduce(0, +) / Double(points.count)
+            nx = points.map(\.x).reduce(0, +) / Double(points.count)
+            ny = points.map(\.y).reduce(0, +) / Double(points.count)
         }
         // object-fit: contain letterboxing
         let scale = min(size.width / CGFloat(naturalWidth), size.height / CGFloat(naturalHeight))
@@ -418,11 +418,11 @@ struct DiagramHotspotToolView: View {
             else { return nil }
             return .circle(cx: cx, cy: cy, r: r)
         case "polygon":
-            let points: [(Double, Double)] = ContentToolPack3Logic.arrayField(value, key: "points").compactMap { pt in
+            let points: [ContentToolPack3Logic.NormPoint] = ContentToolPack3Logic.arrayField(value, key: "points").compactMap { pt in
                 guard case .array(let arr) = pt, arr.count >= 2,
                       case .number(let x) = arr[0], case .number(let y) = arr[1]
                 else { return nil }
-                return (x, y)
+                return ContentToolPack3Logic.NormPoint(x: x, y: y)
             }
             return .polygon(points: points)
         default:
