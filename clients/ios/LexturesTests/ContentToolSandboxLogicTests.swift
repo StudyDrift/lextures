@@ -95,16 +95,18 @@ final class ContentToolSandboxLogicTests: XCTestCase {
         let rate = try object(try fixtureRoot()["rateLimit"])
         let max = try int(rate["maxPerSec"])
         for item in try objects(rate["cases"]) {
+            let name = try string(item["name"])
             let limiter = ContentToolSandboxLogic.BridgeRateLimiter(maxPerSec: max)
             let stamps = try XCTUnwrap(item["timestampsMs"] as? [Any]).map { try int($0) }
             let expected = try XCTUnwrap(item["expectedAllow"] as? [Any]).map { try bool($0) }
             let actual = stamps.map { limiter.allow(nowMs: Int64($0)) }
-            XCTAssertEqual(actual, expected, try string(item["name"]))
+            XCTAssertEqual(actual, expected, name)
         }
     }
 
     func testSizeGuardRejectsOversize() throws {
         for item in try objects(try object(try fixtureRoot()["sizeGuard"])["cases"]) {
+            let name = try string(item["name"])
             let approx = try int(item["approxBytes"])
             let reject = try bool(item["reject"])
             let payload = String(repeating: "x", count: approx)
@@ -112,9 +114,9 @@ final class ContentToolSandboxLogicTests: XCTestCase {
             let limiter = ContentToolSandboxLogic.BridgeRateLimiter(maxPerSec: 1000)
             let reason = ContentToolSandboxLogic.rejectIngress(rawJSON: raw, limiter: limiter, nowMs: 1)
             if reject {
-                XCTAssertEqual(reason, .oversized, try string(item["name"]))
+                XCTAssertEqual(reason, .oversized, name)
             } else {
-                XCTAssertNil(reason, try string(item["name"]))
+                XCTAssertNil(reason, name)
             }
         }
     }
