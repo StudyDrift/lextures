@@ -331,7 +331,7 @@ struct ExplainItBackToolView: View {
             let raw = try await props.runAction("submit", .object(["text": .string(text)]))
             let result = ContentToolPack2Logic.objectMap(raw)
             if case .string(let code) = result["error"] {
-                errorText = L.text(ContentToolPack2Logic.plainLanguageMessageKey(for: code))
+                errorText = L.dynamicText(ContentToolPack2Logic.plainLanguageMessageKey(for: code))
                 return
             }
             if case .object(let keyLabels) = result["keyPointLabels"] {

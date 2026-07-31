@@ -257,7 +257,7 @@ struct AskQuestionsToolView: View {
                 let raw = try await props.runAction("ask", .object(["question": .string(question)]))
                 let result = ContentToolPack2Logic.objectMap(raw)
                 if case .string(let code) = result["error"] {
-                    errorText = L.text(ContentToolPack2Logic.plainLanguageMessageKey(for: code))
+                    errorText = L.dynamicText(ContentToolPack2Logic.plainLanguageMessageKey(for: code))
                     if case .bool(true) = result["askInstructor"] { askInstructor = true }
                     // Retain draft on failure (FR-2 / AC-3).
                     return

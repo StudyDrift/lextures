@@ -368,7 +368,7 @@ struct InlineDiscussionToolView: View {
             }
             let result = ContentToolPack2Logic.objectMap(raw)
             if case .string(let code) = result["error"] {
-                errorText = L.text(ContentToolPack2Logic.plainLanguageMessageKey(for: code))
+                errorText = L.dynamicText(ContentToolPack2Logic.plainLanguageMessageKey(for: code))
                 return
             }
             draft = ""
