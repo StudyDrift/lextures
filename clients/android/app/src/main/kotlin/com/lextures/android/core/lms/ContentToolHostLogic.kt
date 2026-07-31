@@ -113,12 +113,14 @@ object ContentToolHostLogic {
         contract == supported
 
     fun conflictPolicyForTool(toolId: String, manifestPolicy: String? = null): ConflictPolicy {
-        if (toolId == "highlight_annotate") return ConflictPolicy.MERGE
         if (toolId in ContentToolPack1Logic.pack1ToolIds) {
             return ContentToolPack1Logic.conflictPolicy(toolId)
         }
         if (toolId in ContentToolPack2Logic.pack2ToolIds) {
             return ContentToolPack2Logic.conflictPolicy(toolId)
+        }
+        if (toolId in ContentToolPack3Logic.pack3ToolIds) {
+            return ContentToolPack3Logic.conflictPolicy(toolId)
         }
         return ConflictPolicy.from(manifestPolicy)
     }
@@ -220,7 +222,8 @@ object ContentToolHostLogic {
     fun registeredNativeToolIds(): Set<String> =
         setOf("noop_probe") +
             ContentToolPack1Logic.allowlistedToolIds() +
-            ContentToolPack2Logic.allowlistedToolIds()
+            ContentToolPack2Logic.allowlistedToolIds() +
+            ContentToolPack3Logic.allowlistedToolIds()
 
     fun hasNativeRenderer(toolId: String, registered: Set<String> = registeredNativeToolIds()): Boolean =
         toolId in registered
