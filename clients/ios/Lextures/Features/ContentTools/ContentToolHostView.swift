@@ -207,7 +207,7 @@ struct ContentToolHostView: View {
         readOnly: Bool,
         readOnlyMessage: String?,
         showSandboxBadge: Bool = false,
-        @ViewBuilder content: () -> Content
+        @ViewBuilder content: @escaping () -> Content
     ) -> some View {
         ToolFrameView(
             title: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
@@ -218,10 +218,9 @@ struct ContentToolHostView: View {
             readOnlyMessage: readOnlyMessage ?? errorMessage,
             studentResetAllowed: studentResetAllowed,
             showSandboxBadge: showSandboxBadge,
-            onReset: { showResetConfirm = true }
-        ) {
-            content()
-        }
+            onReset: { showResetConfirm = true },
+            content: content
+        )
     }
 
     private func openWeb(page: ContentToolsPageContext, instanceId: String) {

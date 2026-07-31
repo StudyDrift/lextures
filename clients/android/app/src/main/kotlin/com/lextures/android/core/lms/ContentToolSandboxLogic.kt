@@ -10,7 +10,6 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 /**
  * Pure CT.M4 sandbox decisions — bridge validation, rate/size guards, height clamp,
@@ -128,12 +127,12 @@ object ContentToolSandboxLogic {
     fun measureMessageBytes(msg: JsonElement?): Int {
         if (msg == null || msg is JsonNull) return Int.MAX_VALUE
         return runCatching {
-            json.encodeToString(JsonElement.serializer(), msg).toByteArray(StandardCharsets.UTF_8).size
+            json.encodeToString(JsonElement.serializer(), msg).toByteArray(Charsets.UTF_8).size
         }.getOrDefault(Int.MAX_VALUE)
     }
 
     fun measureMessageBytes(jsonString: String): Int =
-        jsonString.toByteArray(StandardCharsets.UTF_8).size
+        jsonString.toByteArray(Charsets.UTF_8).size
 
     /** Classify a raw ingress payload before dispatch. Returns null when accepted. */
     fun rejectIngress(
@@ -170,11 +169,14 @@ object ContentToolSandboxLogic {
     }
 
     fun documentPath(toolId: String, version: String? = null): String {
-        val encoded = URLEncoder.encode(toolId, StandardCharsets.UTF_8).replace("+", "%20")
+        // Use the String charset overload (API 1); Charset overload requires API 33.
+        @Suppress("DEPRECATION")
+        val encoded = URLEncoder.encode(toolId, "UTF-8").replace("+", "%20")
         var path = "/tool-sandbox/$encoded.html"
         if (!version.isNullOrBlank()) {
             val sep = if (path.contains("?")) "&" else "?"
-            path += sep + "v=" + URLEncoder.encode(version, StandardCharsets.UTF_8)
+            @Suppress("DEPRECATION")
+            path += sep + "v=" + URLEncoder.encode(version, "UTF-8")
         }
         return path
     }
