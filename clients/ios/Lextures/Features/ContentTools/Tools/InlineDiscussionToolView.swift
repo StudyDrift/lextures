@@ -119,7 +119,7 @@ struct InlineDiscussionToolView: View {
             }
 
             if !props.readOnly {
-                if let replyTo {
+                if replyTo != nil {
                     Text(L.text("mobile.contentTools.tools.inline_discussion.replyLabel"))
                         .font(.caption.weight(.semibold))
                     Button(L.text("mobile.contentTools.tools.inline_discussion.cancel")) {
