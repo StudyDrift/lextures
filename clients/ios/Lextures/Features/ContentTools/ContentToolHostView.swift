@@ -218,9 +218,10 @@ struct ContentToolHostView: View {
             readOnlyMessage: readOnlyMessage ?? errorMessage,
             studentResetAllowed: studentResetAllowed,
             showSandboxBadge: showSandboxBadge,
-            onReset: { showResetConfirm = true },
-            content: content
-        )
+            onReset: { showResetConfirm = true }
+        ) {
+            content()
+        }
     }
 
     private func openWeb(page: ContentToolsPageContext, instanceId: String) {
