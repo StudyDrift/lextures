@@ -2,9 +2,269 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>code_sandbox sandbox canary</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; frame-ancestors *;"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Code Sandbox</title>
+    <style>
+      :root { color-scheme: light dark; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      body { margin: 0; padding: 10px; }
+      .banner { font-family: system-ui, sans-serif; font-size: 12px; opacity: 0.85; margin-bottom: 8px; }
+      .prompt { font-family: system-ui, sans-serif; font-size: 14px; margin: 0 0 8px; white-space: pre-wrap; }
+      .toolbar, .accessory {
+        display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+        font-family: system-ui, sans-serif; margin: 6px 0;
+      }
+      .accessory button, .toolbar button {
+        font: inherit; padding: 8px 10px; min-height: 40px;
+      }
+      #editor {
+        width: 100%; min-height: 180px; box-sizing: border-box;
+        font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        white-space: pre; overflow-x: auto; resize: vertical;
+        padding: 8px; border: 1px solid #8886; border-radius: 8px;
+      }
+      #stdin {
+        width: 100%; min-height: 48px; box-sizing: border-box;
+        font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        margin-top: 6px; padding: 6px; border: 1px solid #8886; border-radius: 8px;
+      }
+      .panel {
+        margin-top: 8px; padding: 8px; border-radius: 8px;
+        background: #8881; font-size: 12px; white-space: pre-wrap; word-break: break-word;
+      }
+      .panel h3 { font-family: system-ui, sans-serif; font-size: 12px; margin: 0 0 4px; }
+      .status { font-family: system-ui, sans-serif; font-size: 12px; margin-top: 6px; }
+      .sticky-run {
+        position: sticky; bottom: 0; background: Canvas; padding: 8px 0 0;
+        border-top: 1px solid #8884; margin-top: 8px;
+      }
+      label { font-family: system-ui, sans-serif; font-size: 12px; display: block; margin-top: 6px; }
+    </style>
   </head>
   <body>
-    <p data-tool-sandbox="code_sandbox">CT.17 code_sandbox sandbox host canary</p>
+    <div id="app">
+      <p class="banner" id="banner">Editing code is easier on a larger screen. You can still read, run, and check here.</p>
+      <p class="prompt" id="prompt"></p>
+      <label for="editor">Code</label>
+      <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+      <div class="accessory" id="accessory" aria-label="Code helpers">
+        <button type="button" data-ins="\t">Tab</button>
+        <button type="button" data-ins="(">(</button>
+        <button type="button" data-ins=")">)</button>
+        <button type="button" data-ins="[">[</button>
+        <button type="button" data-ins="]">]</button>
+        <button type="button" data-ins="{">{</button>
+        <button type="button" data-ins="}">}</button>
+        <button type="button" data-ins="=">=</button>
+        <button type="button" data-ins=":">:</button>
+        <button type="button" data-ins="_">_</button>
+        <button type="button" data-ins='"'>"</button>
+      </div>
+      <label for="stdin">Standard input</label>
+      <textarea id="stdin" spellcheck="false"></textarea>
+      <div class="sticky-run toolbar">
+        <button type="button" id="run">Run</button>
+        <button type="button" id="check">Check</button>
+        <button type="button" id="reset">Reset code</button>
+        <button type="button" id="reference" hidden>Try reference</button>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <div class="panel" id="stdoutPanel" hidden>
+        <h3>Output</h3>
+        <pre id="stdout"></pre>
+      </div>
+      <div class="panel" id="stderrPanel" hidden>
+        <h3>Errors</h3>
+        <pre id="stderr"></pre>
+      </div>
+      <div class="panel" id="testsPanel" hidden>
+        <h3>Tests</h3>
+        <ul id="tests"></ul>
+      </div>
+    </div>
+    <script>
+      let revision = 0
+      let readOnly = false
+      let parentOrigin = '*'
+      let config = { language: 'python', prompt: '', starterCode: '', sampleInput: '', tests: [] }
+      let state = { v: 1, code: '', runs: [] }
+      let pending = null
+
+      function post(msg) {
+        parent.postMessage(msg, parentOrigin === 'null' ? '*' : parentOrigin)
+      }
+      function resize() {
+        post({ t: 'resize', v: 1, height: Math.max(document.documentElement.scrollHeight, 200) })
+      }
+      function setBusy(on) {
+        ;['run', 'check', 'reset', 'reference', 'editor', 'stdin'].forEach((id) => {
+          const el = document.getElementById(id)
+          if (el) el.disabled = on || (id !== 'editor' && id !== 'stdin' ? false : readOnly)
+        })
+        if (readOnly) {
+          document.getElementById('editor').disabled = true
+          document.getElementById('stdin').disabled = true
+        }
+      }
+
+      function persist() {
+        state.code = document.getElementById('editor').value
+        post({
+          t: 'save',
+          v: 1,
+          state: {
+            v: 1,
+            code: state.code,
+            runs: state.runs || [],
+            best: state.best,
+            editorMode: state.editorMode || 'plain',
+          },
+        })
+      }
+
+      function render() {
+        document.getElementById('prompt').textContent = config.prompt || ''
+        const editor = document.getElementById('editor')
+        editor.value = typeof state.code === 'string' && state.code !== ''
+          ? state.code
+          : (config.starterCode || '')
+        document.getElementById('stdin').value = config.sampleInput || ''
+        document.getElementById('reference').hidden = !config.allowTryReference
+        editor.disabled = readOnly
+        document.getElementById('stdin').disabled = readOnly
+        ;['run', 'check', 'reset', 'reference'].forEach((id) => {
+          document.getElementById(id).disabled = readOnly
+        })
+        const last = Array.isArray(state.runs) && state.runs.length
+          ? state.runs[state.runs.length - 1]
+          : null
+        if (last) applyResult(last, last.action === 'check')
+        resize()
+      }
+
+      function applyResult(result, isCheck) {
+        const status = document.getElementById('status')
+        const st = result.status || (result.ok ? 'ok' : 'error')
+        if (st === 'timeout' || st === 'timed_out') status.textContent = 'Timed out'
+        else if (st === 'passed' || result.passed === true) status.textContent = 'Passed'
+        else if (st === 'failed' || result.passed === false) status.textContent = 'Failed'
+        else if (st === 'running') status.textContent = 'Running…'
+        else status.textContent = st
+
+        const stdout = result.stdout || ''
+        const stderr = result.stderr || ''
+        document.getElementById('stdout').textContent = stdout
+        document.getElementById('stderr').textContent = stderr
+        document.getElementById('stdoutPanel').hidden = !stdout
+        document.getElementById('stderrPanel').hidden = !stderr
+
+        const tests = result.tests || []
+        const list = document.getElementById('tests')
+        list.innerHTML = ''
+        tests.forEach((t) => {
+          const li = document.createElement('li')
+          li.textContent = (t.name || t.id || 'test') + ': ' + (t.passed ? 'pass' : 'fail')
+          list.appendChild(li)
+        })
+        document.getElementById('testsPanel').hidden = !isCheck || tests.length === 0
+        resize()
+        post({ t: 'announce', v: 1, message: status.textContent })
+      }
+
+      function runAction(action, input) {
+        if (readOnly) return
+        const id = action + '-' + Date.now()
+        pending = id
+        setBusy(true)
+        document.getElementById('status').textContent = 'Running…'
+        post({ t: 'runAction', v: 1, id, action, input })
+      }
+
+      document.getElementById('editor').addEventListener('change', persist)
+      document.getElementById('editor').addEventListener('blur', persist)
+
+      document.getElementById('accessory').addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button[data-ins]')
+        if (!btn || readOnly) return
+        const editor = document.getElementById('editor')
+        const ins = btn.getAttribute('data-ins') === '\\t' ? '\t' : btn.getAttribute('data-ins')
+        const start = editor.selectionStart
+        const end = editor.selectionEnd
+        const v = editor.value
+        editor.value = v.slice(0, start) + ins + v.slice(end)
+        editor.selectionStart = editor.selectionEnd = start + ins.length
+        editor.focus()
+        persist()
+      })
+
+      document.getElementById('run').addEventListener('click', () => {
+        persist()
+        runAction('run', {
+          code: document.getElementById('editor').value,
+          stdin: document.getElementById('stdin').value,
+        })
+      })
+      document.getElementById('check').addEventListener('click', () => {
+        persist()
+        runAction('check', {
+          code: document.getElementById('editor').value,
+          stdin: document.getElementById('stdin').value,
+        })
+      })
+      document.getElementById('reset').addEventListener('click', () => {
+        runAction('reset_code', {})
+      })
+      document.getElementById('reference').addEventListener('click', () => {
+        runAction('try_reference', {})
+      })
+
+      window.addEventListener('message', (ev) => {
+        const msg = ev.data
+        if (!msg || msg.v !== 1) return
+        if (msg.t === 'init' || msg.t === 'props') {
+          parentOrigin = ev.origin || '*'
+          config = Object.assign(config, msg.config || {})
+          state = Object.assign({ v: 1, code: '', runs: [] }, msg.state || {})
+          readOnly = !!msg.readOnly
+          revision = msg.revision || 0
+          render()
+          if (msg.t === 'init') post({ t: 'ready', v: 1 })
+        } else if (msg.t === 'actionResult') {
+          setBusy(false)
+          if (pending && msg.id && msg.id !== pending) return
+          pending = null
+          if (msg.error) {
+            document.getElementById('status').textContent = String(msg.error.message || msg.error || 'Error')
+            document.getElementById('stderr').textContent = document.getElementById('status').textContent
+            document.getElementById('stderrPanel').hidden = false
+            resize()
+            return
+          }
+          const result = msg.result || {}
+          if (result.code != null) {
+            state.code = result.code
+            document.getElementById('editor').value = result.code
+          }
+          if (result.starterCode != null && (result.reset || result.ok)) {
+            state.code = result.starterCode || config.starterCode || ''
+            document.getElementById('editor').value = state.code
+          }
+          if (Array.isArray(result.runs)) state.runs = result.runs
+          if (result.best) state.best = result.best
+          applyResult(result, !!result.tests || msg.action === 'check')
+        } else if (msg.t === 'stateAccepted') {
+          revision = msg.revision || revision
+        } else if (msg.t === 'error') {
+          setBusy(false)
+          document.getElementById('status').textContent = String(msg.message || 'Error')
+        }
+      })
+
+      post({ t: 'ready', v: 1 })
+      resize()
+    </script>
   </body>
 </html>

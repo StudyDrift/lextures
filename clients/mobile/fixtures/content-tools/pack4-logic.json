@@ -1,0 +1,531 @@
+{
+  "description": "Shared CT.M8 pack-4 behaviour fixtures consumed by iOS/Android unit suites.",
+  "allowlist": {
+    "pack4ToolIds": [
+      "media_checkpoints",
+      "worked_example",
+      "parameter_explorer"
+    ],
+    "sandboxToolIds": [
+      "code_sandbox"
+    ],
+    "cases": [
+      {
+        "name": "all_enabled",
+        "allowlist": [
+          "media_checkpoints",
+          "worked_example",
+          "parameter_explorer"
+        ],
+        "toolId": "worked_example",
+        "expected": true
+      },
+      {
+        "name": "media_held_back",
+        "allowlist": [
+          "worked_example",
+          "parameter_explorer"
+        ],
+        "toolId": "media_checkpoints",
+        "expected": false
+      },
+      {
+        "name": "explorer_held_back",
+        "allowlist": [
+          "media_checkpoints",
+          "worked_example"
+        ],
+        "toolId": "parameter_explorer",
+        "expected": false
+      },
+      {
+        "name": "unknown_not_allowlisted",
+        "allowlist": [
+          "media_checkpoints",
+          "worked_example",
+          "parameter_explorer"
+        ],
+        "toolId": "code_sandbox",
+        "expected": false
+      }
+    ]
+  },
+  "conflictPolicy": {
+    "cases": [
+      {
+        "toolId": "media_checkpoints",
+        "expected": "server_wins"
+      },
+      {
+        "toolId": "worked_example",
+        "expected": "server_wins"
+      },
+      {
+        "toolId": "parameter_explorer",
+        "expected": "server_wins"
+      },
+      {
+        "toolId": "code_sandbox",
+        "expected": "server_wins"
+      }
+    ]
+  },
+  "offlineQueue": {
+    "cases": [
+      {
+        "toolId": "media_checkpoints",
+        "action": "answer_checkpoint",
+        "expected": false
+      },
+      {
+        "toolId": "media_checkpoints",
+        "action": "record_progress",
+        "expected": false
+      },
+      {
+        "toolId": "worked_example",
+        "action": "check_step",
+        "expected": false
+      },
+      {
+        "toolId": "worked_example",
+        "action": "hint",
+        "expected": false
+      },
+      {
+        "toolId": "parameter_explorer",
+        "action": "submit_answer",
+        "expected": false
+      },
+      {
+        "toolId": "code_sandbox",
+        "action": "run",
+        "expected": false
+      },
+      {
+        "toolId": "code_sandbox",
+        "action": "check",
+        "expected": false
+      }
+    ]
+  },
+  "checkpointEngine": {
+    "toleranceSec": 0.25,
+    "checkpoints": [
+      { "id": "c1", "atSec": 15, "required": true, "attempts": 2 },
+      { "id": "c2", "atSec": 45, "required": true, "attempts": 2 },
+      { "id": "c3", "atSec": 90, "required": false, "attempts": 2 }
+    ],
+    "findDue": [
+      {
+        "name": "fires_near_timestamp",
+        "currentTime": 15.1,
+        "answers": {},
+        "prompted": [],
+        "expectedId": "c1"
+      },
+      {
+        "name": "skips_done",
+        "currentTime": 45,
+        "answers": {
+          "c1": { "done": true }
+        },
+        "prompted": [],
+        "expectedId": "c2"
+      },
+      {
+        "name": "skips_prompted",
+        "currentTime": 15.2,
+        "answers": {},
+        "prompted": ["c1"],
+        "expectedId": null
+      },
+      {
+        "name": "before_window",
+        "currentTime": 10,
+        "answers": {},
+        "prompted": [],
+        "expectedId": null
+      }
+    ],
+    "clampSeek": [
+      {
+        "name": "clamps_past_required",
+        "preventSkip": true,
+        "answers": {},
+        "targetSec": 100,
+        "expectedTime": 15,
+        "expectedClamped": true
+      },
+      {
+        "name": "no_clamp_when_disabled",
+        "preventSkip": false,
+        "answers": {},
+        "targetSec": 100,
+        "expectedTime": 100,
+        "expectedClamped": false
+      },
+      {
+        "name": "no_clamp_when_answered",
+        "preventSkip": true,
+        "answers": {
+          "c1": { "done": true },
+          "c2": { "done": true }
+        },
+        "targetSec": 100,
+        "expectedTime": 100,
+        "expectedClamped": false
+      }
+    ],
+    "isDone": [
+      {
+        "name": "done_flag",
+        "checkpointId": "c1",
+        "answers": { "c1": { "done": true } },
+        "expected": true
+      },
+      {
+        "name": "correct_attempt",
+        "checkpointId": "c1",
+        "answers": {
+          "c1": {
+            "attempts": [{ "value": "a", "correct": true, "at": "t" }]
+          }
+        },
+        "expected": true
+      },
+      {
+        "name": "exhausted",
+        "checkpointId": "c1",
+        "answers": {
+          "c1": {
+            "attempts": [
+              { "value": "a", "correct": false, "at": "t1" },
+              { "value": "b", "correct": false, "at": "t2" }
+            ]
+          }
+        },
+        "expected": true
+      },
+      {
+        "name": "not_done",
+        "checkpointId": "c1",
+        "answers": {
+          "c1": {
+            "attempts": [{ "value": "a", "correct": false, "at": "t1" }]
+          }
+        },
+        "expected": false
+      }
+    ],
+    "mergeSegments": [
+      {
+        "name": "empty_to_first",
+        "existing": [],
+        "start": 0.2,
+        "end": 3.1,
+        "expected": [[0, 5]]
+      },
+      {
+        "name": "merge_adjacent",
+        "existing": [[0, 5]],
+        "start": 4,
+        "end": 12,
+        "expected": [[0, 15]]
+      }
+    ],
+    "resume": [
+      {
+        "name": "uses_furthest",
+        "furthestSec": 32.5,
+        "watchedSegments": [[0, 10]],
+        "expected": 32.5
+      },
+      {
+        "name": "uses_segment_end",
+        "furthestSec": null,
+        "watchedSegments": [[0, 10], [20, 28]],
+        "expected": 28
+      },
+      {
+        "name": "zero_default",
+        "furthestSec": null,
+        "watchedSegments": [],
+        "expected": 0
+      }
+    ],
+    "progressThrottle": {
+      "intervalMs": 5000,
+      "cases": [
+        {
+          "name": "first_always",
+          "lastFiredAtMs": null,
+          "nowMs": 1000,
+          "expected": true
+        },
+        {
+          "name": "within_interval",
+          "lastFiredAtMs": 1000,
+          "nowMs": 3000,
+          "expected": false
+        },
+        {
+          "name": "after_interval",
+          "lastFiredAtMs": 1000,
+          "nowMs": 7000,
+          "expected": true
+        }
+      ]
+    },
+    "playbackBlocked": [
+      {
+        "name": "required_unanswered",
+        "checkpointId": "c1",
+        "answers": {},
+        "expected": true
+      },
+      {
+        "name": "optional_not_blocked",
+        "checkpointId": "c3",
+        "answers": {},
+        "expected": false
+      },
+      {
+        "name": "done_not_blocked",
+        "checkpointId": "c1",
+        "answers": { "c1": { "done": true } },
+        "expected": false
+      }
+    ]
+  },
+  "workedExample": {
+    "steps": [
+      { "id": "s1", "hasBlank": true },
+      { "id": "s2", "hasBlank": true },
+      { "id": "s3", "hasBlank": false },
+      { "id": "s4", "hasBlank": true }
+    ],
+    "status": [
+      {
+        "name": "current_first",
+        "blankedStepIds": ["s1", "s2", "s4"],
+        "currentStepId": "s1",
+        "progress": {},
+        "expected": {
+          "s1": "current",
+          "s2": "locked",
+          "s3": "scaffolded",
+          "s4": "locked"
+        }
+      },
+      {
+        "name": "solved_and_revealed",
+        "blankedStepIds": ["s1", "s2", "s4"],
+        "currentStepId": "s2",
+        "progress": {
+          "s1": {
+            "completedAt": "t",
+            "attempts": [{ "value": "1", "result": "correct", "at": "t" }]
+          },
+          "s2": { "revealed": true }
+        },
+        "expected": {
+          "s1": "solved",
+          "s2": "revealed",
+          "s3": "scaffolded",
+          "s4": "locked"
+        }
+      }
+    ],
+    "stepDone": [
+      {
+        "name": "completed",
+        "progress": { "completedAt": "t" },
+        "expected": true
+      },
+      {
+        "name": "revealed",
+        "progress": { "revealed": true },
+        "expected": true
+      },
+      {
+        "name": "correct_attempt",
+        "progress": {
+          "attempts": [{ "value": "x", "result": "correct", "at": "t" }]
+        },
+        "expected": true
+      },
+      {
+        "name": "incorrect",
+        "progress": {
+          "attempts": [{ "value": "x", "result": "incorrect", "at": "t" }]
+        },
+        "expected": false
+      }
+    ],
+    "canCheck": [
+      {
+        "name": "ok",
+        "draft": "42",
+        "readOnly": false,
+        "busy": false,
+        "stepDone": false,
+        "expected": true
+      },
+      {
+        "name": "empty_draft",
+        "draft": "  ",
+        "readOnly": false,
+        "busy": false,
+        "stepDone": false,
+        "expected": false
+      },
+      {
+        "name": "already_done",
+        "draft": "42",
+        "readOnly": false,
+        "busy": false,
+        "stepDone": true,
+        "expected": false
+      }
+    ],
+    "resolveCurrent": [
+      {
+        "name": "from_state",
+        "blankedStepIds": ["s1", "s2", "s4"],
+        "currentStepId": "s2",
+        "progress": { "s1": { "completedAt": "t" } },
+        "expected": "s2"
+      },
+      {
+        "name": "first_undone",
+        "blankedStepIds": ["s1", "s2", "s4"],
+        "currentStepId": null,
+        "progress": { "s1": { "completedAt": "t" } },
+        "expected": "s2"
+      }
+    ]
+  },
+  "parameterExplorer": {
+    "recomputeThrottleMs": 33,
+    "throttle": [
+      {
+        "name": "first",
+        "lastAtMs": null,
+        "nowMs": 100,
+        "expected": true
+      },
+      {
+        "name": "within",
+        "lastAtMs": 100,
+        "nowMs": 120,
+        "expected": false
+      },
+      {
+        "name": "after",
+        "lastAtMs": 100,
+        "nowMs": 140,
+        "expected": true
+      }
+    ],
+    "settle": [
+      {
+        "name": "dragging_no_save",
+        "dragging": true,
+        "dirty": true,
+        "expected": false
+      },
+      {
+        "name": "settled_dirty",
+        "dragging": false,
+        "dirty": true,
+        "expected": true
+      },
+      {
+        "name": "settled_clean",
+        "dragging": false,
+        "dirty": false,
+        "expected": false
+      }
+    ],
+    "defaults": {
+      "parameters": [
+        { "id": "a", "kind": "number", "default": 1 },
+        { "id": "b", "kind": "boolean", "default": true },
+        { "id": "c", "kind": "choice", "default": "x" }
+      ],
+      "expected": { "a": 1, "b": true, "c": "x" }
+    },
+    "clampNumber": [
+      {
+        "name": "in_range",
+        "value": 5,
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "expected": 5
+      },
+      {
+        "name": "below_min",
+        "value": -2,
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "expected": 0
+      },
+      {
+        "name": "snap_step",
+        "value": 5.4,
+        "min": 0,
+        "max": 10,
+        "step": 0.5,
+        "expected": 5.5
+      }
+    ]
+  },
+  "unknownFieldPreservation": {
+    "base": {
+      "v": 1,
+      "params": { "a": 1 },
+      "customClientKey": "keep-me",
+      "nested": { "x": 1, "y": 2 }
+    },
+    "patch": {
+      "params": { "a": 2, "b": 3 },
+      "furthestSec": 12
+    },
+    "expectedKeys": ["v", "params", "customClientKey", "nested", "furthestSec"]
+  },
+  "mediaProvider": {
+    "cases": [
+      {
+        "name": "direct_url",
+        "source": "course_file",
+        "url": "https://cdn.example/v.mp4",
+        "provider": null,
+        "expectedReliable": true
+      },
+      {
+        "name": "youtube_unreliable",
+        "source": "external",
+        "url": "https://youtube.com/watch?v=abc",
+        "provider": "youtube",
+        "expectedReliable": false
+      },
+      {
+        "name": "vimeo_unreliable",
+        "source": "external",
+        "url": "https://vimeo.com/123",
+        "provider": "vimeo",
+        "expectedReliable": false
+      },
+      {
+        "name": "missing_url",
+        "source": "course_file",
+        "url": null,
+        "provider": null,
+        "expectedReliable": false
+      }
+    ]
+  }
+}
