@@ -154,6 +154,8 @@ final class ContentToolSandboxLogicTests: XCTestCase {
             } else {
                 sandboxMode = try string(item["sandboxMode"])
             }
+            let name = try string(item["name"])
+            let expected = try string(item["expected"])
             let path = ContentToolSandboxLogic.resolveRenderPath(
                 toolId: try string(item["toolId"]),
                 contract: try int(item["contract"]),
@@ -165,16 +167,18 @@ final class ContentToolSandboxLogicTests: XCTestCase {
                 deprecated: try bool(item["deprecated"]),
                 killed: try bool(item["killed"])
             )
-            XCTAssertEqual(path.rawValue, try string(item["expected"]), try string(item["name"]))
+            XCTAssertEqual(path.rawValue, expected, name)
         }
     }
 
     func testContractRangeMatchesFixture() throws {
         let root = try object(try fixtureRoot()["contractRange"])
         for item in try objects(root["cases"]) {
+            let contract = try string(item["contract"])
+            let ok = try bool(item["ok"])
             XCTAssertEqual(
-                ContentToolSandboxLogic.contractInSupportedRange(try string(item["contract"])),
-                try bool(item["ok"])
+                ContentToolSandboxLogic.contractInSupportedRange(contract),
+                ok
             )
         }
     }
