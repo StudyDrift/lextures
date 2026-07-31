@@ -5,11 +5,7 @@ final class ContentToolHostLogicTests: XCTestCase {
     private func fixtureRoot() throws -> [String: Any] {
         let url = fixtureURL()
         let data = try Data(contentsOf: url)
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            XCTFail("invalid fixture JSON")
-            return [:]
-        }
-        return json
+        return try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
     }
 
     private func fixtureURL() -> URL {
@@ -20,7 +16,7 @@ final class ContentToolHostLogicTests: XCTestCase {
             .deletingLastPathComponent() // clients
             .appendingPathComponent("mobile/fixtures/content-tools/host-logic.json")
         if FileManager.default.fileExists(atPath: direct.path) { return direct }
-        var searchRoots = [
+        let searchRoots = [
             URL(fileURLWithPath: FileManager.default.currentDirectoryPath),
             thisFile.deletingLastPathComponent(),
         ]
@@ -40,12 +36,43 @@ final class ContentToolHostLogicTests: XCTestCase {
         return direct
     }
 
+    private func object(_ value: Any?, file: StaticString = #filePath, line: UInt = #line) throws -> [String: Any] {
+        try XCTUnwrap(value as? [String: Any], file: file, line: line)
+    }
+
+    private func objects(_ value: Any?, file: StaticString = #filePath, line: UInt = #line) throws -> [[String: Any]] {
+        try XCTUnwrap(value as? [[String: Any]], file: file, line: line)
+    }
+
+    private func bool(_ value: Any?, file: StaticString = #filePath, line: UInt = #line) throws -> Bool {
+        try XCTUnwrap(value as? Bool, file: file, line: line)
+    }
+
+    private func int(_ value: Any?, file: StaticString = #filePath, line: UInt = #line) throws -> Int {
+        if let intVal = value as? Int { return intVal }
+        if let number = value as? NSNumber { return number.intValue }
+        return try XCTUnwrap(value as? Int, file: file, line: line)
+    }
+
+    private func string(_ value: Any?, file: StaticString = #filePath, line: UInt = #line) throws -> String {
+        try XCTUnwrap(value as? String, file: file, line: line)
+    }
+
+    private func numberMap(_ raw: [String: Any]) -> [String: JSONValue] {
+        raw.mapValues { value in
+            if let number = value as? NSNumber {
+                return .number(number.doubleValue)
+            }
+            return .null
+        }
+    }
+
     func testClampDebounceMatchesFixture() throws {
         let root = try fixtureRoot()
-        let debounce = root["debounce"] as! [String: Any]
-        let cases = debounce["cases"] as! [[String: Any]]
+        let debounce = try object(root["debounce"])
+        let cases = try objects(debounce["cases"])
         for item in cases {
-            let expected = item["expected"] as! Int
+            let expected = try int(item["expected"])
             let actual: Int
             if item["input"] is NSNull || item["input"] == nil {
                 actual = ContentToolHostLogic.clampDebounceMs(nil as Int?)
@@ -62,15 +89,12 @@ final class ContentToolHostLogicTests: XCTestCase {
 
     func testConflictPolicyMatchesFixture() throws {
         let root = try fixtureRoot()
-        let cases = (root["conflictPolicy"] as! [String: Any])["cases"] as! [[String: Any]]
+        let cases = try objects(try object(root["conflictPolicy"])["cases"])
         for item in cases {
             let policy = ContentToolHostLogic.ConflictPolicy.from(item["policy"] as? String)
-            let clientRaw = item["client"] as! [String: Any]
-            let serverRaw = item["server"] as! [String: Any]
-            let expectedRaw = item["expected"] as! [String: Any]
-            let client = clientRaw.mapValues { JSONValue.number(($0 as! NSNumber).doubleValue) }
-            let server = serverRaw.mapValues { JSONValue.number(($0 as! NSNumber).doubleValue) }
-            let expected = expectedRaw.mapValues { JSONValue.number(($0 as! NSNumber).doubleValue) }
+            let client = numberMap(try object(item["client"]))
+            let server = numberMap(try object(item["server"]))
+            let expected = numberMap(try object(item["expected"]))
             let resolved = ContentToolHostLogic.resolveConflictState(
                 policy: policy,
                 client: client,
@@ -82,23 +106,23 @@ final class ContentToolHostLogicTests: XCTestCase {
 
     func testReadOnlyPrecedenceMatchesFixture() throws {
         let root = try fixtureRoot()
-        let cases = root["readOnlyPrecedence"] as! [[String: Any]]
+        let cases = try objects(root["readOnlyPrecedence"])
         for item in cases {
-            let input = item["input"] as! [String: Any]
+            let input = try object(item["input"])
             let reason = ContentToolHostLogic.readOnlyReason(
                 ContentToolHostLogic.ReadOnlyInput(
-                    tombstone: input["tombstone"] as! Bool,
-                    breakerOpen: input["breakerOpen"] as! Bool,
-                    status: input["status"] as! String,
-                    pastDue: input["pastDue"] as! Bool,
-                    respectsDueDate: input["respectsDueDate"] as! Bool,
-                    observer: input["observer"] as! Bool
+                    tombstone: try bool(input["tombstone"]),
+                    breakerOpen: try bool(input["breakerOpen"]),
+                    status: try string(input["status"]),
+                    pastDue: try bool(input["pastDue"]),
+                    respectsDueDate: try bool(input["respectsDueDate"]),
+                    observer: try bool(input["observer"])
                 )
             )
             if item["expected"] is NSNull || item["expected"] == nil {
                 XCTAssertNil(reason, item["name"] as? String ?? "")
             } else {
-                let expected = ContentToolHostLogic.ReadOnlyReason(rawValue: item["expected"] as! String)
+                let expected = ContentToolHostLogic.ReadOnlyReason(rawValue: try string(item["expected"]))
                 XCTAssertEqual(reason, expected, item["name"] as? String ?? "")
             }
         }
@@ -106,25 +130,25 @@ final class ContentToolHostLogicTests: XCTestCase {
 
     func testContractGatingMatchesFixture() throws {
         let root = try fixtureRoot()
-        let contract = root["contract"] as! [String: Any]
-        let supported = contract["supportedVersion"] as! Int
-        for item in contract["cases"] as! [[String: Any]] {
-            let value = item["contract"] as! Int
-            let ok = item["supported"] as! Bool
+        let contract = try object(root["contract"])
+        let supported = try int(contract["supportedVersion"])
+        for item in try objects(contract["cases"]) {
+            let value = try int(item["contract"])
+            let ok = try bool(item["supported"])
             XCTAssertEqual(ContentToolHostLogic.contractSupported(value, supported: supported), ok)
         }
     }
 
     func testFenceMappingMatchesFixture() throws {
         let root = try fixtureRoot()
-        let mapping = root["fenceMapping"] as! [String: Any]
-        let instances = (mapping["instances"] as! [[String: Any]]).map {
-            ToolInstance(id: $0["id"] as! String, toolId: $0["toolId"] as! String)
+        let mapping = try object(root["fenceMapping"])
+        let instances = try objects(mapping["instances"]).map {
+            ToolInstance(id: try string($0["id"]), toolId: try string($0["toolId"]))
         }
         let map = ContentToolHostLogic.instanceMap(instances)
-        for item in mapping["cases"] as! [[String: Any]] {
-            let id = item["instanceId"] as! String
-            let found = item["found"] as! Bool
+        for item in try objects(mapping["cases"]) {
+            let id = try string(item["instanceId"])
+            let found = try bool(item["found"])
             XCTAssertEqual(ContentToolHostLogic.resolveInstance(map, instanceId: id) != nil, found)
             XCTAssertEqual(ContentToolHostLogic.shouldMountFence(map[id]), found)
         }
@@ -132,13 +156,13 @@ final class ContentToolHostLogicTests: XCTestCase {
 
     func testRenderGateMatchesFixture() throws {
         let root = try fixtureRoot()
-        let cases = (root["renderGate"] as! [String: Any])["cases"] as! [[String: Any]]
+        let cases = try objects(try object(root["renderGate"])["cases"])
         for item in cases {
             let mode = ContentToolHostLogic.fenceRenderMode(
-                mobileContentToolsEnabled: item["mobileContentToolsEnabled"] as! Bool,
-                contentToolsEnabled: item["contentToolsEnabled"] as! Bool
+                mobileContentToolsEnabled: try bool(item["mobileContentToolsEnabled"]),
+                contentToolsEnabled: try bool(item["contentToolsEnabled"])
             )
-            let expected = ContentToolHostLogic.FenceRenderMode(rawValue: item["expected"] as! String)
+            let expected = ContentToolHostLogic.FenceRenderMode(rawValue: try string(item["expected"]))
             XCTAssertEqual(mode, expected, item["name"] as? String ?? "")
         }
     }

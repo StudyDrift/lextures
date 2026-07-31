@@ -1,120 +1,5 @@
 import SwiftUI
 
-/// Page-scoped context for one batched instances fetch (FR-2).
-struct ContentToolsPageContext: Equatable {
-    var courseCode: String
-    var itemId: String
-    var contentToolsEnabled: Bool
-    var mobileContentToolsEnabled: Bool
-    var observer: Bool = false
-    var pastDue: Bool = false
-}
-
-private struct ContentToolsPageContextKey: EnvironmentKey {
-    static let defaultValue: ContentToolsPageContext? = nil
-}
-
-private struct ContentToolsInstancesKey: EnvironmentKey {
-    static let defaultValue: [String: ToolInstance] = [:]
-}
-
-private struct ContentToolsLoadingKey: EnvironmentKey {
-    static let defaultValue: Bool = false
-}
-
-private struct ContentToolsStudentResetKey: EnvironmentKey {
-    static let defaultValue: Bool = false
-}
-
-extension EnvironmentValues {
-    var contentToolsPage: ContentToolsPageContext? {
-        get { self[ContentToolsPageContextKey.self] }
-        set { self[ContentToolsPageContextKey.self] = newValue }
-    }
-
-    var contentToolsInstances: [String: ToolInstance] {
-        get { self[ContentToolsInstancesKey.self] }
-        set { self[ContentToolsInstancesKey.self] = newValue }
-    }
-
-    var contentToolsLoading: Bool {
-        get { self[ContentToolsLoadingKey.self] }
-        set { self[ContentToolsLoadingKey.self] = newValue }
-    }
-
-    var contentToolsStudentResetAllowed: Bool {
-        get { self[ContentToolsStudentResetKey.self] }
-        set { self[ContentToolsStudentResetKey.self] = newValue }
-    }
-}
-
-/// Loads instances once per item and injects them for fence hosts.
-struct ContentToolsPageProvider<Content: View>: View {
-    @Environment(AuthSession.self) private var session
-    @Environment(OfflineService.self) private var offline
-
-    let context: ContentToolsPageContext
-    @ViewBuilder var content: () -> Content
-
-    @State private var instances: [String: ToolInstance] = [:]
-    @State private var loading = false
-    @State private var studentResetAllowed = false
-
-    var body: some View {
-        content()
-            .environment(\.contentToolsPage, context)
-            .environment(\.contentToolsInstances, instances)
-            .environment(\.contentToolsLoading, loading)
-            .environment(\.contentToolsStudentResetAllowed, studentResetAllowed)
-            .task(id: "\(context.courseCode)|\(context.itemId)|\(context.contentToolsEnabled)|\(context.mobileContentToolsEnabled)") {
-                await load()
-            }
-    }
-
-    private func load() async {
-        let shouldFetch = ContentToolHostLogic.shouldFetchInstances(
-            mobileContentToolsEnabled: context.mobileContentToolsEnabled,
-            contentToolsEnabled: context.contentToolsEnabled,
-            courseCode: context.courseCode,
-            itemId: context.itemId
-        )
-        guard shouldFetch, let token = session.accessToken else {
-            instances = [:]
-            loading = false
-            return
-        }
-        loading = true
-        defer { loading = false }
-        do {
-            let list = try await offline.cachedFetch(
-                key: OfflineCacheKey.contentToolInstances(
-                    courseCode: context.courseCode,
-                    itemId: context.itemId
-                ),
-                accessToken: token
-            ) {
-                try await LMSAPI.fetchContentToolInstances(
-                    courseCode: context.courseCode,
-                    accessToken: token,
-                    itemId: context.itemId,
-                    withState: true
-                )
-            }.value
-            // cachedFetch returns T directly when T is the list — wrap via ToolInstancesListResponse for Codable cache.
-            // Offline cache stores [ToolInstance] via a box:
-            instances = ContentToolHostLogic.instanceMap(list)
-            if let settings = try? await LMSAPI.fetchContentToolSettings(
-                courseCode: context.courseCode,
-                accessToken: token
-            ) {
-                studentResetAllowed = settings.studentResetAllowed
-            }
-        } catch {
-            instances = [:]
-        }
-    }
-}
-
 /// Mounts one tool fence inside the page host.
 struct ContentToolHostView: View {
     @Environment(AuthSession.self) private var session
@@ -237,42 +122,51 @@ struct ContentToolHostView: View {
                 onRetry: { crashed = false }
             )
         } else {
-            ToolFrameView(
-                title: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
-                status: envelope.status,
-                syncStatus: syncStatus,
-                score: envelope.score,
-                readOnly: readOnly,
-                readOnlyMessage: readOnlyMessage ?? errorMessage,
-                studentResetAllowed: studentResetAllowed,
-                onReset: { showResetConfirm = true }
-            ) {
-                ToolRendererRegistry.view(
-                    for: instance.toolId,
-                    props: ContentToolRendererProps(
-                        instanceId: instance.id,
-                        toolId: instance.toolId,
-                        config: instance.config,
-                        state: envelope.document,
-                        status: envelope.status,
-                        readOnly: readOnly,
-                        save: { patch in
-                            let next = ContentToolHostLogic.mergeStatePatch(base: envelope.document, patch: patch)
-                            scheduleSave(next, page: page, toolId: instance.toolId, readOnly: readOnly)
-                        },
-                        submit: { patch in
-                            let next = ContentToolHostLogic.mergeStatePatch(base: envelope.document, patch: patch)
-                            Task { await persist(next, mode: "submit", page: page, toolId: instance.toolId, readOnly: readOnly) }
-                        },
-                        runAction: { name, input in
-                            try await runAction(name: name, input: input, page: page, instanceId: instance.id)
-                        },
-                        announce: { message, assertive in
-                            ToolLiveRegion.announce(message, assertive: assertive)
-                        }
-                    )
+            toolFrame(instance: instance, page: page, readOnly: readOnly, readOnlyMessage: readOnlyMessage)
+        }
+    }
+
+    private func toolFrame(
+        instance: ToolInstance,
+        page: ContentToolsPageContext,
+        readOnly: Bool,
+        readOnlyMessage: String?
+    ) -> some View {
+        ToolFrameView(
+            title: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
+            status: envelope.status,
+            syncStatus: syncStatus,
+            score: envelope.score,
+            readOnly: readOnly,
+            readOnlyMessage: readOnlyMessage ?? errorMessage,
+            studentResetAllowed: studentResetAllowed,
+            onReset: { showResetConfirm = true }
+        ) {
+            ToolRendererRegistry.view(
+                for: instance.toolId,
+                props: ContentToolRendererProps(
+                    instanceId: instance.id,
+                    toolId: instance.toolId,
+                    config: instance.config,
+                    state: envelope.document,
+                    status: envelope.status,
+                    readOnly: readOnly,
+                    save: { patch in
+                        let next = ContentToolHostLogic.mergeStatePatch(base: envelope.document, patch: patch)
+                        scheduleSave(next, page: page, toolId: instance.toolId, readOnly: readOnly)
+                    },
+                    submit: { patch in
+                        let next = ContentToolHostLogic.mergeStatePatch(base: envelope.document, patch: patch)
+                        Task { await persist(next, mode: "submit", page: page, toolId: instance.toolId, readOnly: readOnly) }
+                    },
+                    runAction: { name, input in
+                        try await runAction(name: name, input: input, page: page, instanceId: instance.id)
+                    },
+                    announce: { message, assertive in
+                        ToolLiveRegion.announce(message, assertive: assertive)
+                    }
                 )
-            }
+            )
         }
     }
 
@@ -322,104 +216,128 @@ struct ContentToolHostView: View {
             }
         }
         do {
-            let result: ToolStateEnvelope
-            if mode == "submit" {
-                result = try await LMSAPI.submitContentToolState(
-                    courseCode: page.courseCode,
-                    instanceId: instanceId,
-                    revision: revision,
-                    state: nextState,
-                    accessToken: token
-                )
-            } else {
-                do {
-                    result = try await LMSAPI.putContentToolState(
-                        courseCode: page.courseCode,
-                        instanceId: instanceId,
-                        revision: revision,
-                        state: nextState,
-                        accessToken: token
-                    )
-                } catch let error as APIError {
-                    if case .transport = error, ContentToolHostLogic.canQueueStateWriteOffline() {
-                        _ = try await offline.enqueueMutation(
-                            method: "PUT",
-                            path: LMSAPI.contentToolStatePutPath(courseCode: page.courseCode, instanceId: instanceId),
-                            body: SaveToolStateBody(revision: revision, state: nextState, stateJson: nextState),
-                            label: "content-tool-state:\(instanceId)",
-                            accessToken: token,
-                            preferQueue: true
-                        )
-                        syncStatus = .unsynced
-                        dirty = true
-                        pending = nextState
-                        ToolLiveRegion.announce(L.text("mobile.contentTools.runtime.unsynced"))
-                        return
-                    }
-                    throw error
-                }
-            }
-            envelope = result
-            dirty = false
-            pending = nil
-            syncStatus = .saved
-            ToolLiveRegion.announce(L.text("mobile.contentTools.runtime.saved"))
+            let result = try await writeState(
+                nextState,
+                mode: mode,
+                page: page,
+                revision: revision,
+                token: token
+            )
+            applySaved(result)
+        } catch is ContentToolHostPersistCancel {
+            // State write was queued offline; status already updated.
         } catch let LMSAPI.ContentToolAPIError.revisionConflict(current) {
-            let policy = ContentToolHostLogic.conflictPolicyForTool(toolId)
-            let resolved = ContentToolHostLogic.resolveConflictJSON(
-                policy: policy,
-                client: nextState,
-                server: current.document
-            )
-            envelope = ToolStateEnvelope(
-                instanceId: current.instanceId,
-                revision: current.revision,
-                status: current.status,
-                state: resolved,
-                stateJson: resolved,
-                score: current.score,
-                updatedAt: current.updatedAt,
-                resetCount: current.resetCount,
-                lastResetAt: current.lastResetAt,
-                scope: current.scope,
-                stateSchemaVersion: current.stateSchemaVersion,
-                quarantined: current.quarantined
-            )
-            if policy == .serverWins {
-                dirty = false
-                pending = nil
-                syncStatus = .saved
-                ToolLiveRegion.announce(L.text("mobile.contentTools.runtime.saved"))
-            } else if let token = session.accessToken {
-                do {
-                    let retry = try await LMSAPI.putContentToolState(
-                        courseCode: page.courseCode,
-                        instanceId: instanceId,
-                        revision: current.revision,
-                        state: resolved,
-                        accessToken: token
-                    )
-                    envelope = retry
-                    dirty = false
-                    pending = nil
-                    syncStatus = .saved
-                    ToolLiveRegion.announce(L.text("mobile.contentTools.runtime.saved"))
-                } catch {
-                    dirty = true
-                    syncStatus = .unsynced
-                    errorMessage = L.text("mobile.contentTools.runtime.retry")
-                }
-            }
+            await applyConflict(current, client: nextState, page: page, toolId: toolId, token: token)
         } catch LMSAPI.ContentToolAPIError.stateTooLarge {
+            applyHardError(L.text("mobile.contentTools.runtime.stateTooLarge"))
+        } catch LMSAPI.ContentToolAPIError.schemaInvalid {
+            applyHardError(L.text("mobile.contentTools.runtime.schemaInvalid"))
+        } catch {
             dirty = true
-            syncStatus = .error
-            errorMessage = L.text("mobile.contentTools.runtime.stateTooLarge")
-            ToolLiveRegion.announce(errorMessage ?? "", assertive: true)
-        } catch let LMSAPI.ContentToolAPIError.schemaInvalid {
-            dirty = true
-            syncStatus = .error
-            errorMessage = L.text("mobile.contentTools.runtime.schemaInvalid")
-            ToolLiveRegion.announce(errorMessage ?? "", assertive: true)
+            syncStatus = .unsynced
+            errorMessage = L.text("mobile.contentTools.runtime.retry")
+        }
+    }
+
+    private func writeState(
+        _ nextState: JSONValue,
+        mode: String,
+        page: ContentToolsPageContext,
+        revision: Int64,
+        token: String
+    ) async throws -> ToolStateEnvelope {
+        if mode == "submit" {
+            return try await LMSAPI.submitContentToolState(
+                courseCode: page.courseCode,
+                instanceId: instanceId,
+                revision: revision,
+                state: nextState,
+                accessToken: token
+            )
+        }
+        do {
+            return try await LMSAPI.putContentToolState(
+                courseCode: page.courseCode,
+                instanceId: instanceId,
+                revision: revision,
+                state: nextState,
+                accessToken: token
+            )
+        } catch let error as APIError {
+            if case .transport = error, ContentToolHostLogic.canQueueStateWriteOffline() {
+                _ = try await offline.enqueueMutation(
+                    method: "PUT",
+                    path: LMSAPI.contentToolStatePutPath(courseCode: page.courseCode, instanceId: instanceId),
+                    body: SaveToolStateBody(revision: revision, state: nextState, stateJson: nextState),
+                    label: "content-tool-state:\(instanceId)",
+                    accessToken: token,
+                    preferQueue: true
+                )
+                syncStatus = .unsynced
+                dirty = true
+                pending = nextState
+                ToolLiveRegion.announce(L.text("mobile.contentTools.runtime.unsynced"))
+                throw ContentToolHostPersistCancel()
+            }
+            throw error
+        }
+    }
+
+    private func applySaved(_ result: ToolStateEnvelope) {
+        envelope = result
+        dirty = false
+        pending = nil
+        syncStatus = .saved
+        ToolLiveRegion.announce(L.text("mobile.contentTools.runtime.saved"))
+    }
+
+    private func applyHardError(_ message: String) {
+        dirty = true
+        syncStatus = .error
+        errorMessage = message
+        ToolLiveRegion.announce(message, assertive: true)
+    }
+
+    private func applyConflict(
+        _ current: ToolStateEnvelope,
+        client: JSONValue,
+        page: ContentToolsPageContext,
+        toolId: String,
+        token: String
+    ) async {
+        let policy = ContentToolHostLogic.conflictPolicyForTool(toolId)
+        let resolved = ContentToolHostLogic.resolveConflictJSON(
+            policy: policy,
+            client: client,
+            server: current.document
+        )
+        envelope = ToolStateEnvelope(
+            instanceId: current.instanceId,
+            revision: current.revision,
+            status: current.status,
+            state: resolved,
+            stateJson: resolved,
+            score: current.score,
+            updatedAt: current.updatedAt,
+            resetCount: current.resetCount,
+            lastResetAt: current.lastResetAt,
+            scope: current.scope,
+            stateSchemaVersion: current.stateSchemaVersion,
+            quarantined: current.quarantined
+        )
+        if policy == .serverWins {
+            applySaved(envelope)
+            return
+        }
+        do {
+            let retry = try await LMSAPI.putContentToolState(
+                courseCode: page.courseCode,
+                instanceId: instanceId,
+                revision: current.revision,
+                state: resolved,
+                accessToken: token
+            )
+            applySaved(retry)
         } catch {
             dirty = true
             syncStatus = .unsynced
@@ -471,3 +389,6 @@ struct ContentToolHostView: View {
         }
     }
 }
+
+/// Thrown when a state write was intentionally queued offline (not a user-facing failure).
+private struct ContentToolHostPersistCancel: Error {}
