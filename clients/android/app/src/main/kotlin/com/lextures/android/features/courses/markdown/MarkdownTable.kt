@@ -46,6 +46,7 @@ fun MarkdownTable(
     header: List<String>,
     rows: List<List<String>>,
     modifier: Modifier = Modifier,
+    suppressExpand: Boolean = false,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -53,16 +54,18 @@ fun MarkdownTable(
         Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
             TableGrid(align = align, header = header, rows = rows, minCellWidth = 96)
         }
-        TextButton(onClick = { expanded = true }) {
-            Text(
-                text = L.text(R.string.mobile_markdown_table_expand),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-            )
+        if (MarkdownRenderStyle.allowsAffordances(suppressExpand)) {
+            TextButton(onClick = { expanded = true }) {
+                Text(
+                    text = L.text(R.string.mobile_markdown_table_expand),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
         }
     }
 
-    if (expanded) {
+    if (expanded && MarkdownRenderStyle.allowsAffordances(suppressExpand)) {
         Dialog(
             onDismissRequest = { expanded = false },
             properties = DialogProperties(usePlatformDefaultWidth = false),

@@ -12,6 +12,25 @@ final class AccessibilitySupportTests: XCTestCase {
         XCTAssertEqual(plain, "Title Bold text with link.")
     }
 
+    func testPlainTextFromMarkdownLinearisesTablesWithoutPipes() {
+        let md = """
+        | Week | Topic |
+        | --- | --- |
+        | 1 | Intro |
+        | 2 | Labs |
+        """
+        let plain = AccessibilitySupport.plainText(fromMarkdown: md)
+        XCTAssertFalse(plain.contains("|"))
+        XCTAssertTrue(plain.contains("Week"))
+        XCTAssertTrue(plain.contains("Intro"))
+    }
+
+    func testPlainTextFromMarkdownSpeaksCodeWithoutFences() {
+        let plain = AccessibilitySupport.plainText(fromMarkdown: "```python\nprint(1)\n```")
+        XCTAssertFalse(plain.contains("```"))
+        XCTAssertTrue(plain.contains("print(1)"))
+    }
+
     func testContrastRatioMeetsWCAGAAForBrandText() {
         XCTAssertTrue(LexturesTheme.primaryTextContrastMeetsAA)
         let ratio = AccessibilitySupport.contrastRatio(

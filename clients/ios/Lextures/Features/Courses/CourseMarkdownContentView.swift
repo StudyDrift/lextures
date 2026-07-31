@@ -2,16 +2,20 @@ import SwiftUI
 import AVKit
 
 /// Read-only markdown reader for course content pages (NotebookMarkdown blocks + math/video).
+/// CT.M2: single renderer for all reading surfaces; `compact` caps spacing; `suppressAffordances`
+/// hides copy/expand/link escapes during lockdown quizzes (FR-11 / FR-13).
 struct CourseMarkdownContentView: View {
     @Environment(AuthSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
     let markdown: String
     var captionsEnabled = false
+    var compact = false
+    var suppressAffordances = false
     @State private var cachedMarkdown = ""
     @State private var cachedBlocks: [NotebookBlock] = []
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: MarkdownRenderStyle.blockSpacing(compact: compact)) {
             ForEach(cachedBlocks) { block in
                 blockView(block)
             }
@@ -31,9 +35,9 @@ struct CourseMarkdownContentView: View {
         switch block.kind {
         case .heading(let level, let text):
             Text(inline(text))
-                .font(LexturesTheme.displayFont(level == 1 ? 24 : level == 2 ? 19 : 16))
+                .font(LexturesTheme.displayFont(MarkdownRenderStyle.headingPointSize(level: level, compact: compact)))
                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                .padding(.top, level == 1 ? 6 : 2)
+                .padding(.top, MarkdownRenderStyle.headingTopPadding(level: level, compact: compact))
         case .paragraph(let text):
             if let videoURL = ModuleContentMedia.videoURL(in: text) {
                 if captionsEnabled {
@@ -82,11 +86,20 @@ struct CourseMarkdownContentView: View {
                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             }
         case .code(let language, let source):
-            MarkdownCodeBlockView(language: language, source: source)
+            MarkdownCodeBlockView(
+                language: language,
+                source: source,
+                suppressCopy: suppressAffordances
+            )
         case .math(let latex, let display):
             MathLatexView(latex: latex, displayMode: display)
         case .table(let align, let header, let rows):
-            MarkdownTableView(align: align, header: header, rows: rows)
+            MarkdownTableView(
+                align: align,
+                header: header,
+                rows: rows,
+                suppressExpand: suppressAffordances
+            )
         case .toolFence(_, let toolId, _):
             Label {
                 Text(L.format("mobile.markdown.tool.placeholder", toolId))
@@ -95,7 +108,7 @@ struct CourseMarkdownContentView: View {
                 Image(systemName: "puzzlepiece.extension")
             }
             .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            .padding(12)
+            .padding(compact ? 8 : 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(LexturesTheme.sceneBackground(for: colorScheme))
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -115,17 +128,16 @@ struct CourseMarkdownContentView: View {
         if segments.count == 1, case .text(let only) = segments[0] {
             Text(inline(only))
                 .font(.subheadline)
-                .lineSpacing(3)
+                .lineSpacing(compact ? 1 : 3)
                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
         } else {
-            // Flow inline math within a wrapping HStack of text runs.
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: compact ? 4 : 6) {
                 ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
                     switch segment {
                     case .text(let value):
                         Text(inline(value))
                             .font(.subheadline)
-                            .lineSpacing(3)
+                            .lineSpacing(compact ? 1 : 3)
                             .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                     case .math(let latex, let display):
                         MathLatexView(latex: latex, displayMode: display)
@@ -136,10 +148,7 @@ struct CourseMarkdownContentView: View {
     }
 
     private func inline(_ text: String) -> AttributedString {
-        (try? AttributedString(
-            markdown: text,
-            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        )) ?? AttributedString(text)
+        MarkdownRenderStyle.inlineAttributedString(text, suppressLinks: suppressAffordances)
     }
 }
 

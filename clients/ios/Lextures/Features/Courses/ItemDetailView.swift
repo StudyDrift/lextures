@@ -239,7 +239,7 @@ struct ItemDetailView: View {
     private func contentCard(_ markdown: String) -> some View {
         LMSCard {
             readerToolbar(markdown: markdown)
-            MarkdownTextView(markdown: markdown)
+            CourseMarkdownContentView(markdown: markdown)
                 .lexturesReadableText()
         }
         .accessibilityElement(children: .contain)
@@ -364,125 +364,5 @@ enum ItemKind {
     /// Kinds the module list can navigate to (including placeholders for upcoming epics).
     static func isOpenable(_ kind: String) -> Bool {
         ModuleContentLogic.isNavigable(kind)
-    }
-}
-
-/// CT.M1 shim for legacy call sites. When `ffMobileRichMarkdown` is on (default),
-/// delegates to `CourseMarkdownContentView`; otherwise keeps the lightweight legacy path.
-struct MarkdownTextView: View {
-    @Environment(AppShellModel.self) private var shell
-    @Environment(\.colorScheme) private var colorScheme
-    let markdown: String
-
-    var body: some View {
-        if shell.platformFeatures.ffMobileRichMarkdown {
-            CourseMarkdownContentView(markdown: markdown)
-        } else {
-            LegacyMarkdownTextView(markdown: markdown)
-        }
-    }
-}
-
-/// Pre-CT.M1 lightweight renderer retained for feature-flag rollback.
-private struct LegacyMarkdownTextView: View {
-    @Environment(\.colorScheme) private var colorScheme
-    let markdown: String
-
-    private enum Block: Identifiable {
-        case heading(level: Int, text: String, id: Int)
-        case bullet(text: String, id: Int)
-        case numbered(index: String, text: String, id: Int)
-        case paragraph(text: String, id: Int)
-
-        var id: Int {
-            switch self {
-            case .heading(_, _, let id), .bullet(_, let id), .numbered(_, _, let id), .paragraph(_, let id):
-                return id
-            }
-        }
-    }
-
-    private var blocks: [Block] {
-        var out: [Block] = []
-        var paragraph: [String] = []
-        var counter = 0
-
-        func flushParagraph() {
-            guard !paragraph.isEmpty else { return }
-            out.append(.paragraph(text: paragraph.joined(separator: " "), id: counter))
-            counter += 1
-            paragraph = []
-        }
-
-        for rawLine in markdown.components(separatedBy: .newlines) {
-            let line = rawLine.trimmingCharacters(in: .whitespaces)
-            if line.isEmpty {
-                flushParagraph()
-            } else if line.hasPrefix("#") {
-                flushParagraph()
-                let level = line.prefix(while: { $0 == "#" }).count
-                let text = line.drop(while: { $0 == "#" }).trimmingCharacters(in: .whitespaces)
-                out.append(.heading(level: min(level, 3), text: text, id: counter))
-                counter += 1
-            } else if line.hasPrefix("- ") || line.hasPrefix("* ") {
-                flushParagraph()
-                out.append(.bullet(text: String(line.dropFirst(2)), id: counter))
-                counter += 1
-            } else if let match = line.range(of: #"^\d+\.\s+"#, options: .regularExpression) {
-                flushParagraph()
-                let index = line[..<match.upperBound].trimmingCharacters(in: .whitespaces)
-                out.append(.numbered(index: index, text: String(line[match.upperBound...]), id: counter))
-                counter += 1
-            } else {
-                paragraph.append(line)
-            }
-        }
-        flushParagraph()
-        return out
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ForEach(blocks) { block in
-                switch block {
-                case .heading(let level, let text, _):
-                    Text(inline(text))
-                        .font(LexturesTheme.displayFont(level == 1 ? 21 : level == 2 ? 18 : 16))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                        .padding(.top, 4)
-                case .bullet(let text, _):
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Circle()
-                            .fill(LexturesTheme.accent(for: colorScheme))
-                            .frame(width: 5, height: 5)
-                            .padding(.top, 6)
-                        Text(inline(text))
-                            .font(.subheadline)
-                            .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                    }
-                case .numbered(let index, let text, _):
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(index)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-                        Text(inline(text))
-                            .font(.subheadline)
-                            .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                    }
-                case .paragraph(let text, _):
-                    Text(inline(text))
-                        .font(.subheadline)
-                        .lineSpacing(3)
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                }
-            }
-        }
-    }
-
-    private func inline(_ text: String) -> AttributedString {
-        (try? AttributedString(
-            markdown: text,
-            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        )) ?? AttributedString(text)
     }
 }

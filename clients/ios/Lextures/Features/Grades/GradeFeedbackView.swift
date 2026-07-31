@@ -132,18 +132,14 @@ struct GradeFeedbackView: View {
                             }
                         }
                         if let description = criterion.description?.nilIfEmpty {
-                            Text(description)
-                                .font(.caption)
-                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            CourseMarkdownContentView(markdown: description, compact: true)
                         }
                         if let score = grade?.rubricScores?[criterion.id],
                            let level = matchedLevel(criterion: criterion, score: score) {
                             Text(level.label)
                                 .font(.caption.weight(.medium))
                             if let note = level.description?.nilIfEmpty {
-                                Text(note)
-                                    .font(.caption)
-                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                                CourseMarkdownContentView(markdown: note, compact: true)
                             }
                         }
                     }
@@ -159,9 +155,7 @@ struct GradeFeedbackView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
                     .font(LexturesTheme.displayFont(16))
-                Text(body)
-                    .font(.subheadline)
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                CourseMarkdownContentView(markdown: body, compact: true)
             }
         }
     }
@@ -177,8 +171,7 @@ struct GradeFeedbackView: View {
                             Text(name)
                                 .font(.caption.weight(.semibold))
                         }
-                        Text(comment.body)
-                            .font(.subheadline)
+                        CourseMarkdownContentView(markdown: comment.body, compact: true)
                     }
                     .padding(.vertical, 2)
                 }

@@ -256,7 +256,7 @@ struct BoardPostCard: View {
         case .text:
             let plain = BoardsLogic.bodyPlainText(post)
             if !plain.isEmpty {
-                MarkdownTextView(markdown: plain)
+                CourseMarkdownContentView(markdown: plain, compact: true)
             }
         case .image:
             mediaAttachment(kind: .image)

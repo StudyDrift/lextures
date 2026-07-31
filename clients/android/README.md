@@ -84,9 +84,9 @@ Access and refresh tokens are stored in EncryptedSharedPreferences. MFA-required
 
 Notebooks are device-local (same model as the web app's localStorage notebooks, format v2), keyed per signed-in user.
 
-## Markdown engine (CT.M1)
+## Markdown engine (CT.M1 / CT.M2)
 
-Course and notebook readers share one parser (`core/notebook/NotebookMarkdown.kt` + `MarkdownTableLogic.kt`) and one renderer (`NotebookContentView` plus `features/courses/markdown/*`). The engine handles GFM tables (blank-line healing parity to web `normalizeMarkdownTables`), fenced code (language + copy), `$`/`$$` math (monospace fallback with a11y labels), GFM task lists, inline formatting (bold/italic/strike/code/links — `stripInline` removed), and ` ```lex-tool ` placeholders. Shared golden fixtures: `clients/mobile/fixtures/markdown/corpus.json`. Unit coverage: `app/src/test/kotlin/.../core/notebook/*Test.kt`. Feature flag: `ffMobileRichMarkdown` (default on). Legacy `MarkdownText` is a thin shim over `NotebookContentView` for CT.M2 migration.
+Course and notebook readers share one parser (`core/notebook/NotebookMarkdown.kt` + `MarkdownTableLogic.kt`) and **one** renderer (`NotebookContentView` plus `features/courses/markdown/*`). Assignments, quizzes (prompt/choices/review), syllabus, item detail, boards, portfolio, tutor, discussions, feed, and grade feedback all use that renderer. Pass `compact = true` in chat/cards/list rows; pass `suppressAffordances = true` during lockdown quizzes so copy/table-expand/link taps stay closed. The legacy `MarkdownText` shim is deleted — CI enforces this via `scripts/check-mobile-markdown-renderer.sh`. Shared golden fixtures: `clients/mobile/fixtures/markdown/corpus.json`. Unit coverage: `app/src/test/kotlin/.../core/notebook/*Test.kt`, `.../markdown/MarkdownRenderStyleTest.kt`. Feature flag: `ffMobileRichMarkdown` (default on).
 
 ## Realtime sockets
 

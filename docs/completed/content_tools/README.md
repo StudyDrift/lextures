@@ -26,5 +26,6 @@
 | **CT.22** | [Inline Discussion](CT.22-tool-inline-discussion.md) |
 | **CT.23** | [Flashcards & Spaced Recall](CT.23-tool-flashcards-and-spaced-recall.md) |
 | **CT.M1** | [Mobile markdown engine: tables, code, math & media](CT.M1-mobile-markdown-engine-tables-code-math.md) |
+| **CT.M2** | [Mobile rich content parity: assignments, quizzes, syllabus & discussions](CT.M2-mobile-rich-content-parity-assignments-quizzes.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

@@ -30,9 +30,7 @@ struct AnnouncementCard: View {
                             .font(.caption2)
                             .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                     }
-                    Text(broadcast.body)
-                        .font(.caption)
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                    CourseMarkdownContentView(markdown: broadcast.body, compact: true)
                         .lineLimit(3)
                 }
             }
@@ -127,9 +125,7 @@ struct AnnouncementsListView: View {
                                         .font(.caption2)
                                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                                 }
-                                Text(broadcast.body)
-                                    .font(.caption)
-                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                                CourseMarkdownContentView(markdown: broadcast.body, compact: true)
                             }
                         }
                     }

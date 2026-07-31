@@ -64,6 +64,7 @@ import com.lextures.android.core.notebook.ParsedNotebookTask
 import com.lextures.android.core.routing.ContentLinkRouter
 import com.lextures.android.features.courses.markdown.MarkdownCodeBlock
 import com.lextures.android.features.courses.markdown.MarkdownMath
+import com.lextures.android.features.courses.markdown.MarkdownRenderStyle
 import com.lextures.android.features.courses.markdown.MarkdownTable
 import com.lextures.android.features.courses.markdown.MarkdownToolPlaceholder
 import com.lextures.android.features.reader.CaptionedPlayer
@@ -74,27 +75,35 @@ import java.time.Instant
 /**
  * Rendered reading view for a notebook page: headings, lists, quotes, code,
  * and interactive task checkboxes (parity with the web notebook editor output).
+ *
+ * CT.M2: single renderer for all reading surfaces. `compact` caps spacing/heading sizes;
+ * `suppressAffordances` hides copy/expand/link escapes during lockdown quizzes.
  */
 @Composable
 fun NotebookContentView(
     markdown: String,
-    onToggleTask: (ParsedNotebookTask) -> Unit,
-    onEditTaskDue: (ParsedNotebookTask) -> Unit,
+    onToggleTask: (ParsedNotebookTask) -> Unit = {},
+    onEditTaskDue: (ParsedNotebookTask) -> Unit = {},
     modifier: Modifier = Modifier,
     accessToken: String? = null,
     captionsEnabled: Boolean = false,
     onEditDrawing: ((index: Int, elementsJson: String) -> Unit)? = null,
+    compact: Boolean = false,
+    suppressAffordances: Boolean = false,
 ) {
     // Memoised once per markdown body (CT.M1 NFR).
     val blocks = remember(markdown) { NotebookMarkdown.parseBlocks(markdown) }
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(MarkdownRenderStyle.blockSpacing(compact)),
+    ) {
         blocks.forEach { block ->
             when (block) {
                 is NotebookBlock.Heading -> Text(
-                    text = inlineMarkdown(block.text),
-                    style = LexturesType.display(if (block.level == 1) 24 else if (block.level == 2) 19 else 16),
+                    text = inlineMarkdown(block.text, suppressLinks = suppressAffordances),
+                    style = LexturesType.display(MarkdownRenderStyle.headingSize(block.level, compact)),
                     color = textPrimary(),
-                    modifier = Modifier.padding(top = if (block.level == 1) 6.dp else 2.dp),
+                    modifier = Modifier.padding(top = MarkdownRenderStyle.headingTopPadding(block.level, compact)),
                 )
 
                 is NotebookBlock.Paragraph -> {
@@ -104,7 +113,7 @@ fun NotebookContentView(
                             CaptionedPlayer(url = videoUrl, accessToken = accessToken)
                         videoUrl != null && accessToken != null ->
                             ContentVideoPlayer(url = videoUrl, accessToken = accessToken)
-                        else -> MathAwareParagraph(text = block.text)
+                        else -> MathAwareParagraph(text = block.text, suppressLinks = suppressAffordances, compact = compact)
                     }
                 }
 
@@ -119,7 +128,7 @@ fun NotebookContentView(
                             .clip(CircleShape)
                             .background(accentColor()),
                     )
-                    MathAwareParagraph(text = block.text)
+                    MathAwareParagraph(text = block.text, suppressLinks = suppressAffordances, compact = compact)
                 }
 
                 is NotebookBlock.OrderedItem -> Row(
@@ -132,7 +141,7 @@ fun NotebookContentView(
                         fontWeight = FontWeight.SemiBold,
                         color = accentColor(),
                     )
-                    MathAwareParagraph(text = block.text)
+                    MathAwareParagraph(text = block.text, suppressLinks = suppressAffordances, compact = compact)
                 }
 
                 is NotebookBlock.TaskItem -> Row(
@@ -146,7 +155,7 @@ fun NotebookContentView(
                         modifier = Modifier.size(18.dp),
                     )
                     Text(
-                        text = inlineMarkdown(block.text),
+                        text = inlineMarkdown(block.text, suppressLinks = suppressAffordances),
                         fontSize = 14.sp,
                         color = if (block.checked) textSecondary() else textPrimary(),
                         textDecoration = if (block.checked) TextDecoration.LineThrough else TextDecoration.None,
@@ -165,14 +174,18 @@ fun NotebookContentView(
                             .background(LexturesColors.BrandAmber),
                     )
                     Text(
-                        text = inlineMarkdown(block.text),
+                        text = inlineMarkdown(block.text, suppressLinks = suppressAffordances),
                         fontSize = 14.sp,
                         fontStyle = FontStyle.Italic,
                         color = textSecondary(),
                     )
                 }
 
-                is NotebookBlock.Code -> MarkdownCodeBlock(source = block.text, language = block.language)
+                is NotebookBlock.Code -> MarkdownCodeBlock(
+                    source = block.text,
+                    language = block.language,
+                    suppressCopy = suppressAffordances,
+                )
 
                 is NotebookBlock.Math -> MarkdownMath(latex = block.latex, display = block.display)
 
@@ -180,6 +193,7 @@ fun NotebookContentView(
                     align = block.align,
                     header = block.header,
                     rows = block.rows,
+                    suppressExpand = suppressAffordances,
                 )
 
                 is NotebookBlock.ToolFence -> MarkdownToolPlaceholder(toolId = block.toolId)
@@ -214,24 +228,30 @@ fun NotebookContentView(
 }
 
 @Composable
-private fun MathAwareParagraph(text: String) {
+private fun MathAwareParagraph(
+    text: String,
+    suppressLinks: Boolean = false,
+    compact: Boolean = false,
+) {
     val segments = remember(text) { mathSegments(text) }
+    val lineHeight = if (compact) 18.sp else 21.sp
+    val gap = if (compact) 4.dp else 6.dp
     if (segments.size == 1 && segments[0] is MathSegment.Text) {
         Text(
-            text = inlineMarkdown((segments[0] as MathSegment.Text).value),
+            text = inlineMarkdown((segments[0] as MathSegment.Text).value, suppressLinks = suppressLinks),
             fontSize = 14.sp,
-            lineHeight = 21.sp,
+            lineHeight = lineHeight,
             color = textPrimary(),
         )
         return
     }
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(gap)) {
         segments.forEach { segment ->
             when (segment) {
                 is MathSegment.Text -> Text(
-                    text = inlineMarkdown(segment.value),
+                    text = inlineMarkdown(segment.value, suppressLinks = suppressLinks),
                     fontSize = 14.sp,
-                    lineHeight = 21.sp,
+                    lineHeight = lineHeight,
                     color = textPrimary(),
                 )
                 is MathSegment.Math -> MarkdownMath(latex = segment.latex, display = segment.display)
@@ -405,7 +425,7 @@ private fun isPastDue(dueAt: String): Boolean =
 private val linkRegex = Regex("""\[([^\]]+)]\(([^)]+)\)""")
 
 /** Inline markdown: **bold**, *italic*, ~~strike~~, `code`, [text](url). */
-fun inlineMarkdown(raw: String): AnnotatedString = buildAnnotatedString {
+fun inlineMarkdown(raw: String, suppressLinks: Boolean = false): AnnotatedString = buildAnnotatedString {
     var i = 0
     while (i < raw.length) {
         when {
@@ -458,20 +478,24 @@ fun inlineMarkdown(raw: String): AnnotatedString = buildAnnotatedString {
                 if (match != null && ContentLinkRouter.isAllowedHref(match.groupValues[2])) {
                     val label = match.groupValues[1]
                     val href = match.groupValues[2]
-                    val linkStyle = SpanStyle(
-                        color = LexturesColors.Primary,
-                        textDecoration = TextDecoration.Underline,
-                    )
-                    if (ContentLinkRouter.isExternalHref(href)) {
-                        withLink(LinkAnnotation.Url(href)) {
+                    if (suppressLinks) {
+                        append(label)
+                    } else {
+                        val linkStyle = SpanStyle(
+                            color = LexturesColors.Primary,
+                            textDecoration = TextDecoration.Underline,
+                        )
+                        if (ContentLinkRouter.isExternalHref(href)) {
+                            withLink(LinkAnnotation.Url(href)) {
+                                pushStyle(linkStyle)
+                                append(label)
+                                pop()
+                            }
+                        } else {
                             pushStyle(linkStyle)
                             append(label)
                             pop()
                         }
-                    } else {
-                        pushStyle(linkStyle)
-                        append(label)
-                        pop()
                     }
                     i = match.range.last + 1
                 } else {

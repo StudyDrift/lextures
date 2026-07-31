@@ -22,6 +22,28 @@ class AccessibilitySupportTest {
     }
 
     @Test
+    fun plainTextFromMarkdown_linearisesTablesWithoutPipes() {
+        val plain = AccessibilitySupport.plainTextFromMarkdown(
+            """
+            | Week | Topic |
+            | --- | --- |
+            | 1 | Intro |
+            | 2 | Labs |
+            """.trimIndent(),
+        )
+        assertFalse(plain.contains("|"))
+        assertTrue(plain.contains("Week"))
+        assertTrue(plain.contains("Intro"))
+    }
+
+    @Test
+    fun plainTextFromMarkdown_speaksCodeWithoutFences() {
+        val plain = AccessibilitySupport.plainTextFromMarkdown("```python\nprint(1)\n```")
+        assertFalse(plain.contains("```"))
+        assertTrue(plain.contains("print(1)"))
+    }
+
+    @Test
     fun contrastRatio_meetsWcagAAForBrandText() {
         assertTrue(primaryTextContrastMeetsAA)
         val ratio = AccessibilitySupport.contrastRatio(

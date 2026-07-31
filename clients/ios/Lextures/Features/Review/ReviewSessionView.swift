@@ -294,24 +294,26 @@ private struct ReviewQuestionPreview: View {
                     HStack(spacing: 10) {
                         Image(systemName: "circle")
                             .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                        Text(choice)
-                            .font(.subheadline)
+                        InlineMarkdownText(markdown: choice)
                             .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                         Spacer(minLength: 0)
                     }
                     .padding(10)
                     .background(LexturesTheme.cardBackground(for: colorScheme))
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(MarkdownRenderStyle.plainLabel(choice))
                 }
             case .ordering:
                 ForEach(Array(QuizLogic.orderingItems(question).enumerated()), id: \.offset) { index, item in
                     HStack {
                         Text("\(index + 1).")
                             .font(.caption.monospaced())
-                        Text(item)
-                            .font(.subheadline)
+                        InlineMarkdownText(markdown: item)
                         Spacer(minLength: 0)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(MarkdownRenderStyle.plainLabel(item))
                 }
             default:
                 EmptyView()

@@ -92,6 +92,7 @@ import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsProgressRing
 import com.lextures.android.features.home.LmsSkeletonList
+import com.lextures.android.features.notebooks.NotebookContentView
 import kotlinx.coroutines.launch
 
 // region Syllabus ("Overview")
@@ -140,7 +141,7 @@ fun CourseSyllabusSection(
                                 color = textPrimary(),
                             )
                         }
-                        MarkdownText(section.markdown)
+                        NotebookContentView(markdown = section.markdown)
                     }
                 }
                 LmsDates.parse(payload.updatedAt)?.let {

@@ -2,10 +2,12 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// Fenced code block: language label, monospace, horizontal scroll, copy (CT.M1 FR-7).
+/// `suppressCopy` hides the clipboard affordance during lockdown quizzes (CT.M2 FR-13).
 struct MarkdownCodeBlockView: View {
     @Environment(\.colorScheme) private var colorScheme
     let language: String?
     let source: String
+    var suppressCopy = false
     @State private var copied = false
 
     var body: some View {
@@ -15,17 +17,19 @@ struct MarkdownCodeBlockView: View {
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                 Spacer()
-                Button {
-                    UIPasteboard.general.string = source
-                    copied = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { copied = false }
-                } label: {
-                    Text(copied ? L.text("mobile.markdown.code.copied") : L.text("mobile.markdown.code.copy"))
-                        .font(.caption2.weight(.semibold))
+                if MarkdownRenderStyle.allowsAffordances(suppressAffordances: suppressCopy) {
+                    Button {
+                        UIPasteboard.general.string = source
+                        copied = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { copied = false }
+                    } label: {
+                        Text(copied ? L.text("mobile.markdown.code.copied") : L.text("mobile.markdown.code.copy"))
+                            .font(.caption2.weight(.semibold))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                    .accessibilityLabel(L.text("mobile.markdown.code.copy"))
                 }
-                .buttonStyle(.plain)
-                .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-                .accessibilityLabel(L.text("mobile.markdown.code.copy"))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)

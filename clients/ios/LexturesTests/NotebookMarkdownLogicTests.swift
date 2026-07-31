@@ -99,25 +99,37 @@ final class NotebookMarkdownLogicTests: XCTestCase {
             let id = fixture["id"] as? String ?? "?"
             let markdown = fixture["markdown"] as? String ?? ""
             let expected = fixture["kinds"] as? [String] ?? []
-            let actual = NotebookMarkdown.parseBlocks(markdown).map(NotebookMarkdown.fixtureKindName)
+            let actual = NotebookMarkdown.parseBlocks(markdown).map { NotebookMarkdown.fixtureKindName($0.kind) }
             XCTAssertEqual(actual, expected, "fixture \(id)")
         }
     }
 
     private func fixtureCorpusURL() -> URL {
-        // Repo layout: clients/ios/LexturesTests → ../../mobile/fixtures/markdown/corpus.json
+        // Repo layout: clients/ios/LexturesTests/File.swift → ../../../mobile/fixtures/markdown/corpus.json
         let thisFile = URL(fileURLWithPath: #filePath)
         let corpus = thisFile
             .deletingLastPathComponent() // LexturesTests
             .deletingLastPathComponent() // ios
+            .deletingLastPathComponent() // clients
             .appendingPathComponent("mobile/fixtures/markdown/corpus.json")
         if FileManager.default.fileExists(atPath: corpus.path) { return corpus }
-        // Fallback: walk up from CWD for CI checkouts.
-        var dir = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-        for _ in 0 ..< 6 {
-            let candidate = dir.appendingPathComponent("clients/mobile/fixtures/markdown/corpus.json")
-            if FileManager.default.fileExists(atPath: candidate.path) { return candidate }
-            dir = dir.deletingLastPathComponent()
+        // Fallback: walk up from CWD (and from #filePath) for CI / DerivedData checkouts.
+        var searchRoots = [
+            URL(fileURLWithPath: FileManager.default.currentDirectoryPath),
+            thisFile.deletingLastPathComponent(),
+        ]
+        for root in searchRoots {
+            var dir = root
+            for _ in 0 ..< 8 {
+                for relative in [
+                    "clients/mobile/fixtures/markdown/corpus.json",
+                    "mobile/fixtures/markdown/corpus.json",
+                ] {
+                    let candidate = dir.appendingPathComponent(relative)
+                    if FileManager.default.fileExists(atPath: candidate.path) { return candidate }
+                }
+                dir = dir.deletingLastPathComponent()
+            }
         }
         return corpus
     }

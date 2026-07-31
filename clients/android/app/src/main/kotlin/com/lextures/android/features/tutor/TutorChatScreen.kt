@@ -501,8 +501,7 @@ private fun TutorMessageBubble(message: TutorDisplayMessage) {
             } else {
                 NotebookContentView(
                     markdown = message.content,
-                    onToggleTask = {},
-                    onEditTaskDue = {},
+                    compact = true,
                 )
                 message.citations.forEach { citation ->
                     Text(

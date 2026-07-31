@@ -54,6 +54,9 @@ jobs:
       - name: I18n artifacts
         run: ../../scripts/check-mobile-i18n.sh
 
+      - name: Single markdown renderer gate (CT.M2)
+        run: ../../scripts/check-mobile-markdown-renderer.sh
+
       - name: Select iOS Simulator
         id: sim
         run: |

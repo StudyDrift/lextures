@@ -91,9 +91,7 @@ struct QuizResultsView: View {
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                     if let prompt = question.promptSnapshot, !prompt.isEmpty {
-                        Text(prompt)
-                            .font(.subheadline)
-                            .lineLimit(4)
+                        CourseMarkdownContentView(markdown: prompt, compact: true)
                     }
                     if let awarded = question.pointsAwarded {
                         HStack {

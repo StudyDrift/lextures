@@ -47,6 +47,7 @@ fun MarkdownCodeBlock(
     source: String,
     language: String?,
     modifier: Modifier = Modifier,
+    suppressCopy: Boolean = false,
 ) {
     val context = LocalContext.current
     var copied by remember { mutableStateOf(false) }
@@ -83,23 +84,25 @@ fun MarkdownCodeBlock(
                 color = textSecondary(),
                 modifier = Modifier.padding(start = 4.dp),
             )
-            TextButton(
-                onClick = {
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("code", source))
-                    copied = true
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.mobile_markdown_code_copied),
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                },
-            ) {
-                Text(
-                    text = if (copied) L.text(R.string.mobile_markdown_code_copied) else L.text(R.string.mobile_markdown_code_copy),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
+            if (MarkdownRenderStyle.allowsAffordances(suppressCopy)) {
+                TextButton(
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("code", source))
+                        copied = true
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.mobile_markdown_code_copied),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    },
+                ) {
+                    Text(
+                        text = if (copied) L.text(R.string.mobile_markdown_code_copied) else L.text(R.string.mobile_markdown_code_copy),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
             }
         }
         Row(

@@ -4891,6 +4891,28 @@
       }
     },
     {
+      "id": "ct-m2-mobile-rich-content-parity-assignments-quizzes",
+      "path": "docs/completed/content_tools/CT.M2-mobile-rich-content-parity-assignments-quizzes.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story: migrates every reading surface onto the CT.M1 renderer (assignments, quizzes, syllabus, discussions, etc.). Covered by native unit suites + CI grep gate; web Playwright is not the coverage surface.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": "n/a",
+        "authorization": "n/a",
+        "dependency": true,
+        "rollback": true,
+        "notes": "Depends on CT.M1 renderer. Reuses ffMobileRichMarkdown; compact + suppressAffordances modes; scripts/check-mobile-markdown-renderer.sh blocks legacy MarkdownTextView/MarkdownText/stripInline."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

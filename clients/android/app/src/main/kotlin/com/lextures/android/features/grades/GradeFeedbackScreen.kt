@@ -61,6 +61,7 @@ import com.lextures.android.core.lms.SubmissionGrade
 import com.lextures.android.features.files.AnnotatedFilePreviewScreen
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsEmptyState
+import com.lextures.android.features.notebooks.NotebookContentView
 
 /** Full student feedback: rubric, comments, annotated file, a/v playback (M6.1). */
 @Composable
@@ -270,13 +271,13 @@ private fun RubricCriterionRow(criterion: RubricCriterion, score: Double?) {
             )
         }
         criterion.description?.takeIf { it.isNotBlank() }?.let {
-            Text(it, fontSize = 12.sp, color = textSecondary())
+            NotebookContentView(markdown = it, compact = true)
         }
         if (score != null) {
             matchedLevel(criterion, score)?.let { level ->
                 Text(level.label, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 level.description?.takeIf { it.isNotBlank() }?.let { note ->
-                    Text(note, fontSize = 12.sp, color = textSecondary())
+                    NotebookContentView(markdown = note, compact = true)
                 }
             }
         }
@@ -288,7 +289,7 @@ private fun FeedbackCommentCard(title: String, body: String) {
     LmsCard {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(title, style = LexturesType.display(16, FontWeight.Bold))
-            Text(body, fontSize = 14.sp)
+            NotebookContentView(markdown = body, compact = true)
         }
     }
 }
@@ -303,7 +304,7 @@ private fun CommentsSection(comments: List<GradeComment>) {
                     comment.displayName?.takeIf { it.isNotBlank() }?.let {
                         Text(it, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
-                    Text(comment.body, fontSize = 14.sp)
+                    NotebookContentView(markdown = comment.body, compact = true)
                 }
             }
         }

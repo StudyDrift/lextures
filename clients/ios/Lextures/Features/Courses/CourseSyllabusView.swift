@@ -59,7 +59,7 @@ struct CourseSyllabusSection: View {
                     .font(LexturesTheme.displayFont(18))
                     .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
             }
-            MarkdownTextView(markdown: section.markdown)
+            CourseMarkdownContentView(markdown: section.markdown)
         }
     }
 
