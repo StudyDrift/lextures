@@ -58,6 +58,7 @@ import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.cardBackground
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.i18n.L
+import com.lextures.android.core.i18n.LocalLocalePreferences
 import com.lextures.android.core.lms.ContentToolHostLogic
 import com.lextures.android.core.lms.ContentToolPack4Logic
 import com.lextures.android.features.contenttools.ContentToolRendererProps
@@ -91,6 +92,7 @@ fun MediaCheckpointsTool(props: ContentToolRendererProps) {
     val accessToken = page?.accessToken
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+    val localePrefs = LocalLocalePreferences.current
 
     var currentTime by remember { mutableDoubleStateOf(0.0) }
     var promptedIds by remember(props.instanceId) { mutableStateOf<Set<String>>(emptySet()) }
@@ -259,6 +261,8 @@ fun MediaCheckpointsTool(props: ContentToolRendererProps) {
         blocked = ContentToolPack4Logic.shouldBlockPlayback(cp, answers)
         props.announce(
             L.format(
+                context,
+                localePrefs,
                 R.string.mobile_contentTools_tools_media_checkpoints_checkpointAnnounce,
                 formatTime(cp.atSec),
             ),

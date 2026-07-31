@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -37,6 +38,7 @@ import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.i18n.L
+import com.lextures.android.core.i18n.LocalLocalePreferences
 import com.lextures.android.core.lms.ContentToolHostLogic
 import com.lextures.android.core.lms.ContentToolPack4Logic
 import com.lextures.android.features.contenttools.ContentToolRendererProps
@@ -81,6 +83,8 @@ private data class PromptItem(
 @Composable
 fun ParameterExplorerTool(props: ContentToolRendererProps) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val localePrefs = LocalLocalePreferences.current
 
     var params by remember(props.instanceId) { mutableStateOf<Map<String, JsonElement>>(emptyMap()) }
     var dragging by remember { mutableStateOf(false) }
@@ -233,7 +237,13 @@ fun ParameterExplorerTool(props: ContentToolRendererProps) {
         dirty = true
         recompute(force = false)
         props.announce(
-            L.format(R.string.mobile_contentTools_tools_parameter_explorer_valueAnnounce, id, value),
+            L.format(
+                context,
+                localePrefs,
+                R.string.mobile_contentTools_tools_parameter_explorer_valueAnnounce,
+                id,
+                value,
+            ),
             false,
         )
     }
@@ -389,6 +399,8 @@ fun ParameterExplorerTool(props: ContentToolRendererProps) {
                             .width(88.dp)
                             .semantics {
                                 contentDescription = L.format(
+                                    context,
+                                    localePrefs,
                                     R.string.mobile_contentTools_tools_parameter_explorer_directEntry,
                                     param.label,
                                 )
