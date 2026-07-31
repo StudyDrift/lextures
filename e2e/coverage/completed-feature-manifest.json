@@ -5023,6 +5023,28 @@
       }
     },
     {
+      "id": "ct-m8-mobile-tools-media-and-procedural",
+      "path": "docs/completed/content_tools/CT.M8-mobile-tools-media-and-procedural.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story: native pack-4 renderers (media_checkpoints, worked_example, parameter_explorer) on the CT.M3 host plus code_sandbox via CT.M4 sandbox. Covered by ContentToolPack4Logic unit suites + shared pack4-logic fixtures (AC-17); web Playwright is not the coverage surface.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": "n/a",
+        "authorization": "n/a",
+        "dependency": true,
+        "rollback": true,
+        "notes": "Reuses ffMobileContentTools + per-tool client allowlist; code_sandbox also requires ffMobileContentToolsSandbox. Shared fixtures under clients/mobile/fixtures/content-tools/pack4-logic.json."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [
