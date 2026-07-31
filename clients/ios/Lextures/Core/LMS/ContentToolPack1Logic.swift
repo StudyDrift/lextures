@@ -69,20 +69,20 @@ enum ContentToolPack1Logic {
         // nil = unlimited
         guard let raw else { return 2 }
         switch raw {
-        case .string(let s) where s.lowercased() == "unlimited":
+        case .string(let text) where text.lowercased() == "unlimited":
             return nil
-        case .string(let s):
-            return Int(s).map { max(1, $0) } ?? 2
-        case .number(let n):
-            return max(1, Int(n.rounded()))
+        case .string(let text):
+            return Int(text).map { max(1, $0) } ?? 2
+        case .number(let number):
+            return max(1, Int(number.rounded()))
         default:
             return 2
         }
     }
 
     static func attemptsUsed(answers: [String: JSONValue], questionId: String) -> Int {
-        guard case .object(let q)? = answers[questionId],
-              case .array(let attempts)? = q["attempts"]
+        guard case .object(let question)? = answers[questionId],
+              case .array(let attempts)? = question["attempts"]
         else { return 0 }
         return attempts.count
     }
@@ -116,8 +116,8 @@ enum ContentToolPack1Logic {
         guard items.count > 1 else { return items }
         var out = items
         var h: UInt32 = 0
-        for u in seed.utf8 {
-            h = h &* 31 &+ UInt32(u)
+        for byte in seed.utf8 {
+            h = h &* 31 &+ UInt32(byte)
         }
         if out.count > 1 {
             for i in stride(from: out.count - 1, through: 1, by: -1) {
@@ -153,8 +153,10 @@ enum ContentToolPack1Logic {
     static func hasVoted(votes: [JSONValue], round: Int = 1) -> Bool {
         votes.contains { vote in
             guard case .object(let obj) = vote else { return false }
-            if case .number(let r) = obj["round"] { return Int(r) == round }
-            if case .string(let s) = obj["round"], let r = Int(s) { return r == round }
+            if case .number(let roundNumber) = obj["round"] { return Int(roundNumber) == round }
+            if case .string(let roundText) = obj["round"], let parsed = Int(roundText) {
+                return parsed == round
+            }
             return false
         }
     }
@@ -212,14 +214,14 @@ enum ContentToolPack1Logic {
 
     static func boolField(_ value: JSONValue?, key: String) -> Bool? {
         guard case .object(let obj) = value, let field = obj[key] else { return nil }
-        if case .bool(let b) = field { return b }
+        if case .bool(let flag) = field { return flag }
         return nil
     }
 
     static func numberField(_ value: JSONValue?, key: String) -> Double? {
         guard case .object(let obj) = value, let field = obj[key] else { return nil }
-        if case .number(let n) = field { return n }
-        if case .string(let s) = field { return Double(s) }
+        if case .number(let number) = field { return number }
+        if case .string(let text) = field { return Double(text) }
         return nil
     }
 }

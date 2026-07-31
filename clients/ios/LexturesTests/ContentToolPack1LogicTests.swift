@@ -71,12 +71,14 @@ final class ContentToolPack1LogicTests: XCTestCase {
         }
         let order = try object(root["order"])
         let input = try objects(order["input"])
-        let pending = input.map {
-            ContentToolPack1Logic.PendingAction(
-                instanceId: $0["instanceId"] as! String,
+        let pending: [ContentToolPack1Logic.PendingAction] = try input.map { item in
+            let instanceId = try XCTUnwrap(item["instanceId"] as? String)
+            let sequence = try XCTUnwrap(item["sequence"] as? NSNumber).int64Value
+            return ContentToolPack1Logic.PendingAction(
+                instanceId: instanceId,
                 toolId: "flashcards",
                 action: "rate",
-                sequence: ($0["sequence"] as! NSNumber).int64Value,
+                sequence: sequence,
                 payloadJSON: "{}"
             )
         }
@@ -200,12 +202,12 @@ final class ContentToolPack1LogicTests: XCTestCase {
         )
         let expectedKeys = Set(try XCTUnwrap(preserve["expectedKeys"] as? [String]))
         XCTAssertEqual(Set(merged.keys), expectedKeys)
-        if case .object(let drafts) = merged["drafts"], case .string(let v) = drafts["q1"] {
-            XCTAssertEqual(v, "b")
+        if case .object(let drafts) = merged["drafts"], case .string(let draftValue) = drafts["q1"] {
+            XCTAssertEqual(draftValue, "b")
         } else {
             XCTFail("drafts not merged")
         }
-        _ = base
+        XCTAssertFalse(base.isEmpty)
     }
 
     func testRegisteredNativeIncludesPack1() {
