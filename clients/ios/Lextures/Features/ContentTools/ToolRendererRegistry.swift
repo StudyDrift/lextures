@@ -24,6 +24,7 @@ enum ToolRendererRegistry {
         ids.formUnion(ContentToolPack1Logic.allowlistedToolIds())
         ids.formUnion(ContentToolPack2Logic.allowlistedToolIds())
         ids.formUnion(ContentToolPack3Logic.allowlistedToolIds())
+        ids.formUnion(ContentToolPack4Logic.allowlistedToolIds())
         return ids
     }
 
@@ -52,6 +53,12 @@ enum ToolRendererRegistry {
             HighlightAnnotateToolView(props: props)
         case "diagram_hotspot":
             DiagramHotspotToolView(props: props)
+        case "media_checkpoints":
+            MediaCheckpointsToolView(props: props)
+        case "worked_example":
+            WorkedExampleToolView(props: props)
+        case "parameter_explorer":
+            ParameterExplorerToolView(props: props)
         default:
             EmptyView()
         }

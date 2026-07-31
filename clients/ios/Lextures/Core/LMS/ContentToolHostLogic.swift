@@ -118,6 +118,10 @@ enum ContentToolHostLogic {
         if ContentToolPack3Logic.pack3ToolIds.contains(toolId) {
             return ContentToolPack3Logic.conflictPolicy(for: toolId)
         }
+        if ContentToolPack4Logic.pack4ToolIds.contains(toolId)
+            || ContentToolPack4Logic.sandboxToolIds.contains(toolId) {
+            return ContentToolPack4Logic.conflictPolicy(for: toolId)
+        }
         return .from(manifestPolicy)
     }
 
@@ -243,6 +247,7 @@ enum ContentToolHostLogic {
         ids.formUnion(ContentToolPack1Logic.allowlistedToolIds())
         ids.formUnion(ContentToolPack2Logic.allowlistedToolIds())
         ids.formUnion(ContentToolPack3Logic.allowlistedToolIds())
+        ids.formUnion(ContentToolPack4Logic.allowlistedToolIds())
         return ids
     }
 

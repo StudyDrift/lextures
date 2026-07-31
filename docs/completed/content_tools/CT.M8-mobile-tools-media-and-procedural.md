@@ -1,6 +1,6 @@
 # CT.M8 — Mobile Tool Pack 4: Media & Procedural (Media Checkpoints, Worked Example, Parameter Explorer, Code Sandbox)
 
-> Implementation plan. Source: mobile renderers for [CT.19](../../completed/content_tools/CT.19-tool-media-checkpoints.md), [CT.18](../../completed/content_tools/CT.18-tool-step-through-worked-example.md), [CT.16](../../completed/content_tools/CT.16-tool-parameter-explorer.md), [CT.17](../../completed/content_tools/CT.17-tool-code-sandbox.md). Folder overview: [README](README.md).
+> Implementation plan. Source: mobile renderers for [CT.19](CT.19-tool-media-checkpoints.md), [CT.18](CT.18-tool-step-through-worked-example.md), [CT.16](CT.16-tool-parameter-explorer.md), [CT.17](CT.17-tool-code-sandbox.md). Folder overview: [README](../../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,8 +10,8 @@
 | **Section** | Content Tools (CT) — Mobile |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
-| **Estimated effort** | M (2–4w) |
+| **Status (today)** | DONE |
+| **Estimated effort** | M |
 | **Owner (proposed)** | Mobile squad |
 | **Depends on** | CT.M3; CT.M4 for `code_sandbox` |
 | **Unblocks** | — (completes native coverage of the shipped shelf) |
@@ -332,10 +332,10 @@ verify the tool's declared capabilities at mount rather than assuming.
 
 ## 19. References
 
-- Web plans: [CT.19](../../completed/content_tools/CT.19-tool-media-checkpoints.md),
-  [CT.18](../../completed/content_tools/CT.18-tool-step-through-worked-example.md),
-  [CT.16](../../completed/content_tools/CT.16-tool-parameter-explorer.md),
-  [CT.17](../../completed/content_tools/CT.17-tool-code-sandbox.md).
+- Web plans: [CT.19](CT.19-tool-media-checkpoints.md),
+  [CT.18](CT.18-tool-step-through-worked-example.md),
+  [CT.16](CT.16-tool-parameter-explorer.md),
+  [CT.17](CT.17-tool-code-sandbox.md).
 - Web renderers: `clients/web/src/components/content-tools/tools/{media_checkpoints,worked_example,
   parameter_explorer,code_sandbox}/`.
 - Server: `server/internal/service/contenttools/{media_checkpoints,worked_example,parameter_explorer,
@@ -344,6 +344,6 @@ verify the tool's declared capabilities at mount rather than assuming.
   (`ContentVideoPlayer`, `CaptionedPlayerView`), the Android player equivalents.
 - Related plans: [CT.M3](CT.M3-mobile-content-tool-host-and-state.md),
   [CT.M4](CT.M4-mobile-sandboxed-webview-tool-host.md),
-  [CT.M1](../../completed/content_tools/CT.M1-mobile-markdown-engine-tables-code-math.md).
+  [CT.M1](CT.M1-mobile-markdown-engine-tables-code-math.md).
 - Standards: WCAG 2.1 AA §1.2.2 (captions), §1.4.13, §4.1.2 (slider semantics), §2.2.2 (pause, stop,
   hide for auto-updating visualisations).

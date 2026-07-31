@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import com.lextures.android.core.lms.ContentToolPack1Logic
 import com.lextures.android.core.lms.ContentToolPack2Logic
 import com.lextures.android.core.lms.ContentToolPack3Logic
+import com.lextures.android.core.lms.ContentToolPack4Logic
 import com.lextures.android.core.lms.ToolInstance
 import com.lextures.android.core.lms.ToolStateEnvelope
 import com.lextures.android.features.contenttools.tools.AskQuestionsTool
@@ -14,8 +15,11 @@ import com.lextures.android.features.contenttools.tools.FlashcardsTool
 import com.lextures.android.features.contenttools.tools.HighlightAnnotateTool
 import com.lextures.android.features.contenttools.tools.InlineDiscussionTool
 import com.lextures.android.features.contenttools.tools.InlineQuestionsTool
+import com.lextures.android.features.contenttools.tools.MediaCheckpointsTool
+import com.lextures.android.features.contenttools.tools.ParameterExplorerTool
 import com.lextures.android.features.contenttools.tools.PredictRevealTool
 import com.lextures.android.features.contenttools.tools.SortSequenceTool
+import com.lextures.android.features.contenttools.tools.WorkedExampleTool
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
@@ -48,6 +52,9 @@ object ToolRegistry {
         "sort_sequence" to { props -> SortSequenceTool(props) },
         "highlight_annotate" to { props -> HighlightAnnotateTool(props) },
         "diagram_hotspot" to { props -> DiagramHotspotTool(props) },
+        "media_checkpoints" to { props -> MediaCheckpointsTool(props) },
+        "worked_example" to { props -> WorkedExampleTool(props) },
+        "parameter_explorer" to { props -> ParameterExplorerTool(props) },
     )
 
     fun isRegistered(toolId: String): Boolean = toolId in registeredIds()
@@ -63,7 +70,8 @@ object ToolRegistry {
         val allowlisted =
             ContentToolPack1Logic.allowlistedToolIds() +
                 ContentToolPack2Logic.allowlistedToolIds() +
-                ContentToolPack3Logic.allowlistedToolIds()
+                ContentToolPack3Logic.allowlistedToolIds() +
+                ContentToolPack4Logic.allowlistedToolIds()
         return renderers.keys.filter { id ->
             id == "noop_probe" || id in allowlisted
         }.toSet()

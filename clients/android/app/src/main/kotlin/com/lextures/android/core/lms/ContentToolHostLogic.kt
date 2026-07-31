@@ -122,6 +122,9 @@ object ContentToolHostLogic {
         if (toolId in ContentToolPack3Logic.pack3ToolIds) {
             return ContentToolPack3Logic.conflictPolicy(toolId)
         }
+        if (toolId in ContentToolPack4Logic.pack4ToolIds || toolId in ContentToolPack4Logic.sandboxToolIds) {
+            return ContentToolPack4Logic.conflictPolicy(toolId)
+        }
         return ConflictPolicy.from(manifestPolicy)
     }
 
@@ -223,7 +226,8 @@ object ContentToolHostLogic {
         setOf("noop_probe") +
             ContentToolPack1Logic.allowlistedToolIds() +
             ContentToolPack2Logic.allowlistedToolIds() +
-            ContentToolPack3Logic.allowlistedToolIds()
+            ContentToolPack3Logic.allowlistedToolIds() +
+            ContentToolPack4Logic.allowlistedToolIds()
 
     fun hasNativeRenderer(toolId: String, registered: Set<String> = registeredNativeToolIds()): Boolean =
         toolId in registered
