@@ -68,6 +68,8 @@ data class CourseSummary(
     val visualBoardsEnabled: Boolean? = null,
     /** IQ / MOB.5 — interactive live quizzes (opt-in; default off). */
     val interactiveQuizzesEnabled: Boolean? = null,
+    /** CT.1 / CT.M3 — per-course Content Tools flag (opt-in; default off). */
+    val contentToolsEnabled: Boolean? = null,
     val requireCaptions: Boolean? = null,
     val viewerEnrollmentInvitationPending: Boolean? = null,
     val viewerPendingEnrollmentId: String? = null,
@@ -118,6 +120,7 @@ data class CourseSummary(
 
     val isVisualBoardsEnabled: Boolean get() = visualBoardsEnabled == true
     val isInteractiveQuizzesEnabled: Boolean get() = interactiveQuizzesEnabled == true
+    val isContentToolsEnabled: Boolean get() = contentToolsEnabled == true
 }
 
 @Serializable

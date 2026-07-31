@@ -85,6 +85,7 @@ fun ContentPageScreen(
     var showTutor by remember { mutableStateOf(false) }
     var showReadingPrefs by remember { mutableStateOf(false) }
     var readerCapabilities by remember { mutableStateOf(ImmersiveReaderCapabilities()) }
+    var mobileContentToolsEnabled by remember { mutableStateOf(false) }
     val readingStore = LocalReadingPreferencesStore.current
 
     val markDoneLabel = moduleMarkDoneLabel()
@@ -96,7 +97,9 @@ fun ContentPageScreen(
     LaunchedEffect(accessToken) {
         val token = accessToken ?: return@LaunchedEffect
         val features = runCatching { LmsApi.fetchPlatformFeatures(token) }.getOrNull()
-        readerCapabilities = MobilePlatformFeatures.from(features).immersiveReader
+        val mapped = MobilePlatformFeatures.from(features)
+        readerCapabilities = mapped.immersiveReader
+        mobileContentToolsEnabled = mapped.ffMobileContentTools
         readingStore.loadFromServer(token, readerCapabilities.preferencesEnabled)
     }
 
@@ -228,13 +231,21 @@ fun ContentPageScreen(
                                 onOpenPreferences = { showReadingPrefs = true },
                                 ttsSpeed = readingStore.row.ttsSpeed.toFloat(),
                             )
-                            NotebookContentView(
-                                markdown = markdown,
-                                onToggleTask = {},
-                                onEditTaskDue = {},
+                            com.lextures.android.features.contenttools.ContentToolsPageProvider(
+                                courseCode = course.courseCode,
+                                itemId = item.id,
+                                contentToolsEnabled = course.isContentToolsEnabled,
+                                mobileContentToolsEnabled = mobileContentToolsEnabled,
                                 accessToken = accessToken,
-                                captionsEnabled = readerCapabilities.captionsEnabled,
-                            )
+                            ) {
+                                NotebookContentView(
+                                    markdown = markdown,
+                                    onToggleTask = {},
+                                    onEditTaskDue = {},
+                                    accessToken = accessToken,
+                                    captionsEnabled = readerCapabilities.captionsEnabled,
+                                )
+                            }
                         }
                     }
                 }

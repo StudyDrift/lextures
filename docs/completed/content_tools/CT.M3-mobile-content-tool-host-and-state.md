@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — Mobile |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile squad + backend platform (consult) |
 | **Depends on** | CT.M1, CT.M2 (web: CT.1, CT.2, CT.3) |

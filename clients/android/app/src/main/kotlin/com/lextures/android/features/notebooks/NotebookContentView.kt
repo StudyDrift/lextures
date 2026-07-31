@@ -196,7 +196,10 @@ fun NotebookContentView(
                     suppressExpand = suppressAffordances,
                 )
 
-                is NotebookBlock.ToolFence -> MarkdownToolPlaceholder(toolId = block.toolId)
+                is NotebookBlock.ToolFence -> com.lextures.android.features.contenttools.ContentToolHost(
+                    instanceId = block.instanceId,
+                    toolId = block.toolId,
+                )
 
                 NotebookBlock.Divider -> Box(
                     Modifier

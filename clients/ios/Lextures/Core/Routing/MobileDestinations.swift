@@ -370,6 +370,8 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileImmersiveReader = true
     /// CT.M1 rich markdown engine; default on when unset.
     var ffMobileRichMarkdown = true
+    /// CT.M3 Content Tools host; default off when unset (dark-launch).
+    var ffMobileContentTools = false
     var ffMobileLiveMeetings = true
     var readAloudEnabled = false
     var ffReadAloud = false
@@ -462,6 +464,7 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileLibraryEreserves: features?.ffMobileLibraryEreserves != false,
             ffMobileImmersiveReader: features?.ffMobileImmersiveReader != false,
             ffMobileRichMarkdown: features?.ffMobileRichMarkdown != false,
+            ffMobileContentTools: features?.ffMobileContentTools == true,
             ffMobileLiveMeetings: features?.ffMobileLiveMeetings != false,
             readAloudEnabled: features?.readAloudEnabled == true,
             ffReadAloud: features?.ffReadAloud == true,

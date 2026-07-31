@@ -60,6 +60,8 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var visualBoardsEnabled: Bool?
     /// IQ / MOB.5 — interactive live quizzes (opt-in; default off).
     var interactiveQuizzesEnabled: Bool?
+    /// CT.1 / CT.M3 — per-course Content Tools flag (opt-in; default off).
+    var contentToolsEnabled: Bool?
     var requireCaptions: Bool?
     var viewerEnrollmentInvitationPending: Bool?
     var viewerPendingEnrollmentId: String?
@@ -102,6 +104,8 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var isVisualBoardsEnabled: Bool { visualBoardsEnabled == true }
 
     var isInteractiveQuizzesEnabled: Bool { interactiveQuizzesEnabled == true }
+
+    var isContentToolsEnabled: Bool { contentToolsEnabled == true }
 
     var isPinned: Bool { catalogPinned == true }
 

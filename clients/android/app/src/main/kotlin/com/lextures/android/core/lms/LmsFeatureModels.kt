@@ -448,6 +448,8 @@ data class PlatformFeatures(
     val ffMobileImmersiveReader: Boolean? = null,
     /** CT.M1 rich markdown engine (tables/code/math/toolFence). Default on when unset. */
     val ffMobileRichMarkdown: Boolean? = null,
+    /** CT.M3 Content Tools host dark-launch. Default off when unset. */
+    val ffMobileContentTools: Boolean? = null,
     val ffMobileLiveMeetings: Boolean? = null,
     val readAloudEnabled: Boolean? = null,
     val ffReadAloud: Boolean? = null,

@@ -61,6 +61,7 @@ struct QuizIntroView: View {
         }
         .navigationTitle(item.title)
         .navigationBarTitleDisplayMode(.inline)
+        .contentToolsPageHost(courseCode: course.courseCode, itemId: item.id, contentToolsEnabled: course.isContentToolsEnabled)
         .task { await load() }
         .navigationDestination(isPresented: $showTaker) {
             if let start = startResponse {

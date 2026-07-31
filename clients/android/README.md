@@ -117,3 +117,11 @@ No secrets or signing config are required for the debug build.
 - Assignment / quiz detail and submissions
 - OIDC / SAML sign-in
 - Forgot password and magic link
+
+
+## Content Tools host (CT.M3)
+
+Native Content Tool runtime under `features/contenttools/`: page provider batches instances,
+`ToolFrame` + placeholder/error cards, host logic for debounce/conflict/read-only, offline
+cache key `contentToolInstances`, and `noop_probe`. Dark-launched via `ffMobileContentTools`
+(default off) with course `contentToolsEnabled`.

@@ -40,11 +40,20 @@ struct ContentPageView: View {
                         } else if let markdown = detail?.markdown, !markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             LMSCard {
                                 readerToolbar(markdown: markdown)
-                                CourseMarkdownContentView(
-                                    markdown: markdown,
-                                    captionsEnabled: shell.platformFeatures.immersiveReader.captionsEnabled
-                                )
-                                .lexturesReadableText()
+                                ContentToolsPageProvider(
+                                    context: ContentToolsPageContext(
+                                        courseCode: course.courseCode,
+                                        itemId: item.id,
+                                        contentToolsEnabled: course.isContentToolsEnabled,
+                                        mobileContentToolsEnabled: shell.platformFeatures.ffMobileContentTools
+                                    )
+                                ) {
+                                    CourseMarkdownContentView(
+                                        markdown: markdown,
+                                        captionsEnabled: shell.platformFeatures.immersiveReader.captionsEnabled
+                                    )
+                                    .lexturesReadableText()
+                                }
                             }
                             .accessibilityElement(children: .contain)
                         }

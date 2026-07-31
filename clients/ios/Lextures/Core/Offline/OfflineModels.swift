@@ -15,6 +15,9 @@ enum OfflineCacheKey {
     static func contentPage(courseCode: String, itemId: String) -> String {
         "course:\(courseCode):content-page:\(itemId)"
     }
+    static func contentToolInstances(courseCode: String, itemId: String) -> String {
+        "course:\(courseCode):content-tools:instances:\(itemId)"
+    }
     static func vibeActivity(courseCode: String, itemId: String) -> String {
         "course:\(courseCode):vibe-activity:\(itemId)"
     }

@@ -100,19 +100,9 @@ struct CourseMarkdownContentView: View {
                 rows: rows,
                 suppressExpand: suppressAffordances
             )
-        case .toolFence(_, let toolId, _):
-            Label {
-                Text(L.format("mobile.markdown.tool.placeholder", toolId))
-                    .font(.subheadline)
-            } icon: {
-                Image(systemName: "puzzlepiece.extension")
-            }
-            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            .padding(compact ? 8 : 12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(LexturesTheme.sceneBackground(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .accessibilityLabel(L.format("mobile.markdown.tool.placeholder", toolId))
+        case .toolFence(let instanceId, let toolId, _):
+            ContentToolHostView(instanceId: instanceId, toolId: toolId)
+                .padding(.vertical, compact ? 2 : 4)
         case .divider:
             Divider()
         case .task, .drawing:
