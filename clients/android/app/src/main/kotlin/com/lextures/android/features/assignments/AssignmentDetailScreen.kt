@@ -409,11 +409,13 @@ fun AssignmentDetailScreen(
                             ttsSpeed = readerState.store.row.ttsSpeed.toFloat(),
                         )
                         var mobileContentToolsEnabled by remember { mutableStateOf(false) }
+                        var mobileContentToolsSandboxEnabled by remember { mutableStateOf(false) }
                         LaunchedEffect(accessToken) {
                             val token = accessToken ?: return@LaunchedEffect
                             val features = runCatching { LmsApi.fetchPlatformFeatures(token) }.getOrNull()
-                            mobileContentToolsEnabled =
-                                com.lextures.android.core.navigation.MobilePlatformFeatures.from(features).ffMobileContentTools
+                            val mapped = com.lextures.android.core.navigation.MobilePlatformFeatures.from(features)
+                            mobileContentToolsEnabled = mapped.ffMobileContentTools
+                            mobileContentToolsSandboxEnabled = mapped.ffMobileContentToolsSandbox
                         }
                         com.lextures.android.features.contenttools.ContentToolsPageProvider(
                             courseCode = courseCode,
@@ -421,6 +423,7 @@ fun AssignmentDetailScreen(
                             contentToolsEnabled = course.isContentToolsEnabled,
                             mobileContentToolsEnabled = mobileContentToolsEnabled,
                             accessToken = accessToken,
+                            mobileContentToolsSandboxEnabled = mobileContentToolsSandboxEnabled,
                         ) {
                             NotebookContentView(markdown = markdown)
                         }

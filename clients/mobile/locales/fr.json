@@ -3724,7 +3724,13 @@
     "mobile.contentTools.runtime.status.submitted": "Soumis",
     "mobile.contentTools.runtime.status.completed": "Terminé",
     "mobile.contentTools.runtime.stateTooLarge": "Votre réponse est trop volumineuse pour être enregistrée.",
-    "mobile.contentTools.runtime.schemaInvalid": "Une partie de votre réponse n’a pas pu être enregistrée."
+    "mobile.contentTools.runtime.schemaInvalid": "Une partie de votre réponse n’a pas pu être enregistrée.",
+    "mobile.contentTools.sandbox.badge": "S’exécute dans un bac à sable sécurisé",
+    "mobile.contentTools.sandbox.timeout": "Cette activité a mis trop de temps à se charger. Réessayez.",
+    "mobile.contentTools.sandbox.crashed": "Cette activité s’est arrêtée de façon inattendue. Réessayez.",
+    "mobile.contentTools.sandbox.needsConnection": "Cette activité nécessite une connexion.",
+    "mobile.contentTools.sandbox.capabilityPrompt": "Cette activité souhaite utiliser %@. Autoriser ?",
+    "mobile.contentTools.sandbox.nonConformant": "Cette activité peut ne pas respecter les consignes d’accessibilité."
   },
   "plurals": {
     "mobile.dashboard.dueThisWeek.count": {

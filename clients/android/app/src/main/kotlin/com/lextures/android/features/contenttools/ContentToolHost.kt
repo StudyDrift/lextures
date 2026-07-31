@@ -28,6 +28,7 @@ import com.lextures.android.R
 import com.lextures.android.core.config.AppConfiguration
 import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.ContentToolHostLogic
+import com.lextures.android.core.lms.ContentToolSandboxLogic
 import com.lextures.android.core.lms.ContentToolsApi
 import com.lextures.android.core.lms.ToolInstance
 import com.lextures.android.core.lms.ToolStateEnvelope
@@ -35,6 +36,7 @@ import com.lextures.android.core.lms.emptyToolState
 import com.lextures.android.core.network.ApiError
 import com.lextures.android.core.offline.OfflineCacheKey
 import com.lextures.android.core.offline.OfflineService
+import com.lextures.android.features.contenttools.sandbox.SandboxWebViewHost
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -48,6 +50,8 @@ data class ContentToolsPageContext(
     val contentToolsEnabled: Boolean,
     val mobileContentToolsEnabled: Boolean,
     val accessToken: String?,
+    /** CT.M4 sandbox WebView host capability (independent of CT.M3). */
+    val mobileContentToolsSandboxEnabled: Boolean = false,
     val observer: Boolean = false,
     val pastDue: Boolean = false,
     val loading: Boolean = false,
@@ -66,6 +70,7 @@ fun ContentToolsPageProvider(
     contentToolsEnabled: Boolean,
     mobileContentToolsEnabled: Boolean,
     accessToken: String?,
+    mobileContentToolsSandboxEnabled: Boolean = false,
     observer: Boolean = false,
     pastDue: Boolean = false,
     onOpenBrowser: (Uri) -> Unit = {},
@@ -129,6 +134,7 @@ fun ContentToolsPageProvider(
             itemId = itemId,
             contentToolsEnabled = contentToolsEnabled,
             mobileContentToolsEnabled = mobileContentToolsEnabled,
+            mobileContentToolsSandboxEnabled = mobileContentToolsSandboxEnabled,
             accessToken = accessToken,
             observer = observer,
             pastDue = pastDue,
@@ -261,12 +267,19 @@ private fun ContentToolHostMounted(
         return
     }
 
-    if (ContentToolHostLogic.shouldShowUnsupportedPlaceholder(
-            toolId = instance.toolId,
-            contract = instance.contract,
-            registered = ToolRegistry.registeredIds(),
-        )
-    ) {
+    val renderPath = ContentToolSandboxLogic.resolveRenderPath(
+        toolId = instance.toolId,
+        contract = instance.contract,
+        sandboxMode = instance.sandboxMode,
+        sandboxEnabled = page.mobileContentToolsSandboxEnabled,
+        registered = ToolRegistry.registeredIds(),
+        tombstone = instance.tombstone,
+        breakerOpen = instance.breakerOpen,
+        deprecated = instance.deprecated,
+        killed = false,
+    )
+
+    if (renderPath == ContentToolSandboxLogic.RenderPath.PLACEHOLDER) {
         val path = ContentToolHostLogic.webActivityPath(page.courseCode, page.itemId, instance.id)
         ToolPlaceholder(
             reason = ToolPlaceholderReason.OPEN_IN_BROWSER,
@@ -279,7 +292,7 @@ private fun ContentToolHostMounted(
         return
     }
 
-    if (crashed) {
+    if (crashed && renderPath == ContentToolSandboxLogic.RenderPath.NATIVE) {
         ToolErrorCard(
             toolName = ContentToolHostLogic.displayTitle(instance, instance.toolId),
             onRetry = { crashed = false },
@@ -288,18 +301,10 @@ private fun ContentToolHostMounted(
         return
     }
 
-    val renderer = ToolRegistry.resolve(instance.toolId)
-    if (renderer == null) {
-        ToolPlaceholder(
-            reason = ToolPlaceholderReason.OPEN_IN_BROWSER,
-            toolName = ContentToolHostLogic.displayTitle(instance, instance.toolId),
-            onOpenInBrowser = {
-                val path = ContentToolHostLogic.webActivityPath(page.courseCode, page.itemId, instance.id)
-                page.onOpenBrowser(Uri.parse(AppConfiguration.webUrl(path)))
-            },
-            modifier = modifier,
-        )
-        return
+    val renderer = if (renderPath == ContentToolSandboxLogic.RenderPath.NATIVE) {
+        ToolRegistry.resolve(instance.toolId)
+    } else {
+        null
     }
 
     fun applyEnvelope(next: ToolStateEnvelope) {
@@ -462,51 +467,110 @@ private fun ContentToolHostMounted(
         readOnly = readOnly,
         readOnlyMessage = readOnlyMessage ?: errorMessage,
         studentResetAllowed = page.studentResetAllowed,
+        showSandboxBadge = renderPath == ContentToolSandboxLogic.RenderPath.SANDBOX,
         onReset = { showResetConfirm = true },
         frameModifier = modifier,
     ) {
-        renderer(
-            ContentToolRendererProps(
-                instanceId = instance.id,
-                toolId = instance.toolId,
-                config = instance.config,
-                state = envelope.document(),
-                status = envelope.status,
-                readOnly = readOnly,
-                save = { patch ->
-                    val next = ContentToolHostLogic.mergeStatePatch(envelope.document(), patch)
-                    scheduleSave(next)
-                },
-                submit = { patch ->
-                    val next = ContentToolHostLogic.mergeStatePatch(envelope.document(), patch)
-                    scope.launch { persist(next, "submit") }
-                },
-                runAction = { name, input ->
-                    val token = page.accessToken
-                    if (token.isNullOrBlank()) {
-                        page.announce(needsConnectionLabel, true)
-                        throw IllegalStateException("offline")
-                    }
-                    val key = actionKeys.getOrPut(name) { ContentToolHostLogic.newIdempotencyKey() }
-                    try {
-                        val res = ContentToolsApi.runAction(
-                            courseCode = page.courseCode,
+        when (renderPath) {
+            ContentToolSandboxLogic.RenderPath.SANDBOX -> {
+                SandboxWebViewHost(
+                    toolId = instance.toolId,
+                    instanceId = instance.id,
+                    toolVersion = instance.toolVersion,
+                    title = ContentToolHostLogic.displayTitle(instance, instance.toolId),
+                    config = instance.config,
+                    state = envelope.document(),
+                    revision = envelope.revision,
+                    readOnly = readOnly,
+                    capabilities = instance.capabilities,
+                    accessToken = page.accessToken,
+                    save = { next -> scheduleSave(next) },
+                    runAction = { name, input ->
+                        val token = page.accessToken
+                        if (token.isNullOrBlank()) {
+                            page.announce(needsConnectionLabel, true)
+                            throw IllegalStateException("offline")
+                        }
+                        val key = actionKeys.getOrPut(name) { ContentToolHostLogic.newIdempotencyKey() }
+                        try {
+                            val res = ContentToolsApi.runAction(
+                                courseCode = page.courseCode,
+                                instanceId = instance.id,
+                                action = name,
+                                input = input,
+                                accessToken = token,
+                                idempotencyKey = key,
+                            )
+                            res.state?.let { applyEnvelope(it) }
+                            actionKeys.remove(name)
+                            res.result
+                        } catch (e: ApiError.Transport) {
+                            page.announce(needsConnectionLabel, true)
+                            throw e
+                        }
+                    },
+                    announce = page.announce,
+                    onOpenUrl = { page.onOpenBrowser(it) },
+                )
+            }
+            ContentToolSandboxLogic.RenderPath.NATIVE -> {
+                val native = renderer
+                if (native == null) {
+                    val path = ContentToolHostLogic.webActivityPath(page.courseCode, page.itemId, instance.id)
+                    ToolPlaceholder(
+                        reason = ToolPlaceholderReason.OPEN_IN_BROWSER,
+                        toolName = ContentToolHostLogic.displayTitle(instance, instance.toolId),
+                        onOpenInBrowser = {
+                            page.onOpenBrowser(Uri.parse(AppConfiguration.webUrl(path)))
+                        },
+                    )
+                } else {
+                    native(
+                        ContentToolRendererProps(
                             instanceId = instance.id,
-                            action = name,
-                            input = input,
-                            accessToken = token,
-                            idempotencyKey = key,
-                        )
-                        res.state?.let { applyEnvelope(it) }
-                        actionKeys.remove(name)
-                        res.result
-                    } catch (e: ApiError.Transport) {
-                        page.announce(needsConnectionLabel, true)
-                        throw e
-                    }
-                },
-                announce = page.announce,
-            ),
-        )
+                            toolId = instance.toolId,
+                            config = instance.config,
+                            state = envelope.document(),
+                            status = envelope.status,
+                            readOnly = readOnly,
+                            save = { patch ->
+                                val next = ContentToolHostLogic.mergeStatePatch(envelope.document(), patch)
+                                scheduleSave(next)
+                            },
+                            submit = { patch ->
+                                val next = ContentToolHostLogic.mergeStatePatch(envelope.document(), patch)
+                                scope.launch { persist(next, "submit") }
+                            },
+                            runAction = { name, input ->
+                                val token = page.accessToken
+                                if (token.isNullOrBlank()) {
+                                    page.announce(needsConnectionLabel, true)
+                                    throw IllegalStateException("offline")
+                                }
+                                val key = actionKeys.getOrPut(name) { ContentToolHostLogic.newIdempotencyKey() }
+                                try {
+                                    val res = ContentToolsApi.runAction(
+                                        courseCode = page.courseCode,
+                                        instanceId = instance.id,
+                                        action = name,
+                                        input = input,
+                                        accessToken = token,
+                                        idempotencyKey = key,
+                                    )
+                                    res.state?.let { applyEnvelope(it) }
+                                    actionKeys.remove(name)
+                                    res.result
+                                } catch (e: ApiError.Transport) {
+                                    page.announce(needsConnectionLabel, true)
+                                    throw e
+                                }
+                            },
+                            announce = page.announce,
+                        ),
+                    )
+                }
+            }
+            ContentToolSandboxLogic.RenderPath.PLACEHOLDER -> Unit
+        }
     }
 }

@@ -29,7 +29,8 @@ private struct ContentToolsPageHostModifier<Content: View>: View {
                 courseCode: courseCode,
                 itemId: itemId,
                 contentToolsEnabled: contentToolsEnabled,
-                mobileContentToolsEnabled: shell.platformFeatures.ffMobileContentTools
+                mobileContentToolsEnabled: shell.platformFeatures.ffMobileContentTools,
+                mobileContentToolsSandboxEnabled: shell.platformFeatures.ffMobileContentToolsSandbox
             )
         ) {
             content

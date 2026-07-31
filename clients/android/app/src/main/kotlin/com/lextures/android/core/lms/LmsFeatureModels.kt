@@ -450,6 +450,8 @@ data class PlatformFeatures(
     val ffMobileRichMarkdown: Boolean? = null,
     /** CT.M3 Content Tools host dark-launch. Default off when unset. */
     val ffMobileContentTools: Boolean? = null,
+    /** CT.M4 sandboxed WebView tool host. Default off when unset. */
+    val ffMobileContentToolsSandbox: Boolean? = null,
     val ffMobileLiveMeetings: Boolean? = null,
     val readAloudEnabled: Boolean? = null,
     val ffReadAloud: Boolean? = null,

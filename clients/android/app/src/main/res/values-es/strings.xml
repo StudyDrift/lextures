@@ -1300,6 +1300,12 @@ Bring a photo ID</string>
     <string name="mobile_contentTools_runtime_unavailable">Este elemento interactivo no está disponible.</string>
     <string name="mobile_contentTools_runtime_unsynced">Guardado en este dispositivo — se sincronizará</string>
     <string name="mobile_contentTools_runtime_yourAnswer">Tu respuesta</string>
+    <string name="mobile_contentTools_sandbox_badge">Se ejecuta en un entorno aislado seguro</string>
+    <string name="mobile_contentTools_sandbox_capabilityPrompt">Esta actividad quiere usar %1$s. ¿Permitir?</string>
+    <string name="mobile_contentTools_sandbox_crashed">Esta actividad se detuvo inesperadamente. Inténtalo de nuevo.</string>
+    <string name="mobile_contentTools_sandbox_needsConnection">Esta actividad necesita conexión.</string>
+    <string name="mobile_contentTools_sandbox_nonConformant">Es posible que esta actividad no cumpla las pautas de accesibilidad.</string>
+    <string name="mobile_contentTools_sandbox_timeout">Esta actividad tardó demasiado en cargar. Inténtalo de nuevo.</string>
     <string name="mobile_courseInvite_accept">Aceptar invitación</string>
     <string name="mobile_courseInvite_body">Acepta la invitación para unirte y ver el contenido del curso, o recházala para quitarlo de tu lista.</string>
     <string name="mobile_courseInvite_decline">Rechazar</string>

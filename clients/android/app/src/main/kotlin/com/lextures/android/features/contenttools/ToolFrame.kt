@@ -46,6 +46,7 @@ fun ToolFrame(
     readOnlyMessage: String?,
     studentResetAllowed: Boolean,
     onReset: (() -> Unit)?,
+    showSandboxBadge: Boolean = false,
     frameModifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -53,10 +54,12 @@ fun ToolFrame(
     val resolvedStatus = toolStatusLabel(status)
     val resolvedSync = toolSyncLabel(syncStatus)
     val scoreLabel = L.text(R.string.mobile_contentTools_runtime_score)
+    val sandboxBadge = L.text(R.string.mobile_contentTools_sandbox_badge)
     val a11y = buildString {
         append(ContentToolHostLogic.accessibleName(title, status))
         if (resolvedSync != null) append(", ").append(resolvedSync)
         if (score != null) append(", ").append(scoreLabel).append(" ${score.raw}/${score.max}")
+        if (showSandboxBadge) append(", ").append(sandboxBadge)
     }
     Column(
         frameModifier
@@ -83,6 +86,7 @@ fun ToolFrame(
                     ToolChip(resolvedStatus)
                     resolvedSync?.let { ToolChip(it) }
                     score?.let { ToolChip("$scoreLabel ${it.raw}/${it.max}") }
+                    if (showSandboxBadge) ToolChip(sandboxBadge)
                 }
             }
             TextButton(onClick = { menuOpen = true }) { Text("⋯") }

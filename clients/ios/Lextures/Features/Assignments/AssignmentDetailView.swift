@@ -174,7 +174,8 @@ struct AssignmentDetailView: View {
                     courseCode: courseCode,
                     itemId: item.id,
                     contentToolsEnabled: course.isContentToolsEnabled,
-                    mobileContentToolsEnabled: shell.platformFeatures.ffMobileContentTools
+                    mobileContentToolsEnabled: shell.platformFeatures.ffMobileContentTools,
+                    mobileContentToolsSandboxEnabled: shell.platformFeatures.ffMobileContentToolsSandbox
                 )
             ) {
                 CourseMarkdownContentView(markdown: markdown)

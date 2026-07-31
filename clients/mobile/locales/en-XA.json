@@ -3724,7 +3724,13 @@
     "mobile.contentTools.runtime.status.submitted": "[SSuubbmmiitttteedd]",
     "mobile.contentTools.runtime.status.completed": "[CCoommpplleetteedd]",
     "mobile.contentTools.runtime.stateTooLarge": "[YYoouurr rreessppoonnssee iiss ttoooo llaarrggee ttoo ssaavvee.]",
-    "mobile.contentTools.runtime.schemaInvalid": "[SSoommeetthhiinngg iinn yyoouurr rreessppoonnssee ccoouulldd nnoott bbee ssaavveedd.]"
+    "mobile.contentTools.runtime.schemaInvalid": "[SSoommeetthhiinngg iinn yyoouurr rreessppoonnssee ccoouulldd nnoott bbee ssaavveedd.]",
+    "mobile.contentTools.sandbox.badge": "[!! Runs in a secure sandbox !!]",
+    "mobile.contentTools.sandbox.timeout": "[!! This activity took too long to load. Try again. !!]",
+    "mobile.contentTools.sandbox.crashed": "[!! This activity stopped unexpectedly. Try again. !!]",
+    "mobile.contentTools.sandbox.needsConnection": "[!! This activity needs a connection. !!]",
+    "mobile.contentTools.sandbox.capabilityPrompt": "[!! This activity wants to use %@. Allow? !!]",
+    "mobile.contentTools.sandbox.nonConformant": "[!! This activity may not meet accessibility guidelines. !!]"
   },
   "plurals": {
     "mobile.dashboard.dueThisWeek.count": {

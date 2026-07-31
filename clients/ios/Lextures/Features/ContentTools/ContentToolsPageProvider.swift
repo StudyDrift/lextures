@@ -6,6 +6,8 @@ struct ContentToolsPageContext: Equatable {
     var itemId: String
     var contentToolsEnabled: Bool
     var mobileContentToolsEnabled: Bool
+    /// CT.M4 sandbox WebView host capability (independent of CT.M3).
+    var mobileContentToolsSandboxEnabled: Bool = false
     var observer: Bool = false
     var pastDue: Bool = false
 }

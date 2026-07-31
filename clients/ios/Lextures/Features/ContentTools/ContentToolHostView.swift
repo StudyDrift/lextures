@@ -106,31 +106,108 @@ struct ContentToolHostView: View {
                 reason: instance.breakerOpen ? .maintenance : .unavailable,
                 toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId)
             )
-        } else if ContentToolHostLogic.shouldShowUnsupportedPlaceholder(
-            toolId: instance.toolId,
-            contract: instance.contract,
-            registered: ToolRendererRegistry.registeredIds()
-        ) {
-            ToolPlaceholderView(
-                reason: .openInBrowser,
-                toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
-                onOpenInBrowser: { openWeb(page: page, instanceId: instance.id) }
-            )
-        } else if crashed {
-            ToolErrorCardView(
-                toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
-                onRetry: { crashed = false }
-            )
         } else {
-            toolFrame(instance: instance, page: page, readOnly: readOnly, readOnlyMessage: readOnlyMessage)
+            let path = ContentToolSandboxLogic.resolveRenderPath(
+                toolId: instance.toolId,
+                contract: instance.contract,
+                sandboxMode: instance.sandboxMode,
+                sandboxEnabled: page.mobileContentToolsSandboxEnabled,
+                registered: ToolRendererRegistry.registeredIds(),
+                tombstone: instance.tombstone,
+                breakerOpen: instance.breakerOpen,
+                deprecated: instance.deprecated,
+                killed: false
+            )
+            switch path {
+            case .placeholder:
+                ToolPlaceholderView(
+                    reason: .openInBrowser,
+                    toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
+                    onOpenInBrowser: { openWeb(page: page, instanceId: instance.id) }
+                )
+            case .native:
+                if crashed {
+                    ToolErrorCardView(
+                        toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
+                        onRetry: { crashed = false }
+                    )
+                } else {
+                    toolFrame(instance: instance, page: page, readOnly: readOnly, readOnlyMessage: readOnlyMessage) {
+                        ToolRendererRegistry.view(
+                            for: instance.toolId,
+                            props: rendererProps(instance: instance, page: page, readOnly: readOnly)
+                        )
+                    }
+                }
+            case .sandbox:
+                toolFrame(
+                    instance: instance,
+                    page: page,
+                    readOnly: readOnly,
+                    readOnlyMessage: readOnlyMessage,
+                    showSandboxBadge: true
+                ) {
+                    SandboxWebViewHost(
+                        toolId: instance.toolId,
+                        instanceId: instance.id,
+                        toolVersion: instance.toolVersion,
+                        title: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
+                        config: instance.config,
+                        state: envelope.document,
+                        revision: envelope.revision,
+                        readOnly: readOnly,
+                        capabilities: instance.capabilities,
+                        save: { next in
+                            scheduleSave(next, page: page, toolId: instance.toolId, readOnly: readOnly)
+                        },
+                        runAction: { name, input in
+                            try await runAction(name: name, input: input, page: page, instanceId: instance.id)
+                        },
+                        announce: { message, assertive in
+                            ToolLiveRegion.announce(message, assertive: assertive)
+                        }
+                    )
+                }
+            }
         }
     }
 
-    private func toolFrame(
+    private func rendererProps(
+        instance: ToolInstance,
+        page: ContentToolsPageContext,
+        readOnly: Bool
+    ) -> ContentToolRendererProps {
+        ContentToolRendererProps(
+            instanceId: instance.id,
+            toolId: instance.toolId,
+            config: instance.config,
+            state: envelope.document,
+            status: envelope.status,
+            readOnly: readOnly,
+            save: { patch in
+                let next = ContentToolHostLogic.mergeStatePatch(base: envelope.document, patch: patch)
+                scheduleSave(next, page: page, toolId: instance.toolId, readOnly: readOnly)
+            },
+            submit: { patch in
+                let next = ContentToolHostLogic.mergeStatePatch(base: envelope.document, patch: patch)
+                Task { await persist(next, mode: "submit", page: page, toolId: instance.toolId, readOnly: readOnly) }
+            },
+            runAction: { name, input in
+                try await runAction(name: name, input: input, page: page, instanceId: instance.id)
+            },
+            announce: { message, assertive in
+                ToolLiveRegion.announce(message, assertive: assertive)
+            }
+        )
+    }
+
+    private func toolFrame<Content: View>(
         instance: ToolInstance,
         page: ContentToolsPageContext,
         readOnly: Bool,
-        readOnlyMessage: String?
+        readOnlyMessage: String?,
+        showSandboxBadge: Bool = false,
+        @ViewBuilder content: () -> Content
     ) -> some View {
         ToolFrameView(
             title: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
@@ -140,34 +217,10 @@ struct ContentToolHostView: View {
             readOnly: readOnly,
             readOnlyMessage: readOnlyMessage ?? errorMessage,
             studentResetAllowed: studentResetAllowed,
-            onReset: { showResetConfirm = true }
-        ) {
-            ToolRendererRegistry.view(
-                for: instance.toolId,
-                props: ContentToolRendererProps(
-                    instanceId: instance.id,
-                    toolId: instance.toolId,
-                    config: instance.config,
-                    state: envelope.document,
-                    status: envelope.status,
-                    readOnly: readOnly,
-                    save: { patch in
-                        let next = ContentToolHostLogic.mergeStatePatch(base: envelope.document, patch: patch)
-                        scheduleSave(next, page: page, toolId: instance.toolId, readOnly: readOnly)
-                    },
-                    submit: { patch in
-                        let next = ContentToolHostLogic.mergeStatePatch(base: envelope.document, patch: patch)
-                        Task { await persist(next, mode: "submit", page: page, toolId: instance.toolId, readOnly: readOnly) }
-                    },
-                    runAction: { name, input in
-                        try await runAction(name: name, input: input, page: page, instanceId: instance.id)
-                    },
-                    announce: { message, assertive in
-                        ToolLiveRegion.announce(message, assertive: assertive)
-                    }
-                )
-            )
-        }
+            showSandboxBadge: showSandboxBadge,
+            onReset: { showResetConfirm = true },
+            content: content
+        )
     }
 
     private func openWeb(page: ContentToolsPageContext, instanceId: String) {

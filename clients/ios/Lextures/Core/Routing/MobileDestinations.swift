@@ -372,6 +372,8 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileRichMarkdown = true
     /// CT.M3 Content Tools host; default off when unset (dark-launch).
     var ffMobileContentTools = false
+    /// CT.M4 sandboxed WebView tool host; default off when unset.
+    var ffMobileContentToolsSandbox = false
     var ffMobileLiveMeetings = true
     var readAloudEnabled = false
     var ffReadAloud = false
@@ -465,6 +467,7 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileImmersiveReader: features?.ffMobileImmersiveReader != false,
             ffMobileRichMarkdown: features?.ffMobileRichMarkdown != false,
             ffMobileContentTools: features?.ffMobileContentTools == true,
+            ffMobileContentToolsSandbox: features?.ffMobileContentToolsSandbox == true,
             ffMobileLiveMeetings: features?.ffMobileLiveMeetings != false,
             readAloudEnabled: features?.readAloudEnabled == true,
             ffReadAloud: features?.ffReadAloud == true,

@@ -1,0 +1,407 @@
+{
+  "description": "Shared CT.M4 bridge fixtures \u2014 identical accept/reject decisions across iOS, Android, and web (AC-16).",
+  "constants": {
+    "bridgeVersion": 1,
+    "maxMessageBytes": 65536,
+    "maxMessagesPerSec": 20,
+    "readyTimeoutMs": 10000,
+    "minHeight": 80,
+    "maxHeight": 2000,
+    "maxLiveWebViews": 3
+  },
+  "fromToolAllowlist": [
+    "ready",
+    "save",
+    "runAction",
+    "resize",
+    "announce"
+  ],
+  "toToolAllowlist": [
+    "init",
+    "stateAccepted",
+    "actionResult",
+    "error"
+  ],
+  "validation": {
+    "cases": [
+      {
+        "name": "valid_ready",
+        "msg": {
+          "t": "ready",
+          "v": 1,
+          "contract": "1"
+        },
+        "direction": "fromTool",
+        "accept": true
+      },
+      {
+        "name": "valid_save",
+        "msg": {
+          "t": "save",
+          "v": 1,
+          "state": {},
+          "revision": 0
+        },
+        "direction": "fromTool",
+        "accept": true
+      },
+      {
+        "name": "valid_runAction",
+        "msg": {
+          "t": "runAction",
+          "v": 1,
+          "id": "a1",
+          "action": "grade",
+          "input": {}
+        },
+        "direction": "fromTool",
+        "accept": true
+      },
+      {
+        "name": "valid_resize",
+        "msg": {
+          "t": "resize",
+          "v": 1,
+          "height": 240
+        },
+        "direction": "fromTool",
+        "accept": true
+      },
+      {
+        "name": "valid_announce",
+        "msg": {
+          "t": "announce",
+          "v": 1,
+          "message": "hi"
+        },
+        "direction": "fromTool",
+        "accept": true
+      },
+      {
+        "name": "wrong_version",
+        "msg": {
+          "t": "ready",
+          "v": 2,
+          "contract": "1"
+        },
+        "direction": "fromTool",
+        "accept": false,
+        "reason": "malformed"
+      },
+      {
+        "name": "unknown_type",
+        "msg": {
+          "t": "ping",
+          "v": 1
+        },
+        "direction": "fromTool",
+        "accept": false,
+        "reason": "malformed"
+      },
+      {
+        "name": "missing_t",
+        "msg": {
+          "v": 1
+        },
+        "direction": "fromTool",
+        "accept": false,
+        "reason": "malformed"
+      },
+      {
+        "name": "null_msg",
+        "msg": null,
+        "direction": "fromTool",
+        "accept": false,
+        "reason": "malformed"
+      },
+      {
+        "name": "array_msg",
+        "msg": [],
+        "direction": "fromTool",
+        "accept": false,
+        "reason": "malformed"
+      },
+      {
+        "name": "valid_init",
+        "msg": {
+          "t": "init",
+          "v": 1,
+          "instanceId": "i",
+          "config": {},
+          "state": {},
+          "revision": 0,
+          "locale": "en",
+          "dir": "ltr",
+          "readOnly": false,
+          "participantId": "p_1"
+        },
+        "direction": "toTool",
+        "accept": true
+      },
+      {
+        "name": "valid_stateAccepted",
+        "msg": {
+          "t": "stateAccepted",
+          "v": 1,
+          "revision": 2
+        },
+        "direction": "toTool",
+        "accept": true
+      },
+      {
+        "name": "toTool_wrong_type",
+        "msg": {
+          "t": "ready",
+          "v": 1,
+          "contract": "1"
+        },
+        "direction": "toTool",
+        "accept": false,
+        "reason": "malformed"
+      }
+    ]
+  },
+  "rateLimit": {
+    "maxPerSec": 2,
+    "cases": [
+      {
+        "name": "burst_rejects_third",
+        "timestampsMs": [
+          1000,
+          1001,
+          1002
+        ],
+        "expectedAllow": [
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "name": "window_slides",
+        "timestampsMs": [
+          1000,
+          1001,
+          2001
+        ],
+        "expectedAllow": [
+          true,
+          true,
+          true
+        ]
+      }
+    ]
+  },
+  "sizeGuard": {
+    "cases": [
+      {
+        "name": "small_ok",
+        "approxBytes": 32,
+        "reject": false
+      },
+      {
+        "name": "oversize_1mb",
+        "approxBytes": 1048576,
+        "reject": true,
+        "reason": "oversized"
+      }
+    ]
+  },
+  "heightClamp": {
+    "cases": [
+      {
+        "input": 100,
+        "expected": 100
+      },
+      {
+        "input": 40,
+        "expected": 80
+      },
+      {
+        "input": 100000,
+        "expected": 2000
+      },
+      {
+        "input": 0,
+        "expected": 80
+      },
+      {
+        "input": -10,
+        "expected": 80
+      }
+    ]
+  },
+  "opaqueParticipantId": {
+    "cases": [
+      {
+        "instanceId": "inst",
+        "enrollmentHint": "enr",
+        "expected": "p_2104b9b5"
+      },
+      {
+        "instanceId": "abc",
+        "enrollmentHint": null,
+        "expected": "p_48c38ae4"
+      }
+    ]
+  },
+  "resolution": {
+    "cases": [
+      {
+        "name": "native_wins",
+        "toolId": "noop_probe",
+        "contract": 1,
+        "sandboxMode": "iframe",
+        "sandboxEnabled": true,
+        "registered": [
+          "noop_probe"
+        ],
+        "tombstone": false,
+        "breakerOpen": false,
+        "deprecated": false,
+        "killed": false,
+        "expected": "native"
+      },
+      {
+        "name": "sandbox_when_no_native",
+        "toolId": "sandbox_probe",
+        "contract": 1,
+        "sandboxMode": "iframe",
+        "sandboxEnabled": true,
+        "registered": [
+          "noop_probe"
+        ],
+        "tombstone": false,
+        "breakerOpen": false,
+        "deprecated": false,
+        "killed": false,
+        "expected": "sandbox"
+      },
+      {
+        "name": "placeholder_when_sandbox_flag_off",
+        "toolId": "sandbox_probe",
+        "contract": 1,
+        "sandboxMode": "iframe",
+        "sandboxEnabled": false,
+        "registered": [
+          "noop_probe"
+        ],
+        "tombstone": false,
+        "breakerOpen": false,
+        "deprecated": false,
+        "killed": false,
+        "expected": "placeholder"
+      },
+      {
+        "name": "placeholder_tombstone",
+        "toolId": "sandbox_probe",
+        "contract": 1,
+        "sandboxMode": "iframe",
+        "sandboxEnabled": true,
+        "registered": [],
+        "tombstone": true,
+        "breakerOpen": false,
+        "deprecated": false,
+        "killed": false,
+        "expected": "placeholder"
+      },
+      {
+        "name": "placeholder_breaker",
+        "toolId": "sandbox_probe",
+        "contract": 1,
+        "sandboxMode": "iframe",
+        "sandboxEnabled": true,
+        "registered": [],
+        "tombstone": false,
+        "breakerOpen": true,
+        "deprecated": false,
+        "killed": false,
+        "expected": "placeholder"
+      },
+      {
+        "name": "placeholder_killed",
+        "toolId": "sandbox_probe",
+        "contract": 1,
+        "sandboxMode": "iframe",
+        "sandboxEnabled": true,
+        "registered": [],
+        "tombstone": false,
+        "breakerOpen": false,
+        "deprecated": false,
+        "killed": true,
+        "expected": "placeholder"
+      },
+      {
+        "name": "placeholder_bad_contract",
+        "toolId": "sandbox_probe",
+        "contract": 2,
+        "sandboxMode": "iframe",
+        "sandboxEnabled": true,
+        "registered": [],
+        "tombstone": false,
+        "breakerOpen": false,
+        "deprecated": false,
+        "killed": false,
+        "expected": "placeholder"
+      },
+      {
+        "name": "sandbox_long_tail_without_iframe_mode",
+        "toolId": "inline_questions",
+        "contract": 1,
+        "sandboxMode": null,
+        "sandboxEnabled": true,
+        "registered": [
+          "noop_probe"
+        ],
+        "tombstone": false,
+        "breakerOpen": false,
+        "deprecated": false,
+        "killed": false,
+        "expected": "sandbox"
+      },
+      {
+        "name": "placeholder_deprecated",
+        "toolId": "sandbox_probe",
+        "contract": 1,
+        "sandboxMode": "iframe",
+        "sandboxEnabled": true,
+        "registered": [],
+        "tombstone": false,
+        "breakerOpen": false,
+        "deprecated": true,
+        "killed": false,
+        "expected": "placeholder"
+      }
+    ]
+  },
+  "contractRange": {
+    "supported": "1",
+    "cases": [
+      {
+        "contract": "1",
+        "ok": true
+      },
+      {
+        "contract": "2",
+        "ok": false
+      },
+      {
+        "contract": "",
+        "ok": false
+      },
+      {
+        "contract": "1.0",
+        "ok": false
+      }
+    ]
+  },
+  "ingressOrder": {
+    "description": "Host ingress rejection order: rate \u2192 size \u2192 schema (origin checked separately on web).",
+    "rejectionReasons": [
+      "rate_limited",
+      "oversized",
+      "malformed",
+      "unknown_type"
+    ]
+  }
+}

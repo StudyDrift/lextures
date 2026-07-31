@@ -19,6 +19,8 @@ struct PlatformFeatures: Decodable {
     var ffMobileRichMarkdown: Bool?
     /// CT.M3 Content Tools host dark-launch. Default off when unset.
     var ffMobileContentTools: Bool?
+    /// CT.M4 sandboxed WebView tool host. Default off when unset (independent of CT.M3).
+    var ffMobileContentToolsSandbox: Bool?
     var ffMobileLiveMeetings: Bool?
     var readAloudEnabled: Bool?
     var ffReadAloud: Bool?

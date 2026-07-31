@@ -1300,6 +1300,12 @@ Bring a photo ID</string>
     <string name="mobile_contentTools_runtime_unavailable">[TThhiiss iinntteerraaccttiivvee eelleemmeenntt iiss uunnaavvaaiillaabbllee.]</string>
     <string name="mobile_contentTools_runtime_unsynced">[SSaavveedd oonn tthhiiss ddeevviiccee — wwiillll ssyynncc]</string>
     <string name="mobile_contentTools_runtime_yourAnswer">[YYoouurr aannsswweerr]</string>
+    <string name="mobile_contentTools_sandbox_badge">[!! Runs in a secure sandbox !!]</string>
+    <string name="mobile_contentTools_sandbox_capabilityPrompt">[!! This activity wants to use %1$s. Allow? !!]</string>
+    <string name="mobile_contentTools_sandbox_crashed">[!! This activity stopped unexpectedly. Try again. !!]</string>
+    <string name="mobile_contentTools_sandbox_needsConnection">[!! This activity needs a connection. !!]</string>
+    <string name="mobile_contentTools_sandbox_nonConformant">[!! This activity may not meet accessibility guidelines. !!]</string>
+    <string name="mobile_contentTools_sandbox_timeout">[!! This activity took too long to load. Try again. !!]</string>
     <string name="mobile_courseInvite_accept">[Àççépt îñvîtàtîöñ]</string>
     <string name="mobile_courseInvite_body">[Àççépt thé îñvîtàtîöñ tö jöîñ àñd šéé thé çöüŕšé çöñtéñt, öŕ déçlîñé tö ŕémövé ît fŕöm ýöüŕ lîšt.]</string>
     <string name="mobile_courseInvite_decline">[Déçlîñé]</string>

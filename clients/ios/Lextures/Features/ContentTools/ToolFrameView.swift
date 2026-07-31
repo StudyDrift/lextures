@@ -9,6 +9,7 @@ struct ToolFrameView<Content: View>: View {
     let readOnly: Bool
     let readOnlyMessage: String?
     let studentResetAllowed: Bool
+    var showSandboxBadge: Bool = false
     var onReset: (() -> Void)?
     @ViewBuilder var content: () -> Content
 
@@ -24,6 +25,9 @@ struct ToolFrameView<Content: View>: View {
                         if let sync = syncLabel { chip(sync) }
                         if let score {
                             chip("\(L.text("mobile.contentTools.runtime.score")) \(score.raw)/\(score.max)")
+                        }
+                        if showSandboxBadge {
+                            chip(L.text("mobile.contentTools.sandbox.badge"))
                         }
                     }
                 }
@@ -53,7 +57,11 @@ struct ToolFrameView<Content: View>: View {
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .opacity(readOnly ? 0.85 : 1)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(ContentToolHostLogic.accessibleName(title: title, status: status))
+        .accessibilityLabel(
+            showSandboxBadge
+                ? "\(ContentToolHostLogic.accessibleName(title: title, status: status)), \(L.text("mobile.contentTools.sandbox.badge"))"
+                : ContentToolHostLogic.accessibleName(title: title, status: status)
+        )
     }
 
     private var statusLabel: String {

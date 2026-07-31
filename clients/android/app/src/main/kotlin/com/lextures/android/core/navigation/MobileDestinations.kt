@@ -189,6 +189,8 @@ data class MobilePlatformFeatures(
     val ffMobileRichMarkdown: Boolean = true,
     /** CT.M3 Content Tools host; default off when unset (dark-launch). */
     val ffMobileContentTools: Boolean = false,
+    /** CT.M4 sandboxed WebView tool host; default off when unset. */
+    val ffMobileContentToolsSandbox: Boolean = false,
     val ffMobileLiveMeetings: Boolean = true,
     val readAloudEnabled: Boolean = false,
     val ffReadAloud: Boolean = false,
@@ -300,6 +302,7 @@ data class MobilePlatformFeatures(
             ffMobileImmersiveReader = features?.ffMobileImmersiveReader != false,
             ffMobileRichMarkdown = features?.ffMobileRichMarkdown != false,
             ffMobileContentTools = features?.ffMobileContentTools == true,
+            ffMobileContentToolsSandbox = features?.ffMobileContentToolsSandbox == true,
             ffMobileLiveMeetings = features?.ffMobileLiveMeetings != false,
             readAloudEnabled = features?.readAloudEnabled == true,
             ffReadAloud = features?.ffReadAloud == true,
