@@ -113,3 +113,17 @@ fun emptyToolState(instanceId: String): ToolStateEnvelope = ToolStateEnvelope(
 fun jsonObjectOf(vararg pairs: Pair<String, String>): JsonObject = buildJsonObject {
     for ((k, v) in pairs) put(k, JsonPrimitive(v))
 }
+
+/** CT.M6 / CT.8 — AI consent response for content-tool composers. */
+@Serializable
+data class ContentToolAIConsent(
+    val aiDisclosureMode: String = "acknowledge",
+    val decision: String? = null,
+    val decidedAt: String? = null,
+)
+
+@Serializable
+data class ContentToolAIConsentBody(
+    val toolId: String? = null,
+    val decision: String,
+)

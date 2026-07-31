@@ -226,3 +226,32 @@ struct StateTooLargeBody: Codable, Equatable {
     var error: String?
     var maxBytes: Int64
 }
+
+/// CT.M6 / CT.8 — AI consent response for content-tool composers.
+struct ContentToolAIConsent: Codable, Equatable {
+    var aiDisclosureMode: String
+    var decision: String?
+    var decidedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case aiDisclosureMode, decision, decidedAt
+    }
+
+    init(aiDisclosureMode: String = "acknowledge", decision: String? = nil, decidedAt: String? = nil) {
+        self.aiDisclosureMode = aiDisclosureMode
+        self.decision = decision
+        self.decidedAt = decidedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        aiDisclosureMode = try c.decodeIfPresent(String.self, forKey: .aiDisclosureMode) ?? "acknowledge"
+        decision = try c.decodeIfPresent(String.self, forKey: .decision)
+        decidedAt = try c.decodeIfPresent(String.self, forKey: .decidedAt)
+    }
+}
+
+struct ContentToolAIConsentBody: Encodable {
+    var toolId: String?
+    var decision: String
+}

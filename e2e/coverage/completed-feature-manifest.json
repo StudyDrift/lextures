@@ -4979,6 +4979,28 @@
       }
     },
     {
+      "id": "ct-m6-mobile-tools-text-and-ai",
+      "path": "docs/completed/content_tools/CT.M6-mobile-tools-text-and-ai.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story: native pack-2 renderers (ask_questions, explain_it_back, inline_discussion) on the CT.M3 host. Covered by ContentToolPack2Logic unit suites + shared pack2-logic fixtures (AC-16); web Playwright is not the coverage surface.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": "n/a",
+        "authorization": "n/a",
+        "dependency": true,
+        "rollback": true,
+        "notes": "Reuses ffMobileContentTools + per-tool client allowlist. AI composers gated on server consent. Shared fixtures under clients/mobile/fixtures/content-tools/pack2-logic.json."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

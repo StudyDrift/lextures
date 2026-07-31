@@ -30,5 +30,6 @@
 | **CT.M3** | [Mobile content tool host & state persistence](CT.M3-mobile-content-tool-host-and-state.md) |
 | **CT.M4** | [Mobile sandboxed WebView tool host](CT.M4-mobile-sandboxed-webview-tool-host.md) |
 | **CT.M5** | [Mobile tool pack 1 — check & commit](CT.M5-mobile-tools-check-and-commit.md) |
+| **CT.M6** | [Mobile tool pack 2 — text & AI](CT.M6-mobile-tools-text-and-ai.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).

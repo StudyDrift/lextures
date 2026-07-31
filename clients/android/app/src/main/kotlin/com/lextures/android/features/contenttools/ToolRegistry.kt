@@ -2,10 +2,14 @@ package com.lextures.android.features.contenttools
 
 import androidx.compose.runtime.Composable
 import com.lextures.android.core.lms.ContentToolPack1Logic
+import com.lextures.android.core.lms.ContentToolPack2Logic
 import com.lextures.android.core.lms.ToolInstance
 import com.lextures.android.core.lms.ToolStateEnvelope
+import com.lextures.android.features.contenttools.tools.AskQuestionsTool
 import com.lextures.android.features.contenttools.tools.ClassPulseTool
+import com.lextures.android.features.contenttools.tools.ExplainItBackTool
 import com.lextures.android.features.contenttools.tools.FlashcardsTool
+import com.lextures.android.features.contenttools.tools.InlineDiscussionTool
 import com.lextures.android.features.contenttools.tools.InlineQuestionsTool
 import com.lextures.android.features.contenttools.tools.PredictRevealTool
 import kotlinx.serialization.json.JsonElement
@@ -34,6 +38,9 @@ object ToolRegistry {
         "predict_reveal" to { props -> PredictRevealTool(props) },
         "class_pulse" to { props -> ClassPulseTool(props) },
         "flashcards" to { props -> FlashcardsTool(props) },
+        "ask_questions" to { props -> AskQuestionsTool(props) },
+        "explain_it_back" to { props -> ExplainItBackTool(props) },
+        "inline_discussion" to { props -> InlineDiscussionTool(props) },
     )
 
     fun isRegistered(toolId: String): Boolean = toolId in registeredIds()
@@ -46,7 +53,8 @@ object ToolRegistry {
     }
 
     fun registeredIds(): Set<String> {
-        val allowlisted = ContentToolPack1Logic.allowlistedToolIds()
+        val allowlisted =
+            ContentToolPack1Logic.allowlistedToolIds() + ContentToolPack2Logic.allowlistedToolIds()
         return renderers.keys.filter { id ->
             id == "noop_probe" || id in allowlisted
         }.toSet()
