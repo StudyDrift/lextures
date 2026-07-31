@@ -1,0 +1,157 @@
+{
+  "description": "Shared CT.M5 pack-1 behaviour fixtures consumed by iOS/Android unit suites.",
+  "allowlist": {
+    "pack1ToolIds": ["inline_questions", "predict_reveal", "class_pulse", "flashcards"],
+    "cases": [
+      {
+        "name": "all_enabled",
+        "allowlist": ["inline_questions", "predict_reveal", "class_pulse", "flashcards"],
+        "toolId": "inline_questions",
+        "expected": true
+      },
+      {
+        "name": "disabled_falls_back",
+        "allowlist": ["flashcards"],
+        "toolId": "inline_questions",
+        "expected": false
+      },
+      {
+        "name": "unknown_not_allowlisted",
+        "allowlist": ["inline_questions", "predict_reveal", "class_pulse", "flashcards"],
+        "toolId": "ask_questions",
+        "expected": false
+      }
+    ]
+  },
+  "offlineQueue": {
+    "cases": [
+      { "toolId": "inline_questions", "action": "submit", "expected": true },
+      { "toolId": "flashcards", "action": "rate", "expected": true },
+      { "toolId": "class_pulse", "action": "vote", "expected": false },
+      { "toolId": "predict_reveal", "action": "commit", "expected": false },
+      { "toolId": "class_pulse", "action": "aggregate", "expected": false },
+      { "toolId": "inline_questions", "action": "reveal", "expected": false }
+    ],
+    "order": {
+      "input": [
+        { "instanceId": "b", "sequence": 2 },
+        { "instanceId": "a", "sequence": 10 },
+        { "instanceId": "b", "sequence": 1 },
+        { "instanceId": "a", "sequence": 1 }
+      ],
+      "expectedInstanceOrder": ["a", "a", "b", "b"],
+      "expectedSequenceOrder": [1, 10, 1, 2]
+    }
+  },
+  "attempts": {
+    "cases": [
+      {
+        "name": "under_limit",
+        "answers": { "q1": { "attempts": [{ "correct": false }, { "correct": true }] } },
+        "questionId": "q1",
+        "maxAttempts": 3,
+        "readOnly": false,
+        "expected": true
+      },
+      {
+        "name": "at_limit",
+        "answers": { "q1": { "attempts": [{ "correct": false }] } },
+        "questionId": "q1",
+        "maxAttempts": 1,
+        "readOnly": false,
+        "expected": false
+      },
+      {
+        "name": "unlimited",
+        "answers": { "q1": { "attempts": [{ "correct": false }, { "correct": false }] } },
+        "questionId": "q1",
+        "maxAttempts": null,
+        "readOnly": false,
+        "expected": true
+      },
+      {
+        "name": "read_only",
+        "answers": {},
+        "questionId": "q1",
+        "maxAttempts": 2,
+        "readOnly": true,
+        "expected": false
+      }
+    ]
+  },
+  "sequential": {
+    "questions": ["q1", "q2", "q3"],
+    "cases": [
+      {
+        "name": "first_always",
+        "answers": {},
+        "questionId": "q1",
+        "sequential": true,
+        "expected": true
+      },
+      {
+        "name": "second_locked",
+        "answers": {},
+        "questionId": "q2",
+        "sequential": true,
+        "expected": false
+      },
+      {
+        "name": "second_unlocked_after_first",
+        "answers": { "q1": { "attempts": [{ "correct": true }] } },
+        "questionId": "q2",
+        "sequential": true,
+        "expected": true
+      },
+      {
+        "name": "non_sequential",
+        "answers": {},
+        "questionId": "q3",
+        "sequential": false,
+        "expected": true
+      }
+    ]
+  },
+  "predictReveal": {
+    "cases": [
+      { "committedAt": null, "hasReveal": true, "canShow": false, "canEdit": true },
+      { "committedAt": "2026-01-01T00:00:00Z", "hasReveal": false, "canShow": false, "canEdit": false },
+      { "committedAt": "2026-01-01T00:00:00Z", "hasReveal": true, "canShow": true, "canEdit": false },
+      { "committedAt": "", "hasReveal": true, "canShow": false, "canEdit": true }
+    ]
+  },
+  "classPulsePoll": {
+    "baseMs": 30000,
+    "maxMs": 120000,
+    "visibility": [
+      { "visible": true, "hasVoted": true, "expected": true },
+      { "visible": false, "hasVoted": true, "expected": false },
+      { "visible": true, "hasVoted": false, "expected": false }
+    ],
+    "backoff": [
+      { "failures": 0, "expected": 30000 },
+      { "failures": 1, "expected": 60000 },
+      { "failures": 2, "expected": 120000 },
+      { "failures": 3, "expected": 120000 },
+      { "failures": 5, "expected": 120000 }
+    ]
+  },
+  "flashcards": {
+    "validRatings": ["again", "hard", "good", "easy"],
+    "invalidRatings": ["maybe", "", "AGAIN "],
+    "reviewCacheKeys": ["review:queue", "review:stats"]
+  },
+  "conflictPolicy": {
+    "cases": [
+      { "toolId": "flashcards", "expected": "merge" },
+      { "toolId": "inline_questions", "expected": "server_wins" },
+      { "toolId": "predict_reveal", "expected": "server_wins" },
+      { "toolId": "class_pulse", "expected": "server_wins" }
+    ]
+  },
+  "unknownFieldPreservation": {
+    "base": { "v": 1, "futureField": "keep-me", "drafts": { "q1": "a" } },
+    "patch": { "drafts": { "q1": "b" } },
+    "expectedKeys": ["v", "futureField", "drafts"]
+  }
+}

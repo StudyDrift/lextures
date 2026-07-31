@@ -20,7 +20,9 @@ enum ToolRendererRegistry {
     }
 
     static func registeredIds() -> Set<String> {
-        ["noop_probe"]
+        var ids: Set<String> = ["noop_probe"]
+        ids.formUnion(ContentToolPack1Logic.allowlistedToolIds())
+        return ids
     }
 
     @ViewBuilder
@@ -28,6 +30,14 @@ enum ToolRendererRegistry {
         switch toolId {
         case "noop_probe":
             NoopProbeRendererView(props: props)
+        case "inline_questions":
+            InlineQuestionsToolView(props: props)
+        case "predict_reveal":
+            PredictRevealToolView(props: props)
+        case "class_pulse":
+            ClassPulseToolView(props: props)
+        case "flashcards":
+            FlashcardsToolView(props: props)
         default:
             EmptyView()
         }

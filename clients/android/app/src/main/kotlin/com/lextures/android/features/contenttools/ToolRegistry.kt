@@ -1,8 +1,13 @@
 package com.lextures.android.features.contenttools
 
 import androidx.compose.runtime.Composable
+import com.lextures.android.core.lms.ContentToolPack1Logic
 import com.lextures.android.core.lms.ToolInstance
 import com.lextures.android.core.lms.ToolStateEnvelope
+import com.lextures.android.features.contenttools.tools.ClassPulseTool
+import com.lextures.android.features.contenttools.tools.FlashcardsTool
+import com.lextures.android.features.contenttools.tools.InlineQuestionsTool
+import com.lextures.android.features.contenttools.tools.PredictRevealTool
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
@@ -25,17 +30,27 @@ typealias ContentToolRenderer = @Composable (ContentToolRendererProps) -> Unit
 object ToolRegistry {
     private val renderers: MutableMap<String, ContentToolRenderer> = mutableMapOf(
         "noop_probe" to { props -> NoopProbeRenderer(props) },
+        "inline_questions" to { props -> InlineQuestionsTool(props) },
+        "predict_reveal" to { props -> PredictRevealTool(props) },
+        "class_pulse" to { props -> ClassPulseTool(props) },
+        "flashcards" to { props -> FlashcardsTool(props) },
     )
 
-    fun isRegistered(toolId: String): Boolean = toolId in renderers
+    fun isRegistered(toolId: String): Boolean = toolId in registeredIds()
 
-    fun resolve(toolId: String): ContentToolRenderer? = renderers[toolId]
+    fun resolve(toolId: String): ContentToolRenderer? =
+        if (isRegistered(toolId)) renderers[toolId] else null
 
     fun register(toolId: String, renderer: ContentToolRenderer) {
         renderers[toolId] = renderer
     }
 
-    fun registeredIds(): Set<String> = renderers.keys.toSet()
+    fun registeredIds(): Set<String> {
+        val allowlisted = ContentToolPack1Logic.allowlistedToolIds()
+        return renderers.keys.filter { id ->
+            id == "noop_probe" || id in allowlisted
+        }.toSet()
+    }
 }
 
 fun ToolInstance.initialEnvelope(): ToolStateEnvelope =

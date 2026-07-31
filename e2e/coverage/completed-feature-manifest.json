@@ -4957,6 +4957,28 @@
       }
     },
     {
+      "id": "ct-m5-mobile-tools-check-and-commit",
+      "path": "docs/completed/content_tools/CT.M5-mobile-tools-check-and-commit.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story: native pack-1 renderers (inline_questions, predict_reveal, class_pulse, flashcards) on the CT.M3 host. Covered by ContentToolPack1Logic unit suites + shared pack1-logic fixtures (AC-14); web Playwright is not the coverage surface.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": "n/a",
+        "authorization": "n/a",
+        "dependency": true,
+        "rollback": true,
+        "notes": "Reuses ffMobileContentTools + per-tool client allowlist. Shared fixtures under clients/mobile/fixtures/content-tools/pack1-logic.json."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

@@ -49,6 +49,12 @@ class CacheStore(
 
     fun totalSizeBytes(): Long = index.values.sumOf { it.sizeBytes.toLong() }
 
+    fun remove(key: String) {
+        if (index.remove(key) != null) {
+            persistIndex()
+        }
+    }
+
     fun clearAll() {
         index.clear()
         rootDir.deleteRecursively()

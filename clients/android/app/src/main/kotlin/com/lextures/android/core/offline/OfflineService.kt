@@ -149,6 +149,14 @@ class OfflineService private constructor(context: Context) {
         refreshState()
     }
 
+    /** Drop specific cache keys so the next read refreshes from the network (CT.M5 FR-18). */
+    fun invalidateCache(keys: List<String>) {
+        for (key in keys) {
+            cacheStore.remove(key)
+        }
+        refreshState()
+    }
+
     fun downloadContent(key: String, data: ByteArray, fileName: String, mimeType: String?) {
         downloadStore.save(key, data, fileName, mimeType)
         refreshState()

@@ -109,7 +109,7 @@ enum ContentToolHostLogic {
     }
 
     static func conflictPolicyForTool(_ toolId: String, manifestPolicy: String? = nil) -> ConflictPolicy {
-        if toolId == "highlight_annotate" { return .merge }
+        if toolId == "highlight_annotate" || toolId == "flashcards" { return .merge }
         return .from(manifestPolicy)
     }
 
@@ -230,7 +230,11 @@ enum ContentToolHostLogic {
         "\(title), \(statusChip(status).replacingOccurrences(of: "_", with: " "))"
     }
 
-    static func registeredNativeToolIds() -> Set<String> { ["noop_probe"] }
+    static func registeredNativeToolIds() -> Set<String> {
+        var ids: Set<String> = ["noop_probe"]
+        ids.formUnion(ContentToolPack1Logic.allowlistedToolIds())
+        return ids
+    }
 
     static func hasNativeRenderer(_ toolId: String, registered: Set<String> = registeredNativeToolIds()) -> Bool {
         registered.contains(toolId)
