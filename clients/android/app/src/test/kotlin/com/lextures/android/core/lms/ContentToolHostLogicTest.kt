@@ -23,22 +23,25 @@ class ContentToolHostLogicTest {
     private val json = Json { ignoreUnknownKeys = true }
 
     private fun fixture(): JsonObject {
-        val path = File("../mobile/fixtures/content-tools/host-logic.json").let { relative ->
-            if (relative.exists()) relative
-            else File("clients/mobile/fixtures/content-tools/host-logic.json").takeIf { it.exists() }
-                ?: File("../../../../../../../../mobile/fixtures/content-tools/host-logic.json")
+        return json.parseToJsonElement(resolveFixture().readText()).jsonObject
+    }
+
+    private fun resolveFixture(): File {
+        var dir: File? = File(System.getProperty("user.dir") ?: ".")
+        repeat(8) {
+            val current = dir ?: return@repeat
+            val candidates = listOf(
+                File(current, "clients/mobile/fixtures/content-tools/host-logic.json"),
+                File(current, "../mobile/fixtures/content-tools/host-logic.json"),
+                File(current, "../../mobile/fixtures/content-tools/host-logic.json"),
+                File(current, "mobile/fixtures/content-tools/host-logic.json"),
+            )
+            candidates.firstOrNull { it.isFile }?.let { return it.canonicalFile }
+            dir = current.parentFile
         }
-        // Resolve from repo root relative to this test source / working dir.
-        val candidates = listOf(
-            File("clients/mobile/fixtures/content-tools/host-logic.json"),
-            File("../mobile/fixtures/content-tools/host-logic.json"),
-            File("../../../../../mobile/fixtures/content-tools/host-logic.json"),
-            File("../../../../../../mobile/fixtures/content-tools/host-logic.json"),
-            File("/workspace/clients/mobile/fixtures/content-tools/host-logic.json"),
+        error(
+            "clients/mobile/fixtures/content-tools/host-logic.json not found from ${System.getProperty("user.dir")}"
         )
-        val file = candidates.firstOrNull { it.exists() }
-            ?: error("host-logic.json fixture not found")
-        return json.parseToJsonElement(file.readText()).jsonObject
     }
 
     @Test
