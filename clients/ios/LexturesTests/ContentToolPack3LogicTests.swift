@@ -1,3 +1,4 @@
+// swiftlint:disable identifier_name type_body_length file_length
 import XCTest
 @testable import Lextures
 

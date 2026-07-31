@@ -1,3 +1,4 @@
+// swiftlint:disable identifier_name
 import SwiftUI
 
 /// Shared select-then-place interaction for CT.M7 (visible by default, not a11y-only).

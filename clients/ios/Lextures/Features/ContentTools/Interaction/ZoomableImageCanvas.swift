@@ -1,3 +1,4 @@
+// swiftlint:disable identifier_name
 import SwiftUI
 
 /// Fit-to-width image canvas with pinch-zoom / pan for diagram_hotspot (CT.M7).

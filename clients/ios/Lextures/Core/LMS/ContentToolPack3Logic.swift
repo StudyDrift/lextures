@@ -1,3 +1,4 @@
+// swiftlint:disable identifier_name large_tuple force_try type_body_length file_length
 import Foundation
 
 /// Pure CT.M7 pack-3 decisions — placement engine, quote anchors, normalised

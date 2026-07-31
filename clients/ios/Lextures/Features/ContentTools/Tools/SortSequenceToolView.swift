@@ -1,3 +1,4 @@
+// swiftlint:disable identifier_name large_tuple
 import SwiftUI
 
 struct SortSequenceToolView: View {

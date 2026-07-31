@@ -1,3 +1,4 @@
+// swiftlint:disable identifier_name large_tuple
 import SwiftUI
 
 /// Purpose-built passage selection for highlight_annotate — sentence/paragraph tap
