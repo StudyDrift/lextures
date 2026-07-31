@@ -52,15 +52,16 @@ final class ContentToolPack3LogicTests: XCTestCase {
 
     private func jsonValue(_ any: Any?) -> JSONValue? {
         guard let any else { return nil }
-        if any is NSNull { return nil }
-        if let stringValue = any as? String { return .string(stringValue) }
-        if let boolValue = any as? Bool { return .bool(boolValue) }
+        if any is NSNull { return .null }
+        // NSNumber before Bool — JSONSerialization boxes both, and `as? Bool` accepts non-zero numbers.
         if let numberValue = any as? NSNumber {
             if CFGetTypeID(numberValue) == CFBooleanGetTypeID() {
                 return .bool(numberValue.boolValue)
             }
             return .number(numberValue.doubleValue)
         }
+        if let stringValue = any as? String { return .string(stringValue) }
+        if let boolValue = any as? Bool { return .bool(boolValue) }
         if let arr = any as? [Any] {
             return .array(arr.map { jsonValue($0) ?? .null })
         }
