@@ -1,6 +1,6 @@
 # CT.M7 — Mobile Tool Pack 3: Direct Manipulation (Sort & Sequence, Highlight & Annotate, Labeled Diagram)
 
-> Implementation plan. Source: mobile renderers for [CT.14](../../completed/content_tools/CT.14-tool-sort-and-sequence.md), [CT.13](../../completed/content_tools/CT.13-tool-highlight-and-annotate.md), [CT.15](../../completed/content_tools/CT.15-tool-labeled-diagram-and-hotspot.md). Folder overview: [README](README.md).
+> Implementation plan. Source: mobile renderers for [CT.14](CT.14-tool-sort-and-sequence.md), [CT.13](CT.13-tool-highlight-and-annotate.md), [CT.15](CT.15-tool-labeled-diagram-and-hotspot.md). Folder overview: [README](../../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — Mobile |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile squad + design (consult) |
 | **Depends on** | CT.M3 |
@@ -308,14 +308,14 @@ these tools may use AI on the web; mobile only renders and submits.)
 
 ## 19. References
 
-- Web plans: [CT.14](../../completed/content_tools/CT.14-tool-sort-and-sequence.md),
-  [CT.13](../../completed/content_tools/CT.13-tool-highlight-and-annotate.md),
-  [CT.15](../../completed/content_tools/CT.15-tool-labeled-diagram-and-hotspot.md).
+- Web plans: [CT.14](CT.14-tool-sort-and-sequence.md),
+  [CT.13](CT.13-tool-highlight-and-annotate.md),
+  [CT.15](CT.15-tool-labeled-diagram-and-hotspot.md).
 - Web renderers: `clients/web/src/components/content-tools/tools/{sort_sequence,highlight_annotate,
   diagram_hotspot}/renderer.tsx`.
 - Server: `server/internal/service/contenttools/{sort_sequence,highlight_annotate,diagram_hotspot}_actions.go`.
 - Related plans: [CT.M3](CT.M3-mobile-content-tool-host-and-state.md),
-  [CT.M9](CT.M9-mobile-tools-governance-a11y-telemetry.md);
-  accessibility checklist `docs/accessibility/mobile-audit-checklist.md`.
+  [CT.M9](../../plan/content_tools/CT.M9-mobile-tools-governance-a11y-telemetry.md);
+  accessibility checklist `../../accessibility/mobile-audit-checklist.md`.
 - Standards: WCAG 2.1 AA §2.5.7 (dragging movements), §2.5.1 (pointer gestures), §2.5.5 (target size),
   §1.4.1 (use of colour), §1.3.1 (info & relationships).

@@ -5001,6 +5001,28 @@
       }
     },
     {
+      "id": "ct-m7-mobile-tools-manipulation",
+      "path": "docs/completed/content_tools/CT.M7-mobile-tools-manipulation.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story: native pack-3 renderers (sort_sequence, highlight_annotate, diagram_hotspot) on the CT.M3 host with tap-to-assign alternatives (WCAG §2.5.7). Covered by ContentToolPack3Logic unit suites + shared pack3-logic fixtures (AC-15); web Playwright is not the coverage surface.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": "n/a",
+        "authorization": "n/a",
+        "dependency": true,
+        "rollback": true,
+        "notes": "Reuses ffMobileContentTools + per-tool client allowlist. Shared fixtures under clients/mobile/fixtures/content-tools/pack3-logic.json."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

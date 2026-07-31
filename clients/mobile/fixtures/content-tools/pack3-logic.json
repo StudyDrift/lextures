@@ -1,0 +1,704 @@
+{
+  "description": "Shared CT.M7 pack-3 behaviour fixtures consumed by iOS/Android unit suites.",
+  "allowlist": {
+    "pack3ToolIds": [
+      "sort_sequence",
+      "highlight_annotate",
+      "diagram_hotspot"
+    ],
+    "cases": [
+      {
+        "name": "all_enabled",
+        "allowlist": [
+          "sort_sequence",
+          "highlight_annotate",
+          "diagram_hotspot"
+        ],
+        "toolId": "sort_sequence",
+        "expected": true
+      },
+      {
+        "name": "highlight_held_back",
+        "allowlist": [
+          "sort_sequence",
+          "diagram_hotspot"
+        ],
+        "toolId": "highlight_annotate",
+        "expected": false
+      },
+      {
+        "name": "diagram_held_back",
+        "allowlist": [
+          "sort_sequence",
+          "highlight_annotate"
+        ],
+        "toolId": "diagram_hotspot",
+        "expected": false
+      },
+      {
+        "name": "unknown_not_allowlisted",
+        "allowlist": [
+          "sort_sequence",
+          "highlight_annotate",
+          "diagram_hotspot"
+        ],
+        "toolId": "flashcards",
+        "expected": false
+      }
+    ]
+  },
+  "conflictPolicy": {
+    "cases": [
+      {
+        "toolId": "sort_sequence",
+        "expected": "server_wins"
+      },
+      {
+        "toolId": "diagram_hotspot",
+        "expected": "server_wins"
+      },
+      {
+        "toolId": "highlight_annotate",
+        "expected": "merge"
+      }
+    ]
+  },
+  "offlineQueue": {
+    "cases": [
+      {
+        "toolId": "sort_sequence",
+        "action": "check",
+        "expected": false
+      },
+      {
+        "toolId": "sort_sequence",
+        "action": "reset_attempt",
+        "expected": false
+      },
+      {
+        "toolId": "diagram_hotspot",
+        "action": "check",
+        "expected": false
+      },
+      {
+        "toolId": "diagram_hotspot",
+        "action": "reset_attempt",
+        "expected": false
+      },
+      {
+        "toolId": "highlight_annotate",
+        "action": "filter_note",
+        "expected": false
+      }
+    ]
+  },
+  "attempts": {
+    "cases": [
+      {
+        "name": "unlimited_string",
+        "raw": "unlimited",
+        "expectedMax": null
+      },
+      {
+        "name": "three",
+        "raw": 3,
+        "expectedMax": 3
+      },
+      {
+        "name": "string_two",
+        "raw": "2",
+        "expectedMax": 2
+      },
+      {
+        "name": "missing_default",
+        "raw": null,
+        "expectedMax": 3
+      }
+    ],
+    "canCheck": [
+      {
+        "name": "under_limit",
+        "attemptsUsed": 1,
+        "maxAttempts": 3,
+        "readOnly": false,
+        "expected": true
+      },
+      {
+        "name": "at_limit",
+        "attemptsUsed": 3,
+        "maxAttempts": 3,
+        "readOnly": false,
+        "expected": false
+      },
+      {
+        "name": "unlimited",
+        "attemptsUsed": 10,
+        "maxAttempts": null,
+        "readOnly": false,
+        "expected": true
+      },
+      {
+        "name": "read_only",
+        "attemptsUsed": 0,
+        "maxAttempts": 3,
+        "readOnly": true,
+        "expected": false
+      }
+    ]
+  },
+  "sortReorder": {
+    "cases": [
+      {
+        "name": "move_up",
+        "order": [
+          "a",
+          "b",
+          "c"
+        ],
+        "itemId": "c",
+        "direction": -1,
+        "locked": [],
+        "expected": [
+          "a",
+          "c",
+          "b"
+        ]
+      },
+      {
+        "name": "move_down",
+        "order": [
+          "a",
+          "b",
+          "c"
+        ],
+        "itemId": "a",
+        "direction": 1,
+        "locked": [],
+        "expected": [
+          "b",
+          "a",
+          "c"
+        ]
+      },
+      {
+        "name": "move_up_noop_at_top",
+        "order": [
+          "a",
+          "b",
+          "c"
+        ],
+        "itemId": "a",
+        "direction": -1,
+        "locked": [],
+        "expected": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "name": "locked_noop",
+        "order": [
+          "a",
+          "b",
+          "c"
+        ],
+        "itemId": "b",
+        "direction": -1,
+        "locked": [
+          "b"
+        ],
+        "expected": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    ]
+  },
+  "sortTapAssign": {
+    "categorize": [
+      {
+        "name": "pick_then_place",
+        "itemIds": [
+          "a",
+          "b"
+        ],
+        "bucketIds": [
+          "x",
+          "y"
+        ],
+        "placement": {
+          "a": null,
+          "b": null
+        },
+        "grabbedId": null,
+        "hit": {
+          "type": "item",
+          "id": "a"
+        },
+        "expectedGrabbed": "a",
+        "expectedPlacement": {
+          "a": null,
+          "b": null
+        }
+      },
+      {
+        "name": "drop_in_bucket",
+        "itemIds": [
+          "a",
+          "b"
+        ],
+        "bucketIds": [
+          "x",
+          "y"
+        ],
+        "placement": {
+          "a": null,
+          "b": null
+        },
+        "grabbedId": "a",
+        "hit": {
+          "type": "bucket",
+          "id": "y"
+        },
+        "expectedGrabbed": null,
+        "expectedPlacement": {
+          "a": "y",
+          "b": null
+        }
+      },
+      {
+        "name": "return_to_tray",
+        "itemIds": [
+          "a",
+          "b"
+        ],
+        "bucketIds": [
+          "x",
+          "y"
+        ],
+        "placement": {
+          "a": "x",
+          "b": null
+        },
+        "grabbedId": "a",
+        "hit": {
+          "type": "tray"
+        },
+        "expectedGrabbed": null,
+        "expectedPlacement": {
+          "a": null,
+          "b": null
+        }
+      }
+    ],
+    "order": [
+      {
+        "name": "insert_at_position",
+        "itemIds": [
+          "a",
+          "b",
+          "c"
+        ],
+        "placement": [
+          "a"
+        ],
+        "grabbedId": "b",
+        "hit": {
+          "type": "position",
+          "index": 0
+        },
+        "expectedGrabbed": null,
+        "expectedPlacement": [
+          "b",
+          "a"
+        ]
+      },
+      {
+        "name": "append",
+        "itemIds": [
+          "a",
+          "b",
+          "c"
+        ],
+        "placement": [
+          "a"
+        ],
+        "grabbedId": "c",
+        "hit": {
+          "type": "position",
+          "index": 1
+        },
+        "expectedGrabbed": null,
+        "expectedPlacement": [
+          "a",
+          "c"
+        ]
+      }
+    ]
+  },
+  "dragInterrupt": {
+    "cases": [
+      {
+        "name": "restore_settled",
+        "settledPlacement": {
+          "a": "x",
+          "b": null
+        },
+        "inFlightGrabbed": "b",
+        "expectedGrabbed": null,
+        "expectedPlacement": {
+          "a": "x",
+          "b": null
+        }
+      }
+    ]
+  },
+  "allPlaced": {
+    "cases": [
+      {
+        "name": "categorize_complete",
+        "mode": "categorize",
+        "itemIds": [
+          "a",
+          "b"
+        ],
+        "placement": {
+          "a": "x",
+          "b": "y"
+        },
+        "expected": true
+      },
+      {
+        "name": "categorize_incomplete",
+        "mode": "categorize",
+        "itemIds": [
+          "a",
+          "b"
+        ],
+        "placement": {
+          "a": "x",
+          "b": null
+        },
+        "expected": false
+      },
+      {
+        "name": "order_complete",
+        "mode": "order",
+        "itemIds": [
+          "a",
+          "b"
+        ],
+        "placement": [
+          "b",
+          "a"
+        ],
+        "expected": true
+      },
+      {
+        "name": "order_incomplete",
+        "mode": "order",
+        "itemIds": [
+          "a",
+          "b"
+        ],
+        "placement": [
+          "a"
+        ],
+        "expected": false
+      }
+    ]
+  },
+  "anchors": {
+    "contextLen": 32,
+    "build": [
+      {
+        "name": "basic",
+        "passage": "The quick brown fox jumps over the lazy dog.",
+        "start": 4,
+        "end": 9,
+        "expectedQuote": "quick",
+        "expectedPrefix": "The ",
+        "expectedSuffix": " brown fox jumps over the lazy d",
+        "expectedOffset": 4
+      },
+      {
+        "name": "emoji_utf16",
+        "passage": "Hello \ud83d\udc4b world",
+        "start": 6,
+        "end": 8,
+        "expectedQuote": "\ud83d\udc4b",
+        "expectedPrefix": "Hello ",
+        "expectedSuffix": " world",
+        "expectedOffset": 6
+      }
+    ],
+    "resolve": [
+      {
+        "name": "exact_offset",
+        "passage": "The quick brown fox jumps over the lazy dog.",
+        "quote": "quick",
+        "anchor": {
+          "prefix": "The ",
+          "suffix": " brown",
+          "approxOffset": 4
+        },
+        "expectedStart": 4,
+        "expectedEnd": 9
+      },
+      {
+        "name": "shifted_text",
+        "passage": "XXThe quick brown fox",
+        "quote": "quick",
+        "anchor": {
+          "prefix": "The ",
+          "suffix": " brown",
+          "approxOffset": 4
+        },
+        "expectedStart": 6,
+        "expectedEnd": 11
+      },
+      {
+        "name": "orphaned",
+        "passage": "Nothing matches here",
+        "quote": "quick",
+        "anchor": {
+          "prefix": "The ",
+          "suffix": " brown",
+          "approxOffset": 4
+        },
+        "expectedStart": null,
+        "expectedEnd": null
+      }
+    ],
+    "segment": [
+      {
+        "name": "sentences",
+        "passage": "One. Two! Three?",
+        "granularity": "sentence",
+        "expected": [
+          {
+            "index": 0,
+            "text": "One.",
+            "start": 0,
+            "end": 4
+          },
+          {
+            "index": 1,
+            "text": "Two!",
+            "start": 5,
+            "end": 9
+          },
+          {
+            "index": 2,
+            "text": "Three?",
+            "start": 10,
+            "end": 16
+          }
+        ]
+      },
+      {
+        "name": "paragraphs",
+        "passage": "First para\n\nSecond para",
+        "granularity": "paragraph",
+        "expected": [
+          {
+            "index": 0,
+            "text": "First para",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "index": 1,
+            "text": "Second para",
+            "start": 12,
+            "end": 23
+          }
+        ]
+      }
+    ]
+  },
+  "geometry": {
+    "clamp01": [
+      {
+        "input": -0.5,
+        "expected": 0
+      },
+      {
+        "input": 0.25,
+        "expected": 0.25
+      },
+      {
+        "input": 1.5,
+        "expected": 1
+      }
+    ],
+    "pointInShape": [
+      {
+        "name": "rect_inside",
+        "x": 0.2,
+        "y": 0.3,
+        "shape": {
+          "kind": "rect",
+          "x": 0.1,
+          "y": 0.1,
+          "w": 0.4,
+          "h": 0.4
+        },
+        "expected": true
+      },
+      {
+        "name": "rect_outside",
+        "x": 0.9,
+        "y": 0.9,
+        "shape": {
+          "kind": "rect",
+          "x": 0.1,
+          "y": 0.1,
+          "w": 0.4,
+          "h": 0.4
+        },
+        "expected": false
+      },
+      {
+        "name": "circle_inside",
+        "x": 0.5,
+        "y": 0.5,
+        "shape": {
+          "kind": "circle",
+          "cx": 0.5,
+          "cy": 0.5,
+          "r": 0.2
+        },
+        "expected": true
+      },
+      {
+        "name": "circle_outside",
+        "x": 0.9,
+        "y": 0.5,
+        "shape": {
+          "kind": "circle",
+          "cx": 0.5,
+          "cy": 0.5,
+          "r": 0.2
+        },
+        "expected": false
+      }
+    ],
+    "hitTest": [
+      {
+        "name": "smallest_wins",
+        "x": 0.5,
+        "y": 0.5,
+        "regions": [
+          {
+            "id": "big",
+            "label": "Big",
+            "description": "large",
+            "shape": {
+              "kind": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 1,
+              "h": 1
+            }
+          },
+          {
+            "id": "small",
+            "label": "Small",
+            "description": "tiny",
+            "shape": {
+              "kind": "circle",
+              "cx": 0.5,
+              "cy": 0.5,
+              "r": 0.1
+            }
+          }
+        ],
+        "expectedId": "small"
+      }
+    ],
+    "hitTargetExpansion": [
+      {
+        "name": "tiny_rect_expands",
+        "shape": {
+          "kind": "rect",
+          "x": 0.45,
+          "y": 0.45,
+          "w": 0.02,
+          "h": 0.02
+        },
+        "imageDisplayWidthPt": 320,
+        "imageDisplayHeightPt": 240,
+        "minTargetPt": 44,
+        "pointInsideExpanded": [
+          0.5,
+          0.5
+        ],
+        "expectedContains": true,
+        "storedShapeUnchanged": true
+      },
+      {
+        "name": "already_large",
+        "shape": {
+          "kind": "rect",
+          "x": 0.1,
+          "y": 0.1,
+          "w": 0.5,
+          "h": 0.5
+        },
+        "imageDisplayWidthPt": 320,
+        "imageDisplayHeightPt": 240,
+        "minTargetPt": 44,
+        "pointInsideExpanded": [
+          0.2,
+          0.2
+        ],
+        "expectedContains": true,
+        "storedShapeUnchanged": true
+      }
+    ],
+    "pointerToNormalized": [
+      {
+        "name": "center_no_zoom",
+        "clientX": 160,
+        "clientY": 120,
+        "viewWidth": 320,
+        "viewHeight": 240,
+        "naturalWidth": 800,
+        "naturalHeight": 600,
+        "zoom": 1,
+        "panX": 0,
+        "panY": 0,
+        "expectedX": 0.5,
+        "expectedY": 0.5
+      }
+    ]
+  },
+  "checkResult": {
+    "cases": [
+      {
+        "name": "ok_score",
+        "result": {
+          "scorePct": 80,
+          "attemptsRemaining": 2,
+          "showPerItem": true
+        },
+        "expectedError": null,
+        "expectedScore": 80,
+        "expectedAttemptsRemaining": 2
+      },
+      {
+        "name": "max_attempts",
+        "result": {
+          "error": "max_attempts",
+          "attemptsRemaining": 0
+        },
+        "expectedError": "max_attempts",
+        "expectedScore": null,
+        "expectedAttemptsRemaining": 0
+      }
+    ]
+  }
+}

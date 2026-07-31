@@ -23,6 +23,7 @@ enum ToolRendererRegistry {
         var ids: Set<String> = ["noop_probe"]
         ids.formUnion(ContentToolPack1Logic.allowlistedToolIds())
         ids.formUnion(ContentToolPack2Logic.allowlistedToolIds())
+        ids.formUnion(ContentToolPack3Logic.allowlistedToolIds())
         return ids
     }
 
@@ -45,6 +46,12 @@ enum ToolRendererRegistry {
             ExplainItBackToolView(props: props)
         case "inline_discussion":
             InlineDiscussionToolView(props: props)
+        case "sort_sequence":
+            SortSequenceToolView(props: props)
+        case "highlight_annotate":
+            HighlightAnnotateToolView(props: props)
+        case "diagram_hotspot":
+            DiagramHotspotToolView(props: props)
         default:
             EmptyView()
         }

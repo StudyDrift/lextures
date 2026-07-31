@@ -109,12 +109,14 @@ enum ContentToolHostLogic {
     }
 
     static func conflictPolicyForTool(_ toolId: String, manifestPolicy: String? = nil) -> ConflictPolicy {
-        if toolId == "highlight_annotate" { return .merge }
         if ContentToolPack1Logic.pack1ToolIds.contains(toolId) {
             return ContentToolPack1Logic.conflictPolicy(for: toolId)
         }
         if ContentToolPack2Logic.pack2ToolIds.contains(toolId) {
             return ContentToolPack2Logic.conflictPolicy(for: toolId)
+        }
+        if ContentToolPack3Logic.pack3ToolIds.contains(toolId) {
+            return ContentToolPack3Logic.conflictPolicy(for: toolId)
         }
         return .from(manifestPolicy)
     }
@@ -240,6 +242,7 @@ enum ContentToolHostLogic {
         var ids: Set<String> = ["noop_probe"]
         ids.formUnion(ContentToolPack1Logic.allowlistedToolIds())
         ids.formUnion(ContentToolPack2Logic.allowlistedToolIds())
+        ids.formUnion(ContentToolPack3Logic.allowlistedToolIds())
         return ids
     }
 
