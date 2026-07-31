@@ -176,6 +176,14 @@ final class OfflineService {
         await downloadStore.clearAll()
         await refreshState()
     }
+
+    /// Drop specific cache keys so the next read refreshes from the network (CT.M5 FR-18).
+    func invalidateCache(keys: [String]) async {
+        for key in keys {
+            await cacheStore.remove(key: key)
+        }
+        await refreshState()
+    }
 }
 
 private struct AnyEncodable: Encodable {

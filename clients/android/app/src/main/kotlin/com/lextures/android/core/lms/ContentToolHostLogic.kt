@@ -113,7 +113,7 @@ object ContentToolHostLogic {
         contract == supported
 
     fun conflictPolicyForTool(toolId: String, manifestPolicy: String? = null): ConflictPolicy {
-        if (toolId == "highlight_annotate") return ConflictPolicy.MERGE
+        if (toolId == "highlight_annotate" || toolId == "flashcards") return ConflictPolicy.MERGE
         return ConflictPolicy.from(manifestPolicy)
     }
 
@@ -211,7 +211,8 @@ object ContentToolHostLogic {
     fun accessibleName(title: String, status: String): String =
         "$title, ${statusChip(status).replace('_', ' ')}"
 
-    fun registeredNativeToolIds(): Set<String> = setOf("noop_probe")
+    fun registeredNativeToolIds(): Set<String> =
+        setOf("noop_probe") + ContentToolPack1Logic.allowlistedToolIds()
 
     fun hasNativeRenderer(toolId: String, registered: Set<String> = registeredNativeToolIds()): Boolean =
         toolId in registered

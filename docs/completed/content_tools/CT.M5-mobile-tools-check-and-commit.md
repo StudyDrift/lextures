@@ -1,6 +1,6 @@
 # CT.M5 — Mobile Tool Pack 1: Check & Commit (Inline Questions, Predict & Reveal, Class Pulse, Flashcards)
 
-> Implementation plan. Source: mobile renderers for [CT.11](../../completed/content_tools/CT.11-tool-inline-questions.md), [CT.12](../../completed/content_tools/CT.12-tool-predict-and-reveal.md), [CT.21](../../completed/content_tools/CT.21-tool-class-pulse.md), [CT.23](../../completed/content_tools/CT.23-tool-flashcards-and-spaced-recall.md). Folder overview: [README](README.md).
+> Implementation plan. Source: mobile renderers for [CT.11](CT.11-tool-inline-questions.md), [CT.12](CT.12-tool-predict-and-reveal.md), [CT.21](CT.21-tool-class-pulse.md), [CT.23](CT.23-tool-flashcards-and-spaced-recall.md). Folder overview: [README](../../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — Mobile |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile squad |
 | **Depends on** | CT.M3 |
@@ -292,16 +292,16 @@ is made from this pack. (AI-backed tools are CT.M6.)
 
 ## 19. References
 
-- Web plans: [CT.11](../../completed/content_tools/CT.11-tool-inline-questions.md),
-  [CT.12](../../completed/content_tools/CT.12-tool-predict-and-reveal.md),
-  [CT.21](../../completed/content_tools/CT.21-tool-class-pulse.md),
-  [CT.23](../../completed/content_tools/CT.23-tool-flashcards-and-spaced-recall.md).
+- Web plans: [CT.11](CT.11-tool-inline-questions.md),
+  [CT.12](CT.12-tool-predict-and-reveal.md),
+  [CT.21](CT.21-tool-class-pulse.md),
+  [CT.23](CT.23-tool-flashcards-and-spaced-recall.md).
 - Web renderers: `clients/web/src/components/content-tools/tools/{inline_questions,predict_reveal,
   class_pulse,flashcards}/renderer.tsx`.
 - Server: `server/internal/service/contenttools/{inline_questions,predict_reveal,class_pulse,
   flashcards}_actions.go`; manifests under `server/internal/service/contenttools/tools/*/manifest.json`.
-- Related plans: [CT.M1](../../completed/content_tools/CT.M1-mobile-markdown-engine-tables-code-math.md),
+- Related plans: [CT.M1](CT.M1-mobile-markdown-engine-tables-code-math.md),
   [CT.M3](CT.M3-mobile-content-tool-host-and-state.md),
-  [CT.M9](CT.M9-mobile-tools-governance-a11y-telemetry.md).
+  [CT.M9](../../plan/content_tools/CT.M9-mobile-tools-governance-a11y-telemetry.md).
 - Standards: WCAG 2.1 AA §1.4.1 (use of colour), §2.5.1 (pointer gestures — flip must have a
   non-gesture equivalent), §4.1.3 (status messages).

@@ -27,5 +27,8 @@
 | **CT.23** | [Flashcards & Spaced Recall](CT.23-tool-flashcards-and-spaced-recall.md) |
 | **CT.M1** | [Mobile markdown engine: tables, code, math & media](CT.M1-mobile-markdown-engine-tables-code-math.md) |
 | **CT.M2** | [Mobile rich content parity: assignments, quizzes, syllabus & discussions](CT.M2-mobile-rich-content-parity-assignments-quizzes.md) |
+| **CT.M3** | [Mobile content tool host & state persistence](CT.M3-mobile-content-tool-host-and-state.md) |
+| **CT.M4** | [Mobile sandboxed WebView tool host](CT.M4-mobile-sandboxed-webview-tool-host.md) |
+| **CT.M5** | [Mobile tool pack 1 — check & commit](CT.M5-mobile-tools-check-and-commit.md) |
 
 Remaining plans live under [`docs/plan/content_tools/`](../../plan/content_tools/README.md).
