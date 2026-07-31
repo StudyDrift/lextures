@@ -1,0 +1,263 @@
+{
+  "description": "Shared CT.M6 pack-2 behaviour fixtures consumed by iOS/Android unit suites.",
+  "allowlist": {
+    "pack2ToolIds": ["ask_questions", "explain_it_back", "inline_discussion"],
+    "cases": [
+      {
+        "name": "all_enabled",
+        "allowlist": ["ask_questions", "explain_it_back", "inline_discussion"],
+        "toolId": "inline_discussion",
+        "expected": true
+      },
+      {
+        "name": "ai_held_back",
+        "allowlist": ["inline_discussion"],
+        "toolId": "ask_questions",
+        "expected": false
+      },
+      {
+        "name": "explain_held_back",
+        "allowlist": ["inline_discussion", "ask_questions"],
+        "toolId": "explain_it_back",
+        "expected": false
+      },
+      {
+        "name": "unknown_not_allowlisted",
+        "allowlist": ["ask_questions", "explain_it_back", "inline_discussion"],
+        "toolId": "flashcards",
+        "expected": false
+      }
+    ]
+  },
+  "offlineQueue": {
+    "cases": [
+      { "toolId": "ask_questions", "action": "ask", "expected": false },
+      { "toolId": "ask_questions", "action": "clear", "expected": false },
+      { "toolId": "explain_it_back", "action": "submit", "expected": false },
+      { "toolId": "inline_discussion", "action": "post", "expected": false },
+      { "toolId": "inline_discussion", "action": "report", "expected": false },
+      { "toolId": "inline_discussion", "action": "thread", "expected": false }
+    ]
+  },
+  "draftLifecycle": {
+    "cases": [
+      { "name": "clear_on_success", "success": true, "preserveInput": false, "expected": "clearOnSuccess" },
+      { "name": "retain_on_failure", "success": false, "preserveInput": true, "expected": "retainOnFailure" },
+      { "name": "retain_even_without_flag", "success": false, "preserveInput": false, "expected": "retainOnFailure" }
+    ],
+    "keys": [
+      { "instanceId": "inst-1", "slot": "composer", "expected": "content-tool-draft:inst-1:composer" },
+      { "instanceId": "inst-2", "slot": "reply", "expected": "content-tool-draft:inst-2:reply" }
+    ]
+  },
+  "consentGating": {
+    "cases": [
+      {
+        "name": "unfetched_blocks",
+        "disclosureMode": "acknowledge",
+        "decision": null,
+        "consentFetched": false,
+        "composerAllowed": false,
+        "showDisclosure": true
+      },
+      {
+        "name": "mode_none_allows",
+        "disclosureMode": "none",
+        "decision": null,
+        "consentFetched": true,
+        "composerAllowed": true,
+        "showDisclosure": false
+      },
+      {
+        "name": "acknowledge_required",
+        "disclosureMode": "acknowledge",
+        "decision": null,
+        "consentFetched": true,
+        "composerAllowed": false,
+        "showDisclosure": true
+      },
+      {
+        "name": "acknowledged_allows",
+        "disclosureMode": "acknowledge",
+        "decision": "acknowledged",
+        "consentFetched": true,
+        "composerAllowed": true,
+        "showDisclosure": false
+      },
+      {
+        "name": "opted_out_blocks",
+        "disclosureMode": "banner",
+        "decision": "opted_out",
+        "consentFetched": true,
+        "composerAllowed": false,
+        "showDisclosure": false
+      },
+      {
+        "name": "banner_allows_without_ack",
+        "disclosureMode": "banner",
+        "decision": null,
+        "consentFetched": true,
+        "composerAllowed": true,
+        "showDisclosure": true
+      }
+    ]
+  },
+  "errorClassification": {
+    "cases": [
+      { "code": "rate_limited", "expected": "rate_limited", "messageKey": "mobile.contentTools.ai.error.rateLimited" },
+      { "code": "budget", "expected": "budget", "messageKey": "mobile.contentTools.ai.error.budget" },
+      { "code": "provider_unavailable", "expected": "provider_unavailable", "messageKey": "mobile.contentTools.ai.error.providerUnavailable" },
+      { "code": "filtered", "expected": "filtered", "messageKey": "mobile.contentTools.ai.error.filtered" },
+      { "code": "opt_out", "expected": "opt_out", "messageKey": "mobile.contentTools.ai.error.optOut" },
+      { "code": "coppa", "expected": "coppa", "messageKey": "mobile.contentTools.ai.error.coppa" },
+      { "code": "too_short", "expected": "too_short", "messageKey": "mobile.contentTools.tools.explain_it_back.error.tooShort" },
+      { "code": "forbidden", "expected": "forbidden", "messageKey": "mobile.contentTools.tools.inline_discussion.error.forbidden" },
+      { "code": "something_weird", "expected": "unknown", "messageKey": "mobile.contentTools.runtime.retry" }
+    ]
+  },
+  "lengthGuidance": {
+    "cases": [
+      { "text": "one two three four five", "minWords": 5, "maxWords": 10, "expected": true },
+      { "text": "too short", "minWords": 5, "maxWords": 10, "expected": false },
+      { "text": "one two three four five six seven eight nine ten eleven", "minWords": 5, "maxWords": 10, "expected": false }
+    ]
+  },
+  "pagination": {
+    "cases": [
+      { "currentPage": 1, "pageSize": 20, "total": 40, "expectedNext": 2 },
+      { "currentPage": 2, "pageSize": 20, "total": 40, "expectedNext": null },
+      { "currentPage": 1, "pageSize": 20, "total": 15, "expectedNext": null },
+      { "currentPage": 1, "pageSize": 20, "total": null, "expectedNext": null }
+    ]
+  },
+  "discussionControls": {
+    "cases": [
+      {
+        "name": "own_post",
+        "isOwn": true,
+        "canEditFlag": true,
+        "canDeleteFlag": true,
+        "allowReplies": true,
+        "viewerCanEndorse": false,
+        "viewerCanModerate": false,
+        "readOnly": false,
+        "removed": false,
+        "expected": {
+          "canEdit": true,
+          "canDelete": true,
+          "canEndorse": false,
+          "canModerate": false,
+          "canUpvote": true,
+          "canReport": false,
+          "canReply": true
+        }
+      },
+      {
+        "name": "peer_post",
+        "isOwn": false,
+        "canEditFlag": false,
+        "canDeleteFlag": false,
+        "allowReplies": true,
+        "viewerCanEndorse": false,
+        "viewerCanModerate": false,
+        "readOnly": false,
+        "removed": false,
+        "expected": {
+          "canEdit": false,
+          "canDelete": false,
+          "canEndorse": false,
+          "canModerate": false,
+          "canUpvote": true,
+          "canReport": true,
+          "canReply": true
+        }
+      },
+      {
+        "name": "staff_peer",
+        "isOwn": false,
+        "canEditFlag": false,
+        "canDeleteFlag": false,
+        "allowReplies": true,
+        "viewerCanEndorse": true,
+        "viewerCanModerate": true,
+        "readOnly": false,
+        "removed": false,
+        "expected": {
+          "canEdit": false,
+          "canDelete": false,
+          "canEndorse": true,
+          "canModerate": true,
+          "canUpvote": true,
+          "canReport": true,
+          "canReply": true
+        }
+      },
+      {
+        "name": "tombstone",
+        "isOwn": false,
+        "canEditFlag": false,
+        "canDeleteFlag": false,
+        "allowReplies": true,
+        "viewerCanEndorse": true,
+        "viewerCanModerate": true,
+        "readOnly": false,
+        "removed": true,
+        "expected": {
+          "canEdit": false,
+          "canDelete": false,
+          "canEndorse": true,
+          "canModerate": true,
+          "canUpvote": false,
+          "canReport": false,
+          "canReply": false
+        }
+      },
+      {
+        "name": "read_only",
+        "isOwn": true,
+        "canEditFlag": true,
+        "canDeleteFlag": true,
+        "allowReplies": true,
+        "viewerCanEndorse": true,
+        "viewerCanModerate": true,
+        "readOnly": true,
+        "removed": false,
+        "expected": {
+          "canEdit": false,
+          "canDelete": false,
+          "canEndorse": false,
+          "canModerate": false,
+          "canUpvote": false,
+          "canReport": false,
+          "canReply": false
+        }
+      }
+    ]
+  },
+  "tombstone": {
+    "cases": [
+      { "removed": true, "tombstone": false, "moderationState": null, "expected": true },
+      { "removed": false, "tombstone": true, "moderationState": null, "expected": true },
+      { "removed": false, "tombstone": false, "moderationState": "hidden", "expected": true },
+      { "removed": false, "tombstone": false, "moderationState": "mystery", "expected": true },
+      { "removed": false, "tombstone": false, "moderationState": null, "expected": false }
+    ]
+  },
+  "conflictPolicy": {
+    "cases": [
+      { "toolId": "ask_questions", "expected": "merge" },
+      { "toolId": "explain_it_back", "expected": "merge" },
+      { "toolId": "inline_discussion", "expected": "server_wins" }
+    ]
+  },
+  "composerSend": {
+    "cases": [
+      { "text": "hello", "readOnly": false, "online": true, "busy": false, "consentAllowed": true, "expected": true },
+      { "text": "  ", "readOnly": false, "online": true, "busy": false, "consentAllowed": true, "expected": false },
+      { "text": "hello", "readOnly": true, "online": true, "busy": false, "consentAllowed": true, "expected": false },
+      { "text": "hello", "readOnly": false, "online": false, "busy": false, "consentAllowed": true, "expected": false },
+      { "text": "hello", "readOnly": false, "online": true, "busy": true, "consentAllowed": true, "expected": false },
+      { "text": "hello", "readOnly": false, "online": true, "busy": false, "consentAllowed": false, "expected": false }
+    ]
+  }
+}

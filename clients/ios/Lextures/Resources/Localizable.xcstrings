@@ -43215,6 +43215,414 @@
         }
       }
     },
+    "mobile.contentTools.ai.acknowledge": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[I understand]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I understand"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.consentRequired": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is unavailable until you acknowledge the disclosure above."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is unavailable until you acknowledge the disclosure above."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[AI help is unavailable until you acknowledge the disclosure above.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is unavailable until you acknowledge the disclosure above."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is unavailable until you acknowledge the disclosure above."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.disclosureBody": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your question or explanation is sent to an AI model with this activity’s content. You can opt out anytime."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your question or explanation is sent to an AI model with this activity’s content. You can opt out anytime."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Your question or explanation is sent to an AI model with this activity’s content. You can opt out anytime.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your question or explanation is sent to an AI model with this activity’s content. You can opt out anytime."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your question or explanation is sent to an AI model with this activity’s content. You can opt out anytime."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.disclosureTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help for this activity"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help for this activity"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[AI help for this activity]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help for this activity"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help for this activity"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.error.budget": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help for this course has reached its limit for now. Ask your instructor if you need more."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help for this course has reached its limit for now. Ask your instructor if you need more."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[AI help for this course has reached its limit for now. Ask your instructor if you need more.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help for this course has reached its limit for now. Ask your instructor if you need more."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help for this course has reached its limit for now. Ask your instructor if you need more."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.error.coppa": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help isn’t available for this course."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help isn’t available for this course."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[AI help isn’t available for this course.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help isn’t available for this course."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help isn’t available for this course."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.error.filtered": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That message couldn’t be sent. Please rephrase and try again."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That message couldn’t be sent. Please rephrase and try again."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[That message couldn’t be sent. Please rephrase and try again.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That message couldn’t be sent. Please rephrase and try again."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That message couldn’t be sent. Please rephrase and try again."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.error.optOut": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is turned off for you in this course."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is turned off for you in this course."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[AI help is turned off for you in this course.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is turned off for you in this course."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is turned off for you in this course."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.error.providerUnavailable": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is temporarily unavailable. Your question is saved — try again in a moment."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is temporarily unavailable. Your question is saved — try again in a moment."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[AI help is temporarily unavailable. Your question is saved — try again in a moment.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is temporarily unavailable. Your question is saved — try again in a moment."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI help is temporarily unavailable. Your question is saved — try again in a moment."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.error.rateLimited": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’ve asked enough questions for today. Try again tomorrow."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’ve asked enough questions for today. Try again tomorrow."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[You’ve asked enough questions for today. Try again tomorrow.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’ve asked enough questions for today. Try again tomorrow."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’ve asked enough questions for today. Try again tomorrow."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.ai.optOut": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don’t use AI"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don’t use AI"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Don’t use AI]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don’t use AI"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don’t use AI"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.runtime.cancel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Cancel]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
     "mobile.contentTools.runtime.checkAnswer": {
       "localizations": {
         "ar": {
@@ -43381,6 +43789,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Connexion requise — réessayez lorsque vous serez en ligne."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.runtime.offlineComposer": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’re offline — your draft is saved. Send when you’re back online."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’re offline — your draft is saved. Send when you’re back online."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[You’re offline — your draft is saved. Send when you’re back online.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’re offline — your draft is saved. Send when you’re back online."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’re offline — your draft is saved. Send when you’re back online."
           }
         }
       }
@@ -44337,6 +44779,482 @@
         }
       }
     },
+    "mobile.contentTools.tools.ask_questions.aiBadge": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[AI]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.answerReceived": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer received, %lld sources"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer received, %lld sources"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Answer received, %lld sources]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer received, %lld sources"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer received, %lld sources"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.ask": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ask]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.askInstructor": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can send this question to your instructor instead."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can send this question to your instructor instead."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[You can send this question to your instructor instead.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can send this question to your instructor instead."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can send this question to your instructor instead."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.clear": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear conversation"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear conversation"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Clear conversation]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear conversation"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear conversation"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.clearConfirm": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear this conversation? Your questions and answers will be removed."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear this conversation? Your questions and answers will be removed."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Clear this conversation? Your questions and answers will be removed.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear this conversation? Your questions and answers will be removed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear this conversation? Your questions and answers will be removed."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.cleared": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation cleared"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation cleared"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Conversation cleared]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation cleared"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation cleared"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.empty": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No questions yet — ask something about this page."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No questions yet — ask something about this page."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[No questions yet — ask something about this page.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No questions yet — ask something about this page."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No questions yet — ask something about this page."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.messagesLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Conversation]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.placeholder": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask anything about this page"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask anything about this page"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ask anything about this page]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask anything about this page"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask anything about this page"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.sourceChip": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source %lld: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source %lld: %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Source %lld: %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source %lld: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source %lld: %@"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.sources": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sources"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sources"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Sources]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sources"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sources"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.thinking": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thinking…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thinking…"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Thinking…]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thinking…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thinking…"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.ask_questions.you": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[You]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        }
+      }
+    },
     "mobile.contentTools.tools.class_pulse.chooseOption": {
       "localizations": {
         "ar": {
@@ -44639,6 +45557,720 @@
           "stringUnit": {
             "state": "translated",
             "value": "Votre réponse"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.attemptsLeft": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld attempts left"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld attempts left"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[%lld attempts left]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld attempts left"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld attempts left"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.defaultPrompt": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In your own words, explain the idea from this activity."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In your own words, explain the idea from this activity."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[In your own words, explain the idea from this activity.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In your own words, explain the idea from this activity."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In your own words, explain the idea from this activity."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.error.maxAttempts": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’ve used all attempts for this explanation."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’ve used all attempts for this explanation."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[You’ve used all attempts for this explanation.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’ve used all attempts for this explanation."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’ve used all attempts for this explanation."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.error.tooLong": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That’s a little long — try tightening it up."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That’s a little long — try tightening it up."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[That’s a little long — try tightening it up.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That’s a little long — try tightening it up."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That’s a little long — try tightening it up."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.error.tooShort": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a bit more — aim for the suggested length."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a bit more — aim for the suggested length."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Add a bit more — aim for the suggested length.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a bit more — aim for the suggested length."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a bit more — aim for the suggested length."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.feedbackReceived": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback is ready"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback is ready"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Feedback is ready]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback is ready"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback is ready"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.feedbackTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Feedback]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.inputLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your explanation"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your explanation"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Your explanation]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your explanation"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your explanation"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.instructorNote": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note from your instructor"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note from your instructor"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Note from your instructor]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note from your instructor"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note from your instructor"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.lengthGuide": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld–%lld words (a few sentences)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld–%lld words (a few sentences)."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[About %lld–%lld words (a few sentences).]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld–%lld words (a few sentences)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld–%lld words (a few sentences)."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.practiceNote": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is practice, not a grade. Be honest about what you know."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is practice, not a grade. Be honest about what you know."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[This is practice, not a grade. Be honest about what you know.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is practice, not a grade. Be honest about what you know."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is practice, not a grade. Be honest about what you know."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.probe": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Think about"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Think about"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Think about]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Think about"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Think about"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.reviewTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved for review"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved for review"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Saved for review]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved for review"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved for review"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.revise": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revise (%lld left)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revise (%lld left)"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Revise (%lld left)]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revise (%lld left)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revise (%lld left)"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.strength": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One strength"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One strength"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[One strength]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One strength"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One strength"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.submitFeedback": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submit for feedback"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submit for feedback"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Submit for feedback]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submit for feedback"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submit for feedback"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.submitReview": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submit"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Submit]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submit"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submit"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.suggestion": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One suggestion"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One suggestion"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[One suggestion]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One suggestion"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One suggestion"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.whatYouGot": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you got"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you got"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[What you got]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you got"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you got"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.whatsMissing": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Worth another look"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Worth another look"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Worth another look]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Worth another look"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Worth another look"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.explain_it_back.wordCount": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld words (aim for %lld–%lld)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld words (aim for %lld–%lld)"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[%lld words (aim for %lld–%lld)]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld words (aim for %lld–%lld)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld words (aim for %lld–%lld)"
           }
         }
       }
@@ -45285,6 +46917,1128 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld nouvelles · %lld pour aujourd’hui"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.anonymityNote": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your classmates will see this as anonymous. Your instructor can still see your name."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your classmates will see this as anonymous. Your instructor can still see your name."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Your classmates will see this as anonymous. Your instructor can still see your name.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your classmates will see this as anonymous. Your instructor can still see your name."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your classmates will see this as anonymous. Your instructor can still see your name."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.cancel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Cancel]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.classmate": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classmate"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classmate"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Classmate]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classmate"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classmate"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.composerLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your response"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your response"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Your response]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your response"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your response"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.delete": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Delete]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.deleteError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not delete the post."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not delete the post."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not delete the post.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not delete the post."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not delete the post."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.edit": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Edit]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.editLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit your post"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit your post"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Edit your post]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit your post"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit your post"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.empty": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Be the first to answer."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Be the first to answer."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Be the first to answer.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Be the first to answer."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Be the first to answer."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.endorse": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endorse"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endorse"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Endorse]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endorse"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endorse"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.endorseError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not endorse the post."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not endorse the post."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not endorse the post.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not endorse the post."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not endorse the post."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.endorsedBadge": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instructor endorsed"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instructor endorsed"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Instructor endorsed]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instructor endorsed"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instructor endorsed"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.error.forbidden": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don’t have permission to do that."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don’t have permission to do that."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[You don’t have permission to do that.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don’t have permission to do that."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don’t have permission to do that."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.label": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discussion"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discussion"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Discussion]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discussion"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discussion"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.loadError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load the discussion."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load the discussion."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not load the discussion.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load the discussion."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load the discussion."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.loadMore": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load more"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load more"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Load more]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load more"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load more"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.lockedHint": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post your own response before you can read classmates’ answers."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post your own response before you can read classmates’ answers."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Post your own response before you can read classmates’ answers.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post your own response before you can read classmates’ answers."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post your own response before you can read classmates’ answers."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.moderate": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide post"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide post"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Hide post]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide post"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide post"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.moderationNote": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posts are screened for safety. You can report unkind replies."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posts are screened for safety. You can report unkind replies."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Posts are screened for safety. You can report unkind replies.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posts are screened for safety. You can report unkind replies."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posts are screened for safety. You can report unkind replies."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.postAnnounced": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your post was published."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your post was published."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Your post was published.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your post was published."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your post was published."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.postAria": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post by %@, %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post by %@, %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Post by %@, %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post by %@, %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post by %@, %@"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.postError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not post. Try again."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not post. Try again."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not post. Try again.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not post. Try again."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not post. Try again."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.progress": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your progress: %lld post(s), %lld reply(ies)."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your progress: %lld post(s), %lld reply(ies)."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Your progress: %lld post(s), %lld reply(ies).]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your progress: %lld post(s), %lld reply(ies)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your progress: %lld post(s), %lld reply(ies)."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.reply": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Reply]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.replyLabel": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your reply"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your reply"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Your reply]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your reply"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your reply"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.report": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Report]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.reportError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not submit the report."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not submit the report."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Could not submit the report.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not submit the report."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not submit the report."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.reportThanks": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thanks — we received your report."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thanks — we received your report."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Thanks — we received your report.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thanks — we received your report."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thanks — we received your report."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.saveEdit": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save edit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save edit"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Save edit]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save edit"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save edit"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.submitPost": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Post]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Post"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.submitReply": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Reply]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply"
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.tombstone": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This post was removed."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This post was removed."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[This post was removed.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This post was removed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This post was removed."
+          }
+        }
+      }
+    },
+    "mobile.contentTools.tools.inline_discussion.upvote": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upvote (%lld)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upvote (%lld)"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Upvote (%lld)]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upvote (%lld)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upvote (%lld)"
           }
         }
       }

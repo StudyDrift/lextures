@@ -152,6 +152,42 @@ object ContentToolsApi {
         json.decodeFromString(RunToolActionResponse.serializer(), body)
     }
 
+    suspend fun fetchAIConsent(
+        courseCode: String,
+        toolId: String,
+        accessToken: String,
+    ): ContentToolAIConsent = withContext(Dispatchers.IO) {
+        val qs = "?toolId=${encodePath(toolId)}"
+        val (body, status) = client.requestRaw(
+            path = "${base(courseCode)}/ai-consent$qs",
+            method = "GET",
+            accessToken = accessToken,
+        )
+        if (status !in 200..299) {
+            throw ApiError.HttpStatus(status, parseApiErrorMessage(body))
+        }
+        json.decodeFromString(ContentToolAIConsent.serializer(), body)
+    }
+
+    suspend fun postAIConsent(
+        courseCode: String,
+        toolId: String?,
+        decision: String,
+        accessToken: String,
+    ): ContentToolAIConsent = withContext(Dispatchers.IO) {
+        val payload = ContentToolAIConsentBody(toolId = toolId, decision = decision)
+        val (body, status) = client.requestRaw(
+            path = "${base(courseCode)}/ai-consent",
+            method = "POST",
+            body = json.encodeToString(ContentToolAIConsentBody.serializer(), payload),
+            accessToken = accessToken,
+        )
+        if (status !in 200..299) {
+            throw ApiError.HttpStatus(status, parseApiErrorMessage(body))
+        }
+        json.decodeFromString(ContentToolAIConsent.serializer(), body)
+    }
+
     suspend fun selfReset(
         courseCode: String,
         instanceId: String,

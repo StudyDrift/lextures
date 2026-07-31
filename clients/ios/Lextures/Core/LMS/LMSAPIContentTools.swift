@@ -185,6 +185,39 @@ extension LMSAPI {
         return try decode(ToolStateEnvelope.self, from: data)
     }
 
+    static func fetchContentToolAIConsent(
+        courseCode: String,
+        toolId: String,
+        accessToken: String
+    ) async throws -> ContentToolAIConsent {
+        var components = URLComponents()
+        components.queryItems = [URLQueryItem(name: "toolId", value: toolId)]
+        let qs = components.percentEncodedQuery.map { "?\($0)" } ?? ""
+        let (data, _) = try await client.request(
+            path: "\(contentToolsBase(courseCode))/ai-consent\(qs)",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ContentToolAIConsent.self, from: data)
+    }
+
+    static func postContentToolAIConsent(
+        courseCode: String,
+        toolId: String?,
+        decision: String,
+        accessToken: String
+    ) async throws -> ContentToolAIConsent {
+        let body = ContentToolAIConsentBody(toolId: toolId, decision: decision)
+        let (data, _) = try await client.request(
+            path: "\(contentToolsBase(courseCode))/ai-consent",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ContentToolAIConsent.self, from: data)
+    }
+
     static func contentToolStatePutPath(courseCode: String, instanceId: String) -> String {
         "\(contentToolsBase(courseCode))/instances/\(encodePath(instanceId))/state"
     }

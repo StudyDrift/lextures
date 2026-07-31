@@ -22,6 +22,7 @@ enum ToolRendererRegistry {
     static func registeredIds() -> Set<String> {
         var ids: Set<String> = ["noop_probe"]
         ids.formUnion(ContentToolPack1Logic.allowlistedToolIds())
+        ids.formUnion(ContentToolPack2Logic.allowlistedToolIds())
         return ids
     }
 
@@ -38,6 +39,12 @@ enum ToolRendererRegistry {
             ClassPulseToolView(props: props)
         case "flashcards":
             FlashcardsToolView(props: props)
+        case "ask_questions":
+            AskQuestionsToolView(props: props)
+        case "explain_it_back":
+            ExplainItBackToolView(props: props)
+        case "inline_discussion":
+            InlineDiscussionToolView(props: props)
         default:
             EmptyView()
         }

@@ -192,7 +192,8 @@ class ContentToolHostLogicTest {
 
     @Test
     fun unsupportedPlaceholderForUnknownToolOrContract() {
-        assertTrue(ContentToolHostLogic.shouldShowUnsupportedPlaceholder("ask_questions", 1))
+        // Pack-2 registers ask_questions when allowlisted (CT.M6).
+        assertFalse(ContentToolHostLogic.shouldShowUnsupportedPlaceholder("ask_questions", 1))
         assertTrue(ContentToolHostLogic.shouldShowUnsupportedPlaceholder("noop_probe", 2))
         assertFalse(ContentToolHostLogic.shouldShowUnsupportedPlaceholder("noop_probe", 1))
         assertFalse(ContentToolHostLogic.shouldShowUnsupportedPlaceholder("inline_questions", 1))

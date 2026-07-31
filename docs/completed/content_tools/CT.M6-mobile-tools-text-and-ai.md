@@ -1,6 +1,6 @@
 # CT.M6 — Mobile Tool Pack 2: Text & AI (Ask Questions, Explain It Back, Inline Discussion)
 
-> Implementation plan. Source: mobile renderers for [CT.10](../../completed/content_tools/CT.10-tool-ask-questions.md), [CT.20](../../completed/content_tools/CT.20-tool-explain-it-back.md), [CT.22](../../completed/content_tools/CT.22-tool-inline-discussion.md). Folder overview: [README](README.md).
+> Implementation plan. Source: mobile renderers for [CT.10](CT.10-tool-ask-questions.md), [CT.20](CT.20-tool-explain-it-back.md), [CT.22](CT.22-tool-inline-discussion.md). Folder overview: [README](../../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — Mobile |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile squad |
 | **Depends on** | CT.M3 (web: CT.6, CT.8) |
@@ -314,11 +314,11 @@ Plus CT.M9's consent and report routes (`…/content-tools/ai-consent`,
 
 ## 19. References
 
-- Web plans: [CT.10](../../completed/content_tools/CT.10-tool-ask-questions.md),
-  [CT.20](../../completed/content_tools/CT.20-tool-explain-it-back.md),
-  [CT.22](../../completed/content_tools/CT.22-tool-inline-discussion.md),
-  [CT.6](../../completed/content_tools/CT.6-grounded-context-and-link-ingestion.md),
-  [CT.8](../../completed/content_tools/CT.8-governance-safety-privacy-accessibility.md).
+- Web plans: [CT.10](CT.10-tool-ask-questions.md),
+  [CT.20](CT.20-tool-explain-it-back.md),
+  [CT.22](CT.22-tool-inline-discussion.md),
+  [CT.6](CT.6-grounded-context-and-link-ingestion.md),
+  [CT.8](CT.8-governance-safety-privacy-accessibility.md).
 - Web renderers: `clients/web/src/components/content-tools/tools/{ask_questions,explain_it_back,
   inline_discussion}/renderer.tsx`.
 - Server: `server/internal/service/contenttools/{ask_questions,explain_it_back,inline_discussion}_actions.go`,
@@ -326,6 +326,6 @@ Plus CT.M9's consent and report routes (`…/content-tools/ai-consent`,
 - Existing mobile patterns: `clients/ios/Lextures/Features/Tutor/TutorChatView.swift`,
   `clients/android/.../features/tutor/TutorChatScreen.kt`.
 - Related plans: [CT.M3](CT.M3-mobile-content-tool-host-and-state.md),
-  [CT.M9](CT.M9-mobile-tools-governance-a11y-telemetry.md).
+  [CT.M9](../../plan/content_tools/CT.M9-mobile-tools-governance-a11y-telemetry.md).
 - Standards: WCAG 2.1 AA §4.1.3 (status messages), §3.3.1 (error identification); EU AI Act
   transparency (S13); S01/S02 (DSAR, retention); S08 (children's privacy).

@@ -217,6 +217,7 @@ final class ContentToolPack1LogicTests: XCTestCase {
             XCTAssertTrue(ids.contains(toolId), toolId)
         }
         XCTAssertFalse(ContentToolHostLogic.shouldShowUnsupportedPlaceholder(toolId: "inline_questions", contract: 1))
-        XCTAssertTrue(ContentToolHostLogic.shouldShowUnsupportedPlaceholder(toolId: "ask_questions", contract: 1))
+        // Pack-2 registers ask_questions when allowlisted (CT.M6).
+        XCTAssertFalse(ContentToolHostLogic.shouldShowUnsupportedPlaceholder(toolId: "ask_questions", contract: 1))
     }
 }
