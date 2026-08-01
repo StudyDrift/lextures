@@ -1,7 +1,10 @@
-# Content Tool host surfaces (CT.M3) — page provider + fence host stay co-located.
+# Content Tool host surfaces (CT.M3/CT.M9) — page provider + fence host stay co-located.
 type_body_length:
   warning: 350
-  error: 750
+  error: 900
 file_length:
   warning: 500
-  error: 800
+  error: 900
+function_body_length:
+  warning: 50
+  error: 120

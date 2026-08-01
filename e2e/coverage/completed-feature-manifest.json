@@ -5045,6 +5045,28 @@
       }
     },
     {
+      "id": "ct-m9-mobile-tools-governance-a11y-telemetry",
+      "path": "docs/completed/content_tools/CT.M9-mobile-tools-governance-a11y-telemetry.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story: CT.M3 host governance chrome (policy mount gating, AI disclosure/consent, report/moderate, crisis/filter outcomes, conformance note, content-free telemetry). Covered by ContentToolGovernanceLogic unit suites + shared governance-logic fixtures (AC-16); web Playwright is not the coverage surface.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": false,
+        "disabledState": true,
+        "enabledJourney": "n/a",
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Enforcement inside ffMobileContentTools path; kill/policy refresh on foreground. Shared fixtures under clients/mobile/fixtures/content-tools/governance-logic.json."
+      }
+    },
+    {
       "id": "node-code-test-runner",
       "path": "docs/completed/agent-grader/node-code-test-runner.md",
       "markets": [

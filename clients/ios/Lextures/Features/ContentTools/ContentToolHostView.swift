@@ -177,10 +177,11 @@ struct ContentToolHostView: View {
             observer: page.observer
         )
         let readOnly = reason != nil
-        let readOnlyMessage = reason.map { L.text(String.LocalizationValue(ContentToolHostLogic.readOnlyMessageKey($0))) }
+        let readOnlyMessage = reason.map {
+            L.text(String.LocalizationValue(ContentToolHostLogic.readOnlyMessageKey($0)))
+        }
         let requiresAI = ContentToolGovernanceLogic.isAICapable(instance.capabilities)
         let nonConformant = governance.nonConformantToolIds.contains(instance.toolId)
-
         let path = ContentToolSandboxLogic.resolveRenderPath(
             toolId: instance.toolId,
             contract: instance.contract,
@@ -192,89 +193,131 @@ struct ContentToolHostView: View {
             deprecated: instance.deprecated,
             killed: killed
         )
-
         Group {
-        switch path {
-        case .placeholder:
-            ToolPlaceholderView(
-                reason: .openInBrowser,
-                toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
-                onOpenInBrowser: { openWeb(page: page, instanceId: instance.id) }
-            )
-            .onAppear {
-                ContentToolsObservability.record("unsupported_placeholder", toolId: instance.toolId)
-            }
-        case .native:
-            if crashed {
-                ToolErrorCardView(
-                    toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
-                    onRetry: { crashed = false }
-                )
-                .onAppear {
-                    ContentToolsObservability.record(
-                        "render_error",
-                        toolId: instance.toolId,
-                        attributes: ["error_class": "crash"]
-                    )
-                }
-            } else {
-                toolFrame(
+            switch path {
+            case .placeholder:
+                unsupportedPlaceholder(instance: instance, page: page)
+            case .native:
+                nativeMounted(
                     instance: instance,
                     page: page,
                     readOnly: readOnly,
                     readOnlyMessage: readOnlyMessage,
                     requiresAI: requiresAI,
                     nonConformant: nonConformant
-                ) {
-                    ToolRendererRegistry.view(
-                        for: instance.toolId,
-                        props: rendererProps(instance: instance, page: page, readOnly: readOnly)
-                    )
-                }
-            }
-        case .sandbox:
-            // Capability denial: never solicit OS permissions for denied caps (FR-2).
-            let denied = Set((governance.settings?.policy?.deniedCapabilities ?? []).map { $0.lowercased() })
-            let filteredCaps = instance.capabilities.filter {
-                ContentToolGovernanceLogic.canObtainDeniedCapability(
-                    capability: $0,
-                    deniedCapabilities: Array(denied)
+                )
+            case .sandbox:
+                sandboxMounted(
+                    instance: instance,
+                    page: page,
+                    readOnly: readOnly,
+                    readOnlyMessage: readOnlyMessage,
+                    requiresAI: requiresAI,
+                    nonConformant: nonConformant
                 )
             }
+        }
+        .onAppear {
+            ContentToolsObservability.record("tool_mount", toolId: instance.toolId)
+        }
+    }
+
+    @ViewBuilder
+    private func unsupportedPlaceholder(instance: ToolInstance, page: ContentToolsPageContext) -> some View {
+        ToolPlaceholderView(
+            reason: .openInBrowser,
+            toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
+            onOpenInBrowser: { openWeb(page: page, instanceId: instance.id) }
+        )
+        .onAppear {
+            ContentToolsObservability.record("unsupported_placeholder", toolId: instance.toolId)
+        }
+    }
+
+    @ViewBuilder
+    private func nativeMounted(
+        instance: ToolInstance,
+        page: ContentToolsPageContext,
+        readOnly: Bool,
+        readOnlyMessage: String?,
+        requiresAI: Bool,
+        nonConformant: Bool
+    ) -> some View {
+        if crashed {
+            ToolErrorCardView(
+                toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
+                onRetry: { crashed = false }
+            )
+            .onAppear {
+                ContentToolsObservability.record(
+                    "render_error",
+                    toolId: instance.toolId,
+                    attributes: ["error_class": "crash"]
+                )
+            }
+        } else {
             toolFrame(
                 instance: instance,
                 page: page,
                 readOnly: readOnly,
                 readOnlyMessage: readOnlyMessage,
                 requiresAI: requiresAI,
-                nonConformant: nonConformant,
-                showSandboxBadge: true
+                nonConformant: nonConformant
             ) {
-                SandboxWebViewHost(
-                    toolId: instance.toolId,
-                    instanceId: instance.id,
-                    toolVersion: instance.toolVersion,
-                    title: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
-                    config: instance.config,
-                    state: envelope.document,
-                    revision: envelope.revision,
-                    readOnly: readOnly,
-                    capabilities: filteredCaps,
-                    save: { next in
-                        scheduleSave(next, page: page, toolId: instance.toolId, readOnly: readOnly)
-                    },
-                    runAction: { name, input in
-                        try await runAction(name: name, input: input, page: page, instanceId: instance.id)
-                    },
-                    announce: { message, assertive in
-                        ToolLiveRegion.announce(message, assertive: assertive)
-                    }
+                ToolRendererRegistry.view(
+                    for: instance.toolId,
+                    props: rendererProps(instance: instance, page: page, readOnly: readOnly)
                 )
             }
         }
+    }
+
+    @ViewBuilder
+    private func sandboxMounted(
+        instance: ToolInstance,
+        page: ContentToolsPageContext,
+        readOnly: Bool,
+        readOnlyMessage: String?,
+        requiresAI: Bool,
+        nonConformant: Bool
+    ) -> some View {
+        // Capability denial: never solicit OS permissions for denied caps (FR-2).
+        let denied = Set((governance.settings?.policy?.deniedCapabilities ?? []).map { $0.lowercased() })
+        let filteredCaps = instance.capabilities.filter {
+            ContentToolGovernanceLogic.canObtainDeniedCapability(
+                capability: $0,
+                deniedCapabilities: Array(denied)
+            )
         }
-        .onAppear {
-            ContentToolsObservability.record("tool_mount", toolId: instance.toolId)
+        toolFrame(
+            instance: instance,
+            page: page,
+            readOnly: readOnly,
+            readOnlyMessage: readOnlyMessage,
+            requiresAI: requiresAI,
+            nonConformant: nonConformant,
+            showSandboxBadge: true
+        ) {
+            SandboxWebViewHost(
+                toolId: instance.toolId,
+                instanceId: instance.id,
+                toolVersion: instance.toolVersion,
+                title: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
+                config: instance.config,
+                state: envelope.document,
+                revision: envelope.revision,
+                readOnly: readOnly,
+                capabilities: filteredCaps,
+                save: { next in
+                    scheduleSave(next, page: page, toolId: instance.toolId, readOnly: readOnly)
+                },
+                runAction: { name, input in
+                    try await runAction(name: name, input: input, page: page, instanceId: instance.id)
+                },
+                announce: { message, assertive in
+                    ToolLiveRegion.announce(message, assertive: assertive)
+                }
+            )
         }
     }
 
@@ -731,12 +774,12 @@ struct ContentToolHostView: View {
     private func handleActionResult(_ result: JSONValue, toolId: String) {
         guard case .object(let obj) = result else { return }
         let code: String? = {
-            if case .string(let s) = obj["error"] { return s }
-            if case .string(let s) = obj["code"] { return s }
+            if case .string(let errorCode) = obj["error"] { return errorCode }
+            if case .string(let statusCode) = obj["code"] { return statusCode }
             return nil
         }()
         let crisis: Bool = {
-            if case .bool(let b) = obj["crisis"] { return b }
+            if case .bool(let flagged) = obj["crisis"] { return flagged }
             return false
         }()
         let outcome = ContentToolGovernanceLogic.filterCrisisOutcome(
