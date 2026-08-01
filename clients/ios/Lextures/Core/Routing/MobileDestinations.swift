@@ -370,10 +370,14 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileImmersiveReader = true
     /// CT.M1 rich markdown engine; default on when unset.
     var ffMobileRichMarkdown = true
-    /// CT.M3 Content Tools host; default off when unset (dark-launch).
-    var ffMobileContentTools = false
+    /// CT.M3 Content Tools host; default on when unset (native packs shipped).
+    var ffMobileContentTools = true
     /// CT.M4 sandboxed WebView tool host; default off when unset.
     var ffMobileContentToolsSandbox = false
+    /// MB.1 full-screen in-app browser — always on (flag removed; kill-switch is mobileLinkHandling).
+    var ffMobileInAppBrowser = true
+    /// MB.1 admin policy; default in_app when unset/unknown.
+    var mobileLinkHandling = "in_app"
     var ffMobileLiveMeetings = true
     var readAloudEnabled = false
     var ffReadAloud = false
@@ -466,8 +470,11 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileLibraryEreserves: features?.ffMobileLibraryEreserves != false,
             ffMobileImmersiveReader: features?.ffMobileImmersiveReader != false,
             ffMobileRichMarkdown: features?.ffMobileRichMarkdown != false,
-            ffMobileContentTools: features?.ffMobileContentTools == true,
+            // Always on: native content tool packs ship with the app; course contentToolsEnabled still gates mount.
+            ffMobileContentTools: true,
             ffMobileContentToolsSandbox: features?.ffMobileContentToolsSandbox == true,
+            ffMobileInAppBrowser: true,
+            mobileLinkHandling: MobileLinkPolicy.Handling.parse(features?.mobileLinkHandling).rawValue,
             ffMobileLiveMeetings: features?.ffMobileLiveMeetings != false,
             readAloudEnabled: features?.readAloudEnabled == true,
             ffReadAloud: features?.ffReadAloud == true,

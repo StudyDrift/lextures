@@ -57,6 +57,25 @@ final class AppShellModel {
     var pendingLiveQuizCode: String? = nil
     var showLiveQuizPlay = false
 
+    // MARK: MB.1 in-app browser
+
+    /// Full-screen in-app browser session presented above all tabs/drawers.
+    var inAppBrowserSession: InAppBrowserSession?
+    /// Policy-blocked link toast / banner.
+    var linkBlockedNotice = false
+
+    func presentInAppBrowser(_ session: InAppBrowserSession) {
+        inAppBrowserSession = session
+    }
+
+    func dismissInAppBrowser() {
+        inAppBrowserSession = nil
+    }
+
+    func presentLinkBlockedNotice() {
+        linkBlockedNotice = true
+    }
+
     // MARK: Drawer navigation
 
     /// Current left-drawer state (two-level: course menu → global menu).
@@ -459,6 +478,24 @@ struct MainTabView: View {
             BoardPublicView(token: item.token) {
                 shell.pendingBoardLinkToken = nil
             }
+        }
+        .fullScreenCover(item: Bindable(shell).inAppBrowserSession) { session in
+            InAppBrowserView(session: session) {
+                shell.dismissInAppBrowser()
+            }
+            .transaction { tx in
+                if reduceMotion || !shell.platformFeatures.ffMotionOverlays {
+                    tx.disablesAnimations = false
+                    tx.animation = .easeInOut(duration: LexturesMotion.base)
+                } else {
+                    tx.animation = LexturesMotion.bubble
+                }
+            }
+        }
+        .alert(L.text("mobile.browser.blockedByPolicy"), isPresented: Bindable(shell).linkBlockedNotice) {
+            Button(L.text("mobile.browser.close"), role: .cancel) {}
+        } message: {
+            Text(L.text("mobile.browser.blockedByPolicy"))
         }
         .sheet(isPresented: Bindable(shell).showLiveQuizPlay) {
             LiveQuizPlayView(initialCode: shell.pendingLiveQuizCode)

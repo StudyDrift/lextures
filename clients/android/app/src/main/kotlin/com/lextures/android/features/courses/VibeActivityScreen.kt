@@ -1,5 +1,6 @@
 package com.lextures.android.features.courses
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -359,7 +360,7 @@ private fun OpenOnWebButton(courseCode: String, itemId: String) {
         text = moduleOpenExternalLabel(),
         onClick = {
             val url = AppConfiguration.webUrl(VibeActivityLogic.webPath(courseCode, itemId))
-            runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+            runCatching { LinkOpener.open(context, url.toString(), null, "legacy") }
         },
         modifier = Modifier.fillMaxWidth(),
     )

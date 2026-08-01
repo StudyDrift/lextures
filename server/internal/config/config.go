@@ -360,6 +360,8 @@ type Config struct {
 	FFMobileMarketplacePurchase bool
 	// FFMobileBoardsAdvanced is always on (platform master removed). Board templates/export/present/governance.
 	FFMobileBoardsAdvanced bool
+	// FFMobileContentTools is always on (platform master removed). CT.M3 native content tool host on mobile.
+	FFMobileContentTools bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).

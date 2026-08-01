@@ -5,8 +5,18 @@ type ParseInfo = {
 }
 
 /**
+ * Convert legacy i18next `{{name}}` placeholders to ICU `{name}`.
+ * Complex ICU forms (`{count, plural, ...}`) already use single braces and are left alone.
+ */
+export function normalizeI18nextPlaceholders(res: string): string {
+  return res.replace(/\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g, '{$1}')
+}
+
+/**
  * i18nFormat plugin for ICU MessageFormat (plan 11.1).
  * Replaces i18next-icu to avoid ESM default-import issues with intl-messageformat in Vitest/Vite.
+ *
+ * Also accepts legacy double-brace placeholders so mixed locale catalogs keep interpolating.
  */
 export class IcuFormatPlugin {
   readonly type = 'i18nFormat' as const
@@ -27,11 +37,12 @@ export class IcuFormatPlugin {
   ): string {
     const hadLookup = Boolean(info?.resolved?.res)
     if (!hadLookup && !res) return res
-    const cacheKey = `${lng}|${key}|${res}`
+    const message = normalizeI18nextPlaceholders(res)
+    const cacheKey = `${lng}|${key}|${message}`
     let formatter = this.cache.get(cacheKey)
     if (!formatter) {
       try {
-        formatter = new IntlMessageFormat(res, lng, undefined, { ignoreTag: true })
+        formatter = new IntlMessageFormat(message, lng, undefined, { ignoreTag: true })
         this.cache.set(cacheKey, formatter)
       } catch {
         return res

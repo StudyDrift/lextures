@@ -1,5 +1,6 @@
 package com.lextures.android.features.live
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.horizontalScroll
@@ -227,7 +228,7 @@ private fun meetingSection(
                     }
                     OutlinedButton(onClick = { onSelect(meeting) }) { Text(liveDetails()) }
                     OutlinedButton(onClick = {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(LiveMeetingsLogic.meetingIcalUrl(meeting.id))))
+                        LinkOpener.open(context, LiveMeetingsLogic.meetingIcalUrl(meeting.id), null, "legacy")
                     }) { Text(liveAddToCalendar()) }
                 }
             }
@@ -249,7 +250,7 @@ private suspend fun joinMeeting(
         onError(context.getString(R.string.mobile_live_error_join))
         return
     }
-    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    LinkOpener.open(context, url.toString(), null, "legacy")
 }
 
 @Composable

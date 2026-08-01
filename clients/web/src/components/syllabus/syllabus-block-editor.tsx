@@ -1,7 +1,15 @@
 import { FileText, Plus } from 'lucide-react'
 import { formatNumber } from '../../lib/format'
 import { marked } from 'marked'
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MutableRefObject,
+  type ReactNode,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Editor } from '@tiptap/core'
 import {
@@ -111,6 +119,14 @@ function collectContentToolInstanceIds(
   return ids
 }
 
+/**
+ * Host document save should call `flush()` first so unsaved content-tool
+ * config drafts (e.g. inline questions) are persisted with the page.
+ */
+export type ContentToolsFlushHandle = {
+  flush: () => Promise<void>
+}
+
 type SyllabusBlockEditorProps = {
   sections: SyllabusSection[]
   onChange: (next: SyllabusSection[]) => void
@@ -121,6 +137,11 @@ type SyllabusBlockEditorProps = {
   structureItemId?: string
   /** CT.2 — host surface for Content Tool instances. */
   hostKind?: ContentToolHostKind
+  /**
+   * Bump to re-fetch content-tool instances (e.g. after Build with AI creates tools
+   * outside this editor’s insert path).
+   */
+  instancesReloadKey?: number
   /** Sidebar copy: syllabus vs module page / assignment body. */
   documentVariant?: 'syllabus' | 'page'
   /**
@@ -131,6 +152,11 @@ type SyllabusBlockEditorProps = {
   /** Syllabus only: require first-visit acceptance from students. */
   requireSyllabusAcceptance?: boolean
   onRequireSyllabusAcceptanceChange?: (next: boolean) => void
+  /**
+   * Optional handle so host Save can persist all pending content-tool configs
+   * (open panel + drafts from tools edited then closed).
+   */
+  contentToolsFlushRef?: MutableRefObject<ContentToolsFlushHandle | null>
 }
 
 type ActiveField = { blockId: string; field: 'heading' | 'markdown' }
@@ -398,10 +424,13 @@ function SyllabusSidebar({
   onRequireSyllabusAcceptanceChange,
   configureInstance,
   courseCode,
+  draftConfig,
+  onDraftChange,
   onConfigSaved,
   onConfigClose,
   onManifestLoaded,
   manifests,
+  toolConfigFlushRef,
 }: {
   sections: SyllabusSection[]
   onChange: (next: SyllabusSection[]) => void
@@ -412,10 +441,13 @@ function SyllabusSidebar({
   onRequireSyllabusAcceptanceChange?: (next: boolean) => void
   configureInstance: ContentToolInstance | null
   courseCode?: string
+  draftConfig?: Record<string, unknown>
+  onDraftChange: (instanceId: string, config: Record<string, unknown>) => void
   onConfigSaved: (instance: ContentToolInstance) => void
   onConfigClose: () => void
   onManifestLoaded: (manifest: ContentToolManifest) => void
   manifests: Record<string, ContentToolManifest>
+  toolConfigFlushRef: MutableRefObject<(() => Promise<void>) | null>
 }) {
   const { selectedId } = useBlockEditor()
   const index = selectedId ? sections.findIndex((s) => s.id === selectedId) : -1
@@ -445,10 +477,13 @@ function SyllabusSidebar({
           <ToolConfigPanel
             courseCode={courseCode}
             instance={configureInstance}
+            draftConfig={draftConfig}
             manifestCache={manifests[configureInstance.toolId] ?? null}
             onManifestLoaded={onManifestLoaded}
+            onDraftChange={onDraftChange}
             onSaved={onConfigSaved}
             onClose={onConfigClose}
+            flushRef={toolConfigFlushRef}
           />
         ) : section ? (
           <SyllabusBlockPanel
@@ -558,10 +593,12 @@ function SyllabusBlockEditorInner({
   courseCode,
   structureItemId,
   hostKind: hostKindProp,
+  instancesReloadKey = 0,
   documentVariant = 'syllabus',
   pageDocumentPanel,
   requireSyllabusAcceptance,
   onRequireSyllabusAcceptanceChange,
+  contentToolsFlushRef,
 }: SyllabusBlockEditorInnerProps) {
   const { t } = useTranslation('common')
   const { selectedId, setSelectedId } = useBlockEditor()
@@ -585,6 +622,16 @@ function SyllabusBlockEditorInner({
   const [previewInstanceId, setPreviewInstanceId] = useState<string | null>(null)
   const [deleteInstanceId, setDeleteInstanceId] = useState<string | null>(null)
   const [ctInsertError, setCtInsertError] = useState<string | null>(null)
+  /** Unsaved config drafts keyed by instance id (open panel + closed-without-save). */
+  const toolDraftsRef = useRef<Record<string, Record<string, unknown>>>({})
+  const [toolDraftsVersion, setToolDraftsVersion] = useState(0)
+  const toolConfigFlushRef = useRef<(() => Promise<void>) | null>(null)
+  const ctInstancesRef = useRef(ctInstances)
+  ctInstancesRef.current = ctInstances
+  const configureInstanceIdRef = useRef(configureInstanceId)
+  configureInstanceIdRef.current = configureInstanceId
+  const courseCodeRef = useRef(courseCode)
+  courseCodeRef.current = courseCode
   const generateInputRef = useRef<HTMLInputElement>(null)
   const pendingToolbarImageSectionRef = useRef<string | null>(null)
   const [toolbarImageModalOpen, setToolbarImageModalOpen] = useState(false)
@@ -720,7 +767,7 @@ function SyllabusBlockEditorInner({
     return () => {
       cancelled = true
     }
-  }, [courseCode, contentToolsEnabled, structureItemId, hostKind])
+  }, [courseCode, contentToolsEnabled, structureItemId, hostKind, instancesReloadKey])
 
   const activeInstanceCount = Object.values(ctInstances).filter((i) => i.status === 'active').length
   const atMaxInstances = activeInstanceCount >= ctMaxInstances
@@ -881,6 +928,65 @@ function SyllabusBlockEditorInner({
 
   const configureInstance = configureInstanceId ? ctInstances[configureInstanceId] ?? null : null
   const previewInstance = previewInstanceId ? ctInstances[previewInstanceId] ?? null : null
+  // toolDraftsVersion forces re-read of toolDraftsRef when drafts change.
+  const configureDraftConfig = useMemo(() => {
+    if (!configureInstanceId) return undefined
+    return toolDraftsRef.current[configureInstanceId]
+  }, [configureInstanceId, toolDraftsVersion])
+
+  const handleToolDraftChange = useCallback((instanceId: string, config: Record<string, unknown>) => {
+    toolDraftsRef.current[instanceId] = config
+    setToolDraftsVersion((v) => v + 1)
+  }, [])
+
+  const handleToolConfigSaved = useCallback((inst: ContentToolInstance) => {
+    setCtInstances((prev) => ({ ...prev, [inst.id]: inst }))
+    delete toolDraftsRef.current[inst.id]
+    setToolDraftsVersion((v) => v + 1)
+  }, [])
+
+  /**
+   * Persist every pending content-tool config draft. Host document save awaits this
+   * so page Save does not discard open inline-question / tool edits.
+   */
+  const flushPendingContentTools = useCallback(async () => {
+    const code = courseCodeRef.current
+    if (!code) return
+
+    // Open panel first (shows field errors in the sidebar when validation fails).
+    if (toolConfigFlushRef.current) {
+      await toolConfigFlushRef.current()
+    }
+
+    const drafts = { ...toolDraftsRef.current }
+    const openId = configureInstanceIdRef.current
+    for (const [id, config] of Object.entries(drafts)) {
+      // Open panel flush already handled this id when dirty.
+      if (id === openId) continue
+      const saved = ctInstancesRef.current[id]?.config ?? {}
+      try {
+        if (JSON.stringify(config) === JSON.stringify(saved)) {
+          delete toolDraftsRef.current[id]
+          continue
+        }
+      } catch {
+        /* fall through and PATCH */
+      }
+      const updated = await patchContentToolInstance(code, id, { config })
+      setCtInstances((prev) => ({ ...prev, [id]: updated }))
+      delete toolDraftsRef.current[id]
+    }
+    setToolDraftsVersion((v) => v + 1)
+  }, [])
+
+  // Publish flush handle for host Save buttons.
+  useEffect(() => {
+    if (!contentToolsFlushRef) return
+    contentToolsFlushRef.current = { flush: flushPendingContentTools }
+    return () => {
+      contentToolsFlushRef.current = null
+    }
+  }, [contentToolsFlushRef, flushPendingContentTools])
 
   // Drop stale configure/preview ids when the instance map no longer has them
   // (e.g. section delete cleaned up tools, or external refresh).
@@ -1353,12 +1459,13 @@ function SyllabusBlockEditorInner({
           onRequireSyllabusAcceptanceChange={onRequireSyllabusAcceptanceChange}
           configureInstance={configureInstance}
           courseCode={courseCode}
+          draftConfig={configureDraftConfig}
+          onDraftChange={handleToolDraftChange}
           manifests={ctManifests}
           onManifestLoaded={(m) => setCtManifests((prev) => ({ ...prev, [m.id]: m }))}
-          onConfigSaved={(inst) => {
-            setCtInstances((prev) => ({ ...prev, [inst.id]: inst }))
-          }}
+          onConfigSaved={handleToolConfigSaved}
           onConfigClose={() => setConfigureInstanceId(null)}
+          toolConfigFlushRef={toolConfigFlushRef}
         />
       }
     >

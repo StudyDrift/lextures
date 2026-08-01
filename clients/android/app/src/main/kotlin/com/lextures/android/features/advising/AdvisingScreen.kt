@@ -1,5 +1,6 @@
 package com.lextures.android.features.advising
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -187,7 +188,7 @@ fun AdvisingScreen(
                     val canBook = AdvisingLogic.canBookAppointment(isOnline, url)
                     Button(
                         onClick = {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                            LinkOpener.open(context, url.toString(), null, "legacy")
                         },
                         enabled = canBook,
                         modifier = Modifier

@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Pencil } from 'lucide-react'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
-import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
+import {
+  SyllabusBlockEditor,
+  type ContentToolsFlushHandle,
+} from '../../components/syllabus/syllabus-block-editor'
 import { sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -56,6 +59,7 @@ export default function CourseSyllabus() {
   const [markups, setMarkups] = useState<ContentPageMarkup[]>([])
   const [mdPreset, setMdPreset] = useState<string>('classic')
   const [mdCustom, setMdCustom] = useState<MarkdownThemeCustom | null>(null)
+  const contentToolsFlushRef = useRef<ContentToolsFlushHandle | null>(null)
   const lmsUiDark = useLmsDarkMode()
   const mdTheme = useMemo(
     (): ResolvedMarkdownTheme => resolveMarkdownTheme(mdPreset, mdCustom, { lmsUiDark }),
@@ -131,6 +135,7 @@ export default function CourseSyllabus() {
     setSaveError(null)
     setSaving(true)
     try {
+      await contentToolsFlushRef.current?.flush()
       const data = await patchCourseSyllabus(courseCode, {
         sections: draft,
         requireSyllabusAcceptance,
@@ -270,6 +275,7 @@ export default function CourseSyllabus() {
               disabled={saving}
               requireSyllabusAcceptance={requireSyllabusAcceptance}
               onRequireSyllabusAcceptanceChange={setRequireSyllabusAcceptance}
+              contentToolsFlushRef={contentToolsFlushRef}
             />
           </div>
         </div>

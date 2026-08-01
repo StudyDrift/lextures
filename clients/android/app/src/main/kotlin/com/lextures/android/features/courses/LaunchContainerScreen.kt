@@ -1,5 +1,6 @@
 package com.lextures.android.features.courses
 
+import com.lextures.android.core.routing.LinkOpener
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
@@ -158,7 +159,7 @@ fun LaunchContainerScreen(
                 externalUrlFor(launchTarget)?.let { externalUrl ->
                     TextButton(
                         onClick = {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(externalUrl)))
+                            LinkOpener.open(context, externalUrl.toString(), null, "legacy")
                         },
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
                     ) {

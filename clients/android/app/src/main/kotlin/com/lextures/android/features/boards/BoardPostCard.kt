@@ -1,5 +1,6 @@
 package com.lextures.android.features.boards
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import android.webkit.WebView
@@ -227,14 +228,14 @@ fun BoardPostCard(
                 post = post,
                 onOpenImage = { fullImage = true },
                 onOpenFile = { url ->
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    LinkOpener.open(context, url.toString(), null, "legacy")
                 },
             )
             BoardContentType.File -> MediaBlock(
                 post = post,
                 onOpenImage = {},
                 onOpenFile = { url ->
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    LinkOpener.open(context, url.toString(), null, "legacy")
                 },
             )
             BoardContentType.Audio -> MediaBlock(post = post, onOpenImage = {}, onOpenFile = {})
@@ -475,7 +476,7 @@ private fun LinkBlock(post: BoardPost, link: String) {
             .fillMaxWidth()
             .clickable {
                 BoardsLogic.absoluteUrl(link)?.let {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
+                    LinkOpener.open(context, it.toString(), null, "legacy")
                 }
             },
         horizontalArrangement = Arrangement.spacedBy(10.dp),

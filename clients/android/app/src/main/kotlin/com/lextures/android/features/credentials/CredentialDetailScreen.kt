@@ -1,5 +1,6 @@
 package com.lextures.android.features.credentials
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -89,7 +90,7 @@ fun CredentialDetailScreen(
 
         Button(
             onClick = {
-                context.startActivity(Intent(Intent.ACTION_VIEW, credential.verificationUrl.toUri()))
+                LinkOpener.open(context, credential.verificationUrl.toString(), null, "legacy")
             },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         ) {
@@ -105,7 +106,7 @@ fun CredentialDetailScreen(
                     try {
                         val params = LmsApi.fetchCredentialLinkedInParams(credential.id, token)
                         LmsApi.recordCredentialShare(credential.id, "linkedin", token)
-                        context.startActivity(Intent(Intent.ACTION_VIEW, params.url.toUri()))
+                        LinkOpener.open(context, params.url.toString(), null, "legacy")
                     } catch (_: Exception) {
                         actionError = L.text(context, localePrefs, R.string.mobile_credentials_linkedInError)
                     } finally {
@@ -134,7 +135,7 @@ fun CredentialDetailScreen(
                     try {
                         val export = LmsApi.fetchCredentialBadgeExportUrl(credential.id, token)
                         LmsApi.recordCredentialShare(credential.id, "badge_export", token)
-                        context.startActivity(Intent(Intent.ACTION_VIEW, export.downloadUrl.toUri()))
+                        LinkOpener.open(context, export.downloadUrl.toString(), null, "legacy")
                     } catch (_: Exception) {
                         actionError = L.text(context, localePrefs, R.string.mobile_credentials_badgeExportError)
                     } finally {

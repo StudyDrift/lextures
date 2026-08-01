@@ -1,5 +1,6 @@
 package com.lextures.android.features.settings.admin
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
@@ -330,9 +331,7 @@ private fun DetailScaffold(
             content()
             Button(
                 onClick = {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse(AppConfiguration.webUrl(webPath))),
-                    )
+                    LinkOpener.open(context, AppConfiguration.webUrl(webPath), null, "legacy")
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {

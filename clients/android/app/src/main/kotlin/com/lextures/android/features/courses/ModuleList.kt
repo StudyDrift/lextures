@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -97,18 +98,43 @@ fun ModuleList(
                     )
                 } else {
                     group.items.forEachIndexed { itemIndex, item ->
-                        if (itemIndex > 0) HorizontalDivider()
-                        ModuleListItemRow(
-                            item = item,
-                            progress = progress,
-                            onSelect = { onSelectItem(item) },
-                            onLocked = { onLockedItem(item, ModuleContentLogic.itemLockState(progress, item.id)?.reason) },
-                        )
+                        if (item.kind == "heading") {
+                            ModuleHeadingRow(title = item.title, isFirst = itemIndex == 0)
+                        } else {
+                            val previousWasHeading = itemIndex > 0 && group.items[itemIndex - 1].kind == "heading"
+                            if (itemIndex > 0 && !previousWasHeading) HorizontalDivider()
+                            ModuleListItemRow(
+                                item = item,
+                                progress = progress,
+                                onSelect = { onSelectItem(item) },
+                                onLocked = { onLockedItem(item, ModuleContentLogic.itemLockState(progress, item.id)?.reason) },
+                            )
+                        }
                     }
                 }
             }
         }
     }
+}
+
+/** In-module section heading (kind == "heading") — matches web: large bold primary title, no row chrome. */
+@Composable
+private fun ModuleHeadingRow(
+    title: String,
+    isFirst: Boolean,
+) {
+    Text(
+        text = title,
+        style = LexturesType.display(19, FontWeight.Bold),
+        color = textPrimary(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = if (isFirst) 6.dp else 14.dp, bottom = 4.dp)
+            .semantics {
+                heading()
+                contentDescription = title
+            },
+    )
 }
 
 @Composable

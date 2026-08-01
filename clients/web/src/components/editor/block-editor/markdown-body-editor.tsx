@@ -8,6 +8,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { ExternalLink, Image as ImageIcon, Trash2, X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Editor } from '@tiptap/core'
 import type { EditorView } from '@tiptap/pm/view'
 import { fetchCourseStructure, type CourseStructureItem } from '../../../lib/courses-api'
@@ -85,6 +86,26 @@ const editorShellClass = [
 
 function sanitizeImageAlt(name: string): string {
   return (name || 'Image').replace(/[[\]]/g, '').slice(0, 200)
+}
+
+/** Title-case a tool id when catalog name is still an unresolved i18n key. */
+function toolDisplayNameFallback(tool: Pick<ContentToolsCatalogTool, 'id' | 'name'>): string {
+  if (tool.name && !tool.name.startsWith('contentTools.')) return tool.name
+  return tool.id
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
+/** Human-readable category for slash-menu subheading fallback. */
+function toolCategoryLabel(category: string): string {
+  if (!category) return ''
+  return category
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
 }
 
 function imageInsertAttrs(path: string, fileName: string) {
@@ -171,6 +192,7 @@ export function MarkdownBodyEditor({
   contentToolsCatalog = [],
   onInsertContentTool,
 }: MarkdownBodyEditorProps) {
+  const { t, i18n } = useTranslation('contentTools')
   const { visualBoardsEnabled } = useCourseNavFeatures()
   const [boardPickerOpen, setBoardPickerOpen] = useState(false)
   const boardInsertPosRef = useRef<number | null>(null)
@@ -428,12 +450,27 @@ export function MarkdownBodyEditor({
         image: imageSlashEnabled,
         board: boardSlashEnabled,
         tools: contentToolsSlashEnabled
-          ? contentToolsCatalog.map((tool) => ({
-              id: tool.id,
-              name: tool.name,
-              description: tool.category,
-              keywords: [tool.id, tool.category, tool.ui.group],
-            }))
+          ? contentToolsCatalog.map((tool) => {
+              // Catalog `name` is an i18n key (e.g. contentTools.tools.explain_it_back.name).
+              const name = t(`contentTools.tools.${tool.id}.name`, {
+                defaultValue: toolDisplayNameFallback(tool),
+              })
+              const description = t(`contentTools.tools.${tool.id}.description`, {
+                defaultValue: toolCategoryLabel(tool.category),
+              })
+              return {
+                id: tool.id,
+                name,
+                description,
+                keywords: [
+                  tool.id,
+                  tool.category,
+                  tool.ui.group,
+                  name,
+                  ...name.toLowerCase().split(/\s+/),
+                ],
+              }
+            })
           : undefined,
       }),
     [
@@ -442,6 +479,8 @@ export function MarkdownBodyEditor({
       boardSlashEnabled,
       contentToolsSlashEnabled,
       contentToolsCatalog,
+      t,
+      i18n.language,
     ],
   )
 

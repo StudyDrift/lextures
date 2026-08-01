@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulecontent"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
@@ -16,11 +17,14 @@ import (
 	"github.com/lextures/lextures/server/internal/service/aigateway"
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	"github.com/lextures/lextures/server/internal/service/contentpagegeneration"
+	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
 
 type buildPageBodyWithAIRequest struct {
-	Prompt           string `json:"prompt"`
-	ExistingMarkdown string `json:"existingMarkdown"`
+	Prompt           string   `json:"prompt"`
+	ExistingMarkdown string   `json:"existingMarkdown"`
+	IncludeTools     *bool    `json:"includeTools"`
+	AllowedToolIDs   []string `json:"allowedToolIds"`
 }
 
 type buildPageBodyWithAIResponse struct {
@@ -33,6 +37,8 @@ func (d Deps) writeBuildPageBodyWithAI(
 	courseCode string,
 	courseID, viewer uuid.UUID,
 	pageTitle, prompt, existingMarkdown string,
+	includeTools bool,
+	allowedToolIDs []string,
 ) {
 	prompt = strings.TrimSpace(prompt)
 	if prompt == "" {
@@ -49,6 +55,36 @@ func (d Deps) writeBuildPageBodyWithAI(
 	model, err := userai.GetCourseSetupModelID(r.Context(), d.Pool, viewer)
 	if err != nil {
 		model = userai.DefaultCourseSetupModelID
+	}
+
+	genOpts := contentpagegeneration.GenerateOpts{}
+	if includeTools {
+		// Only enable tools when Content Tools is available for the course.
+		pub, pubErr := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
+		if pubErr == nil && pub != nil && ctsvc.AvailableForCourse(pub.ContentToolsEnabled) {
+			courseAllow := allowedToolIDs
+			if settings, sErr := ctrepo.GetSettings(r.Context(), d.Pool, courseID); sErr == nil && settings != nil {
+				// Empty course allowlist means all tools; otherwise intersect.
+				if len(settings.AllowedToolIDs) > 0 {
+					courseAllow = contentpagegeneration.IntersectAllowedToolIDs(
+						firstNonEmptyToolIDs(allowedToolIDs, contentpagegeneration.DefaultAIToolIDs),
+						settings.AllowedToolIDs,
+					)
+				} else {
+					courseAllow = contentpagegeneration.NormalizeAllowedToolIDs(
+						firstNonEmptyToolIDs(allowedToolIDs, contentpagegeneration.DefaultAIToolIDs),
+					)
+				}
+			} else {
+				courseAllow = contentpagegeneration.NormalizeAllowedToolIDs(
+					firstNonEmptyToolIDs(allowedToolIDs, contentpagegeneration.DefaultAIToolIDs),
+				)
+			}
+			if len(courseAllow) > 0 {
+				genOpts.IncludeTools = true
+				genOpts.AllowedToolIDs = courseAllow
+			}
+		}
 	}
 
 	promptMaterial := prompt + strings.TrimSpace(existingMarkdown)
@@ -69,6 +105,7 @@ func (d Deps) writeBuildPageBodyWithAI(
 		prompt,
 		existingMarkdown,
 		pageTitle,
+		genOpts,
 	)
 	if err != nil {
 		msg := err.Error()
@@ -92,8 +129,40 @@ func (d Deps) writeBuildPageBodyWithAI(
 	if sections == nil {
 		sections = []contentpagegeneration.DraftSection{}
 	}
+	if genOpts.IncludeTools {
+		// Drop tools whose config fails manifest schema validation.
+		sections = contentpagegeneration.NormalizeDraftSectionToolsWith(
+			sections,
+			genOpts.AllowedToolIDs,
+			contentToolConfigValidator(),
+		)
+	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(buildPageBodyWithAIResponse{Sections: sections})
+}
+
+func contentToolConfigValidator() contentpagegeneration.ToolConfigValidator {
+	reg := ctsvc.MustDefault()
+	return func(toolID string, config json.RawMessage) error {
+		m := reg.Get(toolID)
+		if m == nil {
+			return errContentToolUnknown
+		}
+		return ctsvc.ValidateConfigJSON(m, config)
+	}
+}
+
+type contentToolUnknownError struct{}
+
+func (contentToolUnknownError) Error() string { return "unknown content tool" }
+
+var errContentToolUnknown = contentToolUnknownError{}
+
+func firstNonEmptyToolIDs(preferred, fallback []string) []string {
+	if len(preferred) > 0 {
+		return preferred
+	}
+	return fallback
 }
 
 func (d Deps) requireContentPageEdit(
@@ -162,12 +231,13 @@ func (d Deps) handleBuildModuleContentPageWithAI() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		d.writeBuildPageBodyWithAI(w, r, courseCode, courseID, viewer, pageTitle, body.Prompt, body.ExistingMarkdown)
+		includeTools := body.IncludeTools != nil && *body.IncludeTools
+		d.writeBuildPageBodyWithAI(w, r, courseCode, courseID, viewer, pageTitle, body.Prompt, body.ExistingMarkdown, includeTools, body.AllowedToolIDs)
 	}
 }
 
 // handleBuildModuleQuizIntroWithAI is POST /api/v1/courses/{course_code}/quizzes/{item_id}/build-intro-with-ai.
-// Returns draft sections only; does not persist.
+// Returns draft sections only; does not persist. Quiz intro is prose-only (no content tools).
 func (d Deps) handleBuildModuleQuizIntroWithAI() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
@@ -197,6 +267,7 @@ func (d Deps) handleBuildModuleQuizIntroWithAI() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		d.writeBuildPageBodyWithAI(w, r, courseCode, courseID, viewer, row.Title, body.Prompt, body.ExistingMarkdown)
+		// Quiz intro deliberately ignores includeTools.
+		d.writeBuildPageBodyWithAI(w, r, courseCode, courseID, viewer, row.Title, body.Prompt, body.ExistingMarkdown, false, nil)
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/crypto/appsecrets"
+	"github.com/lextures/lextures/server/internal/repos/mobilelinkpolicy"
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
 	"github.com/lextures/lextures/server/internal/telemetry"
@@ -254,6 +255,10 @@ type platformSettingsJSON struct {
 	SESRegion           string `json:"sesRegion"`
 	SESFrom             string `json:"sesFrom"`
 	SESConfigurationSet string `json:"sesConfigurationSet"`
+
+	// MB.1 — platform mobile link policy. Browser feature always on (ff kept for API compatibility).
+	MobileLinkHandling   string `json:"mobileLinkHandling"`
+	FFMobileInAppBrowser bool   `json:"ffMobileInAppBrowser"`
 
 	Sources platformSourcesJSON `json:"sources"`
 }
@@ -555,6 +560,14 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				SESConfigurationSet:         src(sources.SESConfigurationSet),
 			},
 		}
+		// MB.1 — read from dedicated columns (not platformconfig merge). Browser always on.
+		out.MobileLinkHandling = string(mobilelinkpolicy.HandlingInApp)
+		out.FFMobileInAppBrowser = true
+		if d.Pool != nil {
+			if p, err := mobilelinkpolicy.GetPlatform(ctx, d.Pool); err == nil {
+				out.MobileLinkHandling = string(p.MobileLinkHandling)
+			}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}
@@ -772,6 +785,10 @@ type putPlatformBody struct {
 	SESRegion           *string `json:"sesRegion"`
 	SESFrom             *string `json:"sesFrom"`
 	SESConfigurationSet *string `json:"sesConfigurationSet"`
+
+	// MB.1 — only mobileLinkHandling is writable; ffMobileInAppBrowser is ignored (always on).
+	MobileLinkHandling   *string `json:"mobileLinkHandling"`
+	FFMobileInAppBrowser *bool   `json:"ffMobileInAppBrowser"`
 
 	UpdateMask []string `json:"updateMask"`
 }
@@ -1221,6 +1238,31 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			wr.MFAEnforcement = &s
 		})
 
+		// MB.1 — dedicated column (not platformconfig.Write). Browser flag always on; ignore writes.
+		var mobileHandling *string
+		set("mobilelinkhandling", body.MobileLinkHandling != nil, func() {
+			s := strings.TrimSpace(*body.MobileLinkHandling)
+			if !mobilelinkpolicy.IsValid(s) {
+				return
+			}
+			n := string(mobilelinkpolicy.Normalize(s))
+			mobileHandling = &n
+		})
+		if body.MobileLinkHandling != nil {
+			// Reject invalid values even when updateMask omits other fields.
+			if (len(mask) == 0 || func() bool { _, ok := mask["mobilelinkhandling"]; return ok }()) &&
+				!mobilelinkpolicy.IsValid(*body.MobileLinkHandling) {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "mobileLinkHandling must be in_app, system, or blocked.")
+				return
+			}
+		}
+		if mobileHandling != nil {
+			if err := mobilelinkpolicy.SetPlatform(r.Context(), d.Pool, mobileHandling, nil); err != nil {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+				return
+			}
+		}
+
 		dbRow, err := platformconfig.Upsert(r.Context(), d.Pool, wr)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save platform settings.")
@@ -1495,6 +1537,11 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				SESFrom:                     src(sources.SESFrom),
 				SESConfigurationSet:         src(sources.SESConfigurationSet),
 			},
+		}
+		out.MobileLinkHandling = string(mobilelinkpolicy.HandlingInApp)
+		out.FFMobileInAppBrowser = true
+		if p, err := mobilelinkpolicy.GetPlatform(r.Context(), d.Pool); err == nil {
+			out.MobileLinkHandling = string(p.MobileLinkHandling)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)

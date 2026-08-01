@@ -1,0 +1,255 @@
+{
+  "description": "MB.1 shared MobileLinkPolicy fixture table — iOS and Android must classify identically.",
+  "constants": {
+    "allowedSchemes": ["http", "https", "mailto", "tel", "sms", "geo", "maps", "itms-apps", "market", "lextures"],
+    "nativeAppHostSuffixes": [
+      "zoom.us",
+      "zoom.com",
+      "meet.google.com",
+      "teams.microsoft.com",
+      "teams.live.com"
+    ],
+    "checkoutHostSuffixes": [
+      "checkout.stripe.com",
+      "billing.stripe.com",
+      "pay.stripe.com"
+    ],
+    "ssoPathMarkers": ["/oauth", "/oidc", "/saml", "/sso", "/auth/callback", "/login/oauth"]
+  },
+  "cases": [
+    {
+      "name": "relative_courses_path",
+      "url": "/courses/abc",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "native"
+    },
+    {
+      "name": "lextures_scheme",
+      "url": "lextures://courses/abc",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "native"
+    },
+    {
+      "name": "first_party_https_path",
+      "url": "https://app.lextures.com/courses/abc",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "native"
+    },
+    {
+      "name": "localhost_first_party",
+      "url": "http://localhost:5173/settings/account",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "127.0.0.1:8080",
+      "want": "native"
+    },
+    {
+      "name": "external_https_in_app",
+      "url": "https://en.wikipedia.org/wiki/Photosynthesis",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "in_app_browser"
+    },
+    {
+      "name": "external_https_flag_off",
+      "url": "https://en.wikipedia.org/wiki/Photosynthesis",
+      "policy": "in_app",
+      "flagOn": false,
+      "apiHost": "api.lextures.com",
+      "want": "system_browser"
+    },
+    {
+      "name": "external_https_policy_system",
+      "url": "https://en.wikipedia.org/wiki/Photosynthesis",
+      "policy": "system",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "system_browser"
+    },
+    {
+      "name": "external_https_policy_blocked",
+      "url": "https://en.wikipedia.org/wiki/Photosynthesis",
+      "policy": "blocked",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "blocked"
+    },
+    {
+      "name": "mailto",
+      "url": "mailto:teacher@school.edu",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "external_app"
+    },
+    {
+      "name": "tel",
+      "url": "tel:+15551212",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "external_app"
+    },
+    {
+      "name": "sms",
+      "url": "sms:+15551212",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "external_app"
+    },
+    {
+      "name": "itms_apps",
+      "url": "itms-apps://apps.apple.com/app/id123",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "external_app"
+    },
+    {
+      "name": "market",
+      "url": "market://details?id=com.example",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "external_app"
+    },
+    {
+      "name": "zoom_join",
+      "url": "https://zoom.us/j/123456789",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "external_app"
+    },
+    {
+      "name": "meet_join",
+      "url": "https://meet.google.com/abc-defg-hij",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "external_app"
+    },
+    {
+      "name": "teams_join",
+      "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "external_app"
+    },
+    {
+      "name": "stripe_checkout",
+      "url": "https://checkout.stripe.com/c/pay/cs_test_abc",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "system_browser"
+    },
+    {
+      "name": "sso_path_oauth",
+      "url": "https://login.example.com/oauth/authorize?client_id=1",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "auth_session"
+    },
+    {
+      "name": "sso_path_saml",
+      "url": "https://idp.school.edu/saml/sso",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "auth_session"
+    },
+    {
+      "name": "javascript_blocked",
+      "url": "javascript:alert(1)",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "blocked"
+    },
+    {
+      "name": "file_scheme_blocked",
+      "url": "file:///etc/passwd",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "blocked"
+    },
+    {
+      "name": "data_scheme_blocked",
+      "url": "data:text/html,hi",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "blocked"
+    },
+    {
+      "name": "uppercase_https",
+      "url": "HTTPS://Example.COM/path",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "in_app_browser"
+    },
+    {
+      "name": "http_insecure_external",
+      "url": "http://example.com/article",
+      "policy": "in_app",
+      "flagOn": true,
+      "apiHost": "api.lextures.com",
+      "want": "in_app_browser"
+    }
+  ],
+  "bearerAttachment": [
+    {
+      "name": "exact_api_host",
+      "requestHost": "api.lextures.com",
+      "apiHost": "api.lextures.com",
+      "want": true
+    },
+    {
+      "name": "subdomain_of_api",
+      "requestHost": "cdn.api.lextures.com",
+      "apiHost": "api.lextures.com",
+      "want": true
+    },
+    {
+      "name": "lookalike_prefix",
+      "requestHost": "api.lextures.com.example.net",
+      "apiHost": "api.lextures.com",
+      "want": false
+    },
+    {
+      "name": "unrelated",
+      "requestHost": "evil.example",
+      "apiHost": "api.lextures.com",
+      "want": false
+    },
+    {
+      "name": "port_stripped",
+      "requestHost": "api.lextures.com:443",
+      "apiHost": "api.lextures.com",
+      "want": true
+    },
+    {
+      "name": "localhost_dev",
+      "requestHost": "127.0.0.1",
+      "apiHost": "127.0.0.1:8080",
+      "want": true
+    }
+  ],
+  "telemetryShape": {
+    "allowedKeys": ["source", "classification", "outcome", "errorClass"],
+    "forbiddenKeys": ["url", "host", "path", "title", "href", "pageTitle"]
+  }
+}

@@ -138,6 +138,23 @@ class ContentToolPack1LogicTest {
     }
 
     @Test
+    fun questionsAtATimePagingHelpers() {
+        assertEquals(null, ContentToolPack1Logic.parseQuestionsAtATime(JsonPrimitive("all")))
+        assertEquals(null, ContentToolPack1Logic.parseQuestionsAtATime(null))
+        assertEquals(1, ContentToolPack1Logic.parseQuestionsAtATime(JsonPrimitive(1)))
+        assertEquals(2, ContentToolPack1Logic.parseQuestionsAtATime(JsonPrimitive(2)))
+        assertEquals(null, ContentToolPack1Logic.parseQuestionsAtATime(JsonPrimitive(9)))
+
+        assertEquals(0 until 3, ContentToolPack1Logic.pageWindow(3, null, 0))
+        assertEquals(0 until 1, ContentToolPack1Logic.pageWindow(3, 1, 0))
+        assertEquals(1 until 2, ContentToolPack1Logic.pageWindow(3, 1, 1))
+        assertEquals(0 until 2, ContentToolPack1Logic.pageWindow(3, 2, 0))
+        assertEquals(2 until 3, ContentToolPack1Logic.pageWindow(3, 2, 1))
+        assertEquals(1, ContentToolPack1Logic.initialPageIndex(3, 1, 2))
+        assertEquals(0, ContentToolPack1Logic.initialPageIndex(3, 2, 1))
+    }
+
+    @Test
     fun predictRevealGatingMatchesFixture() {
         for (item in fixture()["predictReveal"]!!.jsonObject["cases"]!!.jsonArray) {
             val obj = item.jsonObject

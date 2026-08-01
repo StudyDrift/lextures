@@ -59,12 +59,14 @@ mobile-ios: mobile-lint-ios mobile-test-ios
 
 mobile-lint-android:
 	cd clients/android && ./gradlew lint --no-daemon
+	bash scripts/check-mobile-link-opener.sh
 
 mobile-test-android:
 	cd clients/android && ./gradlew test --no-daemon
 
 mobile-lint-ios:
 	cd clients/ios && swiftlint lint
+	bash scripts/check-mobile-link-opener.sh
 
 # iOS xcodebuild tuning (optional env overrides):
 #   IOS_DERIVED_DATA_PATH=.cache/DerivedData  — reuse compile artifacts (default)

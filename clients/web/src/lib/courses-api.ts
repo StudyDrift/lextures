@@ -7461,16 +7461,27 @@ export async function generateSyllabusSectionMarkdown(
   return parseApiResponse('generateSyllabusSectionMarkdown', generatedSyllabusSectionMarkdownSchema, raw)
 }
 
+export type DraftContentPageTool = {
+  toolId: string
+  config: Record<string, unknown>
+}
+
 export type DraftContentPageSection = {
   heading: string
   markdown: string
+  tools?: DraftContentPageTool[]
 }
 
 /** POST `/content-pages/{itemId}/build-with-ai` — AI draft sections (not persisted). */
 export async function buildContentPageWithAi(
   courseCode: string,
   itemId: string,
-  body: { prompt: string; existingMarkdown?: string },
+  body: {
+    prompt: string
+    existingMarkdown?: string
+    includeTools?: boolean
+    allowedToolIds?: string[]
+  },
 ): Promise<{ sections: DraftContentPageSection[] }> {
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/content-pages/${encodeURIComponent(itemId)}/build-with-ai`,
@@ -7480,12 +7491,24 @@ export async function buildContentPageWithAi(
       body: JSON.stringify({
         prompt: body.prompt,
         existingMarkdown: body.existingMarkdown ?? '',
+        ...(body.includeTools !== undefined ? { includeTools: body.includeTools } : {}),
+        ...(body.allowedToolIds !== undefined ? { allowedToolIds: body.allowedToolIds } : {}),
       }),
     },
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return parseApiResponse('buildContentPageWithAi', buildContentPageWithAiResponseSchema, raw)
+  const parsed = parseApiResponse('buildContentPageWithAi', buildContentPageWithAiResponseSchema, raw)
+  return {
+    sections: parsed.sections.map((s) => ({
+      heading: s.heading,
+      markdown: s.markdown,
+      tools: s.tools?.map((t) => ({
+        toolId: t.toolId,
+        config: (t.config ?? {}) as Record<string, unknown>,
+      })),
+    })),
+  }
 }
 
 /** POST `/quizzes/{itemId}/build-intro-with-ai` — AI draft quiz intro sections (not persisted). */

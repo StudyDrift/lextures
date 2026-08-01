@@ -1,5 +1,6 @@
 package com.lextures.android.features.instructorinsights
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
@@ -204,7 +205,7 @@ fun CourseInsightsSection(
                     .fillMaxWidth()
                     .clickable {
                         val url = AppConfiguration.webUrl(InstructorInsightsLogic.webReportsPath(course.courseCode))
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        LinkOpener.open(context, url.toString(), null, "legacy")
                     },
             ) {
                 Column(Modifier.padding(12.dp)) {

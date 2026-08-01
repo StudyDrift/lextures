@@ -367,6 +367,7 @@ enum ItemKind {
         case "vibe_activity": return "Activity"
         case "library_resource": return "Library"
         case "textbook_resource": return "Textbook"
+        case "heading": return "Heading"
         default: return "Item"
         }
     }

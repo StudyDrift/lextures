@@ -305,7 +305,7 @@ func TestMerge_MobileParityFlagsAlwaysOn(t *testing.T) {
 		!got.FFMobileCanvasImport || !got.FFMobileAdminConsole ||
 		!got.FFMobileEnrollmentAdd || !got.FFMobileLiveQuiz ||
 		!got.FFMobileWhiteboardEdit || !got.FFMobileMarketplacePurchase ||
-		!got.FFMobileBoardsAdvanced {
+		!got.FFMobileBoardsAdvanced || !got.FFMobileContentTools {
 		t.Fatal("expected mobile parity flags always on when DB unset")
 	}
 	off := false
@@ -324,7 +324,7 @@ func TestMerge_MobileParityFlagsAlwaysOn(t *testing.T) {
 		!got.FFMobileCanvasImport || !got.FFMobileAdminConsole ||
 		!got.FFMobileEnrollmentAdd || !got.FFMobileLiveQuiz ||
 		!got.FFMobileWhiteboardEdit || !got.FFMobileMarketplacePurchase ||
-		!got.FFMobileBoardsAdvanced {
+		!got.FFMobileBoardsAdvanced || !got.FFMobileContentTools {
 		t.Fatal("expected mobile parity flags on even when DB stores false")
 	}
 }

@@ -1,5 +1,6 @@
 package com.lextures.android.features.groups
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import android.webkit.WebView
@@ -477,7 +478,7 @@ fun CollabDocScreen(
         ) {
             TextButton(
                 onClick = {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(webUrl)))
+                    LinkOpener.open(context, webUrl.toString(), null, "legacy")
                 },
             ) { Text(collabDocsOpenOnWeb(context, localePrefs)) }
         }

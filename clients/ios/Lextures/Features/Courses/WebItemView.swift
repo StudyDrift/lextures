@@ -1,38 +1,49 @@
 import SwiftUI
 import WebKit
 
-/// In-app browser for external links and textbook resources with auth injection (M3.1).
+/// Course web / textbook item — shared MB.1 browser chrome with first-party auth injection (FR-20/28).
 struct WebItemView: View {
     @Environment(AuthSession.self) private var session
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.openURL) private var openURL
+    @Environment(AppShellModel.self) private var shell
 
     let title: String
     let urlString: String
     var provider: String?
 
-    @State private var loadError: String?
-
     var body: some View {
-        VStack(spacing: 0) {
-            if let loadError {
-                LMSErrorBanner(message: loadError)
-                    .padding(16)
-            }
-            AuthenticatedWebView(
-                urlString: urlString,
-                accessToken: session.accessToken,
-                onError: { loadError = L.text("mobile.modules.webLoadError") }
-            )
-            HStack {
-                Spacer()
-                Button(L.text("mobile.modules.openExternal")) {
-                    if let url = resolvedURL { openURL(url) }
+        Group {
+            if let url = resolvedURL {
+                // When the in-app browser feature is on and policy allows, use full shared chrome.
+                // Otherwise fall back to system open for external, or still show shared browser for first-party.
+                let state = LinkOpener.policyState(from: shell)
+                let classification = MobileLinkPolicy.classify(urlString: urlString, state: state)
+                if classification == .inAppBrowser || classification == .native || classification == .systemBrowser {
+                    InAppBrowserView(
+                        session: InAppBrowserSession(
+                            initialURL: url,
+                            accessToken: session.accessToken,
+                            source: "web_item",
+                            allowReport: false
+                        ),
+                        onDismiss: {
+                            // Pushed as a nav destination — close is a no-op; user uses system back.
+                        }
+                    )
+                    .navigationBarHidden(true)
+                } else {
+                    ContentUnavailableView(
+                        L.text("mobile.browser.blockedByPolicy"),
+                        systemImage: "hand.raised",
+                        description: Text(L.text("mobile.browser.blockedByPolicy"))
+                    )
                 }
-                .font(.subheadline.weight(.semibold))
-                .padding(12)
+            } else {
+                ContentUnavailableView(
+                    L.text("mobile.browser.errorTitle"),
+                    systemImage: "exclamationmark.triangle",
+                    description: Text(L.text("mobile.browser.errorBody"))
+                )
             }
-            .background(LexturesTheme.sceneBackground(for: colorScheme))
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
@@ -46,6 +57,10 @@ struct WebItemView: View {
     }
 }
 
+// MARK: - AuthenticatedWebView (collab docs & embedded first-party pages)
+
+/// Lightweight WKWebView with first-party bearer injection (parsed-host check, FR-20).
+/// Used by surfaces that need an embedded web editor (e.g. collab docs) rather than the full-screen MB.1 chrome.
 struct AuthenticatedWebView: UIViewRepresentable {
     let urlString: String
     let accessToken: String?
@@ -55,6 +70,7 @@ struct AuthenticatedWebView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
+        config.websiteDataStore = InAppBrowserDataStore.shared.store
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
         load(into: webView)
@@ -80,7 +96,8 @@ struct AuthenticatedWebView: UIViewRepresentable {
             return
         }
         var request = URLRequest(url: url)
-        if let accessToken, url.absoluteString.hasPrefix(AppConfiguration.apiBaseURL.absoluteString) {
+        if let accessToken,
+           MobileLinkPolicy.shouldAttachBearer(requestURL: url, apiBaseURL: AppConfiguration.apiBaseURL) {
             request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
         webView.load(request)
@@ -100,6 +117,25 @@ struct AuthenticatedWebView: UIViewRepresentable {
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
             onError()
+        }
+
+        /// Do not re-attach Authorization across cross-origin redirects (FR-21).
+        func webView(
+            _ webView: WKWebView,
+            decidePolicyFor navigationAction: WKNavigationAction,
+            decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+        ) {
+            guard let url = navigationAction.request.url else {
+                decisionHandler(.allow)
+                return
+            }
+            if navigationAction.request.value(forHTTPHeaderField: "Authorization") != nil,
+               !MobileLinkPolicy.shouldAttachBearer(requestURL: url, apiBaseURL: AppConfiguration.apiBaseURL) {
+                decisionHandler(.cancel)
+                webView.load(URLRequest(url: url))
+                return
+            }
+            decisionHandler(.allow)
         }
     }
 }

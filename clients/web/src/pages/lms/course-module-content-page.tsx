@@ -4,13 +4,18 @@ import { Pencil, FastForward, Download, CheckCircle, Loader2, Sparkles } from 'l
 import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useOfflineContent } from '../../hooks/use-offline-content'
 import { useOnlineStatus } from '../../hooks/use-online-status'
-import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
+import {
+  SyllabusBlockEditor,
+  type ContentToolsFlushHandle,
+} from '../../components/syllabus/syllabus-block-editor'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
 import { BuildContentPageWithAiModal } from '../../components/content-page/build-content-page-with-ai-modal'
 import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
 import { usePermissions } from '../../context/use-permissions'
 import {
   buildContentPageWithAi,
+  createContentToolInstance,
+  defaultContentToolConfig,
   fetchContentPageMarkups,
   fetchCourse,
   fetchEnrollmentNext,
@@ -27,6 +32,8 @@ import {
   type DraftContentPageSection,
   type SyllabusSection,
 } from '../../lib/courses-api'
+import { serializeLexToolFenceBlock } from '../../lib/content-tools/lex-tool-fence'
+import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import {
   type MarkdownThemeCustom,
   type ResolvedMarkdownTheme,
@@ -80,6 +87,7 @@ export default function CourseModuleContentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const { allows, loading: permLoading } = usePermissions()
   const { ffCeuTracking, aiStudyBuddyEnabled, aiConfigured } = usePlatformFeatures()
+  const { contentToolsEnabled } = useCourseNavFeatures()
   const { prompt, InputDialogHost } = usePrompt()
 
   const [title, setTitle] = useState('')
@@ -92,6 +100,7 @@ export default function CourseModuleContentPage() {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<SyllabusSection[]>([])
   const [buildAiOpen, setBuildAiOpen] = useState(false)
+  const [ctInstancesReloadKey, setCtInstancesReloadKey] = useState(0)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [lastLocalAuthoringSave, setLastLocalAuthoringSave] = useState<string | null>(null)
@@ -126,6 +135,7 @@ export default function CourseModuleContentPage() {
 
   const contentLeaveSentRef = useRef(false)
   const contentOpenSentForRef = useRef<string | null>(null)
+  const contentToolsFlushRef = useRef<ContentToolsFlushHandle | null>(null)
   const [courseProfile, setCourseProfile] = useState<CoursePublic | null>(null)
   const [nextNav, setNextNav] = useState<{ href: string; title: string; live: string } | null>(null)
   const [autoAdvance, setAutoAdvance] = useState(() => {
@@ -347,15 +357,77 @@ export default function CourseModuleContentPage() {
     setDraft([])
   }
 
-  function applyBuiltSections(sections: DraftContentPageSection[]) {
-    setDraft(
-      sections.map((s) => ({
-        id: newLocalId(),
+  /**
+   * Apply AI draft sections. When tools are present, create content-tool instances
+   * and embed ```lex-tool fences before updating the editor draft.
+   */
+  async function applyBuiltSections(sections: DraftContentPageSection[]) {
+    if (!courseCode || !itemId) return
+
+    const next: SyllabusSection[] = []
+    let toolsCreated = 0
+    let toolsFailed = 0
+
+    for (const s of sections) {
+      const sectionId = newLocalId()
+      const bodyParts: string[] = []
+      const prose = (s.markdown ?? '').trim()
+      if (prose) bodyParts.push(prose)
+
+      const tools = s.tools ?? []
+      for (const tool of tools) {
+        const toolId = String(tool.toolId ?? '').trim()
+        if (!toolId) continue
+        try {
+          const config =
+            tool.config && Object.keys(tool.config).length > 0
+              ? tool.config
+              : defaultContentToolConfig(toolId)
+          const created = await createContentToolInstance(courseCode, {
+            toolId,
+            hostKind: 'content_page',
+            structureItemId: itemId,
+            sectionKey: sectionId,
+            config,
+          })
+          bodyParts.push(
+            serializeLexToolFenceBlock({
+              instanceId: created.id,
+              toolId: created.toolId,
+              v: 1,
+            }),
+          )
+          toolsCreated += 1
+        } catch {
+          toolsFailed += 1
+        }
+      }
+
+      const markdownBody = bodyParts.join('\n\n').trim()
+      if (!s.heading.trim() && !markdownBody) continue
+      next.push({
+        id: sectionId,
         heading: s.heading,
-        markdown: s.markdown,
-      })),
-    )
+        markdown: markdownBody,
+      })
+    }
+
+    if (next.length === 0) {
+      throw new Error('No content sections were generated. Try a more specific description.')
+    }
+
+    setDraft(next)
+    if (toolsCreated > 0) {
+      setCtInstancesReloadKey((k) => k + 1)
+    }
     setBuildAiOpen(false)
+    if (toolsFailed > 0) {
+      toastMutationError(
+        toolsCreated > 0
+          ? `Draft applied, but ${toolsFailed} interactive tool${toolsFailed === 1 ? '' : 's'} could not be placed.`
+          : `Could not place interactive tools (${toolsFailed} failed). Prose draft was still applied.`,
+      )
+    }
   }
 
   async function save() {
@@ -364,6 +436,8 @@ export default function CourseModuleContentPage() {
     setSaveError(null)
     setSaving(true)
     try {
+      // Persist open/dirty content-tool configs (e.g. inline questions) before the page body.
+      await contentToolsFlushRef.current?.flush()
       const data = await patchModuleContentPage(courseCode, itemId, {
         markdown: body,
         dueAt: null,
@@ -763,10 +837,12 @@ export default function CourseModuleContentPage() {
               courseCode={courseCode}
               structureItemId={itemId}
               hostKind="content_page"
+              instancesReloadKey={ctInstancesReloadKey}
               sections={draft}
               onChange={setDraft}
               disabled={saving}
               documentVariant="page"
+              contentToolsFlushRef={contentToolsFlushRef}
             />
           </div>
         </div>
@@ -790,11 +866,19 @@ export default function CourseModuleContentPage() {
         <BuildContentPageWithAiModal
           open={buildAiOpen}
           existingMarkdown={sectionsToMarkdown(draft)}
+          contentToolsAvailable={contentToolsEnabled}
+          defaultIncludeTools
+          description={
+            contentToolsEnabled
+              ? 'Describe what this page should cover. The draft can include prose and interactive tools (checks, flashcards, and more). Nothing is saved until you click Save.'
+              : undefined
+          }
           onClose={() => setBuildAiOpen(false)}
-          onBuild={async ({ prompt, existingMarkdown }) => {
+          onBuild={async ({ prompt, existingMarkdown, includeTools }) => {
             const { sections } = await buildContentPageWithAi(courseCode, itemId, {
               prompt,
               existingMarkdown: existingMarkdown || undefined,
+              includeTools,
             })
             return sections
           }}

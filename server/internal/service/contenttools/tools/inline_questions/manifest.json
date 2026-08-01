@@ -95,6 +95,14 @@
       },
       "shuffleOptions": { "type": "boolean", "default": false },
       "sequential": { "type": "boolean", "default": false },
+      "questionsAtATime": {
+        "default": "all",
+        "description": "How many questions to show at once (all, or 1–3)",
+        "oneOf": [
+          { "type": "integer", "minimum": 1, "maximum": 3 },
+          { "type": "string", "const": "all" }
+        ]
+      },
       "scorePolicy": {
         "type": "string",
         "enum": ["last", "best", "first"],

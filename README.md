@@ -128,7 +128,7 @@ Connect AI agents in **Cursor**, **Claude Desktop**, or any MCP client to your L
    cd clients/mcp && npm install && npm run build
    ```
 
-2. **Create an access key** in the web app under **Settings → Integrations**. Include the **MCP: Connect** scope (`mcp:connect`) plus any data scopes your agent needs (for example `courses:read`, `assignments:read`, `files:read`, `feed:read`, `enrollments:read`). Copy the key when shown — it is only displayed once.
+2. **Create an access key** in the web app under **Settings → Integrations**. Include the **MCP: Connect** scope (`mcp:connect`) plus any data scopes your agent needs (for example `courses:read`, `courses:write`, `assignments:read`, `assignments:write`, `files:read`, `feed:read`, `enrollments:read`). Copy the key when shown — it is only displayed once. The key’s user must also have course RBAC permission to create/edit items (`item:create`) for authoring tools.
 
 3. **Add MCP config** to your client. Open the project with this repository as the workspace root so `clients/mcp/dist/index.js` resolves. Example for Cursor or Claude Desktop:
 
@@ -158,8 +158,27 @@ Connect AI agents in **Cursor**, **Claude Desktop**, or any MCP client to your L
 | ---- | ----------- |
 | `whoami` | Authenticated user profile |
 | `list_courses` | Courses visible to the key (optional term filter) |
+| `list_structure` | Course modules and items (optional kind filter) |
 | `list_assignments` | Assignment metadata in a course |
+| `list_quizzes` | Quiz metadata in a course |
+| `list_content_pages` | Content page metadata in a course |
 | `read_assignment` | Full assignment content and metadata |
+| `read_quiz` | Full quiz (questions, settings, intro) |
+| `read_content_page` | Content page markdown body |
+| `create_module` | Create a course module |
+| `create_content_page` | Create a content page (optional markdown + publish) |
+| `update_content_page` | Update content page markdown |
+| `create_assignment` | Create an assignment under a module |
+| `update_assignment` | Update assignment content and settings |
+| `create_quiz` | Create a quiz (optional questions + publish) |
+| `update_quiz` | Modify quiz questions and delivery settings |
+| `publish_structure_item` | Publish or unpublish any structure item |
+| `list_content_tool_catalog` | Available content tools for a course |
+| `get_content_tool_manifest` | Tool manifest + configSchema (e.g. `inline_questions`) |
+| `list_content_tool_instances` | Tool instances (optional item filter) |
+| `create_content_tool_instance` | Create a tool instance with settings |
+| `update_content_tool_instance` | Update tool config / title / status |
+| `attach_content_tool` | Create instance and embed a lex-tool fence in host markdown |
 | `list_enrollments` | Course roster |
 | `list_activity_feed` | Feed messages from the last *N* days |
 | `list_files` | Files and folders in a course file space |
