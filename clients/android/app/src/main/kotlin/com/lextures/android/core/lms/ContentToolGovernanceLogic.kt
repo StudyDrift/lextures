@@ -197,4 +197,11 @@ object ContentToolGovernanceLogic {
         val needle = capability.lowercase()
         return deniedCapabilities.none { it.equals(needle, ignoreCase = true) }
     }
+
+    /** Merge course allowlist with org policy allowlist (intersection when both non-empty). */
+    fun effectiveAllowedToolIds(courseAllowed: List<String>, orgAllowed: List<String>): List<String> {
+        if (orgAllowed.isEmpty()) return courseAllowed
+        if (courseAllowed.isEmpty()) return orgAllowed
+        return courseAllowed.intersect(orgAllowed.toSet()).toList()
+    }
 }

@@ -331,11 +331,10 @@ private fun ContentToolHostMounted(
         killAllAI = settings?.killAllAI ?: false,
     )
     // Merge course allowlist with org policy allow/deny lists.
-    var allowed = settings?.allowedToolIds.orEmpty()
-    val orgAllowed = policy?.allowedToolIds.orEmpty()
-    if (orgAllowed.isNotEmpty()) {
-        allowed = if (allowed.isEmpty()) orgAllowed else allowed.intersect(orgAllowed.toSet()).toList()
-    }
+    val allowed = ContentToolGovernanceLogic.effectiveAllowedToolIds(
+        courseAllowed = settings?.allowedToolIds.orEmpty(),
+        orgAllowed = policy?.allowedToolIds.orEmpty(),
+    )
     val decision = ContentToolGovernanceLogic.mountDecision(
         ContentToolGovernanceLogic.MountInput(
             toolId = instance.toolId,

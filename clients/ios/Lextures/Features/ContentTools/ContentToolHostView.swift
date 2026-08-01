@@ -125,11 +125,10 @@ struct ContentToolHostView: View {
             killedCapabilities: settings?.killedCapabilities ?? [],
             killAllAI: settings?.killAllAI ?? false
         )
-        // Merge course allowlist with org policy allow/deny lists.
-        var allowed = settings?.allowedToolIds ?? []
-        if let orgAllowed = policy?.allowedToolIds, !orgAllowed.isEmpty {
-            allowed = allowed.isEmpty ? orgAllowed : Array(Set(allowed).intersection(orgAllowed))
-        }
+        let allowed = ContentToolGovernanceLogic.effectiveAllowedToolIds(
+            courseAllowed: settings?.allowedToolIds ?? [],
+            orgAllowed: policy?.allowedToolIds ?? []
+        )
         let decision = ContentToolGovernanceLogic.mountDecision(
             ContentToolGovernanceLogic.MountInput(
                 toolId: instance.toolId,
@@ -753,7 +752,7 @@ struct ContentToolHostView: View {
                 attributes: ["outcome": "ok"]
             )
             return res.result
-        } catch let APIError.transport {
+        } catch APIError.transport {
             ToolLiveRegion.announce(L.text("mobile.contentTools.runtime.needsConnection"), assertive: true)
             ContentToolsObservability.record(
                 "action_outcome",

@@ -225,4 +225,14 @@ enum ContentToolGovernanceLogic {
         let needle = capability.lowercased()
         return !deniedCapabilities.contains { $0.lowercased() == needle }
     }
+
+    /// Merge course allowlist with org policy allowlist (intersection when both non-empty).
+    static func effectiveAllowedToolIds(
+        courseAllowed: [String],
+        orgAllowed: [String]
+    ) -> [String] {
+        if orgAllowed.isEmpty { return courseAllowed }
+        if courseAllowed.isEmpty { return orgAllowed }
+        return Array(Set(courseAllowed).intersection(orgAllowed))
+    }
 }
