@@ -63,8 +63,8 @@ struct ModerationSheet: View {
         busy = true
         errorText = nil
         defer { busy = false }
-        let ok = await onModerate(action)
-        if !ok {
+        let succeeded = await onModerate(action)
+        if !succeeded {
             if forbidden {
                 errorText = L.text("mobile.contentTools.governance.moderateForbidden")
             } else {

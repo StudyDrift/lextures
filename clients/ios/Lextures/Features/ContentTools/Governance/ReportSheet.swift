@@ -70,8 +70,8 @@ struct ReportSheet: View {
         errorText = nil
         defer { busy = false }
         let noteTrim = note.trimmingCharacters(in: .whitespacesAndNewlines)
-        let ok = await onSubmit(category, noteTrim.isEmpty ? nil : noteTrim)
-        if ok {
+        let succeeded = await onSubmit(category, noteTrim.isEmpty ? nil : noteTrim)
+        if succeeded {
             done = true
             try? await Task.sleep(nanoseconds: 600_000_000)
             dismiss()
