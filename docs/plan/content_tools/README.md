@@ -156,7 +156,7 @@ in this series adds a migration or an endpoint** — mobile consumes the shipped
 | **CT.M6** | [Tool pack 2 — text & AI](../../completed/content_tools/CT.M6-mobile-tools-text-and-ai.md) | DONE | M | CT.M3 (+ CT.M9) | `ask_questions`, `explain_it_back`, `inline_discussion` |
 | **CT.M7** | [Tool pack 3 — direct manipulation](../../completed/content_tools/CT.M7-mobile-tools-manipulation.md) | DONE | M | CT.M3 | `sort_sequence`, `highlight_annotate`, `diagram_hotspot` — touch design + a non-drag path (WCAG §2.5.7) |
 | **CT.M8** | [Tool pack 4 — media & procedural](../../completed/content_tools/CT.M8-mobile-tools-media-and-procedural.md) | DONE | M | CT.M3, CT.M4 | `media_checkpoints` (native player), `worked_example`, `parameter_explorer`, `code_sandbox` via the sandbox |
-| **CT.M9** | [Governance, safety, accessibility & telemetry](CT.M9-mobile-tools-governance-a11y-telemetry.md) | MAJOR | S | CT.M3 | Allowlist/kill-switch enforcement, AI disclosure & consent, report/moderate, conformance surfacing, content-free telemetry |
+| **CT.M9** | [Governance, safety, accessibility & telemetry](../../completed/content_tools/CT.M9-mobile-tools-governance-a11y-telemetry.md) | DONE | S | CT.M3 | Allowlist/kill-switch enforcement, AI disclosure & consent, report/moderate, conformance surfacing, content-free telemetry |
 
 ```
 CT.M1 Markdown ──► CT.M2 Parity ──► CT.M3 Host ──┬─► CT.M4 Sandbox ──► (marketplace tools)

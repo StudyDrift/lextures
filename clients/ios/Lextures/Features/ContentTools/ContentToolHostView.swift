@@ -151,16 +151,18 @@ struct ContentToolHostView: View {
         )
 
         if decision != .mount {
-            let _ = ContentToolsObservability.record(
-                "policy_blocked",
-                toolId: instance.toolId,
-                attributes: ["reason": decision.rawValue]
-            )
             PolicyBlockedPlaceholder(
                 decision: decision,
                 toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
                 onRefresh: refreshGovernance
             )
+            .onAppear {
+                ContentToolsObservability.record(
+                    "policy_blocked",
+                    toolId: instance.toolId,
+                    attributes: ["reason": decision.rawValue]
+                )
+            }
         } else {
             mountedAllowed(instance: instance, page: page, killed: killed)
         }
@@ -190,30 +192,31 @@ struct ContentToolHostView: View {
             deprecated: instance.deprecated,
             killed: killed
         )
-        let _ = ContentToolsObservability.record("tool_mount", toolId: instance.toolId)
 
+        Group {
         switch path {
         case .placeholder:
-            let _ = ContentToolsObservability.record(
-                "unsupported_placeholder",
-                toolId: instance.toolId
-            )
             ToolPlaceholderView(
                 reason: .openInBrowser,
                 toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
                 onOpenInBrowser: { openWeb(page: page, instanceId: instance.id) }
             )
+            .onAppear {
+                ContentToolsObservability.record("unsupported_placeholder", toolId: instance.toolId)
+            }
         case .native:
             if crashed {
-                let _ = ContentToolsObservability.record(
-                    "render_error",
-                    toolId: instance.toolId,
-                    attributes: ["error_class": "crash"]
-                )
                 ToolErrorCardView(
                     toolName: ContentToolHostLogic.displayTitle(instance: instance, toolId: instance.toolId),
                     onRetry: { crashed = false }
                 )
+                .onAppear {
+                    ContentToolsObservability.record(
+                        "render_error",
+                        toolId: instance.toolId,
+                        attributes: ["error_class": "crash"]
+                    )
+                }
             } else {
                 toolFrame(
                     instance: instance,
@@ -268,6 +271,10 @@ struct ContentToolHostView: View {
                     }
                 )
             }
+        }
+        }
+        .onAppear {
+            ContentToolsObservability.record("tool_mount", toolId: instance.toolId)
         }
     }
 
@@ -357,12 +364,14 @@ struct ContentToolHostView: View {
                             }
                         )
                     } else if requiresAI && !aiAllowed {
-                        let _ = ContentToolsObservability.record(
-                            "ai_blocked_by_consent",
-                            toolId: instance.toolId
-                        )
                         ConsentGateView(busy: consentBusy) {
                             Task { await postConsent(decision: "acknowledged", toolId: instance.toolId, page: page) }
+                        }
+                        .onAppear {
+                            ContentToolsObservability.record(
+                                "ai_blocked_by_consent",
+                                toolId: instance.toolId
+                            )
                         }
                     }
                     if showCrisis {
