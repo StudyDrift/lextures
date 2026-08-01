@@ -1,6 +1,6 @@
 # CT.M9 — Mobile Content Tools: Governance, Safety, Accessibility & Telemetry
 
-> Implementation plan. Source: mobile half of [CT.8](../../completed/content_tools/CT.8-governance-safety-privacy-accessibility.md) and the client half of [CT.7](../../completed/content_tools/CT.7-analytics-insights-and-gradebook.md). Folder overview: [README](README.md).
+> Implementation plan. Source: mobile half of [CT.8](CT.8-governance-safety-privacy-accessibility.md) and the client half of [CT.7](CT.7-analytics-insights-and-gradebook.md). Folder overview: [README](../../plan/content_tools/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Content Tools (CT) — Mobile |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Mobile squad + trust & safety (consult) |
 | **Depends on** | CT.M3 |
@@ -374,5 +374,5 @@ server-side; mobile explains their outcomes honestly rather than retrying.
 - Related plans: [CT.M3](CT.M3-mobile-content-tool-host-and-state.md),
   [CT.M4](CT.M4-mobile-sandboxed-webview-tool-host.md), [CT.M6](CT.M6-mobile-tools-text-and-ai.md).
 - Instruments: `docs/accessibility/mobile-audit-checklist.md`; standards folder
-  [`../standards/`](../standards/README.md) — S01, S02, S06, S08, S13, S20.
+  [`../../plan/standards/`](../../plan/standards/README.md) — S01, S02, S06, S08, S13, S20.
 - External: WCAG 2.1 AA; EU AI Act transparency obligations; COPPA; FERPA.

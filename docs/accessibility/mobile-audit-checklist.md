@@ -52,6 +52,20 @@ and read-aloud/dictation coverage. Use during feature work and before release.
 - [ ] Dyslexia-friendly display toggle labeled with hint
 - [ ] Sign out and clear-cache actions labeled; destructive role where appropriate
 
+### Content Tools host & renderers (CT.M9)
+
+Frame chrome and every shipped renderer (Pack 1–4 + sandbox WebView):
+
+- [x] Tool frame accessible name includes title, status, and sandbox / non-conformant notes when shown
+- [x] AI disclosure banner is native frame chrome above tool content; encountered before the tool body
+- [x] Consent gate and report / moderate dialogs are modal with labeled actions (not icon-only)
+- [x] Crisis resources announce assertively; support copy is readable at max font scale
+- [x] Policy-blocked / killed / withdrawn placeholders use plain-language reasons
+- [x] Overflow Report is reachable in two taps; controls meet 44×44 pt / 48×48 dp targets
+- [x] Filter outcomes never echo blocked learner content back as an error string
+- [x] RTL verified for governance chrome (disclosure, report sheet, crisis resources)
+- [x] No open blocker findings for the frame or shipped renderers prior to GA
+
 ## Automated checks (CI)
 
 | Platform | Check | Command |

@@ -59,6 +59,19 @@ data class ToolInstancesListResponse(
     val instances: List<ToolInstance> = emptyList(),
 )
 
+/** CT.M9 — org governance policy snapshot (mirrors server OrgPolicy). */
+@Serializable
+data class ToolGovernancePolicy(
+    val deniedCapabilities: List<String> = emptyList(),
+    val deniedToolIds: List<String> = emptyList(),
+    val allowedToolIds: List<String> = emptyList(),
+    val aiDisclosureMode: String = "",
+    val freeTextFilterAction: String = "",
+    val crisisEscalationEnabled: Boolean? = null,
+    val aiLogRetentionDays: Int = 0,
+    val updatedAt: String? = null,
+)
+
 @Serializable
 data class ContentToolSettings(
     val allowedToolIds: List<String> = emptyList(),
@@ -70,6 +83,61 @@ data class ContentToolSettings(
     val linkHostAllowlist: List<String> = emptyList(),
     val gradeLinksAllowed: Boolean = false,
     val updatedAt: String? = null,
+    /** CT.M9 — org policy + kill snapshot attached to settings GET. */
+    val policy: ToolGovernancePolicy? = null,
+    val killedToolIds: List<String> = emptyList(),
+    val killedCapabilities: List<String> = emptyList(),
+    val killAllAI: Boolean = false,
+)
+
+@Serializable
+data class ContentToolModerationAction(
+    val id: String = "",
+    val instanceId: String = "",
+    val action: String = "",
+    val category: String? = null,
+    val reason: String? = null,
+    val contentPath: String? = null,
+    val createdAt: String = "",
+)
+
+@Serializable
+data class ContentToolReportBody(
+    val category: String? = null,
+    val reason: String? = null,
+    val contentPath: String? = null,
+)
+
+@Serializable
+data class ContentToolModerateBody(
+    val action: String,
+    val category: String? = null,
+    val reason: String? = null,
+    val contentPath: String? = null,
+)
+
+@Serializable
+data class ContentToolModerationListResponse(
+    val items: List<ContentToolModerationAction> = emptyList(),
+)
+
+@Serializable
+data class ContentToolConformanceTool(
+    val toolId: String = "",
+    val ok: Boolean = true,
+    val wcagLevel: String = "",
+    val errors: List<String>? = null,
+)
+
+@Serializable
+data class ContentToolConformanceResponse(
+    val ok: Boolean = true,
+    val tools: List<ContentToolConformanceTool> = emptyList(),
+)
+
+@Serializable
+data class ContentToolFilterFlagsResponse(
+    val items: List<JsonElement> = emptyList(),
 )
 
 @Serializable

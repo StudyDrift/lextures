@@ -1,0 +1,475 @@
+{
+  "description": "Shared CT.M9 governance behaviour fixtures consumed by iOS/Android unit suites.",
+  "staleWindowMs": 900000,
+  "mountDecision": {
+    "cases": [
+      {
+        "name": "allowed_mounts",
+        "input": {
+          "toolId": "flashcards",
+          "capabilities": [],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": ["flashcards", "ask_questions"],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "mount"
+      },
+      {
+        "name": "empty_allowlist_allows",
+        "input": {
+          "toolId": "flashcards",
+          "capabilities": [],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "mount"
+      },
+      {
+        "name": "not_on_allowlist",
+        "input": {
+          "toolId": "ask_questions",
+          "capabilities": ["ai"],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": ["flashcards"],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_not_available"
+      },
+      {
+        "name": "denied_tool_id",
+        "input": {
+          "toolId": "inline_discussion",
+          "capabilities": ["peer_visible"],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": ["inline_discussion"],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_not_available"
+      },
+      {
+        "name": "denied_capability_ai",
+        "input": {
+          "toolId": "ask_questions",
+          "capabilities": ["ai"],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": ["ai"],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_capability"
+      },
+      {
+        "name": "tombstone",
+        "input": {
+          "toolId": "vendor.tool",
+          "capabilities": [],
+          "sandboxMode": "iframe",
+          "tombstone": true,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_tombstone"
+      },
+      {
+        "name": "breaker",
+        "input": {
+          "toolId": "flashcards",
+          "capabilities": [],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": true,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_breaker"
+      },
+      {
+        "name": "killed",
+        "input": {
+          "toolId": "ask_questions",
+          "capabilities": ["ai"],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": true,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_killed"
+      },
+      {
+        "name": "deprecated",
+        "input": {
+          "toolId": "old_tool",
+          "capabilities": [],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": true,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_deprecated"
+      },
+      {
+        "name": "unknown_state_fail_closed",
+        "input": {
+          "toolId": "flashcards",
+          "capabilities": [],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": true
+        },
+        "expected": "block_unknown"
+      },
+      {
+        "name": "stale_policy_blocks_ai",
+        "input": {
+          "toolId": "ask_questions",
+          "capabilities": ["ai"],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_stale_policy"
+      },
+      {
+        "name": "stale_policy_blocks_third_party",
+        "input": {
+          "toolId": "vendor.tool",
+          "capabilities": ["network"],
+          "sandboxMode": "iframe",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_stale_policy"
+      },
+      {
+        "name": "stale_policy_allows_first_party_non_ai",
+        "input": {
+          "toolId": "flashcards",
+          "capabilities": [],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": ["flashcards"],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "mount"
+      },
+      {
+        "name": "unfetched_policy_blocks_ai",
+        "input": {
+          "toolId": "ask_questions",
+          "capabilities": ["ai"],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": [],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": false,
+          "policyAgeMs": 0,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_stale_policy"
+      },
+      {
+        "name": "unfetched_policy_allows_cached_first_party",
+        "input": {
+          "toolId": "flashcards",
+          "capabilities": [],
+          "sandboxMode": "in_process",
+          "tombstone": false,
+          "breakerOpen": false,
+          "deprecated": false,
+          "killed": false,
+          "allowedToolIds": ["flashcards"],
+          "deniedToolIds": [],
+          "deniedCapabilities": [],
+          "policyFetched": false,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false,
+          "hasCachedPolicy": true
+        },
+        "expected": "mount"
+      },
+      {
+        "name": "precedence_tombstone_over_kill",
+        "input": {
+          "toolId": "vendor.tool",
+          "capabilities": [],
+          "sandboxMode": "iframe",
+          "tombstone": true,
+          "breakerOpen": true,
+          "deprecated": true,
+          "killed": true,
+          "allowedToolIds": [],
+          "deniedToolIds": ["vendor.tool"],
+          "deniedCapabilities": [],
+          "policyFetched": true,
+          "policyAgeMs": 1000,
+          "staleWindowMs": 900000,
+          "unknownGovernanceState": false
+        },
+        "expected": "block_tombstone"
+      }
+    ]
+  },
+  "consentGating": {
+    "cases": [
+      {
+        "name": "unfetched_blocks",
+        "disclosureMode": "acknowledge",
+        "decision": null,
+        "consentFetched": false,
+        "aiAllowed": false,
+        "showDisclosure": true
+      },
+      {
+        "name": "mode_none_allows",
+        "disclosureMode": "none",
+        "decision": null,
+        "consentFetched": true,
+        "aiAllowed": true,
+        "showDisclosure": false
+      },
+      {
+        "name": "acknowledge_required",
+        "disclosureMode": "acknowledge",
+        "decision": null,
+        "consentFetched": true,
+        "aiAllowed": false,
+        "showDisclosure": true
+      },
+      {
+        "name": "acknowledged_allows",
+        "disclosureMode": "acknowledge",
+        "decision": "acknowledged",
+        "consentFetched": true,
+        "aiAllowed": true,
+        "showDisclosure": false
+      },
+      {
+        "name": "opted_out_blocks",
+        "disclosureMode": "banner",
+        "decision": "opted_out",
+        "consentFetched": true,
+        "aiAllowed": false,
+        "showDisclosure": false
+      },
+      {
+        "name": "banner_without_decision_allows_with_disclosure",
+        "disclosureMode": "banner",
+        "decision": null,
+        "consentFetched": true,
+        "aiAllowed": true,
+        "showDisclosure": true
+      }
+    ]
+  },
+  "killDerivation": {
+    "cases": [
+      {
+        "name": "tool_killed",
+        "toolId": "ask_questions",
+        "capabilities": ["ai"],
+        "killedToolIds": ["ask_questions"],
+        "killedCapabilities": [],
+        "killAllAI": false,
+        "expected": true
+      },
+      {
+        "name": "capability_killed",
+        "toolId": "ask_questions",
+        "capabilities": ["ai"],
+        "killedToolIds": [],
+        "killedCapabilities": ["ai"],
+        "killAllAI": false,
+        "expected": true
+      },
+      {
+        "name": "all_ai_killed",
+        "toolId": "explain_it_back",
+        "capabilities": ["ai"],
+        "killedToolIds": [],
+        "killedCapabilities": [],
+        "killAllAI": true,
+        "expected": true
+      },
+      {
+        "name": "non_ai_survives_all_ai_kill",
+        "toolId": "flashcards",
+        "capabilities": [],
+        "killedToolIds": [],
+        "killedCapabilities": [],
+        "killAllAI": true,
+        "expected": false
+      }
+    ]
+  },
+  "reportReachability": {
+    "maxTaps": 2,
+    "overflowThenReportTaps": 2
+  },
+  "telemetryPayloadShape": {
+    "allowedKeys": ["tool_id", "platform", "outcome", "error_class", "reason", "event"],
+    "forbiddenValueSubstrings": ["prompt:", "state_json", "free_text=", "peer_content="],
+    "validExamples": [
+      { "tool_id": "ask_questions", "platform": "ios", "outcome": "blocked", "error_class": "consent" },
+      { "tool_id": "flashcards", "platform": "android", "outcome": "ok" }
+    ],
+    "invalidExamples": [
+      { "tool_id": "ask_questions", "prompt": "what is photosynthesis?" },
+      { "tool_id": "inline_discussion", "free_text": "hello classmates" }
+    ]
+  },
+  "filterCrisis": {
+    "cases": [
+      {
+        "name": "filtered_block",
+        "errorCode": "filtered",
+        "crisis": false,
+        "expectedKind": "filtered",
+        "preserveDraft": true,
+        "retry": false
+      },
+      {
+        "name": "crisis_escalation",
+        "errorCode": "filtered",
+        "crisis": true,
+        "expectedKind": "crisis",
+        "preserveDraft": true,
+        "retry": false
+      },
+      {
+        "name": "generic_error",
+        "errorCode": "provider_unavailable",
+        "crisis": false,
+        "expectedKind": "generic",
+        "preserveDraft": true,
+        "retry": true
+      }
+    ]
+  },
+  "messageKeys": {
+    "block_not_available": "mobile.contentTools.governance.notAvailableInCourse",
+    "block_capability": "mobile.contentTools.governance.notAvailableInCourse",
+    "block_killed": "mobile.contentTools.governance.killed",
+    "block_breaker": "mobile.contentTools.governance.temporarilyUnavailable",
+    "block_tombstone": "mobile.contentTools.governance.withdrawn",
+    "block_deprecated": "mobile.contentTools.governance.withdrawn",
+    "block_unknown": "mobile.contentTools.governance.unavailable",
+    "block_stale_policy": "mobile.contentTools.governance.policyStale"
+  }
+}

@@ -1024,6 +1024,11 @@ export const contentToolsSettingsSchema = z.object({
   linkHostAllowlist: z.array(z.string()).default([]),
   gradeLinksAllowed: z.boolean().default(true),
   updatedAt: z.string().optional(),
+  // CT.M9 — org policy + kill snapshot (mobile/web hosts); ignored by settings editors.
+  policy: z.unknown().optional(),
+  killedToolIds: z.array(z.string()).optional(),
+  killedCapabilities: z.array(z.string()).optional(),
+  killAllAI: z.boolean().optional(),
 })
 
 /** CT.7 — Instance analytics. */

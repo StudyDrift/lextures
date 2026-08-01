@@ -9,6 +9,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import java.net.URLEncoder
 
 /** CT.M3 — Content Tools HTTP client (consumes shipped web APIs). */
@@ -203,6 +205,104 @@ object ContentToolsApi {
         }
         json.decodeFromString(ToolStateEnvelope.serializer(), body)
     }
+
+    suspend fun reportContent(
+        courseCode: String,
+        instanceId: String,
+        category: String?,
+        reason: String?,
+        contentPath: String?,
+        accessToken: String,
+    ): ContentToolModerationAction = withContext(Dispatchers.IO) {
+        val payload = ContentToolReportBody(category = category, reason = reason, contentPath = contentPath)
+        val (body, status) = client.requestRaw(
+            path = "${base(courseCode)}/instances/${encodePath(instanceId)}/report",
+            method = "POST",
+            body = json.encodeToString(ContentToolReportBody.serializer(), payload),
+            accessToken = accessToken,
+        )
+        if (status !in 200..299) {
+            throw ApiError.HttpStatus(status, parseApiErrorMessage(body))
+        }
+        json.decodeFromString(ContentToolModerationAction.serializer(), body)
+    }
+
+    suspend fun moderateContent(
+        courseCode: String,
+        instanceId: String,
+        action: String,
+        category: String?,
+        reason: String?,
+        contentPath: String?,
+        accessToken: String,
+    ): ContentToolModerationAction = withContext(Dispatchers.IO) {
+        val payload = ContentToolModerateBody(
+            action = action,
+            category = category,
+            reason = reason,
+            contentPath = contentPath,
+        )
+        val (body, status) = client.requestRaw(
+            path = "${base(courseCode)}/instances/${encodePath(instanceId)}/moderate",
+            method = "POST",
+            body = json.encodeToString(ContentToolModerateBody.serializer(), payload),
+            accessToken = accessToken,
+        )
+        if (status !in 200..299) {
+            throw ApiError.HttpStatus(status, parseApiErrorMessage(body))
+        }
+        runCatching {
+            val obj = json.parseToJsonElement(body).jsonObject
+            obj["action"]?.let {
+                json.decodeFromJsonElement(ContentToolModerationAction.serializer(), it)
+            }
+        }.getOrNull() ?: json.decodeFromString(ContentToolModerationAction.serializer(), body)
+    }
+
+    suspend fun fetchModeration(
+        courseCode: String,
+        instanceId: String,
+        accessToken: String,
+    ): List<ContentToolModerationAction> = withContext(Dispatchers.IO) {
+        val (body, status) = client.requestRaw(
+            path = "${base(courseCode)}/instances/${encodePath(instanceId)}/moderation",
+            method = "GET",
+            accessToken = accessToken,
+        )
+        if (status !in 200..299) {
+            throw ApiError.HttpStatus(status, parseApiErrorMessage(body))
+        }
+        json.decodeFromString(ContentToolModerationListResponse.serializer(), body).items
+    }
+
+    suspend fun fetchFilterFlags(
+        courseCode: String,
+        instanceId: String,
+        accessToken: String,
+    ): List<JsonElement> = withContext(Dispatchers.IO) {
+        val (body, status) = client.requestRaw(
+            path = "${base(courseCode)}/instances/${encodePath(instanceId)}/filter-flags",
+            method = "GET",
+            accessToken = accessToken,
+        )
+        if (status !in 200..299) {
+            throw ApiError.HttpStatus(status, parseApiErrorMessage(body))
+        }
+        json.decodeFromString(ContentToolFilterFlagsResponse.serializer(), body).items
+    }
+
+    suspend fun fetchConformance(accessToken: String): ContentToolConformanceResponse =
+        withContext(Dispatchers.IO) {
+            val (body, status) = client.requestRaw(
+                path = "/api/v1/content-tools/conformance",
+                method = "GET",
+                accessToken = accessToken,
+            )
+            if (status !in 200..299) {
+                throw ApiError.HttpStatus(status, parseApiErrorMessage(body))
+            }
+            json.decodeFromString(ContentToolConformanceResponse.serializer(), body)
+        }
 
     fun statePutPath(courseCode: String, instanceId: String): String =
         "${base(courseCode)}/instances/${encodePath(instanceId)}/state"

@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E31A006FADFB4A8E80A9C5D6 /* ContentToolGovernanceLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3634406E3BBC47DAAE63B6D4 /* ContentToolGovernanceLogic.swift */; };
+		F4C952DFE5854B73A59EFEE8 /* ContentToolsObservability.swift in Sources */ = {isa = PBXBuildFile; fileRef = E551C7D022414943A2725E97 /* ContentToolsObservability.swift */; };
+		A237083515EA4E38B997726C /* AIDisclosureBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0144483B9E467C963096A7 /* AIDisclosureBanner.swift */; };
+		572A93C2E4C94A3BA64D8429 /* ConsentGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D30A4DEECF4E9CA072E8EA /* ConsentGateView.swift */; };
+		E216A15F45DE437C888BA7C7 /* PolicyBlockedPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 592E2CE0732B4ED883DE285F /* PolicyBlockedPlaceholder.swift */; };
+		87D27E2B7B324239A8E3E71F /* CrisisResourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D41219DD1024718A4C0EFA4 /* CrisisResourcesView.swift */; };
+		DCE44E76D0654D11A6AFEA12 /* ReportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3B937220D84FD896516181 /* ReportSheet.swift */; };
+		669D073B1491497CA990F54B /* ModerationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFAF06C5C6A4B4596A97E0C /* ModerationSheet.swift */; };
+		72B53DAC9F5F4224BBAD3EC3 /* ContentToolGovernanceLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295D398A06314DADB86787A1 /* ContentToolGovernanceLogicTests.swift */; };
 		DE69980481944399ADC75CCC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FB40F9A7D4AF185E1D320 /* AppDelegate.swift */; };
 		7F201566C5E5455CABF1D246 /* LexturesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CAAF09167E4F9A9C60FB97 /* LexturesApp.swift */; };
 		71AF4D18A1274613AC7798AC /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3285775BF67C45CBADCD47BF /* RootView.swift */; };
@@ -705,6 +714,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3634406E3BBC47DAAE63B6D4 /* ContentToolGovernanceLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentToolGovernanceLogic.swift; sourceTree = "<group>"; };
+		E551C7D022414943A2725E97 /* ContentToolsObservability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentToolsObservability.swift; sourceTree = "<group>"; };
+		3C0144483B9E467C963096A7 /* AIDisclosureBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDisclosureBanner.swift; sourceTree = "<group>"; };
+		34D30A4DEECF4E9CA072E8EA /* ConsentGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsentGateView.swift; sourceTree = "<group>"; };
+		592E2CE0732B4ED883DE285F /* PolicyBlockedPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolicyBlockedPlaceholder.swift; sourceTree = "<group>"; };
+		8D41219DD1024718A4C0EFA4 /* CrisisResourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrisisResourcesView.swift; sourceTree = "<group>"; };
+		EC3B937220D84FD896516181 /* ReportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportSheet.swift; sourceTree = "<group>"; };
+		1CFAF06C5C6A4B4596A97E0C /* ModerationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModerationSheet.swift; sourceTree = "<group>"; };
+		295D398A06314DADB86787A1 /* ContentToolGovernanceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentToolGovernanceLogicTests.swift; sourceTree = "<group>"; };
 		CA17EC71758646FCA8EDD2C7 /* Lextures.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lextures.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61053BDA0F5E4D19A4D3B996 /* LexturesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LexturesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		177FB40F9A7D4AF185E1D320 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -1417,6 +1435,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F490110DA404443CA6568C61 /* Governance */ = {
+			isa = PBXGroup;
+			children = (
+				3C0144483B9E467C963096A7 /* AIDisclosureBanner.swift */,
+				34D30A4DEECF4E9CA072E8EA /* ConsentGateView.swift */,
+				592E2CE0732B4ED883DE285F /* PolicyBlockedPlaceholder.swift */,
+				8D41219DD1024718A4C0EFA4 /* CrisisResourcesView.swift */,
+				EC3B937220D84FD896516181 /* ReportSheet.swift */,
+				1CFAF06C5C6A4B4596A97E0C /* ModerationSheet.swift */,
+			);
+			path = Governance;
+			sourceTree = "<group>";
+		};
 		8AFADC6944FE465EA8290EEA /* Lextures */ = {
 			isa = PBXGroup;
 			children = (
@@ -1453,6 +1484,7 @@
 				D10D477C8D5C421E9F98D2F9 /* CatalogLogicTests.swift */,
 				0BC04C18D41B44BBA48AE881 /* ConferenceLogicTests.swift */,
 				3947CD1EC14E42849ABC5A4B /* ContentToolHostLogicTests.swift */,
+				295D398A06314DADB86787A1 /* ContentToolGovernanceLogicTests.swift */,
 				66EA5CC2C24F4FBFA5E9BCFD /* ContentToolPack1LogicTests.swift */,
 				F444F02D25474A218D041F45 /* ContentToolSandboxLogicTests.swift */,
 				9242CCC3BBC54928AB7DFB9C /* CourseAccessibilityReviewLogicTests.swift */,
@@ -1719,6 +1751,8 @@
 				5194BCD84AC24A74B80547EB /* CatalogLogic.swift */,
 				213A23F32AF045688FE3F5F5 /* ConferenceLogic.swift */,
 				68EE46AF9F8D41E0B31F5B40 /* ContentToolHostLogic.swift */,
+				E551C7D022414943A2725E97 /* ContentToolsObservability.swift */,
+				3634406E3BBC47DAAE63B6D4 /* ContentToolGovernanceLogic.swift */,
 				06EDEC61715643B8BDE154A0 /* ContentToolPack1Logic.swift */,
 				C70BE644B18A4428ADB58750 /* ContentToolSandboxLogic.swift */,
 				89BBDD44669B4469ACC76607 /* CourseAccessibilityReviewLogic.swift */,
@@ -2119,6 +2153,7 @@
 				E585BD20964147D79FDC0D47 /* ContentToolHostView.swift */,
 				EC4401EDF42543FEBFEF6DE2 /* ContentToolsMarkdownBlock.swift */,
 				7D993BEDB90E43799506DE47 /* ContentToolsPageProvider.swift */,
+				F490110DA404443CA6568C61 /* Governance */,
 				7744B42BFFB94BB4B54EB7FA /* NoopProbeRendererView.swift */,
 				74A3BAF5B46C4618A0581DC0 /* ToolErrorCardView.swift */,
 				61C302FA8763408883548C50 /* ToolFrameView.swift */,
@@ -2936,6 +2971,14 @@
 				50C3A165354B452E98B3C522 /* CatalogLogic.swift in Sources */,
 				E96FF31EA43946D798F3D1D9 /* ConferenceLogic.swift in Sources */,
 				5728BA71449E4DE3A451D55C /* ContentToolHostLogic.swift in Sources */,
+				669D073B1491497CA990F54B /* ModerationSheet.swift in Sources */,
+				DCE44E76D0654D11A6AFEA12 /* ReportSheet.swift in Sources */,
+				87D27E2B7B324239A8E3E71F /* CrisisResourcesView.swift in Sources */,
+				E216A15F45DE437C888BA7C7 /* PolicyBlockedPlaceholder.swift in Sources */,
+				572A93C2E4C94A3BA64D8429 /* ConsentGateView.swift in Sources */,
+				A237083515EA4E38B997726C /* AIDisclosureBanner.swift in Sources */,
+				F4C952DFE5854B73A59EFEE8 /* ContentToolsObservability.swift in Sources */,
+				E31A006FADFB4A8E80A9C5D6 /* ContentToolGovernanceLogic.swift in Sources */,
 				58CD0FDFAAE841F79ACE6FAD /* ContentToolPack1Logic.swift in Sources */,
 				3C8183817057463AA5A38514 /* ContentToolSandboxLogic.swift in Sources */,
 				620F03E5CE384ABD9F4DB998 /* CourseAccessibilityReviewLogic.swift in Sources */,
@@ -3495,6 +3538,7 @@
 				DAECDF3B02B2419FA2202078 /* CatalogLogicTests.swift in Sources */,
 				47662D6A2A8C4043A234432D /* ConferenceLogicTests.swift in Sources */,
 				4AF460EC21EB4F47BC0DF938 /* ContentToolHostLogicTests.swift in Sources */,
+				72B53DAC9F5F4224BBAD3EC3 /* ContentToolGovernanceLogicTests.swift in Sources */,
 				2BF1B0AC28A44156A9FD785A /* ContentToolPack1LogicTests.swift in Sources */,
 				FB6212C342FF4F90A2E7F07C /* ContentToolSandboxLogicTests.swift in Sources */,
 				3AC692EDDFFE4088B455C7CB /* CourseAccessibilityReviewLogicTests.swift in Sources */,
