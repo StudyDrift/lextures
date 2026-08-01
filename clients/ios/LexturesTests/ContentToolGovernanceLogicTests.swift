@@ -132,13 +132,13 @@ final class ContentToolGovernanceLogicTests: XCTestCase {
         let shape = try object(root["telemetryPayloadShape"])
         for example in try objects(shape["validExamples"]) {
             let attrs = example.reduce(into: [String: String]()) { acc, pair in
-                if let s = pair.value as? String { acc[pair.key] = s }
+                if let value = pair.value as? String { acc[pair.key] = value }
             }
             XCTAssertTrue(ContentToolGovernanceLogic.telemetryAttributesAreContentFree(attrs))
         }
         for example in try objects(shape["invalidExamples"]) {
             let attrs = example.reduce(into: [String: String]()) { acc, pair in
-                if let s = pair.value as? String { acc[pair.key] = s }
+                if let value = pair.value as? String { acc[pair.key] = value }
             }
             XCTAssertFalse(ContentToolGovernanceLogic.telemetryAttributesAreContentFree(attrs))
         }
