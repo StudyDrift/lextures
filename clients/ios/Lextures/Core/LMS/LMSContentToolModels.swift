@@ -170,6 +170,56 @@ struct ToolInstancesListResponse: Codable, Equatable {
     var instances: [ToolInstance]
 }
 
+/// CT.M9 — org governance policy snapshot (mirrors server OrgPolicy).
+struct ToolGovernancePolicy: Codable, Equatable {
+    var deniedCapabilities: [String]
+    var deniedToolIds: [String]
+    var allowedToolIds: [String]
+    var aiDisclosureMode: String
+    var freeTextFilterAction: String
+    var crisisEscalationEnabled: Bool?
+    var aiLogRetentionDays: Int
+    var updatedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case deniedCapabilities, deniedToolIds, allowedToolIds
+        case aiDisclosureMode, freeTextFilterAction, crisisEscalationEnabled
+        case aiLogRetentionDays, updatedAt
+    }
+
+    init(
+        deniedCapabilities: [String] = [],
+        deniedToolIds: [String] = [],
+        allowedToolIds: [String] = [],
+        aiDisclosureMode: String = "",
+        freeTextFilterAction: String = "",
+        crisisEscalationEnabled: Bool? = nil,
+        aiLogRetentionDays: Int = 0,
+        updatedAt: String? = nil
+    ) {
+        self.deniedCapabilities = deniedCapabilities
+        self.deniedToolIds = deniedToolIds
+        self.allowedToolIds = allowedToolIds
+        self.aiDisclosureMode = aiDisclosureMode
+        self.freeTextFilterAction = freeTextFilterAction
+        self.crisisEscalationEnabled = crisisEscalationEnabled
+        self.aiLogRetentionDays = aiLogRetentionDays
+        self.updatedAt = updatedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        deniedCapabilities = try c.decodeIfPresent([String].self, forKey: .deniedCapabilities) ?? []
+        deniedToolIds = try c.decodeIfPresent([String].self, forKey: .deniedToolIds) ?? []
+        allowedToolIds = try c.decodeIfPresent([String].self, forKey: .allowedToolIds) ?? []
+        aiDisclosureMode = try c.decodeIfPresent(String.self, forKey: .aiDisclosureMode) ?? ""
+        freeTextFilterAction = try c.decodeIfPresent(String.self, forKey: .freeTextFilterAction) ?? ""
+        crisisEscalationEnabled = try c.decodeIfPresent(Bool.self, forKey: .crisisEscalationEnabled)
+        aiLogRetentionDays = try c.decodeIfPresent(Int.self, forKey: .aiLogRetentionDays) ?? 0
+        updatedAt = try c.decodeIfPresent(String.self, forKey: .updatedAt)
+    }
+}
+
 struct ContentToolSettings: Codable, Equatable {
     var allowedToolIds: [String]
     var studentResetAllowed: Bool
@@ -180,11 +230,47 @@ struct ContentToolSettings: Codable, Equatable {
     var linkHostAllowlist: [String]
     var gradeLinksAllowed: Bool
     var updatedAt: String?
+    /// CT.M9 — org policy + kill snapshot attached to settings GET.
+    var policy: ToolGovernancePolicy?
+    var killedToolIds: [String]
+    var killedCapabilities: [String]
+    var killAllAI: Bool
 
     enum CodingKeys: String, CodingKey {
         case allowedToolIds, studentResetAllowed, maxInstancesPerItem
         case monthlyAiTokenBudget, dailyAiCallsPerUser, linkIngestionMode
         case linkHostAllowlist, gradeLinksAllowed, updatedAt
+        case policy, killedToolIds, killedCapabilities, killAllAI
+    }
+
+    init(
+        allowedToolIds: [String] = [],
+        studentResetAllowed: Bool = false,
+        maxInstancesPerItem: Int = 0,
+        monthlyAiTokenBudget: Int64 = 0,
+        dailyAiCallsPerUser: Int = 0,
+        linkIngestionMode: String = "off",
+        linkHostAllowlist: [String] = [],
+        gradeLinksAllowed: Bool = false,
+        updatedAt: String? = nil,
+        policy: ToolGovernancePolicy? = nil,
+        killedToolIds: [String] = [],
+        killedCapabilities: [String] = [],
+        killAllAI: Bool = false
+    ) {
+        self.allowedToolIds = allowedToolIds
+        self.studentResetAllowed = studentResetAllowed
+        self.maxInstancesPerItem = maxInstancesPerItem
+        self.monthlyAiTokenBudget = monthlyAiTokenBudget
+        self.dailyAiCallsPerUser = dailyAiCallsPerUser
+        self.linkIngestionMode = linkIngestionMode
+        self.linkHostAllowlist = linkHostAllowlist
+        self.gradeLinksAllowed = gradeLinksAllowed
+        self.updatedAt = updatedAt
+        self.policy = policy
+        self.killedToolIds = killedToolIds
+        self.killedCapabilities = killedCapabilities
+        self.killAllAI = killAllAI
     }
 
     init(from decoder: Decoder) throws {
@@ -198,7 +284,89 @@ struct ContentToolSettings: Codable, Equatable {
         linkHostAllowlist = try c.decodeIfPresent([String].self, forKey: .linkHostAllowlist) ?? []
         gradeLinksAllowed = try c.decodeIfPresent(Bool.self, forKey: .gradeLinksAllowed) ?? false
         updatedAt = try c.decodeIfPresent(String.self, forKey: .updatedAt)
+        policy = try c.decodeIfPresent(ToolGovernancePolicy.self, forKey: .policy)
+        killedToolIds = try c.decodeIfPresent([String].self, forKey: .killedToolIds) ?? []
+        killedCapabilities = try c.decodeIfPresent([String].self, forKey: .killedCapabilities) ?? []
+        killAllAI = try c.decodeIfPresent(Bool.self, forKey: .killAllAI) ?? false
     }
+}
+
+struct ContentToolModerationAction: Codable, Equatable {
+    var id: String
+    var instanceId: String
+    var action: String
+    var category: String?
+    var reason: String?
+    var contentPath: String?
+    var createdAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case id, instanceId, action, category, reason, contentPath, createdAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(String.self, forKey: .id) ?? ""
+        instanceId = try c.decodeIfPresent(String.self, forKey: .instanceId) ?? ""
+        action = try c.decodeIfPresent(String.self, forKey: .action) ?? ""
+        category = try c.decodeIfPresent(String.self, forKey: .category)
+        reason = try c.decodeIfPresent(String.self, forKey: .reason)
+        contentPath = try c.decodeIfPresent(String.self, forKey: .contentPath)
+        createdAt = try c.decodeIfPresent(String.self, forKey: .createdAt) ?? ""
+    }
+}
+
+struct ContentToolReportBody: Encodable {
+    var category: String?
+    var reason: String?
+    var contentPath: String?
+}
+
+struct ContentToolModerateBody: Encodable {
+    var action: String
+    var category: String?
+    var reason: String?
+    var contentPath: String?
+}
+
+struct ContentToolModerationListResponse: Codable, Equatable {
+    var items: [ContentToolModerationAction]
+}
+
+struct ContentToolConformanceTool: Codable, Equatable {
+    var toolId: String
+    var ok: Bool
+    var wcagLevel: String
+    var errors: [String]?
+
+    enum CodingKeys: String, CodingKey {
+        case toolId, ok, wcagLevel, errors
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        toolId = try c.decodeIfPresent(String.self, forKey: .toolId) ?? ""
+        ok = try c.decodeIfPresent(Bool.self, forKey: .ok) ?? true
+        wcagLevel = try c.decodeIfPresent(String.self, forKey: .wcagLevel) ?? ""
+        errors = try c.decodeIfPresent([String].self, forKey: .errors)
+    }
+}
+
+struct ContentToolConformanceResponse: Codable, Equatable {
+    var ok: Bool
+    var tools: [ContentToolConformanceTool]
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        ok = try c.decodeIfPresent(Bool.self, forKey: .ok) ?? true
+        tools = try c.decodeIfPresent([ContentToolConformanceTool].self, forKey: .tools) ?? []
+    }
+
+    enum CodingKeys: String, CodingKey { case ok, tools }
+}
+
+struct ContentToolFilterFlagsResponse: Codable, Equatable {
+    var items: [JSONValue]
 }
 
 struct SaveToolStateBody: Encodable {

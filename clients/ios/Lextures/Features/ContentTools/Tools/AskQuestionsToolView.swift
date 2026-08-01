@@ -30,13 +30,8 @@ struct AskQuestionsToolView: View {
         )
     }
 
-    private var showDisclosure: Bool {
-        ContentToolPack2Logic.shouldShowAIDisclosure(
-            disclosureMode: consent?.aiDisclosureMode,
-            decision: consent?.decision,
-            consentFetched: consentFetched
-        )
-    }
+    /// CT.M9: disclosure lives in ToolFrame chrome so sandboxed tools cannot cover it.
+    private var showDisclosure: Bool { false }
 
     private var turns: [(id: String, role: String, text: String, citations: [(title: String, url: String?)])] {
         ContentToolPack2Logic.arrayField(props.state, key: "turns").compactMap { raw in

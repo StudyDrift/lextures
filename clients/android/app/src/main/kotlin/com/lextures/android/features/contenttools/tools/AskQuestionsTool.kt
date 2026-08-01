@@ -74,7 +74,8 @@ fun AskQuestionsTool(props: ContentToolRendererProps) {
     var consentFetched by remember { mutableStateOf(false) }
 
     val consentAllowed = ContentToolPack2Logic.composerAIAllowed(disclosureMode, decision, consentFetched)
-    val showDisclosure = ContentToolPack2Logic.shouldShowAIDisclosure(disclosureMode, decision, consentFetched)
+    // CT.M9: disclosure lives in ToolFrame chrome so sandboxed tools cannot cover it.
+    val showDisclosure = false
 
     val turns = remember(props.state) {
         ContentToolPack2Logic.arrayField(props.state, "turns").mapNotNull { raw ->

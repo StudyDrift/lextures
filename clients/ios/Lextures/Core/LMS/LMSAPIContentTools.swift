@@ -218,6 +218,93 @@ extension LMSAPI {
         return try decode(ContentToolAIConsent.self, from: data)
     }
 
+    static func reportContentToolContent(
+        courseCode: String,
+        instanceId: String,
+        category: String?,
+        reason: String?,
+        contentPath: String?,
+        accessToken: String
+    ) async throws -> ContentToolModerationAction {
+        let body = ContentToolReportBody(category: category, reason: reason, contentPath: contentPath)
+        let (data, _) = try await client.request(
+            path: "\(contentToolsBase(courseCode))/instances/\(encodePath(instanceId))/report",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ContentToolModerationAction.self, from: data)
+    }
+
+    static func moderateContentToolContent(
+        courseCode: String,
+        instanceId: String,
+        action: String,
+        category: String?,
+        reason: String?,
+        contentPath: String?,
+        accessToken: String
+    ) async throws -> ContentToolModerationAction {
+        let body = ContentToolModerateBody(
+            action: action,
+            category: category,
+            reason: reason,
+            contentPath: contentPath
+        )
+        let (data, _) = try await client.request(
+            path: "\(contentToolsBase(courseCode))/instances/\(encodePath(instanceId))/moderate",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        // Server may wrap as { action, effectiveContentAction } or return the action directly.
+        if let wrapped = try? decode(ModerationWrap.self, from: data), let action = wrapped.action {
+            return action
+        }
+        return try decode(ContentToolModerationAction.self, from: data)
+    }
+
+    private struct ModerationWrap: Codable {
+        var action: ContentToolModerationAction?
+    }
+
+    static func fetchContentToolModeration(
+        courseCode: String,
+        instanceId: String,
+        accessToken: String
+    ) async throws -> [ContentToolModerationAction] {
+        let (data, _) = try await client.request(
+            path: "\(contentToolsBase(courseCode))/instances/\(encodePath(instanceId))/moderation",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ContentToolModerationListResponse.self, from: data).items
+    }
+
+    static func fetchContentToolFilterFlags(
+        courseCode: String,
+        instanceId: String,
+        accessToken: String
+    ) async throws -> [JSONValue] {
+        let (data, _) = try await client.request(
+            path: "\(contentToolsBase(courseCode))/instances/\(encodePath(instanceId))/filter-flags",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ContentToolFilterFlagsResponse.self, from: data).items
+    }
+
+    static func fetchContentToolConformance(accessToken: String) async throws -> ContentToolConformanceResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/content-tools/conformance",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ContentToolConformanceResponse.self, from: data)
+    }
+
     static func contentToolStatePutPath(courseCode: String, instanceId: String) -> String {
         "\(contentToolsBase(courseCode))/instances/\(encodePath(instanceId))/state"
     }

@@ -12,6 +12,22 @@ struct ContentToolsPageContext: Equatable {
     var pastDue: Bool = false
 }
 
+/// CT.M9 — cached course settings + governance snapshot for mount gating.
+struct ContentToolsGovernanceContext: Equatable {
+    var settings: ContentToolSettings?
+    var fetchedAtMs: Int64 = 0
+    var fetchSucceeded = false
+    var nonConformantToolIds: Set<String> = []
+
+    var policy: ToolGovernancePolicy? { settings?.policy }
+
+    var ageMs: Int64 {
+        guard fetchedAtMs > 0 else { return Int64.max }
+        let now = Int64(Date().timeIntervalSince1970 * 1000)
+        return max(0, now - fetchedAtMs)
+    }
+}
+
 private struct ContentToolsPageContextKey: EnvironmentKey {
     static let defaultValue: ContentToolsPageContext? = nil
 }
@@ -26,6 +42,18 @@ private struct ContentToolsLoadingKey: EnvironmentKey {
 
 private struct ContentToolsStudentResetKey: EnvironmentKey {
     static let defaultValue: Bool = false
+}
+
+private struct ContentToolsGovernanceKey: EnvironmentKey {
+    static let defaultValue = ContentToolsGovernanceContext()
+}
+
+private struct ContentToolsCanModerateKey: EnvironmentKey {
+    static let defaultValue: Bool = false
+}
+
+private struct ContentToolsRefreshGovernanceKey: EnvironmentKey {
+    static let defaultValue: (() -> Void)? = nil
 }
 
 extension EnvironmentValues {
@@ -48,12 +76,28 @@ extension EnvironmentValues {
         get { self[ContentToolsStudentResetKey.self] }
         set { self[ContentToolsStudentResetKey.self] = newValue }
     }
+
+    var contentToolsGovernance: ContentToolsGovernanceContext {
+        get { self[ContentToolsGovernanceKey.self] }
+        set { self[ContentToolsGovernanceKey.self] = newValue }
+    }
+
+    var contentToolsCanModerate: Bool {
+        get { self[ContentToolsCanModerateKey.self] }
+        set { self[ContentToolsCanModerateKey.self] = newValue }
+    }
+
+    var contentToolsRefreshGovernance: (() -> Void)? {
+        get { self[ContentToolsRefreshGovernanceKey.self] }
+        set { self[ContentToolsRefreshGovernanceKey.self] = newValue }
+    }
 }
 
 /// Loads instances once per item and injects them for fence hosts.
 struct ContentToolsPageProvider<Content: View>: View {
     @Environment(AuthSession.self) private var session
     @Environment(OfflineService.self) private var offline
+    @Environment(\.scenePhase) private var scenePhase
 
     let context: ContentToolsPageContext
     @ViewBuilder var content: () -> Content
@@ -61,6 +105,9 @@ struct ContentToolsPageProvider<Content: View>: View {
     @State private var instances: [String: ToolInstance] = [:]
     @State private var loading = false
     @State private var studentResetAllowed = false
+    @State private var governance = ContentToolsGovernanceContext()
+    @State private var canModerate = false
+    @State private var refreshTick = 0
 
     var body: some View {
         content()
@@ -68,8 +115,20 @@ struct ContentToolsPageProvider<Content: View>: View {
             .environment(\.contentToolsInstances, instances)
             .environment(\.contentToolsLoading, loading)
             .environment(\.contentToolsStudentResetAllowed, studentResetAllowed)
-            .task(id: "\(context.courseCode)|\(context.itemId)|\(context.contentToolsEnabled)|\(context.mobileContentToolsEnabled)") {
+            .environment(\.contentToolsGovernance, governance)
+            .environment(\.contentToolsCanModerate, canModerate)
+            .environment(\.contentToolsRefreshGovernance, { refreshTick += 1 })
+            .task(id: "\(context.courseCode)|\(context.itemId)|\(context.contentToolsEnabled)|\(context.mobileContentToolsEnabled)|\(refreshTick)") {
                 await load()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                // FR-4: re-evaluate policy on foreground so kills apply without an app release.
+                if phase == .active {
+                    refreshTick += 1
+                }
+            }
+            .onChange(of: context.courseCode) { _, _ in
+                refreshTick += 1
             }
     }
 
@@ -103,11 +162,50 @@ struct ContentToolsPageProvider<Content: View>: View {
                 )
             }.value
             instances = ContentToolHostLogic.instanceMap(list)
+
+            // Settings + governance snapshot (CT.M9) — fail closed for AI/third-party when missing.
+            let priorNonConformant = governance.nonConformantToolIds
+            let priorSettings = governance.settings
+            let priorFetchedAt = governance.fetchedAtMs
             if let settings = try? await LMSAPI.fetchContentToolSettings(
                 courseCode: context.courseCode,
                 accessToken: token
             ) {
                 studentResetAllowed = settings.studentResetAllowed
+                governance = ContentToolsGovernanceContext(
+                    settings: settings,
+                    fetchedAtMs: Int64(Date().timeIntervalSince1970 * 1000),
+                    fetchSucceeded: true,
+                    nonConformantToolIds: priorNonConformant
+                )
+            } else if let priorSettings {
+                // Keep cached policy; mark fetch failed so staleness rules apply.
+                governance = ContentToolsGovernanceContext(
+                    settings: priorSettings,
+                    fetchedAtMs: priorFetchedAt,
+                    fetchSucceeded: false,
+                    nonConformantToolIds: priorNonConformant
+                )
+            } else {
+                governance = ContentToolsGovernanceContext(
+                    settings: nil,
+                    fetchedAtMs: 0,
+                    fetchSucceeded: false,
+                    nonConformantToolIds: []
+                )
+            }
+
+            // Staff moderation: non-observers may attempt; 403 handled in sheet (FR-11).
+            canModerate = !context.observer
+
+            if let conf = try? await LMSAPI.fetchContentToolConformance(accessToken: token) {
+                let bad = Set(conf.tools.filter { !$0.ok }.map(\.toolId))
+                governance = ContentToolsGovernanceContext(
+                    settings: governance.settings,
+                    fetchedAtMs: governance.fetchedAtMs,
+                    fetchSucceeded: governance.fetchSucceeded,
+                    nonConformantToolIds: bad
+                )
             }
         } catch {
             instances = [:]

@@ -82,11 +82,8 @@ fun ExplainItBackTool(props: ContentToolRendererProps) {
     } else {
         ContentToolPack2Logic.composerAIAllowed(disclosureMode, decision, consentFetched)
     }
-    val showDisclosure = if (!aiFeedback) {
-        false
-    } else {
-        ContentToolPack2Logic.shouldShowAIDisclosure(disclosureMode, decision, consentFetched)
-    }
+    // CT.M9: disclosure lives in ToolFrame chrome so sandboxed tools cannot cover it.
+    val showDisclosure = false
 
     val minWords = (ContentToolPack2Logic.numberField(props.config, "minWords") ?: 25.0).toInt()
     val maxWords = (ContentToolPack2Logic.numberField(props.config, "maxWords") ?: 150.0).toInt()

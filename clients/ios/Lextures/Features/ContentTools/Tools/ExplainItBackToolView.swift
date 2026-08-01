@@ -33,16 +33,8 @@ struct ExplainItBackToolView: View {
         )
     }
 
-    private var showDisclosure: Bool {
-        if ContentToolPack2Logic.boolField(props.config, key: "aiFeedback") == false {
-            return false
-        }
-        return ContentToolPack2Logic.shouldShowAIDisclosure(
-            disclosureMode: consent?.aiDisclosureMode,
-            decision: consent?.decision,
-            consentFetched: consentFetched
-        )
-    }
+    /// CT.M9: disclosure lives in ToolFrame chrome so sandboxed tools cannot cover it.
+    private var showDisclosure: Bool { false }
 
     private var minWords: Int {
         Int(ContentToolPack2Logic.numberField(props.config, key: "minWords") ?? 25)

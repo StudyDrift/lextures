@@ -33,6 +33,7 @@ import com.lextures.android.core.design.sceneBackground
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.i18n.L
+import com.lextures.android.core.lms.ContentToolGovernanceLogic
 import com.lextures.android.core.lms.ContentToolHostLogic
 import com.lextures.android.core.lms.ToolScore
 
@@ -47,7 +48,13 @@ fun ToolFrame(
     studentResetAllowed: Boolean,
     onReset: (() -> Unit)?,
     showSandboxBadge: Boolean = false,
+    showNonConformantNote: Boolean = false,
+    canReport: Boolean = true,
+    canModerate: Boolean = false,
+    onReport: (() -> Unit)? = null,
+    onModerate: (() -> Unit)? = null,
     frameModifier: Modifier = Modifier,
+    disclosure: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
@@ -55,12 +62,20 @@ fun ToolFrame(
     val resolvedSync = toolSyncLabel(syncStatus)
     val scoreLabel = L.text(R.string.mobile_contentTools_runtime_score)
     val sandboxBadge = L.text(R.string.mobile_contentTools_sandbox_badge)
+    val nonConformantNote = L.text(R.string.mobile_contentTools_governance_nonConformant)
+    val helpLabel = L.text(R.string.mobile_contentTools_runtime_help)
+    val reportLabel = L.text(R.string.mobile_contentTools_governance_reportTitle)
+    val moderateLabel = L.text(R.string.mobile_contentTools_governance_moderateTitle)
+    val resetLabel = L.text(R.string.mobile_contentTools_runtime_reset)
     val a11y = buildString {
         append(ContentToolHostLogic.accessibleName(title, status))
         if (resolvedSync != null) append(", ").append(resolvedSync)
         if (score != null) append(", ").append(scoreLabel).append(" ${score.raw}/${score.max}")
         if (showSandboxBadge) append(", ").append(sandboxBadge)
+        if (showNonConformantNote) append(", ").append(nonConformantNote)
     }
+    val showReset = ContentToolGovernanceLogic.studentResetVisible(studentResetAllowed, readOnly) &&
+        onReset != null
     Column(
         frameModifier
             .fillMaxWidth()
@@ -89,30 +104,63 @@ fun ToolFrame(
                     if (showSandboxBadge) ToolChip(sandboxBadge)
                 }
             }
-            TextButton(onClick = { menuOpen = true }) { Text("⋯") }
+            TextButton(
+                onClick = { menuOpen = true },
+                modifier = Modifier.semantics { contentDescription = helpLabel },
+            ) {
+                Text("⋯")
+            }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                 DropdownMenuItem(
-                    text = { Text(L.text(R.string.mobile_contentTools_runtime_help)) },
+                    text = { Text(helpLabel) },
                     onClick = { menuOpen = false },
+                    modifier = Modifier.semantics { contentDescription = helpLabel },
                 )
-                if (studentResetAllowed && onReset != null && !readOnly) {
+                if (showReset) {
                     DropdownMenuItem(
-                        text = { Text(L.text(R.string.mobile_contentTools_runtime_reset)) },
+                        text = { Text(resetLabel) },
                         onClick = {
                             menuOpen = false
-                            onReset()
+                            onReset?.invoke()
                         },
+                        modifier = Modifier.semantics { contentDescription = resetLabel },
                     )
                 }
-                DropdownMenuItem(
-                    text = { Text(L.text(R.string.mobile_contentTools_runtime_report)) },
-                    onClick = { menuOpen = false },
-                )
+                if (canReport && onReport != null) {
+                    DropdownMenuItem(
+                        text = { Text(reportLabel) },
+                        onClick = {
+                            menuOpen = false
+                            onReport()
+                        },
+                        modifier = Modifier.semantics { contentDescription = reportLabel },
+                    )
+                }
+                if (canModerate && onModerate != null) {
+                    DropdownMenuItem(
+                        text = { Text(moderateLabel) },
+                        onClick = {
+                            menuOpen = false
+                            onModerate()
+                        },
+                        modifier = Modifier.semantics { contentDescription = moderateLabel },
+                    )
+                }
             }
         }
         if (!readOnlyMessage.isNullOrBlank()) {
             Text(text = readOnlyMessage, fontSize = 12.sp, color = textSecondary())
         }
+        if (showNonConformantNote) {
+            Text(
+                text = nonConformantNote,
+                fontSize = 12.sp,
+                color = textSecondary(),
+                modifier = Modifier.semantics { contentDescription = nonConformantNote },
+            )
+        }
+        // FR-6: disclosure is native frame chrome above tool content.
+        disclosure()
         content()
     }
 }

@@ -19,6 +19,13 @@ type Settings struct {
 	LinkHostAllowlist    []string  `json:"linkHostAllowlist"`
 	GradeLinksAllowed    bool      `json:"gradeLinksAllowed"`
 	UpdatedAt            time.Time `json:"updatedAt,omitempty"`
+	// Policy is the org governance snapshot for mobile/web hosts (CT.M9 FR-1).
+	// Omitted when the org cannot be resolved; clients fail closed for AI/third-party.
+	Policy *OrgPolicy `json:"policy,omitempty"`
+	// Kill snapshot so clients can no-mount without an app release (CT.M9 FR-3/FR-4).
+	KilledToolIDs        []string `json:"killedToolIds,omitempty"`
+	KilledCapabilities   []string `json:"killedCapabilities,omitempty"`
+	KillAllAI            bool     `json:"killAllAI,omitempty"`
 }
 
 // ContextSegment is one grounded pack segment (CT.6).

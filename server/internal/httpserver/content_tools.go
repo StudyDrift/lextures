@@ -341,17 +341,10 @@ func (d Deps) handleContentToolsSettingsGet() http.HandlerFunc {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
+		// CT.M9 FR-1/FR-5: any course member may read settings + governance snapshot
+		// (allowlist, studentResetAllowed, org policy, kill state). Writes stay editor-only.
+		courseCode, _, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
-			return
-		}
-		canEdit, err := d.viewerCanEditContentTools(r.Context(), courseCode, viewer)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
-			return
-		}
-		if !canEdit {
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
 			return
 		}
 		row, err := ctrepo.GetSettings(r.Context(), d.Pool, courseID)
@@ -359,15 +352,52 @@ func (d Deps) handleContentToolsSettingsGet() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load settings.")
 			return
 		}
+		var out ctmodel.Settings
 		if row == nil {
-			def := ctrepo.DefaultSettings(courseID)
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			_ = json.NewEncoder(w).Encode(contentToolsSettingsToAPI(def))
-			return
+			out = contentToolsSettingsToAPI(ctrepo.DefaultSettings(courseID))
+		} else {
+			out = contentToolsSettingsToAPI(*row)
 		}
+		d.enrichContentToolsSettingsGovernance(r, courseCode, &out)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(contentToolsSettingsToAPI(*row))
+		_ = json.NewEncoder(w).Encode(out)
 	}
+}
+
+// enrichContentToolsSettingsGovernance attaches org policy + kill snapshot for hosts (CT.M9).
+func (d Deps) enrichContentToolsSettingsGovernance(r *http.Request, courseCode string, out *ctmodel.Settings) {
+	if out == nil || d.Pool == nil {
+		return
+	}
+	ctsvc.SyncDurableKillsFromDB(r.Context(), d.Pool)
+	if pol := d.loadContentToolsOrgPolicy(r, courseCode); pol != nil {
+		api := contentToolPolicyToAPI(pol)
+		out.Policy = &api
+	}
+	kills, err := ctrepo.ListActiveKills(r.Context(), d.Pool)
+	if err != nil {
+		return
+	}
+	tools := make([]string, 0)
+	caps := make([]string, 0)
+	killAllAI := ctsvc.AIKillSwitchEngaged()
+	for _, k := range kills {
+		switch k.Scope {
+		case "all_ai":
+			killAllAI = true
+		case "tool":
+			if strings.TrimSpace(k.Target) != "" {
+				tools = append(tools, k.Target)
+			}
+		case "capability":
+			if strings.TrimSpace(k.Target) != "" {
+				caps = append(caps, k.Target)
+			}
+		}
+	}
+	out.KilledToolIDs = tools
+	out.KilledCapabilities = caps
+	out.KillAllAI = killAllAI
 }
 
 func (d Deps) handleContentToolsSettingsPut() http.HandlerFunc {
