@@ -4,6 +4,7 @@ import {
   putModuleRequirements,
   type ModuleCompletionMode,
 } from '../../lib/conditional-release-api'
+import { ScheduleDatetimeField } from '../lms/schedule-datetime-field'
 
 export const MODULE_REQUIREMENTS_FORM_ID = 'module-requirements-form'
 
@@ -31,6 +32,8 @@ type Props = {
   onSaved?: () => void
   /** Parent registers this to submit from a footer button outside the form. */
   registerSubmit?: (submit: (() => void) | null) => void
+  scheduleMode?: string | null
+  relativeScheduleAnchorAt?: string | null
 }
 
 export function ModuleRequirementsPanel({
@@ -42,6 +45,8 @@ export function ModuleRequirementsPanel({
   onErrorChange,
   onSaved,
   registerSubmit,
+  scheduleMode,
+  relativeScheduleAnchorAt,
 }: Props) {
   const [mode, setMode] = useState<ModuleCompletionMode>('all_items')
   const [prereqs, setPrereqs] = useState<string[]>([])
@@ -204,16 +209,19 @@ export function ModuleRequirementsPanel({
       ) : (
         <p className="text-xs text-slate-500">No other modules available as prerequisites.</p>
       )}
-      <label className="block">
-        <span className="text-xs font-medium text-slate-600">Lock until (optional)</span>
-        <input
-          type="datetime-local"
-          value={unlockAt}
-          onChange={(e) => setUnlockAt(e.target.value)}
-          disabled={loading}
-          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
-        />
-      </label>
+      <ScheduleDatetimeField
+        id="module-requirements-unlock-at"
+        label="Lock until (optional)"
+        relativeLabel="Unlock after enrollment (optional)"
+        relativeHint="Module stays locked until this offset from the student’s enrollment."
+        value={unlockAt}
+        onChange={setUnlockAt}
+        disabled={loading}
+        scheduleMode={scheduleMode}
+        relativeAnchorAt={relativeScheduleAnchorAt}
+        defaultTime="00:00"
+        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+      />
       {/* Enables Enter-to-submit; footer Save calls registerSubmit instead. */}
       <button type="submit" className="sr-only" tabIndex={-1}>
         Save requirements

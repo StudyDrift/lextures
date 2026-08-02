@@ -17,6 +17,8 @@ import { ImportWorkflowMenu } from './import-workflow-menu'
 import { SaveWorkflowMenu } from './save-workflow-menu'
 import { useGraderAgentSubmissions } from './use-grader-agent-submissions'
 import {
+  graderAgentAcceptBlockReason,
+  isGraderAgentAcceptDisabled,
   primaryValidationMessage,
   useGraderAgentWorkflow,
   type GraderAgentTemplateMode,
@@ -231,14 +233,21 @@ export function GraderAgentWorkflowModal({
         : actionAlert
     : null
 
-  const acceptDisabled = !hadDryRun || saving || !runnable
-  const acceptTooltip = acceptDisabled
-    ? saving
-      ? null
-      : !hadDryRun
-        ? t('gradingAgent.accept.needsDryRun')
-        : actionAlert
-    : null
+  const acceptGate = {
+    hadDryRun,
+    saving,
+    runnable,
+    submissionsLoading,
+    submissionCount: submissions.length,
+  }
+  const acceptDisabled = isGraderAgentAcceptDisabled(acceptGate)
+  const acceptBlockReason = graderAgentAcceptBlockReason(acceptGate)
+  const acceptTooltip =
+    acceptBlockReason === 'needs_dry_run'
+      ? t('gradingAgent.accept.needsDryRun')
+      : acceptBlockReason === 'not_runnable'
+        ? actionAlert
+        : null
 
   const runDisabled = saving || !runnable
   const runTooltip = runDisabled && !saving ? actionAlert : null

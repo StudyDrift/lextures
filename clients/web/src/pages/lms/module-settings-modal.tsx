@@ -1,6 +1,10 @@
 import { useEffect, useId, useState, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { MODULE_REQUIREMENTS_FORM_ID } from '../../components/modules/module-requirements-panel'
+import {
+  RelativeScheduleBanner,
+  ScheduleDatetimeField,
+} from '../../components/lms/schedule-datetime-field'
 
 const MODULE_SETTINGS_FORM_ID = 'module-settings-form'
 
@@ -39,6 +43,8 @@ type ModuleSettingsModalProps = {
   requirementsLoading?: boolean
   /** Optional explicit submit for the requirements tab (preferred over form= association). */
   onSaveRequirements?: () => void
+  scheduleMode?: string | null
+  relativeScheduleAnchorAt?: string | null
 }
 
 export function ModuleSettingsModal(props: ModuleSettingsModalProps) {
@@ -59,6 +65,8 @@ function ModuleSettingsModalInner({
   requirementsSaving = false,
   requirementsLoading = false,
   onSaveRequirements,
+  scheduleMode,
+  relativeScheduleAnchorAt,
 }: ModuleSettingsModalProps) {
   const titleId = useId()
   const nameInputId = useId()
@@ -230,20 +238,26 @@ function ModuleSettingsModalInner({
                 </label>
               </div>
 
-              <label htmlFor={dateInputId} className="mt-4 block text-xs font-medium text-slate-600">
-                Visible from (optional)
-              </label>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Leave empty to show when published. Uses your local timezone.
-              </p>
-              <input
-                id={dateInputId}
-                type="datetime-local"
-                value={visibleLocal}
-                onChange={(e) => setVisibleLocal(e.target.value)}
-                disabled={busy}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
-              />
+              <div className="mt-4 space-y-2">
+                <RelativeScheduleBanner
+                  scheduleMode={scheduleMode}
+                  relativeAnchorAt={relativeScheduleAnchorAt}
+                />
+                <ScheduleDatetimeField
+                  id={dateInputId}
+                  label="Visible from (optional)"
+                  relativeLabel="Visible after enrollment (optional)"
+                  fixedHint="Leave empty to show when published. Uses your local timezone."
+                  relativeHint="Leave empty to show when published. Offset is from each student’s enrollment."
+                  value={visibleLocal}
+                  onChange={setVisibleLocal}
+                  disabled={busy}
+                  scheduleMode={scheduleMode}
+                  relativeAnchorAt={relativeScheduleAnchorAt}
+                  defaultTime="00:00"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+              </div>
               <button type="submit" className="sr-only" tabIndex={-1}>
                 Save
               </button>

@@ -26,9 +26,17 @@ import {
 import { usePinnedSettings } from '../settings-panel/use-pinned-settings'
 import { ModuleItemOutcomesMappingAccordion } from '../outcomes/module-item-outcomes-mapping-accordion'
 import { AssignToEditor } from '../assignment/assign-to-editor'
+import {
+  RelativeScheduleBanner,
+  ScheduleDatetimeField,
+} from '../lms/schedule-datetime-field'
 
 export type QuizPageSettingsPanelProps = {
   disabled?: boolean
+  /** Course schedule mode: `fixed` (calendar) or `relative` (from enrollment). */
+  scheduleMode?: string | null
+  /** Course timeline anchor ISO; required for relative offset authoring. */
+  relativeScheduleAnchorAt?: string | null
   dueLocal: string
   onDueLocalChange: (value: string) => void
   availableFromLocal: string
@@ -206,6 +214,8 @@ function Field({
 
 export function QuizPageSettingsPanel({
   disabled,
+  scheduleMode,
+  relativeScheduleAnchorAt,
   dueLocal,
   onDueLocalChange,
   availableFromLocal,
@@ -333,49 +343,57 @@ export function QuizPageSettingsPanel({
             {show('scheduling') ? (
               <SettingsAccordion title="Scheduling" sectionId="scheduling" forceOpen={sectionForceOpen('scheduling')}>
                 <div className="space-y-3 pt-1">
+                  <RelativeScheduleBanner
+                    scheduleMode={scheduleMode}
+                    relativeAnchorAt={relativeScheduleAnchorAt}
+                  />
                   <SettingRow settingId="quiz.scheduling.due-date">
-                    <Field label="Due date" htmlFor="quiz-settings-due" hint="Optional. Cleared if empty.">
-                      <input
-                        id="quiz-settings-due"
-                        type="datetime-local"
-                        value={dueLocal}
-                        onChange={(e) => onDueLocalChange(e.target.value)}
-                        disabled={disabled}
-                        className={inputClass}
-                      />
-                    </Field>
+                    <ScheduleDatetimeField
+                      id="quiz-settings-due"
+                      label="Due date"
+                      relativeLabel="Due after enrollment"
+                      fixedHint="Optional. Cleared if empty."
+                      relativeHint="Offset from each student’s enrollment. Clear to remove."
+                      value={dueLocal}
+                      onChange={onDueLocalChange}
+                      disabled={disabled}
+                      scheduleMode={scheduleMode}
+                      relativeAnchorAt={relativeScheduleAnchorAt}
+                      defaultTime="23:59"
+                      className={inputClass}
+                    />
                   </SettingRow>
                   <SettingRow settingId="quiz.scheduling.visible-from">
-                    <Field
+                    <ScheduleDatetimeField
+                      id="quiz-settings-visible-from"
                       label="Visibility start"
-                      htmlFor="quiz-settings-visible-from"
-                      hint="Learners cannot open the quiz before this time."
-                    >
-                      <input
-                        id="quiz-settings-visible-from"
-                        type="datetime-local"
-                        value={availableFromLocal}
-                        onChange={(e) => onAvailableFromLocalChange(e.target.value)}
-                        disabled={disabled}
-                        className={inputClass}
-                      />
-                    </Field>
+                      relativeLabel="Available after enrollment"
+                      fixedHint="Learners cannot open the quiz before this time."
+                      relativeHint="Learners cannot open the quiz before this offset from enrollment."
+                      value={availableFromLocal}
+                      onChange={onAvailableFromLocalChange}
+                      disabled={disabled}
+                      scheduleMode={scheduleMode}
+                      relativeAnchorAt={relativeScheduleAnchorAt}
+                      defaultTime="00:00"
+                      className={inputClass}
+                    />
                   </SettingRow>
                   <SettingRow settingId="quiz.scheduling.visible-until">
-                    <Field
+                    <ScheduleDatetimeField
+                      id="quiz-settings-visible-until"
                       label="Visibility end"
-                      htmlFor="quiz-settings-visible-until"
-                      hint="After this time the quiz is no longer available."
-                    >
-                      <input
-                        id="quiz-settings-visible-until"
-                        type="datetime-local"
-                        value={availableUntilLocal}
-                        onChange={(e) => onAvailableUntilLocalChange(e.target.value)}
-                        disabled={disabled}
-                        className={inputClass}
-                      />
-                    </Field>
+                      relativeLabel="Unavailable after enrollment"
+                      fixedHint="After this time the quiz is no longer available."
+                      relativeHint="After this offset from enrollment the quiz is no longer available."
+                      value={availableUntilLocal}
+                      onChange={onAvailableUntilLocalChange}
+                      disabled={disabled}
+                      scheduleMode={scheduleMode}
+                      relativeAnchorAt={relativeScheduleAnchorAt}
+                      defaultTime="23:59"
+                      className={inputClass}
+                    />
                   </SettingRow>
                 </div>
               </SettingsAccordion>
@@ -855,7 +873,13 @@ export function QuizPageSettingsPanel({
             {courseCode && quizItemId && show('assign-to') ? (
               <SettingsAccordion title="Assign to" sectionId="assign-to" forceOpen={sectionForceOpen('assign-to')}>
                 <SettingRow settingId="quiz.assign-to.editor">
-                  <AssignToEditor courseCode={courseCode} itemId={quizItemId} disabled={disabled} />
+                  <AssignToEditor
+                    courseCode={courseCode}
+                    itemId={quizItemId}
+                    disabled={disabled}
+                    scheduleMode={scheduleMode}
+                    relativeScheduleAnchorAt={relativeScheduleAnchorAt}
+                  />
                 </SettingRow>
               </SettingsAccordion>
             ) : null}

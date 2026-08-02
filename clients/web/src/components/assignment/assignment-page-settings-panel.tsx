@@ -28,9 +28,17 @@ import {
 import { usePinnedSettings } from '../settings-panel/use-pinned-settings'
 import { ModuleItemOutcomesMappingAccordion } from '../outcomes/module-item-outcomes-mapping-accordion'
 import { AssignToEditor } from './assign-to-editor'
+import {
+  RelativeScheduleBanner,
+  ScheduleDatetimeField,
+} from '../lms/schedule-datetime-field'
 
 export type AssignmentPageSettingsPanelProps = {
   disabled?: boolean
+  /** Course schedule mode: `fixed` (calendar) or `relative` (from enrollment). */
+  scheduleMode?: string | null
+  /** Course timeline anchor ISO; required for relative offset authoring. */
+  relativeScheduleAnchorAt?: string | null
   dueLocal: string
   onDueLocalChange: (value: string) => void
   availableFromLocal: string
@@ -224,6 +232,8 @@ function Field({
 
 export function AssignmentPageSettingsPanel({
   disabled,
+  scheduleMode,
+  relativeScheduleAnchorAt,
   dueLocal,
   onDueLocalChange,
   availableFromLocal,
@@ -350,49 +360,57 @@ export function AssignmentPageSettingsPanel({
           {show('scheduling') ? (
             <SettingsAccordion title="Scheduling" sectionId="scheduling" forceOpen={sectionForceOpen('scheduling')}>
               <div className="space-y-3 pt-1">
+                <RelativeScheduleBanner
+                  scheduleMode={scheduleMode}
+                  relativeAnchorAt={relativeScheduleAnchorAt}
+                />
                 <SettingRow settingId="assignment.scheduling.due-date">
-                  <Field label="Due date" htmlFor="assignment-settings-due" hint="Shown on the course calendar. Clear the field to remove.">
-                    <input
-                      id="assignment-settings-due"
-                      type="datetime-local"
-                      value={dueLocal}
-                      onChange={(e) => onDueLocalChange(e.target.value)}
-                      disabled={disabled}
-                      className={inputClass}
-                    />
-                  </Field>
+                  <ScheduleDatetimeField
+                    id="assignment-settings-due"
+                    label="Due date"
+                    relativeLabel="Due after enrollment"
+                    fixedHint="Shown on the course calendar. Clear the field to remove."
+                    relativeHint="Offset from each student’s enrollment. Clear to remove."
+                    value={dueLocal}
+                    onChange={onDueLocalChange}
+                    disabled={disabled}
+                    scheduleMode={scheduleMode}
+                    relativeAnchorAt={relativeScheduleAnchorAt}
+                    defaultTime="23:59"
+                    className={inputClass}
+                  />
                 </SettingRow>
                 <SettingRow settingId="assignment.scheduling.visible-from">
-                  <Field
+                  <ScheduleDatetimeField
+                    id="assignment-settings-visible-from"
                     label="Visibility start"
-                    htmlFor="assignment-settings-visible-from"
-                    hint="Learners cannot open the assignment before this time. Clear to remove."
-                  >
-                    <input
-                      id="assignment-settings-visible-from"
-                      type="datetime-local"
-                      value={availableFromLocal}
-                      onChange={(e) => onAvailableFromLocalChange(e.target.value)}
-                      disabled={disabled}
-                      className={inputClass}
-                    />
-                  </Field>
+                    relativeLabel="Available after enrollment"
+                    fixedHint="Learners cannot open the assignment before this time. Clear to remove."
+                    relativeHint="Learners cannot open the assignment before this offset from enrollment."
+                    value={availableFromLocal}
+                    onChange={onAvailableFromLocalChange}
+                    disabled={disabled}
+                    scheduleMode={scheduleMode}
+                    relativeAnchorAt={relativeScheduleAnchorAt}
+                    defaultTime="00:00"
+                    className={inputClass}
+                  />
                 </SettingRow>
                 <SettingRow settingId="assignment.scheduling.visible-until">
-                  <Field
+                  <ScheduleDatetimeField
+                    id="assignment-settings-visible-until"
                     label="Visibility end"
-                    htmlFor="assignment-settings-visible-until"
-                    hint="After this time the assignment is no longer available. Clear to remove."
-                  >
-                    <input
-                      id="assignment-settings-visible-until"
-                      type="datetime-local"
-                      value={availableUntilLocal}
-                      onChange={(e) => onAvailableUntilLocalChange(e.target.value)}
-                      disabled={disabled}
-                      className={inputClass}
-                    />
-                  </Field>
+                    relativeLabel="Unavailable after enrollment"
+                    fixedHint="After this time the assignment is no longer available. Clear to remove."
+                    relativeHint="After this offset from enrollment the assignment is no longer available."
+                    value={availableUntilLocal}
+                    onChange={onAvailableUntilLocalChange}
+                    disabled={disabled}
+                    scheduleMode={scheduleMode}
+                    relativeAnchorAt={relativeScheduleAnchorAt}
+                    defaultTime="23:59"
+                    className={inputClass}
+                  />
                 </SettingRow>
               </div>
             </SettingsAccordion>
@@ -576,20 +594,20 @@ export function AssignmentPageSettingsPanel({
                 </SettingRow>
                 {onReleaseAtLocalChange && postingPolicy === 'manual' ? (
                   <SettingRow settingId="assignment.grade-posting.release-at">
-                    <Field
+                    <ScheduleDatetimeField
+                      id="assignment-posting-release"
                       label="Release grades at (optional)"
-                      htmlFor="assignment-posting-release"
-                      hint="If set, held grades are posted at this time without opening the gradebook. Clear to use only the Post button."
-                    >
-                      <input
-                        id="assignment-posting-release"
-                        type="datetime-local"
-                        value={releaseAtLocal}
-                        onChange={(e) => onReleaseAtLocalChange(e.target.value)}
-                        disabled={disabled}
-                        className={inputClass}
-                      />
-                    </Field>
+                      relativeLabel="Release grades after enrollment"
+                      fixedHint="If set, held grades are posted at this time without opening the gradebook. Clear to use only the Post button."
+                      relativeHint="If set, held grades post at this offset from enrollment. Clear to use only the Post button."
+                      value={releaseAtLocal ?? ''}
+                      onChange={onReleaseAtLocalChange}
+                      disabled={disabled}
+                      scheduleMode={scheduleMode}
+                      relativeAnchorAt={relativeScheduleAnchorAt}
+                      defaultTime="00:00"
+                      className={inputClass}
+                    />
                   </SettingRow>
                 ) : null}
               </div>
@@ -854,7 +872,13 @@ export function AssignmentPageSettingsPanel({
           {courseCode && assignmentItemId && show('assign-to') ? (
             <SettingsAccordion title="Assign to" sectionId="assign-to" forceOpen={sectionForceOpen('assign-to')}>
               <SettingRow settingId="assignment.assign-to.editor">
-                <AssignToEditor courseCode={courseCode} itemId={assignmentItemId} disabled={disabled} />
+                <AssignToEditor
+                  courseCode={courseCode}
+                  itemId={assignmentItemId}
+                  disabled={disabled}
+                  scheduleMode={scheduleMode}
+                  relativeScheduleAnchorAt={relativeScheduleAnchorAt}
+                />
               </SettingRow>
             </SettingsAccordion>
           ) : null}
