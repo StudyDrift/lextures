@@ -2,6 +2,7 @@ import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   deleteCourseSection,
+  fetchCourse,
   fetchCourseSections,
   postCourseSection,
   putSectionAssignmentOverride,
@@ -10,6 +11,7 @@ import {
 import { authorizedFetch } from '../../lib/api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { useConfirm } from '../../components/use-confirm'
+import { ScheduleDatetimeField } from '../../components/lms/schedule-datetime-field'
 
 type Props = {
   courseCode: string
@@ -29,6 +31,8 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
   const [overrideSectionId, setOverrideSectionId] = useState('')
   const [overrideItemId, setOverrideItemId] = useState('')
   const [overrideDue, setOverrideDue] = useState('')
+  const [scheduleMode, setScheduleMode] = useState<string>('fixed')
+  const [relativeScheduleAnchorAt, setRelativeScheduleAnchorAt] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
     setLoadError(null)
@@ -44,6 +48,27 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
   useEffect(() => {
     void reload()
   }, [reload])
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const c = await fetchCourse(courseCode)
+        if (!cancelled) {
+          setScheduleMode(c.scheduleMode === 'relative' ? 'relative' : 'fixed')
+          setRelativeScheduleAnchorAt(c.relativeScheduleAnchorAt ?? null)
+        }
+      } catch {
+        if (!cancelled) {
+          setScheduleMode('fixed')
+          setRelativeScheduleAnchorAt(null)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
 
   useEffect(() => {
     let cancelled = false
@@ -264,15 +289,20 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
               ))}
             </select>
           </label>
-          <label className="block text-sm">
-            <span className="text-slate-700 dark:text-neutral-300">Due (local)</span>
-            <input
-              type="datetime-local"
+          <div className="block text-sm">
+            <ScheduleDatetimeField
+              id="section-override-due"
+              label="Due"
+              fixedLabel="Due (local)"
+              relativeLabel="Due after enrollment"
               value={overrideDue}
-              onChange={(e) => setOverrideDue(e.target.value)}
+              onChange={setOverrideDue}
+              scheduleMode={scheduleMode}
+              relativeAnchorAt={relativeScheduleAnchorAt}
+              defaultTime="23:59"
               className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
             />
-          </label>
+          </div>
           <button
             type="submit"
             disabled={busy || !overrideSectionId || !overrideItemId}

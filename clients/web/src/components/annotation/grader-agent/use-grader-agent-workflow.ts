@@ -1249,3 +1249,39 @@ export type GraderAgentWorkflowState = ReturnType<typeof useGraderAgentWorkflow>
 export function primaryValidationMessage(issues: WorkflowValidationIssue[]): string | null {
   return issues[0]?.message ?? null
 }
+
+/**
+ * Accept/publish normally requires a successful dry run so instructors validate first.
+ * When there are no student submissions yet, dry run is impossible — still allow publishing
+ * a valid workflow (e.g. so auto-grade can run when submissions arrive).
+ */
+export function isGraderAgentAcceptDisabled(opts: {
+  hadDryRun: boolean
+  saving: boolean
+  runnable: boolean
+  submissionsLoading: boolean
+  submissionCount: number
+}): boolean {
+  const { hadDryRun, saving, runnable, submissionsLoading, submissionCount } = opts
+  if (saving || !runnable) return true
+  if (hadDryRun) return false
+  if (submissionsLoading) return true
+  return submissionCount > 0
+}
+
+/** Why accept is blocked, for tooltips. Null when enabled or when saving (no tooltip). */
+export function graderAgentAcceptBlockReason(opts: {
+  hadDryRun: boolean
+  saving: boolean
+  runnable: boolean
+  submissionsLoading: boolean
+  submissionCount: number
+}): 'saving' | 'needs_dry_run' | 'not_runnable' | null {
+  if (!isGraderAgentAcceptDisabled(opts)) return null
+  if (opts.saving) return 'saving'
+  const dryRunSatisfied =
+    opts.hadDryRun || (!opts.submissionsLoading && opts.submissionCount === 0)
+  if (!dryRunSatisfied) return 'needs_dry_run'
+  if (!opts.runnable) return 'not_runnable'
+  return null
+}

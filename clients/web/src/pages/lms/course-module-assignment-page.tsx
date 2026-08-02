@@ -236,6 +236,8 @@ export default function CourseModuleAssignmentPage() {
   const [viewerEnrollmentRoles, setViewerEnrollmentRoles] = useState<string[]>([])
   const [annotationsEnabled, setAnnotationsEnabled] = useState(false)
   const [resubmissionWorkflowEnabled, setResubmissionWorkflowEnabled] = useState(false)
+  const [scheduleMode, setScheduleMode] = useState<string>('fixed')
+  const [relativeScheduleAnchorAt, setRelativeScheduleAnchorAt] = useState<string | null>(null)
   const [feedbackMediaEnabled, setFeedbackMediaEnabled] = useState(false)
   const [blindGrading, setBlindGrading] = useState(false)
   const [identitiesRevealedAt, setIdentitiesRevealedAt] = useState<string | null>(null)
@@ -364,6 +366,8 @@ export default function CourseModuleAssignmentPage() {
       setAnnotationsEnabled(Boolean(courseRow.annotationsEnabled))
       setResubmissionWorkflowEnabled(Boolean(courseRow.resubmissionWorkflowEnabled))
       setFeedbackMediaEnabled(Boolean(courseRow.feedbackMediaEnabled))
+      setScheduleMode(courseRow.scheduleMode === 'relative' ? 'relative' : 'fixed')
+      setRelativeScheduleAnchorAt(courseRow.relativeScheduleAnchorAt ?? null)
       recordLastVisitedModuleItem(courseCode, {
         itemId,
         kind: 'assignment',
@@ -391,6 +395,8 @@ export default function CourseModuleAssignmentPage() {
       setViewerEnrollmentRoles([])
       setAnnotationsEnabled(false)
       setResubmissionWorkflowEnabled(false)
+      setScheduleMode('fixed')
+      setRelativeScheduleAnchorAt(null)
       setBlindGrading(false)
       setDraftBlindGrading(false)
       setModeratedGrading(false)
@@ -966,6 +972,8 @@ export default function CourseModuleAssignmentPage() {
                 canEdit ? (
                   <AssignmentPageSettingsPanel
                     disabled={saving}
+                    scheduleMode={scheduleMode}
+                    relativeScheduleAnchorAt={relativeScheduleAnchorAt}
                     dueLocal={draftDueLocal}
                     onDueLocalChange={setDraftDueLocal}
                     availableFromLocal={draftAvailableFromLocal}

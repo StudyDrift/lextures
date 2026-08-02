@@ -414,6 +414,8 @@ export default function CourseModuleQuizPage() {
   const [draftUnlimitedAttempts, setDraftUnlimitedAttempts] = useState(false)
   const [draftOneQuestionAtATime, setDraftOneQuestionAtATime] = useState(false)
   const [courseLockdownEnabled, setCourseLockdownEnabled] = useState(false)
+  const [scheduleMode, setScheduleMode] = useState<string>('fixed')
+  const [relativeScheduleAnchorAt, setRelativeScheduleAnchorAt] = useState<string | null>(null)
   const [lockdownMode, setLockdownMode] = useState<LockdownMode>('standard')
   const [draftLockdownMode, setDraftLockdownMode] = useState<LockdownMode>('standard')
   const [focusLossThreshold, setFocusLossThreshold] = useState<number | null>(null)
@@ -573,6 +575,8 @@ export default function CourseModuleQuizPage() {
       setAdaptiveDeliveryMode(data.adaptiveDeliveryMode === 'cat' ? 'cat' : 'ai')
       setCourseQuestionBankEnabled(courseRow.questionBankEnabled === true)
       setCourseLockdownEnabled(courseRow.lockdownModeEnabled === true)
+      setScheduleMode(courseRow.scheduleMode === 'relative' ? 'relative' : 'fixed')
+      setRelativeScheduleAnchorAt(courseRow.relativeScheduleAnchorAt ?? null)
       setLockdownMode(data.lockdownMode)
       setDraftLockdownMode(data.lockdownMode)
       const lossTh = data.focusLossThreshold
@@ -613,6 +617,8 @@ export default function CourseModuleQuizPage() {
       setDraftReplaceWithFinal(false)
       setMarkups([])
       setCourseLockdownEnabled(false)
+      setScheduleMode('fixed')
+      setRelativeScheduleAnchorAt(null)
       setLockdownMode('standard')
       setDraftLockdownMode('standard')
       setFocusLossThreshold(null)
@@ -1720,6 +1726,8 @@ export default function CourseModuleQuizPage() {
                 canEdit ? (
                   <QuizPageSettingsPanel
                     disabled={saving}
+                    scheduleMode={scheduleMode}
+                    relativeScheduleAnchorAt={relativeScheduleAnchorAt}
                     dueLocal={draftDueLocal}
                     onDueLocalChange={setDraftDueLocal}
                     availableFromLocal={draftAvailableFromLocal}

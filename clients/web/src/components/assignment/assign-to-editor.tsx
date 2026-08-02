@@ -13,11 +13,14 @@ import {
   type CourseEnrollmentRosterRow,
   type CourseSection,
 } from '../../lib/courses-api'
+import { ScheduleDatetimeField } from '../lms/schedule-datetime-field'
 
 export type AssignToEditorProps = {
   courseCode: string
   itemId: string
   disabled?: boolean
+  scheduleMode?: string | null
+  relativeScheduleAnchorAt?: string | null
 }
 
 type DraftTarget = {
@@ -75,7 +78,13 @@ const targetTypeLabels: Record<AssignToTargetType, string> = {
 
 /** Plan 2.15 — "assign to" editor: targets an assignment/quiz at everyone, sections, groups, or
  * individual students, each with its own optional due/availability override. */
-export function AssignToEditor({ courseCode, itemId, disabled }: AssignToEditorProps) {
+export function AssignToEditor({
+  courseCode,
+  itemId,
+  disabled,
+  scheduleMode,
+  relativeScheduleAnchorAt,
+}: AssignToEditorProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -281,36 +290,42 @@ export function AssignToEditor({ courseCode, itemId, disabled }: AssignToEditorP
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <label className="space-y-1 text-[11px] text-slate-500 dark:text-neutral-400">
-                Due date
-                <input
-                  type="datetime-local"
-                  value={t.dueLocal}
-                  disabled={disabled || saving}
-                  onChange={(e) => updateTarget(t.key, { dueLocal: e.target.value })}
-                  className={`mt-1 block w-full ${inputClass}`}
-                />
-              </label>
-              <label className="space-y-1 text-[11px] text-slate-500 dark:text-neutral-400">
-                Available from
-                <input
-                  type="datetime-local"
-                  value={t.availableFromLocal}
-                  disabled={disabled || saving}
-                  onChange={(e) => updateTarget(t.key, { availableFromLocal: e.target.value })}
-                  className={`mt-1 block w-full ${inputClass}`}
-                />
-              </label>
-              <label className="space-y-1 text-[11px] text-slate-500 dark:text-neutral-400">
-                Available until
-                <input
-                  type="datetime-local"
-                  value={t.availableUntilLocal}
-                  disabled={disabled || saving}
-                  onChange={(e) => updateTarget(t.key, { availableUntilLocal: e.target.value })}
-                  className={`mt-1 block w-full ${inputClass}`}
-                />
-              </label>
+              <ScheduleDatetimeField
+                id={`assign-to-due-${t.key}`}
+                label="Due date"
+                relativeLabel="Due after enrollment"
+                value={t.dueLocal}
+                onChange={(v) => updateTarget(t.key, { dueLocal: v })}
+                disabled={disabled || saving}
+                scheduleMode={scheduleMode}
+                relativeAnchorAt={relativeScheduleAnchorAt}
+                defaultTime="23:59"
+                className={inputClass}
+              />
+              <ScheduleDatetimeField
+                id={`assign-to-from-${t.key}`}
+                label="Available from"
+                relativeLabel="Available after enrollment"
+                value={t.availableFromLocal}
+                onChange={(v) => updateTarget(t.key, { availableFromLocal: v })}
+                disabled={disabled || saving}
+                scheduleMode={scheduleMode}
+                relativeAnchorAt={relativeScheduleAnchorAt}
+                defaultTime="00:00"
+                className={inputClass}
+              />
+              <ScheduleDatetimeField
+                id={`assign-to-until-${t.key}`}
+                label="Available until"
+                relativeLabel="Unavailable after enrollment"
+                value={t.availableUntilLocal}
+                onChange={(v) => updateTarget(t.key, { availableUntilLocal: v })}
+                disabled={disabled || saving}
+                scheduleMode={scheduleMode}
+                relativeAnchorAt={relativeScheduleAnchorAt}
+                defaultTime="23:59"
+                className={inputClass}
+              />
             </div>
 
             {t.targetType === 'student' && t.targetId ? (

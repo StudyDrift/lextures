@@ -3153,6 +3153,8 @@ export default function CourseModules() {
         initialTitle={settingsTargetItem?.title ?? ''}
         initialPublished={settingsTargetItem?.published ?? true}
         initialVisibleFrom={settingsTargetItem?.visibleFrom ?? null}
+        scheduleMode={courseMeta?.scheduleMode}
+        relativeScheduleAnchorAt={courseMeta?.relativeScheduleAnchorAt}
         onClose={() => {
           if (!moduleSettingsSaving && !moduleRequirementsSaving) {
             setModuleSettingsOpen(false)
@@ -3177,6 +3179,8 @@ export default function CourseModules() {
               courseCode={courseCode}
               moduleId={settingsTargetItem.id}
               allModules={allModules}
+              scheduleMode={courseMeta?.scheduleMode}
+              relativeScheduleAnchorAt={courseMeta?.relativeScheduleAnchorAt}
               onSavingChange={setModuleRequirementsSaving}
               onLoadingChange={setModuleRequirementsLoading}
               onErrorChange={setModuleRequirementsSaveError}
