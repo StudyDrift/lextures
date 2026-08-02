@@ -1359,6 +1359,9 @@ POST	/api/v1/orgs/{orgId}/role-grants	anonymous
 DELETE	/api/v1/orgs/{orgId}/role-grants/{grantId}	anonymous
 GET	/api/v1/orgs/{orgId}/settings/content-filter	anonymous
 PATCH	/api/v1/orgs/{orgId}/settings/content-filter	anonymous
+GET	/api/v1/orgs/{orgId}/settings/mobile-link-handling	anonymous
+PATCH	/api/v1/orgs/{orgId}/settings/mobile-link-handling	anonymous
+PUT	/api/v1/orgs/{orgId}/settings/mobile-link-handling	anonymous
 GET	/api/v1/orgs/{orgId}/settings/org-type	anonymous
 PUT	/api/v1/orgs/{orgId}/settings/org-type	anonymous
 GET	/api/v1/orgs/{orgId}/settings/support-widget	anonymous

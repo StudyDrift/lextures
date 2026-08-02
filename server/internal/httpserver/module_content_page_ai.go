@@ -62,7 +62,7 @@ func (d Deps) writeBuildPageBodyWithAI(
 		// Only enable tools when Content Tools is available for the course.
 		pub, pubErr := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
 		if pubErr == nil && pub != nil && ctsvc.AvailableForCourse(pub.ContentToolsEnabled) {
-			courseAllow := allowedToolIDs
+			var courseAllow []string
 			if settings, sErr := ctrepo.GetSettings(r.Context(), d.Pool, courseID); sErr == nil && settings != nil {
 				// Empty course allowlist means all tools; otherwise intersect.
 				if len(settings.AllowedToolIDs) > 0 {

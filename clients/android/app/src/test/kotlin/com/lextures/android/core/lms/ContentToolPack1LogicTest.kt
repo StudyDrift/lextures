@@ -150,7 +150,8 @@ class ContentToolPack1LogicTest {
         assertEquals(1 until 2, ContentToolPack1Logic.pageWindow(3, 1, 1))
         assertEquals(0 until 2, ContentToolPack1Logic.pageWindow(3, 2, 0))
         assertEquals(2 until 3, ContentToolPack1Logic.pageWindow(3, 2, 1))
-        assertEquals(1, ContentToolPack1Logic.initialPageIndex(3, 1, 2))
+        // pageSize 1 → page index equals the item index (0-based).
+        assertEquals(2, ContentToolPack1Logic.initialPageIndex(3, 1, 2))
         assertEquals(0, ContentToolPack1Logic.initialPageIndex(3, 2, 1))
     }
 
