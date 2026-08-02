@@ -59,6 +59,8 @@ var demoChecksumRepairMigrations = []struct {
 	{431, "431_parent_link_assign.sql"},
 	// Idempotent grade_level→grade_levels backfill (IF EXISTS + DROP IF EXISTS); edited for re-apply after repair_345.
 	{438, "438_course_grade_levels_array.sql"},
+	// Idempotent ADD COLUMN IF NOT EXISTS + CREATE TABLE IF NOT EXISTS; MB.1 policy refined after first apply.
+	{460, "460_mobile_link_handling.sql"},
 }
 
 // repairMigration289RenumberCollision fixes dev/demo DBs that applied grading_agent as v289

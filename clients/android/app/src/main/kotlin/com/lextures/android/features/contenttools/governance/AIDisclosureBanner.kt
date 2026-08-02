@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.R
@@ -52,12 +54,35 @@ fun AIDisclosureBanner(
             fontSize = 12.sp,
             color = textSecondary(),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = onAcknowledge, enabled = !busy) {
-                Text(ackLabel)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Button(
+                onClick = onAcknowledge,
+                enabled = !busy,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = ackLabel,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                )
             }
-            OutlinedButton(onClick = onOptOut, enabled = !busy) {
-                Text(L.text(R.string.mobile_contentTools_governance_consentOptOut))
+            OutlinedButton(
+                onClick = onOptOut,
+                enabled = !busy,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = L.text(R.string.mobile_contentTools_governance_consentOptOut),
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
     }

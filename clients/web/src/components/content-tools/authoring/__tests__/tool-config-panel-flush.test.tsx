@@ -125,4 +125,70 @@ describe('ToolConfigPanel flush', () => {
     await flushRef.current!()
     expect(patchContentToolInstance).not.toHaveBeenCalled()
   })
+
+  it('paste JSON config saves valid config and updates the form', async () => {
+    const user = userEvent.setup()
+    const onSaved = vi.fn()
+    const onDraftChange = vi.fn()
+
+    render(
+      <ToolConfigPanel
+        courseCode="CS101"
+        instance={instance}
+        manifestCache={manifest}
+        onSaved={onSaved}
+        onDraftChange={onDraftChange}
+      />,
+    )
+
+    await screen.findByLabelText(/title/i)
+    await user.click(screen.getByRole('button', { name: /pasteJson$/i }))
+
+    const dialog = await screen.findByRole('dialog')
+    const textarea = dialog.querySelector('textarea')
+    expect(textarea).toBeTruthy()
+    await user.clear(textarea!)
+    await user.click(textarea!)
+    await user.paste('{"title":"From paste"}')
+
+    await user.click(screen.getByRole('button', { name: /pasteJsonApply/i }))
+
+    await waitFor(() => {
+      expect(patchContentToolInstance).toHaveBeenCalledWith('CS101', 'inst-1', {
+        config: { title: 'From paste' },
+      })
+    })
+    expect(onSaved).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+    expect(await screen.findByLabelText(/title/i)).toHaveValue('From paste')
+  })
+
+  it('paste JSON config shows client validation errors without saving', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <ToolConfigPanel
+        courseCode="CS101"
+        instance={instance}
+        manifestCache={manifest}
+      />,
+    )
+
+    await screen.findByLabelText(/title/i)
+    await user.click(screen.getByRole('button', { name: /pasteJson$/i }))
+
+    const dialog = await screen.findByRole('dialog')
+    const textarea = dialog.querySelector('textarea')
+    await user.clear(textarea!)
+    await user.click(textarea!)
+    await user.paste('{}')
+
+    await user.click(screen.getByRole('button', { name: /pasteJsonApply/i }))
+
+    expect(await screen.findByText(/this field is required/i)).toBeInTheDocument()
+    expect(patchContentToolInstance).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
 })
