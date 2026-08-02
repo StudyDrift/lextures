@@ -9,7 +9,10 @@ import { useOfflineContent } from '../../hooks/use-offline-content'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
 import { BuildContentPageWithAiModal } from '../../components/content-page/build-content-page-with-ai-modal'
 import { ReadAloudControls } from '../../components/a11y/read-aloud-controls'
-import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
+import {
+  SyllabusBlockEditor,
+  type ContentToolsFlushHandle,
+} from '../../components/syllabus/syllabus-block-editor'
 import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -803,6 +806,7 @@ export default function CourseModuleQuizPage() {
   const quizActionsRef = useRef<HTMLDivElement>(null)
   const importDropdownRef = useRef<HTMLDivElement>(null)
   const importButtonRef = useRef<HTMLButtonElement>(null)
+  const contentToolsFlushRef = useRef<ContentToolsFlushHandle | null>(null)
 
   function beginEditContent() {
     setSaveError(null)
@@ -890,6 +894,7 @@ export default function CourseModuleQuizPage() {
     setSaveError(null)
     setSaving(true)
     try {
+      await contentToolsFlushRef.current?.flush()
       const code = draftQuizAdvanced.quizAccessCode.trim()
       const data = await patchModuleQuiz(courseCode, itemId, {
         title: trimmedTitle,
@@ -1710,6 +1715,7 @@ export default function CourseModuleQuizPage() {
               onChange={setDraft}
               disabled={saving}
               documentVariant="page"
+              contentToolsFlushRef={contentToolsFlushRef}
               pageDocumentPanel={
                 canEdit ? (
                   <QuizPageSettingsPanel
@@ -1767,6 +1773,7 @@ export default function CourseModuleQuizPage() {
           placeholder="e.g. Intro for a midterm on cell division: overview, time limit note, and what students should review…"
           onClose={() => setBuildAiOpen(false)}
           onBuild={async ({ prompt, existingMarkdown }) => {
+            // Quiz intro is prose-only (no content tools).
             const { sections } = await buildQuizIntroWithAi(courseCode, itemId, {
               prompt,
               existingMarkdown: existingMarkdown || undefined,

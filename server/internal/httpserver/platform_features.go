@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/config"
 	aidisclosurerepo "github.com/lextures/lextures/server/internal/repos/aidisclosure"
+	"github.com/lextures/lextures/server/internal/repos/mobilelinkpolicy"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 )
@@ -70,7 +71,10 @@ type platformFeaturesJSON struct {
 	FFMobileWhiteboardEdit             bool `json:"ffMobileWhiteboardEdit"`
 	FFMobileMarketplacePurchase        bool `json:"ffMobileMarketplacePurchase"`
 	FFMobileBoardsAdvanced             bool `json:"ffMobileBoardsAdvanced"`
-	FFParentPortal                     bool `json:"ffParentPortal"`
+	// FFMobileContentTools gates the CT.M3 native content tool host on iOS/Android.
+	// Always on (platform master removed); JSON key kept for client kill-switch parity.
+	FFMobileContentTools bool `json:"ffMobileContentTools"`
+	FFParentPortal       bool `json:"ffParentPortal"`
 	FFParentPortalV2                   bool `json:"ffParentPortalV2"`
 	FFReportCards                      bool `json:"ffReportCards"`
 	FFLibrary                          bool `json:"ffLibrary"`
@@ -176,6 +180,11 @@ type platformFeaturesJSON struct {
 	IRTCatModeEnabled            bool    `json:"irtCatModeEnabled"`
 	AdaptiveLearnerModelEnabled  bool    `json:"adaptiveLearnerModelEnabled"`
 	LearnerModelEMAAlpha         float64 `json:"learnerModelEmaAlpha"`
+
+	// MB.1 — mobile in-app browser (always on; kept for API compatibility).
+	FFMobileInAppBrowser bool `json:"ffMobileInAppBrowser"`
+	// MB.1 — effective mobile link handling policy (org override wins when present).
+	MobileLinkHandling string `json:"mobileLinkHandling"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -237,7 +246,9 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFMobileWhiteboardEdit:             cfg.FFMobileWhiteboardEdit,
 		FFMobileMarketplacePurchase:        cfg.FFMobileMarketplacePurchase,
 		FFMobileBoardsAdvanced:             cfg.FFMobileBoardsAdvanced,
-		FFParentPortal:                     cfg.FFParentPortal,
+		// Always on: native content tool packs ship with the app; course contentToolsEnabled still gates host.
+		FFMobileContentTools: true,
+		FFParentPortal:       cfg.FFParentPortal,
 		FFParentPortalV2:                   cfg.FFParentPortalV2,
 		FFReportCards:                      cfg.FFReportCards,
 		FFLibrary:                          cfg.FFLibrary,
@@ -334,6 +345,9 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		MaintenanceBannerEnabled:     cfg.MaintenanceBannerEnabled,
 		CustomFieldsEnabled:          cfg.CustomFieldsEnabled,
 		SeatManagementEnabled:        cfg.SeatManagementEnabled,
+		// MB.1: in-app browser always on; policy still overridable via mobileLinkHandling.
+		FFMobileInAppBrowser: true,
+		MobileLinkHandling:   "in_app",
 	}
 }
 
@@ -411,6 +425,15 @@ func (d Deps) handleGetPlatformFeatures() http.HandlerFunc {
 		out.AiProviderAbstractionEnabled = cfg.AiProviderAbstractionEnabled
 		out.RagNotebookEnabled = d.effectiveRagNotebookEnabled(r.Context(), userID)
 		out.AiStudyBuddyEnabled = d.effectiveAIStudyBuddyEnabled(r.Context(), userID)
+		// MB.1: mobile link policy (org override when present). Browser feature always on.
+		out.MobileLinkHandling = string(mobilelinkpolicy.HandlingInApp)
+		out.FFMobileInAppBrowser = true
+		if d.Pool != nil {
+			handling, _, err := mobilelinkpolicy.Effective(r.Context(), d.Pool, orgID)
+			if err == nil {
+				out.MobileLinkHandling = string(handling)
+			}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

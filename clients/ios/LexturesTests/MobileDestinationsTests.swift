@@ -119,13 +119,16 @@ final class MobileDestinationsTests: XCTestCase {
         raw.ffMobileWhiteboardEdit = false
         raw.ffMobileMarketplacePurchase = false
         raw.ffMobileBoardsAdvanced = false
+        raw.ffMobileContentTools = false
         let mapped = MobilePlatformFeatures.from(raw)
         XCTAssertTrue(mapped.ffMobileWhiteboardEdit)
         XCTAssertTrue(mapped.ffMobileMarketplacePurchase)
         XCTAssertTrue(mapped.ffMobileBoardsAdvanced)
+        XCTAssertTrue(mapped.ffMobileContentTools)
         XCTAssertTrue(MobilePlatformFeatures.from(nil).ffMobileWhiteboardEdit)
         XCTAssertTrue(MobilePlatformFeatures.from(nil).ffMobileMarketplacePurchase)
         XCTAssertTrue(MobilePlatformFeatures.from(nil).ffMobileBoardsAdvanced)
+        XCTAssertTrue(MobilePlatformFeatures.from(nil).ffMobileContentTools)
     }
 
     func testCourseWorkspaceHidesDisabledFeatures() {

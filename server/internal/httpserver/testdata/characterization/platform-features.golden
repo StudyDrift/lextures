@@ -82,9 +82,11 @@ keys:
   ffMobileAdminConsole
   ffMobileBoardsAdvanced
   ffMobileCanvasImport
+  ffMobileContentTools
   ffMobileCourseCreateV2
   ffMobileCreateCourse
   ffMobileEnrollmentAdd
+  ffMobileInAppBrowser
   ffMobileLiveQuiz
   ffMobileMarketplacePurchase
   ffMobileWhiteboardEdit
@@ -141,6 +143,7 @@ keys:
   learnerProfileEnabled
   lrsAnonymizeActors
   maintenanceBannerEnabled
+  mobileLinkHandling
   oerLibraryEnabled
   openRouterConfigured
   outcomesReportEnabled

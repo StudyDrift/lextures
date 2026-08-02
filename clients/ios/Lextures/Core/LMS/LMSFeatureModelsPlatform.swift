@@ -17,10 +17,14 @@ struct PlatformFeatures: Decodable {
     var ffMobileImmersiveReader: Bool?
     /// CT.M1 rich markdown engine (tables/code/math/toolFence). Default on when unset.
     var ffMobileRichMarkdown: Bool?
-    /// CT.M3 Content Tools host dark-launch. Default off when unset.
+    /// CT.M3 Content Tools host. Default on when unset (native packs shipped).
     var ffMobileContentTools: Bool?
     /// CT.M4 sandboxed WebView tool host. Default off when unset (independent of CT.M3).
     var ffMobileContentToolsSandbox: Bool?
+    /// MB.1 full-screen in-app browser. Always treated as on by clients (flag removed).
+    var ffMobileInAppBrowser: Bool?
+    /// MB.1 admin policy: in_app | system | blocked.
+    var mobileLinkHandling: String?
     var ffMobileLiveMeetings: Bool?
     var readAloudEnabled: Bool?
     var ffReadAloud: Bool?

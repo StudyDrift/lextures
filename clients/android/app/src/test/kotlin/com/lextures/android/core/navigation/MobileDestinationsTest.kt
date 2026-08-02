@@ -112,14 +112,17 @@ class MobileDestinationsTest {
             ffMobileWhiteboardEdit = false,
             ffMobileMarketplacePurchase = false,
             ffMobileBoardsAdvanced = false,
+            ffMobileContentTools = false,
         )
         val mapped = MobilePlatformFeatures.from(off)
         assertTrue(mapped.ffMobileWhiteboardEdit)
         assertTrue(mapped.ffMobileMarketplacePurchase)
         assertTrue(mapped.ffMobileBoardsAdvanced)
+        assertTrue(mapped.ffMobileContentTools)
         assertTrue(MobilePlatformFeatures.from(null).ffMobileWhiteboardEdit)
         assertTrue(MobilePlatformFeatures.from(null).ffMobileMarketplacePurchase)
         assertTrue(MobilePlatformFeatures.from(null).ffMobileBoardsAdvanced)
+        assertTrue(MobilePlatformFeatures.from(null).ffMobileContentTools)
     }
 
     @Test

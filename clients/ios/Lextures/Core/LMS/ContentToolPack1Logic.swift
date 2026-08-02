@@ -112,6 +112,41 @@ enum ContentToolPack1Logic {
         return false
     }
 
+    /// How many questions to show at once. `nil` means all.
+    static func parseQuestionsAtATime(_ raw: JSONValue?) -> Int? {
+        guard let raw else { return nil }
+        switch raw {
+        case .string(let text) where text.lowercased() == "all":
+            return nil
+        case .string(let text):
+            guard let n = Int(text), (1 ... 3).contains(n) else { return nil }
+            return n
+        case .number(let number):
+            let n = Int(number.rounded())
+            return (1 ... 3).contains(n) ? n : nil
+        default:
+            return nil
+        }
+    }
+
+    /// Exclusive end index of the visible window for a paged question list.
+    static func pageWindow(total: Int, pageSize: Int?, pageIndex: Int) -> (start: Int, end: Int) {
+        guard let pageSize, pageSize > 0, pageSize < total, total > 0 else {
+            return (0, max(0, total))
+        }
+        let pageCount = (total + pageSize - 1) / pageSize
+        let page = max(0, min(pageIndex, pageCount - 1))
+        let start = page * pageSize
+        let end = min(total, start + pageSize)
+        return (start, end)
+    }
+
+    static func initialPageIndex(total: Int, pageSize: Int?, firstIncompleteIndex: Int) -> Int {
+        guard let pageSize, pageSize > 0, total > 0 else { return 0 }
+        let idx = min(max(0, firstIncompleteIndex), total - 1)
+        return idx / pageSize
+    }
+
     static func shuffleStable<T>(_ items: [T], seed: String, id: (T) -> String) -> [T] {
         guard items.count > 1 else { return items }
         var out = items

@@ -1,5 +1,6 @@
 package com.lextures.android.features.settings.admin
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
@@ -225,12 +226,7 @@ fun PeopleAdminScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            context.startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse(AppConfiguration.webUrl(PeopleAdminLogic.webSettingsPath())),
-                                ),
-                            )
+                            LinkOpener.open(context, AppConfiguration.webUrl(PeopleAdminLogic.webSettingsPath()), null, "legacy")
                         }
                         .padding(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),

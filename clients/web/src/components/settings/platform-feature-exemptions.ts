@@ -24,6 +24,8 @@ export const PLATFORM_FEATURE_EXEMPT_KEYS = [
   'ffMobileWhiteboardEdit',
   'ffMobileMarketplacePurchase',
   'ffMobileBoardsAdvanced',
+  // MB.1 — in-app browser is always on; org/platform policy uses mobileLinkHandling only.
+  'ffMobileInAppBrowser',
   // COLLAPSE (docs/plan/flags.md): folded into ffIqLiveHosting's per-course merge; always-on, no
   // independent Global platform toggle.
   'ffIqLiveHosting',

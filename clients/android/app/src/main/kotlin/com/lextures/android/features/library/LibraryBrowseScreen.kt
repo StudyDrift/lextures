@@ -1,5 +1,6 @@
 package com.lextures.android.features.library
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -184,7 +185,7 @@ fun LibraryBrowseScreen(
                 title = hit.title,
                 urlString = hit.url,
                 accessToken = accessToken,
-                onOpenExternal = { uri -> context.startActivity(Intent(Intent.ACTION_VIEW, uri)) },
+                onOpenExternal = { uri -> LinkOpener.open(context, uri.toString(), null, "legacy") },
                 modifier = Modifier.fillMaxSize(),
             )
         }

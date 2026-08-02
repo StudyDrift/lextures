@@ -43,6 +43,34 @@ function attemptsUsed(answers: Record<string, QuestionAnswer>, qid: string): num
   return answers[qid]?.attempts?.length ?? 0
 }
 
+/** Returns page size 1–3, or null for “show all”. */
+function parseQuestionsAtATime(raw: unknown): number | null {
+  if (raw === undefined || raw === null || raw === 'all') return null
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    const n = Math.floor(raw)
+    if (n >= 1 && n <= 3) return n
+  }
+  if (typeof raw === 'string') {
+    const n = Number(raw)
+    if (Number.isFinite(n)) {
+      const i = Math.floor(n)
+      if (i >= 1 && i <= 3) return i
+    }
+  }
+  return null
+}
+
+function initialPageIndex(
+  questions: Question[],
+  answers: Record<string, QuestionAnswer>,
+  pageSize: number | null,
+): number {
+  if (!pageSize || pageSize <= 0 || questions.length === 0) return 0
+  const firstIncomplete = questions.findIndex((q) => attemptsUsed(answers, q.id) === 0)
+  const idx = firstIncomplete === -1 ? questions.length - 1 : firstIncomplete
+  return Math.floor(idx / pageSize)
+}
+
 export default function InlineQuestionsRenderer({
   instanceId,
   config,
@@ -60,6 +88,7 @@ export default function InlineQuestionsRenderer({
     : []
   const sequential = config.sequential === true
   const shuffleOptions = config.shuffleOptions === true
+  const questionsAtATime = parseQuestionsAtATime(config.questionsAtATime)
   const label =
     typeof config.label === 'string' && config.label.trim()
       ? config.label
@@ -75,10 +104,25 @@ export default function InlineQuestionsRenderer({
   const [localDrafts, setLocalDrafts] = useState<Record<string, unknown>>(drafts)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [lastResult, setLastResult] = useState<Record<string, SubmitResult>>({})
+  const [pageIndex, setPageIndex] = useState(() =>
+    initialPageIndex(questions, answers, questionsAtATime),
+  )
 
   useEffect(() => {
     setLocalDrafts(drafts)
   }, [JSON.stringify(drafts)])
+
+  const pagingEnabled =
+    questionsAtATime != null && questionsAtATime > 0 && questions.length > questionsAtATime
+  const pageCount = pagingEnabled
+    ? Math.ceil(questions.length / (questionsAtATime as number))
+    : 1
+  const safePage = Math.max(0, Math.min(pageIndex, pageCount - 1))
+  const pageStart = pagingEnabled ? safePage * (questionsAtATime as number) : 0
+  const pageEnd = pagingEnabled
+    ? Math.min(questions.length, pageStart + (questionsAtATime as number))
+    : questions.length
+  const visibleQuestions = questions.slice(pageStart, pageEnd)
 
   function isUnlocked(qid: string): boolean {
     if (!sequential) return true
@@ -87,6 +131,13 @@ export default function InlineQuestionsRenderer({
       if (attemptsUsed(answers, q.id) === 0) return false
     }
     return false
+  }
+
+  function canAdvancePage(): boolean {
+    if (!pagingEnabled || safePage >= pageCount - 1) return false
+    if (!sequential) return true
+    // In sequential mode, require every visible question on this page to have been attempted.
+    return visibleQuestions.every((q) => attemptsUsed(answers, q.id) > 0)
   }
 
   function optionsFor(q: Question): Option[] {
@@ -163,7 +214,8 @@ export default function InlineQuestionsRenderer({
         </div>
       ) : null}
 
-      {questions.map((q, idx) => {
+      {visibleQuestions.map((q) => {
+        const idx = questions.findIndex((item) => item.id === q.id)
         const unlocked = isUnlocked(q.id)
         const used = attemptsUsed(answers, q.id)
         const ans = answers[q.id]
@@ -367,6 +419,36 @@ export default function InlineQuestionsRenderer({
           </fieldset>
         )
       })}
+
+      {pagingEnabled ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-neutral-700">
+          <p className="text-xs text-slate-500 dark:text-neutral-400">
+            {t('contentTools.tools.inline_questions.pageOf', {
+              from: pageStart + 1,
+              to: pageEnd,
+              total: questions.length,
+            })}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={safePage <= 0}
+              onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+              className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            >
+              {t('contentTools.tools.inline_questions.previous')}
+            </button>
+            <button
+              type="button"
+              disabled={!canAdvancePage()}
+              onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+              className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            >
+              {t('contentTools.tools.inline_questions.next')}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

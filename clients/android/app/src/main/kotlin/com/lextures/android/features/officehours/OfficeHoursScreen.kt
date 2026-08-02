@@ -1,5 +1,6 @@
 package com.lextures.android.features.officehours
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
@@ -272,7 +273,7 @@ private fun MyBookingsList(
                                 val token = accessToken ?: return@launch
                                 val meetingId = slot.meetingId ?: return@launch
                                 val joinUrl = LmsApi.fetchMeetingJoinUrl(meetingId, token) ?: return@launch
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(joinUrl)))
+                                LinkOpener.open(context, joinUrl.toString(), null, "legacy")
                             }
                         }) {
                             Text(officeHoursJoinMeeting())
@@ -280,7 +281,7 @@ private fun MyBookingsList(
                     }
                     OutlinedButton(onClick = {
                         val url = AppConfiguration.apiUrl("/api/v1/slots/${slot.id}/ical").toString()
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        LinkOpener.open(context, url.toString(), null, "legacy")
                     }) {
                         Text(officeHoursAddToCalendar())
                     }

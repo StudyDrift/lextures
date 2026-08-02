@@ -123,9 +123,13 @@ No secrets or signing config are required for the debug build.
 
 Native Content Tool runtime under `features/contenttools/`: page provider batches instances,
 `ToolFrame` + placeholder/error cards, host logic for debounce/conflict/read-only, offline
-cache key `contentToolInstances`, and `noop_probe`. Dark-launched via `ffMobileContentTools`
-(default off) with course `contentToolsEnabled`.
+cache key `contentToolInstances`, and native pack renderers (e.g. `inline_questions`).
+Enabled via `ffMobileContentTools` (default on) with course `contentToolsEnabled`.
 
 CT.M4 sandboxed WebView host lives under `features/contenttools/sandbox/` (opaque-origin WebView,
 WebMessageListener bridge, pool of ≤3). Resolution is native → sandbox → placeholder, gated by
 `ffMobileContentToolsSandbox` (default off). Shared fixtures: `clients/mobile/fixtures/content-tools/bridge/`.
+
+## Opening URLs (MB.1)
+
+Do **not** start `Intent.ACTION_VIEW` from feature code. Use `LinkOpener` (`core/routing/LinkOpener.kt`) so routing goes through `MobileLinkPolicy`. SSO and billing keep Custom Tabs / system checkout. CI soft-lints via `scripts/check-mobile-link-opener.sh` (set `MB1_LINK_OPENER_STRICT=1` to fail the build).

@@ -122,6 +122,9 @@ export type PlatformSettingsPayload = {
   ffMobileWhiteboardEdit: boolean
   ffMobileMarketplacePurchase: boolean
   ffMobileBoardsAdvanced: boolean
+  // MB.1 — always on; kept for API compatibility (see platform-feature-exemptions).
+  ffMobileInAppBrowser: boolean
+  mobileLinkHandling: string
   ffUiMode: boolean
   ffReadAloud: boolean
   ffAltTextEnforcement: boolean

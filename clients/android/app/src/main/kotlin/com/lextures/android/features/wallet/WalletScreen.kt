@@ -1,5 +1,6 @@
 package com.lextures.android.features.wallet
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
@@ -423,7 +424,7 @@ private fun WalletCcrDetailScreen(
                             })
                         }) { Text(L.text(context, localePrefs, R.string.mobile_wallet_shareVerify)) }
                         TextButton(onClick = {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                            LinkOpener.open(context, url.toString(), null, "legacy")
                         }) { Text(L.text(context, localePrefs, R.string.mobile_wallet_openVerify)) }
                     } ?: Text(
                         L.text(context, localePrefs, R.string.mobile_wallet_verification_private),
@@ -497,7 +498,7 @@ private fun WalletOfficialTranscriptDetailScreen(
             Text(L.text(context, localePrefs, R.string.mobile_wallet_officialTranscriptsHint), color = textSecondary())
             Button(
                 onClick = {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(WalletLogic.officialTranscriptWebUrl())))
+                    LinkOpener.open(context, WalletLogic.officialTranscriptWebUrl(), null, "legacy")
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             ) {

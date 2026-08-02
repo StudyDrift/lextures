@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatDateTime } from '../../lib/format'
 import { formatEntityLabel } from '../../lib/format-entity-label'
@@ -6,7 +6,10 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { Eye } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
-import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
+import {
+  SyllabusBlockEditor,
+  type ContentToolsFlushHandle,
+} from '../../components/syllabus/syllabus-block-editor'
 import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -249,6 +252,7 @@ export default function CourseModuleAssignmentPage() {
   const [saving, setSaving] = useState(false)
   const [mdPreset, setMdPreset] = useState<string>('classic')
   const [mdCustom, setMdCustom] = useState<MarkdownThemeCustom | null>(null)
+  const contentToolsFlushRef = useRef<ContentToolsFlushHandle | null>(null)
   const lmsUiDark = useLmsDarkMode()
   const mdTheme = useMemo(
     (): ResolvedMarkdownTheme => resolveMarkdownTheme(mdPreset, mdCustom, { lmsUiDark }),
@@ -584,6 +588,7 @@ export default function CourseModuleAssignmentPage() {
     setSaveError(null)
     setSaving(true)
     try {
+      await contentToolsFlushRef.current?.flush()
       const data = await patchModuleAssignment(courseCode, itemId, {
         markdown: body,
         dueAt: datetimeLocalValueToIso(draftDueLocal),
@@ -956,6 +961,7 @@ export default function CourseModuleAssignmentPage() {
               onChange={setDraft}
               disabled={saving}
               documentVariant="page"
+              contentToolsFlushRef={contentToolsFlushRef}
               pageDocumentPanel={
                 canEdit ? (
                   <AssignmentPageSettingsPanel

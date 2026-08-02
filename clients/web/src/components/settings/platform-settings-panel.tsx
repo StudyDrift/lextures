@@ -183,6 +183,8 @@ function emptyForm(): PlatformSettingsPayload {
     ffMobileWhiteboardEdit: true,
     ffMobileMarketplacePurchase: true,
     ffMobileBoardsAdvanced: true,
+    ffMobileInAppBrowser: true,
+    mobileLinkHandling: 'in_app',
     ffUiMode: false,
     ffReadAloud: false,
     ffAltTextEnforcement: false,

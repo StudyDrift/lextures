@@ -86,7 +86,7 @@ struct ProfileAppearanceCard: View {
 /// Outbound links to the privacy center, trust center, and accessibility statement.
 struct ProfileLegalCard: View {
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.openURL) private var openURL
+    @Environment(AppShellModel.self) private var shell
 
     var body: some View {
         LMSCard {
@@ -103,7 +103,7 @@ struct ProfileLegalCard: View {
 
     private func linkRow(systemImage: String, title: String, path: String) -> some View {
         Button {
-            openURL(AppConfiguration.webURL(path: path))
+            LinkOpener.open(AppConfiguration.webURL(path: path), shell: shell, source: "settings_legal")
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: systemImage)
@@ -287,6 +287,7 @@ struct ProfileOfflineStorageCard: View {
     @Environment(\.colorScheme) private var colorScheme
     @Binding var confirmingClearCache: Bool
     @Binding var confirmingClearSearchHistory: Bool
+    @State private var confirmingClearBrowsingData = false
 
     var body: some View {
         LMSCard {
@@ -308,6 +309,27 @@ struct ProfileOfflineStorageCard: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .buttonStyle(.plain)
+            Divider()
+            Button {
+                confirmingClearBrowsingData = true
+            } label: {
+                Label(L.text("mobile.browser.clearBrowsingData"), systemImage: "globe")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.error)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+            .confirmationDialog(
+                L.text("mobile.browser.clearBrowsingDataConfirm"),
+                isPresented: $confirmingClearBrowsingData,
+                titleVisibility: .visible
+            ) {
+                Button(L.text("mobile.browser.clearBrowsingData"), role: .destructive) {
+                    Task { await InAppBrowserDataStore.shared.purgeAll() }
+                }
+            } message: {
+                Text(L.text("mobile.browser.clearBrowsingDataMessage"))
+            }
             if shell.universalSearchEnabled {
                 Divider()
                 Button {

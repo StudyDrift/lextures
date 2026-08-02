@@ -1,5 +1,6 @@
 package com.lextures.android.features.settings.admin
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
@@ -161,7 +162,7 @@ fun AuditLogAdminScreen(
             Button(
                 onClick = {
                     val uri = Uri.parse(AppConfiguration.webUrl(AuditLogAdminLogic.webPath()))
-                    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    LinkOpener.open(context, uri.toString(), null, "legacy")
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {

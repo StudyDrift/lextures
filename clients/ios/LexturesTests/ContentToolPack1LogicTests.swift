@@ -220,4 +220,32 @@ final class ContentToolPack1LogicTests: XCTestCase {
         // Pack-2 registers ask_questions when allowlisted (CT.M6).
         XCTAssertFalse(ContentToolHostLogic.shouldShowUnsupportedPlaceholder(toolId: "ask_questions", contract: 1))
     }
+
+    func testQuestionsAtATimePagingHelpers() {
+        XCTAssertNil(ContentToolPack1Logic.parseQuestionsAtATime(.string("all")))
+        XCTAssertNil(ContentToolPack1Logic.parseQuestionsAtATime(nil))
+        XCTAssertEqual(ContentToolPack1Logic.parseQuestionsAtATime(.number(1.0)), Optional(1))
+        XCTAssertEqual(ContentToolPack1Logic.parseQuestionsAtATime(.number(2.0)), Optional(2))
+        XCTAssertEqual(ContentToolPack1Logic.parseQuestionsAtATime(.string("2")), Optional(2))
+        XCTAssertNil(ContentToolPack1Logic.parseQuestionsAtATime(.number(9.0)))
+
+        let all = ContentToolPack1Logic.pageWindow(total: 3, pageSize: nil, pageIndex: 0)
+        XCTAssertEqual(all.start, 0)
+        XCTAssertEqual(all.end, 3)
+        let page0 = ContentToolPack1Logic.pageWindow(total: 3, pageSize: 1, pageIndex: 0)
+        XCTAssertEqual(page0.start, 0)
+        XCTAssertEqual(page0.end, 1)
+        let pageMid = ContentToolPack1Logic.pageWindow(total: 3, pageSize: 1, pageIndex: 1)
+        XCTAssertEqual(pageMid.start, 1)
+        XCTAssertEqual(pageMid.end, 2)
+        let pageWide = ContentToolPack1Logic.pageWindow(total: 3, pageSize: 2, pageIndex: 0)
+        XCTAssertEqual(pageWide.start, 0)
+        XCTAssertEqual(pageWide.end, 2)
+        let pageLast = ContentToolPack1Logic.pageWindow(total: 3, pageSize: 2, pageIndex: 1)
+        XCTAssertEqual(pageLast.start, 2)
+        XCTAssertEqual(pageLast.end, 3)
+        // pageSize 1 → page index equals the item index (0-based).
+        XCTAssertEqual(ContentToolPack1Logic.initialPageIndex(total: 3, pageSize: 1, firstIncompleteIndex: 2), 2)
+        XCTAssertEqual(ContentToolPack1Logic.initialPageIndex(total: 3, pageSize: 2, firstIncompleteIndex: 1), 0)
+    }
 }

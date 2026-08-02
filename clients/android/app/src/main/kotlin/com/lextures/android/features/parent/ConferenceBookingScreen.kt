@@ -1,5 +1,6 @@
 package com.lextures.android.features.parent
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
@@ -388,15 +389,13 @@ private fun MyConferencesList(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (canJoin && videoLink.isNotEmpty()) {
                             Button(onClick = {
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(videoLink)))
+                                LinkOpener.open(context, videoLink.toString(), null, "legacy")
                             }) {
                                 Text(L.text(context, localePrefs, R.string.mobile_parent_conferences_joinMeeting))
                             }
                         }
                         OutlinedButton(onClick = {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse(ConferenceLogic.icalUrl(item.slot.id))),
-                            )
+                            LinkOpener.open(context, ConferenceLogic.icalUrl(item.slot.id), null, "legacy")
                         }) {
                             Icon(Icons.Default.CalendarMonth, contentDescription = L.text(context, localePrefs, R.string.mobile_parent_conferences_addToCalendar))
                         }

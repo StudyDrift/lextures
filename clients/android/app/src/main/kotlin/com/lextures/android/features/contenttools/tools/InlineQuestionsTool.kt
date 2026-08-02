@@ -77,6 +77,8 @@ fun InlineQuestionsTool(props: ContentToolRendererProps) {
     val correctAnnounce = L.text(R.string.mobile_contentTools_tools_inline_questions_correctAnnounce)
     val incorrectAnnounce = L.text(R.string.mobile_contentTools_tools_inline_questions_incorrectAnnounce)
     val needsConnection = L.text(R.string.mobile_contentTools_runtime_needsConnection)
+    val previousLabel = L.text(R.string.mobile_contentTools_tools_inline_questions_previous)
+    val nextLabel = L.text(R.string.mobile_contentTools_tools_inline_questions_next)
 
     val label = ContentToolHostLogic.stringField(props.config, "label")
         ?.trim()
@@ -84,9 +86,9 @@ fun InlineQuestionsTool(props: ContentToolRendererProps) {
         ?: checkLabel
     val sequential = ContentToolPack1Logic.boolField(props.config, "sequential") == true
     val shuffleOptions = ContentToolPack1Logic.boolField(props.config, "shuffleOptions") == true
-    val maxAttempts = ContentToolPack1Logic.parseAttemptsConfig(
-        ContentToolPack1Logic.objectMap(props.config)["attempts"],
-    )
+    val configMap = ContentToolPack1Logic.objectMap(props.config)
+    val maxAttempts = ContentToolPack1Logic.parseAttemptsConfig(configMap["attempts"])
+    val questionsAtATime = ContentToolPack1Logic.parseQuestionsAtATime(configMap["questionsAtATime"])
     val answers = ContentToolPack1Logic.objectMap(
         ContentToolPack1Logic.objectMap(props.state)["answers"],
     )
@@ -94,6 +96,32 @@ fun InlineQuestionsTool(props: ContentToolRendererProps) {
         parseQuestions(props.config, props.instanceId, shuffleOptions)
     }
     val questionIds = remember(questions) { questions.map { it.id } }
+    val firstIncompleteIndex = remember(questions, answers) {
+        val idx = questions.indexOfFirst {
+            ContentToolPack1Logic.attemptsUsed(answers, it.id) == 0
+        }
+        if (idx < 0) maxOf(0, questions.lastIndex) else idx
+    }
+    var pageIndex by remember(props.instanceId, questionsAtATime, questions.size) {
+        mutableStateOf(
+            ContentToolPack1Logic.initialPageIndex(
+                questions.size,
+                questionsAtATime,
+                firstIncompleteIndex,
+            ),
+        )
+    }
+    val pagingEnabled =
+        questionsAtATime != null && questionsAtATime > 0 && questions.size > questionsAtATime
+    val pageCount =
+        if (pagingEnabled && questionsAtATime != null) {
+            maxOf(1, (questions.size + questionsAtATime - 1) / questionsAtATime)
+        } else {
+            1
+        }
+    val safePage = pageIndex.coerceIn(0, pageCount - 1)
+    val window = ContentToolPack1Logic.pageWindow(questions.size, questionsAtATime, safePage)
+    val visibleQuestions = if (pagingEnabled) questions.slice(window) else questions
 
     fun hydrate() {
         val remote = ContentToolPack1Logic.objectMap(
@@ -200,7 +228,7 @@ fun InlineQuestionsTool(props: ContentToolRendererProps) {
         if (gradingPending) {
             Text(text = gradingPendingLabel, fontSize = 12.sp, color = textSecondary())
         }
-        questions.forEach { q ->
+        visibleQuestions.forEach { q ->
             val unlocked = ContentToolPack1Logic.isSequentiallyUnlocked(
                 questionIds,
                 answers,
@@ -318,6 +346,43 @@ fun InlineQuestionsTool(props: ContentToolRendererProps) {
                         ContentToolHostLogic.stringField(result, "explanation")
                             ?.takeIf { it.isNotBlank() }
                             ?.let { NotebookContentView(markdown = it, compact = true) }
+                    }
+                }
+            }
+        }
+        if (pagingEnabled) {
+            val canAdvance = !sequential || visibleQuestions.all {
+                ContentToolPack1Logic.attemptsUsed(answers, it.id) > 0
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = L.format(
+                        context,
+                        localePrefs,
+                        R.string.mobile_contentTools_tools_inline_questions_pageOf,
+                        window.first + 1,
+                        window.last + 1,
+                        questions.size,
+                    ),
+                    fontSize = 12.sp,
+                    color = textSecondary(),
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { pageIndex = maxOf(0, safePage - 1) },
+                        enabled = safePage > 0,
+                    ) {
+                        Text(previousLabel)
+                    }
+                    Button(
+                        onClick = { pageIndex = minOf(pageCount - 1, safePage + 1) },
+                        enabled = safePage < pageCount - 1 && canAdvance,
+                    ) {
+                        Text(nextLabel)
                     }
                 }
             }

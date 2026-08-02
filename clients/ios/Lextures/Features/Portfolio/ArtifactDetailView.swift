@@ -3,9 +3,9 @@ import SwiftUI
 /// Artifact detail with preview, edit, delete (M12.1).
 struct ArtifactDetailView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.openURL) private var openURL
 
     let portfolioId: String
     @State var artifact: PortfolioArtifact
@@ -55,7 +55,7 @@ struct ArtifactDetailView: View {
                 if !artifact.externalUrl.isEmpty {
                     LMSCard {
                         Button {
-                            if let url = URL(string: artifact.externalUrl) { openURL(url) }
+                            LinkOpener.open(artifact.externalUrl, shell: shell, source: "portfolio")
                         } label: {
                             Label(artifact.externalUrl, systemImage: "link")
                                 .font(.subheadline)

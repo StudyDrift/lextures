@@ -32,10 +32,10 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -137,6 +137,9 @@ class HomeShellState {
     /** Live quiz join code pending presentation (MOB.5). Null code opens blank join. */
     var pendingLiveQuizCode by mutableStateOf<String?>(null)
     var showLiveQuizPlay by mutableStateOf(false)
+    /** MB.1 full-screen in-app browser session. */
+    var inAppBrowserSession by mutableStateOf<com.lextures.android.core.routing.LinkOpener.BrowserSession?>(null)
+    var linkBlockedNotice by mutableStateOf(false)
     var pendingBilling by mutableStateOf(false)
     var pendingProfileSettingsRoute by mutableStateOf<SettingsDeepLinkSection?>(null)
     var pendingParentStudentId by mutableStateOf<String?>(null)
@@ -236,6 +239,18 @@ class HomeShellState {
                 ShellTab.Profile,
             )
         }
+
+    fun presentInAppBrowser(session: com.lextures.android.core.routing.LinkOpener.BrowserSession) {
+        inAppBrowserSession = session
+    }
+
+    fun dismissInAppBrowser() {
+        inAppBrowserSession = null
+    }
+
+    fun presentLinkBlockedNotice() {
+        linkBlockedNotice = true
+    }
 
     fun openDeepLink(destination: DeepLinkDestination) {
         pendingDeepLink = destination
@@ -460,6 +475,15 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         shell.androidContext = context.applicationContext
     }
+    // MB.1: register shell for LinkOpener call sites without an explicit shell argument.
+    DisposableEffect(shell) {
+        com.lextures.android.core.routing.LinkOpener.activeShell = shell
+        onDispose {
+            if (com.lextures.android.core.routing.LinkOpener.activeShell === shell) {
+                com.lextures.android.core.routing.LinkOpener.activeShell = null
+            }
+        }
+    }
 
     LaunchedEffect(initialDeepLink) {
         initialDeepLink?.let { shell.openDeepLink(it) }
@@ -581,6 +605,52 @@ fun HomeScreen(
                     },
                 )
             }
+        }
+
+        // MB.1 full-screen in-app browser.
+        shell.inAppBrowserSession?.let { browserSession ->
+            Dialog(
+                onDismissRequest = { shell.dismissInAppBrowser() },
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = false,
+                ),
+            ) {
+                com.lextures.android.features.browser.InAppBrowserScreen(
+                    session = browserSession,
+                    onDismiss = { shell.dismissInAppBrowser() },
+                )
+            }
+        }
+
+        if (shell.linkBlockedNotice) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { shell.linkBlockedNotice = false },
+                confirmButton = {
+                    androidx.compose.material3.TextButton(onClick = { shell.linkBlockedNotice = false }) {
+                        androidx.compose.material3.Text(
+                            com.lextures.android.core.i18n.L.text(
+                                com.lextures.android.R.string.mobile_browser_close,
+                            ),
+                        )
+                    }
+                },
+                title = {
+                    androidx.compose.material3.Text(
+                        com.lextures.android.core.i18n.L.text(
+                            com.lextures.android.R.string.mobile_browser_blockedByPolicy,
+                        ),
+                    )
+                },
+                text = {
+                    androidx.compose.material3.Text(
+                        com.lextures.android.core.i18n.L.text(
+                            com.lextures.android.R.string.mobile_browser_blockedByPolicy,
+                        ),
+                    )
+                },
+            )
         }
     }
 }

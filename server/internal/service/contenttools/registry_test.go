@@ -203,12 +203,23 @@ func TestValidateConfigJSON_InlineQuestions(t *testing.T) {
 	raw := json.RawMessage(`{
 		"attempts":2,
 		"revealCorrectAfter":"last_attempt",
+		"questionsAtATime":1,
 		"questions":[{
 			"id":"q1","type":"single","prompt":"Q?",
 			"options":[{"id":"a","text":"A","correct":true},{"id":"b","text":"B","correct":false}]
 		}]
 	}`)
 	if err := ValidateConfigJSON(m, raw); err != nil {
+		t.Fatal(err)
+	}
+	rawAll := json.RawMessage(`{
+		"questionsAtATime":"all",
+		"questions":[{
+			"id":"q1","type":"single","prompt":"Q?",
+			"options":[{"id":"a","text":"A","correct":true},{"id":"b","text":"B","correct":false}]
+		}]
+	}`)
+	if err := ValidateConfigJSON(m, rawAll); err != nil {
 		t.Fatal(err)
 	}
 	if err := ValidateConfigJSON(m, json.RawMessage(`{"questions":[]}`)); err == nil {

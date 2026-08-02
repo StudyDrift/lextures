@@ -1,5 +1,6 @@
 package com.lextures.android.features.portfolio
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -170,7 +171,7 @@ fun ArtifactDetailScreen(
                 TextButton(
                     onClick = {
                         runCatching {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, current.externalUrl.toUri()))
+                            LinkOpener.open(context, current.externalUrl.toString(), null, "legacy")
                         }
                     },
                 ) {

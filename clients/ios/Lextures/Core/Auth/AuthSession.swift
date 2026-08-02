@@ -149,6 +149,8 @@ final class AuthSession {
         Task { await PushManager.shared.deregisterFromBackend(explicitAccessToken: savedToken) }
         RealtimeManager.shared.disconnect()
         OfflineService.shared.clearAllOnLogout()
+        // MB.1 FR-23: purge in-app browser cookies / storage / caches on sign-out.
+        Task { await InAppBrowserDataStore.shared.purgeAll() }
         KeychainStore.deleteAll()
         accessToken = nil
         refreshToken = nil

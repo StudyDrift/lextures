@@ -1,5 +1,6 @@
 package com.lextures.android.features.courses
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -122,7 +123,7 @@ fun LibraryResourceScreen(
                 title = title,
                 urlString = openUrl!!,
                 accessToken = accessToken,
-                onOpenExternal = { uri -> context.startActivity(Intent(Intent.ACTION_VIEW, uri)) },
+                onOpenExternal = { uri -> LinkOpener.open(context, uri.toString(), null, "legacy") },
                 modifier = Modifier.fillMaxSize(),
             )
             loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

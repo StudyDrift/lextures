@@ -885,9 +885,15 @@ export const generatedSyllabusSectionMarkdownSchema = z.object({
   markdown: z.string(),
 })
 
+export const draftContentPageToolSchema = z.object({
+  toolId: z.string(),
+  config: z.record(z.string(), z.unknown()).optional().default({}),
+})
+
 export const draftContentPageSectionSchema = z.object({
   heading: z.string(),
   markdown: z.string(),
+  tools: z.array(draftContentPageToolSchema).optional(),
 })
 
 export const buildContentPageWithAiResponseSchema = z.object({

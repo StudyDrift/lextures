@@ -1,5 +1,6 @@
 package com.lextures.android.features.settings.admin
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
@@ -316,7 +317,7 @@ fun TranscriptsSettingsScreen(
                         val url = AppConfiguration.webUrl(
                             TranscriptsAdvisingAdminLogic.Section.TRANSCRIPTS.webPath,
                         )
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        LinkOpener.open(context, url.toString(), null, "legacy")
                     },
                     modifier = Modifier.fillMaxWidth(),
                 ) {

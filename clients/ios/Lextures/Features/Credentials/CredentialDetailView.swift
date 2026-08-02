@@ -3,8 +3,8 @@ import SwiftUI
 /// Credential detail with verify, share, LinkedIn, and Open Badge export (M9.3).
 struct CredentialDetailView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.openURL) private var openURL
 
     let credential: IssuedCredentialSummary
 
@@ -57,7 +57,7 @@ struct CredentialDetailView: View {
                         }
 
                         Button {
-                            openURL(URL(string: credential.verificationUrl)!)
+                            LinkOpener.open(credential.verificationUrl, shell: shell, source: "credentials")
                         } label: {
                             actionRow(
                                 title: L.text("mobile.credentials.openVerify"),
@@ -131,7 +131,7 @@ struct CredentialDetailView: View {
                 accessToken: token
             )
             if let url = URL(string: params.url) {
-                openURL(url)
+                LinkOpener.open(url, shell: shell, source: "credentials_linkedin")
             }
         } catch {
             actionError = L.text("mobile.credentials.linkedInError")
@@ -154,7 +154,7 @@ struct CredentialDetailView: View {
                 accessToken: token
             )
             if let url = URL(string: export.downloadUrl) {
-                openURL(url)
+                LinkOpener.open(url, shell: shell, source: "credentials_badge")
             }
         } catch {
             actionError = L.text("mobile.credentials.badgeExportError")

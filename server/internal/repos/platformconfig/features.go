@@ -102,8 +102,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFMotionDelight = motion
 
 	// Mobile create / Canvas import / admin / enrollment / live quiz / whiteboard /
-	// marketplace / boards-advanced and in-app feedback are always on (platform master
-	// switches removed; JSON keys kept for API compatibility).
+	// marketplace / boards-advanced / content-tools and in-app feedback are always on
+	// (platform master switches removed; JSON keys kept for API compatibility).
 	out.FFMobileCreateCourse = true
 	out.FFMobileCourseCreateV2 = true
 	out.FFMobileCanvasImport = true
@@ -113,6 +113,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFMobileWhiteboardEdit = true
 	out.FFMobileMarketplacePurchase = true
 	out.FFMobileBoardsAdvanced = true
+	out.FFMobileContentTools = true
 
 	// COLLAPSE parent portal V2 into the parent (expanded sections always on with the portal).
 	parentPortal := mergeBool(db.FFParentPortal, false)

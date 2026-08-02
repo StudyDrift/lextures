@@ -110,6 +110,34 @@ object ContentToolPack1Logic {
         return false
     }
 
+    /** How many questions to show at once. null means all. */
+    fun parseQuestionsAtATime(raw: JsonElement?): Int? {
+        if (raw == null) return null
+        val prim = raw as? JsonPrimitive ?: return null
+        val content = prim.contentOrNull ?: return null
+        if (content.equals("all", ignoreCase = true)) return null
+        val n = content.toIntOrNull() ?: prim.doubleOrNull?.toInt() ?: return null
+        return if (n in 1..3) n else null
+    }
+
+    /** Inclusive-exclusive window [start, end) of the visible page. */
+    fun pageWindow(total: Int, pageSize: Int?, pageIndex: Int): IntRange {
+        if (pageSize == null || pageSize <= 0 || pageSize >= total || total <= 0) {
+            return 0 until maxOf(0, total)
+        }
+        val pageCount = (total + pageSize - 1) / pageSize
+        val page = pageIndex.coerceIn(0, pageCount - 1)
+        val start = page * pageSize
+        val end = minOf(total, start + pageSize)
+        return start until end
+    }
+
+    fun initialPageIndex(total: Int, pageSize: Int?, firstIncompleteIndex: Int): Int {
+        if (pageSize == null || pageSize <= 0 || total <= 0) return 0
+        val idx = firstIncompleteIndex.coerceIn(0, total - 1)
+        return idx / pageSize
+    }
+
     fun <T> shuffleStable(items: List<T>, seed: String): List<T> {
         if (items.size <= 1) return items
         val out = items.toMutableList()

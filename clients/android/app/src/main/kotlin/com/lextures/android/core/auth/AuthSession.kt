@@ -166,6 +166,8 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
         PushManager.getInstance(getApplication()).deregisterFromBackend(savedToken)
         RealtimeManager.disconnect()
         OfflineService.get(getApplication()).clearAllOnLogout()
+        // MB.1 FR-23: purge in-app browser cookies / storage / caches on sign-out.
+        com.lextures.android.features.browser.InAppBrowserDataStore.purgeAll(getApplication())
         tokenStore.clearAll()
         _accessToken.value = null
         _userEmail.value = null

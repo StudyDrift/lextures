@@ -8,39 +8,54 @@ type BuildContentPageWithAiModalProps = {
   /** Optional copy tweaks for quiz intro vs content page. */
   description?: string
   placeholder?: string
+  /**
+   * When true, show the “Include interactive tools” toggle (Content Tools enabled for the course).
+   * Defaults to false (prose-only path).
+   */
+  contentToolsAvailable?: boolean
+  /** Initial value for the tools toggle when the modal opens. */
+  defaultIncludeTools?: boolean
   onClose: () => void
   onBuild: (args: {
     prompt: string
     existingMarkdown: string
+    includeTools: boolean
   }) => Promise<DraftContentPageSection[]>
-  onBuilt: (sections: DraftContentPageSection[]) => void
+  onBuilt: (sections: DraftContentPageSection[]) => void | Promise<void>
 }
 
 /**
  * Prompt modal: describe the page topic; AI returns draft sections for the editor
- * (not persisted until the user saves).
+ * (not persisted until the user saves). Optionally includes interactive content tools.
  */
 export function BuildContentPageWithAiModal({
   open,
   existingMarkdown,
   description = 'Describe what this page should cover. The draft replaces the current editor content; nothing is saved until you click Save.',
   placeholder = 'e.g. An introduction to photosynthesis for high school biology, with key vocabulary and a short practice check…',
+  contentToolsAvailable = false,
+  defaultIncludeTools = true,
   onClose,
   onBuild,
   onBuilt,
 }: BuildContentPageWithAiModalProps) {
   const titleId = useId()
   const promptId = useId()
+  const toolsToggleId = useId()
   const [prompt, setPrompt] = useState('')
+  const [includeTools, setIncludeTools] = useState(defaultIncludeTools)
   const [busy, setBusy] = useState(false)
+  const [phase, setPhase] = useState<'prompt' | 'placing'>('prompt')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) return
     setPrompt('')
+    setIncludeTools(contentToolsAvailable ? defaultIncludeTools : false)
     setError(null)
     setBusy(false)
-  }, [open])
+    setPhase('prompt')
+  }, [open, contentToolsAvailable, defaultIncludeTools])
 
   if (!open) return null
 
@@ -49,20 +64,27 @@ export function BuildContentPageWithAiModal({
     if (!text || busy) return
     setBusy(true)
     setError(null)
+    setPhase('prompt')
     try {
+      const wantTools = Boolean(contentToolsAvailable && includeTools)
       const sections = await onBuild({
         prompt: text,
         existingMarkdown: existingMarkdown.trim(),
+        includeTools: wantTools,
       })
       if (sections.length === 0) {
         setError('No content sections were generated. Try a more specific description.')
         return
       }
-      onBuilt(sections)
+      const hasTools = sections.some((s) => (s.tools?.length ?? 0) > 0)
+      if (hasTools) setPhase('placing')
+      await onBuilt(sections)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not generate content.')
+      setPhase('prompt')
     } finally {
       setBusy(false)
+      setPhase('prompt')
     }
   }
 
@@ -121,6 +143,29 @@ export function BuildContentPageWithAiModal({
               ⌘/Ctrl + Enter to generate
             </p>
           </div>
+          {contentToolsAvailable ? (
+            <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-950/40">
+              <label className="flex cursor-pointer items-start gap-3" htmlFor={toolsToggleId}>
+                <input
+                  id={toolsToggleId}
+                  type="checkbox"
+                  checked={includeTools}
+                  disabled={busy}
+                  onChange={(e) => setIncludeTools(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-60"
+                />
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-slate-800 dark:text-neutral-100">
+                    Include interactive tools
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+                    Let AI add checks for understanding, flashcards, polls, and other content tools
+                    alongside the prose. You can edit or remove them before saving.
+                  </span>
+                </span>
+              </label>
+            </div>
+          ) : null}
           {error ? (
             <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200">
               {error}
@@ -143,7 +188,11 @@ export function BuildContentPageWithAiModal({
             className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden /> : null}
-            {busy ? 'Generating…' : 'Generate'}
+            {busy
+              ? phase === 'placing'
+                ? 'Placing tools…'
+                : 'Generating…'
+              : 'Generate'}
           </button>
         </div>
       </div>

@@ -18,6 +18,7 @@ func ParseConfig(raw json.RawMessage) Config {
 		RevealCorrectAfter *RevealPolicy `json:"revealCorrectAfter"`
 		ShuffleOptions     *bool         `json:"shuffleOptions"`
 		Sequential         *bool         `json:"sequential"`
+		QuestionsAtATime   any           `json:"questionsAtATime"`
 		ScorePolicy        *ScorePolicy  `json:"scorePolicy"`
 		Label              *string       `json:"label"`
 	}
@@ -44,6 +45,14 @@ func ParseConfig(raw json.RawMessage) Config {
 	}
 	if overlay.Sequential != nil {
 		cfg.Sequential = *overlay.Sequential
+	}
+	if overlay.QuestionsAtATime != nil {
+		cfg.QuestionsAtATime = overlay.QuestionsAtATime
+		if n := QuestionsAtATimeCount(cfg); n > 0 {
+			cfg.QuestionsAtATime = n
+		} else {
+			cfg.QuestionsAtATime = "all"
+		}
 	}
 	if overlay.ScorePolicy != nil {
 		switch *overlay.ScorePolicy {

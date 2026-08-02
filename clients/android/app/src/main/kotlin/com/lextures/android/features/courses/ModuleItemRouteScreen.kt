@@ -1,5 +1,6 @@
 package com.lextures.android.features.courses
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -204,7 +205,7 @@ private fun WebItemLoaderScreen(
                 urlString = url!!,
                 accessToken = accessToken,
                 onOpenExternal = { uri ->
-                    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    LinkOpener.open(context, uri.toString(), null, "legacy")
                 },
                 modifier = Modifier.fillMaxSize(),
             )

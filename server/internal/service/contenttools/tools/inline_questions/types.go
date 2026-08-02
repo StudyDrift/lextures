@@ -76,8 +76,10 @@ type Config struct {
 	RevealCorrectAfter RevealPolicy `json:"revealCorrectAfter"`
 	ShuffleOptions     bool         `json:"shuffleOptions"`
 	Sequential         bool         `json:"sequential"`
-	ScorePolicy        ScorePolicy  `json:"scorePolicy"`
-	Label              string       `json:"label,omitempty"`
+	// QuestionsAtATime is how many questions to show at once: integer 1–3 or "all".
+	QuestionsAtATime any         `json:"questionsAtATime"` // number | "all"
+	ScorePolicy      ScorePolicy `json:"scorePolicy"`
+	Label            string      `json:"label,omitempty"`
 }
 
 // Attempt is one recorded submission for a question.
@@ -112,6 +114,7 @@ func DefaultConfig() Config {
 		RevealCorrectAfter: RevealLastAttempt,
 		ShuffleOptions:     false,
 		Sequential:         false,
+		QuestionsAtATime:   "all",
 		ScorePolicy:        ScoreLast,
 	}
 }
@@ -164,4 +167,31 @@ func MaxAttempts(cfg Config) int {
 		}
 	}
 	return 2
+}
+
+// QuestionsAtATimeCount returns how many questions to show at once, or 0 for all.
+func QuestionsAtATimeCount(cfg Config) int {
+	switch v := cfg.QuestionsAtATime.(type) {
+	case float64:
+		n := int(v)
+		if n >= 1 && n <= 3 {
+			return n
+		}
+	case int:
+		if v >= 1 && v <= 3 {
+			return v
+		}
+	case int64:
+		n := int(v)
+		if n >= 1 && n <= 3 {
+			return n
+		}
+	case string:
+		if v == "all" || v == "" {
+			return 0
+		}
+	case nil:
+		return 0
+	}
+	return 0
 }

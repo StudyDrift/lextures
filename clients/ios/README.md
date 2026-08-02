@@ -116,7 +116,7 @@ Notebooks are device-local (same model as the web app's localStorage notebooks, 
 
 Native Content Tool runtime: batched instance fetch, `ToolFrame`, debounced autosave with
 revision conflicts, offline state outbox, actions with idempotency, and a `noop_probe`
-renderer. Gated by course `contentToolsEnabled` plus client `ffMobileContentTools` (default off).
+renderer. Gated by course `contentToolsEnabled` plus client `ffMobileContentTools` (default on).
 Unsupported tools show an “Open in browser” placeholder instead of raw `lex-tool` JSON.
 
 CT.M4 adds a sandboxed WebView tool host (`Features/ContentTools/Sandbox/`) for long-tail and
@@ -158,3 +158,7 @@ No provisioning profile or Apple developer account is needed for simulator build
 - Assignment / quiz detail and submissions
 - OIDC / SAML sign-in
 - Forgot password and magic link
+
+## Opening URLs (MB.1)
+
+Do **not** call `openURL` / `UIApplication.shared.open` from feature code. Use `LinkOpener` (`Core/Routing/LinkOpener.swift`) so routing goes through `MobileLinkPolicy` (native · in-app browser · system · external app · auth · blocked). SSO and billing keep platform auth/checkout surfaces. CI soft-lints via `scripts/check-mobile-link-opener.sh`.

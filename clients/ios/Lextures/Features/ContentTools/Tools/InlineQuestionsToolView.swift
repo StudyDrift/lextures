@@ -10,6 +10,8 @@ struct InlineQuestionsToolView: View {
     @State private var lastResults: [String: JSONValue] = [:]
     @State private var pendingSubmit: [String: JSONValue] = [:]
     @State private var gradingPending = false
+    @State private var pageIndex: Int = 0
+    @State private var didInitPage = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -24,12 +26,49 @@ struct InlineQuestionsToolView: View {
                 .font(.caption)
                 .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             }
-            ForEach(questions, id: \.id) { question in
+            ForEach(visibleQuestions, id: \.id) { question in
                 questionBlock(question)
             }
+            if pagingEnabled {
+                pageControls
+            }
         }
-        .onAppear { hydrate() }
+        .onAppear {
+            hydrate()
+            if !didInitPage {
+                pageIndex = ContentToolPack1Logic.initialPageIndex(
+                    total: questions.count,
+                    pageSize: questionsAtATime,
+                    firstIncompleteIndex: firstIncompleteIndex
+                )
+                didInitPage = true
+            }
+        }
         .onChange(of: props.state) { _, _ in hydrate() }
+    }
+
+    private var pageControls: some View {
+        HStack {
+            Text(
+                L.format(
+                    "mobile.contentTools.tools.inline_questions.pageOf",
+                    pageStart + 1,
+                    pageEnd,
+                    questions.count
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            Spacer()
+            Button(L.text("mobile.contentTools.tools.inline_questions.previous")) {
+                pageIndex = max(0, safePage - 1)
+            }
+            .disabled(safePage <= 0)
+            Button(L.text("mobile.contentTools.tools.inline_questions.next")) {
+                pageIndex = min(pageCount - 1, safePage + 1)
+            }
+            .disabled(!canAdvancePage)
+        }
     }
 
     private var label: String {
@@ -45,6 +84,11 @@ struct InlineQuestionsToolView: View {
 
     private var shuffleOptions: Bool {
         ContentToolPack1Logic.boolField(props.config, key: "shuffleOptions") == true
+    }
+
+    private var questionsAtATime: Int? {
+        let cfg = ContentToolPack1Logic.objectMap(props.config)
+        return ContentToolPack1Logic.parseQuestionsAtATime(cfg["questionsAtATime"])
     }
 
     private var maxAttempts: Int? {
@@ -86,6 +130,58 @@ struct InlineQuestionsToolView: View {
             let unit: String?
             if case .string(let u) = obj["unit"] { unit = u } else { unit = nil }
             return Question(id: id, type: type, prompt: prompt, options: options, unit: unit)
+        }
+    }
+
+    private var pagingEnabled: Bool {
+        guard let pageSize = questionsAtATime else { return false }
+        return pageSize > 0 && questions.count > pageSize
+    }
+
+    private var pageCount: Int {
+        guard pagingEnabled, let pageSize = questionsAtATime else { return 1 }
+        return max(1, (questions.count + pageSize - 1) / pageSize)
+    }
+
+    private var safePage: Int {
+        max(0, min(pageIndex, pageCount - 1))
+    }
+
+    private var pageStart: Int {
+        ContentToolPack1Logic.pageWindow(
+            total: questions.count,
+            pageSize: questionsAtATime,
+            pageIndex: safePage
+        ).start
+    }
+
+    private var pageEnd: Int {
+        ContentToolPack1Logic.pageWindow(
+            total: questions.count,
+            pageSize: questionsAtATime,
+            pageIndex: safePage
+        ).end
+    }
+
+    private var visibleQuestions: [Question] {
+        guard questions.indices.contains(pageStart), pageEnd > pageStart else { return questions }
+        return Array(questions[pageStart ..< pageEnd])
+    }
+
+    private var firstIncompleteIndex: Int {
+        if let idx = questions.firstIndex(where: {
+            ContentToolPack1Logic.attemptsUsed(answers: answers, questionId: $0.id) == 0
+        }) {
+            return idx
+        }
+        return max(0, questions.count - 1)
+    }
+
+    private var canAdvancePage: Bool {
+        guard pagingEnabled, safePage < pageCount - 1 else { return false }
+        if !sequential { return true }
+        return visibleQuestions.allSatisfy {
+            ContentToolPack1Logic.attemptsUsed(answers: answers, questionId: $0.id) > 0
         }
     }
 

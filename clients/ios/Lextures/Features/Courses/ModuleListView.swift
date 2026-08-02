@@ -46,11 +46,29 @@ struct ModuleListView: View {
                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             } else {
                 ForEach(Array(group.items.enumerated()), id: \.element.id) { index, item in
-                    if index > 0 { Divider() }
-                    moduleItemRow(item)
+                    if item.kind == "heading" {
+                        moduleHeadingRow(item, isFirst: index == 0)
+                    } else {
+                        if index > 0 && group.items[index - 1].kind != "heading" {
+                            Divider()
+                        }
+                        moduleItemRow(item)
+                    }
                 }
             }
         }
+    }
+
+    /// In-module section heading (kind == "heading") — matches web: large bold primary title, no row chrome.
+    private func moduleHeadingRow(_ item: CourseStructureItem, isFirst: Bool) -> some View {
+        Text(item.title)
+            .font(LexturesTheme.displayFont(19, weight: .bold))
+            .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, isFirst ? 6 : 14)
+            .padding(.bottom, 4)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityLabel(item.title)
     }
 
     private func moduleItemRow(_ item: CourseStructureItem) -> some View {

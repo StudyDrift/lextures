@@ -1,5 +1,6 @@
 package com.lextures.android.features.courses.settings
 
+import com.lextures.android.core.routing.LinkOpener
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -262,7 +263,7 @@ fun CourseImportExportScreen(
                         val url = AppConfiguration.webUrl(
                             CourseImportExportLogic.webImportExportPath(course.courseCode),
                         )
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        LinkOpener.open(context, url.toString(), null, "legacy")
                     },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
