@@ -47,25 +47,11 @@ func ParseConfig(raw json.RawMessage) Config {
 		cfg.Sequential = *overlay.Sequential
 	}
 	if overlay.QuestionsAtATime != nil {
-		switch v := overlay.QuestionsAtATime.(type) {
-		case string:
-			if v == "all" {
-				cfg.QuestionsAtATime = "all"
-			}
-		case float64:
-			n := int(v)
-			if n >= 1 && n <= 3 {
-				cfg.QuestionsAtATime = n
-			}
-		case int:
-			if v >= 1 && v <= 3 {
-				cfg.QuestionsAtATime = v
-			}
-		case int64:
-			n := int(v)
-			if n >= 1 && n <= 3 {
-				cfg.QuestionsAtATime = n
-			}
+		cfg.QuestionsAtATime = overlay.QuestionsAtATime
+		if n := QuestionsAtATimeCount(cfg); n > 0 {
+			cfg.QuestionsAtATime = n
+		} else {
+			cfg.QuestionsAtATime = "all"
 		}
 	}
 	if overlay.ScorePolicy != nil {

@@ -61,7 +61,7 @@ struct BrowserWebView: UIViewRepresentable {
             }
             urlObs = webView.observe(\.url, options: .new) { [weak self] wv, _ in
                 DispatchQueue.main.async {
-                    if let u = wv.url { self?.parent.currentURL = u }
+                    if let pageURL = wv.url { self?.parent.currentURL = pageURL }
                 }
             }
             canGoBackObs = webView.observe(\.canGoBack, options: .new) { [weak self] wv, _ in

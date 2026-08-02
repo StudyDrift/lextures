@@ -5009,7 +5009,7 @@
       "risk": "major",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: native pack-3 renderers (sort_sequence, highlight_annotate, diagram_hotspot) on the CT.M3 host with tap-to-assign alternatives (WCAG §2.5.7). Covered by ContentToolPack3Logic unit suites + shared pack3-logic fixtures (AC-15); web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: native pack-3 renderers (sort_sequence, highlight_annotate, diagram_hotspot) on the CT.M3 host with tap-to-assign alternatives (WCAG \u00a72.5.7). Covered by ContentToolPack3Logic unit suites + shared pack3-logic fixtures (AC-15); web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -5064,6 +5064,28 @@
         "dependency": true,
         "rollback": true,
         "notes": "Enforcement inside ffMobileContentTools path; kill/policy refresh on foreground. Shared fixtures under clients/mobile/fixtures/content-tools/governance-logic.json."
+      }
+    },
+    {
+      "id": "mb-1-in-app-browser",
+      "path": "docs/completed/mobile/MB.1-in-app-browser.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story: shared LinkOpener / MobileLinkPolicy and full-screen in-app browser on iOS + Android. Covered by MobileLinkPolicy unit suites, scripts/check-mobile-link-opener.sh CI lint, and platform native tests; web Playwright is not the coverage surface.",
+      "owner": "Mobile",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": "n/a",
+        "authorization": true,
+        "dependency": false,
+        "rollback": true,
+        "notes": "Org/platform mobileLinkHandling policy + migration 460. External SSO/checkout carve-outs remain system-browser handoffs."
       }
     },
     {

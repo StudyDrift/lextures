@@ -111,11 +111,11 @@ enum LinkOpener {
     }
 
     static func resolveURL(_ urlString: String) -> URL? {
-        let t = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
-        if t.hasPrefix("/") {
-            return AppConfiguration.webURL(path: t)
+        let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.hasPrefix("/") {
+            return AppConfiguration.webURL(path: trimmed)
         }
-        return URL(string: t)
+        return URL(string: trimmed)
     }
 
     private static func emit(source: String, classification: String, outcome: String, errorClass: String? = nil) {
