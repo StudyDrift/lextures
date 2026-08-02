@@ -74,10 +74,10 @@ export function AIDisclosureBanner({ courseCode, toolId, requiresAI, onOptOut }:
           {error}
         </p>
       ) : null}
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 flex gap-2">
         <button
           type="button"
-          className="rounded bg-slate-900 px-3 py-1.5 text-white disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900"
+          className="min-w-0 flex-1 rounded-lg bg-slate-900 px-3 py-2 text-center text-sm font-medium text-white disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900"
           disabled={busy}
           onClick={() => void decide('acknowledged')}
           data-testid="content-tool-ai-ack"
@@ -88,7 +88,7 @@ export function AIDisclosureBanner({ courseCode, toolId, requiresAI, onOptOut }:
         </button>
         <button
           type="button"
-          className="rounded border border-slate-400 px-3 py-1.5 disabled:opacity-50"
+          className="min-w-0 flex-1 rounded-lg border border-slate-400 px-3 py-2 text-center text-sm font-medium disabled:opacity-50"
           disabled={busy}
           onClick={() => void decide('opted_out')}
           data-testid="content-tool-ai-opt-out"

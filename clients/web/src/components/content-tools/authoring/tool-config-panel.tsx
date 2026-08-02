@@ -7,6 +7,7 @@ import {
   type ContentToolInstance,
   type ContentToolManifest,
 } from '../../../lib/courses-api'
+import { PasteJsonConfigDialog } from './paste-json-config-dialog'
 import { SchemaForm } from './schema-form/schema-form'
 import { validateRequiredFields } from './schema-form/validate'
 import type { JsonSchema, SchemaFieldError } from './schema-form/types'
@@ -63,6 +64,11 @@ export function ToolConfigPanel({
   const [errors, setErrors] = useState<SchemaFieldError[]>([])
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [pasteOpen, setPasteOpen] = useState(false)
+  const [pasteBusy, setPasteBusy] = useState(false)
+  const [pasteSubmitError, setPasteSubmitError] = useState<string | null>(null)
+  const [pasteFieldErrors, setPasteFieldErrors] = useState<SchemaFieldError[]>([])
+  const [pasteInitialJson, setPasteInitialJson] = useState('{}')
 
   const configRef = useRef(config)
   configRef.current = config
@@ -116,6 +122,44 @@ export function ToolConfigPanel({
   function updateConfig(next: Record<string, unknown>) {
     setConfig(next)
     onDraftChangeRef.current?.(instance.id, next)
+  }
+
+  function openPasteDialog() {
+    try {
+      setPasteInitialJson(JSON.stringify(configRef.current, null, 2))
+    } catch {
+      setPasteInitialJson('{}')
+    }
+    setPasteSubmitError(null)
+    setPasteFieldErrors([])
+    setPasteOpen(true)
+  }
+
+  async function applyPastedConfig(nextConfig: Record<string, unknown>): Promise<void> {
+    if (disabled || !manifest) return
+    setPasteBusy(true)
+    setPasteSubmitError(null)
+    setPasteFieldErrors([])
+    try {
+      const updated = await patchContentToolInstance(courseCode, instance.id, {
+        config: nextConfig,
+      })
+      setConfig(updated.config ?? nextConfig)
+      onDraftChangeRef.current?.(instance.id, updated.config ?? nextConfig)
+      onSavedRef.current?.(updated)
+      setErrors([])
+      setSaveError(null)
+      setPasteOpen(false)
+    } catch (err) {
+      if (err instanceof ContentToolsConfigValidationError) {
+        setPasteFieldErrors(err.fieldErrors)
+        setPasteSubmitError(err.message)
+      } else {
+        setPasteSubmitError(err instanceof Error ? err.message : String(err))
+      }
+    } finally {
+      setPasteBusy(false)
+    }
   }
 
   async function save(opts?: { requireSuccess?: boolean }): Promise<void> {
@@ -256,7 +300,7 @@ export function ToolConfigPanel({
               {saveError}
             </p>
           ) : null}
-          <div className="flex items-center gap-2 border-t border-slate-200 pt-4 dark:border-neutral-700">
+          <div className="flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4 dark:border-neutral-700">
             <button
               type="submit"
               disabled={disabled || saving}
@@ -264,8 +308,34 @@ export function ToolConfigPanel({
             >
               {saving ? t('contentTools.authoring.saving') : t('contentTools.authoring.save')}
             </button>
+            <button
+              type="button"
+              disabled={disabled || saving}
+              onClick={openPasteDialog}
+              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            >
+              {t('contentTools.authoring.pasteJson')}
+            </button>
           </div>
         </form>
+      ) : null}
+
+      {manifest ? (
+        <PasteJsonConfigDialog
+          open={pasteOpen}
+          initialJson={pasteInitialJson}
+          schema={manifest.configSchema as JsonSchema}
+          busy={pasteBusy}
+          submitError={pasteSubmitError}
+          fieldErrors={pasteFieldErrors}
+          onClose={() => {
+            if (pasteBusy) return
+            setPasteOpen(false)
+            setPasteSubmitError(null)
+            setPasteFieldErrors([])
+          }}
+          onApply={applyPastedConfig}
+        />
       ) : null}
     </div>
   )

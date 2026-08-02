@@ -17,12 +17,31 @@ struct AIDisclosureBanner: View {
                 .font(.caption)
                 .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             HStack(spacing: 8) {
-                Button(ackLabel) { onAcknowledge() }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(busy)
-                Button(L.text("mobile.contentTools.governance.consentOptOut")) { onOptOut() }
-                    .buttonStyle(.bordered)
-                    .disabled(busy)
+                Button {
+                    onAcknowledge()
+                } label: {
+                    Text(ackLabel)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.roundedRectangle(radius: 10))
+                .controlSize(.regular)
+                .disabled(busy)
+
+                Button {
+                    onOptOut()
+                } label: {
+                    Text(L.text("mobile.contentTools.governance.consentOptOut"))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.roundedRectangle(radius: 10))
+                .controlSize(.regular)
+                .disabled(busy)
             }
         }
         .padding(10)

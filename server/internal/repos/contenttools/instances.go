@@ -108,6 +108,106 @@ WHERE course_id = $1 AND status = 'active'
 	return n, err
 }
 
+// UpsertInstanceForImport inserts or updates an instance with an explicit id (course JSON import).
+// Does not touch learner state. On conflict, only updates when the existing row belongs to courseID.
+func UpsertInstanceForImport(ctx context.Context, pool *pgxpool.Pool, r InstanceRow) error {
+	cfg := r.ConfigJSON
+	if len(cfg) == 0 {
+		cfg = json.RawMessage(`{}`)
+	}
+	ver := r.ConfigSchemaVersion
+	if ver <= 0 {
+		ver = 1
+	}
+	status := r.Status
+	if status == "" {
+		status = "active"
+	}
+	tag, err := pool.Exec(ctx, `
+INSERT INTO course.content_tool_instances (
+  id, course_id, structure_item_id, host_kind, section_key, tool_id, tool_version,
+  title, config_json, config_schema_version, status, created_by, created_at, updated_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10,$11,$12,NOW(),NOW())
+ON CONFLICT (id) DO UPDATE SET
+  structure_item_id = EXCLUDED.structure_item_id,
+  host_kind = EXCLUDED.host_kind,
+  section_key = EXCLUDED.section_key,
+  tool_id = EXCLUDED.tool_id,
+  tool_version = EXCLUDED.tool_version,
+  title = EXCLUDED.title,
+  config_json = EXCLUDED.config_json,
+  config_schema_version = EXCLUDED.config_schema_version,
+  status = EXCLUDED.status,
+  updated_at = NOW()
+WHERE course.content_tool_instances.course_id = EXCLUDED.course_id
+`, r.ID, r.CourseID, r.StructureItemID, r.HostKind, r.SectionKey, r.ToolID, r.ToolVersion,
+		r.Title, cfg, ver, status, r.CreatedBy)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		// Conflict on another course's primary key (or no-op).
+		return errors.New("content tool instance id already exists in another course")
+	}
+	return nil
+}
+
+// InsertInstanceIfMissing inserts an instance with an explicit id; skips when the id already exists.
+// Returns true when a row was inserted.
+func InsertInstanceIfMissing(ctx context.Context, pool *pgxpool.Pool, r InstanceRow) (bool, error) {
+	cfg := r.ConfigJSON
+	if len(cfg) == 0 {
+		cfg = json.RawMessage(`{}`)
+	}
+	ver := r.ConfigSchemaVersion
+	if ver <= 0 {
+		ver = 1
+	}
+	status := r.Status
+	if status == "" {
+		status = "active"
+	}
+	var id uuid.UUID
+	err := pool.QueryRow(ctx, `
+INSERT INTO course.content_tool_instances (
+  id, course_id, structure_item_id, host_kind, section_key, tool_id, tool_version,
+  title, config_json, config_schema_version, status, created_by, created_at, updated_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10,$11,$12,NOW(),NOW())
+ON CONFLICT (id) DO NOTHING
+RETURNING id
+`, r.ID, r.CourseID, r.StructureItemID, r.HostKind, r.SectionKey, r.ToolID, r.ToolVersion,
+		r.Title, cfg, ver, status, r.CreatedBy).Scan(&id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// DeleteAllInstancesForCourse removes every content-tool instance for a course
+// (including syllabus hosts with null structure_item_id). Cascades learner state.
+func DeleteAllInstancesForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) error {
+	_, err := pool.Exec(ctx, `
+DELETE FROM course.content_tool_instances WHERE course_id = $1
+`, courseID)
+	return err
+}
+
+// DeleteInstancesNotInExport deletes course instances whose ids are not in keep.
+// Empty keep deletes all instances for the course.
+func DeleteInstancesNotInExport(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, keep []uuid.UUID) error {
+	if len(keep) == 0 {
+		return DeleteAllInstancesForCourse(ctx, pool, courseID)
+	}
+	_, err := pool.Exec(ctx, `
+DELETE FROM course.content_tool_instances
+WHERE course_id = $1 AND NOT (id = ANY($2::uuid[]))
+`, courseID, keep)
+	return err
+}
+
 // CreateInstance inserts a new instance row.
 func CreateInstance(ctx context.Context, pool *pgxpool.Pool, r InstanceRow) (*InstanceRow, error) {
 	cfg := r.ConfigJSON

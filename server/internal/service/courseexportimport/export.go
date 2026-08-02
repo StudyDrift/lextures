@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/models/courseexport"
 	"github.com/lextures/lextures/server/internal/models/coursesyllabus"
 	acrepo "github.com/lextures/lextures/server/internal/repos/adaptivecontent"
+	"github.com/lextures/lextures/server/internal/repos/contenttools"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursegrading"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
@@ -43,6 +44,9 @@ type Bundle struct {
 	// Adaptive content authoring only (AC.1 FR-9) — never profiles/variants/servings.
 	AdaptiveContentSettings *courseexport.ExportedAdaptiveContentSettings `json:"adaptiveContentSettings,omitempty"`
 	AdaptiveContentUnits    []courseexport.ExportedAdaptiveContentUnit    `json:"adaptiveContentUnits,omitempty"`
+	// Content tool authoring only — never learner state/events/grade links.
+	ContentToolSettings  *courseexport.ExportedContentToolSettings  `json:"contentToolSettings,omitempty"`
+	ContentToolInstances []courseexport.ExportedContentToolInstance `json:"contentToolInstances,omitempty"`
 }
 
 // ErrNotFound is returned when the course code does not exist.
@@ -309,6 +313,57 @@ func BuildExport(ctx context.Context, pool *pgxpool.Pool, courseCode string) (*B
 			})
 		}
 		bundle.AdaptiveContentUnits = out
+	}
+
+	// Content Tools authoring (settings + instances). Markdown bodies already embed
+	// ```lex-tool fences by instance id — keep those ids stable on import.
+	if settings, err := contenttools.GetSettings(ctx, pool, courseID); err != nil {
+		return nil, err
+	} else if settings != nil {
+		allowed := settings.AllowedToolIDs
+		if allowed == nil {
+			allowed = []string{}
+		}
+		allowlist := settings.LinkHostAllowlist
+		if allowlist == nil {
+			allowlist = []string{}
+		}
+		bundle.ContentToolSettings = &courseexport.ExportedContentToolSettings{
+			AllowedToolIDs:       allowed,
+			StudentResetAllowed:  settings.StudentResetAllowed,
+			MaxInstancesPerItem:  settings.MaxInstancesPerItem,
+			MonthlyAITokenBudget: settings.MonthlyAITokenBudget,
+			DailyAICallsPerUser:  settings.DailyAICallsPerUser,
+			LinkIngestionMode:    settings.LinkIngestionMode,
+			LinkHostAllowlist:    allowlist,
+			GradeLinksAllowed:    settings.GradeLinksAllowed,
+		}
+	}
+	if instances, err := contenttools.ListInstances(ctx, pool, courseID, nil, "", true); err != nil {
+		return nil, err
+	} else if len(instances) > 0 {
+		out := make([]courseexport.ExportedContentToolInstance, 0, len(instances))
+		for _, in := range instances {
+			cfg := in.ConfigJSON
+			if len(cfg) == 0 {
+				cfg = json.RawMessage(`{}`)
+			} else {
+				cfg = append(json.RawMessage(nil), cfg...)
+			}
+			out = append(out, courseexport.ExportedContentToolInstance{
+				ID:                  in.ID,
+				StructureItemID:     in.StructureItemID,
+				HostKind:            in.HostKind,
+				SectionKey:          in.SectionKey,
+				ToolID:              in.ToolID,
+				ToolVersion:         in.ToolVersion,
+				Title:               in.Title,
+				ConfigJSON:          cfg,
+				ConfigSchemaVersion: in.ConfigSchemaVersion,
+				Status:              in.Status,
+			})
+		}
+		bundle.ContentToolInstances = out
 	}
 
 	return bundle, nil

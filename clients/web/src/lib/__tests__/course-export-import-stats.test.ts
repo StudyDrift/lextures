@@ -44,12 +44,29 @@ describe('summarizeCourseExportBundle', () => {
     expect(stats.syllabusSections).toBe(2)
     expect(stats.assignmentGroups).toBe(2)
     expect(stats.enrollments).toBe(2)
+    expect(stats.contentToolInstances).toBe(0)
     expect(stats.hasCourseSettings).toBe(true)
 
     const lines = courseExportImportStatLines(stats)
     expect(lines.find((l) => l.key === 'assignments')?.count).toBe(2)
     expect(lines.find((l) => l.key === 'enrollments')?.count).toBe(2)
     expect(lines.every((l) => l.count > 0)).toBe(true)
+  })
+
+  it('counts content tool instances', () => {
+    const stats = summarizeCourseExportBundle({
+      formatVersion: 1,
+      courseCode: 'C-CT',
+      structure: [],
+      contentToolInstances: [
+        { id: 'i1', toolId: 'flashcards' },
+        { id: 'i2', toolId: 'drag_drop' },
+      ],
+    })
+    expect(stats.contentToolInstances).toBe(2)
+    expect(courseExportImportStatLines(stats).find((l) => l.key === 'contentToolInstances')?.count).toBe(
+      2,
+    )
   })
 
   it('falls back to body maps when structure is empty', () => {
@@ -65,6 +82,7 @@ describe('summarizeCourseExportBundle', () => {
     expect(stats.contentPages).toBe(2)
     expect(stats.assignments).toBe(1)
     expect(stats.quizzes).toBe(0)
+    expect(stats.contentToolInstances).toBe(0)
   })
 
   it('rejects non-objects', () => {

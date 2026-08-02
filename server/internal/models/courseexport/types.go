@@ -76,6 +76,34 @@ type ExportedAdaptiveContentUnit struct {
 	MasteryFreshnessDays int16      `json:"masteryFreshnessDays,omitempty"`
 }
 
+// ExportedContentToolSettings is per-course Content Tools config for export/import.
+// Learner state, events, and grade links are never exported.
+type ExportedContentToolSettings struct {
+	AllowedToolIDs       []string `json:"allowedToolIds"`
+	StudentResetAllowed  bool     `json:"studentResetAllowed"`
+	MaxInstancesPerItem  int16    `json:"maxInstancesPerItem"`
+	MonthlyAITokenBudget int64    `json:"monthlyAiTokenBudget"`
+	DailyAICallsPerUser  int      `json:"dailyAiCallsPerUser"`
+	LinkIngestionMode    string   `json:"linkIngestionMode"`
+	LinkHostAllowlist    []string `json:"linkHostAllowlist"`
+	GradeLinksAllowed    bool     `json:"gradeLinksAllowed"`
+}
+
+// ExportedContentToolInstance is a placed tool + config (no learner state).
+// Instance IDs are preserved so ```lex-tool fences in markdown keep resolving.
+type ExportedContentToolInstance struct {
+	ID                  uuid.UUID       `json:"id"`
+	StructureItemID     *uuid.UUID      `json:"structureItemId,omitempty"`
+	HostKind            string          `json:"hostKind"`
+	SectionKey          *string         `json:"sectionKey,omitempty"`
+	ToolID              string          `json:"toolId"`
+	ToolVersion         string          `json:"toolVersion"`
+	Title               *string         `json:"title,omitempty"`
+	ConfigJSON          json.RawMessage `json:"configJson"`
+	ConfigSchemaVersion int             `json:"configSchemaVersion"`
+	Status              string          `json:"status"`
+}
+
 type ExportedContentPageBody struct {
 	Markdown string     `json:"markdown"`
 	DueAt    *time.Time `json:"dueAt"`
@@ -161,6 +189,9 @@ type CourseExportV1 struct {
 	// Never includes profiles, variants, or servings.
 	AdaptiveContentSettings *ExportedAdaptiveContentSettings `json:"adaptiveContentSettings,omitempty"`
 	AdaptiveContentUnits    []ExportedAdaptiveContentUnit    `json:"adaptiveContentUnits,omitempty"`
+	// Content tool authoring only — never learner state / events.
+	ContentToolSettings  *ExportedContentToolSettings  `json:"contentToolSettings,omitempty"`
+	ContentToolInstances []ExportedContentToolInstance `json:"contentToolInstances,omitempty"`
 }
 
 type CourseImportRequest struct {

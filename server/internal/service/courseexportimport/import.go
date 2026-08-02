@@ -54,6 +54,8 @@ const (
 	maxSyllabusHeadingLen        = 512
 	maxSyllabusMarkdownLen       = 200_000
 	maxModuleContentMarkdownLen  = 200_000
+	maxContentToolInstances      = 5000
+	maxContentToolConfigBytes    = 262144 // matches content_tool_instances_config_size
 )
 
 // ApplyImport applies a course JSON export bundle to targetCourseCode (Rust apply_import).
@@ -107,6 +109,8 @@ func ApplyImport(
 	eraseOutlineBeforeApply := len(ex.Structure) > 0 || canvasInclude == nil
 	overwritePruneStructure := len(ex.Structure) > 0 || canvasInclude == nil
 
+	var mergeInserted map[uuid.UUID]struct{}
+
 	switch mode {
 	case courseexport.CourseImportModeErase:
 		if eraseOutlineBeforeApply {
@@ -159,6 +163,7 @@ func ApplyImport(
 				}
 			}
 		}
+		mergeInserted = inserted
 		if err := applyModuleBodies(ctx, pool, courseID, ex, inserted); err != nil {
 			return err
 		}
@@ -196,6 +201,12 @@ func ApplyImport(
 				return err
 			}
 		}
+	}
+
+	// Content tools after structure + bodies so FKs and fence ids line up.
+	// Canvas partial imports that skipped outline still apply CT when present in the bundle.
+	if err := applyContentTools(ctx, pool, courseID, mode, ex, mergeInserted); err != nil {
+		return err
 	}
 
 	if applyEnrollments {

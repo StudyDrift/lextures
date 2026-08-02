@@ -1,6 +1,7 @@
 package courseexportimport
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -71,7 +72,67 @@ func validateExportPayload(ex *Bundle) error {
 			return InvalidInput(err.Error())
 		}
 	}
+	if err := validateContentToolsExport(ex); err != nil {
+		return err
+	}
 	return validateExportEnrollments(ex.Enrollments)
+}
+
+func validateContentToolsExport(ex *Bundle) error {
+	if ex.ContentToolSettings != nil {
+		s := ex.ContentToolSettings
+		if s.MaxInstancesPerItem != 0 && (s.MaxInstancesPerItem < 1 || s.MaxInstancesPerItem > 200) {
+			return InvalidInput("contentToolSettings.maxInstancesPerItem must be between 1 and 200.")
+		}
+		mode := strings.TrimSpace(s.LinkIngestionMode)
+		if mode != "" && mode != "public" && mode != "allowlist" && mode != "disabled" {
+			return InvalidInput("contentToolSettings.linkIngestionMode is invalid.")
+		}
+	}
+	if len(ex.ContentToolInstances) > maxContentToolInstances {
+		return InvalidInput(fmt.Sprintf("Too many content tool instances in export (max %d).", maxContentToolInstances))
+	}
+	seen := map[uuid.UUID]struct{}{}
+	allowedHost := map[string]struct{}{
+		"content_page": {}, "assignment": {}, "quiz": {}, "syllabus": {}, "portfolio_artifact": {},
+	}
+	for _, in := range ex.ContentToolInstances {
+		if in.ID == uuid.Nil {
+			return InvalidInput("Each content tool instance needs a valid id.")
+		}
+		if _, ok := seen[in.ID]; ok {
+			return InvalidInput("Duplicate content tool instance id.")
+		}
+		seen[in.ID] = struct{}{}
+		if strings.TrimSpace(in.ToolID) == "" {
+			return InvalidInput("Each content tool instance needs a toolId.")
+		}
+		if strings.TrimSpace(in.ToolVersion) == "" {
+			return InvalidInput("Each content tool instance needs a toolVersion.")
+		}
+		host := strings.TrimSpace(in.HostKind)
+		if _, ok := allowedHost[host]; !ok {
+			return InvalidInput(fmt.Sprintf("Unsupported content tool hostKind: %s.", host))
+		}
+		if host == "syllabus" {
+			if in.StructureItemID != nil {
+				return InvalidInput("Syllabus content tool instances must not have structureItemId.")
+			}
+		} else if in.StructureItemID == nil {
+			return InvalidInput("Non-syllabus content tool instances need structureItemId.")
+		}
+		status := strings.TrimSpace(in.Status)
+		if status != "" && status != "active" && status != "archived" {
+			return InvalidInput("content tool instance status must be active or archived.")
+		}
+		if len(in.ConfigJSON) > maxContentToolConfigBytes {
+			return InvalidInput(fmt.Sprintf("Content tool instance %s config is too large.", in.ID))
+		}
+		if len(in.ConfigJSON) > 0 && !json.Valid(in.ConfigJSON) {
+			return InvalidInput(fmt.Sprintf("Content tool instance %s configJson is not valid JSON.", in.ID))
+		}
+	}
+	return nil
 }
 
 func validateSyllabusSections(sections []course.SyllabusSection) error {

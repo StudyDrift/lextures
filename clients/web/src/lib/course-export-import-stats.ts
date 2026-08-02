@@ -18,6 +18,8 @@ export type CourseExportImportStats = {
   syllabusSections: number
   assignmentGroups: number
   enrollments: number
+  /** Placed content-tool instances in the export (authoring only; no learner state). */
+  contentToolInstances: number
   /** True when the export includes a non-empty course settings snapshot. */
   hasCourseSettings: boolean
 }
@@ -128,6 +130,9 @@ export function summarizeCourseExportBundle(parsed: unknown): CourseExportImport
     assignmentGroups = parsed.grading.assignmentGroups.length
   }
   const enrollments = Array.isArray(parsed.enrollments) ? parsed.enrollments.length : 0
+  const contentToolInstances = Array.isArray(parsed.contentToolInstances)
+    ? parsed.contentToolInstances.length
+    : 0
 
   return {
     sourceCourseCode,
@@ -142,6 +147,7 @@ export function summarizeCourseExportBundle(parsed: unknown): CourseExportImport
     syllabusSections,
     assignmentGroups,
     enrollments,
+    contentToolInstances,
     hasCourseSettings: course != null,
   }
 }
@@ -159,6 +165,7 @@ export function courseExportImportStatLines(stats: CourseExportImportStats): Cou
     { key: 'syllabusSections', label: 'Syllabus sections', count: stats.syllabusSections },
     { key: 'assignmentGroups', label: 'Assignment groups', count: stats.assignmentGroups },
     { key: 'enrollments', label: 'Enrollments', count: stats.enrollments },
+    { key: 'contentToolInstances', label: 'Content tools', count: stats.contentToolInstances },
   ]
   return lines.filter((l) => l.count > 0)
 }
