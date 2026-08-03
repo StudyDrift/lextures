@@ -104,6 +104,38 @@ type ExportedContentToolInstance struct {
 	Status              string          `json:"status"`
 }
 
+// ExportedCourseFile is an embedded content asset (course.course_files) with base64 body.
+// IDs are preserved so markdown / hero URLs of the form
+// /api/v1/courses/{code}/course-files/{id}/content keep resolving after import.
+type ExportedCourseFile struct {
+	ID               uuid.UUID `json:"id"`
+	OriginalFilename string    `json:"originalFilename"`
+	MimeType         string    `json:"mimeType"`
+	ByteSize         int64     `json:"byteSize"`
+	// ContentBase64 is the raw file bytes (standard base64). Omitted when the blob
+	// was missing at export time.
+	ContentBase64 string `json:"contentBase64,omitempty"`
+}
+
+// ExportedFileFolder is a course file-manager folder (course.file_folders).
+type ExportedFileFolder struct {
+	ID       uuid.UUID  `json:"id"`
+	ParentID *uuid.UUID `json:"parentId"`
+	Name     string     `json:"name"`
+}
+
+// ExportedFileItem is a course file-manager file (course.file_items) with base64 body.
+// IDs are preserved so /api/v1/courses/{code}/files/items/{id}/content URLs keep resolving.
+type ExportedFileItem struct {
+	ID               uuid.UUID  `json:"id"`
+	FolderID         *uuid.UUID `json:"folderId"`
+	OriginalFilename string     `json:"originalFilename"`
+	DisplayName      string     `json:"displayName"`
+	MimeType         string     `json:"mimeType"`
+	ByteSize         int64      `json:"byteSize"`
+	ContentBase64    string     `json:"contentBase64,omitempty"`
+}
+
 type ExportedContentPageBody struct {
 	Markdown string     `json:"markdown"`
 	DueAt    *time.Time `json:"dueAt"`
@@ -192,6 +224,11 @@ type CourseExportV1 struct {
 	// Content tool authoring only — never learner state / events.
 	ContentToolSettings  *ExportedContentToolSettings  `json:"contentToolSettings,omitempty"`
 	ContentToolInstances []ExportedContentToolInstance `json:"contentToolInstances,omitempty"`
+	// Embedded content images (course.course_files) with base64 bodies.
+	CourseFiles []ExportedCourseFile `json:"courseFiles,omitempty"`
+	// File manager hierarchy (course.file_folders + course.file_items).
+	FileFolders []ExportedFileFolder `json:"fileFolders,omitempty"`
+	FileItems   []ExportedFileItem   `json:"fileItems,omitempty"`
 }
 
 type CourseImportRequest struct {

@@ -98,10 +98,6 @@ func (d Deps) handleGenerateAssignmentRubric() http.HandlerFunc {
 			return
 		}
 		prompt := strings.TrimSpace(body.Prompt)
-		if prompt == "" {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Instructions are required.")
-			return
-		}
 		if utf8.RuneCountInString(prompt) > assignmentrubricai.MaxPromptRunes {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Instructions are too long.")
 			return
@@ -114,6 +110,7 @@ func (d Deps) handleGenerateAssignmentRubric() http.HandlerFunc {
 				return
 			}
 		}
+		// Empty prompt is allowed: service uses DefaultUserPrompt grounded on assignment title + body.
 
 		orgID := d.orgIDPtrForUser(r.Context(), viewer)
 		if !d.aiConfigured(r.Context(), orgID) {

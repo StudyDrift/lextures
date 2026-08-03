@@ -75,7 +75,97 @@ func validateExportPayload(ex *Bundle) error {
 	if err := validateContentToolsExport(ex); err != nil {
 		return err
 	}
+	if err := validateCourseFilesExport(ex); err != nil {
+		return err
+	}
 	return validateExportEnrollments(ex.Enrollments)
+}
+
+func validateCourseFilesExport(ex *Bundle) error {
+	if len(ex.CourseFiles) > maxExportCourseFiles {
+		return InvalidInput(fmt.Sprintf("Too many course files in export (max %d).", maxExportCourseFiles))
+	}
+	if len(ex.FileFolders) > maxExportFileFolders {
+		return InvalidInput(fmt.Sprintf("Too many file folders in export (max %d).", maxExportFileFolders))
+	}
+	if len(ex.FileItems) > maxExportFileItems {
+		return InvalidInput(fmt.Sprintf("Too many file items in export (max %d).", maxExportFileItems))
+	}
+	seenFiles := map[uuid.UUID]struct{}{}
+	var totalApprox int64
+	for _, f := range ex.CourseFiles {
+		if f.ID == uuid.Nil {
+			return InvalidInput("Each course file needs a valid id.")
+		}
+		if _, ok := seenFiles[f.ID]; ok {
+			return InvalidInput("Duplicate course file id.")
+		}
+		seenFiles[f.ID] = struct{}{}
+		if strings.TrimSpace(f.OriginalFilename) == "" {
+			return InvalidInput(fmt.Sprintf("Course file %s needs originalFilename.", f.ID))
+		}
+		if f.ByteSize < 0 {
+			return InvalidInput(fmt.Sprintf("Course file %s has invalid byteSize.", f.ID))
+		}
+		if b64 := strings.TrimSpace(f.ContentBase64); b64 != "" {
+			approx := (int64(len(b64)) * 3) / 4
+			if approx > maxExportSingleFileBytes+1024 {
+				return InvalidInput(fmt.Sprintf("Course file %s content is too large.", f.ID))
+			}
+			totalApprox += approx
+		}
+	}
+	seenFolders := map[uuid.UUID]struct{}{}
+	for _, f := range ex.FileFolders {
+		if f.ID == uuid.Nil {
+			return InvalidInput("Each file folder needs a valid id.")
+		}
+		if _, ok := seenFolders[f.ID]; ok {
+			return InvalidInput("Duplicate file folder id.")
+		}
+		seenFolders[f.ID] = struct{}{}
+		if strings.TrimSpace(f.Name) == "" {
+			return InvalidInput(fmt.Sprintf("File folder %s needs a name.", f.ID))
+		}
+		if len(f.Name) > 255 {
+			return InvalidInput(fmt.Sprintf("File folder %s name is too long.", f.ID))
+		}
+	}
+	seenItems := map[uuid.UUID]struct{}{}
+	for _, it := range ex.FileItems {
+		if it.ID == uuid.Nil {
+			return InvalidInput("Each file item needs a valid id.")
+		}
+		if _, ok := seenItems[it.ID]; ok {
+			return InvalidInput("Duplicate file item id.")
+		}
+		seenItems[it.ID] = struct{}{}
+		if strings.TrimSpace(it.OriginalFilename) == "" && strings.TrimSpace(it.DisplayName) == "" {
+			return InvalidInput(fmt.Sprintf("File item %s needs a name.", it.ID))
+		}
+		if it.ByteSize < 0 {
+			return InvalidInput(fmt.Sprintf("File item %s has invalid byteSize.", it.ID))
+		}
+		if it.FolderID != nil {
+			if _, ok := seenFolders[*it.FolderID]; !ok {
+				// Parent may already exist on the target course; only require presence
+				// when folders are listed in this export and the id is unknown here.
+				// Soft-check: if export includes folders, parent should be among them
+				// or be null. Unknown parents are nulled on import.
+			}
+		}
+		if b64 := strings.TrimSpace(it.ContentBase64); b64 != "" {
+			approx := (int64(len(b64)) * 3) / 4
+			if approx > maxExportSingleFileBytes+1024 {
+				return InvalidInput(fmt.Sprintf("File item %s content is too large.", it.ID))
+			}
+			totalApprox += approx
+		}
+	}
+	if totalApprox > maxExportTotalFileBytes {
+		return InvalidInput(fmt.Sprintf("Total file content in export exceeds size limit (%d bytes).", maxExportTotalFileBytes))
+	}
+	return nil
 }
 
 func validateContentToolsExport(ex *Bundle) error {
