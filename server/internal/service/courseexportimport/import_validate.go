@@ -146,14 +146,8 @@ func validateCourseFilesExport(ex *Bundle) error {
 		if it.ByteSize < 0 {
 			return InvalidInput(fmt.Sprintf("File item %s has invalid byteSize.", it.ID))
 		}
-		if it.FolderID != nil {
-			if _, ok := seenFolders[*it.FolderID]; !ok {
-				// Parent may already exist on the target course; only require presence
-				// when folders are listed in this export and the id is unknown here.
-				// Soft-check: if export includes folders, parent should be among them
-				// or be null. Unknown parents are nulled on import.
-			}
-		}
+		// Unknown folder parents (not listed in this export) are nulled on import;
+		// they may already exist on the target course.
 		if b64 := strings.TrimSpace(it.ContentBase64); b64 != "" {
 			approx := (int64(len(b64)) * 3) / 4
 			if approx > maxExportSingleFileBytes+1024 {
