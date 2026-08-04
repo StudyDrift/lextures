@@ -62,9 +62,18 @@ semantics change (invalidates CC.2 caches).
 | `files` | File metadata |
 | `sections` | Sections |
 | `accommodations` | Active count |
-| `standards` | Course standards count |
+| `standards` | Course standards + aligned structure item IDs |
+| `content_tool_counts` | Active content-tool instance item IDs |
+| `module_prerequisites` | Module prerequisite edges + item completion-rule presence |
 
 `DataNeedsForEvaluate(reg, opt)` computes the union for Only-mode pruning.
+
+### Evidence tables with per-row targets (CC.4)
+
+Some rules (notably `outcomes.assessment-mapping`) emit evidence where each row has its own
+`TargetOverride` (assignment/quiz editor + settings-registry anchor). Clients MUST prefer the row
+target over the item-level `Target` when present. Column headers come from `EvidenceShape.Columns`
+and MUST be rendered as real `<th scope="col">` cells (CC.7).
 
 ## Guards
 

@@ -5,18 +5,20 @@ package coursechecklist
 type DataNeed string
 
 const (
-	DataNeedCourse         DataNeed = "course"         // course row + feature columns + dates
-	DataNeedStructure      DataNeed = "structure"      // modules / headings / items
-	DataNeedItemMeta       DataNeed = "item_meta"      // content/assignment/quiz/survey metadata
-	DataNeedSyllabus       DataNeed = "syllabus"       // syllabus sections
-	DataNeedOutcomes       DataNeed = "outcomes"       // learning outcomes + links
-	DataNeedGrading        DataNeed = "grading"        // assignment groups + grading scheme
-	DataNeedEnrollments    DataNeed = "enrollments"    // role aggregates (+ privacy-safe roster stubs)
-	DataNeedFeed           DataNeed = "feed"           // channels + latest message per channel
-	DataNeedFiles          DataNeed = "files"          // course file metadata
-	DataNeedSections       DataNeed = "sections"       // course sections
-	DataNeedAccommodations DataNeed = "accommodations" // accommodation counts
-	DataNeedStandards      DataNeed = "standards"      // K-12 standards alignments (optional)
+	DataNeedCourse              DataNeed = "course"               // course row + feature columns + dates
+	DataNeedStructure           DataNeed = "structure"            // modules / headings / items
+	DataNeedItemMeta            DataNeed = "item_meta"            // content/assignment/quiz/survey/link metadata
+	DataNeedSyllabus            DataNeed = "syllabus"             // syllabus sections
+	DataNeedOutcomes            DataNeed = "outcomes"             // learning outcomes + links
+	DataNeedGrading             DataNeed = "grading"              // assignment groups + grading scheme
+	DataNeedEnrollments         DataNeed = "enrollments"          // role aggregates (+ privacy-safe roster stubs)
+	DataNeedFeed                DataNeed = "feed"                 // channels + latest message per channel
+	DataNeedFiles               DataNeed = "files"                // course file metadata
+	DataNeedSections            DataNeed = "sections"             // course sections
+	DataNeedAccommodations      DataNeed = "accommodations"       // accommodation counts
+	DataNeedStandards           DataNeed = "standards"            // K-12 standards + item alignments (optional)
+	DataNeedContentTools        DataNeed = "content_tool_counts"  // content tool instance item IDs
+	DataNeedModulePrerequisites DataNeed = "module_prerequisites" // gating prerequisite edges
 )
 
 // AllDataNeeds is the full set loaded for a complete evaluation.
@@ -33,6 +35,8 @@ var AllDataNeeds = []DataNeed{
 	DataNeedSections,
 	DataNeedAccommodations,
 	DataNeedStandards,
+	DataNeedContentTools,
+	DataNeedModulePrerequisites,
 }
 
 func unionDataNeeds(items []ItemDescriptor) []DataNeed {

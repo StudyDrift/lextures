@@ -10,13 +10,13 @@ import (
 
 // AssembleOptions controls response assembly from an evaluation Result.
 type AssembleOptions struct {
-	CourseCode            string
-	ComputedAt            time.Time
-	Stale                 bool
-	EvidenceTruncated     bool
-	IncludeNotApplicable  bool
-	Dismissed             []ccrepo.ItemState
-	DisplayNames          map[uuid.UUID]string
+	CourseCode           string
+	ComputedAt           time.Time
+	Stale                bool
+	EvidenceTruncated    bool
+	IncludeNotApplicable bool
+	Dismissed            []ccrepo.ItemState
+	DisplayNames         map[uuid.UUID]string
 }
 
 // AssembleChecklist builds the API response from Result + dismissals (FR-12/13).
@@ -162,7 +162,12 @@ func navTargetPtr(t NavTarget) *ChecklistNavTarget {
 	if strings.TrimSpace(t.Route) == "" {
 		return nil
 	}
-	out := &ChecklistNavTarget{Route: t.Route}
+	route := t.Route
+	// Substitute per-row entity keys into {itemId} (CC.4 / CC.8 graceful path).
+	if strings.TrimSpace(t.EntityKey) != "" {
+		route = strings.ReplaceAll(route, "{itemId}", t.EntityKey)
+	}
+	out := &ChecklistNavTarget{Route: route}
 	if strings.TrimSpace(t.Anchor) != "" {
 		a := t.Anchor
 		out.Anchor = &a

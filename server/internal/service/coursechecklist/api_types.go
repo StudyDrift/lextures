@@ -25,33 +25,33 @@ type ChecklistCategory struct {
 
 // ChecklistItem is one checklist finding plus optional dismissal metadata.
 type ChecklistItem struct {
-	ID         string              `json:"id"`
-	TitleKey   string              `json:"titleKey"`
-	Title      string              `json:"title"`
-	WhyKey     string              `json:"whyKey"`
-	Why        string              `json:"why"`
-	Tier       Tier                `json:"tier"`
-	Status     Status              `json:"status"`
-	Detail     *string             `json:"detail"`
-	Progress   *Progress           `json:"progress"`
-	Sources    []string            `json:"sources"`
-	HelpRef    *string             `json:"helpRef"`
-	Target     *ChecklistNavTarget `json:"target"`
-	Evidence   *ChecklistEvidence  `json:"evidence"`
-	Dismissal  *ChecklistDismissal `json:"dismissal"`
+	ID        string              `json:"id"`
+	TitleKey  string              `json:"titleKey"`
+	Title     string              `json:"title"`
+	WhyKey    string              `json:"whyKey"`
+	Why       string              `json:"why"`
+	Tier      Tier                `json:"tier"`
+	Status    Status              `json:"status"`
+	Detail    *string             `json:"detail"`
+	Progress  *Progress           `json:"progress"`
+	Sources   []string            `json:"sources"`
+	HelpRef   *string             `json:"helpRef"`
+	Target    *ChecklistNavTarget `json:"target"`
+	Evidence  *ChecklistEvidence  `json:"evidence"`
+	Dismissal *ChecklistDismissal `json:"dismissal"`
 }
 
 // ChecklistNavTarget is the client navigation target for an item.
 type ChecklistNavTarget struct {
 	Route  string  `json:"route"`
-	Anchor *string `json:"anchor"`
+	Anchor *string `json:"anchor,omitempty"`
 }
 
 // ChecklistEvidence is the expandable evidence table.
 type ChecklistEvidence struct {
-	Columns     []string              `json:"columns"`
+	Columns     []string               `json:"columns"`
 	Rows        []ChecklistEvidenceRow `json:"rows"`
-	TruncatedAt *int                  `json:"truncatedAt"`
+	TruncatedAt *int                   `json:"truncatedAt"`
 }
 
 // ChecklistEvidenceRow is one evidence table row.

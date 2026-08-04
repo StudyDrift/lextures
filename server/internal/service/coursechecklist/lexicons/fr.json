@@ -21,5 +21,24 @@
     "noLate": ["aucun travail en retard", "travaux en retard non acceptés", "pas de soumissions tardives"]
   },
   "academicIntegrity": ["intégrité académique", "honnêteté académique", "plagiat", "tricherie", "code d'honneur", "politique ia"],
-  "accessibility": ["accessibilité", "aménagements", "services aux étudiants handicapés", "handicap", "adaptations"]
+  "accessibility": ["accessibilité", "aménagements", "services aux étudiants handicapés", "handicap", "adaptations"],
+  "placeholderTitles": ["sans titre", "nouvelle page", "nouveau devoir", "nouveau quiz", "test", "asdf", "tbd", "lorem", "placeholder"],
+  "moduleOverviewTitles": ["aperçu", "vue d'ensemble", "cette semaine", "introduction", "objectifs"],
+  "bloomVerbs": {
+    "remember": ["définir", "lister", "rappeler", "identifier", "nommer", "reconnaître"],
+    "understand": ["expliquer", "résumer", "décrire", "interpréter", "classifier", "comparer"],
+    "apply": ["appliquer", "mettre en œuvre", "utiliser", "résoudre", "démontrer", "calculer"],
+    "analyze": ["analyser", "différencier", "organiser", "examiner", "contraster"],
+    "evaluate": ["évaluer", "juger", "critiquer", "défendre", "justifier"],
+    "create": ["créer", "concevoir", "composer", "développer", "formuler", "produire"]
+  },
+  "nonMeasurableOpeners": ["comprendre", "savoir", "connaître", "apprendre", "se familiariser", "apprécier"],
+  "suggestedReplacements": {
+    "comprendre": "expliquer",
+    "savoir": "identifier",
+    "connaître": "identifier",
+    "apprendre": "décrire",
+    "se familiariser": "identifier",
+    "apprécier": "évaluer"
+  }
 }

@@ -2,6 +2,7 @@ package coursechecklist
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync/atomic"
@@ -24,7 +25,8 @@ import (
 )
 
 // MaxSnapshotQueries is the hard budget for a full snapshot load (NFR / AC-9).
-const MaxSnapshotQueries = 18
+// CC.4 adds ≤ 4 queries (content tools, prerequisites/rules, enriched standards).
+const MaxSnapshotQueries = 20
 
 // queryCounter tallies logical SQL round-trips during LoadSnapshot (tests / AC-9).
 type queryCounter struct {
@@ -46,7 +48,7 @@ func DataNeedsForEvaluate(reg *Registry, opt EvaluateOptions) []DataNeed {
 }
 
 // LoadSnapshot loads a CourseSnapshot for courseCode using existing repos plus
-// read-only batch helpers (FR-7, FR-15). Query count for a full load MUST stay ≤ 18.
+// read-only batch helpers (FR-7, FR-15). Query count for a full load MUST stay ≤ MaxSnapshotQueries.
 func LoadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, needs []DataNeed) (CourseSnapshot, error) {
 	return loadSnapshot(ctx, pool, courseCode, needs, nil)
 }
@@ -106,6 +108,11 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 		homeContentID = pub.CourseHomeContentItemID
 	}
 
+	var sbgScale json.RawMessage
+	if pub.SbgProficiencyScaleJSON != nil {
+		sbgScale = append(json.RawMessage(nil), *pub.SbgProficiencyScaleJSON...)
+	}
+
 	snap := CourseSnapshot{
 		CourseCode:              courseCode,
 		CourseID:                courseID,
@@ -122,6 +129,8 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 		FeedEnabled:             pub.FeedEnabled,
 		FilesEnabled:            pub.FilesEnabled,
 		SbgEnabled:              pub.SbgEnabled,
+		SbgProficiencyScaleJSON: sbgScale,
+		ModuleGatingEnabled:     pub.ModuleGatingEnabled,
 		StandardsEnabled:        pub.StandardsAlignmentEnabled,
 		CourseType:              pub.CourseType,
 		CourseMode:              pub.CourseMode,
@@ -131,8 +140,7 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 		CreatedAt:               pub.CreatedAt,
 		HomeschoolMode:          pub.OrgID == nil,
 		OrgIsK12:                len(pub.GradeLevels) > 0,
-		// ParentPortalEnabled left false by default (guardian rule N/A unless tests set it).
-		GradingScale: pub.GradingScale,
+		GradingScale:            pub.GradingScale,
 		Features: CourseFeatures{
 			NotebookEnabled:           pub.NotebookEnabled,
 			FeedEnabled:               pub.FeedEnabled,
@@ -191,6 +199,7 @@ WHERE id = $1
 				Title:             it.Title,
 				ParentID:          it.ParentID,
 				Published:         it.Published,
+				VisibleFrom:       it.VisibleFrom,
 				DueAt:             it.DueAt,
 				AssignmentGroupID: it.AssignmentGroupID,
 				Archived:          it.Archived,
@@ -217,8 +226,17 @@ WHERE id = $1
 				ExternalURL:          m.ExternalURL,
 				QuestionCount:        m.QuestionCount,
 				LateSubmissionPolicy: m.LateSubmissionPolicy,
+				Attribution:          m.Attribution,
+				BodyMarkdown:         m.BodyMarkdown,
+				EmbeddedFileIDs:      m.EmbeddedFileIDs,
 			}
 		}
+	}
+
+	// Gradable set once for FR-17/18/19/21 (CC.4 FR-26).
+	if hasDataNeed(needs, DataNeedStructure) {
+		snap.GradableItems = computeGradableItems(snap)
+		snap.GradableComputed = true
 	}
 
 	if hasDataNeed(needs, DataNeedSyllabus) {
@@ -268,7 +286,12 @@ WHERE id = $1
 			}
 		} else {
 			for _, o := range outcomes {
-				snap.Outcomes = append(snap.Outcomes, OutcomeSnap{ID: o.ID, Title: o.Title})
+				snap.Outcomes = append(snap.Outcomes, OutcomeSnap{
+					ID:          o.ID,
+					Title:       o.Title,
+					Description: o.Description,
+					SortOrder:   int(o.SortOrder),
+				})
 			}
 		}
 		links, err := courseoutcomes.ListLinksForCourse(ctx, pool, courseID)
@@ -280,8 +303,12 @@ WHERE id = $1
 		} else {
 			for _, l := range links {
 				snap.OutcomeLinks = append(snap.OutcomeLinks, OutcomeLinkSnap{
-					OutcomeID: l.OutcomeID,
-					ItemID:    l.StructureItemID,
+					OutcomeID:        l.OutcomeID,
+					ItemID:           l.StructureItemID,
+					TargetKind:       l.TargetKind,
+					MeasurementLevel: l.MeasurementLevel,
+					ItemTitle:        l.ItemTitle,
+					ItemKind:         l.ItemKind,
 				})
 			}
 		}
@@ -426,17 +453,114 @@ WHERE id = $1
 	}
 
 	if hasDataNeed(needs, DataNeedStandards) {
-		var n int
-		err := pool.QueryRow(ctx, `
-SELECT COUNT(*)::int FROM course.course_standards WHERE course_id = $1
-`, courseID).Scan(&n)
+		rows, err := pool.Query(ctx, `
+SELECT s.id, a.structure_item_id
+FROM course.course_standards s
+LEFT JOIN course.standard_sbg_alignments a ON a.standard_id = s.id AND a.course_id = s.course_id
+WHERE s.course_id = $1
+`, courseID)
 		count(1)
 		if err != nil {
 			if !isUndefinedTable(err) {
 				return CourseSnapshot{}, err
 			}
 		} else {
-			snap.StandardsCount = n
+			seenStd := map[uuid.UUID]struct{}{}
+			snap.StandardAlignedItemIDs = map[uuid.UUID]struct{}{}
+			for rows.Next() {
+				var sid uuid.UUID
+				var itemID *uuid.UUID
+				if err := rows.Scan(&sid, &itemID); err != nil {
+					rows.Close()
+					return CourseSnapshot{}, err
+				}
+				seenStd[sid] = struct{}{}
+				if itemID != nil {
+					snap.StandardAlignedItemIDs[*itemID] = struct{}{}
+				}
+			}
+			err = rows.Err()
+			rows.Close()
+			if err != nil {
+				return CourseSnapshot{}, err
+			}
+			snap.StandardsCount = len(seenStd)
+		}
+	}
+
+	if hasDataNeed(needs, DataNeedContentTools) {
+		rows, err := pool.Query(ctx, `
+SELECT DISTINCT structure_item_id
+FROM course.content_tool_instances
+WHERE course_id = $1
+  AND status = 'active'
+  AND structure_item_id IS NOT NULL
+`, courseID)
+		count(1)
+		if err != nil {
+			if !isUndefinedTable(err) {
+				return CourseSnapshot{}, err
+			}
+		} else {
+			snap.ContentToolItemIDs = map[uuid.UUID]struct{}{}
+			for rows.Next() {
+				var id uuid.UUID
+				if err := rows.Scan(&id); err != nil {
+					rows.Close()
+					return CourseSnapshot{}, err
+				}
+				snap.ContentToolItemIDs[id] = struct{}{}
+			}
+			err = rows.Err()
+			rows.Close()
+			if err != nil {
+				return CourseSnapshot{}, err
+			}
+		}
+	}
+
+	if hasDataNeed(needs, DataNeedModulePrerequisites) {
+		// One query: prerequisite edges + whether any item completion rules exist.
+		rows, err := pool.Query(ctx, `
+SELECT 'edge'::text AS kind, mp.module_id, mp.prerequisite_module_id
+FROM course.module_prerequisites mp
+INNER JOIN course.course_structure_items m ON m.id = mp.module_id
+WHERE m.course_id = $1
+UNION ALL
+SELECT 'rule'::text AS kind, r.structure_item_id, r.structure_item_id
+FROM course.item_completion_rules r
+INNER JOIN course.course_structure_items i ON i.id = r.structure_item_id
+WHERE i.course_id = $1
+LIMIT 5000
+`, courseID)
+		count(1)
+		if err != nil {
+			if !isUndefinedTable(err) {
+				return CourseSnapshot{}, err
+			}
+		} else {
+			for rows.Next() {
+				var kind string
+				var a, b uuid.UUID
+				if err := rows.Scan(&kind, &a, &b); err != nil {
+					rows.Close()
+					return CourseSnapshot{}, err
+				}
+				switch kind {
+				case "edge":
+					snap.ModulePrerequisiteEdges = append(snap.ModulePrerequisiteEdges, PrerequisiteEdge{
+						ModuleID:             a,
+						PrerequisiteModuleID: b,
+					})
+				case "rule":
+					snap.HasItemCompletionRules = true
+				}
+			}
+			err = rows.Err()
+			rows.Close()
+			if err != nil {
+				return CourseSnapshot{}, err
+			}
 		}
 	}
 

@@ -18,7 +18,7 @@ Every plan follows [_TEMPLATE.md](../_TEMPLATE.md).
 | CC.1 | [Checklist rule registry & evaluation engine](../../completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md) ✅ | Server | M | — |
 | CC.2 | [Checklist state, API & dismissals](../../completed/checklist/CC.2-checklist-state-api-and-dismissals.md) ✅ | Server | M | CC.1 |
 | CC.3 | [Rule pack A — foundations, orientation, policies & people](../../completed/checklist/CC.3-rule-pack-foundations-and-orientation.md) ✅ (33 rules) | Server | M | CC.1, CC.2 |
-| CC.4 | [Rule pack B — structure, content & outcome alignment](CC.4-rule-pack-structure-outcomes-alignment.md) (22 rules) | Server | M | CC.1, CC.2 |
+| CC.4 | [Rule pack B — structure, content & outcome alignment](../../completed/checklist/CC.4-rule-pack-structure-outcomes-alignment.md) ✅ (22 rules) | Server | M | CC.1, CC.2 |
 | CC.5 | [Rule pack C — assessment, grading, feedback & interaction](CC.5-rule-pack-assessment-feedback-interaction.md) (26 rules) | Server | M | CC.1, CC.2 |
 | CC.6 | [Rule pack D — accessibility, inclusive design & launch readiness](CC.6-rule-pack-accessibility-and-launch-readiness.md) (20 rules) | Server | M | CC.1, CC.2 |
 | CC.7 | [Web: checklist page, nav entry & badge](CC.7-web-checklist-page-and-nav-badge.md) | Web | M | CC.2, CC.3 |
