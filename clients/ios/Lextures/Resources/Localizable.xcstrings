@@ -103400,31 +103400,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تُشترى الدورات المدفوعة عبر الويب للامتثال لمتجر التطبيقات وPlay."
+            "value": "تُشترى الدورات الرقمية المدفوعة عبر المتصفح، وليس كعملية شراء داخل التطبيق."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Paid courses are purchased on the web for App Store and Play compliance."
+            "value": "Paid digital courses are purchased in your browser, not as an in-app purchase."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "[Paid courses are purchased on the web for App Store and Play compliance.]"
+            "value": "[Paid digital courses are purchased in your browser, not as an in-app purchase.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los cursos de pago se compran en la web para cumplir con App Store y Play."
+            "value": "Los cursos digitales de pago se compran en el navegador, no como compra dentro de la app."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les cours payants s’achètent sur le web pour respecter App Store et Play."
+            "value": "Les cours numériques payants s’achètent dans le navigateur, pas en achat intégré."
           }
         }
       }
@@ -121921,6 +121921,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vos données personnelles seront anonymisées et vous serez déconnecté de tous les appareils. Cette action est irréversible."
+          }
+        }
+      }
+    },
+    "mobile.profile.deleteAccountSection": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حذف الحساب"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete account"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ðëľëţë äççöüñţ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar cuenta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer le compte"
+          }
+        }
+      }
+    },
+    "mobile.profile.deleteAccountSectionDescription": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أزل حسابك وبياناتك الشخصية نهائياً من هذه المنصة."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permanently remove your account and personal data from this platform."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Þëŕɱäñëñţľÿ ŕëɱöṽë ÿöûŕ äççöüñţ äñđ þëŕšöñäľ đäţä.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina permanentemente tu cuenta y tus datos personales de esta plataforma."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimez définitivement votre compte et vos données personnelles de cette plateforme."
           }
         }
       }

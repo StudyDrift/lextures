@@ -3046,7 +3046,7 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_marketplace_openCourseError">[Could not open this course.]</string>
     <string name="mobile_marketplace_owned">[Owned]</string>
     <string name="mobile_marketplace_paidCheckoutHint">[You\'ll review price and tax, then complete checkout securely in your browser.]</string>
-    <string name="mobile_marketplace_paidWebHint">[Paid courses are purchased on the web for App Store and Play compliance.]</string>
+    <string name="mobile_marketplace_paidWebHint">[Paid digital courses are purchased in your browser, not as an in-app purchase.]</string>
     <string name="mobile_marketplace_priceLabel">[Price]</string>
     <string name="mobile_marketplace_prompt">[Browse courses available to enroll.]</string>
     <string name="mobile_marketplace_purchases_disabledBody">[The course marketplace is not enabled.]</string>
@@ -3591,6 +3591,8 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_profile_deleteAccountConfirm">[Þëŕɱäñëñţľÿ đëľëţë ÿöûŕ äççöüñţ?]</string>
     <string name="mobile_profile_deleteAccountError">[Çöûľđ ñöţ đëľëţë äççöüñţ.]</string>
     <string name="mobile_profile_deleteAccountMessage">[Ýöûŕ þëŕšöñäľ đäţä ẅîľľ ɓë äñöñÿɱîžëđ.]</string>
+    <string name="mobile_profile_deleteAccountSection">[Ðëľëţë äççöüñţ]</string>
+    <string name="mobile_profile_deleteAccountSectionDescription">[Þëŕɱäñëñţľÿ ŕëɱöṽë ÿöûŕ äççöüñţ äñđ þëŕšöñäľ đäţä.]</string>
     <string name="mobile_profile_displayName">[Ðîšþľäÿ ñäɱë]</string>
     <string name="mobile_profile_dyslexiaFriendly">[Ðÿšľëẍîä-ƒŕîëñđļÿ đîšþľäÿ]</string>
     <string name="mobile_profile_dyslexiaFriendlyDescription">[Ŕöüñđëđ ţÿþë, ëẋţŕä šþäçîñġ.]</string>

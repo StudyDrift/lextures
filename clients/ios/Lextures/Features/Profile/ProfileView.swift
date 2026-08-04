@@ -71,11 +71,13 @@ struct ProfileView: View {
                         accessibilityCard
                         ProfileSecurityCard()
                         ProfileAccountCard(billingNav: $billingNav, purchasesNav: $purchasesNav)
+                        // Account deletion sits with account controls (App Store 5.1.1(v)) so
+                        // reviewers and users do not have to scroll past legal/about/sign-out only.
+                        ProfileDeleteAccountButton(confirmingDeleteAccount: $confirmingDeleteAccount)
                         ProfileNotificationsCard()
                         ProfileLegalCard()
                         ProfileAboutCard()
                         ProfileSignOutButton(confirmingSignOut: $confirmingSignOut)
-                        ProfileDeleteAccountButton(confirmingDeleteAccount: $confirmingDeleteAccount)
                     }
                     .padding(16)
                 }

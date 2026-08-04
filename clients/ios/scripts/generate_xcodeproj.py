@@ -66,11 +66,13 @@ def main() -> None:
     app_group = gen_id()
     assets_ref = gen_id()
     localizable_ref = gen_id()
+    privacy_manifest_ref = gen_id()
     info_plist_ref = gen_id()
     dev_xcconfig_ref = gen_id()
     config_group = gen_id()
     assets_build = gen_id()
     localizable_build = gen_id()
+    privacy_manifest_build = gen_id()
 
     test_target_id = gen_id()
     test_sources_phase = gen_id()
@@ -112,6 +114,9 @@ def main() -> None:
     w(
         f"\t\t{localizable_build} /* Localizable.xcstrings in Resources */ = {{isa = PBXBuildFile; fileRef = {localizable_ref} /* Localizable.xcstrings */; }};"
     )
+    w(
+        f"\t\t{privacy_manifest_build} /* PrivacyInfo.xcprivacy in Resources */ = {{isa = PBXBuildFile; fileRef = {privacy_manifest_ref} /* PrivacyInfo.xcprivacy */; }};"
+    )
     w("/* End PBXBuildFile section */")
 
     w("\n/* Begin PBXFileReference section */")
@@ -132,6 +137,9 @@ def main() -> None:
     )
     w(
         f"\t\t{localizable_ref} /* Localizable.xcstrings */ = {{isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = \"<group>\"; }};"
+    )
+    w(
+        f"\t\t{privacy_manifest_ref} /* PrivacyInfo.xcprivacy */ = {{isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = \"<group>\"; }};"
     )
     w(
         f"\t\t{info_plist_ref} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = \"<group>\"; }};"
@@ -176,6 +184,7 @@ def main() -> None:
             children = [
                 f"{assets_ref} /* Assets.xcassets */",
                 f"{localizable_ref} /* Localizable.xcstrings */",
+                f"{privacy_manifest_ref} /* PrivacyInfo.xcprivacy */",
                 f"{info_plist_ref} /* Info.plist */",
             ]
         else:
@@ -329,6 +338,7 @@ def main() -> None:
     w("\t\t\tfiles = (")
     w(f"\t\t\t\t{assets_build} /* Assets.xcassets in Resources */,")
     w(f"\t\t\t\t{localizable_build} /* Localizable.xcstrings in Resources */,")
+    w(f"\t\t\t\t{privacy_manifest_build} /* PrivacyInfo.xcprivacy in Resources */,")
     w("\t\t\t);")
     w("\t\t};")
     w("/* End PBXResourcesBuildPhase section */")
@@ -402,7 +412,7 @@ def main() -> None:
         w(f'\t\t\t\tASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;')
         w(f'\t\t\t\tCODE_SIGN_ENTITLEMENTS = {APP_NAME}/Resources/Lextures.entitlements;')
         w(f'\t\t\t\tCODE_SIGN_STYLE = Automatic;')
-        w(f'\t\t\t\tCURRENT_PROJECT_VERSION = 1;')
+        w(f'\t\t\t\tCURRENT_PROJECT_VERSION = 3;')
         w(f'\t\t\t\tDEVELOPMENT_TEAM = "";')
         w(f'\t\t\t\tENABLE_PREVIEWS = YES;')
         if name == "Debug":
@@ -413,7 +423,7 @@ def main() -> None:
         w(f'\t\t\t\t\t"$(inherited)",')
         w(f'\t\t\t\t\t"@executable_path/Frameworks",')
         w(f'\t\t\t\t);')
-        w(f'\t\t\t\tMARKETING_VERSION = 0.1.0;')
+        w(f'\t\t\t\tMARKETING_VERSION = 1.0.1;')
         w(f'\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = {BUNDLE_ID};')
         w(f'\t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";')
         w(f'\t\t\t\tSUPPORTED_PLATFORMS = "iphoneos iphonesimulator";')
@@ -433,10 +443,10 @@ def main() -> None:
             w("\t\t\tbuildSettings = {")
             w(f'\t\t\t\tBUNDLE_LOADER = "$(TEST_HOST)";')
             w(f'\t\t\t\tCODE_SIGN_STYLE = Automatic;')
-            w(f'\t\t\t\tCURRENT_PROJECT_VERSION = 1;')
+            w(f'\t\t\t\tCURRENT_PROJECT_VERSION = 3;')
             w(f'\t\t\t\tGENERATE_INFOPLIST_FILE = YES;')
             w(f'\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = {DEPLOYMENT_TARGET};')
-            w(f'\t\t\t\tMARKETING_VERSION = 0.1.0;')
+            w(f'\t\t\t\tMARKETING_VERSION = 1.0.1;')
             w(f'\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = {BUNDLE_ID}.tests;')
             w(f'\t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";')
             w(f'\t\t\t\tSWIFT_VERSION = 5.0;')
