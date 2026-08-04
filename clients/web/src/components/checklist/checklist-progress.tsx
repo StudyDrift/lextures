@@ -38,7 +38,7 @@ export function ChecklistProgressBar({
         aria-label={label}
       >
         <div
-          className="h-full rounded-full bg-emerald-600 transition-[width] duration-300 motion-reduce:transition-none dark:bg-emerald-500"
+          className="h-full rounded-full bg-emerald-600 motion-safe:transition-[width] motion-safe:duration-300 dark:bg-emerald-500"
           style={{ width: `${pct}%` }}
         />
       </div>

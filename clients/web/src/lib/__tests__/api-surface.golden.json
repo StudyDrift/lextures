@@ -517,6 +517,15 @@
     "putCourseCatalogSettings",
     "putCourseKanbanBoard"
   ],
+  "course-checklist-api.ts": [
+    "CourseChecklistApiError",
+    "dismissChecklistItem",
+    "fetchCourseChecklist",
+    "fetchCourseChecklistSummary",
+    "recheckChecklistItem",
+    "refreshCourseChecklist",
+    "restoreChecklistItem"
+  ],
   "course-evaluations-api.ts": [
     "AdminReportRow",
     "EvaluationQuestion",

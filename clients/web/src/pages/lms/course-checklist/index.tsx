@@ -15,9 +15,9 @@ function ChecklistSkeleton() {
     <div className="space-y-4" aria-busy="true" aria-label="Loading checklist">
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="space-y-2 rounded-lg border border-slate-200 p-4 dark:border-neutral-700">
-          <div className="h-5 w-1/3 animate-pulse rounded bg-slate-200 dark:bg-neutral-700" />
-          <div className="h-4 w-full animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
-          <div className="h-4 w-5/6 animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
+          <div className="h-5 w-1/3 motion-safe:animate-pulse rounded bg-slate-200 dark:bg-neutral-700" />
+          <div className="h-4 w-full motion-safe:animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
+          <div className="h-4 w-5/6 motion-safe:animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
         </div>
       ))}
     </div>

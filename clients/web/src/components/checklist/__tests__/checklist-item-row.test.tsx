@@ -41,7 +41,9 @@ describe('ChecklistItemRow', () => {
         </ul>
       </MemoryRouter>,
     )
-    expect(screen.getByText('Completed')).toHaveClass('sr-only')
+    const completed = screen.getAllByText('Completed')
+    expect(completed.length).toBeGreaterThanOrEqual(1)
+    expect(completed.every((el) => el.classList.contains('sr-only'))).toBe(true)
     expect(screen.getByText('Post a welcome announcement').className).toMatch(/line-through/)
   })
 

@@ -5236,6 +5236,38 @@
       }
     },
     {
+      "id": "CC.7",
+      "path": "docs/completed/checklist/CC.7-web-checklist-page-and-nav-badge.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Staff-only Checklist nav under Dashboard with outstanding-essential badge, full checklist page (categories, evidence table, dismiss/restore, re-check), dashboard card, and command-palette destination. Playwright covers teacher nav+page, dismiss/restore, and student no-access (no item titles).",
+      "owner": "Learning Platform",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/course-checklist-ui.spec.ts"
+        },
+        {
+          "path": "e2e/tests/course-checklist.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": false,
+        "disabledState": "n/a",
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": "n/a",
+        "rollback": true,
+        "notes": "No feature flag. Client gating is UX-only; server enforces item:create (CC.2). Unblocks CC.8–CC.10."
+      }
+    },
+    {
       "id": "mb-1-in-app-browser",
       "path": "docs/completed/mobile/MB.1-in-app-browser.md",
       "markets": [

@@ -32,8 +32,8 @@ export function ChecklistDashboardCard({
 
       {loading && !summary ? (
         <div className="mt-3 space-y-2" aria-busy="true">
-          <div className="h-4 w-2/3 animate-pulse rounded bg-slate-200 dark:bg-neutral-700" />
-          <div className="h-3 w-full animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
+          <div className="h-4 w-2/3 motion-safe:animate-pulse rounded bg-slate-200 dark:bg-neutral-700" />
+          <div className="h-3 w-full motion-safe:animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
         </div>
       ) : outstanding <= 0 ? (
         <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
