@@ -21,12 +21,15 @@ test.describe('Course checklist UI (CC.7)', () => {
 
     await injectToken(page, token)
     await page.goto(`/courses/${encodeURIComponent(course.courseCode)}`)
-    await expect(mainNav(page)).toBeVisible()
+    const courseNav = page.getByRole('navigation', { name: 'Course menu' })
+    await expect(courseNav).toBeVisible()
 
-    const checklistNav = mainNav(page).locator(
-      `a[href="/courses/${encodeURIComponent(course.courseCode)}/checklist"]`,
-    )
+    const checklistNav = courseNav.getByRole('link', { name: /^checklist$/i })
     await expect(checklistNav).toBeVisible()
+    await expect(checklistNav).toHaveAttribute(
+      'href',
+      `/courses/${encodeURIComponent(course.courseCode)}/checklist`,
+    )
 
     await checklistNav.click()
     await expect(page.getByRole('heading', { name: /course checklist/i })).toBeVisible({
@@ -97,10 +100,9 @@ test.describe('Course checklist UI (CC.7)', () => {
 
     await injectToken(page, studentTok)
     await page.goto(`/courses/${encodeURIComponent(course.courseCode)}`)
-    await expect(mainNav(page)).toBeVisible()
-    await expect(
-      mainNav(page).locator(`a[href="/courses/${encodeURIComponent(course.courseCode)}/checklist"]`),
-    ).toHaveCount(0)
+    const courseNav = page.getByRole('navigation', { name: 'Course menu' })
+    await expect(courseNav).toBeVisible()
+    await expect(courseNav.getByRole('link', { name: /^checklist$/i })).toHaveCount(0)
 
     await page.goto(`/courses/${encodeURIComponent(course.courseCode)}/checklist`)
     await expect(page.getByText(/don't have access/i)).toBeVisible({ timeout: 15_000 })
