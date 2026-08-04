@@ -5067,6 +5067,30 @@
       }
     },
     {
+      "id": "CC.1",
+      "path": "docs/completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "ops",
+      "coverage": "not-applicable",
+      "rationale": "Server-only Go engine (registry + Evaluate + LoadSnapshot). No HTTP or UI in CC.1; covered by package unit/integration tests. Web/mobile journeys land with CC.7/CC.9.",
+      "owner": "Learning Platform",
+      "reviewed": true,
+      "flags": {
+        "settingsToggle": false,
+        "disabledState": "n/a",
+        "enabledJourney": "n/a",
+        "authorization": "n/a",
+        "dependency": "n/a",
+        "rollback": true,
+        "notes": "No feature flag by design. Retire via RETIRED_ITEM_IDS; EngineVersion bump invalidates CC.2 caches. Depends on nothing; unblocks CC.2+."
+      }
+    },
+    {
       "id": "mb-1-in-app-browser",
       "path": "docs/completed/mobile/MB.1-in-app-browser.md",
       "markets": [
