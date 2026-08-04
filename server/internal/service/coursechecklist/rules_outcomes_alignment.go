@@ -348,7 +348,7 @@ func ruleOutcomesStandardsAlignment() ItemDescriptor {
 }
 
 func evalOutcomesStandardsAlignment(_ context.Context, snap CourseSnapshot) (Finding, error) {
-	if !(snap.Features.StandardsAlignmentEnabled || snap.StandardsEnabled) {
+	if !snap.Features.StandardsAlignmentEnabled && !snap.StandardsEnabled {
 		return Finding{
 			Status:        StatusNotApplicable,
 			DetailKey:     "coursechecklist.item.outcomes.standards-alignment.detail.na",
