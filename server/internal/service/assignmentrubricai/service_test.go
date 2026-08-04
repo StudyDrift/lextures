@@ -2,6 +2,7 @@ package assignmentrubricai
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/lextures/lextures/server/internal/models/assignmentrubric"
@@ -80,9 +81,15 @@ func TestNormalizeRubricGridPadsLevels(t *testing.T) {
 	}
 }
 
-func TestGenerate_rejectsEmptyPrompt(t *testing.T) {
+func TestGenerate_rejectsEmptyContext(t *testing.T) {
 	_, _, err := Generate(context.Background(), nil, "model", "", GenerateInput{})
-	if err == nil || err.Error() != "instructions are required" {
+	if err == nil || err.Error() != "assignment content is required to generate a rubric" {
 		t.Fatalf("err = %v", err)
+	}
+}
+
+func TestDefaultUserPrompt_nonEmpty(t *testing.T) {
+	if strings.TrimSpace(DefaultUserPrompt) == "" {
+		t.Fatal("DefaultUserPrompt must be non-empty for one-click Build with AI")
 	}
 }

@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
+	"github.com/lextures/lextures/server/internal/service/filestorage"
 )
 
 const exportFormatVersion int32 = 1
@@ -47,13 +48,25 @@ type Bundle struct {
 	// Content tool authoring only — never learner state/events/grade links.
 	ContentToolSettings  *courseexport.ExportedContentToolSettings  `json:"contentToolSettings,omitempty"`
 	ContentToolInstances []courseexport.ExportedContentToolInstance `json:"contentToolInstances,omitempty"`
+	// Embedded content images (course.course_files) with base64 bodies.
+	CourseFiles []courseexport.ExportedCourseFile `json:"courseFiles,omitempty"`
+	// File manager hierarchy with base64 bodies on each item.
+	FileFolders []courseexport.ExportedFileFolder `json:"fileFolders,omitempty"`
+	FileItems   []courseexport.ExportedFileItem   `json:"fileItems,omitempty"`
+}
+
+// BlobOptions configures how export/import reads and writes course file blobs.
+// When Storage is nil, FilesRoot (or "data/course-files") is used for local disk I/O.
+type BlobOptions struct {
+	FilesRoot string
+	Storage   filestorage.Driver
 }
 
 // ErrNotFound is returned when the course code does not exist.
 var ErrNotFound = errors.New("course not found")
 
 // BuildExport builds a full course JSON export bundle (Rust `build_export`).
-func BuildExport(ctx context.Context, pool *pgxpool.Pool, courseCode string) (*Bundle, error) {
+func BuildExport(ctx context.Context, pool *pgxpool.Pool, courseCode string, blobOpts BlobOptions) (*Bundle, error) {
 	if pool == nil {
 		return nil, errors.New("db pool is nil")
 	}
@@ -364,6 +377,10 @@ func BuildExport(ctx context.Context, pool *pgxpool.Pool, courseCode string) (*B
 			})
 		}
 		bundle.ContentToolInstances = out
+	}
+
+	if err := attachCourseFilesToExport(ctx, pool, courseID, courseCode, blobOpts, bundle); err != nil {
+		return nil, err
 	}
 
 	return bundle, nil

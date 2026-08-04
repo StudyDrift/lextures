@@ -20,6 +20,12 @@ export type CourseExportImportStats = {
   enrollments: number
   /** Placed content-tool instances in the export (authoring only; no learner state). */
   contentToolInstances: number
+  /** Embedded content files (course.course_files) with optional base64 bodies. */
+  courseFiles: number
+  /** File-manager files (course.file_items). */
+  fileItems: number
+  /** File-manager folders (course.file_folders). */
+  fileFolders: number
   /** True when the export includes a non-empty course settings snapshot. */
   hasCourseSettings: boolean
 }
@@ -133,6 +139,9 @@ export function summarizeCourseExportBundle(parsed: unknown): CourseExportImport
   const contentToolInstances = Array.isArray(parsed.contentToolInstances)
     ? parsed.contentToolInstances.length
     : 0
+  const courseFiles = Array.isArray(parsed.courseFiles) ? parsed.courseFiles.length : 0
+  const fileItems = Array.isArray(parsed.fileItems) ? parsed.fileItems.length : 0
+  const fileFolders = Array.isArray(parsed.fileFolders) ? parsed.fileFolders.length : 0
 
   return {
     sourceCourseCode,
@@ -148,6 +157,9 @@ export function summarizeCourseExportBundle(parsed: unknown): CourseExportImport
     assignmentGroups,
     enrollments,
     contentToolInstances,
+    courseFiles,
+    fileItems,
+    fileFolders,
     hasCourseSettings: course != null,
   }
 }
@@ -166,6 +178,9 @@ export function courseExportImportStatLines(stats: CourseExportImportStats): Cou
     { key: 'assignmentGroups', label: 'Assignment groups', count: stats.assignmentGroups },
     { key: 'enrollments', label: 'Enrollments', count: stats.enrollments },
     { key: 'contentToolInstances', label: 'Content tools', count: stats.contentToolInstances },
+    { key: 'courseFiles', label: 'Embedded files', count: stats.courseFiles },
+    { key: 'fileFolders', label: 'File folders', count: stats.fileFolders },
+    { key: 'fileItems', label: 'Course files', count: stats.fileItems },
   ]
   return lines.filter((l) => l.count > 0)
 }
@@ -184,10 +199,10 @@ export function importModeLabel(mode: 'erase' | 'mergeAdd' | 'overwrite'): strin
 export function importModeSummary(mode: 'erase' | 'mergeAdd' | 'overwrite'): string {
   switch (mode) {
     case 'erase':
-      return 'Existing modules and related content will be removed, then this file will be applied. Syllabus, grading groups, and course settings from the file replace the current ones. If the file includes enrollments, the roster is replaced except for the course creator’s teacher enrollment.'
+      return 'Existing modules, course files, and related content will be removed, then this file will be applied. Syllabus, grading groups, and course settings from the file replace the current ones. Embedded and file-manager files in the export are restored (base64). If the file includes enrollments, the roster is replaced except for the course creator’s teacher enrollment.'
     case 'mergeAdd':
-      return 'Existing content is kept. Only missing syllabus sections, assignment groups, and outline items (by id) are added, with bodies for new items. If the file includes enrollments, missing roster rows are added.'
+      return 'Existing content is kept. Only missing syllabus sections, assignment groups, outline items (by id), and course files (by id) are added, with bodies for new items. If the file includes enrollments, missing roster rows are added.'
     case 'overwrite':
-      return 'This course will be updated from the file: syllabus and grading are replaced, settings refresh, every listed outline item is upserted, items not in the file are removed, and module bodies are refreshed. If the file includes enrollments, the roster is replaced except for the course creator’s teacher enrollment.'
+      return 'This course will be updated from the file: syllabus and grading are replaced, settings refresh, every listed outline item is upserted, items not in the file are removed, module bodies are refreshed, and course files from the export are restored (base64). If the file includes enrollments, the roster is replaced except for the course creator’s teacher enrollment.'
   }
 }

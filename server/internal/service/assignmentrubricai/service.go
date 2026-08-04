@@ -45,6 +45,10 @@ Rules:
 - Within each criterion, points should usually be non-decreasing as quality improves.
 - When assignment points are provided, the sum of each criterion's maximum level points must equal that total exactly.`
 
+// DefaultUserPrompt is used when the instructor clicks Build with AI without extra instructions.
+// Generation still grounds on assignment title + body when provided.
+const DefaultUserPrompt = `Generate a clear, fair grading rubric based on the assignment content. Align criteria with the tasks, reflection prompts, and learning goals implied by the assignment. Use shared proficiency levels across criteria and match total points when assignment points are set.`
+
 // Service provides AI-backed assignment rubric generation.
 type Service struct {
 	Name string
@@ -96,7 +100,8 @@ func Generate(
 ) (*assignmentrubric.RubricDefinition, aiprovider.CallMeta, error) {
 	prompt := strings.TrimSpace(input.Prompt)
 	if prompt == "" {
-		return nil, aiprovider.CallMeta{}, fmt.Errorf("instructions are required")
+		// One-click Build with AI: ground on assignment title/body without extra instructor text.
+		prompt = DefaultUserPrompt
 	}
 	if utf8.RuneCountInString(prompt) > MaxPromptRunes {
 		return nil, aiprovider.CallMeta{}, fmt.Errorf("instructions are too long (max %d characters)", MaxPromptRunes)
@@ -104,6 +109,9 @@ func Generate(
 	md := strings.TrimSpace(input.AssignmentMarkdown)
 	if utf8.RuneCountInString(md) > MaxAssignmentMarkdownRunes {
 		return nil, aiprovider.CallMeta{}, fmt.Errorf("assignment body is too long (max %d characters)", MaxAssignmentMarkdownRunes)
+	}
+	if strings.TrimSpace(input.AssignmentTitle) == "" && md == "" && strings.TrimSpace(input.Prompt) == "" {
+		return nil, aiprovider.CallMeta{}, fmt.Errorf("assignment content is required to generate a rubric")
 	}
 
 	sys := strings.TrimSpace(systemPrompt)

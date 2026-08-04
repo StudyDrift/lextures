@@ -41,7 +41,12 @@ func (d Deps) handleCourseExportGet() http.HandlerFunc {
 			return
 		}
 
-		bundle, err := courseexportimport.BuildExport(r.Context(), d.Pool, courseCode)
+		cfg := d.effectiveConfig()
+		blobOpts := courseexportimport.BlobOptions{
+			FilesRoot: cfg.CourseFilesRoot,
+			Storage:   d.Storage,
+		}
+		bundle, err := courseexportimport.BuildExport(r.Context(), d.Pool, courseCode, blobOpts)
 		if err != nil {
 			if errors.Is(err, courseexportimport.ErrNotFound) {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
@@ -102,7 +107,12 @@ func (d Deps) handleCourseImportPost() http.HandlerFunc {
 			return
 		}
 
-		err = courseexportimport.ApplyImport(r.Context(), d.Pool, courseCode, req.Mode, req.Export, nil)
+		cfg := d.effectiveConfig()
+		blobOpts := courseexportimport.BlobOptions{
+			FilesRoot: cfg.CourseFilesRoot,
+			Storage:   d.Storage,
+		}
+		err = courseexportimport.ApplyImport(r.Context(), d.Pool, courseCode, req.Mode, req.Export, nil, blobOpts)
 		if err != nil {
 			if errors.Is(err, courseexportimport.ErrNotFound) {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")

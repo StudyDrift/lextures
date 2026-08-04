@@ -45,6 +45,9 @@ describe('summarizeCourseExportBundle', () => {
     expect(stats.assignmentGroups).toBe(2)
     expect(stats.enrollments).toBe(2)
     expect(stats.contentToolInstances).toBe(0)
+    expect(stats.courseFiles).toBe(0)
+    expect(stats.fileItems).toBe(0)
+    expect(stats.fileFolders).toBe(0)
     expect(stats.hasCourseSettings).toBe(true)
 
     const lines = courseExportImportStatLines(stats)
@@ -69,6 +72,27 @@ describe('summarizeCourseExportBundle', () => {
     )
   })
 
+  it('counts course files and file manager items', () => {
+    const stats = summarizeCourseExportBundle({
+      formatVersion: 1,
+      courseCode: 'C-FILES',
+      structure: [],
+      courseFiles: [{ id: 'f1', originalFilename: 'a.png', contentBase64: 'YQ==' }],
+      fileFolders: [{ id: 'd1', name: 'Docs' }],
+      fileItems: [
+        { id: 'i1', originalFilename: 'syllabus.pdf', contentBase64: 'YQ==' },
+        { id: 'i2', originalFilename: 'rubric.docx', contentBase64: 'YQ==' },
+      ],
+    })
+    expect(stats.courseFiles).toBe(1)
+    expect(stats.fileFolders).toBe(1)
+    expect(stats.fileItems).toBe(2)
+    const lines = courseExportImportStatLines(stats)
+    expect(lines.find((l) => l.key === 'courseFiles')?.count).toBe(1)
+    expect(lines.find((l) => l.key === 'fileItems')?.count).toBe(2)
+    expect(lines.find((l) => l.key === 'fileFolders')?.count).toBe(1)
+  })
+
   it('falls back to body maps when structure is empty', () => {
     const stats = summarizeCourseExportBundle({
       formatVersion: 1,
@@ -83,6 +107,7 @@ describe('summarizeCourseExportBundle', () => {
     expect(stats.assignments).toBe(1)
     expect(stats.quizzes).toBe(0)
     expect(stats.contentToolInstances).toBe(0)
+    expect(stats.courseFiles).toBe(0)
   })
 
   it('rejects non-objects', () => {

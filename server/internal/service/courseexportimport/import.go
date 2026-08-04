@@ -67,6 +67,7 @@ func ApplyImport(
 	mode courseexport.CourseImportMode,
 	ex *Bundle,
 	canvasInclude *courseexport.CanvasImportInclude,
+	blobOpts BlobOptions,
 ) error {
 	if pool == nil {
 		return errors.New("db pool is nil")
@@ -87,6 +88,9 @@ func ApplyImport(
 		return err
 	}
 
+	// Rewrite embedded file URLs when importing into a different course code.
+	rewriteCourseFileURLsInBundle(ex, ex.CourseCode, targetCourseCode)
+
 	courseIDPtr, err := course.GetIDByCourseCode(ctx, pool, targetCourseCode)
 	if err != nil {
 		return err
@@ -99,10 +103,12 @@ func ApplyImport(
 	applyGrades := true
 	applySettings := true
 	applyEnrollments := true
+	applyFiles := true
 	if canvasInclude != nil {
 		applyGrades = canvasInclude.Grades
 		applySettings = canvasInclude.Settings
 		applyEnrollments = canvasInclude.Enrollments
+		applyFiles = canvasInclude.Files
 	}
 	// JSON imports erase the outline even when the bundle has no structure rows.
 	// Canvas partial imports skip that when every content category was unchecked.
@@ -207,6 +213,14 @@ func ApplyImport(
 	// Canvas partial imports that skipped outline still apply CT when present in the bundle.
 	if err := applyContentTools(ctx, pool, courseID, mode, ex, mergeInserted); err != nil {
 		return err
+	}
+
+	// Course files + file manager (base64 bodies) after bodies so hero/markdown
+	// path rewrites are already applied and ids stay stable for content URLs.
+	if applyFiles {
+		if err := applyCourseFiles(ctx, pool, courseID, targetCourseCode, mode, ex, blobOpts); err != nil {
+			return err
+		}
 	}
 
 	if applyEnrollments {

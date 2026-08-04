@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDown, Loader2, Plus, Search, Trash2 } from 'lucide-react'
+import { ChevronDown, Loader2, Plus, Search, Sparkles, Trash2 } from 'lucide-react'
 import {
   generateAssignmentRubric,
   GRADING_SCHEME_DISPLAY_TYPES,
@@ -11,6 +11,7 @@ import {
   type RubricCriterion,
   type RubricLevel,
 } from '../../lib/courses-api'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   getMatchingSettingIds,
   sectionHasMatchingSettings,
@@ -32,6 +33,10 @@ import {
   RelativeScheduleBanner,
   ScheduleDatetimeField,
 } from '../lms/schedule-datetime-field'
+
+/** Default instructions when the instructor uses one-click Build with AI from assignment content. */
+const DEFAULT_RUBRIC_AI_PROMPT =
+  'Generate a clear, fair grading rubric based on the assignment content. Align criteria with the tasks, reflection prompts, and learning goals implied by the assignment. Use shared proficiency levels across criteria and match total points when assignment points are set.'
 
 export type AssignmentPageSettingsPanelProps = {
   disabled?: boolean
@@ -1067,16 +1072,18 @@ function RubricEditorModal({
 
   useEffect(() => {
     if (!open) return
-    if (mode === 'create' || seed == null) {
-      setDraft(normalizeRubricLevels(createDefaultRubric(pointsWorth)))
-    } else {
+    // Prefer an explicit seed (edit, or create-from-AI) over the empty template.
+    if (seed != null) {
       setDraft(normalizeRubricLevels(cloneRubric(seed)))
+    } else {
+      setDraft(normalizeRubricLevels(createDefaultRubric(pointsWorth)))
     }
   }, [open, mode, seed, pointsWorth])
 
   useEffect(() => {
     if (!open) return
     setAiError(null)
+    setAiInstruction('')
   }, [open])
 
   useEffect(() => {
@@ -1194,11 +1201,7 @@ function RubricEditorModal({
 
   async function generateRubricFromAi() {
     if (!courseCode || !assignmentItemId) return
-    const text = aiInstruction.trim()
-    if (!text) {
-      setAiError('Describe what you want the rubric to assess.')
-      return
-    }
+    const text = aiInstruction.trim() || DEFAULT_RUBRIC_AI_PROMPT
     setAiBusy(true)
     setAiError(null)
     try {
@@ -1296,7 +1299,7 @@ function RubricEditorModal({
                 value={aiInstruction}
                 disabled={disabled || aiBusy}
                 onChange={(e) => setAiInstruction(e.target.value)}
-                placeholder="Describe the rubric (criteria, proficiency levels, what to emphasize)…"
+                placeholder="Optional: emphasize criteria or levels (e.g. “4 levels, weight writing quality”). Leave blank to build from the assignment content."
                 className={`mt-1.5 ${inputClass} min-h-[4.5rem] resize-y`}
               />
               <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -1306,12 +1309,12 @@ function RubricEditorModal({
                   onClick={() => void generateRubricFromAi()}
                   className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                 >
-                  {aiBusy ? <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden /> : null}
+                  {aiBusy ? <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden /> : <Sparkles className="size-3.5 shrink-0" aria-hidden />}
                   {aiBusy ? 'Generating…' : 'Generate draft'}
                 </button>
                 <span className="text-[11px] text-slate-600 dark:text-neutral-400">
-                  The full assignment text from the editor is included automatically. Fills the grid below;
-                  nothing is stored until you click Save rubric.
+                  Uses the full assignment text from the editor. Fills the grid below; nothing is stored until
+                  you click Save rubric.
                 </span>
               </div>
               {aiError ? <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{aiError}</p> : null}
@@ -1634,39 +1637,90 @@ function AssignmentRubricSection({
   assignmentItemId?: string
   assignmentMarkdown?: string
 }) {
+  const { aiConfigured } = usePlatformFeatures()
   const [editorOpen, setEditorOpen] = useState(false)
   const [editorMode, setEditorMode] = useState<'create' | 'edit'>('create')
+  /** Seed used when opening the editor after a one-click AI build (before Save rubric). */
+  const [editorSeed, setEditorSeed] = useState<RubricDefinition | null>(null)
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
 
   const totalMax = draftRubric ? rubricMaxSum(draftRubric) : 0
   const pointsMismatch =
     pointsWorth != null && pointsWorth > 0 && draftRubric && Math.abs(totalMax - pointsWorth) > 1e-6
 
+  const aiAvailable = Boolean(aiConfigured && courseCode && assignmentItemId)
+
   function openCreate() {
+    setEditorSeed(null)
     setEditorMode('create')
     setEditorOpen(true)
   }
 
   function openEdit() {
     if (!draftRubric) return
+    setEditorSeed(null)
     setEditorMode('edit')
     setEditorOpen(true)
   }
+
+  async function buildWithAi() {
+    if (!courseCode || !assignmentItemId || aiBusy) return
+    setAiBusy(true)
+    setAiError(null)
+    try {
+      const { rubric } = await generateAssignmentRubric(courseCode, assignmentItemId, {
+        prompt: DEFAULT_RUBRIC_AI_PROMPT,
+        assignmentMarkdown: assignmentMarkdown ?? '',
+      })
+      const normalized = normalizeRubricLevels(rubric)
+      setEditorSeed(normalized)
+      setEditorMode(draftRubric ? 'edit' : 'create')
+      setEditorOpen(true)
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : 'Could not generate rubric.')
+    } finally {
+      setAiBusy(false)
+    }
+  }
+
+  const buildWithAiButton = aiAvailable ? (
+    <button
+      type="button"
+      disabled={disabled || aiBusy}
+      onClick={() => void buildWithAi()}
+      className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+    >
+      {aiBusy ? (
+        <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
+      ) : (
+        <Sparkles className="size-4 shrink-0" aria-hidden />
+      )}
+      {aiBusy ? 'Building…' : 'Build with AI'}
+    </button>
+  ) : null
 
   return (
     <div className="space-y-3 pt-1">
       <p className="text-[11px] leading-relaxed text-slate-500 dark:text-neutral-400">
         Optional structured grading: each row is a criterion, each column is a rating. Add or edit in the
         dialog—changes apply when you save the rubric, then save the assignment from the toolbar.
+        {aiAvailable
+          ? ' Build with AI drafts a rubric from the current assignment content for you to review.'
+          : null}
       </p>
       {!draftRubric ? (
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={openCreate}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
-        >
-          Add rubric
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={disabled || aiBusy}
+            onClick={openCreate}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+          >
+            Add rubric
+          </button>
+          {buildWithAiButton}
+        </div>
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 text-sm text-slate-700 dark:text-neutral-300">
@@ -1688,9 +1742,10 @@ function AssignmentRubricSection({
             ) : null}
           </div>
           <div className="flex flex-wrap gap-2">
+            {buildWithAiButton}
             <button
               type="button"
-              disabled={disabled}
+              disabled={disabled || aiBusy}
               onClick={openEdit}
               className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
             >
@@ -1698,7 +1753,7 @@ function AssignmentRubricSection({
             </button>
             <button
               type="button"
-              disabled={disabled}
+              disabled={disabled || aiBusy}
               onClick={() => onDraftRubricChange(null)}
               className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
             >
@@ -1707,18 +1762,23 @@ function AssignmentRubricSection({
           </div>
         </div>
       )}
+      {aiError ? <p className="text-xs text-rose-600 dark:text-rose-400">{aiError}</p> : null}
       <RubricEditorModal
         open={editorOpen}
         mode={editorMode}
-        seed={draftRubric}
+        seed={editorSeed ?? draftRubric}
         pointsWorth={pointsWorth}
         disabled={disabled}
         courseCode={courseCode}
         assignmentItemId={assignmentItemId}
         assignmentMarkdown={assignmentMarkdown}
-        onClose={() => setEditorOpen(false)}
+        onClose={() => {
+          setEditorOpen(false)
+          setEditorSeed(null)
+        }}
         onSave={(r) => {
           onDraftRubricChange(r)
+          setEditorSeed(null)
           setEditorOpen(false)
         }}
       />
