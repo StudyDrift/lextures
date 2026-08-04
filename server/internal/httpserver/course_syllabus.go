@@ -89,7 +89,7 @@ func (d Deps) handleGetCourseSyllabus() http.HandlerFunc {
 
 type patchSyllabusBody struct {
 	Sections                  []course.SyllabusSection `json:"sections"`
-	RequireSyllabusAcceptance bool                     `json:"requireSyllabusAcceptance"`
+	RequireSyllabusAcceptance *bool                    `json:"requireSyllabusAcceptance"`
 }
 
 type generateSyllabusSectionBody struct {

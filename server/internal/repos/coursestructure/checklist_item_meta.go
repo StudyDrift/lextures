@@ -9,12 +9,13 @@ import (
 
 // ChecklistItemMeta is lightweight per-item detail for the course checklist snapshot (CC.1).
 type ChecklistItemMeta struct {
-	ItemID        uuid.UUID
-	Kind          string
-	HasBody       bool
-	PointsWorth   *int
-	ExternalURL   string
-	QuestionCount int
+	ItemID               uuid.UUID
+	Kind                 string
+	HasBody              bool
+	PointsWorth          *int
+	ExternalURL          string
+	QuestionCount        int
+	LateSubmissionPolicy string // assignment/quiz only; "" otherwise
 }
 
 // ListChecklistItemMeta loads content/assignment/quiz/survey/external-link metadata
@@ -32,7 +33,12 @@ SELECT c.id, c.kind,
        END AS has_body,
        a.points_worth,
        COALESCE(e.url, '') AS external_url,
-       COALESCE(jsonb_array_length(q.questions_json), 0) AS question_count
+       COALESCE(jsonb_array_length(q.questions_json), 0) AS question_count,
+       CASE c.kind
+         WHEN 'assignment' THEN COALESCE(a.late_submission_policy, '')
+         WHEN 'quiz' THEN COALESCE(q.late_submission_policy, '')
+         ELSE ''
+       END AS late_submission_policy
 FROM course.course_structure_items c
 LEFT JOIN course.module_content_pages p ON p.structure_item_id = c.id AND c.kind = 'content_page'
 LEFT JOIN course.module_assignments a ON a.structure_item_id = c.id AND c.kind = 'assignment'
@@ -50,7 +56,7 @@ WHERE c.course_id = $1
 	out := make(map[uuid.UUID]ChecklistItemMeta)
 	for rows.Next() {
 		var m ChecklistItemMeta
-		if err := rows.Scan(&m.ItemID, &m.Kind, &m.HasBody, &m.PointsWorth, &m.ExternalURL, &m.QuestionCount); err != nil {
+		if err := rows.Scan(&m.ItemID, &m.Kind, &m.HasBody, &m.PointsWorth, &m.ExternalURL, &m.QuestionCount, &m.LateSubmissionPolicy); err != nil {
 			return nil, err
 		}
 		out[m.ItemID] = m

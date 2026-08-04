@@ -147,9 +147,7 @@ ON CONFLICT DO NOTHING
 	if err := json.NewDecoder(w.Body).Decode(&checklist); err != nil {
 		t.Fatalf("decode: %v", err)
 	}
-	if checklist.Summary.OutstandingEssential < 1 {
-		t.Fatalf("expected outstanding essentials, got %+v", checklist.Summary)
-	}
+	// CC.3 ships all rules as recommended (FR-37); essentials may be 0.
 	outstandingBefore := checklist.Summary.OutstandingEssential
 
 	req = httptest.NewRequest(http.MethodGet, "/api/v1/courses/"+courseCode+"/checklist", nil)
@@ -165,7 +163,7 @@ ON CONFLICT DO NOTHING
 		t.Fatalf("expected snapshot hit increment, before=%v after=%v", beforeHit, afterHit)
 	}
 
-	// Dismiss course.dates (essential todo in the CC.1 reference catalog).
+	// Dismiss course.dates (still a live recommended rule).
 	body := []byte(`{"reason":"not_applicable","note":"pass/fail seminar"}`)
 	req = httptest.NewRequest(http.MethodPost, "/api/v1/courses/"+courseCode+"/checklist/items/course.dates/dismiss", bytes.NewReader(body))
 	req = req.WithContext(ctx)
@@ -195,7 +193,7 @@ ON CONFLICT DO NOTHING
 			}
 		}
 	}
-	if checklist.Summary.Dismissed != 1 || checklist.Summary.OutstandingEssential != outstandingBefore-1 {
+	if checklist.Summary.Dismissed != 1 || checklist.Summary.OutstandingEssential != outstandingBefore {
 		t.Fatalf("summary after dismiss: %+v (before essential %d)", checklist.Summary, outstandingBefore)
 	}
 

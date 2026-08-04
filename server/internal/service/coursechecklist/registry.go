@@ -47,7 +47,9 @@ var ITEM_ID_ALIASES = map[ItemID]ItemID{}
 // RETIRED_ITEM_IDS lists IDs that must resolve to unknown (tombstone) rather than a live rule (FR-4).
 //
 //nolint:revive // exported name matches the CC.1 plan contract.
-var RETIRED_ITEM_IDS = map[ItemID]struct{}{}
+var RETIRED_ITEM_IDS = map[ItemID]struct{}{
+	ItemCourseSections: {}, // replaced by people.sections (CC.3)
+}
 
 // Registry is an ordered checklist rule registry keyed by ItemID (FR-1).
 type Registry struct {

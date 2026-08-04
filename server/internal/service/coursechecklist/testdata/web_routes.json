@@ -13,6 +13,7 @@
     "/courses/{courseCode}/modules",
     "/courses/{courseCode}/files",
     "/courses/{courseCode}/feed",
+    "/courses/{courseCode}/enrollments",
     "/courses/{courseCode}/gradebook",
     "/courses/{courseCode}/people"
   ]

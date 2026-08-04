@@ -1,0 +1,25 @@
+{
+  "locale": "es",
+  "startHereTitles": ["empieza aquí", "comienza aquí", "orientación", "bienvenida", "cómo funciona este curso", "inicio"],
+  "instructorIntroTitles": ["sobre su instructor", "conozca a su instructor", "presentación del instructor", "sobre mí"],
+  "learnerIntroTitles": ["preséntese", "presentaciones", "preséntate", "saludos", "rompimiento de hielo"],
+  "contact": ["contacto", "correo", "email", "teléfono", "horas de oficina", "oficina", "cómo contactarme"],
+  "responseTime": [
+    "responderé\\s+en\\s+\\d+\\s*horas?",
+    "respondo\\s+(?:en|dentro\\s+de)\\s+\\d+",
+    "dentro\\s+de\\s+\\d+\\s*(horas?|días?)",
+    "tiempo\\s+de\\s+respuesta",
+    "calificaré\\s+(?:en|dentro\\s+de)\\s+\\d+"
+  ],
+  "participation": ["participación", "se espera que publique", "frecuencia de discusión", "contribuir a las discusiones"],
+  "netiquette": ["netiqueta", "acuerdo comunitario", "código de conducta", "etiqueta en línea", "comunicación respetuosa"],
+  "techRequirements": ["requisitos técnicos", "tecnología requerida", "navegador", "software", "requisitos del sistema"],
+  "supportLinkHints": ["mesa de ayuda", "tutoría", "biblioteca", "accesibilidad", "discapacidad", "consejería", "apoyo estudiantil"],
+  "gradingPolicy": ["ponderado", "puntos", "escala de calificaciones", "cálculo de notas", "porcentaje", "pesos"],
+  "latePolicy": {
+    "present": ["trabajo tardío", "política de retrasos", "entregas tardías", "tareas atrasadas"],
+    "noLate": ["no se acepta trabajo tardío", "no se aceptan entregas tardías", "trabajo tardío no aceptado"]
+  },
+  "academicIntegrity": ["integridad académica", "honestidad académica", "plagio", "trampas", "código de honor", "política de ia"],
+  "accessibility": ["accesibilidad", "adaptaciones", "servicios para discapacitados", "discapacidad", "adaptaciones razonables"]
+}

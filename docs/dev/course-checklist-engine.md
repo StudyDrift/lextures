@@ -71,3 +71,19 @@ semantics change (invalidates CC.2 caches).
 - `rules_*.go` must not import `pgx` / `database/sql` / `repos/*` (enforced by test).
 - Evidence must not carry email or DOB — display name + opaque user ID only.
 - One broken evaluator → that item `unknown`; evaluation continues.
+
+## Writing a text-heuristic rule (CC.3)
+
+Orientation and syllabus rules match learner-facing prose with **locale-aware lexicons**,
+not English-only inline regexes.
+
+1. Add keywords / patterns under `server/internal/service/coursechecklist/lexicons/{locale}.json`
+   (`en`, `es`, `fr`, `ar` ship today). Missing locales fall back to English (never `unknown`
+   solely for a missing lexicon).
+2. Load via `lexiconForSnap(snap)` (uses `CatalogLanguage`) and call the compiled matchers
+   (`matchResponseTime`, `matchContact`, …). Regexes are compiled once at package init.
+3. Scan syllabus markdown capped at **512 KB**; when truncated, set a detail note
+   (`checked first 512 KB`).
+4. Malformed syllabus JSON → syllabus text rules return `unknown`; other packs keep running.
+5. Prefer `not_applicable` when the inspected feature is disabled on the course.
+6. Keep evaluators pure snapshot functions — no lazy loaders in the CC.3 pack.

@@ -5120,6 +5120,35 @@
       }
     },
     {
+      "id": "CC.3",
+      "path": "docs/completed/checklist/CC.3-rule-pack-foundations-and-orientation.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "ops",
+      "coverage": "smoke",
+      "rationale": "33 foundation checklist rules (recommended tier) evaluated server-side. Playwright covers welcome-message and enrollment flips plus dismiss/restore; UI page lands with CC.7.",
+      "owner": "Learning Platform",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/course-checklist.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": false,
+        "disabledState": "n/a",
+        "enabledJourney": true,
+        "authorization": "n/a",
+        "dependency": "n/a",
+        "rollback": true,
+        "notes": "All rules ship recommended (FR-37); promote essentials after dogfood (CC.10). Retire via RETIRED_ITEM_IDS. No feature flag."
+      }
+    },
+    {
       "id": "mb-1-in-app-browser",
       "path": "docs/completed/mobile/MB.1-in-app-browser.md",
       "markets": [

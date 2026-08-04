@@ -155,6 +155,7 @@ func copySettings(ctx context.Context, tx pgx.Tx, sourceID, targetID uuid.UUID) 
 			sbg_aggregation_rule = src.sbg_aggregation_rule,
 			course_home_landing = src.course_home_landing,
 			course_timezone = src.course_timezone,
+			features_reviewed_at = src.features_reviewed_at,
 			updated_at = NOW()
 		FROM course.courses AS src
 		WHERE tgt.id = $1 AND src.id = $2
@@ -173,12 +174,15 @@ func copySettings(ctx context.Context, tx pgx.Tx, sourceID, targetID uuid.UUID) 
 		return err
 	}
 	if err == nil {
+		// Copy syllabus content and require flag, but leave acceptance_decided_at
+		// null on the target so the checklist item stays actionable (CC.3).
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO course.course_syllabus (course_id, sections, require_syllabus_acceptance, updated_at)
-			VALUES ($1, $2, $3, NOW())
+			INSERT INTO course.course_syllabus (course_id, sections, require_syllabus_acceptance, acceptance_decided_at, updated_at)
+			VALUES ($1, $2, $3, NULL, NOW())
 			ON CONFLICT (course_id) DO UPDATE SET
 				sections = EXCLUDED.sections,
 				require_syllabus_acceptance = EXCLUDED.require_syllabus_acceptance,
+				acceptance_decided_at = NULL,
 				updated_at = NOW()
 		`, targetID, sections, require); err != nil {
 			return err
