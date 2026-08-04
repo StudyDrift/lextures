@@ -5114,7 +5114,7 @@
         "disabledState": "n/a",
         "enabledJourney": true,
         "authorization": true,
-        "dependency": "CC.1",
+        "dependency": "n/a",
         "rollback": true,
         "notes": "No feature flag. Snapshot TTL via CHECKLIST_SNAPSHOT_TTL. Unblocks CC.3–CC.7/CC.9."
       }

@@ -31,7 +31,7 @@ test('Course checklist: student receives 403; teacher dismiss/restore updates ba
   const { access_token: studentTok } = await apiSignup({ email: studentEmail, password: PASSWORD })
   const course = await apiCreateCourse(teacherTok, { title: 'CC2 Checklist Course' })
   await apiEnroll(teacherTok, course.courseCode, teacherEmail, 'teacher')
-  await apiEnroll(teacherTok, course.courseCode, studentEmail, 'student')
+  await apiEnroll(teacherTok, course.courseCode, studentEmail, 'student', studentTok)
 
   const studentRes = await fetch(`${API_BASE}/api/v1/courses/${course.courseCode}/checklist`, {
     headers: { Authorization: `Bearer ${studentTok}` },
