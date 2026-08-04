@@ -73,7 +73,7 @@ export default function CourseChecklistPage() {
           onClick={() => void page.onRefresh()}
           className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-amber-700 px-4 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
         >
-          <RefreshCw className={`h-4 w-4 ${page.refreshing ? 'animate-spin' : ''}`} aria-hidden />
+          <RefreshCw className={`h-4 w-4 ${page.refreshing ? 'motion-safe:animate-spin' : ''}`} aria-hidden />
           {page.refreshing ? courseChecklistI18n.rechecking : courseChecklistI18n.recheck}
         </button>
       }
