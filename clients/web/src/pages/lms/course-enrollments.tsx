@@ -20,6 +20,7 @@ import { LmsPage } from './lms-page'
 import { usePermission, usePermissions } from '../../context/use-permissions'
 import { authorizedFetch } from '../../lib/api'
 import { getJwtSubject } from '../../lib/auth'
+import { invalidateChecklist } from '../../lib/course-checklist-invalidate'
 import {
   courseEnrollmentsReadPermission,
   courseEnrollmentsUpdatePermission,
@@ -780,6 +781,7 @@ export default function CourseEnrollments() {
       setEmailListText('')
       await loadEnrollments()
       await refreshPermissions()
+      invalidateChecklist(courseCode)
     } catch {
       setAddStatus('error')
       setAddMessage('Request failed.')

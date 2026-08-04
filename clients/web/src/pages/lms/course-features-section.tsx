@@ -16,6 +16,7 @@ import {
   type ContentToolsCatalogTool,
   type ContentToolsSettings,
 } from '../../lib/courses-api'
+import { invalidateChecklist } from '../../lib/course-checklist-invalidate'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import type { CoursePublic } from '../../lib/courses-api'
 
@@ -302,6 +303,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         const updated = await patchCourseFeatures(courseCode, body)
         onCourseUpdated(updated)
         await refresh()
+        invalidateChecklist(courseCode)
         setMessage('Saved.')
         toastSaveOk('Course tools updated')
       } catch (e) {

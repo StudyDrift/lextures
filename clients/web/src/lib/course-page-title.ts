@@ -30,6 +30,7 @@ const EXACT_SUBPATH_TITLES: Record<string, string> = {
   gradebook: 'Gradebook',
   reports: 'Reports',
   'at-risk': 'At-risk students',
+  checklist: 'Checklist',
   'event-log': 'Event log',
   'standards-gradebook': 'Standards gradebook',
   'standards-coverage': 'Standards coverage',

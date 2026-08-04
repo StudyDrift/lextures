@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { usePermissions } from '../../context/use-permissions'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { invalidateChecklist } from '../../lib/course-checklist-invalidate'
 import {
   addCourseOutcomeLink,
   courseItemCreatePermission,
@@ -275,6 +276,7 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
 
       await load()
       setDrafts({})
+      invalidateChecklist(courseCode)
       setSaveStatus('saved')
     } catch (e) {
       setSaveStatus('error')

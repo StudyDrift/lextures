@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   Lightbulb,
   ListChecks,
+  ListTodo,
   Library,
   MessageSquare,
   MessagesSquare,
@@ -39,9 +40,12 @@ import {
   studentProgressFeatureEnabled,
   xapiEmissionFeatureEnabled,
 } from '../../lib/platform-features'
+import { ChecklistBadge } from '../checklist/checklist-badge'
+import { useCourseChecklistSummary } from '../../context/course-checklist-summary-context'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
+import { courseChecklistI18n } from '../../lib/course-checklist-i18n'
 import {
   courseEnrollmentsReadPermission,
   courseGradebookViewPermission,
@@ -106,6 +110,17 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
   const canViewMyGrades = viewerShouldShowMyGradesNav(viewerEnrollmentRoles, courseViewPreview)
   const canManageCourse = !permLoading && allows(courseItemCreatePermission(courseCode))
   const canManageQuestionBank = !permLoading && allows(courseItemsCreatePermission(courseCode))
+  const showChecklist = canManageCourse && courseViewPreview !== 'student'
+  const { summary: checklistSummary } = useCourseChecklistSummary()
+  const checklistOutstanding = checklistSummary?.outstandingEssential ?? 0
+  const checklistBadge =
+    showChecklist && checklistOutstanding > 0 ? (
+      <ChecklistBadge outstandingEssential={checklistOutstanding} />
+    ) : undefined
+  const checklistTooltip =
+    checklistOutstanding > 0
+      ? `${courseChecklistI18n.navLabel} (${checklistOutstanding > 99 ? '99+' : checklistOutstanding})`
+      : courseChecklistI18n.navLabel
 
   const boardsNavVisible = visualBoardsEnabled
   const liveQuizzesNavVisible = interactiveQuizzesEnabled
@@ -137,6 +152,16 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
       <SideNavLink to={base} end icon={<LayoutDashboard className="h-5 w-5" />}>
         Dashboard
       </SideNavLink>
+      {showChecklist ? (
+        <SideNavLink
+          to={`${base}/checklist`}
+          icon={<ListTodo className="h-5 w-5" />}
+          badge={checklistBadge}
+          tooltip={checklistTooltip}
+        >
+          {courseChecklistI18n.navLabel}
+        </SideNavLink>
+      ) : null}
 
       <SideNavSectionLabel first>Content</SideNavSectionLabel>
       {filesEnabled && canManageCourse ? (

@@ -154,6 +154,7 @@ export default function App() {
               <Route path="gradebook" element={<Pages.CourseGradebook />} />
               <Route path="reports" element={<Pages.CourseStudentReportsPage />} />
               <Route path="at-risk" element={<Pages.CourseAtRiskPage />} />
+              <Route path="checklist" element={<Pages.CourseChecklistPage />} />
               <Route path="event-log" element={<Pages.CourseEventLogPage />} />
               <Route path="students/:enrollmentId/progress" element={<Pages.StudentProgressPage />} />
               <Route path="standards-gradebook" element={<Pages.CourseStandardsGradebook />} />

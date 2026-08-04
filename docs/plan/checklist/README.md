@@ -21,7 +21,7 @@ Every plan follows [_TEMPLATE.md](../_TEMPLATE.md).
 | CC.4 | [Rule pack B — structure, content & outcome alignment](../../completed/checklist/CC.4-rule-pack-structure-outcomes-alignment.md) ✅ (22 rules) | Server | M | CC.1, CC.2 |
 | CC.5 | [Rule pack C — assessment, grading, feedback & interaction](../../completed/checklist/CC.5-rule-pack-assessment-feedback-interaction.md) ✅ (26 rules) | Server | M | CC.1, CC.2 |
 | CC.6 | [Rule pack D — accessibility, inclusive design & launch readiness](../../completed/checklist/CC.6-rule-pack-accessibility-and-launch-readiness.md) ✅ (20 rules) | Server | M | CC.1, CC.2 |
-| CC.7 | [Web: checklist page, nav entry & badge](CC.7-web-checklist-page-and-nav-badge.md) | Web | M | CC.2, CC.3 |
+| CC.7 | [Web: checklist page, nav entry & badge](../../completed/checklist/CC.7-web-checklist-page-and-nav-badge.md) ✅ | Web | M | CC.2, CC.3 |
 | CC.8 | [Deep-link & highlight targeting](CC.8-deep-link-and-highlight-targeting.md) | Web (+ shared) | M | CC.1, CC.7 |
 | CC.9 | [Mobile: checklist on iOS & Android](CC.9-mobile-checklist-ios-and-android.md) | iOS + Android | M | CC.2, CC.7, CC.8 |
 | CC.10 | [Guidance, assisted fixes, analytics & rollout](CC.10-analytics-guidance-and-rollout.md) | Cross-cutting | M | CC.2–CC.7 |
@@ -34,8 +34,8 @@ for all **101 rules**, and the sources they come from.
 ```
 CC.1 ──▶ CC.2 ──┬──▶ CC.3 ─┐
                 ├──▶ CC.4 ─┤
-                ├──▶ CC.5 ─┼──▶ CC.7 ──▶ CC.8 ──▶ CC.9
-                └──▶ CC.6 ─┘        └──────────────┴──▶ CC.10
+                ├──▶ CC.5 ─┼──▶ CC.7 ✅ ──▶ CC.8 ──▶ CC.9
+                └──▶ CC.6 ─┘              └──────────────┴──▶ CC.10
 ```
 
 CC.1 and CC.2 are the critical path. The four rule packs are independent of each other and can be worked in
