@@ -35,7 +35,8 @@ test.describe('Course checklist UI (CC.7)', () => {
     await expect(page.getByRole('heading', { name: /course checklist/i })).toBeVisible({
       timeout: 15_000,
     })
-    await expect(page.getByRole('button', { name: /re-check/i })).toBeVisible()
+    // Page header re-check; item rows may also expose re-check for unknown status.
+    await expect(page.getByRole('button', { name: /re-check/i }).first()).toBeVisible()
     // Bare course should surface foundation items (CC.3).
     await expect(page.getByText(/welcome/i).first()).toBeVisible({ timeout: 15_000 })
   })
