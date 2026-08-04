@@ -3,7 +3,7 @@
  */
 import { expect, test } from '@playwright/test'
 import { apiSignup, apiCreateCourse, apiEnroll } from '../fixtures/api.js'
-import { injectToken, mainNav, uniqueEmail } from '../fixtures/test.js'
+import { injectToken, uniqueEmail } from '../fixtures/test.js'
 
 const PASSWORD = 'E2eTestPass1!'
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
