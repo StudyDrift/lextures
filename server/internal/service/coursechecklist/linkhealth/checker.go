@@ -58,8 +58,6 @@ type Checker struct {
 	LookupRobots func(ctx context.Context, u string) (disallowed bool, err error)
 	// HostLimiter optionally rate-limits by host. Returns true when allowed.
 	HostLimiter func(host string) bool
-
-	mu sync.Mutex
 }
 
 func (c *Checker) now() time.Time {
@@ -276,7 +274,7 @@ func (c *Checker) doRequest(ctx context.Context, method, raw string) (int, error
 	if err != nil {
 		return 0, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if method == http.MethodGet {
 		_, _ = io.CopyN(io.Discard, resp.Body, MaxResponseBytes)
 	} else {
