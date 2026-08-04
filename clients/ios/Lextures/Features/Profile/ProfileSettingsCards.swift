@@ -460,52 +460,71 @@ struct ProfileSignOutButton: View {
     }
 }
 
-/// Self-service permanent account deletion with confirmation dialog.
+/// Self-service permanent account deletion (App Store 5.1.1(v)) with confirmation dialog.
+/// Presented as a labeled danger-zone card so reviewers and users can find it without
+/// scrolling past an unlabeled red button at the end of Profile.
 struct ProfileDeleteAccountButton: View {
     @Environment(AuthSession.self) private var session
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var confirmingDeleteAccount: Bool
     @State private var deleting = false
     @State private var deleteError: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Button {
-                confirmingDeleteAccount = true
-            } label: {
-                Label(
-                    deleting
-                        ? L.text("mobile.profile.deleteAccountBusy")
-                        : L.text("mobile.profile.deleteAccount"),
-                    systemImage: "trash"
-                )
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(LexturesTheme.error)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(LexturesTheme.error.opacity(0.09))
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            }
-            .buttonStyle(.plain)
-            .disabled(deleting)
-            .confirmationDialog(
-                L.text("mobile.profile.deleteAccountConfirm"),
-                isPresented: $confirmingDeleteAccount,
-                titleVisibility: .visible
-            ) {
-                Button(L.text("mobile.profile.deleteAccountAction"), role: .destructive) {
-                    Task { await deleteAccount() }
-                }
-            } message: {
+        LMSCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L.text("mobile.profile.deleteAccountSection"))
+                    .font(LexturesTheme.displayFont(17))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                Text(L.text("mobile.profile.deleteAccountSectionDescription"))
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                 Text(L.text("mobile.profile.deleteAccountMessage"))
-            }
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
 
-            if let deleteError {
-                Text(deleteError)
-                    .font(.footnote)
+                Button {
+                    confirmingDeleteAccount = true
+                } label: {
+                    Label(
+                        deleting
+                            ? L.text("mobile.profile.deleteAccountBusy")
+                            : L.text("mobile.profile.deleteAccount"),
+                        systemImage: "trash"
+                    )
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(LexturesTheme.error)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityLabel(deleteError)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(LexturesTheme.error.opacity(0.09))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(deleting)
+                .accessibilityIdentifier("profile.deleteAccount")
+                .accessibilityLabel(L.text("mobile.profile.deleteAccount"))
+                .accessibilityHint(L.text("mobile.profile.deleteAccountSectionDescription"))
+                .confirmationDialog(
+                    L.text("mobile.profile.deleteAccountConfirm"),
+                    isPresented: $confirmingDeleteAccount,
+                    titleVisibility: .visible
+                ) {
+                    Button(L.text("mobile.profile.deleteAccountAction"), role: .destructive) {
+                        Task { await deleteAccount() }
+                    }
+                } message: {
+                    Text(L.text("mobile.profile.deleteAccountMessage"))
+                }
+
+                if let deleteError {
+                    Text(deleteError)
+                        .font(.footnote)
+                        .foregroundStyle(LexturesTheme.error)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityLabel(deleteError)
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 

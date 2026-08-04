@@ -3046,7 +3046,7 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_marketplace_openCourseError">Impossible d’ouvrir ce cours.</string>
     <string name="mobile_marketplace_owned">Acquis</string>
     <string name="mobile_marketplace_paidCheckoutHint">Vous vérifierez le prix et les taxes, puis finaliserez le paiement en toute sécurité dans le navigateur.</string>
-    <string name="mobile_marketplace_paidWebHint">Les cours payants s’achètent sur le web pour respecter App Store et Play.</string>
+    <string name="mobile_marketplace_paidWebHint">Les cours numériques payants s’achètent dans le navigateur, pas en achat intégré.</string>
     <string name="mobile_marketplace_priceLabel">Prix</string>
     <string name="mobile_marketplace_prompt">Parcourez les cours disponibles à l’inscription.</string>
     <string name="mobile_marketplace_purchases_disabledBody">La marketplace de cours n\'est pas activée.</string>
@@ -3591,6 +3591,8 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_profile_deleteAccountConfirm">Supprimer définitivement votre compte ?</string>
     <string name="mobile_profile_deleteAccountError">Impossible de supprimer le compte. Réessayez.</string>
     <string name="mobile_profile_deleteAccountMessage">Vos données personnelles seront anonymisées et vous serez déconnecté de tous les appareils. Cette action est irréversible.</string>
+    <string name="mobile_profile_deleteAccountSection">Supprimer le compte</string>
+    <string name="mobile_profile_deleteAccountSectionDescription">Supprimez définitivement votre compte et vos données personnelles de cette plateforme.</string>
     <string name="mobile_profile_displayName">Nom affiché</string>
     <string name="mobile_profile_dyslexiaFriendly">Affichage dyslexie</string>
     <string name="mobile_profile_dyslexiaFriendlyDescription">Police arrondie, espacement supplémentaire et interligne relaxé dans toute l\'app.</string>
