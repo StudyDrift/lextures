@@ -354,6 +354,6 @@ human approval before any link is written. CC.4 MUST NOT write outcome links und
   [NSQ](https://nsqol.org/the-standards/quality-online-courses/) Standards B and C;
   [OSCQR](https://oscqr.suny.edu/) "Design and Layout" (16–28) and "Content and Activities" (29–37);
   [CAST UDL 3.0](https://udlguidelines.cast.org/) Representation.
-- Related plans: [CC.1](CC.1-checklist-registry-and-evaluation-engine.md),
+- Related plans: [CC.1](../../completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md),
   [CC.5](CC.5-rule-pack-assessment-feedback-interaction.md), [CC.8](CC.8-deep-link-and-highlight-targeting.md),
   [CC.10](CC.10-analytics-guidance-and-rollout.md).

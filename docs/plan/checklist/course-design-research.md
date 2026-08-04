@@ -239,7 +239,7 @@ Tier column: **E** = essential (drives the nav badge once promoted), **R** = rec
 ## 5. Design principles the catalog follows
 
 1. **Every rule cites a source.** A proposed rule with no rubric standard and no operational justification is
-   rejected in review ([CC.1 FR-2](CC.1-checklist-registry-and-evaluation-engine.md)).
+   rejected in review ([CC.1 FR-2](../../completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md)).
 2. **Silence beats a false nag.** A rule whose feature is disabled, or whose course context makes it
    irrelevant, reports `not_applicable` and disappears — it does not count against progress.
 3. **Progress, not failure.** Items report `13 / 24` rather than "incomplete", and completed items stay

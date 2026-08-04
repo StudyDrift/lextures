@@ -52,6 +52,7 @@ import (
 	marketplacecoursesservice "github.com/lextures/lextures/server/internal/service/marketplacecourses"
 	acsvc "github.com/lextures/lextures/server/internal/service/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/service/contenttools"
+	"github.com/lextures/lextures/server/internal/service/coursechecklist"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
@@ -191,6 +192,8 @@ func Run(ctx context.Context, fsys fs.FS) error {
 			slog.Warn("contenttools.data_sheet_sync_failed", "err", err)
 		}
 		contenttools.SyncDurableKillsFromDB(ctx, pool)
+		// CC.1: validate checklist registry; keep engine reachable until CC.2 routes land.
+		coursechecklist.WarmStart(ctx, pool)
 	}
 	// AC.4: dedicated adaptive content generation pipeline (Postgres SKIP LOCKED).
 	background.StartAdaptiveContentPipelineWorker(ctx, pool, merged)

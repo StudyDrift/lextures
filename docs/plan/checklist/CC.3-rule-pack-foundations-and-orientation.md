@@ -395,6 +395,6 @@ recorded as §18 Q3, not scoped here.
   GS1 (Course Overview and Introduction) and GS7 (Learner Support);
   [SUNY OSCQR](https://oscqr.suny.edu/) "Overview and Information" (1–10) and "Technology and Tools" (11–15);
   [NSQ Online Courses](https://nsqol.org/the-standards/quality-online-courses/) Standard A.
-- Related plans: [CC.1](CC.1-checklist-registry-and-evaluation-engine.md),
+- Related plans: [CC.1](../../completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md),
   [CC.2](CC.2-checklist-state-api-and-dismissals.md), [CC.4](CC.4-rule-pack-structure-outcomes-alignment.md),
   [CC.7](CC.7-web-checklist-page-and-nav-badge.md), [CC.10](CC.10-analytics-guidance-and-rollout.md).
