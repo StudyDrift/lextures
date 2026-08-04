@@ -1,5 +1,6 @@
 /**
- * Course Checklist state API (CC.2) + foundation rule pack (CC.3) + structure/outcomes (CC.4).
+ * Course Checklist state API (CC.2) + foundation rule pack (CC.3) + structure/outcomes (CC.4)
+ * + assessment/grading/feedback (CC.5).
  *
  * Checklist coverage:
  *   [x] Unauthenticated GET /checklist returns 401
@@ -11,6 +12,8 @@
  *   [x] Enroll a student → people.students-enrolled becomes done
  *   [x] CC.4: 5 assignments / 2 mapped → outcomes.assessment-mapping shows 3 evidence rows
  *   [x] CC.4: map a third assignment → evidence shrinks after refresh
+ *   [x] CC.5: weights 40/30/17 → grading.group-weights todo with 87% detail; fix to 100% → done
+ *   [x] CC.5: 30% assignment without rubric → feedback.rubrics-on-high-stakes evidence targets rubric
  */
 
 import { test, expect } from '@playwright/test'
@@ -25,6 +28,8 @@ import {
   apiPatchAssignment,
   apiCreateOutcome,
   apiCreateOutcomeLink,
+  apiPutCourseGrading,
+  apiGetCourseGrading,
 } from '../fixtures/api.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
@@ -38,7 +43,8 @@ function uniqueEmail(prefix = 'cc3') {
 type ChecklistItem = {
   id: string
   status: string
-  finding?: { status?: string }
+  detail?: string | null
+  finding?: { status?: string; detailDefault?: string }
   progress?: { done: number; total: number }
   evidence?: {
     columns?: string[]
@@ -245,4 +251,85 @@ test('Course checklist CC.4: assessment-mapping evidence rows shrink after mappi
   expect(itemStatus(after)).toBe('in_progress')
   expect(after!.progress).toEqual({ done: 3, total: 5 })
   expect(after!.evidence?.rows?.length).toBe(2)
+})
+
+test('Course checklist CC.5: group weights 87% → todo, then 100% → done', async () => {
+  const teacherEmail = uniqueEmail('cc5-weights-teacher')
+  const { access_token: teacherTok } = await apiSignup({ email: teacherEmail, password: PASSWORD })
+  const course = await apiCreateCourse(teacherTok, { title: 'CC5 Weights Course' })
+  await apiEnroll(teacherTok, course.courseCode, teacherEmail, 'teacher')
+
+  async function refreshChecklist(token: string, courseCode: string): Promise<ChecklistResponse> {
+    const res = await fetch(`${API_BASE}/api/v1/courses/${courseCode}/checklist/refresh`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    expect(res.status).toBe(200)
+    return res.json() as Promise<ChecklistResponse>
+  }
+
+  await apiPutCourseGrading(teacherTok, course.courseCode, {
+    gradingScale: 'percent',
+    assignmentGroups: [
+      { name: 'Essays', sortOrder: 0, weightPercent: 40 },
+      { name: 'Quizzes', sortOrder: 1, weightPercent: 30 },
+      { name: 'Participation', sortOrder: 2, weightPercent: 17 },
+    ],
+  })
+
+  let list = await refreshChecklist(teacherTok, course.courseCode)
+  const weights = findItem(list, 'grading.group-weights')
+  expect(weights, 'grading.group-weights should be present').toBeTruthy()
+  expect(itemStatus(weights)).toBe('todo')
+  const detail = weights!.detail ?? weights!.finding?.detailDefault ?? ''
+  expect(detail).toMatch(/87%/)
+  expect(detail).toMatch(/100%/)
+
+  const current = await apiGetCourseGrading(teacherTok, course.courseCode)
+  const groups = current.assignmentGroups ?? []
+  expect(groups.length).toBeGreaterThanOrEqual(3)
+  await apiPutCourseGrading(teacherTok, course.courseCode, {
+    gradingScale: 'percent',
+    assignmentGroups: groups.map((g) => ({
+      id: g.id,
+      name: g.name,
+      sortOrder: g.sortOrder,
+      weightPercent: g.name === 'Participation' ? 30 : g.weightPercent,
+    })),
+  })
+  list = await refreshChecklist(teacherTok, course.courseCode)
+  expect(itemStatus(findItem(list, 'grading.group-weights'))).toBe('done')
+})
+
+test('Course checklist CC.5: high-stakes assignment without rubric targets rubric section', async () => {
+  const teacherEmail = uniqueEmail('cc5-rubric-teacher')
+  const { access_token: teacherTok } = await apiSignup({ email: teacherEmail, password: PASSWORD })
+  const course = await apiCreateCourse(teacherTok, { title: 'CC5 Rubric Course' })
+  await apiEnroll(teacherTok, course.courseCode, teacherEmail, 'teacher')
+
+  const mod = await apiCreateModule(teacherTok, course.courseCode, 'Unit 1')
+  const capstone = await apiCreateAssignment(teacherTok, course.courseCode, mod.id, 'Capstone Essay')
+  await apiPatchAssignment(teacherTok, course.courseCode, capstone.id, {
+    pointsWorth: 30,
+    markdown: '',
+  })
+  const filler = await apiCreateAssignment(teacherTok, course.courseCode, mod.id, 'Weekly quiz points')
+  await apiPatchAssignment(teacherTok, course.courseCode, filler.id, {
+    pointsWorth: 70,
+    markdown: 'Complete the weekly work.',
+  })
+
+  const res = await fetch(`${API_BASE}/api/v1/courses/${course.courseCode}/checklist/refresh`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${teacherTok}` },
+  })
+  expect(res.status).toBe(200)
+  const list = (await res.json()) as ChecklistResponse
+  const item = findItem(list, 'feedback.rubrics-on-high-stakes')
+  expect(item, 'feedback.rubrics-on-high-stakes should be present').toBeTruthy()
+  expect(itemStatus(item)).toBe('todo')
+  const row = item!.evidence?.rows?.find((r) => (r.label ?? '').includes('Capstone'))
+  expect(row, 'capstone should appear in evidence').toBeTruthy()
+  expect(row!.target?.route).toContain(`/modules/assignment/${capstone.id}`)
+  expect(row!.target?.anchor).toBe('assignment.rubric')
 })

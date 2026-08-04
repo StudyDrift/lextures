@@ -71,4 +71,40 @@ const (
 	ItemOutcomesMasteryScale       ItemID = "outcomes.mastery-scale"
 	ItemOutcomesStandardsAlignment ItemID = "outcomes.standards-alignment"
 	ItemOutcomesSyllabusPublished  ItemID = "outcomes.syllabus-published"
+
+	// C1 — Gradable item configuration (CC.5)
+	ItemAssessmentGradableItems       ItemID = "assessment.gradable-items"
+	ItemAssessmentDueDates            ItemID = "assessment.due-dates"
+	ItemAssessmentPoints              ItemID = "assessment.points"
+	ItemAssessmentDatesWithinTerm     ItemID = "assessment.dates-within-term"
+	ItemAssessmentAvailabilityWindows ItemID = "assessment.availability-windows"
+	ItemAssessmentSpread              ItemID = "assessment.spread"
+
+	// C2 — Grading model integrity (CC.5)
+	ItemGradingGroupWeights         ItemID = "grading.group-weights"
+	ItemGradingEmptyGroups          ItemID = "grading.empty-groups"
+	ItemGradingDropRules            ItemID = "grading.drop-rules"
+	ItemGradingSchemeCoverage       ItemID = "grading.scheme-coverage"
+	ItemGradingPostingPolicy        ItemID = "grading.posting-policy"
+	ItemGradingLatePolicyConfigured ItemID = "grading.late-policy-configured"
+
+	// C3 — Criteria & feedback (CC.5)
+	ItemFeedbackRubricsOnHighStakes ItemID = "feedback.rubrics-on-high-stakes"
+	ItemFeedbackCriteriaPublished   ItemID = "feedback.criteria-published"
+	ItemFeedbackFormativePerModule  ItemID = "feedback.formative-per-module"
+	ItemFeedbackQuizReviewSettings  ItemID = "feedback.quiz-review-settings"
+	ItemFeedbackAttemptsPolicy      ItemID = "feedback.attempts-policy"
+	ItemFeedbackPeerReviewConfig    ItemID = "feedback.peer-review-config"
+
+	// C4 — Integrity & accommodations (CC.5)
+	ItemIntegrityHighStakesSettings ItemID = "integrity.high-stakes-settings"
+	ItemIntegrityAIPolicyAlignment  ItemID = "integrity.ai-policy-alignment"
+	ItemAccommodationsHonored       ItemID = "accommodations.honored"
+	ItemAccommodationsReviewed      ItemID = "accommodations.reviewed"
+
+	// C5 — Interaction & community (CC.5)
+	ItemInteractionDiscussionExists       ItemID = "interaction.discussion-exists"
+	ItemInteractionInstructorPresencePlan ItemID = "interaction.instructor-presence-plan"
+	ItemInteractionOfficeHours            ItemID = "interaction.office-hours"
+	ItemInteractionGroupsConfigured       ItemID = "interaction.groups-configured"
 )

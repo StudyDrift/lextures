@@ -24,6 +24,9 @@
     "/courses/{courseCode}/enrollments",
     "/courses/{courseCode}/gradebook",
     "/courses/{courseCode}/people",
-    "/courses/{courseCode}/standards-coverage"
+    "/courses/{courseCode}/standards-coverage",
+    "/courses/{courseCode}/discussions",
+    "/courses/{courseCode}/office-hours",
+    "/courses/{courseCode}/groups"
   ]
 }

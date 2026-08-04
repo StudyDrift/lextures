@@ -460,6 +460,8 @@ func (d Deps) handlePatchModuleAssignment() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
+		// CC.5: saving assignment settings (incl. originality) stamps integrity review marker.
+		_ = course.StampIntegritySettingsReviewed(r.Context(), d.Pool, *cid)
 		if d.readingLevelEnabled() && req.Markdown != "" {
 			_ = rlrepo.ScoreAndPersist(r.Context(), d.Pool, itemID, rlrepo.TypeAssignment, req.Markdown)
 		}

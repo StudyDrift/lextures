@@ -15,10 +15,17 @@ const (
 	DataNeedFeed                DataNeed = "feed"                 // channels + latest message per channel
 	DataNeedFiles               DataNeed = "files"                // course file metadata
 	DataNeedSections            DataNeed = "sections"             // course sections
-	DataNeedAccommodations      DataNeed = "accommodations"       // accommodation counts
+	DataNeedAccommodations      DataNeed = "accommodations"       // accommodation counts (+ type aggregates, CC.5)
 	DataNeedStandards           DataNeed = "standards"            // K-12 standards + item alignments (optional)
 	DataNeedContentTools        DataNeed = "content_tool_counts"  // content tool instance item IDs
 	DataNeedModulePrerequisites DataNeed = "module_prerequisites" // gating prerequisite edges
+	// CC.5 assessment / interaction slices
+	DataNeedAssessmentItems   DataNeed = "assessment_items"    // assignment/quiz availability, rubrics, quiz settings
+	DataNeedPeerReview        DataNeed = "peer_review_configs" // peer-review configs
+	DataNeedDiscussions       DataNeed = "discussions"         // forums / structured discussions
+	DataNeedOfficeHours       DataNeed = "office_hours"        // future appointment slots
+	DataNeedEnrollmentGroups  DataNeed = "enrollment_groups"   // group sets + unassigned student count
+	DataNeedAnnouncementCadence DataNeed = "announcement_cadence" // announcement timestamps for presence plan
 )
 
 // AllDataNeeds is the full set loaded for a complete evaluation.
@@ -37,6 +44,12 @@ var AllDataNeeds = []DataNeed{
 	DataNeedStandards,
 	DataNeedContentTools,
 	DataNeedModulePrerequisites,
+	DataNeedAssessmentItems,
+	DataNeedPeerReview,
+	DataNeedDiscussions,
+	DataNeedOfficeHours,
+	DataNeedEnrollmentGroups,
+	DataNeedAnnouncementCadence,
 }
 
 func unionDataNeeds(items []ItemDescriptor) []DataNeed {

@@ -13,20 +13,18 @@ import (
 
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursefeed"
-	"github.com/lextures/lextures/server/internal/repos/coursegrading"
 	"github.com/lextures/lextures/server/internal/repos/courseoutcomes"
 	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/filemanager"
-	"github.com/lextures/lextures/server/internal/repos/studentaccommodations"
 	"github.com/lextures/lextures/server/internal/telemetry"
 	"go.opentelemetry.io/otel/attribute"
 )
 
 // MaxSnapshotQueries is the hard budget for a full snapshot load (NFR / AC-9).
-// CC.4 adds ≤ 4 queries (content tools, prerequisites/rules, enriched standards).
-const MaxSnapshotQueries = 20
+// CC.5 adds ≤ 5 queries (assessment items, peer review, interaction, cadence, scheme).
+const MaxSnapshotQueries = 25
 
 // queryCounter tallies logical SQL round-trips during LoadSnapshot (tests / AC-9).
 type queryCounter struct {
@@ -157,29 +155,42 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 			VisualBoardsEnabled:       pub.VisualBoardsEnabled,
 			AiTutorEnabled:            pub.AiTutorEnabled,
 			ModulesAiAssistantEnabled: pub.ModulesAiAssistantEnabled,
+			OfficeHoursEnabled:        pub.OfficeHoursEnabled,
+			AdaptiveContentEnabled:    pub.AdaptiveContentEnabled,
 		},
 		Lazy: make(map[LazyLoaderID]any),
 	}
 
 	// Extra course markers not on CoursePublic (features_reviewed_at, grading_scheme_id,
-	// catalog_language, created_by_user_id) — one query (CC.3).
+	// catalog_language, created_by_user_id, CC.5 review markers) — one query.
 	{
 		var featuresReviewedAt *time.Time
+		var accommodationsReviewedAt *time.Time
+		var integrityReviewedAt *time.Time
 		var gradingSchemeID *uuid.UUID
 		var catalogLanguage *string
 		var creatorID *uuid.UUID
+		var enrollmentGroupsEnabled bool
 		err := pool.QueryRow(ctx, `
-SELECT features_reviewed_at, grading_scheme_id, NULLIF(TRIM(catalog_language), ''), created_by_user_id
+SELECT features_reviewed_at, accommodations_reviewed_at, integrity_settings_reviewed_at,
+       grading_scheme_id, NULLIF(TRIM(catalog_language), ''), created_by_user_id,
+       COALESCE(enrollment_groups_enabled, false)
 FROM course.courses
 WHERE id = $1
-`, courseID).Scan(&featuresReviewedAt, &gradingSchemeID, &catalogLanguage, &creatorID)
+`, courseID).Scan(
+			&featuresReviewedAt, &accommodationsReviewedAt, &integrityReviewedAt,
+			&gradingSchemeID, &catalogLanguage, &creatorID, &enrollmentGroupsEnabled,
+		)
 		count(1)
 		if err != nil {
 			return CourseSnapshot{}, err
 		}
 		snap.FeaturesReviewedAt = featuresReviewedAt
+		snap.AccommodationsReviewedAt = accommodationsReviewedAt
+		snap.IntegritySettingsReviewedAt = integrityReviewedAt
 		snap.GradingSchemeID = gradingSchemeID
 		snap.CreatorUserID = creatorID
+		snap.EnrollmentGroupsEnabled = enrollmentGroupsEnabled
 		if catalogLanguage != nil {
 			snap.CatalogLanguage = *catalogLanguage
 		}
@@ -315,21 +326,8 @@ WHERE id = $1
 	}
 
 	if hasDataNeed(needs, DataNeedGrading) {
-		settings, err := coursegrading.GetSettingsForCourseCode(ctx, pool, courseCode)
-		count(2) // settings query + groups query inside helper
-		if err != nil {
+		if err := loadGradingSlice(ctx, pool, courseCode, &snap, count); err != nil {
 			return CourseSnapshot{}, err
-		}
-		if settings != nil {
-			snap.GradingScale = settings.GradingScale
-			for _, g := range settings.AssignmentGroups {
-				w := g.WeightPercent
-				snap.AssignmentGroups = append(snap.AssignmentGroups, AssignmentGroupSnap{
-					ID:     g.ID,
-					Name:   g.Name,
-					Weight: &w,
-				})
-			}
 		}
 	}
 
@@ -441,15 +439,13 @@ WHERE id = $1
 	}
 
 	if hasDataNeed(needs, DataNeedAccommodations) {
-		n, err := studentaccommodations.CountActiveForCourse(ctx, pool, courseID)
-		count(1)
-		if err != nil {
-			if !isUndefinedTable(err) {
-				return CourseSnapshot{}, err
-			}
-		} else {
-			snap.AccommodationCount = n
+		if err := loadAccommodationsSlice(ctx, pool, courseID, &snap, count); err != nil {
+			return CourseSnapshot{}, err
 		}
+	}
+
+	if err := loadAssessmentCC5Slices(ctx, pool, courseID, needs, &snap, count); err != nil {
+		return CourseSnapshot{}, err
 	}
 
 	if hasDataNeed(needs, DataNeedStandards) {
