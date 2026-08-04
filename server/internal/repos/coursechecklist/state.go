@@ -41,40 +41,6 @@ ORDER BY item_id
 	return scanItemStates(rows)
 }
 
-// ListStates returns all item state rows for a course (including restored).
-func ListStates(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]ItemState, error) {
-	rows, err := pool.Query(ctx, `
-SELECT course_id, item_id, dismissed_at, dismissed_by_user_id, dismiss_reason, dismiss_note,
-       snoozed_until, restored_at, restored_by_user_id, created_at, updated_at
-FROM course.course_checklist_item_state
-WHERE course_id = $1
-ORDER BY item_id
-`, courseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	return scanItemStates(rows)
-}
-
-// GetState returns one item state row, or nil if absent.
-func GetState(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, itemID string) (*ItemState, error) {
-	row := pool.QueryRow(ctx, `
-SELECT course_id, item_id, dismissed_at, dismissed_by_user_id, dismiss_reason, dismiss_note,
-       snoozed_until, restored_at, restored_by_user_id, created_at, updated_at
-FROM course.course_checklist_item_state
-WHERE course_id = $1 AND item_id = $2
-`, courseID, itemID)
-	st, err := scanItemState(row)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &st, nil
-}
-
 // DismissInput is the payload for an idempotent dismiss.
 type DismissInput struct {
 	CourseID uuid.UUID
@@ -211,39 +177,6 @@ SELECT COUNT(*)::int FROM course.course_checklist_item_state
 WHERE course_id = $1 AND dismissed_at IS NOT NULL
 `, courseID).Scan(&n)
 	return n, err
-}
-
-// DeleteAllForCourse removes checklist state/snapshots/events for factory reset (FR-21).
-func DeleteAllForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) error {
-	tx, err := pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = tx.Rollback(ctx) }()
-	if _, err := tx.Exec(ctx, `DELETE FROM course.course_checklist_events WHERE course_id = $1`, courseID); err != nil {
-		return err
-	}
-	if _, err := tx.Exec(ctx, `DELETE FROM course.course_checklist_item_state WHERE course_id = $1`, courseID); err != nil {
-		return err
-	}
-	if _, err := tx.Exec(ctx, `DELETE FROM course.course_checklist_snapshots WHERE course_id = $1`, courseID); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
-}
-
-// DeleteAllForCourseTx is DeleteAllForCourse using an existing transaction.
-func DeleteAllForCourseTx(ctx context.Context, tx pgx.Tx, courseID uuid.UUID) error {
-	if _, err := tx.Exec(ctx, `DELETE FROM course.course_checklist_events WHERE course_id = $1`, courseID); err != nil {
-		return err
-	}
-	if _, err := tx.Exec(ctx, `DELETE FROM course.course_checklist_item_state WHERE course_id = $1`, courseID); err != nil {
-		return err
-	}
-	if _, err := tx.Exec(ctx, `DELETE FROM course.course_checklist_snapshots WHERE course_id = $1`, courseID); err != nil {
-		return err
-	}
-	return nil
 }
 
 func getStateTx(ctx context.Context, tx pgx.Tx, courseID uuid.UUID, itemID string) (*ItemState, error) {

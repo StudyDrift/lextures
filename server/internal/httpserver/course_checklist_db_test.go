@@ -384,7 +384,8 @@ RETURNING id
 				errs[i] = err
 				return
 			}
-			computed[i] = resp.ComputedAt.UTC().Format(time.RFC3339Nano)
+			// Truncate to milliseconds: JSON round-trip may drop sub-ms digits.
+			computed[i] = resp.ComputedAt.UTC().Truncate(time.Millisecond).Format(time.RFC3339Nano)
 		}()
 	}
 	wg.Wait()

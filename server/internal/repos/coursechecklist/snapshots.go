@@ -93,11 +93,6 @@ WHERE course_id = $1
 	return err
 }
 
-// PatchSnapshotPayload replaces payload + counters (used by recheck).
-func PatchSnapshotPayload(ctx context.Context, pool *pgxpool.Pool, in UpsertSnapshotInput) error {
-	return UpsertSnapshot(ctx, pool, in)
-}
-
 // MutationFreshnessForCourse returns course.updated_at and max structure updated_at.
 func MutationFreshnessForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (MutationFreshness, error) {
 	var m MutationFreshness

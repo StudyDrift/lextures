@@ -38,6 +38,7 @@ func WarmStart(ctx context.Context, pool *pgxpool.Pool) {
 	}
 	// Touch metrics registration so Prometheus series exist before first eval.
 	_ = ruleErrorsCounter()
+	_ = SnapshotHitsCounter()
 	slog.Info("coursechecklist.ready",
 		"items", reg.Size(),
 		"catalog_version", catalogVersionFor(reg),
