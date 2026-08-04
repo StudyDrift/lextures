@@ -71,6 +71,7 @@ func PatchFeatures(
 			screen_share_enabled = $26,
 			adaptive_content_enabled = $27,
 			content_tools_enabled = $28,
+			features_reviewed_at = NOW(),
 			updated_at = NOW()
 		WHERE course_code = $29
 	`

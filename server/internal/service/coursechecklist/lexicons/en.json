@@ -1,0 +1,26 @@
+{
+  "locale": "en",
+  "startHereTitles": ["start here", "orientation", "welcome", "getting started", "how this course works"],
+  "instructorIntroTitles": ["about your instructor", "meet your instructor", "instructor introduction", "about me", "who I am"],
+  "learnerIntroTitles": ["introduce yourself", "introductions", "say hello", "get to know", "icebreaker"],
+  "contact": ["contact", "email", "phone", "office hours", "office", "reach me", "how to reach"],
+  "responseTime": [
+    "within\\s+\\d+\\s*(hour|hours|day|days|hr|hrs)",
+    "respond(?:s|ing)?\\s+(?:to\\s+)?(?:email|messages?)?\\s*(?:within|in)\\s+\\d+",
+    "turnaround",
+    "grade\\s+(?:within|in)\\s+\\d+",
+    "response\\s+time",
+    "I\\s+respond\\s+to\\s+email\\s+within\\s+\\d+\\s+hours?"
+  ],
+  "participation": ["participation", "expected to post", "discussion frequency", "contribute to discussions", "post at least"],
+  "netiquette": ["netiquette", "community agreement", "code of conduct", "online etiquette", "discussion etiquette", "respectful communication"],
+  "techRequirements": ["technical requirements", "required technology", "browser", "software", "system requirements", "technology skills", "prerequisite skills"],
+  "supportLinkHints": ["help desk", "tutoring", "library", "accessibility", "disability", "counseling", "counselling", "student support", "writing center"],
+  "gradingPolicy": ["weighted", "points", "grading scale", "grade calculation", "percentage", "how grades", "grade weights", "assignment weights"],
+  "latePolicy": {
+    "present": ["late work", "late policy", "late submissions", "late assignments", "late work policy"],
+    "noLate": ["no late work", "late work not accepted", "no late submissions", "late work will not be accepted", "no late work accepted"]
+  },
+  "academicIntegrity": ["academic integrity", "academic honesty", "plagiarism", "cheating", "honor code", "ai use policy", "use of ai"],
+  "accessibility": ["accessibility", "accommodations", "disability services", "disability", "accessible", "ada", "504"]
+}

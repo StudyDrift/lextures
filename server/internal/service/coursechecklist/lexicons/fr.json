@@ -1,0 +1,25 @@
+{
+  "locale": "fr",
+  "startHereTitles": ["commencer ici", "orientation", "bienvenue", "mise en route", "comment ce cours fonctionne"],
+  "instructorIntroTitles": ["à propos de votre enseignant", "rencontrez votre enseignant", "présentation de l'enseignant", "à propos de moi"],
+  "learnerIntroTitles": ["présentez-vous", "présentations", "dites bonjour", "brise-glace"],
+  "contact": ["contact", "courriel", "email", "téléphone", "heures de bureau", "bureau", "me joindre"],
+  "responseTime": [
+    "répondrai\\s+(?:en|dans)\\s+\\d+\\s*heures?",
+    "réponds\\s+(?:en|dans)\\s+\\d+",
+    "dans\\s+les\\s+\\d+\\s*(heures?|jours?)",
+    "délai\\s+de\\s+réponse",
+    "noterai\\s+(?:en|dans)\\s+\\d+"
+  ],
+  "participation": ["participation", "doit publier", "fréquence de discussion", "contribuer aux discussions"],
+  "netiquette": ["nétiquette", "accord communautaire", "code de conduite", "étiquette en ligne", "communication respectueuse"],
+  "techRequirements": ["exigences techniques", "technologie requise", "navigateur", "logiciel", "configuration requise"],
+  "supportLinkHints": ["assistance", "tutorat", "bibliothèque", "accessibilité", "handicap", "conseil", "soutien étudiant"],
+  "gradingPolicy": ["pondéré", "points", "barème", "calcul des notes", "pourcentage", "pondération"],
+  "latePolicy": {
+    "present": ["travail en retard", "politique de retard", "soumissions tardives", "devoirs en retard"],
+    "noLate": ["aucun travail en retard", "travaux en retard non acceptés", "pas de soumissions tardives"]
+  },
+  "academicIntegrity": ["intégrité académique", "honnêteté académique", "plagiat", "tricherie", "code d'honneur", "politique ia"],
+  "accessibility": ["accessibilité", "aménagements", "services aux étudiants handicapés", "handicap", "adaptations"]
+}

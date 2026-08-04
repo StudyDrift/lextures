@@ -25,10 +25,15 @@ type SyllabusPayload struct {
 	Sections                  []SyllabusSection
 	UpdatedAt                 time.Time
 	RequireSyllabusAcceptance bool
+	AcceptanceDecidedAt       *time.Time
+	// Malformed is true when sections JSONB failed to unmarshal. Callers that
+	// need a hard error should check this; checklist loading treats it as unknown.
+	Malformed bool
 }
 
 // GetSyllabusByCourseCode loads the syllabus, defaulting to empty sections when
 // there is no course_syllabus row. Returns (nil, nil) when the course code is unknown.
+// On JSON unmarshal failure, returns a payload with Malformed=true rather than an error.
 func GetSyllabusByCourseCode(ctx context.Context, pool *pgxpool.Pool, courseCode string) (*SyllabusPayload, error) {
 	if pool == nil {
 		return nil, errors.New("db pool is nil")
@@ -37,16 +42,18 @@ func GetSyllabusByCourseCode(ctx context.Context, pool *pgxpool.Pool, courseCode
 	var raw []byte
 	var updated time.Time
 	var require bool
+	var decidedAt *time.Time
 	err := pool.QueryRow(ctx, `
 SELECT
 	c.id,
 	COALESCE(cs.sections, '[]'::jsonb),
 	COALESCE(cs.updated_at, c.created_at),
-	COALESCE(cs.require_syllabus_acceptance, false)
+	COALESCE(cs.require_syllabus_acceptance, false),
+	cs.acceptance_decided_at
 FROM course.courses c
 LEFT JOIN course.course_syllabus cs ON cs.course_id = c.id
 WHERE c.course_code = $1
-`, courseCode).Scan(&courseID, &raw, &updated, &require)
+`, courseCode).Scan(&courseID, &raw, &updated, &require, &decidedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -55,7 +62,14 @@ WHERE c.course_code = $1
 	}
 	var sections []SyllabusSection
 	if err := json.Unmarshal(raw, &sections); err != nil {
-		return nil, err
+		return &SyllabusPayload{
+			CourseID:                  courseID,
+			Sections:                  []SyllabusSection{},
+			UpdatedAt:                 updated,
+			RequireSyllabusAcceptance: require,
+			AcceptanceDecidedAt:       decidedAt,
+			Malformed:                 true,
+		}, nil
 	}
 	if sections == nil {
 		sections = []SyllabusSection{}
@@ -65,6 +79,7 @@ WHERE c.course_code = $1
 		Sections:                  sections,
 		UpdatedAt:                 updated,
 		RequireSyllabusAcceptance: require,
+		AcceptanceDecidedAt:       decidedAt,
 	}, nil
 }
 
@@ -100,7 +115,10 @@ ON CONFLICT (user_id, course_id) DO NOTHING
 }
 
 // UpsertSyllabus writes syllabus content (staff). Returns updated timestamptz.
-func UpsertSyllabus(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, sections []SyllabusSection, requireSyllabusAcceptance bool) (time.Time, error) {
+// When requireSyllabusAcceptance is non-nil, the flag is written and
+// acceptance_decided_at is stamped to now(). When nil, the existing require flag
+// and acceptance_decided_at are left unchanged.
+func UpsertSyllabus(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, sections []SyllabusSection, requireSyllabusAcceptance *bool) (time.Time, error) {
 	if pool == nil {
 		return time.Time{}, errors.New("db pool is nil")
 	}
@@ -112,15 +130,27 @@ func UpsertSyllabus(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID,
 		return time.Time{}, err
 	}
 	var updated time.Time
-	err = pool.QueryRow(ctx, `
-INSERT INTO course.course_syllabus (course_id, sections, require_syllabus_acceptance, updated_at)
-VALUES ($1, $2, $3, now())
+	if requireSyllabusAcceptance != nil {
+		err = pool.QueryRow(ctx, `
+INSERT INTO course.course_syllabus (course_id, sections, require_syllabus_acceptance, acceptance_decided_at, updated_at)
+VALUES ($1, $2, $3, now(), now())
 ON CONFLICT (course_id) DO UPDATE SET
 	sections = EXCLUDED.sections,
 	require_syllabus_acceptance = EXCLUDED.require_syllabus_acceptance,
+	acceptance_decided_at = now(),
 	updated_at = now()
 RETURNING updated_at
-`, courseID, raw, requireSyllabusAcceptance).Scan(&updated)
+`, courseID, raw, *requireSyllabusAcceptance).Scan(&updated)
+	} else {
+		err = pool.QueryRow(ctx, `
+INSERT INTO course.course_syllabus (course_id, sections, require_syllabus_acceptance, updated_at)
+VALUES ($1, $2, false, now())
+ON CONFLICT (course_id) DO UPDATE SET
+	sections = EXCLUDED.sections,
+	updated_at = now()
+RETURNING updated_at
+`, courseID, raw).Scan(&updated)
+	}
 	if err != nil {
 		return time.Time{}, err
 	}

@@ -82,11 +82,6 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 	defer span.End()
 	span.SetAttributes(attribute.String("course_code", courseCode))
 
-	// Optional query counting via a traced child config is awkward with an
-	// existing pool; instead we increment manually around each helper call when
-	// qc != nil (one increment per logical repo call ≈ one SQL round-trip for
-	// our helpers). For AC-9 precision tests use the manual counter + known
-	// helper query fan-out documented below.
 	count := func(n int) {
 		if qc != nil {
 			qc.n.Add(int64(n))
@@ -106,23 +101,38 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 		return CourseSnapshot{}, fmt.Errorf("coursechecklist: parse course id: %w", err)
 	}
 
+	var homeContentID *string
+	if pub.CourseHomeContentItemID != nil {
+		homeContentID = pub.CourseHomeContentItemID
+	}
+
 	snap := CourseSnapshot{
-		CourseCode:       courseCode,
-		CourseID:         courseID,
-		Title:            pub.Title,
-		Published:        pub.Published,
-		StartsAt:         pub.StartsAt,
-		EndsAt:           pub.EndsAt,
-		CourseTimezone:   pub.CourseTimezone,
-		ScheduleMode:     pub.ScheduleMode,
-		SectionsEnabled:  pub.SectionsEnabled,
-		FeedEnabled:      pub.FeedEnabled,
-		FilesEnabled:     pub.FilesEnabled,
-		SbgEnabled:       pub.SbgEnabled,
-		StandardsEnabled: pub.StandardsAlignmentEnabled,
-		CourseType:       pub.CourseType,
-		CourseMode:       pub.CourseMode,
-		GradingScale:     pub.GradingScale,
+		CourseCode:              courseCode,
+		CourseID:                courseID,
+		Title:                   pub.Title,
+		Description:             pub.Description,
+		Published:               pub.Published,
+		StartsAt:                pub.StartsAt,
+		EndsAt:                  pub.EndsAt,
+		VisibleFrom:             pub.VisibleFrom,
+		HiddenAt:                pub.HiddenAt,
+		CourseTimezone:          pub.CourseTimezone,
+		ScheduleMode:            pub.ScheduleMode,
+		SectionsEnabled:         pub.SectionsEnabled,
+		FeedEnabled:             pub.FeedEnabled,
+		FilesEnabled:            pub.FilesEnabled,
+		SbgEnabled:              pub.SbgEnabled,
+		StandardsEnabled:        pub.StandardsAlignmentEnabled,
+		CourseType:              pub.CourseType,
+		CourseMode:              pub.CourseMode,
+		HeroImageURL:            pub.HeroImageURL,
+		CourseHomeLanding:       pub.CourseHomeLanding,
+		CourseHomeContentItemID: homeContentID,
+		CreatedAt:               pub.CreatedAt,
+		HomeschoolMode:          pub.OrgID == nil,
+		OrgIsK12:                len(pub.GradeLevels) > 0,
+		// ParentPortalEnabled left false by default (guardian rule N/A unless tests set it).
+		GradingScale: pub.GradingScale,
 		Features: CourseFeatures{
 			NotebookEnabled:           pub.NotebookEnabled,
 			FeedEnabled:               pub.FeedEnabled,
@@ -135,8 +145,36 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 			ContentToolsEnabled:       pub.ContentToolsEnabled,
 			InteractiveQuizzesEnabled: pub.InteractiveQuizzesEnabled,
 			RequireCaptions:           pub.RequireCaptions,
+			GroupSpacesEnabled:        pub.GroupSpacesEnabled,
+			VisualBoardsEnabled:       pub.VisualBoardsEnabled,
+			AiTutorEnabled:            pub.AiTutorEnabled,
+			ModulesAiAssistantEnabled: pub.ModulesAiAssistantEnabled,
 		},
 		Lazy: make(map[LazyLoaderID]any),
+	}
+
+	// Extra course markers not on CoursePublic (features_reviewed_at, grading_scheme_id,
+	// catalog_language, created_by_user_id) — one query (CC.3).
+	{
+		var featuresReviewedAt *time.Time
+		var gradingSchemeID *uuid.UUID
+		var catalogLanguage *string
+		var creatorID *uuid.UUID
+		err := pool.QueryRow(ctx, `
+SELECT features_reviewed_at, grading_scheme_id, NULLIF(TRIM(catalog_language), ''), created_by_user_id
+FROM course.courses
+WHERE id = $1
+`, courseID).Scan(&featuresReviewedAt, &gradingSchemeID, &catalogLanguage, &creatorID)
+		count(1)
+		if err != nil {
+			return CourseSnapshot{}, err
+		}
+		snap.FeaturesReviewedAt = featuresReviewedAt
+		snap.GradingSchemeID = gradingSchemeID
+		snap.CreatorUserID = creatorID
+		if catalogLanguage != nil {
+			snap.CatalogLanguage = *catalogLanguage
+		}
 	}
 
 	if hasDataNeed(needs, DataNeedStructure) {
@@ -156,6 +194,7 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 				DueAt:             it.DueAt,
 				AssignmentGroupID: it.AssignmentGroupID,
 				Archived:          it.Archived,
+				SortOrder:         it.SortOrder,
 			})
 		}
 	}
@@ -164,7 +203,6 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 		meta, err := coursestructure.ListChecklistItemMeta(ctx, pool, courseID)
 		count(1)
 		if err != nil {
-			// Optional tables missing → empty meta (not_applicable path for consumers).
 			if !isUndefinedTable(err) {
 				return CourseSnapshot{}, err
 			}
@@ -173,11 +211,12 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 		snap.ItemMeta = make(map[uuid.UUID]ItemMeta, len(meta))
 		for id, m := range meta {
 			snap.ItemMeta[id] = ItemMeta{
-				Kind:          m.Kind,
-				HasBody:       m.HasBody,
-				PointsWorth:   m.PointsWorth,
-				ExternalURL:   m.ExternalURL,
-				QuestionCount: m.QuestionCount,
+				Kind:                 m.Kind,
+				HasBody:              m.HasBody,
+				PointsWorth:          m.PointsWorth,
+				ExternalURL:          m.ExternalURL,
+				QuestionCount:        m.QuestionCount,
+				LateSubmissionPolicy: m.LateSubmissionPolicy,
 			}
 		}
 	}
@@ -189,12 +228,33 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 			return CourseSnapshot{}, err
 		}
 		if syl != nil {
+			snap.SyllabusMalformed = syl.Malformed
+			snap.AcceptanceDecidedAt = syl.AcceptanceDecidedAt
+			snap.RequireSyllabusAcceptance = syl.RequireSyllabusAcceptance
+			totalBytes := 0
 			for _, s := range syl.Sections {
+				md := s.Markdown
+				chunk := len(s.Heading) + len(md) + 2
+				if totalBytes+chunk > MaxSyllabusScanBytes {
+					remain := MaxSyllabusScanBytes - totalBytes
+					if remain < 0 {
+						remain = 0
+					}
+					if len(md) > remain {
+						md = md[:remain]
+					}
+					snap.SyllabusCheckedTruncated = true
+				}
+				totalBytes += len(s.Heading) + len(md) + 2
 				snap.SyllabusSections = append(snap.SyllabusSections, SyllabusSectionSnap{
-					Key:     s.ID,
-					Title:   s.Heading,
-					HasBody: strings.TrimSpace(s.Markdown) != "",
+					Key:      s.ID,
+					Title:    s.Heading,
+					HasBody:  strings.TrimSpace(s.Markdown) != "",
+					Markdown: md,
 				})
+				if snap.SyllabusCheckedTruncated {
+					break
+				}
 			}
 		}
 	}
@@ -253,23 +313,40 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 			return CourseSnapshot{}, err
 		}
 		snap.EnrollmentCounts = counts
-		// Privacy-safe stubs (display name + opaque id) for evidence rows — no email/DOB.
-		people, err := enrollment.ListPeopleStubsForCourse(ctx, pool, courseID)
+		people, err := enrollment.ListChecklistPeopleForCourse(ctx, pool, courseID)
 		count(1)
 		if err != nil {
 			return CourseSnapshot{}, err
 		}
+		now := time.Now().UTC()
 		for _, p := range people {
+			enrolledAt := p.CreatedAt
 			snap.People = append(snap.People, PersonSnap{
-				UserID:      p.UserID,
-				DisplayName: p.DisplayName,
-				Role:        p.Role,
+				UserID:            p.UserID,
+				DisplayName:       p.DisplayName,
+				Role:              p.Role,
+				InvitationPending: p.InvitationPending,
+				EnrolledAt:        &enrolledAt,
+				SectionID:         p.SectionID,
+				Active:            p.Active,
 			})
+			if p.InvitationPending {
+				days := int(now.Sub(p.CreatedAt).Hours() / 24)
+				if days < 0 {
+					days = 0
+				}
+				snap.PendingInvitations = append(snap.PendingInvitations, PendingInviteSnap{
+					DisplayName: p.DisplayName,
+					UserID:      p.UserID,
+					CreatedAt:   p.CreatedAt,
+					DaysPending: days,
+				})
+			}
 		}
 	}
 
 	if hasDataNeed(needs, DataNeedFeed) {
-		channels, err := coursefeed.ListChannelsWithLatestRoot(ctx, pool, courseID)
+		channels, err := coursefeed.ListChecklistFeedChannels(ctx, pool, courseID)
 		count(1)
 		if err != nil {
 			if !isUndefinedTable(err) {
@@ -283,6 +360,13 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 					LatestAt:    ch.LatestAt,
 					LatestTitle: ch.LatestTitle,
 				})
+				if strings.EqualFold(ch.Name, "announcements") && ch.StaffWelcome != nil {
+					snap.AnnouncementsWelcome = &WelcomeMessageSnap{
+						BodyLen:       ch.StaffWelcome.BodyLen,
+						AuthorIsStaff: ch.StaffWelcome.AuthorIsStaff,
+						PostedAt:      ch.StaffWelcome.PostedAt,
+					}
+				}
 			}
 		}
 	}

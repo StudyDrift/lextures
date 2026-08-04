@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"unicode/utf8"
+
+	"github.com/google/uuid"
 )
 
 func TestRegistryIntegrity(t *testing.T) {
@@ -15,8 +18,8 @@ func TestRegistryIntegrity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildBuiltinRegistry: %v", err)
 	}
-	if reg.Size() != 2 {
-		t.Fatalf("expected 2 reference rules, got %d", reg.Size())
+	if reg.Size() != 33 {
+		t.Fatalf("expected 33 rules, got %d", reg.Size())
 	}
 
 	routes, err := loadWebRoutesFixture()
@@ -36,19 +39,34 @@ func TestRegistryIntegrity(t *testing.T) {
 		if strings.TrimSpace(it.TitleDefault) == "" || strings.TrimSpace(it.WhyDefault) == "" {
 			t.Errorf("id %q missing title/why defaults", it.ID)
 		}
+		if utf8.RuneCountInString(it.TitleDefault) > 60 {
+			t.Errorf("id %q TitleDefault exceeds 60 chars: %q", it.ID, it.TitleDefault)
+		}
+		lowerTitle := strings.ToLower(it.TitleDefault)
+		for _, banned := range []string{"failed", "should have", "!"} {
+			if strings.Contains(lowerTitle, banned) {
+				t.Errorf("id %q title contains banned %q", it.ID, banned)
+			}
+		}
 		if len(it.Sources) == 0 {
 			t.Errorf("id %q missing Sources", it.ID)
+		}
+		if it.Tier != TierRecommended {
+			t.Errorf("id %q tier=%s want recommended (FR-37)", it.ID, it.Tier)
 		}
 		if err := validateNavTargetRoute(it.Target.Route, routes); err != nil {
 			t.Errorf("id %q target: %v", it.ID, err)
 		}
 		canEmit := it.EvidenceShape != nil
-		// Smoke: evaluators that declare EvidenceShape should be able to return evidence
-		// on a fixture that triggers the happy path (sections with one section).
-		if canEmit && it.ID == ItemCourseSections {
+		// Smoke: people.sections should emit evidence when students lack sections.
+		if canEmit && it.ID == ItemPeopleSections {
+			uid := uuid.New()
 			f, err := it.Evaluate(context.Background(), CourseSnapshot{
 				SectionsEnabled: true,
 				Sections:        []SectionSnap{{SectionCode: "A", Name: "Section A"}},
+				People: []PersonSnap{
+					{UserID: uid, DisplayName: "Stu", Role: "student", Active: true},
+				},
 			})
 			if err != nil {
 				t.Fatalf("evaluate %s: %v", it.ID, err)
@@ -75,6 +93,13 @@ func TestRegistryIntegrity(t *testing.T) {
 		if reg.Get(to) == nil {
 			t.Errorf("alias %q → missing canonical %q", from, to)
 		}
+	}
+
+	if _, ok := RETIRED_ITEM_IDS[ItemCourseSections]; !ok {
+		t.Fatal("course.sections should be retired")
+	}
+	if _, ok := reg.ResolveItemID(string(ItemCourseSections)); ok {
+		t.Fatal("retired course.sections should not resolve")
 	}
 }
 
@@ -129,8 +154,14 @@ func TestRulesFilesForbidDatabaseImports(t *testing.T) {
 			}
 		}
 	}
-	// Ensure the lint target file exists (reference rules).
-	if _, err := os.Stat(filepath.Join("rules_reference.go")); err != nil {
-		t.Fatalf("rules_reference.go missing: %v", err)
+	for _, name := range []string{
+		"rules_foundations.go",
+		"rules_orientation.go",
+		"rules_syllabus.go",
+		"rules_people.go",
+	} {
+		if _, err := os.Stat(filepath.Join(name)); err != nil {
+			t.Fatalf("%s missing: %v", name, err)
+		}
 	}
 }

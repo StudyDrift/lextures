@@ -133,7 +133,8 @@ func ApplyImport(
 			if err := applyCourseSnapshot(ctx, pool, targetCourseCode, &ex.Course); err != nil {
 				return err
 			}
-			if _, err := course.UpsertSyllabus(ctx, pool, courseID, toRepoSyllabus(ex.Syllabus), ex.RequireSyllabusAcceptance); err != nil {
+			reqAcc := ex.RequireSyllabusAcceptance
+			if _, err := course.UpsertSyllabus(ctx, pool, courseID, toRepoSyllabus(ex.Syllabus), &reqAcc); err != nil {
 				return err
 			}
 		}
@@ -184,7 +185,8 @@ func ApplyImport(
 			if err := applyCourseSnapshot(ctx, pool, targetCourseCode, &ex.Course); err != nil {
 				return err
 			}
-			if _, err := course.UpsertSyllabus(ctx, pool, courseID, toRepoSyllabus(ex.Syllabus), ex.RequireSyllabusAcceptance); err != nil {
+			reqAcc := ex.RequireSyllabusAcceptance
+			if _, err := course.UpsertSyllabus(ctx, pool, courseID, toRepoSyllabus(ex.Syllabus), &reqAcc); err != nil {
 				return err
 			}
 		}

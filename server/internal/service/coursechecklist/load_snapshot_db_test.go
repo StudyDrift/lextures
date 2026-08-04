@@ -126,8 +126,9 @@ func TestLoadSnapshotOnlyModeNeeds(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadSnapshot: %v", err)
 	}
-	if n != 1 {
-		t.Fatalf("Only-mode query count=%d want 1 (course row)", n)
+	// CoursePublic + markers query (features_reviewed_at / grading_scheme_id / catalog_language).
+	if n != 2 {
+		t.Fatalf("Only-mode query count=%d want 2 (course row + markers)", n)
 	}
 	if len(snap.StructureItems) != 0 || len(snap.Sections) != 0 {
 		t.Fatalf("Only-mode loaded unexpected slices: struct=%d sections=%d", len(snap.StructureItems), len(snap.Sections))
@@ -145,12 +146,23 @@ func TestLoadSnapshotEvaluateIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	res := Evaluate(context.Background(), snap, EvaluateOptions{})
-	if res.Findings[0].Finding.Status != StatusDone {
-		t.Fatalf("dates=%s", res.Findings[0].Finding.Status)
+	res := Evaluate(context.Background(), snap, EvaluateOptions{
+		Only: []ItemID{ItemCourseDates, ItemPeopleSections},
+	})
+	var dates, sections *ItemResult
+	for i := range res.Findings {
+		switch res.Findings[i].ID {
+		case ItemCourseDates:
+			dates = &res.Findings[i]
+		case ItemPeopleSections:
+			sections = &res.Findings[i]
+		}
 	}
-	if res.Findings[1].Finding.Status != StatusNotApplicable {
-		t.Fatalf("sections=%s", res.Findings[1].Finding.Status)
+	if dates == nil || dates.Finding.Status != StatusDone {
+		t.Fatalf("dates=%+v", dates)
+	}
+	if sections == nil || sections.Finding.Status != StatusNotApplicable {
+		t.Fatalf("people.sections=%+v", sections)
 	}
 }
 
@@ -160,10 +172,10 @@ func TestPeopleStubSQLHasNoEmail(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Extract only the ListPeopleStubsForCourse query body.
-	idx := strings.Index(string(src), "func ListPeopleStubsForCourse")
+	fn := "func ListChecklistPeopleForCourse"
+	idx := strings.Index(string(src), fn)
 	if idx < 0 {
-		t.Fatal("ListPeopleStubsForCourse missing")
+		t.Fatalf("%s missing", fn)
 	}
 	chunk := strings.ToLower(string(src)[idx:])
 	if end := strings.Index(chunk, "\nfunc "); end > 0 {
@@ -171,7 +183,7 @@ func TestPeopleStubSQLHasNoEmail(t *testing.T) {
 	}
 	for _, banned := range []string{"u.email", "email,", "date_of_birth", ".dob", " birth"} {
 		if strings.Contains(chunk, banned) {
-			t.Fatalf("ListPeopleStubsForCourse must not select %q", banned)
+			t.Fatalf("%s must not select %q", fn, banned)
 		}
 	}
 }

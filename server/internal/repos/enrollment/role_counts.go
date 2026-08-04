@@ -2,6 +2,7 @@ package enrollment
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -33,17 +34,29 @@ GROUP BY ce.role
 	return out, rows.Err()
 }
 
-// ListPeopleStubsForCourse returns privacy-safe enrollment stubs (opaque user id +
-// display name + role). Directory-suppressed PII columns are never selected (CC.1).
-func ListPeopleStubsForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]struct {
-	UserID      uuid.UUID
-	DisplayName string
-	Role        string
-}, error) {
+// PeopleStub is a privacy-safe enrollment stub for checklist evidence (CC.1/CC.3).
+type PeopleStub struct {
+	UserID            uuid.UUID
+	DisplayName       string
+	Role              string
+	Active            bool
+	InvitationPending bool
+	SectionID         *uuid.UUID
+	CreatedAt         time.Time
+}
+
+// ListChecklistPeopleForCourse returns privacy-safe enrollment stubs enriched for
+// CC.3 people rules (active, invitation pending, section, created_at).
+// Directory-suppressed PII columns are never selected.
+func ListChecklistPeopleForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]PeopleStub, error) {
 	rows, err := pool.Query(ctx, `
 SELECT ce.user_id,
        COALESCE(NULLIF(TRIM(u.display_name), ''), 'Learner'),
-       ce.role
+       ce.role,
+       ce.active,
+       ce.invitation_pending,
+       ce.section_id,
+       ce.created_at
 FROM course.course_enrollments ce
 INNER JOIN "user".users u ON u.id = ce.user_id
 WHERE ce.course_id = $1
@@ -55,18 +68,13 @@ LIMIT 500
 		return nil, err
 	}
 	defer rows.Close()
-	var out []struct {
-		UserID      uuid.UUID
-		DisplayName string
-		Role        string
-	}
+	var out []PeopleStub
 	for rows.Next() {
-		var row struct {
-			UserID      uuid.UUID
-			DisplayName string
-			Role        string
-		}
-		if err := rows.Scan(&row.UserID, &row.DisplayName, &row.Role); err != nil {
+		var row PeopleStub
+		if err := rows.Scan(
+			&row.UserID, &row.DisplayName, &row.Role,
+			&row.Active, &row.InvitationPending, &row.SectionID, &row.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		out = append(out, row)

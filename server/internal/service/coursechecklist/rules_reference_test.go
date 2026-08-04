@@ -5,12 +5,8 @@ import (
 	"fmt"
 )
 
-// Reference rule IDs shipped with CC.1 for engine tests only. Real catalog rules
-// arrive in CC.3–CC.6.
-const (
-	ItemCourseDates   ItemID = "course.dates"
-	ItemCourseSections ItemID = "course.sections"
-)
+// Reference helpers kept for engine unit tests that build custom registries.
+// They are NOT registered in BuildBuiltinRegistry (CC.3). course.sections is retired.
 
 func referenceCourseDates() ItemDescriptor {
 	return ItemDescriptor{
@@ -25,7 +21,7 @@ func referenceCourseDates() ItemDescriptor {
 		Sources:      []string{"OSCQR 1", "QM 1.2"},
 		DataNeeds:    []DataNeed{DataNeedCourse},
 		Applies:      nil, // always applies
-		Evaluate:     evalCourseDates,
+		Evaluate:     evalCourseDatesReference,
 		Target: NavTarget{
 			Surface: "web",
 			Route:   "/courses/{courseCode}/settings/general",
@@ -34,7 +30,7 @@ func referenceCourseDates() ItemDescriptor {
 	}
 }
 
-func evalCourseDates(_ context.Context, snap CourseSnapshot) (Finding, error) {
+func evalCourseDatesReference(_ context.Context, snap CourseSnapshot) (Finding, error) {
 	hasStart := snap.StartsAt != nil
 	hasEnd := snap.EndsAt != nil
 	switch {

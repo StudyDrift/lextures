@@ -13,20 +13,34 @@ type CourseSnapshot struct {
 	CourseID   uuid.UUID
 
 	// Course (DataNeedCourse)
-	Title           string
-	Published       bool
-	StartsAt        *time.Time
-	EndsAt          *time.Time
-	CourseTimezone  *string
-	ScheduleMode    string
-	SectionsEnabled bool
-	FeedEnabled     bool
-	FilesEnabled    bool
-	SbgEnabled      bool
-	StandardsEnabled bool
-	CourseType      string
-	CourseMode      string
-	Features        CourseFeatures
+	Title                    string
+	Description              string
+	Published                bool
+	StartsAt                 *time.Time
+	EndsAt                   *time.Time
+	VisibleFrom              *time.Time
+	HiddenAt                 *time.Time
+	CourseTimezone           *string
+	ScheduleMode             string
+	SectionsEnabled          bool
+	FeedEnabled              bool
+	FilesEnabled             bool
+	SbgEnabled               bool
+	StandardsEnabled         bool
+	CourseType               string
+	CourseMode               string
+	HeroImageURL             *string
+	CourseHomeLanding        string
+	CourseHomeContentItemID  *string
+	CreatedAt                time.Time
+	FeaturesReviewedAt       *time.Time
+	GradingSchemeID          *uuid.UUID
+	CatalogLanguage          string
+	HomeschoolMode           bool // true when OrgID is nil (personal / single-instructor)
+	ParentPortalEnabled      bool
+	OrgIsK12                 bool
+	CreatorUserID            *uuid.UUID
+	Features                 CourseFeatures
 
 	// Structure (DataNeedStructure)
 	StructureItems []StructureItem
@@ -35,7 +49,11 @@ type CourseSnapshot struct {
 	ItemMeta map[uuid.UUID]ItemMeta
 
 	// Syllabus (DataNeedSyllabus)
-	SyllabusSections []SyllabusSectionSnap
+	SyllabusSections         []SyllabusSectionSnap
+	SyllabusMalformed        bool
+	AcceptanceDecidedAt      *time.Time
+	RequireSyllabusAcceptance bool
+	SyllabusCheckedTruncated bool
 
 	// Outcomes (DataNeedOutcomes)
 	Outcomes     []OutcomeSnap
@@ -46,11 +64,13 @@ type CourseSnapshot struct {
 	GradingScale     string
 
 	// Enrollments (DataNeedEnrollments) — role counts + privacy-safe people stubs
-	EnrollmentCounts map[string]int
-	People           []PersonSnap
+	EnrollmentCounts    map[string]int
+	People              []PersonSnap
+	PendingInvitations  []PendingInviteSnap
 
 	// Feed (DataNeedFeed)
-	FeedChannels []FeedChannelSnap
+	FeedChannels          []FeedChannelSnap
+	AnnouncementsWelcome  *WelcomeMessageSnap
 
 	// Files (DataNeedFiles)
 	Files []FileSnap
@@ -73,17 +93,21 @@ type CourseSnapshot struct {
 
 // CourseFeatures mirrors the feature switches needed by Applies predicates.
 type CourseFeatures struct {
-	NotebookEnabled              bool
-	FeedEnabled                  bool
-	CalendarEnabled              bool
-	DiscussionsEnabled           bool
-	FilesEnabled                 bool
-	AttendanceEnabled            bool
-	StandardsAlignmentEnabled    bool
-	AdaptivePathsEnabled         bool
-	ContentToolsEnabled          bool
-	InteractiveQuizzesEnabled    bool
-	RequireCaptions              bool
+	NotebookEnabled           bool
+	FeedEnabled               bool
+	CalendarEnabled           bool
+	DiscussionsEnabled        bool
+	FilesEnabled              bool
+	AttendanceEnabled         bool
+	StandardsAlignmentEnabled bool
+	AdaptivePathsEnabled      bool
+	ContentToolsEnabled       bool
+	InteractiveQuizzesEnabled bool
+	RequireCaptions           bool
+	GroupSpacesEnabled        bool
+	VisualBoardsEnabled       bool
+	AiTutorEnabled            bool
+	ModulesAiAssistantEnabled bool
 }
 
 // StructureItem is a course structure row subset for checklist rules.
@@ -96,22 +120,25 @@ type StructureItem struct {
 	DueAt             *time.Time
 	AssignmentGroupID *uuid.UUID
 	Archived          bool
+	SortOrder         int
 }
 
 // ItemMeta is lightweight per-item detail used by structure/assessment rules.
 type ItemMeta struct {
-	Kind          string
-	HasBody       bool
-	PointsWorth   *int
-	ExternalURL   string
-	QuestionCount int
+	Kind                 string
+	HasBody              bool
+	PointsWorth          *int
+	ExternalURL          string
+	QuestionCount        int
+	LateSubmissionPolicy string // "" when N/A (non-gradable kinds)
 }
 
 // SyllabusSectionSnap is one syllabus section.
 type SyllabusSectionSnap struct {
-	Key     string
-	Title   string
-	HasBody bool
+	Key      string
+	Title    string
+	HasBody  bool
+	Markdown string
 }
 
 // OutcomeSnap is a learning outcome.
@@ -128,16 +155,29 @@ type OutcomeLinkSnap struct {
 
 // AssignmentGroupSnap is an assignment group.
 type AssignmentGroupSnap struct {
-	ID    uuid.UUID
-	Name  string
+	ID     uuid.UUID
+	Name   string
 	Weight *float64
 }
 
 // PersonSnap is a privacy-safe enrollment stub (display name + opaque ID only).
 type PersonSnap struct {
-	UserID      uuid.UUID
+	UserID            uuid.UUID
+	DisplayName       string
+	Role              string
+	InvitationPending bool
+	EnrolledAt        *time.Time
+	SectionID         *uuid.UUID
+	Active            bool
+	HasGuardianLink   bool
+}
+
+// PendingInviteSnap is a privacy-safe pending invitation (no email).
+type PendingInviteSnap struct {
 	DisplayName string
-	Role        string
+	UserID      uuid.UUID
+	CreatedAt   time.Time
+	DaysPending int
 }
 
 // FeedChannelSnap is a feed channel with optional latest root message time.
@@ -146,6 +186,13 @@ type FeedChannelSnap struct {
 	Name        string
 	LatestAt    *time.Time
 	LatestTitle string
+}
+
+// WelcomeMessageSnap describes a staff welcome post on announcements.
+type WelcomeMessageSnap struct {
+	BodyLen       int
+	AuthorIsStaff bool
+	PostedAt      *time.Time
 }
 
 // FileSnap is course file metadata.

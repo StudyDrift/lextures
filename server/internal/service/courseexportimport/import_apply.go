@@ -223,7 +223,7 @@ func mergeSyllabusSections(
 	if err := validateSyllabusSections(out); err != nil {
 		return err
 	}
-	_, err = course.UpsertSyllabus(ctx, pool, courseID, out, requireAcceptance)
+	_, err = course.UpsertSyllabus(ctx, pool, courseID, out, &requireAcceptance)
 	return err
 }
 
