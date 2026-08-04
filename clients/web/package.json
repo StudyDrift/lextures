@@ -84,9 +84,11 @@
   "overrides": {
     "@babel/core": "^7.29.6",
     "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.5",
     "js-yaml": "4.3.0",
     "markdown-it": "^14.2.0",
-    "postcss": "8.5.23"
+    "postcss": "8.5.23",
+    "undici": "7.29.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
