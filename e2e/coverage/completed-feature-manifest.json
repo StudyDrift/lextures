@@ -5207,6 +5207,35 @@
       }
     },
     {
+      "id": "CC.6",
+      "path": "docs/completed/checklist/CC.6-rule-pack-accessibility-and-launch-readiness.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "ops",
+      "coverage": "smoke",
+      "rationale": "20 accessibility/UDL/launch checklist rules (recommended tier) with shared ContentDoc parse and SSRF-hardened link-health checker (disabled by default). Playwright covers a11y.image-alt-text progress→done and launch.student-preview after View as: Student; linkhealth SSRF/cap asserted in Go tests. UI lands with CC.7/CC.8.",
+      "owner": "Learning Platform",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/course-checklist.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": false,
+        "disabledState": "n/a",
+        "enabledJourney": true,
+        "authorization": "n/a",
+        "dependency": "n/a",
+        "rollback": true,
+        "notes": "All 20 rules ship recommended (FR-21); promote five essentials after dogfood + a11y/legal sign-off (CC.10). Link checker kill switch CHECKLIST_LINKCHECK_ENABLED=false. Retire via RETIRED_ITEM_IDS. No checklist feature flag."
+      }
+    },
+    {
       "id": "mb-1-in-app-browser",
       "path": "docs/completed/mobile/MB.1-in-app-browser.md",
       "markets": [

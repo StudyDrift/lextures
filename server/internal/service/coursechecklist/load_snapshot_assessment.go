@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursegrading"
 	"github.com/lextures/lextures/server/internal/repos/studentaccommodations"
 )
@@ -122,6 +123,10 @@ SELECT
   COALESCE(m.late_submission_policy, q.late_submission_policy, '') AS late_policy,
   COALESCE(m.posting_policy, '') AS posting_policy,
   COALESCE(m.originality_detection, 'disabled') AS originality,
+  COALESCE(m.submission_allow_text, false) AS allow_text,
+  COALESCE(m.submission_allow_file_upload, false) AS allow_file,
+  COALESCE(m.submission_allow_url, false) AS allow_url,
+  LEFT(COALESCE(m.markdown, q.markdown, ''), 4096) AS body_markdown,
   COALESCE(q.unlimited_attempts, false) AS unlimited_attempts,
   COALESCE(q.max_attempts, 0) AS max_attempts,
   COALESCE(q.grade_attempt_policy, '') AS grade_attempt_policy,
@@ -159,6 +164,7 @@ LIMIT 5000
 			&it.SortOrder, &it.Published, &it.Archived, &it.DueAt, &it.AssignmentGroupID,
 			&it.AvailableFrom, &it.AvailableUntil, &points,
 			&it.HasBody, &it.HasRubric, &it.LateSubmissionPolicy, &it.PostingPolicy, &it.OriginalityDetection,
+			&it.AllowTextSubmission, &it.AllowFileUpload, &it.AllowURLSubmission, &it.BodyMarkdown,
 			&it.UnlimitedAttempts, &it.MaxAttempts, &it.GradeAttemptPolicy,
 			&it.ShowScoreTiming, &it.ReviewVisibility, &it.ReviewWhen,
 			&timeLimit, &it.ShuffleQuestions, &it.ShuffleChoices, &it.LockdownMode,
@@ -282,6 +288,107 @@ LIMIT 500
 			return err
 		}
 		snap.AnnouncementTimes = append(snap.AnnouncementTimes, t)
+	}
+	return rows.Err()
+}
+
+// loadCourseMarkers loads CC.5/CC.6 review markers, theme, and org id (one query).
+func loadCourseMarkers(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, pub *course.CoursePublic, snap *CourseSnapshot, count func(int)) error {
+	var featuresReviewedAt *time.Time
+	var accommodationsReviewedAt *time.Time
+	var integrityReviewedAt *time.Time
+	var a11yReviewedAt *time.Time
+	var studentPreviewAt *time.Time
+	var lastExportAt *time.Time
+	var gradingSchemeID *uuid.UUID
+	var catalogLanguage *string
+	var creatorID *uuid.UUID
+	var enrollmentGroupsEnabled bool
+	var themePreset string
+	var themeCustom []byte
+	var orgID *uuid.UUID
+	err := pool.QueryRow(ctx, `
+SELECT features_reviewed_at, accommodations_reviewed_at, integrity_settings_reviewed_at,
+       a11y_reviewed_at, student_preview_at, last_export_at,
+       grading_scheme_id, NULLIF(TRIM(catalog_language), ''), created_by_user_id,
+       COALESCE(enrollment_groups_enabled, false),
+       COALESCE(markdown_theme_preset, 'classic'), markdown_theme_custom, org_id
+FROM course.courses
+WHERE id = $1
+`, courseID).Scan(
+		&featuresReviewedAt, &accommodationsReviewedAt, &integrityReviewedAt,
+		&a11yReviewedAt, &studentPreviewAt, &lastExportAt,
+		&gradingSchemeID, &catalogLanguage, &creatorID, &enrollmentGroupsEnabled,
+		&themePreset, &themeCustom, &orgID,
+	)
+	count(1)
+	if err != nil {
+		return err
+	}
+	snap.FeaturesReviewedAt = featuresReviewedAt
+	snap.AccommodationsReviewedAt = accommodationsReviewedAt
+	snap.IntegritySettingsReviewedAt = integrityReviewedAt
+	snap.A11yReviewedAt = a11yReviewedAt
+	snap.StudentPreviewAt = studentPreviewAt
+	snap.LastExportAt = lastExportAt
+	snap.GradingSchemeID = gradingSchemeID
+	snap.CreatorUserID = creatorID
+	snap.EnrollmentGroupsEnabled = enrollmentGroupsEnabled
+	snap.MarkdownThemePreset = themePreset
+	if len(themeCustom) > 0 {
+		snap.MarkdownThemeCustom = append(json.RawMessage(nil), themeCustom...)
+	}
+	snap.OrgID = orgID
+	if catalogLanguage != nil {
+		snap.CatalogLanguage = *catalogLanguage
+	}
+	if pub != nil {
+		snap.GradeLevels = append([]string(nil), pub.GradeLevels...)
+	}
+	return nil
+}
+
+func loadStructureChangedAt(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, snap *CourseSnapshot, count func(int)) error {
+	var structureChangedAt *time.Time
+	err := pool.QueryRow(ctx, `
+SELECT MAX(updated_at) FROM course.course_structure_items WHERE course_id = $1
+`, courseID).Scan(&structureChangedAt)
+	count(1)
+	if err != nil && !isUndefinedTable(err) {
+		return err
+	}
+	snap.StructureChangedAt = structureChangedAt
+	return nil
+}
+
+func loadAcademicCalendarBlackouts(ctx context.Context, pool *pgxpool.Pool, snap *CourseSnapshot, count func(int)) error {
+	if snap.OrgID == nil {
+		return nil
+	}
+	rows, err := pool.Query(ctx, `
+SELECT start_date, COALESCE(end_date, start_date)
+FROM tenant.academic_calendar_events
+WHERE org_id = $1
+  AND event_type IN ('holiday', 'no_class_day')
+ORDER BY start_date ASC
+LIMIT 500
+`, *snap.OrgID)
+	count(1)
+	if err != nil {
+		if isUndefinedTable(err) {
+			return nil
+		}
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var start, end time.Time
+		if err := rows.Scan(&start, &end); err != nil {
+			return err
+		}
+		for d := start; !d.After(end); d = d.Add(24 * time.Hour) {
+			snap.BlackoutDates = append(snap.BlackoutDates, d)
+		}
 	}
 	return rows.Err()
 }

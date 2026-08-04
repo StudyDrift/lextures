@@ -107,4 +107,32 @@ const (
 	ItemInteractionInstructorPresencePlan ItemID = "interaction.instructor-presence-plan"
 	ItemInteractionOfficeHours            ItemID = "interaction.office-hours"
 	ItemInteractionGroupsConfigured       ItemID = "interaction.groups-configured"
+
+	// D1 — Authored-content accessibility (CC.6)
+	ItemA11yImageAltText           ItemID = "a11y.image-alt-text"
+	ItemA11yVideoCaptions          ItemID = "a11y.video-captions"
+	ItemA11yHeadingStructure       ItemID = "a11y.heading-structure"
+	ItemA11yLinkText               ItemID = "a11y.link-text"
+	ItemA11yTableHeaders           ItemID = "a11y.table-headers"
+	ItemA11yTablesForLayout        ItemID = "a11y.tables-for-layout"
+	ItemA11yColorContrast          ItemID = "a11y.color-contrast"
+	ItemA11yTextFormatting         ItemID = "a11y.text-formatting"
+	ItemA11yDocumentAccessibility  ItemID = "a11y.document-accessibility"
+	ItemA11yMediaAlternatives      ItemID = "a11y.media-alternatives"
+	ItemA11yEnforcementSettings    ItemID = "a11y.enforcement-settings"
+	ItemA11yPlainLanguage          ItemID = "a11y.plain-language"
+
+	// D2 — Inclusive design / UDL (CC.6)
+	ItemUDLMultipleRepresentations ItemID = "udl.multiple-representations"
+	ItemUDLExpressionChoice      ItemID = "udl.expression-choice"
+	ItemUDLEngagementRelevance   ItemID = "udl.engagement-relevance"
+
+	// D3 — Link health (CC.6)
+	ItemLinksExternalHealth ItemID = "links.external-health"
+
+	// D4 — Launch readiness (CC.6)
+	ItemLaunchStudentPreview    ItemID = "launch.student-preview"
+	ItemLaunchNoDraftsAfterStart ItemID = "launch.no-drafts-after-start"
+	ItemLaunchCalendarSanity    ItemID = "launch.calendar-sanity"
+	ItemLaunchBackupExport      ItemID = "launch.backup-export"
 )

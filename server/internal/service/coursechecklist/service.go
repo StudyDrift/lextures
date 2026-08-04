@@ -366,7 +366,8 @@ func (s *Service) evaluateFull(ctx context.Context, courseID uuid.UUID, courseCo
 		if err != nil {
 			return nil, err
 		}
-		res := Evaluate(ctx, snap, EvaluateOptions{})
+		opt := EvaluateOptions{LazyLoaders: s.lazyLoaders()}
+		res := Evaluate(ctx, snap, opt)
 		truncated := false
 		res, truncated = fitPayload(res)
 		return evalOut{res: res, at: s.now(), truncated: truncated}, nil
@@ -376,6 +377,14 @@ func (s *Service) evaluateFull(ctx context.Context, courseID uuid.UUID, courseCo
 	}
 	out := v.(evalOut)
 	return out.res, out.at, out.truncated, nil
+}
+
+func (s *Service) lazyLoaders() map[LazyLoaderID]LazyLoader {
+	if s == nil || s.Pool == nil {
+		return nil
+	}
+	loader := NewLinkHealthLazyLoader(s.Pool, true)
+	return map[LazyLoaderID]LazyLoader{loader.ID(): loader}
 }
 
 func (s *Service) evaluateOnly(ctx context.Context, courseID uuid.UUID, courseCode string, itemID ItemID) (Result, time.Time, bool, error) {
@@ -388,7 +397,7 @@ func (s *Service) evaluateOnly(ctx context.Context, courseID uuid.UUID, courseCo
 	v, err, _ := evalFlight.Do(key, func() (any, error) {
 		acquireEvalSlot()
 		defer releaseEvalSlot()
-		opt := EvaluateOptions{Only: []ItemID{itemID}}
+		opt := EvaluateOptions{Only: []ItemID{itemID}, LazyLoaders: s.lazyLoaders()}
 		needs := DataNeedsForEvaluate(MustDefault(), opt)
 		snap, err := LoadSnapshot(ctx, s.Pool, courseCode, needs)
 		if err != nil {

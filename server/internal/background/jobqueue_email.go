@@ -97,6 +97,7 @@ func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource) {
 	RegisterContentToolsMigrationJobs(r, pool)
 	RegisterContentToolsAnalyticsJobs(r, pool)
 	RegisterCourseChecklistRetentionJobs(r, pool)
+	RegisterCourseChecklistLinkCheckJobs(r, pool)
 	registerScheduledJobs(r, pool, cfgSrc)
 }
 

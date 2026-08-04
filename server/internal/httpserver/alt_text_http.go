@@ -195,6 +195,8 @@ func (d Deps) handleGetCourseAccessibility() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
+		// Side effect: opening accessibility settings stamps a11y.enforcement-settings (CC.6).
+		_ = course.StampA11yReviewed(r.Context(), d.Pool, *cid)
 		items, err := imagealtrepo.ListCourseMarkdownItems(r.Context(), d.Pool, *cid)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course content.")

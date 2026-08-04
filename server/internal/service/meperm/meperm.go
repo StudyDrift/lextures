@@ -66,12 +66,17 @@ func MyPermissions(
 		return withOrgRolePermissions(ctx, pool, userID, base)
 	}
 	if viewAsStudent {
-		// Validate the caller actually holds a student-equivalent enrollment.
+		// Staff may preview as a student (CC.6 launch.student-preview). Students may also
+		// request the filtered grant set for their own enrollment.
+		isStaff, err := enrollment.UserIsCourseStaff(ctx, pool, courseCode, userID)
+		if err != nil {
+			return nil, err
+		}
 		stu, err := enrollment.UserHasStudentEquivalentEnrollment(ctx, pool, courseCode, userID)
 		if err != nil {
 			return nil, err
 		}
-		if !stu {
+		if !isStaff && !stu {
 			return nil, &InvalidInput{Message: "Not enrolled as a student in this course."}
 		}
 		base, err := rbac.ListGrantedPermissionStringsCourseView(ctx, pool, userID, courseCode, true)

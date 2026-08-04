@@ -26,6 +26,7 @@ const (
 	DataNeedOfficeHours       DataNeed = "office_hours"        // future appointment slots
 	DataNeedEnrollmentGroups  DataNeed = "enrollment_groups"   // group sets + unassigned student count
 	DataNeedAnnouncementCadence DataNeed = "announcement_cadence" // announcement timestamps for presence plan
+	DataNeedAcademicCalendar    DataNeed = "academic_calendar"    // org holiday / no-class days (CC.6 FR-19)
 )
 
 // AllDataNeeds is the full set loaded for a complete evaluation.
@@ -50,6 +51,7 @@ var AllDataNeeds = []DataNeed{
 	DataNeedOfficeHours,
 	DataNeedEnrollmentGroups,
 	DataNeedAnnouncementCadence,
+	DataNeedAcademicCalendar,
 }
 
 func unionDataNeeds(items []ItemDescriptor) []DataNeed {

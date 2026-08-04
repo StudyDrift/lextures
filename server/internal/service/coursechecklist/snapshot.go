@@ -36,18 +36,32 @@ type CourseSnapshot struct {
 	CourseHomeLanding       string
 	CourseHomeContentItemID *string
 	CreatedAt               time.Time
-	FeaturesReviewedAt             *time.Time
-	AccommodationsReviewedAt       *time.Time
-	IntegritySettingsReviewedAt    *time.Time
-	GradingSchemeID                *uuid.UUID
-	GradingSchemeScaleJSON         json.RawMessage
-	CatalogLanguage                string
-	HomeschoolMode                 bool // true when OrgID is nil (personal / single-instructor)
-	ParentPortalEnabled            bool
-	OrgIsK12                       bool
-	CreatorUserID                  *uuid.UUID
-	EnrollmentGroupsEnabled        bool
-	Features                       CourseFeatures
+	FeaturesReviewedAt          *time.Time
+	AccommodationsReviewedAt    *time.Time
+	IntegritySettingsReviewedAt *time.Time
+	A11yReviewedAt              *time.Time
+	StudentPreviewAt            *time.Time
+	LastExportAt                *time.Time
+	StructureChangedAt          *time.Time
+	GradingSchemeID             *uuid.UUID
+	GradingSchemeScaleJSON      json.RawMessage
+	CatalogLanguage             string
+	HomeschoolMode              bool // true when OrgID is nil (personal / single-instructor)
+	ParentPortalEnabled         bool
+	OrgIsK12                    bool
+	GradeLevels                 []string
+	MarkdownThemePreset         string
+	MarkdownThemeCustom         json.RawMessage
+	OrgID                       *uuid.UUID
+	CreatorUserID               *uuid.UUID
+	EnrollmentGroupsEnabled     bool
+	Features                    CourseFeatures
+
+	// BlackoutDates are institutional non-instructional days (FR-19); nil/empty ⇒ N/A.
+	BlackoutDates []time.Time
+
+	// ContentDoc is the shared authored-content parse (CC.6 FR-22); set once via EnsureContentDoc.
+	ContentDoc *ContentDoc
 
 	// Structure (DataNeedStructure)
 	StructureItems []StructureItem
@@ -252,6 +266,11 @@ type AssessmentItemSnap struct {
 	LateSubmissionPolicy string
 	PostingPolicy        string
 	OriginalityDetection string
+	// Assignment submission options (CC.6 FR-13)
+	AllowTextSubmission bool
+	AllowFileUpload     bool
+	AllowURLSubmission  bool
+	BodyMarkdown        string // capped; for authentic-activity lexicon
 	// Quiz behaviour
 	UnlimitedAttempts  bool
 	MaxAttempts        int
@@ -323,6 +342,9 @@ type FileSnap struct {
 	DisplayName string
 	ContentType string
 	ByteSize    int64
+	StorageKey  string
+	// TextLayer is "has_text" | "image_only" | "unknown" | "" (non-PDF).
+	TextLayer string
 }
 
 // SectionSnap is a course section.

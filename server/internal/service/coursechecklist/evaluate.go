@@ -5,10 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"os"
+	"strings"
 	"time"
 
-	"github.com/lextures/lextures/server/internal/telemetry"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.opentelemetry.io/otel/attribute"
+
+	"github.com/lextures/lextures/server/internal/repos/jobqueue"
+	"github.com/lextures/lextures/server/internal/service/coursechecklist/contentdoc"
+	"github.com/lextures/lextures/server/internal/service/coursechecklist/linkhealth"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 // Evaluate runs the checklist engine against an in-memory snapshot (FR-6–FR-13).
@@ -34,6 +42,10 @@ func Evaluate(ctx context.Context, snap CourseSnapshot, opt EvaluateOptions) Res
 
 	items := reg.ItemsForEvaluate(opt)
 	runLazyLoaders(ctx, &snap, items, opt.LazyLoaders)
+	// Shared authored-content parse for accessibility / UDL rules (CC.6 FR-22 / AC-13).
+	if needsContentDoc(items) {
+		EnsureContentDoc(&snap)
+	}
 
 	findings := make([]ItemResult, 0, len(items))
 	for _, it := range items {
@@ -59,6 +71,19 @@ func Evaluate(ctx context.Context, snap CourseSnapshot, opt EvaluateOptions) Res
 		"seconds", elapsed,
 	)
 	return res
+}
+
+func needsContentDoc(items []ItemDescriptor) bool {
+	for _, it := range items {
+		switch it.ID {
+		case ItemA11yImageAltText, ItemA11yVideoCaptions, ItemA11yHeadingStructure,
+			ItemA11yLinkText, ItemA11yTableHeaders, ItemA11yTablesForLayout,
+			ItemA11yTextFormatting, ItemA11yMediaAlternatives, ItemA11yPlainLanguage,
+			ItemUDLMultipleRepresentations, ItemLinksExternalHealth:
+			return true
+		}
+	}
+	return false
 }
 
 func evaluateOne(ctx context.Context, snap CourseSnapshot, it ItemDescriptor) ItemResult {
@@ -256,3 +281,193 @@ func runLazyLoaders(ctx context.Context, snap *CourseSnapshot, items []ItemDescr
 func SerializeResultJSON(r Result) ([]byte, error) {
 	return json.Marshal(r)
 }
+
+// ContentDoc aliases the shared authored-content model (CC.6 FR-22).
+type ContentDoc = contentdoc.Doc
+
+// EnsureContentDoc returns snap.ContentDoc, parsing once when missing.
+func EnsureContentDoc(snap *CourseSnapshot) *ContentDoc {
+	if snap == nil {
+		return &ContentDoc{}
+	}
+	if snap.ContentDoc != nil {
+		return snap.ContentDoc
+	}
+	doc := parseContentDoc(*snap)
+	snap.ContentDoc = doc
+	return doc
+}
+
+func contentDocFor(snap CourseSnapshot) *ContentDoc {
+	if snap.ContentDoc != nil {
+		return snap.ContentDoc
+	}
+	return parseContentDoc(snap)
+}
+
+func parseContentDoc(snap CourseSnapshot) *ContentDoc {
+	moduleTitle := map[uuid.UUID]string{}
+	for _, it := range snap.StructureItems {
+		if it.Kind == "module" {
+			moduleTitle[it.ID] = it.Title
+		}
+	}
+	var sources []contentdoc.Source
+	for _, it := range snap.StructureItems {
+		if it.Archived {
+			continue
+		}
+		meta, ok := snap.ItemMeta[it.ID]
+		if !ok || meta.BodyMarkdown == "" {
+			continue
+		}
+		mod := ""
+		if it.ParentID != nil {
+			mod = moduleTitle[*it.ParentID]
+		}
+		sources = append(sources, contentdoc.Source{
+			ItemID: it.ID, Kind: it.Kind, Title: it.Title, ModuleTitle: mod,
+			Route: contentdoc.PageRoute(it.Kind), Markdown: meta.BodyMarkdown,
+		})
+	}
+	for _, sec := range snap.SyllabusSections {
+		if sec.Markdown == "" {
+			continue
+		}
+		sources = append(sources, contentdoc.Source{
+			Kind: "syllabus", Title: sec.Title,
+			Route: "/courses/{courseCode}/syllabus", Markdown: sec.Markdown,
+		})
+	}
+	return contentdoc.Parse(sources)
+}
+
+func contentPageRoute(kind string, id uuid.UUID) string {
+	_ = id
+	return contentdoc.PageRoute(kind)
+}
+
+type ContentPage = contentdoc.Page
+type ContentImage = contentdoc.Image
+type ContentHeading = contentdoc.Heading
+type ContentLink = contentdoc.Link
+type ContentTable = contentdoc.Table
+type ContentMedia = contentdoc.Media
+
+// JobTypeChecklistLinkCheck is the background job that populates link-health cache.
+const JobTypeChecklistLinkCheck = "checklist-linkcheck"
+
+// LinkCheckEnabled reports whether outbound link checking is enabled.
+// Default false until security review (CC.6 §15); set CHECKLIST_LINKCHECK_ENABLED=true to enable.
+func LinkCheckEnabled() bool {
+	v := strings.TrimSpace(strings.ToLower(os.Getenv("CHECKLIST_LINKCHECK_ENABLED")))
+	return v == "1" || v == "true" || v == "yes" || v == "on"
+}
+
+// NewLinkHealthLazyLoader returns a LazyLoader that serves cached results or enqueues a check.
+func NewLinkHealthLazyLoader(pool *pgxpool.Pool, enqueue bool) LazyLoader {
+	return LazyFunc{
+		LoaderID: LazyLinkHealth,
+		Fn: func(ctx context.Context, snap *CourseSnapshot) error {
+			if snap == nil {
+				return nil
+			}
+			now := time.Now().UTC()
+			rows, err := linkhealth.ListForCourse(ctx, pool, snap.CourseID)
+			if err != nil {
+				// Table missing / error → pending unknown.
+				snap.Lazy[LazyLinkHealth] = LinkHealthLazy{Pending: true}
+				return nil
+			}
+			if linkhealth.CacheFresh(rows, now) {
+				var newest *time.Time
+				capped := false
+				for _, r := range rows {
+					if r.Reason == "cap" {
+						capped = true
+					}
+					t := r.CheckedAt
+					if newest == nil || t.After(*newest) {
+						newest = &t
+					}
+				}
+				snap.Lazy[LazyLinkHealth] = LinkHealthLazy{
+					Pending: false, Rows: rows, Capped: capped, CheckedAt: newest,
+				}
+				return nil
+			}
+			snap.Lazy[LazyLinkHealth] = LinkHealthLazy{Pending: true}
+			if !LinkCheckEnabled() || !enqueue || pool == nil {
+				return nil
+			}
+			payload, _ := json.Marshal(map[string]string{"courseId": snap.CourseID.String()})
+			_, err = jobqueue.Enqueue(ctx, pool, jobqueue.EnqueueParams{
+				JobType:   JobTypeChecklistLinkCheck,
+				Payload:   payload,
+				Priority:  6,
+				UniqueKey: linkhealth.LastEnqueuedKey(snap.CourseID),
+			})
+			if err != nil {
+				slog.Debug("coursechecklist linkcheck enqueue skipped", "err", err, "course_id", snap.CourseID)
+			}
+			return nil
+		},
+	}
+}
+
+// ExtractExternalURLs returns distinct external http(s) URLs from a snapshot's ContentDoc.
+func ExtractExternalURLs(snap CourseSnapshot) []string {
+	doc := contentDocFor(snap)
+	seen := map[string]struct{}{}
+	var out []string
+	for _, p := range doc.Pages {
+		for _, link := range p.Links {
+			href := strings.TrimSpace(link.Href)
+			if !strings.HasPrefix(href, "http://") && !strings.HasPrefix(href, "https://") {
+				continue
+			}
+			n := linkhealth.NormalizeURL(href)
+			if _, ok := seen[n]; ok {
+				continue
+			}
+			seen[n] = struct{}{}
+			out = append(out, n)
+		}
+	}
+	return out
+}
+
+// RunLinkCheckJob executes one course link-health check (worker entrypoint).
+func RunLinkCheckJob(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) error {
+	if !LinkCheckEnabled() {
+		return nil
+	}
+	start := time.Now()
+	// Load a minimal snapshot for URL extraction.
+	code, err := courseCodeForID(ctx, pool, courseID)
+	if err != nil || code == "" {
+		return err
+	}
+	snap, err := LoadSnapshot(ctx, pool, code, []DataNeed{
+		DataNeedCourse, DataNeedStructure, DataNeedItemMeta, DataNeedSyllabus,
+	})
+	if err != nil {
+		return err
+	}
+	EnsureContentDoc(&snap)
+	urls := ExtractExternalURLs(snap)
+	checker := &linkhealth.Checker{}
+	results := checker.CheckURLs(ctx, urls)
+	if err := linkhealth.UpsertResults(ctx, pool, courseID, results); err != nil {
+		return err
+	}
+	linkhealth.ObserveDuration(time.Since(start).Seconds())
+	return nil
+}
+
+func courseCodeForID(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (string, error) {
+	var code string
+	err := pool.QueryRow(ctx, `SELECT course_code FROM course.courses WHERE id = $1`, courseID).Scan(&code)
+	return code, err
+}
+
