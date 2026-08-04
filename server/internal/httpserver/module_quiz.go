@@ -359,6 +359,8 @@ func (d Deps) handlePatchModuleQuiz() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
+		// CC.5: saving quiz settings (incl. lockdown/shuffle) stamps integrity review marker.
+		_ = course.StampIntegritySettingsReviewed(r.Context(), d.Pool, *cid)
 		row, err := coursemodulequizzes.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load quiz.")

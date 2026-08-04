@@ -5178,6 +5178,35 @@
       }
     },
     {
+      "id": "CC.5",
+      "path": "docs/completed/checklist/CC.5-rule-pack-assessment-feedback-interaction.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "ops",
+      "coverage": "smoke",
+      "rationale": "26 assessment/grading/feedback/interaction checklist rules (recommended tier) evaluated server-side. Playwright covers grading.group-weights (87%→todo, 100%→done) and feedback.rubrics-on-high-stakes evidence targeting assignment.rubric; accommodations privacy asserted in Go tests. UI lands with CC.7/CC.8.",
+      "owner": "Learning Platform",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/course-checklist.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": false,
+        "disabledState": "n/a",
+        "enabledJourney": true,
+        "authorization": "n/a",
+        "dependency": "n/a",
+        "rollback": true,
+        "notes": "All 26 rules ship recommended (FR-27); promote arithmetic essentials after dogfood (CC.10). Accommodations rules are count/type-only (no PII). Retire via RETIRED_ITEM_IDS. No feature flag."
+      }
+    },
+    {
       "id": "mb-1-in-app-browser",
       "path": "docs/completed/mobile/MB.1-in-app-browser.md",
       "markets": [

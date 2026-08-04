@@ -1,17 +1,17 @@
 # Completed feature E2E coverage report
 
-Total stories: **545**
+Total stories: **560**
 
 ## Coverage levels
 
 | Level | Count |
 |---|---:|
 | journey | 108 |
-| smoke | 178 |
+| smoke | 182 |
 | api-contract | 1 |
 | covered-by-parent | 11 |
 | manual | 8 |
-| not-applicable | 171 |
+| not-applicable | 182 |
 | missing | 68 |
 
 ## By client
@@ -20,18 +20,18 @@ Total stories: **545**
 |---|---:|
 | cli | 48 |
 | docs | 18 |
-| mobile | 92 |
-| ops | 16 |
+| mobile | 102 |
+| ops | 21 |
 | web | 371 |
 
 ## By market tag
 
 | Market | Count |
 |---|---:|
-| ALL | 498 |
-| HE | 15 |
-| HS | 19 |
-| K12 | 13 |
+| ALL | 508 |
+| HE | 20 |
+| HS | 24 |
+| K12 | 18 |
 
 ## Missing journeys (severity / owner / milestone)
 
@@ -117,9 +117,16 @@ Total stories: **545**
 | AC.1 | enabledJourney, rollback | [docs/completed/adaptive/AC.1-foundations-flag-and-data-model.md](../../docs/completed/adaptive/AC.1-foundations-flag-and-data-model.md) |
 | AC.7 | rollback | [docs/completed/adaptive/AC.7-post-assessment-and-effectiveness.md](../../docs/completed/adaptive/AC.7-post-assessment-and-effectiveness.md) |
 | AC.9 | rollback | [docs/completed/adaptive/AC.9-analytics-reporting-and-operability.md](../../docs/completed/adaptive/AC.9-analytics-reporting-and-operability.md) |
+| CC.1 | settingsToggle | [docs/completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md](../../docs/completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md) |
+| CC.2 | settingsToggle | [docs/completed/checklist/CC.2-checklist-state-api-and-dismissals.md](../../docs/completed/checklist/CC.2-checklist-state-api-and-dismissals.md) |
+| CC.3 | settingsToggle | [docs/completed/checklist/CC.3-rule-pack-foundations-and-orientation.md](../../docs/completed/checklist/CC.3-rule-pack-foundations-and-orientation.md) |
+| CC.4 | settingsToggle | [docs/completed/checklist/CC.4-rule-pack-structure-outcomes-alignment.md](../../docs/completed/checklist/CC.4-rule-pack-structure-outcomes-alignment.md) |
+| CC.5 | settingsToggle | [docs/completed/checklist/CC.5-rule-pack-assessment-feedback-interaction.md](../../docs/completed/checklist/CC.5-rule-pack-assessment-feedback-interaction.md) |
 | CT.1 | enabledJourney, rollback | [docs/completed/content_tools/CT.1-foundations-registry-and-data-model.md](../../docs/completed/content_tools/CT.1-foundations-registry-and-data-model.md) |
 | CT.2 | rollback | [docs/completed/content_tools/CT.2-authoring-tools-dropdown-and-config.md](../../docs/completed/content_tools/CT.2-authoring-tools-dropdown-and-config.md) |
+| ct-m9-mobile-tools-governance-a11y-telemetry | settingsToggle | [docs/completed/content_tools/CT.M9-mobile-tools-governance-a11y-telemetry.md](../../docs/completed/content_tools/CT.M9-mobile-tools-governance-a11y-telemetry.md) |
 | IQ.1 | disabledState, authorization, dependency, rollback | [docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md](../../docs/completed/interactive-quizzes/IQ.1-foundation-and-feature-flag.md) |
+| mb-1-in-app-browser | dependency | [docs/completed/mobile/MB.1-in-app-browser.md](../../docs/completed/mobile/MB.1-in-app-browser.md) |
 | PS.4 | disabledState, enabledJourney, rollback | [docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md](../../docs/completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md) |
 | T01 | disabledState, authorization, dependency, rollback | [docs/completed/transcripts/T01-official-transcript-generation.md](../../docs/completed/transcripts/T01-official-transcript-generation.md) |
 | VC.1 | disabledState, authorization, dependency, rollback | [docs/completed/visual-collaboration/VC.1-foundation-and-feature-flag.md](../../docs/completed/visual-collaboration/VC.1-foundation-and-feature-flag.md) |
@@ -155,8 +162,9 @@ Total stories: **545**
 | ai-providers | 0 | 8 | 0 | 0 | 0 | 0 | 1 |
 | animations | 0 | 4 | 0 | 0 | 0 | 0 | 3 |
 | badges | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| checklist | 0 | 4 | 0 | 0 | 0 | 1 | 0 |
 | cli | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
-| content_tools | 22 | 1 | 0 | 0 | 0 | 0 | 0 |
+| content_tools | 22 | 1 | 0 | 0 | 0 | 9 | 0 |
 | e2e | 3 | 0 | 1 | 0 | 0 | 0 | 0 |
 | emails | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
 | feedback | 0 | 5 | 0 | 0 | 0 | 0 | 0 |
@@ -168,7 +176,7 @@ Total stories: **545**
 | lighthouse | 0 | 3 | 0 | 0 | 0 | 0 | 0 |
 | marketplace | 1 | 9 | 0 | 1 | 0 | 0 | 0 |
 | marketplace-courses | 0 | 2 | 0 | 2 | 0 | 0 | 0 |
-| mobile | 0 | 0 | 0 | 0 | 0 | 84 | 0 |
+| mobile | 0 | 0 | 0 | 0 | 0 | 85 | 0 |
 | parent-portal | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | screenshare | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | settings | 0 | 0 | 0 | 0 | 0 | 3 | 4 |

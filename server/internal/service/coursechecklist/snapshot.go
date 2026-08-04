@@ -36,14 +36,18 @@ type CourseSnapshot struct {
 	CourseHomeLanding       string
 	CourseHomeContentItemID *string
 	CreatedAt               time.Time
-	FeaturesReviewedAt      *time.Time
-	GradingSchemeID         *uuid.UUID
-	CatalogLanguage         string
-	HomeschoolMode          bool // true when OrgID is nil (personal / single-instructor)
-	ParentPortalEnabled     bool
-	OrgIsK12                bool
-	CreatorUserID           *uuid.UUID
-	Features                CourseFeatures
+	FeaturesReviewedAt             *time.Time
+	AccommodationsReviewedAt       *time.Time
+	IntegritySettingsReviewedAt    *time.Time
+	GradingSchemeID                *uuid.UUID
+	GradingSchemeScaleJSON         json.RawMessage
+	CatalogLanguage                string
+	HomeschoolMode                 bool // true when OrgID is nil (personal / single-instructor)
+	ParentPortalEnabled            bool
+	OrgIsK12                       bool
+	CreatorUserID                  *uuid.UUID
+	EnrollmentGroupsEnabled        bool
+	Features                       CourseFeatures
 
 	// Structure (DataNeedStructure)
 	StructureItems []StructureItem
@@ -86,8 +90,30 @@ type CourseSnapshot struct {
 	// Sections (DataNeedSections)
 	Sections []SectionSnap
 
-	// Accommodations (DataNeedAccommodations)
-	AccommodationCount int
+	// Accommodations (DataNeedAccommodations) — counts/types only; never student IDs (CC.5)
+	AccommodationCount       int
+	AccommodationTypeCounts  []AccommodationTypeCount
+	LatestAccommodationAt    *time.Time
+
+	// Assessment item details (DataNeedAssessmentItems)
+	AssessmentItems []AssessmentItemSnap
+
+	// Peer review (DataNeedPeerReview)
+	PeerReviewConfigs []PeerReviewConfigSnap
+
+	// Discussions (DataNeedDiscussions)
+	DiscussionForumCount int
+	DiscussionPromptCount int
+
+	// Office hours (DataNeedOfficeHours)
+	FutureOfficeHourSlots int
+
+	// Enrollment groups (DataNeedEnrollmentGroups)
+	EnrollmentGroupSetCount int
+	UnassignedStudentCount  int
+
+	// Announcement cadence (DataNeedAnnouncementCadence)
+	AnnouncementTimes []time.Time
 
 	// Standards (DataNeedStandards)
 	StandardsCount         int
@@ -124,6 +150,8 @@ type CourseFeatures struct {
 	VisualBoardsEnabled       bool
 	AiTutorEnabled            bool
 	ModulesAiAssistantEnabled bool
+	OfficeHoursEnabled        bool
+	AdaptiveContentEnabled    bool
 }
 
 // StructureItem is a course structure row subset for checklist rules.
@@ -197,9 +225,61 @@ type PrerequisiteEdge struct {
 
 // AssignmentGroupSnap is an assignment group.
 type AssignmentGroupSnap struct {
-	ID     uuid.UUID
-	Name   string
-	Weight *float64
+	ID          uuid.UUID
+	Name        string
+	Weight      *float64
+	DropLowest  int
+	DropHighest int
+}
+
+// AssessmentItemSnap is assignment/quiz detail for assessment rules (CC.5).
+type AssessmentItemSnap struct {
+	ID                   uuid.UUID
+	Kind                 string // assignment | quiz | survey
+	Title                string
+	ParentID             *uuid.UUID
+	ModuleTitle          string
+	SortOrder            int
+	Published            bool
+	Archived             bool
+	DueAt                *time.Time
+	AvailableFrom        *time.Time
+	AvailableUntil       *time.Time
+	Points               *int
+	AssignmentGroupID    *uuid.UUID
+	HasBody              bool
+	HasRubric            bool
+	LateSubmissionPolicy string
+	PostingPolicy        string
+	OriginalityDetection string
+	// Quiz behaviour
+	UnlimitedAttempts  bool
+	MaxAttempts        int
+	GradeAttemptPolicy string
+	ShowScoreTiming    string
+	ReviewVisibility   string
+	ReviewWhen         string
+	TimeLimitMinutes   *int
+	ShuffleQuestions   bool
+	ShuffleChoices     bool
+	LockdownMode       string
+}
+
+// PeerReviewConfigSnap is a peer-review configuration row (CC.5).
+type PeerReviewConfigSnap struct {
+	AssignmentID       uuid.UUID
+	AssignmentTitle    string
+	ReviewsPerReviewer int
+	OpensAt            *time.Time
+	ClosesAt           *time.Time
+	HasRubric          bool
+	DueAt              *time.Time
+}
+
+// AccommodationTypeCount is a privacy-safe aggregate (CC.5 FR-21).
+type AccommodationTypeCount struct {
+	Type  string
+	Count int
 }
 
 // PersonSnap is a privacy-safe enrollment stub (display name + opaque ID only).

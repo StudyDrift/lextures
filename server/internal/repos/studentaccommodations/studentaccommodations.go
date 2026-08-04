@@ -218,6 +218,13 @@ RETURNING id, user_id, course_id,` + rowSelectCols
 	r.EffectiveFrom = effF
 	r.EffectiveUntil = effU
 	r.AlternativeFormat = strptr(alt)
+	if courseID != nil {
+		_, _ = pool.Exec(ctx, `
+UPDATE course.courses
+SET accommodations_reviewed_at = NOW(), updated_at = NOW()
+WHERE id = $1
+`, *courseID)
+	}
 	return &r, nil
 }
 
@@ -276,6 +283,13 @@ RETURNING id, user_id, course_id,` + rowSelectCols
 	r.EffectiveFrom = effF
 	r.EffectiveUntil = effU
 	r.AlternativeFormat = strptr(alt)
+	if courseID != nil {
+		_, _ = pool.Exec(ctx, `
+UPDATE course.courses
+SET accommodations_reviewed_at = NOW(), updated_at = NOW()
+WHERE id = $1
+`, *courseID)
+	}
 	return &r, nil
 }
 

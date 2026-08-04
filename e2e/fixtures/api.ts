@@ -538,7 +538,16 @@ export async function apiGetGradingScheme(
 export async function apiGetCourseGrading(
   token: string,
   courseCode: string,
-): Promise<{ gradingScale: string; sbgEnabled?: boolean }> {
+): Promise<{
+  gradingScale: string
+  sbgEnabled?: boolean
+  assignmentGroups?: Array<{
+    id: string
+    name: string
+    sortOrder: number
+    weightPercent: number
+  }>
+}> {
   const res = await fetch(
     `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/grading`,
     { headers: { Authorization: `Bearer ${token}` } },
@@ -547,7 +556,16 @@ export async function apiGetCourseGrading(
     const body = await res.text()
     throw new Error(`Get course grading failed (${res.status}): ${body}`)
   }
-  return res.json() as Promise<{ gradingScale: string; sbgEnabled?: boolean }>
+  return res.json() as Promise<{
+    gradingScale: string
+    sbgEnabled?: boolean
+    assignmentGroups?: Array<{
+      id: string
+      name: string
+      sortOrder: number
+      weightPercent: number
+    }>
+  }>
 }
 
 export async function apiPutCourseGrading(

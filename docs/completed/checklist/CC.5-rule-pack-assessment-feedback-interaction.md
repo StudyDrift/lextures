@@ -1,7 +1,7 @@
 # CC.5 — Rule Pack C: Assessment, Grading, Feedback & Interaction
 
 > Implementation plan. Source: Course Checklist product request. Folder overview: [README](README.md).
-> Rubric mapping: [course-design-research.md](course-design-research.md).
+> Rubric mapping: [course-design-research.md](../../plan/checklist/course-design-research.md).
 
 ## Metadata
 
@@ -330,7 +330,7 @@ wires the checklist item's action button to it. No new model, prompt or cost bud
 
 ## 17. Documentation & Training
 
-- [course-design-research.md](course-design-research.md) C-sections.
+- [course-design-research.md](../../plan/checklist/course-design-research.md) C-sections.
 - Help-centre: "Why do my weights need to total 100%?", "Writing grading criteria students can use",
   "Formative checks: what counts".
 - Accommodations doc note explaining exactly what the checklist can and cannot see (privacy transparency).
@@ -360,5 +360,5 @@ wires the checklist item's action button to it. No new model, prompt or cost bud
   GS3 (Assessment and Measurement) and GS5 (Course Activities and Learner Interaction);
   [NSQ](https://nsqol.org/the-standards/quality-online-courses/) Standard D (Learner Assessment).
 - Related plans: [CC.4](CC.4-rule-pack-structure-outcomes-alignment.md),
-  [CC.6](CC.6-rule-pack-accessibility-and-launch-readiness.md),
-  [CC.10](CC.10-analytics-guidance-and-rollout.md).
+  [CC.6](../../plan/checklist/CC.6-rule-pack-accessibility-and-launch-readiness.md),
+  [CC.10](../../plan/checklist/CC.10-analytics-guidance-and-rollout.md).
