@@ -1,7 +1,7 @@
 # CC.1 — Checklist Rule Registry & Evaluation Engine
 
 > Implementation plan. Source: Course Checklist product request (a course-scoped "is this course actually
-> ready and well designed?" surface). Folder overview: [README](README.md).
+> ready and well designed?" surface). Folder overview: [README](../../plan/checklist/README.md).
 
 ## Metadata
 
@@ -11,7 +11,7 @@
 | **Section** | Course Checklist |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Server / platform team |
 | **Depends on** | — |
@@ -325,13 +325,13 @@ always on for staff. CC.1's safety valves are therefore structural, not toggle-b
   `server/internal/repos/course/`, `server/internal/repos/coursestructure/`,
   `server/internal/repos/courseoutcomes/`, `server/internal/repos/enrollment/`,
   `server/internal/telemetry/`.
-- Precedent in-repo: [PS.1 settings registry](../../completed/settings/PS.1-settings-registry-and-addressable-controls.md)
+- Precedent in-repo: [PS.1 settings registry](../settings/PS.1-settings-registry-and-addressable-controls.md)
   (stable string IDs, aliases, integrity tests) and
-  [CT.1 content-tools registry](../../completed/content_tools/CT.1-foundations-registry-and-data-model.md)
+  [CT.1 content-tools registry](../content_tools/CT.1-foundations-registry-and-data-model.md)
   (declarative manifest, no migration per tool).
 - External standards: [Quality Matters Higher Ed Rubric](https://www.qualitymatters.org/qa-resources/rubric-standards/higher-ed-rubric),
   [SUNY OSCQR](https://oscqr.suny.edu/),
   [National Standards for Quality Online Courses](https://nsqol.org/the-standards/quality-online-courses/),
   [CAST UDL Guidelines 3.0](https://udlguidelines.cast.org/), WCAG 2.1 AA.
-- Related plans: [CC.2](CC.2-checklist-state-api-and-dismissals.md), [CC.3](CC.3-rule-pack-foundations-and-orientation.md),
-  [CC.7](CC.7-web-checklist-page-and-nav-badge.md), [CC.8](CC.8-deep-link-and-highlight-targeting.md).
+- Related plans: [CC.2](../../plan/checklist/CC.2-checklist-state-api-and-dismissals.md), [CC.3](../../plan/checklist/CC.3-rule-pack-foundations-and-orientation.md),
+  [CC.7](../../plan/checklist/CC.7-web-checklist-page-and-nav-badge.md), [CC.8](../../plan/checklist/CC.8-deep-link-and-highlight-targeting.md).

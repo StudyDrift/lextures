@@ -346,7 +346,7 @@ rule retirement, tier demotion, the link-check env kill switch (CC.6), and TTL t
 - External standards: [Quality Matters](https://www.qualitymatters.org/qa-resources/rubric-standards),
   [OSCQR](https://oscqr.suny.edu/), [NSQ](https://nsqol.org/the-standards/quality-online-courses/),
   [CAST UDL 3.0](https://udlguidelines.cast.org/).
-- Related plans: all of [CC.1](CC.1-checklist-registry-and-evaluation-engine.md) –
+- Related plans: all of [CC.1](../../completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md) –
   [CC.9](CC.9-mobile-checklist-ios-and-android.md); AI provider plumbing in
   [`docs/completed/ai-providers/`](../../completed/ai-providers/);
   compliance evidence programme in [`../standards/`](../standards/).
