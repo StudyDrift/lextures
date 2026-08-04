@@ -42,6 +42,9 @@ type lexiconFile struct {
 	BloomVerbs            map[string][]string `json:"bloomVerbs"`
 	NonMeasurableOpeners  []string            `json:"nonMeasurableOpeners"`
 	SuggestedReplacements map[string]string   `json:"suggestedReplacements"`
+	VagueLinkText         []string            `json:"vagueLinkText"`
+	AuthenticActivity     []string            `json:"authenticActivity"`
+	ExpressionChoice      []string            `json:"expressionChoice"`
 }
 
 // Lexicon is a compiled, locale-specific keyword set for text heuristics (FR-35).
@@ -67,6 +70,9 @@ type Lexicon struct {
 	NonMeasurableOpeners  []string
 	SuggestedReplacements map[string]string
 	HasBloom              bool
+	VagueLinkText         *keywordMatcher
+	AuthenticActivity     *keywordMatcher
+	ExpressionChoice      *keywordMatcher
 }
 
 type keywordMatcher struct {
@@ -185,6 +191,9 @@ func loadLexicons() {
 				NonMeasurableOpeners:  normalizePhraseList(f.NonMeasurableOpeners),
 				SuggestedReplacements: lowerKeyMap(f.SuggestedReplacements),
 				HasBloom:              hasBloom,
+				VagueLinkText:         newKeywordMatcher(f.VagueLinkText),
+				AuthenticActivity:     newKeywordMatcher(f.AuthenticActivity),
+				ExpressionChoice:      newKeywordMatcher(f.ExpressionChoice),
 			}
 		}
 		if _, ok := lexicons["en"]; !ok {

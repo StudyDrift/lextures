@@ -18,8 +18,8 @@ func TestRegistryIntegrity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildBuiltinRegistry: %v", err)
 	}
-	if reg.Size() != 81 {
-		t.Fatalf("expected 81 rules, got %d", reg.Size())
+	if reg.Size() != 101 {
+		t.Fatalf("expected 101 rules, got %d", reg.Size())
 	}
 
 	routes, err := loadWebRoutesFixture()

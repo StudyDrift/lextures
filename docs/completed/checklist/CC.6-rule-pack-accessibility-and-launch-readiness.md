@@ -11,7 +11,7 @@
 | **Section** | Course Checklist |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | SHIPPED |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Server / platform team + accessibility |
 | **Depends on** | CC.1, CC.2 |

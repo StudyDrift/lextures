@@ -43,5 +43,8 @@
     "learn": "apply",
     "become aware": "recognize",
     "gain an understanding": "explain"
-  }
+  },
+  "vagueLinkText": ["click here", "read more", "link", "here", "more", "this link", "go here"],
+  "authenticActivity": ["project", "case study", "portfolio", "capstone", "authentic", "real-world", "applied project", "client project"],
+  "expressionChoice": ["choose (?:one|a) format", "choice of format", "submit (?:as )?(?:a )?video or", "text or video", "optional format"]
 }

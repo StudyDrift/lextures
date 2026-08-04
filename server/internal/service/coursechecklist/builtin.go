@@ -1,6 +1,6 @@
 package coursechecklist
 
-// BuildBuiltinRegistry returns the CC.3–CC.5 rule packs (81 recommended items).
+// BuildBuiltinRegistry returns the CC.3–CC.6 rule packs (101 recommended items).
 // Reference rules from CC.1 remain helpers for engine tests only.
 func BuildBuiltinRegistry() (*Registry, error) {
 	items := []ItemDescriptor{}
@@ -14,5 +14,8 @@ func BuildBuiltinRegistry() (*Registry, error) {
 	items = append(items, gradingRules()...)
 	items = append(items, feedbackRules()...)
 	items = append(items, interactionRules()...)
+	items = append(items, a11yRules()...)
+	items = append(items, udlRules()...)
+	items = append(items, linkAndLaunchRules()...)
 	return NewRegistry(items)
 }

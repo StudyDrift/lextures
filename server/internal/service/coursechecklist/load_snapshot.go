@@ -23,8 +23,8 @@ import (
 )
 
 // MaxSnapshotQueries is the hard budget for a full snapshot load (NFR / AC-9).
-// CC.5 adds ≤ 5 queries (assessment items, peer review, interaction, cadence, scheme).
-const MaxSnapshotQueries = 25
+// CC.6 adds structure-changed + optional academic-calendar blackout queries.
+const MaxSnapshotQueries = 28
 
 // queryCounter tallies logical SQL round-trips during LoadSnapshot (tests / AC-9).
 type queryCounter struct {
@@ -161,39 +161,8 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 		Lazy: make(map[LazyLoaderID]any),
 	}
 
-	// Extra course markers not on CoursePublic (features_reviewed_at, grading_scheme_id,
-	// catalog_language, created_by_user_id, CC.5 review markers) — one query.
-	{
-		var featuresReviewedAt *time.Time
-		var accommodationsReviewedAt *time.Time
-		var integrityReviewedAt *time.Time
-		var gradingSchemeID *uuid.UUID
-		var catalogLanguage *string
-		var creatorID *uuid.UUID
-		var enrollmentGroupsEnabled bool
-		err := pool.QueryRow(ctx, `
-SELECT features_reviewed_at, accommodations_reviewed_at, integrity_settings_reviewed_at,
-       grading_scheme_id, NULLIF(TRIM(catalog_language), ''), created_by_user_id,
-       COALESCE(enrollment_groups_enabled, false)
-FROM course.courses
-WHERE id = $1
-`, courseID).Scan(
-			&featuresReviewedAt, &accommodationsReviewedAt, &integrityReviewedAt,
-			&gradingSchemeID, &catalogLanguage, &creatorID, &enrollmentGroupsEnabled,
-		)
-		count(1)
-		if err != nil {
-			return CourseSnapshot{}, err
-		}
-		snap.FeaturesReviewedAt = featuresReviewedAt
-		snap.AccommodationsReviewedAt = accommodationsReviewedAt
-		snap.IntegritySettingsReviewedAt = integrityReviewedAt
-		snap.GradingSchemeID = gradingSchemeID
-		snap.CreatorUserID = creatorID
-		snap.EnrollmentGroupsEnabled = enrollmentGroupsEnabled
-		if catalogLanguage != nil {
-			snap.CatalogLanguage = *catalogLanguage
-		}
+	if err := loadCourseMarkers(ctx, pool, courseID, pub, &snap, count); err != nil {
+		return CourseSnapshot{}, err
 	}
 
 	if hasDataNeed(needs, DataNeedStructure) {
@@ -216,6 +185,9 @@ WHERE id = $1
 				Archived:          it.Archived,
 				SortOrder:         it.SortOrder,
 			})
+		}
+		if err := loadStructureChangedAt(ctx, pool, courseID, &snap, count); err != nil {
+			return CourseSnapshot{}, err
 		}
 	}
 
@@ -410,6 +382,8 @@ WHERE id = $1
 					DisplayName: f.DisplayName,
 					ContentType: f.ContentType,
 					ByteSize:    f.ByteSize,
+					StorageKey:  f.StorageKey,
+					TextLayer:   f.TextLayer,
 				})
 			}
 		}
@@ -557,6 +531,12 @@ LIMIT 5000
 			if err != nil {
 				return CourseSnapshot{}, err
 			}
+		}
+	}
+
+	if hasDataNeed(needs, DataNeedAcademicCalendar) {
+		if err := loadAcademicCalendarBlackouts(ctx, pool, &snap, count); err != nil {
+			return CourseSnapshot{}, err
 		}
 	}
 

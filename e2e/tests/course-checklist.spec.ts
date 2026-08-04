@@ -14,6 +14,8 @@
  *   [x] CC.4: map a third assignment → evidence shrinks after refresh
  *   [x] CC.5: weights 40/30/17 → grading.group-weights todo with 87% detail; fix to 100% → done
  *   [x] CC.5: 30% assignment without rubric → feedback.rubrics-on-high-stakes evidence targets rubric
+ *   [x] CC.6: image without alt → a11y.image-alt-text evidence; add alt → done
+ *   [x] CC.6: View as student stamps launch.student-preview → done
  */
 
 import { test, expect } from '@playwright/test'
@@ -30,6 +32,8 @@ import {
   apiCreateOutcomeLink,
   apiPutCourseGrading,
   apiGetCourseGrading,
+  apiCreateContentPage,
+  apiPatchContentPage,
 } from '../fixtures/api.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
@@ -332,4 +336,67 @@ test('Course checklist CC.5: high-stakes assignment without rubric targets rubri
   expect(row, 'capstone should appear in evidence').toBeTruthy()
   expect(row!.target?.route).toContain(`/modules/assignment/${capstone.id}`)
   expect(row!.target?.anchor).toBe('assignment.rubric')
+})
+
+test('Course checklist CC.6: missing alt text → evidence, then done after fix', async () => {
+  const teacherEmail = uniqueEmail('cc6-alt-teacher')
+  const { access_token: teacherTok } = await apiSignup({ email: teacherEmail, password: PASSWORD })
+  const course = await apiCreateCourse(teacherTok, { title: 'CC6 Alt Course' })
+  await apiEnroll(teacherTok, course.courseCode, teacherEmail, 'teacher')
+
+  const mod = await apiCreateModule(teacherTok, course.courseCode, 'Unit 1')
+  const page = await apiCreateContentPage(teacherTok, course.courseCode, mod.id, 'Images')
+  await apiPatchContentPage(teacherTok, course.courseCode, page.id, {
+    markdown: '![has alt](https://example.com/a.png)\n![](https://example.com/b.png)\n',
+  })
+
+  async function refreshChecklist(token: string, courseCode: string): Promise<ChecklistResponse> {
+    const res = await fetch(`${API_BASE}/api/v1/courses/${courseCode}/checklist/refresh`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    expect(res.status).toBe(200)
+    return res.json() as Promise<ChecklistResponse>
+  }
+
+  let list = await refreshChecklist(teacherTok, course.courseCode)
+  const item = findItem(list, 'a11y.image-alt-text')
+  expect(item, 'a11y.image-alt-text should be present').toBeTruthy()
+  expect(itemStatus(item)).toBe('in_progress')
+  expect(item!.progress).toEqual({ done: 1, total: 2 })
+  expect(item!.evidence?.rows?.length).toBe(1)
+
+  await apiPatchContentPage(teacherTok, course.courseCode, page.id, {
+    markdown: '![has alt](https://example.com/a.png)\n![also](https://example.com/b.png)\n',
+  })
+  list = await refreshChecklist(teacherTok, course.courseCode)
+  expect(itemStatus(findItem(list, 'a11y.image-alt-text'))).toBe('done')
+})
+
+test('Course checklist CC.6: View as student flips launch.student-preview', async () => {
+  const teacherEmail = uniqueEmail('cc6-preview-teacher')
+  const { access_token: teacherTok } = await apiSignup({ email: teacherEmail, password: PASSWORD })
+  const course = await apiCreateCourse(teacherTok, { title: 'CC6 Preview Course' })
+  await apiEnroll(teacherTok, course.courseCode, teacherEmail, 'teacher')
+
+  async function refreshChecklist(token: string, courseCode: string): Promise<ChecklistResponse> {
+    const res = await fetch(`${API_BASE}/api/v1/courses/${courseCode}/checklist/refresh`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    expect(res.status).toBe(200)
+    return res.json() as Promise<ChecklistResponse>
+  }
+
+  let list = await refreshChecklist(teacherTok, course.courseCode)
+  expect(itemStatus(findItem(list, 'launch.student-preview'))).toBe('todo')
+
+  const permRes = await fetch(
+    `${API_BASE}/api/v1/me/permissions?courseCode=${encodeURIComponent(course.courseCode)}&viewAs=student`,
+    { headers: { Authorization: `Bearer ${teacherTok}` } },
+  )
+  expect(permRes.status).toBe(200)
+
+  list = await refreshChecklist(teacherTok, course.courseCode)
+  expect(itemStatus(findItem(list, 'launch.student-preview'))).toBe('done')
 })

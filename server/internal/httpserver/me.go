@@ -3,15 +3,17 @@ package httpserver
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/auth"
+	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/oidc"
 	"github.com/lextures/lextures/server/internal/repos/organization"
-	cfservice "github.com/lextures/lextures/server/internal/service/customfields"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	cfservice "github.com/lextures/lextures/server/internal/service/customfields"
 	"github.com/lextures/lextures/server/internal/service/meperm"
 )
 
@@ -105,13 +107,19 @@ func (d Deps) handleMyPermissions() http.HandlerFunc {
 			return
 		}
 		q := r.URL.Query()
+		courseCode := q.Get("courseCode")
+		viewAs := q.Get("viewAs")
 		perms, err := meperm.MyPermissions(
-			r.Context(), d.Pool, userID, q.Get("courseCode"), q.Get("viewAs"),
+			r.Context(), d.Pool, userID, courseCode, viewAs,
 		)
 		if err != nil {
 			st, code, msg := meperm.HTTPErrorFor(err)
 			apierr.WriteJSON(w, st, code, msg)
 			return
+		}
+		// Side effect: staff View as: Student stamps launch.student-preview (CC.6).
+		if strings.EqualFold(strings.TrimSpace(viewAs), "student") && strings.TrimSpace(courseCode) != "" {
+			_ = course.StampStudentPreviewByCourseCode(r.Context(), d.Pool, courseCode)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(myPermissionsResponse{PermissionStrings: perms})

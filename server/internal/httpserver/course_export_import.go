@@ -7,6 +7,7 @@ import (
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/models/courseexport"
+	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/service/courseexportimport"
 )
@@ -55,6 +56,9 @@ func (d Deps) handleCourseExportGet() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to build course export.")
 			return
 		}
+
+		// Side effect: successful export stamps launch.backup-export (CC.6).
+		_ = course.StampLastExportByCourseCode(r.Context(), d.Pool, courseCode)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Content-Disposition", `attachment; filename="`+courseCode+`-course-export.json"`)

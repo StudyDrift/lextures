@@ -52,6 +52,8 @@ func (d Deps) handlePatchCourseCaptionPolicy() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
+		// Side effect: reviewing/saving caption policy stamps a11y.enforcement-settings (CC.6).
+		_ = course.StampA11yReviewedByCourseCode(r.Context(), d.Pool, courseCode)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"requireCaptions": body.RequireCaptions,
