@@ -4067,7 +4067,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2\u2013AC.6 gaps."
+        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2–AC.6 gaps."
       }
     },
     {
@@ -4154,7 +4154,7 @@
       "risk": "critical",
       "client": "web",
       "coverage": "smoke",
-      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre\u2192serve\u2192post causal journey remains backlog.",
+      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre→serve→post causal journey remains backlog.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4259,7 +4259,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2\u2013CT.3."
+        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2–CT.3."
       }
     },
     {
@@ -4361,7 +4361,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers sandbox_probe iframe mount, interact\u2192save\u2192grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
+      "rationale": "Playwright covers sandbox_probe iframe mount, interact→save→grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4499,7 +4499,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers ask \u2192 cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
+      "rationale": "Playwright covers ask → cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
       "owner": "AI Platform",
       "specs": [
         {
@@ -4526,7 +4526,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers answer-key redaction, wrong\u2192retry\u2192correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
+      "rationale": "Playwright covers answer-key redaction, wrong→retry→correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4553,7 +4553,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit\u2192reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
+      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit→reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4715,7 +4715,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers sensitive-field redaction, sequential lock, wrong\u2192hint\u2192algebraic normalisation correct, attempt exhaustion\u2192reveal_step, locale numeric input, analytics facets, and UI mount.",
+      "rationale": "Playwright covers sensitive-field redaction, sequential lock, wrong→hint→algebraic normalisation correct, attempt exhaustion→reveal_step, locale numeric input, analytics facets, and UI mount.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4921,7 +4921,7 @@
       "risk": "critical",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: Content Tool host + state persistence (fence\u2192instance, ToolFrame, autosave/conflict/offline, noop_probe). Covered by native unit suites + shared fixtures; web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: Content Tool host + state persistence (fence→instance, ToolFrame, autosave/conflict/offline, noop_probe). Covered by native unit suites + shared fixtures; web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -4943,7 +4943,7 @@
       "risk": "major",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: sandboxed WebView tool host (CT.5 bridge, opaque origin, native\u2192sandbox\u2192placeholder). Covered by native unit suites + shared bridge fixtures (AC-16); web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: sandboxed WebView tool host (CT.5 bridge, opaque origin, native→sandbox→placeholder). Covered by native unit suites + shared bridge fixtures (AC-16); web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -5009,7 +5009,7 @@
       "risk": "major",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: native pack-3 renderers (sort_sequence, highlight_annotate, diagram_hotspot) on the CT.M3 host with tap-to-assign alternatives (WCAG \u00a72.5.7). Covered by ContentToolPack3Logic unit suites + shared pack3-logic fixtures (AC-15); web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: native pack-3 renderers (sort_sequence, highlight_annotate, diagram_hotspot) on the CT.M3 host with tap-to-assign alternatives (WCAG §2.5.7). Covered by ContentToolPack3Logic unit suites + shared pack3-logic fixtures (AC-15); web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -5088,6 +5088,35 @@
         "dependency": "n/a",
         "rollback": true,
         "notes": "No feature flag by design. Retire via RETIRED_ITEM_IDS; EngineVersion bump invalidates CC.2 caches. Depends on nothing; unblocks CC.2+."
+      }
+    },
+    {
+      "id": "CC.2",
+      "path": "docs/completed/checklist/CC.2-checklist-state-api-and-dismissals.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "ops",
+      "coverage": "smoke",
+      "rationale": "Staff-only checklist state API (dismiss/restore/summary). Playwright API-level smoke; deep authz/single-flight covered by Go DB tests.",
+      "owner": "Learning Platform",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/course-checklist.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": false,
+        "disabledState": "n/a",
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": "CC.1",
+        "rollback": true,
+        "notes": "No feature flag. Snapshot TTL via CHECKLIST_SNAPSHOT_TTL. Unblocks CC.3–CC.7/CC.9."
       }
     },
     {
@@ -9533,7 +9562,7 @@
       "risk": "minor",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright journey selects across paragraphs on a content page and asserts \u2318/Ctrl+C copies every paragraph.",
+      "rationale": "Playwright journey selects across paragraphs on a content page and asserts ⌘/Ctrl+C copies every paragraph.",
       "owner": "Web Platform",
       "specs": [
         {

@@ -31,6 +31,8 @@ type Options struct {
 }
 
 // CopyFromCourse copies selected content from source into target. Target must be empty (no structure rows).
+// Course checklist dismissals/snapshots/events (CC.2) are intentionally not copied — a new course
+// starts with a clean checklist (FR-21 / AC-11).
 func CopyFromCourse(ctx context.Context, pool *pgxpool.Pool, opts Options) error {
 	include := opts.Include.WithDefaults()
 

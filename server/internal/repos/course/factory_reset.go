@@ -97,6 +97,16 @@ func FactoryResetCourse(ctx context.Context, pool *pgxpool.Pool, courseCode stri
 	if err = execResetStep(ctx, tx, courseCode, "delete course_standards", `DELETE FROM course.course_standards WHERE course_id = $1`, *courseID); err != nil {
 		return nil, err
 	}
+	// CC.2: checklist dismissals/snapshots/events must not survive factory reset (FR-21 / AC-10).
+	if err = execResetStep(ctx, tx, courseCode, "delete course_checklist_events", `DELETE FROM course.course_checklist_events WHERE course_id = $1`, *courseID); err != nil {
+		return nil, err
+	}
+	if err = execResetStep(ctx, tx, courseCode, "delete course_checklist_item_state", `DELETE FROM course.course_checklist_item_state WHERE course_id = $1`, *courseID); err != nil {
+		return nil, err
+	}
+	if err = execResetStep(ctx, tx, courseCode, "delete course_checklist_snapshots", `DELETE FROM course.course_checklist_snapshots WHERE course_id = $1`, *courseID); err != nil {
+		return nil, err
+	}
 
 	if err = execResetStep(ctx, tx, courseCode, "insert default assignment_group", `
 		INSERT INTO course.assignment_groups (course_id, sort_order, name, weight_percent)
