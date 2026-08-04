@@ -204,9 +204,9 @@ func catalogVersionFor(r *Registry) string {
 		return hex.EncodeToString(sum[:8])
 	}
 	type trip struct {
-		id  string
+		id   string
 		tier string
-		cat string
+		cat  string
 	}
 	trips := make([]trip, 0, r.Size())
 	for _, it := range r.List() {

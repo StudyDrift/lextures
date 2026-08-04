@@ -22,5 +22,26 @@
     "noLate": ["no late work", "late work not accepted", "no late submissions", "late work will not be accepted", "no late work accepted"]
   },
   "academicIntegrity": ["academic integrity", "academic honesty", "plagiarism", "cheating", "honor code", "ai use policy", "use of ai"],
-  "accessibility": ["accessibility", "accommodations", "disability services", "disability", "accessible", "ada", "504"]
+  "accessibility": ["accessibility", "accommodations", "disability services", "disability", "accessible", "ada", "504"],
+  "placeholderTitles": ["untitled", "new page", "new assignment", "new quiz", "test", "asdf", "tbd", "lorem", "lorem ipsum", "placeholder"],
+  "moduleOverviewTitles": ["overview", "module overview", "week overview", "this week", "introduction", "module introduction", "learning objectives", "objectives"],
+  "bloomVerbs": {
+    "remember": ["define", "list", "recall", "identify", "name", "state", "recognize", "label", "select", "match"],
+    "understand": ["explain", "summarize", "describe", "interpret", "classify", "compare", "discuss", "paraphrase", "illustrate"],
+    "apply": ["apply", "implement", "use", "execute", "solve", "demonstrate", "calculate", "operate", "perform", "construct"],
+    "analyze": ["analyze", "differentiate", "organize", "attribute", "compare", "contrast", "examine", "critique", "test", "distinguish"],
+    "evaluate": ["evaluate", "judge", "critique", "assess", "defend", "argue", "justify", "appraise", "recommend", "prioritize"],
+    "create": ["create", "design", "compose", "construct", "develop", "formulate", "produce", "generate", "plan", "write"]
+  },
+  "nonMeasurableOpeners": ["understand", "know", "learn about", "be familiar with", "appreciate", "learn", "become aware", "gain an understanding"],
+  "suggestedReplacements": {
+    "understand": "explain",
+    "know": "identify",
+    "learn about": "describe",
+    "be familiar with": "identify",
+    "appreciate": "evaluate",
+    "learn": "apply",
+    "become aware": "recognize",
+    "gain an understanding": "explain"
+  }
 }

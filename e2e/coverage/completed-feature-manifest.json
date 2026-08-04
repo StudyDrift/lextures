@@ -5149,6 +5149,35 @@
       }
     },
     {
+      "id": "CC.4",
+      "path": "docs/completed/checklist/CC.4-rule-pack-structure-outcomes-alignment.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "ops",
+      "coverage": "smoke",
+      "rationale": "22 structure/outcomes checklist rules (recommended tier) evaluated server-side. Playwright covers outcomes.assessment-mapping evidence rows (5 assignments, map 2→3, evidence shrinks); UI expandable table lands with CC.7/CC.8.",
+      "owner": "Learning Platform",
+      "reviewed": true,
+      "specs": [
+        {
+          "path": "e2e/tests/course-checklist.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": false,
+        "disabledState": "n/a",
+        "enabledJourney": true,
+        "authorization": "n/a",
+        "dependency": "n/a",
+        "rollback": true,
+        "notes": "All 22 rules ship recommended (FR-23); promote seven essentials after dogfood + CC.10 mapping assist. Retire via RETIRED_ITEM_IDS. No feature flag."
+      }
+    },
+    {
       "id": "mb-1-in-app-browser",
       "path": "docs/completed/mobile/MB.1-in-app-browser.md",
       "markets": [

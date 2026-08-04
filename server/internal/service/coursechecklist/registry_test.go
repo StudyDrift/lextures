@@ -18,8 +18,8 @@ func TestRegistryIntegrity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildBuiltinRegistry: %v", err)
 	}
-	if reg.Size() != 33 {
-		t.Fatalf("expected 33 rules, got %d", reg.Size())
+	if reg.Size() != 55 {
+		t.Fatalf("expected 55 rules, got %d", reg.Size())
 	}
 
 	routes, err := loadWebRoutesFixture()
@@ -58,6 +58,9 @@ func TestRegistryIntegrity(t *testing.T) {
 			t.Errorf("id %q target: %v", it.ID, err)
 		}
 		canEmit := it.EvidenceShape != nil
+		if canEmit && len(it.EvidenceShape.Columns) == 0 {
+			t.Errorf("id %q EvidenceShape missing column headers", it.ID)
+		}
 		// Smoke: people.sections should emit evidence when students lack sections.
 		if canEmit && it.ID == ItemPeopleSections {
 			uid := uuid.New()
@@ -159,6 +162,8 @@ func TestRulesFilesForbidDatabaseImports(t *testing.T) {
 		"rules_orientation.go",
 		"rules_syllabus.go",
 		"rules_people.go",
+		"rules_structure.go",
+		"rules_outcomes.go",
 	} {
 		if _, err := os.Stat(filepath.Join(name)); err != nil {
 			t.Fatalf("%s missing: %v", name, err)

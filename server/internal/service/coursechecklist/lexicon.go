@@ -23,20 +23,25 @@ type latePolicyLexicon struct {
 }
 
 type lexiconFile struct {
-	Locale                string           `json:"locale"`
-	StartHereTitles       []string         `json:"startHereTitles"`
-	InstructorIntroTitles []string         `json:"instructorIntroTitles"`
-	LearnerIntroTitles    []string         `json:"learnerIntroTitles"`
-	Contact               []string         `json:"contact"`
-	ResponseTime          []string         `json:"responseTime"`
-	Participation         []string         `json:"participation"`
-	Netiquette            []string         `json:"netiquette"`
-	TechRequirements      []string         `json:"techRequirements"`
-	SupportLinkHints      []string         `json:"supportLinkHints"`
-	GradingPolicy         []string         `json:"gradingPolicy"`
-	LatePolicy            latePolicyLexicon `json:"latePolicy"`
-	AcademicIntegrity     []string         `json:"academicIntegrity"`
-	Accessibility         []string         `json:"accessibility"`
+	Locale                string              `json:"locale"`
+	StartHereTitles       []string            `json:"startHereTitles"`
+	InstructorIntroTitles []string            `json:"instructorIntroTitles"`
+	LearnerIntroTitles    []string            `json:"learnerIntroTitles"`
+	Contact               []string            `json:"contact"`
+	ResponseTime          []string            `json:"responseTime"`
+	Participation         []string            `json:"participation"`
+	Netiquette            []string            `json:"netiquette"`
+	TechRequirements      []string            `json:"techRequirements"`
+	SupportLinkHints      []string            `json:"supportLinkHints"`
+	GradingPolicy         []string            `json:"gradingPolicy"`
+	LatePolicy            latePolicyLexicon   `json:"latePolicy"`
+	AcademicIntegrity     []string            `json:"academicIntegrity"`
+	Accessibility         []string            `json:"accessibility"`
+	PlaceholderTitles     []string            `json:"placeholderTitles"`
+	ModuleOverviewTitles  []string            `json:"moduleOverviewTitles"`
+	BloomVerbs            map[string][]string `json:"bloomVerbs"`
+	NonMeasurableOpeners  []string            `json:"nonMeasurableOpeners"`
+	SuggestedReplacements map[string]string   `json:"suggestedReplacements"`
 }
 
 // Lexicon is a compiled, locale-specific keyword set for text heuristics (FR-35).
@@ -56,6 +61,12 @@ type Lexicon struct {
 	LatePolicyNoLate      *keywordMatcher
 	AcademicIntegrity     *keywordMatcher
 	Accessibility         *keywordMatcher
+	PlaceholderTitles     []string
+	ModuleOverviewTitles  *keywordMatcher
+	BloomVerbs            map[string][]string
+	NonMeasurableOpeners  []string
+	SuggestedReplacements map[string]string
+	HasBloom              bool
 }
 
 type keywordMatcher struct {
@@ -151,6 +162,7 @@ func loadLexicons() {
 			if locale == "" {
 				locale = strings.TrimSuffix(e.Name(), ".json")
 			}
+			hasBloom := len(f.BloomVerbs) > 0 && len(f.NonMeasurableOpeners) > 0
 			lexicons[locale] = &Lexicon{
 				Locale:                locale,
 				StartHereTitles:       newKeywordMatcher(f.StartHereTitles),
@@ -167,6 +179,12 @@ func loadLexicons() {
 				LatePolicyNoLate:      newKeywordMatcher(f.LatePolicy.NoLate),
 				AcademicIntegrity:     newKeywordMatcher(f.AcademicIntegrity),
 				Accessibility:         newKeywordMatcher(f.Accessibility),
+				PlaceholderTitles:     normalizePhraseList(f.PlaceholderTitles),
+				ModuleOverviewTitles:  newKeywordMatcher(f.ModuleOverviewTitles),
+				BloomVerbs:            f.BloomVerbs,
+				NonMeasurableOpeners:  normalizePhraseList(f.NonMeasurableOpeners),
+				SuggestedReplacements: lowerKeyMap(f.SuggestedReplacements),
+				HasBloom:              hasBloom,
 			}
 		}
 		if _, ok := lexicons["en"]; !ok {
@@ -180,6 +198,28 @@ var errMissingEnglishLexicon = errString("coursechecklist: english lexicon missi
 type errString string
 
 func (e errString) Error() string { return string(e) }
+
+func normalizePhraseList(in []string) []string {
+	out := make([]string, 0, len(in))
+	for _, p := range in {
+		p = strings.ToLower(strings.TrimSpace(p))
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func lowerKeyMap(in map[string]string) map[string]string {
+	if in == nil {
+		return nil
+	}
+	out := make(map[string]string, len(in))
+	for k, v := range in {
+		out[strings.ToLower(strings.TrimSpace(k))] = strings.TrimSpace(v)
+	}
+	return out
+}
 
 // LexiconFor returns the lexicon for locale, falling back to English (FR-35).
 func LexiconFor(locale string) *Lexicon {
@@ -200,6 +240,40 @@ func LexiconFor(locale string) *Lexicon {
 		return lx
 	}
 	return lexicons["en"]
+}
+
+// BloomLexiconFor returns a lexicon with Bloom verbs for locale, or nil when unsupported.
+// Unlike LexiconFor, this does NOT fall back to English (CC.4 FR-14).
+func BloomLexiconFor(locale string) *Lexicon {
+	loadLexicons()
+	primary := locale
+	if norm, err := l10n.NormalizeLocale(locale); err == nil && norm != "" {
+		primary = norm
+	}
+	primary = strings.ToLower(strings.TrimSpace(primary))
+	candidates := []string{primary}
+	if i := strings.IndexByte(primary, '-'); i > 0 {
+		candidates = append(candidates, primary[:i])
+	}
+	for _, c := range candidates {
+		if lx, ok := lexicons[c]; ok && lx != nil && lx.HasBloom {
+			return lx
+		}
+	}
+	return nil
+}
+
+// PlaceholderLexiconFor returns placeholder titles for locale, falling back to English (FR-3).
+func PlaceholderLexiconFor(locale string) []string {
+	lx := LexiconFor(locale)
+	if lx != nil && len(lx.PlaceholderTitles) > 0 {
+		return lx.PlaceholderTitles
+	}
+	en := LexiconFor("en")
+	if en == nil {
+		return nil
+	}
+	return en.PlaceholderTitles
 }
 
 // SyllabusPlainText concatenates syllabus section titles + markdown, capped at MaxSyllabusScanBytes.
@@ -238,4 +312,60 @@ func SyllabusPlainText(snap CourseSnapshot) (text string, truncated bool) {
 // TitleMatches reports whether title matches any of the matcher phrases.
 func TitleMatches(m *keywordMatcher, title string) bool {
 	return m != nil && m.Match(strings.TrimSpace(title))
+}
+
+// isStructurePlaceholderTitle reports whole-title or title-prefix placeholder matches (FR-3).
+func isStructurePlaceholderTitle(title string, placeholders []string) bool {
+	t := strings.ToLower(strings.TrimSpace(title))
+	if t == "" {
+		return true
+	}
+	for _, p := range placeholders {
+		if t == p || strings.HasPrefix(t, p+" ") || strings.HasPrefix(t, p+":") || strings.HasPrefix(t, p+"-") {
+			return true
+		}
+	}
+	return false
+}
+
+// measurableOutcomeVerb reports whether title starts with a Bloom verb, or flags a non-measurable opener.
+// suggested is a replacement verb when flagged.
+func measurableOutcomeVerb(title string, lx *Lexicon) (ok bool, flagged bool, suggested string) {
+	if lx == nil || !lx.HasBloom {
+		return false, false, ""
+	}
+	trimmed := strings.TrimSpace(title)
+	if trimmed == "" {
+		return false, true, "identify"
+	}
+	lower := strings.ToLower(trimmed)
+	for _, opener := range lx.NonMeasurableOpeners {
+		if lower == opener || strings.HasPrefix(lower, opener+" ") || strings.HasPrefix(lower, opener+":") {
+			sug := lx.SuggestedReplacements[opener]
+			if sug == "" {
+				sug = "explain"
+			}
+			return false, true, sug
+		}
+	}
+	first := firstWord(lower)
+	for _, verbs := range lx.BloomVerbs {
+		for _, v := range verbs {
+			if first == strings.ToLower(v) {
+				return true, false, ""
+			}
+		}
+	}
+	// Not a known Bloom opener and not in the non-measurable list — treat as OK (avoid false todos).
+	return true, false, ""
+}
+
+func firstWord(s string) string {
+	s = strings.TrimSpace(s)
+	for i, r := range s {
+		if r == ' ' || r == '\t' || r == ':' || r == '-' || r == '—' {
+			return s[:i]
+		}
+	}
+	return s
 }

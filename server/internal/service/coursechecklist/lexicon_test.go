@@ -63,3 +63,34 @@ func TestSyllabusPlainTextCap(t *testing.T) {
 		t.Fatalf("len=%d", len(text))
 	}
 }
+
+func TestBloomLexiconNoEnglishFallback(t *testing.T) {
+	if BloomLexiconFor("zz") != nil {
+		t.Fatal("unsupported locale must not fall back for Bloom")
+	}
+	en := BloomLexiconFor("en")
+	if en == nil || !en.HasBloom {
+		t.Fatal("expected EN bloom lexicon")
+	}
+	ok, flagged, sug := measurableOutcomeVerb("Understand recursion", en)
+	if ok || !flagged || sug != "explain" {
+		t.Fatalf("understand: ok=%v flagged=%v sug=%q", ok, flagged, sug)
+	}
+	ok, flagged, _ = measurableOutcomeVerb("Implement a recursive solution", en)
+	if !ok || flagged {
+		t.Fatalf("implement: ok=%v flagged=%v", ok, flagged)
+	}
+}
+
+func TestPlaceholderWholeTitleMatch(t *testing.T) {
+	ph := PlaceholderLexiconFor("en")
+	if !isStructurePlaceholderTitle("Untitled", ph) {
+		t.Fatal("expected Untitled")
+	}
+	if !isStructurePlaceholderTitle("New page about gravity", ph) {
+		t.Fatal("expected prefix match")
+	}
+	if isStructurePlaceholderTitle("History of Lorem Ipsum studies", ph) {
+		t.Fatal("substring-only match must not flag legitimate titles")
+	}
+}
