@@ -55,6 +55,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	d.registerConditionalReleaseRoutes(r)
 	d.registerAdaptivePathRoutes(r)
 	d.registerPeerReviewRoutes(r)
+	d.registerCourseChecklistRoutes(r)
 	r.Post("/api/v1/courses/{course_code}/vibe-activities/generate", d.handleGenerateVibeActivityHTML())
 	r.Get("/api/v1/courses/{course_code}/vibe-activities/{item_id}", d.handleGetModuleVibeActivity())
 	r.Patch("/api/v1/courses/{course_code}/vibe-activities/{item_id}", d.handlePatchModuleVibeActivity())

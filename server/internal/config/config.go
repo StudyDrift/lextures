@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/lextures/lextures/server/internal/redisclient"
 )
@@ -224,6 +225,12 @@ type Config struct {
 
 	// TusUploadTTLHours is how long stalled (incomplete) tus uploads are retained before cleanup (default 48).
 	TusUploadTTLHours int
+
+	// ChecklistSnapshotTTL is how long a course checklist evaluation snapshot stays warm (CC.2).
+	// Env: CHECKLIST_SNAPSHOT_TTL (Go duration, default 15m).
+	ChecklistSnapshotTTL time.Duration
+	// ChecklistEvidenceMaxRows caps evidence rows per finding (CC.2; default 200).
+	ChecklistEvidenceMaxRows int
 
 	// DRMEnabled gates watermarking and DRM features (plan 8.10). Defaults to false; enterprise-only.
 	DRMEnabled bool
@@ -957,6 +964,9 @@ func Load() Config {
 
 		TusUploadTTLHours: tusUploadTTLHours(),
 
+		ChecklistSnapshotTTL:     checklistSnapshotTTL(),
+		ChecklistEvidenceMaxRows: intEnvDefault("CHECKLIST_EVIDENCE_MAX_ROWS", 200),
+
 		DRMHMACSecret: firstNonEmptyTrimmed("DRM_HMAC_SECRET"),
 
 		TranscodeRetainSourceDays: transcodeRetainSourceDays(),
@@ -1449,6 +1459,18 @@ func tusUploadTTLHours() int {
 		return 48
 	}
 	return n
+}
+
+func checklistSnapshotTTL() time.Duration {
+	raw := strings.TrimSpace(os.Getenv("CHECKLIST_SNAPSHOT_TTL"))
+	if raw == "" {
+		return 15 * time.Minute
+	}
+	d, err := time.ParseDuration(raw)
+	if err != nil || d <= 0 {
+		return 15 * time.Minute
+	}
+	return d
 }
 
 func storagePresignTTL() int {

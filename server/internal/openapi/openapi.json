@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "StudyDrift API",
-    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features \u2014 use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for \u22651 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure).",
+    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features — use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for ≥1 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure). CC.2: course checklist state API and dismissals.",
     "version": "0.2.1"
   },
   "tags": [
@@ -48,7 +48,7 @@
     },
     {
       "name": "transcripts",
-      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01\u2013T06)"
+      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01–T06)"
     },
     {
       "name": "content-tools",
@@ -2551,7 +2551,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Sign in with Apple (AuthenticationServices identity token \u2192 Lextures tokens)",
+        "summary": "Native Sign in with Apple (AuthenticationServices identity token → Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -2604,7 +2604,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Google Sign-In (Credential Manager ID token \u2192 Lextures tokens)",
+        "summary": "Native Google Sign-In (Credential Manager ID token → Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -3356,7 +3356,7 @@
         ],
         "responses": {
           "200": {
-            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } \u2014 no owned field"
+            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } — no owned field"
           },
           "400": {
             "description": "Invalid filter"
@@ -3536,7 +3536,7 @@
             "description": "Sign in required"
           },
           "402": {
-            "description": "Paid course \u2014 use checkout; body includes checkoutHint"
+            "description": "Paid course — use checkout; body includes checkoutHint"
           },
           "404": {
             "description": "Not listed or feature disabled"
@@ -3573,7 +3573,7 @@
             "description": "{ checkoutUrl, sessionId } or { alreadyOwned, courseCode, courseId }"
           },
           "400": {
-            "description": "Free course \u2014 use claim instead"
+            "description": "Free course — use claim instead"
           },
           "401": {
             "description": "Sign in required"
@@ -4298,7 +4298,7 @@
         "tags": [
           "accommodations"
         ],
-        "summary": "List a learner\u2019s accommodation records (coordinator perm)",
+        "summary": "List a learner’s accommodation records (coordinator perm)",
         "security": [
           {
             "bearerAuth": []
@@ -4465,7 +4465,7 @@
           "accommodations",
           "me"
         ],
-        "summary": "List this learner\u2019s active (by date range) accommodation summary entries",
+        "summary": "List this learner’s active (by date range) accommodation summary entries",
         "security": [
           {
             "bearerAuth": []
@@ -4486,7 +4486,7 @@
         "tags": [
           "admin"
         ],
-        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with \u2265200 responses; optional conceptId scopes to one concept",
+        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with ≥200 responses; optional conceptId scopes to one concept",
         "security": [
           {
             "bearerAuth": []
@@ -7744,7 +7744,7 @@
         "tags": [
           "courses"
         ],
-        "summary": "Force-rename a player (plan IQ.9); empty body \u2192 Player N",
+        "summary": "Force-rename a player (plan IQ.9); empty body → Player N",
         "security": [
           {
             "bearerAuth": []
@@ -8947,7 +8947,7 @@
           "courses"
         ],
         "summary": "Board realtime WebSocket (plan VC.4)",
-        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"\u2026\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
+        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"…\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
         "parameters": [
           {
             "name": "course_code",
@@ -14703,6 +14703,373 @@
           }
         }
       }
+    },
+    "/api/v1/courses/{course_code}/checklist": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Course checklist (staff)",
+        "description": "CC.2: Full checklist with categories, evidence, and dismissed pile.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeNotApplicable",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Checklist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/checklist/summary": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Course checklist badge summary",
+        "description": "CC.2: Snapshot-served badge counts without a full evaluation when warm.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistSummary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/checklist/refresh": {
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Force checklist recomputation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fresh checklist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/checklist/history": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Checklist audit history",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistHistoryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/checklist/items/{item_id}/dismiss": {
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Dismiss a checklist item",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChecklistDismissBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistItem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/checklist/items/{item_id}/restore": {
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Restore a dismissed checklist item",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistItem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/checklist/items/{item_id}/recheck": {
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Re-evaluate one checklist item",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChecklistItem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -15065,7 +15432,7 @@
           },
           "sourceRef": {
             "type": "object",
-            "description": "topic/passage text or contentId \u2014 never student data",
+            "description": "topic/passage text or contentId — never student data",
             "properties": {
               "topic": {
                 "type": "string"
@@ -17737,6 +18104,234 @@
                   "type": "integer"
                 }
               }
+            }
+          }
+        }
+      },
+      "ChecklistSummary": {
+        "type": "object",
+        "required": [
+          "outstandingEssential",
+          "outstandingTotal",
+          "done",
+          "total",
+          "dismissed",
+          "computedAt",
+          "stale"
+        ],
+        "properties": {
+          "outstandingEssential": {
+            "type": "integer"
+          },
+          "outstandingTotal": {
+            "type": "integer"
+          },
+          "done": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "dismissed": {
+            "type": "integer"
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stale": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChecklistItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "titleKey",
+          "title",
+          "whyKey",
+          "why",
+          "tier",
+          "status",
+          "sources"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "titleKey": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "whyKey": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "essential",
+              "recommended"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "done",
+              "todo",
+              "in_progress",
+              "unknown",
+              "not_applicable"
+            ]
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "progress": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "done": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              }
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "helpRef": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "target": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "evidence": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "dismissal": {
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        }
+      },
+      "ChecklistResponse": {
+        "type": "object",
+        "required": [
+          "courseCode",
+          "engineVersion",
+          "catalogVersion",
+          "computedAt",
+          "stale",
+          "evidenceTruncated",
+          "summary",
+          "categories",
+          "dismissed"
+        ],
+        "properties": {
+          "courseCode": {
+            "type": "string"
+          },
+          "engineVersion": {
+            "type": "integer"
+          },
+          "catalogVersion": {
+            "type": "string"
+          },
+          "computedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "evidenceTruncated": {
+            "type": "boolean"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ChecklistSummary"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "dismissed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChecklistItem"
+            }
+          }
+        }
+      },
+      "ChecklistDismissBody": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "not_applicable",
+              "done_elsewhere",
+              "disagree",
+              "later",
+              "other"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "ChecklistHistoryResponse": {
+        "type": "object",
+        "required": [
+          "courseCode",
+          "engineVersion",
+          "catalogVersion",
+          "events"
+        ],
+        "properties": {
+          "courseCode": {
+            "type": "string"
+          },
+          "engineVersion": {
+            "type": "integer"
+          },
+          "catalogVersion": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object"
             }
           }
         }

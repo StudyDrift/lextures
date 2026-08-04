@@ -26,6 +26,7 @@ const (
 	JobTypeContentToolResetPurge           = "scheduled.content_tool_reset_purge"
 	JobTypeContentToolDailyRollups         = "scheduled.content_tool_daily_rollups"
 	JobTypeContentToolSummaryRebuild       = "scheduled.content_tool_summary_rebuild"
+	JobTypeCourseChecklistRetention        = "scheduled.course_checklist_retention"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -209,6 +210,13 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "0 */6 * * *", // every 6 hours
 			JobType:        JobTypeContentToolSummaryRebuild,
 			Description:    "Rebuild Content Tool state summaries when projection versions lag (CT.7).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "course_checklist_retention",
+			Spec:           "15 3 * * *", // daily 03:15 UTC
+			JobType:        JobTypeCourseChecklistRetention,
+			Description:    "Purge untouched course checklist snapshots (90d) and aged audit events (400d) (CC.2).",
 			DefaultEnabled: true,
 		},
 	}

@@ -1,6 +1,6 @@
 # CC.2 — Checklist State, API & Dismissals
 
-> Implementation plan. Source: Course Checklist product request. Folder overview: [README](README.md).
+> Implementation plan. Source: Course Checklist product request. Folder overview: [README](../../plan/checklist/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Course Checklist |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Server / platform team |
 | **Depends on** | CC.1 |
@@ -405,8 +405,8 @@ None. No model calls, no prompts, no inference in CC.2.
   `server/internal/httpserver/course_outcomes_report.go` (staff-guard pattern),
   `server/internal/repos/course/factory_reset.go`, `server/internal/service/coursecopy/copy.go`,
   `server/internal/openapi/openapi.json`, `server/migrations/`.
-- Precedent in-repo: [PS.2 pinned-settings data model & API](../../completed/settings/PS.2-pinned-settings-data-model-and-api.md)
+- Precedent in-repo: [PS.2 pinned-settings data model & API](../settings/PS.2-pinned-settings-data-model-and-api.md)
   (string-keyed per-user state, no per-setting migration).
-- Related plans: [CC.1](../../completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md),
-  [CC.7](CC.7-web-checklist-page-and-nav-badge.md), [CC.9](CC.9-mobile-checklist-ios-and-android.md),
-  [CC.10](CC.10-analytics-guidance-and-rollout.md).
+- Related plans: [CC.1](CC.1-checklist-registry-and-evaluation-engine.md),
+  [CC.7](../../plan/checklist/CC.7-web-checklist-page-and-nav-badge.md), [CC.9](../../plan/checklist/CC.9-mobile-checklist-ios-and-android.md),
+  [CC.10](../../plan/checklist/CC.10-analytics-guidance-and-rollout.md).

@@ -37,7 +37,35 @@ on the next snapshot TTL; dismissals remain valid.
 Revert the rules/`RETIRED_ITEM_IDS` change. If `EngineVersion` was bumped, leave it bumped
 (monotonic) or accept a second bump on restore.
 
+## Tune snapshot TTL
+
+| Env | Default | Effect |
+|---|---|---|
+| `CHECKLIST_SNAPSHOT_TTL` | `15m` | How long a warm snapshot serves `/checklist` and `/summary` without re-evaluating |
+| `CHECKLIST_EVIDENCE_MAX_ROWS` | `200` | Evidence row cap per finding (CC.1/CC.2) |
+
+## Force-refresh a course
+
+`POST /api/v1/courses/{course_code}/checklist/refresh` (staff) bypasses TTL. Rate-limited to 6/min/course.
+
+## Inspect dismissals
+
+```sql
+SELECT item_id, dismiss_reason, dismiss_note, dismissed_at, dismissed_by_user_id
+FROM course.course_checklist_item_state
+WHERE course_id = $1 AND dismissed_at IS NOT NULL;
+
+SELECT item_id, action, actor_user_id, reason, occurred_at
+FROM course.course_checklist_events
+WHERE course_id = $1
+ORDER BY occurred_at DESC
+LIMIT 100;
+```
+
+Nightly sweeper `scheduled.course_checklist_retention` deletes untouched snapshots (90d) and aged events (400d).
+
 ## Related
 
 - Dev guide: [course-checklist-engine.md](../dev/course-checklist-engine.md)
 - ADR: [0003-course-checklist-code-registry.md](../adr/0003-course-checklist-code-registry.md)
+- Plan: [CC.2](../completed/checklist/CC.2-checklist-state-api-and-dismissals.md)

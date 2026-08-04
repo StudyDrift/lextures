@@ -20,6 +20,7 @@ import (
 	acrepo "github.com/lextures/lextures/server/internal/repos/adaptivecontent"
 	"github.com/lextures/lextures/server/internal/repos/board"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
+	ccrepo "github.com/lextures/lextures/server/internal/repos/coursechecklist"
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
 	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
 	lprepo "github.com/lextures/lextures/server/internal/repos/learnerprofile"
@@ -324,6 +325,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		AdaptiveContent  acrepo.UserACEExport           `json:"adaptiveContent,omitempty"`
 		ContentTools     ctrepo.UserContentToolsExport  `json:"contentTools,omitempty"`
 		PinnedSettings   []map[string]any               `json:"pinnedSettings,omitempty"`
+		CourseChecklist  []map[string]any               `json:"courseChecklist,omitempty"`
 		ExportedAt       string                         `json:"exportedAt"`
 	}
 
@@ -359,6 +361,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		return "", fmt.Errorf("gdpr: content tools export: %w", err)
 	}
 	pinnedExport := dsarPinnedSettingsExport(ctx, pool, userID)
+	checklistExport := dsarCourseChecklistExport(ctx, pool, userID)
 
 	var customFields map[string]any
 	if len(customRaw) > 0 {
@@ -378,6 +381,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		AdaptiveContent: aceExport,
 		ContentTools:    ctExport,
 		PinnedSettings:  pinnedExport,
+		CourseChecklist: checklistExport,
 		ExportedAt:      time.Now().UTC().Format(time.RFC3339),
 	}
 	b, err := json.Marshal(doc)
@@ -431,6 +435,26 @@ func dsarPinnedSettingsExport(ctx context.Context, pool *pgxpool.Pool, userID uu
 			"surface":     r.Surface,
 			"settingKeys": r.SettingKeys,
 			"updatedAt":   r.UpdatedAt.UTC().Format(time.RFC3339),
+		})
+	}
+	return out
+}
+
+// dsarCourseChecklistExport includes staff-authored checklist dismiss notes (CC.2).
+func dsarCourseChecklistExport(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) []map[string]any {
+	rows, err := ccrepo.ListDismissNotesForUser(ctx, pool, userID)
+	if err != nil || len(rows) == 0 {
+		return nil
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, map[string]any{
+			"courseId":    r.CourseID.String(),
+			"courseCode":  r.CourseCode,
+			"itemId":      r.ItemID,
+			"reason":      r.Reason,
+			"note":        r.Note,
+			"dismissedAt": r.DismissedAt.UTC().Format(time.RFC3339),
 		})
 	}
 	return out

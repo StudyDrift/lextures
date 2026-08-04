@@ -670,6 +670,13 @@ PATCH	/api/v1/courses/{course_code}/caption-policy	session
 GET	/api/v1/courses/{course_code}/catalog-info	anonymous
 GET	/api/v1/courses/{course_code}/catalog-listing	anonymous
 PUT	/api/v1/courses/{course_code}/catalog-listing	anonymous
+GET	/api/v1/courses/{course_code}/checklist	session
+GET	/api/v1/courses/{course_code}/checklist/history	session
+POST	/api/v1/courses/{course_code}/checklist/items/{item_id}/dismiss	session
+POST	/api/v1/courses/{course_code}/checklist/items/{item_id}/recheck	session
+POST	/api/v1/courses/{course_code}/checklist/items/{item_id}/restore	session
+POST	/api/v1/courses/{course_code}/checklist/refresh	session
+GET	/api/v1/courses/{course_code}/checklist/summary	session
 GET	/api/v1/courses/{course_code}/collab-docs	session
 POST	/api/v1/courses/{course_code}/collab-docs	session
 DELETE	/api/v1/courses/{course_code}/collab-docs/{doc_id}	session

@@ -7,9 +7,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// WarmStart validates the builtin registry at process start and keeps the
-// public evaluation/load surface reachable from cmd/server (CC.1; deadcode keep-alive
-// until CC.2 HTTP handlers land).
+// WarmStart validates the builtin registry at process start (CC.1) so a bad
+// catalog fails fast before HTTP traffic (CC.2) hits Evaluate/LoadSnapshot.
 func WarmStart(ctx context.Context, pool *pgxpool.Pool) {
 	reg := MustDefault()
 	_ = CatalogVersion()
@@ -39,6 +38,7 @@ func WarmStart(ctx context.Context, pool *pgxpool.Pool) {
 	}
 	// Touch metrics registration so Prometheus series exist before first eval.
 	_ = ruleErrorsCounter()
+	_ = SnapshotHitsCounter()
 	slog.Info("coursechecklist.ready",
 		"items", reg.Size(),
 		"catalog_version", catalogVersionFor(reg),
