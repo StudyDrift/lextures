@@ -222,7 +222,7 @@ object CourseChecklistLogic {
     }
 
     private fun enc(value: String): String =
-        URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20")
+        URLEncoder.encode(value, "UTF-8").replace("+", "%20")
 
     data class SummaryCacheEntry(
         val summary: CourseChecklistSummary,
