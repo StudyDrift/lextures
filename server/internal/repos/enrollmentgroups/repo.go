@@ -49,6 +49,12 @@ func SetEnabled(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, ena
 func Tree(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (enrollmentgroup.EnrollmentGroupsTreeResponse, error) {
 	out := enrollmentgroup.EnrollmentGroupsTreeResponse{GroupSets: []enrollmentgroup.EnrollmentGroupSetPublic{}}
 
+	enabled, err := IsEnabled(ctx, pool, courseID)
+	if err != nil {
+		return out, err
+	}
+	out.Enabled = enabled
+
 	setRows, err := pool.Query(ctx, `
 		SELECT id, name, sort_order
 		FROM course.enrollment_group_sets
