@@ -28,6 +28,13 @@ func ruleOutcomesAssessmentMapping() ItemDescriptor {
 			Route:   "/courses/{courseCode}/settings/outcomes",
 		},
 		EvidenceShape: &EvidenceShape{Columns: []string{"Item", "Type", "Module", "Points"}},
+		Action: &ItemAction{
+			Kind:       ActionKindSuggestOutcomeMappings,
+			LabelKey:   "coursechecklist.action.suggest_outcome_mappings",
+			Label:      "Suggest outcome mappings",
+			Endpoint:   "/api/v1/courses/{courseCode}/outcomes/suggest-links",
+			RequiresAI: true,
+		},
 	}
 }
 
@@ -149,7 +156,7 @@ func evalOutcomesCoverage(_ context.Context, snap CourseSnapshot) (Finding, erro
 			TargetOverride: &NavTarget{
 				Surface: "web",
 				Route:   "/courses/{courseCode}/settings/outcomes",
-				Anchor:  "outcome:" + o.ID.String(),
+				Anchor:  "course.outcomes.item", EntityKey: o.ID.String(),
 			},
 		})
 	}
@@ -217,7 +224,7 @@ func evalOutcomesSummativeCoverage(_ context.Context, snap CourseSnapshot) (Find
 			TargetOverride: &NavTarget{
 				Surface: "web",
 				Route:   "/courses/{courseCode}/settings/outcomes",
-				Anchor:  "outcome:" + o.ID.String(),
+				Anchor:  "course.outcomes.item", EntityKey: o.ID.String(),
 			},
 		})
 	}

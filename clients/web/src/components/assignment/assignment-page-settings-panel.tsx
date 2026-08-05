@@ -135,6 +135,8 @@ function SettingsAccordion({
       key={forceOpen ? 'forced-open' : 'manual'}
       className="group border-b border-slate-100 last:border-b-0 dark:border-neutral-800/80"
       open={forceOpen || undefined}
+      data-focus-accordion={sectionId}
+      data-focus-anchor={sectionId ? `assignment.${sectionId}` : undefined}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[13px] font-medium text-slate-600 outline-none transition-colors hover:bg-slate-50/80 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800/30 dark:hover:text-neutral-200 [&::-webkit-details-marker]:hidden">
         <span>{title}</span>

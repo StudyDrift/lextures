@@ -118,7 +118,9 @@ RETURNING id
 		return true, nil
 	}
 
-	_, err = pool.Exec(ctx, `
+	// Only update rows that already belong to this course. Never reassign
+	// another course's structure item via ON CONFLICT (global PK on id).
+	tag, err := pool.Exec(ctx, `
 INSERT INTO course.course_structure_items (
 	id, course_id, sort_order, kind, title, parent_id,
 	published, visible_from, archived, due_at, assignment_group_id,
@@ -126,7 +128,6 @@ INSERT INTO course.course_structure_items (
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 ON CONFLICT (id) DO UPDATE SET
-	course_id = EXCLUDED.course_id,
 	sort_order = EXCLUDED.sort_order,
 	kind = EXCLUDED.kind,
 	title = EXCLUDED.title,
@@ -137,11 +138,26 @@ ON CONFLICT (id) DO UPDATE SET
 	due_at = EXCLUDED.due_at,
 	assignment_group_id = EXCLUDED.assignment_group_id,
 	updated_at = EXCLUDED.updated_at
+WHERE course.course_structure_items.course_id = EXCLUDED.course_id
 `, itemID, courseID, item.SortOrder, item.Kind, item.Title, parentID,
 		item.Published, item.VisibleFrom, item.Archived, item.DueAt, groupID,
 		createdAt, updatedAt)
 	if err != nil {
 		return false, err
+	}
+	if tag.RowsAffected() == 0 {
+		// Conflict with a row owned by another course (or no-op edge case).
+		var owned bool
+		if qerr := pool.QueryRow(ctx, `
+SELECT EXISTS(
+  SELECT 1 FROM course.course_structure_items WHERE id = $1 AND course_id = $2
+)`, itemID, courseID).Scan(&owned); qerr != nil {
+			return false, qerr
+		}
+		if owned {
+			return true, nil
+		}
+		return false, errors.New("structure item id already belongs to another course")
 	}
 	return true, nil
 }

@@ -8,6 +8,7 @@ import { fetchEvaluationStatus } from '../../lib/course-evaluations-api'
 import { coursePageTitleFromPath } from '../../lib/course-page-title'
 import { fetchCourse, type CoursePublic } from '../../lib/courses-api'
 import { ConsortiumHomeBrandingBanner } from '../../components/consortium/consortium-home-branding-banner'
+import { useFocusAnchorRuntime } from '../../lib/use-focus-anchor'
 import { CourseSyllabusAcceptanceOverlay } from './course-syllabus-acceptance-overlay'
 
 function EvaluationReminderBanner({ courseCode }: { courseCode: string }) {
@@ -61,6 +62,9 @@ export default function CourseLayout() {
     [structureRevision],
   )
   const defaultPageTitle = courseCode ? coursePageTitleFromPath(location.pathname) : null
+
+  // CC.8 — deep-link highlight when `?focus=` is present (no-op otherwise).
+  useFocusAnchorRuntime()
 
   useEffect(() => {
     if (!courseCode) {

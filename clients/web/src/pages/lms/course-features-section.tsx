@@ -630,7 +630,10 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   }, [allFeatures, query])
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-950">
+    <section
+      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-950"
+      data-focus-anchor="course.features.grid"
+    >
       <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Course tools</h2>
       <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
         Turn tools on or off for everyone in this course. Disabled tools disappear from the course

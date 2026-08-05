@@ -82,7 +82,7 @@ func evalPeopleStudentsEnrolled(_ context.Context, snap CourseSnapshot) (Finding
 				TargetOverride: &NavTarget{
 					Surface: "web",
 					Route:   "/courses/{courseCode}/enrollments",
-					Anchor:  "resend",
+					Anchor:  "enrollments.invitations",
 				},
 			})
 		}
@@ -249,7 +249,7 @@ func evalPeopleStaleInvitations(_ context.Context, snap CourseSnapshot) (Finding
 				TargetOverride: &NavTarget{
 					Surface: "web",
 					Route:   "/courses/{courseCode}/enrollments",
-					Anchor:  "resend",
+					Anchor:  "enrollments.invitations",
 				},
 			})
 		}

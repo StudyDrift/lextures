@@ -408,5 +408,5 @@ None. No model calls, no prompts, no inference in CC.2.
 - Precedent in-repo: [PS.2 pinned-settings data model & API](../settings/PS.2-pinned-settings-data-model-and-api.md)
   (string-keyed per-user state, no per-setting migration).
 - Related plans: [CC.1](CC.1-checklist-registry-and-evaluation-engine.md),
-  [CC.7](../../plan/checklist/CC.7-web-checklist-page-and-nav-badge.md), [CC.9](../../plan/checklist/CC.9-mobile-checklist-ios-and-android.md),
+  [CC.7](CC.7-web-checklist-page-and-nav-badge.md), [CC.9](CC.9-mobile-checklist-ios-and-android.md),
   [CC.10](../../plan/checklist/CC.10-analytics-guidance-and-rollout.md).

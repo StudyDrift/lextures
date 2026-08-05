@@ -222,7 +222,7 @@ export default function CourseGroupsPage() {
     return (
       <LmsPage title="Groups" description="">
         <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
-      </LmsPage>
+    </LmsPage>
     )
   }
 
@@ -235,6 +235,7 @@ export default function CourseGroupsPage() {
 
   return (
     <LmsPage fillHeight omitHeader title={activeGroup ? `Groups — ${activeGroup.name}` : 'Groups'}>
+      <div data-focus-anchor="groups.sets">
       {error && (
         <p className="mb-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
           {error}
@@ -464,6 +465,7 @@ export default function CourseGroupsPage() {
           </section>
         </div>
       )}
+          </div>
     </LmsPage>
   )
 }

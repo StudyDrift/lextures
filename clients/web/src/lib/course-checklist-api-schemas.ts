@@ -24,6 +24,8 @@ const checklistNavTargetSchema = z
   .object({
     route: z.string(),
     anchor: z.string().nullish(),
+    /** Entity id for entity-kind focus anchors (CC.8 `?focusEntity=`). */
+    entityKey: z.string().nullish(),
   })
   .passthrough()
 
@@ -69,6 +71,19 @@ const checklistProgressSchema = z
   })
   .passthrough()
 
+/** Optional assisted-fix action (CC.10 FR-5). Unknown kinds are ignored by UI. */
+export const checklistActionSchema = z
+  .object({
+    kind: z.string(),
+    labelKey: z.string(),
+    label: z.string(),
+    endpoint: z.string(),
+    requiresAi: z.boolean().optional().default(true),
+  })
+  .passthrough()
+
+export type ChecklistAction = z.infer<typeof checklistActionSchema>
+
 export const checklistItemSchema = z
   .object({
     id: z.string(),
@@ -84,6 +99,7 @@ export const checklistItemSchema = z
     helpRef: z.string().nullish(),
     target: checklistNavTargetSchema.nullish(),
     evidence: checklistEvidenceSchema.nullish(),
+    action: checklistActionSchema.nullish(),
     dismissal: checklistDismissalSchema.nullish(),
   })
   .passthrough()
@@ -149,4 +165,17 @@ export function normalizeChecklistStatus(status: string): ChecklistStatus {
 export function isOutstandingStatus(status: string): boolean {
   const s = normalizeChecklistStatus(status)
   return s === 'todo' || s === 'in_progress' || s === 'unknown'
+}
+
+export function isDoneStatus(status: string): boolean {
+  return normalizeChecklistStatus(status) === 'done'
+}
+
+/** Items shown in a category: hide done items unless showCompleted is true. */
+export function visibleChecklistItems<T extends { status: string }>(
+  items: T[],
+  showCompleted: boolean,
+): T[] {
+  if (showCompleted) return items
+  return items.filter((i) => !isDoneStatus(i.status))
 }

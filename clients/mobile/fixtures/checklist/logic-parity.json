@@ -1,0 +1,150 @@
+{
+  "comment": "Shared fixture for CourseChecklistLogic parity tests (CC.9 AC-16).",
+  "badge": [
+    { "outstandingEssential": 0, "visible": false, "text": "", "accessibilityContains": "" },
+    { "outstandingEssential": 1, "visible": true, "text": "1", "accessibilityContains": "1 checklist item needs attention" },
+    { "outstandingEssential": 6, "visible": true, "text": "6", "accessibilityContains": "6 checklist items need attention" },
+    { "outstandingEssential": 99, "visible": true, "text": "99", "accessibilityContains": "99 checklist items need attention" },
+    { "outstandingEssential": 137, "visible": true, "text": "99+", "accessibilityContains": "137 checklist items need attention" }
+  ],
+  "status": [
+    { "raw": "done", "normalized": "done", "outstanding": false, "accessibilityValue": "Completed" },
+    { "raw": "todo", "normalized": "todo", "outstanding": true, "accessibilityValue": "To do" },
+    { "raw": "in_progress", "normalized": "in_progress", "outstanding": true, "accessibilityValue": "In progress" },
+    { "raw": "not_applicable", "normalized": "not_applicable", "outstanding": false, "accessibilityValue": "Not applicable" },
+    { "raw": "weird", "normalized": "unknown", "outstanding": true, "accessibilityValue": "Unknown" }
+  ],
+  "progress": [
+    { "done": 0, "total": 0, "fraction": 0.0, "label": "0 of 0 done" },
+    { "done": 18, "total": 26, "fraction": 0.6923076923076923, "label": "18 of 26 done" },
+    { "done": 26, "total": 26, "fraction": 1.0, "label": "26 of 26 done" }
+  ],
+  "targets": [
+    {
+      "name": "native-settings",
+      "courseCode": "C1",
+      "target": { "route": "/courses/{courseCode}/settings/general", "anchor": "course.general.dates" },
+      "expectedKind": "native",
+      "expectedSection": "settings"
+    },
+    {
+      "name": "web-only-features",
+      "courseCode": "C1",
+      "target": { "route": "/courses/{courseCode}/settings/features", "anchor": "course.features.grid" },
+      "expectedKind": "web",
+      "webPathContains": "focus=course.features.grid"
+    },
+    {
+      "name": "unmapped-fallback",
+      "courseCode": "C1",
+      "target": { "route": "/courses/{courseCode}/unknown-place", "anchor": "does.not.exist" },
+      "expectedKind": "unresolved",
+      "expectedSection": "overview"
+    },
+    {
+      "name": "entity-anchor",
+      "courseCode": "C1",
+      "target": { "route": "/courses/{courseCode}/modules", "anchor": "modules.item:abc", "entityKey": "abc" },
+      "expectedKind": "native",
+      "expectedSection": "modules"
+    },
+    {
+      "name": "nil-target",
+      "courseCode": "C1",
+      "target": null,
+      "expectedKind": "unresolved"
+    }
+  ],
+  "visibility": [
+    { "viewerIsStaff": true, "roleContext": "teaching", "show": true },
+    { "viewerIsStaff": true, "roleContext": "learning", "show": false },
+    { "viewerIsStaff": false, "roleContext": "teaching", "show": false },
+    { "viewerIsStaff": false, "roleContext": "learning", "show": false }
+  ],
+  "notes": [
+    { "input": null, "expected": "" },
+    { "input": "  hello  ", "expected": "hello" },
+    { "input": "x", "repeat": 600, "expectedLength": 500 }
+  ],
+  "presentation": {
+    "courseCode": "C1",
+    "checklist": {
+      "courseCode": "C1",
+      "engineVersion": 1,
+      "catalogVersion": "v1",
+      "computedAt": "2026-01-01T00:00:00Z",
+      "stale": false,
+      "evidenceTruncated": false,
+      "summary": {
+        "outstandingEssential": 1,
+        "outstandingTotal": 1,
+        "done": 1,
+        "total": 2,
+        "dismissed": 0,
+        "computedAt": "2026-01-01T00:00:00Z",
+        "stale": false
+      },
+      "categories": [
+        {
+          "id": "foundations",
+          "titleKey": "cat.foundations",
+          "title": "Foundations",
+          "items": [
+            {
+              "id": "orientation.welcome",
+              "titleKey": "t.welcome",
+              "title": "Post a welcome",
+              "whyKey": "w.welcome",
+              "why": "Students need orientation.",
+              "tier": "essential",
+              "status": "todo",
+              "sources": ["QM"],
+              "target": {
+                "route": "/courses/{courseCode}/feed",
+                "anchor": "feed.channel.announcements"
+              }
+            },
+            {
+              "id": "orientation.dates",
+              "titleKey": "t.dates",
+              "title": "Set course dates",
+              "whyKey": "w.dates",
+              "why": "Dates orient students.",
+              "tier": "essential",
+              "status": "done",
+              "sources": ["OSCQR"],
+              "target": {
+                "route": "/courses/{courseCode}/settings/general",
+                "anchor": "course.general.dates"
+              }
+            }
+          ]
+        }
+      ],
+      "dismissed": []
+    },
+    "expected": [
+      {
+        "id": "orientation.welcome",
+        "title": "Post a welcome",
+        "status": "todo",
+        "accessibilityValue": "To do",
+        "isDone": false,
+        "isOutstanding": true,
+        "targetKind": "native"
+      },
+      {
+        "id": "orientation.dates",
+        "title": "Set course dates",
+        "status": "done",
+        "accessibilityValue": "Completed",
+        "isDone": true,
+        "isOutstanding": false,
+        "targetKind": "native"
+      }
+    ]
+  },
+  "storage": {
+    "forbiddenKeyPrefix": "checklist:"
+  }
+}

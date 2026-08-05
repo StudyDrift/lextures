@@ -40,7 +40,14 @@ func ruleOrientationWelcomeMessage() ItemDescriptor {
 		Target: NavTarget{
 			Surface: "web",
 			Route:   "/courses/{courseCode}/feed",
-			Anchor:  "course.feed.announcements",
+			Anchor:  "feed.channel.announcements",
+		},
+		Action: &ItemAction{
+			Kind:       ActionKindDraftWelcome,
+			LabelKey:   "coursechecklist.action.draft_welcome",
+			Label:      "Draft a welcome announcement",
+			Endpoint:   "/api/v1/courses/{courseCode}/feed/draft-welcome",
+			RequiresAI: true,
 		},
 	}
 }

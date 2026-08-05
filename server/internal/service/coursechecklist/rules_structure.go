@@ -99,7 +99,7 @@ func evalStructureEmptyModules(_ context.Context, snap CourseSnapshot) (Finding,
 				TargetOverride: &NavTarget{
 					Surface: "web",
 					Route:   "/courses/{courseCode}/modules",
-					Anchor:  "module:" + m.ID.String(),
+					Anchor:  "modules.module", EntityKey: m.ID.String(),
 				},
 			})
 		}
@@ -160,7 +160,7 @@ func evalStructurePlaceholderTitles(_ context.Context, snap CourseSnapshot) (Fin
 			TargetOverride: &NavTarget{
 				Surface: "web",
 				Route:   itemEditorRoute(it.Kind),
-				Anchor:  "item:" + it.ID.String(),
+				Anchor:  "modules.item", EntityKey: it.ID.String(),
 			},
 		})
 	}
@@ -226,7 +226,7 @@ func evalStructureModuleOverviews(_ context.Context, snap CourseSnapshot) (Findi
 			TargetOverride: &NavTarget{
 				Surface: "web",
 				Route:   "/courses/{courseCode}/modules",
-				Anchor:  "module:" + m.ID.String(),
+				Anchor:  "modules.module", EntityKey: m.ID.String(),
 			},
 		})
 	}
@@ -326,7 +326,7 @@ func evalStructureUnpublishedItems(_ context.Context, snap CourseSnapshot) (Find
 			TargetOverride: &NavTarget{
 				Surface: "web",
 				Route:   itemEditorRoute(it.Kind),
-				Anchor:  "publish:" + it.ID.String(),
+				Anchor:  "modules.item", EntityKey: it.ID.String(),
 			},
 		})
 	}

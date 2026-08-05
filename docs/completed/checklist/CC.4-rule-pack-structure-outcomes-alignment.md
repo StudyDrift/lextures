@@ -1,7 +1,7 @@
 # CC.4 — Rule Pack B: Structure, Content & Outcome Alignment
 
 > Implementation plan. Source: Course Checklist product request. Folder overview: [README](README.md).
-> Rubric mapping: [course-design-research.md](course-design-research.md).
+> Rubric mapping: [research.md](../../help/course-checklist/research.md).
 
 ## Metadata
 
@@ -323,7 +323,7 @@ human approval before any link is written. CC.4 MUST NOT write outcome links und
 
 ## 17. Documentation & Training
 
-- [course-design-research.md](course-design-research.md) B-sections: rubric mapping for all 22 rules.
+- [research.md](../../help/course-checklist/research.md) B-sections: rubric mapping for all 22 rules.
 - Help-centre article "Aligning assessments to outcomes" covering the mapping workflow, `measurement_level`
   semantics, and why both directions are checked.
 - `docs/dev/course-checklist-engine.md` gains "evidence tables with per-row targets".

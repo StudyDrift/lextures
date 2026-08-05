@@ -104,6 +104,36 @@ func validateDescriptor(it ItemDescriptor) error {
 	if it.WhyKey == "" {
 		return fmt.Errorf("item %q: WhyKey required", it.ID)
 	}
+	if strings.TrimSpace(it.HelpRef) == "" {
+		return fmt.Errorf("item %q: HelpRef required (CC.10 FR-1)", it.ID)
+	}
+	if !strings.HasPrefix(it.HelpRef, "course-checklist#") {
+		return fmt.Errorf("item %q: HelpRef %q must start with course-checklist#", it.ID, it.HelpRef)
+	}
+	if it.Action != nil {
+		if err := validateAction(it.ID, *it.Action); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateAction(id ItemID, a ItemAction) error {
+	switch a.Kind {
+	case ActionKindSuggestOutcomeMappings, ActionKindBuildRubricAI, ActionKindDraftWelcome, ActionKindSuggestAltText:
+		// ok
+	default:
+		return fmt.Errorf("item %q: unknown action kind %q", id, a.Kind)
+	}
+	if strings.TrimSpace(a.LabelKey) == "" {
+		return fmt.Errorf("item %q: action LabelKey required", id)
+	}
+	if strings.TrimSpace(a.Label) == "" {
+		return fmt.Errorf("item %q: action Label required", id)
+	}
+	if strings.TrimSpace(a.Endpoint) == "" {
+		return fmt.Errorf("item %q: action Endpoint required", id)
+	}
 	return nil
 }
 

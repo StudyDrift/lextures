@@ -136,7 +136,7 @@ func ruleCourseTimezone() ItemDescriptor {
 		TitleKey:     "coursechecklist.item.course.timezone.title",
 		TitleDefault: "Choose a course timezone",
 		WhyKey:       "coursechecklist.item.course.timezone.why",
-		WhyDefault:   "Due dates are interpreted in the course timezone, so learners need a consistent zone.",
+		WhyDefault:   "Due dates need a clear timezone policy — a named zone, UTC, or learner-local time.",
 		HelpRef:      "course-checklist#course-timezone",
 		Tier:         TierRecommended,
 		Sources:      []string{"OSCQR 7"},
@@ -152,6 +152,14 @@ func ruleCourseTimezone() ItemDescriptor {
 
 func evalCourseTimezone(_ context.Context, snap CourseSnapshot) (Finding, error) {
 	if zone, ok := validIANATimezone(snap.CourseTimezone); ok {
+		if zone == "LOCAL" {
+			return Finding{
+				Status:        StatusDone,
+				DetailKey:     "coursechecklist.item.course.timezone.detail.done_local",
+				DetailDefault: "Due dates use each learner’s local time (e.g. 11:59 PM their time).",
+				DetailFields:  map[string]any{"timezone": zone},
+			}, nil
+		}
 		return Finding{
 			Status:        StatusDone,
 			DetailKey:     "coursechecklist.item.course.timezone.detail.done",
@@ -162,7 +170,7 @@ func evalCourseTimezone(_ context.Context, snap CourseSnapshot) (Finding, error)
 	return Finding{
 		Status:        StatusTodo,
 		DetailKey:     "coursechecklist.item.course.timezone.detail.todo",
-		DetailDefault: "Set a valid IANA timezone for due dates.",
+		DetailDefault: "Set a course timezone, UTC, or learner local time for due dates.",
 	}, nil
 }
 
@@ -394,7 +402,7 @@ func ruleCourseHeroImage() ItemDescriptor {
 		Target: NavTarget{
 			Surface: "web",
 			Route:   "/courses/{courseCode}/settings/general",
-			Anchor:  "course.general.hero",
+			Anchor:  "course.general.hero-image",
 		},
 	}
 }

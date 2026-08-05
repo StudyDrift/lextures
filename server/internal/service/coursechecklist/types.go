@@ -47,6 +47,28 @@ type EvidenceShape struct {
 	Columns []string `json:"columns"`
 }
 
+// ActionKind identifies an optional assisted-fix primary action (CC.10).
+// Unknown kinds are ignored by clients (backward compatible).
+type ActionKind string
+
+const (
+	ActionKindSuggestOutcomeMappings ActionKind = "suggest_outcome_mappings"
+	ActionKindBuildRubricAI          ActionKind = "build_rubric_ai"
+	ActionKindDraftWelcome           ActionKind = "draft_welcome"
+	ActionKindSuggestAltText         ActionKind = "suggest_alt_text"
+)
+
+// ItemAction is an optional primary action declared on a registry item (CC.10 FR-5).
+// Endpoint is a relative API path template (e.g. "/api/v1/courses/{courseCode}/outcomes/suggest-links").
+// Clients that do not recognise Kind render nothing.
+type ItemAction struct {
+	Kind      ActionKind `json:"kind"`
+	LabelKey  string     `json:"labelKey"`
+	Label     string     `json:"label"`
+	Endpoint  string     `json:"endpoint"`
+	RequiresAI bool      `json:"requiresAi"`
+}
+
 // EvidenceRow is one offending (or exemplary) entity in a finding.
 // Privacy: Label/Sublabel may carry display name + opaque ID only — never email or DOB.
 type EvidenceRow struct {
@@ -90,6 +112,8 @@ type ItemDescriptor struct {
 	Evaluate      func(context.Context, CourseSnapshot) (Finding, error)
 	Target        NavTarget
 	EvidenceShape *EvidenceShape
+	// Action is an optional assisted-fix primary action (CC.10). Nil when absent.
+	Action *ItemAction
 }
 
 // EvaluateOptions controls a single Evaluate call.
@@ -115,6 +139,7 @@ type ItemResult struct {
 	Sources       []string       `json:"sources"`
 	Target        NavTarget      `json:"target"`
 	EvidenceShape *EvidenceShape `json:"evidenceShape,omitempty"`
+	Action        *ItemAction    `json:"action,omitempty"`
 	Finding       Finding        `json:"finding"`
 }
 

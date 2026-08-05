@@ -185,6 +185,8 @@ struct ModuleItemDetail: Codable {
     var submissionAllowUrl: Bool?
     var lateSubmissionPolicy: String?
     var latePenaltyPercent: Int?
+    /// Assignment rubric when configured (criteria with point bands).
+    var rubric: RubricDefinition?
 
     // External link
     var url: String?

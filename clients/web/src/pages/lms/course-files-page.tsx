@@ -502,7 +502,7 @@ export default function CourseFilesPage() {
     return (
       <LmsPage title="Files">
         <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
-      </LmsPage>
+    </LmsPage>
     )
   }
 
@@ -512,6 +512,7 @@ export default function CourseFilesPage() {
 
   return (
     <LmsPage title="Files">
+      <div data-focus-anchor="files.item">
       {/* dismiss context menu on outside click */}
       {contextMenu && (
         <div
@@ -866,6 +867,7 @@ export default function CourseFilesPage() {
         mimeType={previewFile?.mimeType ?? null}
         onClose={() => setPreviewFile(null)}
       />
+          </div>
     </LmsPage>
   )
 }

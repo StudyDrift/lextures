@@ -9,11 +9,17 @@ export {
   toIsoDateTime,
 } from './resolve'
 export {
+  COURSE_TIMEZONE_LOCAL,
   detectBrowserTimezone,
   formatDeadlineDisplay,
   formatUtcOffsetLabel,
-  resolveDisplayTimezone
+  isLearnerLocalTimezone,
+  resolveDisplayTimezone,
 } from './timezone'
+export {
+  datetimeLocalValueToIso,
+  isoToDatetimeLocalValue,
+} from './datetime-local'
 
 import { createLocaleFormatters, type LocaleFormatters } from './create-formatters'
 import { detectBrowserLocale, detectBrowserTimeZone } from './resolve'

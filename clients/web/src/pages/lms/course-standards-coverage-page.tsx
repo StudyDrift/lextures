@@ -127,7 +127,7 @@ export default function CourseStandardsCoveragePage() {
     sortKey === key ? sortDir : 'none'
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
+    <div data-focus-anchor="standards.coverage.grid" className="mx-auto max-w-6xl px-4 py-6">
       <header className="mb-6">
         <h1 className="text-xl font-semibold text-slate-900 dark:text-neutral-100">
           Standards coverage

@@ -249,7 +249,7 @@ function SyllabusDocumentPanel({
   }, [onChange, setPastedFlash])
 
   return (
-    <div className="space-y-4">
+    <div data-focus-anchor="syllabus.section" className="space-y-4">
       <p className="text-[13px] leading-relaxed text-slate-600 dark:text-neutral-300">
         {documentVariant === 'page'
           ? 'Build this page from sections. Each section has an optional title and Markdown body, matching what students see when they open it.'
@@ -1677,6 +1677,7 @@ function SyllabusBlockEditorInner({
   return editorTree
 }
 
+/** CC.8 syllabus.section entity anchors attach per section row. */
 export function SyllabusBlockEditor(props: SyllabusBlockEditorProps) {
   const validBlockIds = useMemo(() => props.sections.map((s) => s.id), [props.sections])
 

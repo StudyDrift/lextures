@@ -266,7 +266,7 @@ export default function CourseSyllabus() {
               onRetry={() => void save()}
             />
           </div>
-          <div className="px-4 md:px-8">
+          <div className="px-4 md:px-8" data-focus-anchor="syllabus.editor">
             <SyllabusBlockEditor
               courseCode={courseCode}
               hostKind="syllabus"

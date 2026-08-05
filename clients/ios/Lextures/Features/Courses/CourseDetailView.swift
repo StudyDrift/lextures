@@ -52,7 +52,8 @@ struct CourseDetailView: View {
             hasAttendanceSessions: hasAttendanceSessions,
             hasLibraryResources: LibraryResourceLogic.hasLibraryResources(in: items),
             evaluationStatus: evaluationStatus,
-            platformFeatures: shell.platformFeatures
+            platformFeatures: shell.platformFeatures,
+            roleContext: shell.activeRoleContext
         )
     }
 
@@ -208,6 +209,11 @@ struct CourseDetailView: View {
         switch section {
         case .overview:
             CourseSyllabusSection(course: course)
+        case .checklist:
+            CourseChecklistSection(
+                course: course,
+                initialFocus: initialSection == .checklist ? initialItemId : nil
+            )
         case .modules:
             modulesSection
         case .files:
@@ -326,6 +332,7 @@ struct CourseDetailView: View {
             hasAttendanceSessions = await !sessionsTask.isEmpty
             evaluationStatus = await evaluationTask
             await refreshProgress()
+            await refreshChecklistSummaryIfNeeded(accessToken: token)
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load course content."
         }
@@ -338,6 +345,26 @@ struct CourseDetailView: View {
     ) async -> EvaluationStatus? {
         guard EvaluationLogic.evaluationsEnabled(features) else { return nil }
         return try? await LMSAPI.fetchEvaluationStatus(courseCode: courseCode, accessToken: accessToken)
+    }
+
+    /// FR-8: fetch badge summary when course opens (memoised 60 s, never to disk).
+    private func refreshChecklistSummaryIfNeeded(accessToken: String) async {
+        guard CourseChecklistLogic.shouldShowWorkspaceSection(
+            viewerIsStaff: course.viewerIsStaff,
+            roleContext: shell.activeRoleContext
+        ) else { return }
+        if CourseChecklistSummaryStore.shared.cached(courseCode: course.courseCode) != nil { return }
+        do {
+            let summary = try await LMSAPI.fetchCourseChecklistSummary(
+                courseCode: course.courseCode,
+                accessToken: accessToken
+            )
+            CourseChecklistSummaryStore.shared.put(courseCode: course.courseCode, summary: summary)
+        } catch let APIError.httpStatus(code, _) where code == 403 {
+            CourseChecklistSummaryStore.shared.markForbidden(courseCode: course.courseCode)
+        } catch {
+            // Badge is non-blocking (NFR reliability).
+        }
     }
 
     private func refreshProgress() async {

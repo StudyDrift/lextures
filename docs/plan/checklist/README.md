@@ -22,26 +22,24 @@ Every plan follows [_TEMPLATE.md](../_TEMPLATE.md).
 | CC.5 | [Rule pack C — assessment, grading, feedback & interaction](../../completed/checklist/CC.5-rule-pack-assessment-feedback-interaction.md) ✅ (26 rules) | Server | M | CC.1, CC.2 |
 | CC.6 | [Rule pack D — accessibility, inclusive design & launch readiness](../../completed/checklist/CC.6-rule-pack-accessibility-and-launch-readiness.md) ✅ (20 rules) | Server | M | CC.1, CC.2 |
 | CC.7 | [Web: checklist page, nav entry & badge](../../completed/checklist/CC.7-web-checklist-page-and-nav-badge.md) ✅ | Web | M | CC.2, CC.3 |
-| CC.8 | [Deep-link & highlight targeting](CC.8-deep-link-and-highlight-targeting.md) | Web (+ shared) | M | CC.1, CC.7 |
-| CC.9 | [Mobile: checklist on iOS & Android](CC.9-mobile-checklist-ios-and-android.md) | iOS + Android | M | CC.2, CC.7, CC.8 |
-| CC.10 | [Guidance, assisted fixes, analytics & rollout](CC.10-analytics-guidance-and-rollout.md) | Cross-cutting | M | CC.2–CC.7 |
+| CC.8 | [Deep-link & highlight targeting](../../completed/checklist/CC.8-deep-link-and-highlight-targeting.md) ✅ | Web (+ shared) | M | CC.1, CC.7 |
+| CC.9 | [Mobile: checklist on iOS & Android](../../completed/checklist/CC.9-mobile-checklist-ios-and-android.md) ✅ | iOS + Android | M | CC.2, CC.7, CC.8 |
+| CC.10 | [Guidance, assisted fixes, analytics & rollout](../../completed/checklist/CC.10-analytics-guidance-and-rollout.md) ✅ | Cross-cutting | M | CC.2–CC.7 |
 
-Supporting reference: **[course-design-research.md](course-design-research.md)** — the rubric-to-rule mapping
-for all **101 rules**, and the sources they come from.
+Supporting reference: **[research.md](../../help/course-checklist/research.md)** — the rubric-to-rule mapping
+for all **101 rules**, and the sources they come from (in-app: `/help/course-checklist/research`).
 
 ## Sequencing
 
 ```
 CC.1 ──▶ CC.2 ──┬──▶ CC.3 ─┐
                 ├──▶ CC.4 ─┤
-                ├──▶ CC.5 ─┼──▶ CC.7 ✅ ──▶ CC.8 ──▶ CC.9
-                └──▶ CC.6 ─┘              └──────────────┴──▶ CC.10
+                ├──▶ CC.5 ─┼──▶ CC.7 ✅ ──▶ CC.8 ✅ ──▶ CC.9 ✅
+                └──▶ CC.6 ─┘                  └──────────────┴──▶ CC.10 ✅
 ```
 
-CC.1 and CC.2 are the critical path. The four rule packs are independent of each other and can be worked in
-parallel once the snapshot loader change they share has landed. CC.7 needs at least CC.3 so the page is not
-empty. CC.8 should land before any rule is promoted to `essential` — a badge that sends people to the wrong
-place is worse than no badge.
+All section plans are complete. Promotion of individual rules to `essential` continues as an
+operational programme under [checklist-promotion-programme.md](../../completed/checklist/checklist-promotion-programme.md).
 
 ## Design decisions worth knowing before reading
 
@@ -63,7 +61,7 @@ The safety valves are structural instead: retire a rule (`RETIRED_ITEM_IDS`, ser
 rule from `essential` to `recommended` (removes it from the badge within one snapshot TTL), tune
 `CHECKLIST_SNAPSHOT_TTL`, and the one env kill switch on the outbound link checker. Every rule ships
 `recommended` and is promoted only after per-rule dismissal telemetry clears the gates in
-[CC.10 FR-20](CC.10-analytics-guidance-and-rollout.md).
+[CC.10 FR-20](../../completed/checklist/CC.10-analytics-guidance-and-rollout.md).
 
 **Teachers and higher.** Visibility requires the `course:{code}:item:create` capability (course owner,
 teacher/instructor, designer) or an org/platform admin role. Students, TAs, observers, auditors, librarians

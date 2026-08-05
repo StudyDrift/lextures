@@ -2,7 +2,7 @@
 
 > Implementation plan. Source: Course Checklist product request. Folder overview: [README](README.md).
 > This is the first of four rule packs; the catalog rationale and rubric mapping live in
-> [course-design-research.md](course-design-research.md).
+> [research.md](../../help/course-checklist/research.md).
 
 ## Metadata
 
@@ -289,7 +289,7 @@ No new UI. CC.3 fixes the **copy contract** that CC.7 renders. Copy rules:
 - Done state reads as a struck-through past-tense fact: "Welcome announcement posted".
 - No rule may use guilt framing, exclamation marks or "you should have".
 - `Sources` render as small citation chips ("QM 1.1", "OSCQR 1") linking to
-  [course-design-research.md](course-design-research.md).
+  [research.md](../../help/course-checklist/research.md).
 
 ## 11. AI / ML Considerations
 
@@ -367,7 +367,7 @@ recorded as §18 Q3, not scoped here.
 
 ## 17. Documentation & Training
 
-- [course-design-research.md](course-design-research.md) — the rubric-to-rule mapping table for all four
+- [research.md](../../help/course-checklist/research.md) — the rubric-to-rule mapping table for all four
   packs; CC.3 populates its A-sections.
 - Help-centre article "Getting your course ready" walking the foundation items in order.
 - `docs/dev/course-checklist-engine.md` gains a "writing a text-heuristic rule" section covering lexicons.

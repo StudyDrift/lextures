@@ -226,6 +226,8 @@ data class ModuleItemDetail(
     val submissionAllowUrl: Boolean? = null,
     val lateSubmissionPolicy: String? = null,
     val latePenaltyPercent: Int? = null,
+    /** Assignment rubric when configured (criteria with point bands). */
+    val rubric: RubricDefinition? = null,
 
     // External link
     val url: String? = null,

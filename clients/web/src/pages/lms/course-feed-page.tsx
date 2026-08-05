@@ -622,7 +622,7 @@ export default function CourseFeedPage() {
     return (
       <LmsPage title="Feed" description="">
         <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
-      </LmsPage>
+    </LmsPage>
     )
   }
 
@@ -634,6 +634,7 @@ export default function CourseFeedPage() {
 
   return (
     <LmsPage fillHeight omitHeader title={pageTitle}>
+      <div data-focus-anchor="feed.channel.announcements">
       {loading && <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>}
       {error && (
         <p className="mt-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
@@ -1081,6 +1082,7 @@ export default function CourseFeedPage() {
         </div>
       )}
       {ConfirmDialogHost}
+          </div>
     </LmsPage>
   )
 }

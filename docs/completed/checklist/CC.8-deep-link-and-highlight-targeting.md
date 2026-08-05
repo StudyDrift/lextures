@@ -11,7 +11,7 @@
 | **Section** | Course Checklist |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Web client team (+ mobile for the native target table) |
 | **Depends on** | CC.1 (target shape), CC.7 (consumer) |
@@ -369,10 +369,13 @@ until CC.7 emits targets.
   `clients/web/src/pages/lms/course-settings.tsx`, `.../course-features-section.tsx`,
   `.../course-grading-settings.tsx`, `.../course-modules.tsx`,
   `clients/web/src/components/syllabus/syllabus-block-editor.tsx`, `clients/web/src/index.css`.
-- Precedent: [PS.1](../../completed/settings/PS.1-settings-registry-and-addressable-controls.md) (addressable
-  controls) and [PS.3](../../completed/settings/PS.3-pin-and-reorder-ux-in-editor-panels.md) (revealing a
+- Precedent: [PS.1](../settings/PS.1-settings-registry-and-addressable-controls.md) (addressable
+  controls) and [PS.3](../settings/PS.3-pin-and-reorder-ux-in-editor-panels.md) (revealing a
   control in a collapsed panel).
 - Standards: WCAG 2.1 — 1.4.1 Use of Colour, 2.3.1 Three Flashes, 2.4.3 Focus Order, 2.4.7 Focus Visible,
   4.1.3 Status Messages.
 - Related plans: [CC.7](CC.7-web-checklist-page-and-nav-badge.md),
-  [CC.9](CC.9-mobile-checklist-ios-and-android.md), [CC.4](CC.4-rule-pack-structure-outcomes-alignment.md).
+  [CC.9](../../plan/checklist/CC.9-mobile-checklist-ios-and-android.md),
+  [CC.4](CC.4-rule-pack-structure-outcomes-alignment.md).
+- Dev docs: [focus-anchors.md](../../dev/focus-anchors.md),
+  [focus-anchor-highlight a11y](../../accessibility/focus-anchor-highlight.md).

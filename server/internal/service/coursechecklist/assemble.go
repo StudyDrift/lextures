@@ -137,6 +137,7 @@ func itemFromFinding(fr ItemResult, st ccrepo.ItemState, names map[uuid.UUID]str
 		HelpRef:  help,
 		Target:   navTargetPtr(fr.Target),
 		Evidence: evidenceFromFinding(fr),
+		Action:   actionFromFinding(fr),
 	}
 	if st.DismissedAt != nil {
 		byID := ""
@@ -158,6 +159,27 @@ func itemFromFinding(fr ItemResult, st ccrepo.ItemState, names map[uuid.UUID]str
 	return item
 }
 
+func actionFromFinding(fr ItemResult) *ChecklistAction {
+	if fr.Action == nil {
+		return nil
+	}
+	a := fr.Action
+	if strings.TrimSpace(string(a.Kind)) == "" || strings.TrimSpace(a.Endpoint) == "" {
+		return nil
+	}
+	label := a.Label
+	if strings.TrimSpace(label) == "" {
+		label = string(a.Kind)
+	}
+	return &ChecklistAction{
+		Kind:       string(a.Kind),
+		LabelKey:   a.LabelKey,
+		Label:      label,
+		Endpoint:   a.Endpoint,
+		RequiresAI: a.RequiresAI,
+	}
+}
+
 func navTargetPtr(t NavTarget) *ChecklistNavTarget {
 	if strings.TrimSpace(t.Route) == "" {
 		return nil
@@ -171,6 +193,10 @@ func navTargetPtr(t NavTarget) *ChecklistNavTarget {
 	if strings.TrimSpace(t.Anchor) != "" {
 		a := t.Anchor
 		out.Anchor = &a
+	}
+	if strings.TrimSpace(t.EntityKey) != "" {
+		ek := t.EntityKey
+		out.EntityKey = &ek
 	}
 	return out
 }

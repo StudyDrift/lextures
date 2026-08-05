@@ -533,6 +533,7 @@ export default function CourseOfficeHoursPage() {
 
   return (
     <LmsPage title="Office Hours" description="Book a 1-on-1 appointment with your instructor.">
+      <div data-focus-anchor="office.hours.slots">
       {/* Header */}
       <div className="mb-4 flex items-center justify-end">
         {!rolesLoading && isStaff && (
@@ -640,6 +641,7 @@ export default function CourseOfficeHoursPage() {
         />
       )}
       {ConfirmDialogHost}
+          </div>
     </LmsPage>
   )
 }

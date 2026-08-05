@@ -3,6 +3,7 @@ package httpserver
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/lextures/lextures/server/internal/apierr"
@@ -126,6 +127,7 @@ func (d Deps) handleCourseImportPost() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, courseexportimport.InvalidInputMessage(err))
 				return
 			}
+			slog.Error("course import failed", "course_code", courseCode, "mode", req.Mode, "err", err)
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to import course.")
 			return
 		}

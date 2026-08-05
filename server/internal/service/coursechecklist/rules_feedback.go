@@ -37,6 +37,13 @@ func ruleFeedbackRubricsOnHighStakes() ItemDescriptor {
 			Anchor:  "assignment.rubric",
 		},
 		EvidenceShape: &EvidenceShape{Columns: assessmentEvidenceColumns},
+		Action: &ItemAction{
+			Kind:       ActionKindBuildRubricAI,
+			LabelKey:   "coursechecklist.action.build_rubric_ai",
+			Label:      "Build a rubric with AI",
+			Endpoint:   "/api/v1/courses/{courseCode}/assignments/{itemId}/generate-rubric",
+			RequiresAI: true,
+		},
 	}
 }
 

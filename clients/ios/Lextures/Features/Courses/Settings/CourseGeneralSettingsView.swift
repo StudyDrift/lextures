@@ -461,7 +461,12 @@ private struct TimezonePickerSheet: View {
     var body: some View {
         NavigationStack {
             List(filtered, id: \.self) { tz in
-                Button(tz) { selection = tz; dismiss() }
+                Button {
+                    selection = tz
+                    dismiss()
+                } label: {
+                    Text(CourseSettingsLogic.displayTimezoneLabel(tz))
+                }
             }
             .searchable(text: $query, prompt: Text(L.text("mobile.courseSettings.searchTimezone")))
             .navigationTitle(L.text("mobile.courseSettings.timezone"))

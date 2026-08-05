@@ -1004,7 +1004,13 @@ function SortableChildRow({
   const gripAlwaysOn = dragHandlesVisible || isDragging
 
   return (
-    <li ref={setNodeRef} style={style} className="group py-3 first:pt-0">
+    <li
+      ref={setNodeRef}
+      style={style}
+      className="group py-3 first:pt-0"
+      data-focus-anchor="modules.item"
+      data-focus-entity={child.id}
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           {(!disabled || dragHandlesVisible || isDragging) && (
@@ -1525,7 +1531,13 @@ function SortableModuleCard({
     ) : null
 
   return (
-    <li ref={setNodeRef} style={style} className="w-full">
+    <li
+      ref={setNodeRef}
+      style={style}
+      className="w-full"
+      data-focus-anchor="modules.module"
+      data-focus-entity={item.id}
+    >
       <ModuleCardBody
         item={item}
         moduleChildrenById={moduleChildrenById}
@@ -2845,6 +2857,7 @@ export default function CourseModules() {
           >
             <ul
               className={`flex w-full max-w-none flex-col gap-3 ${nonModuleTopLevel.length > 0 ? 'mt-3' : 'mt-8'}`}
+              data-focus-anchor="modules.list"
             >
               {sortedTopLevel
                 .filter((i) => i.kind === 'module')

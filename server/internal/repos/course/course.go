@@ -4,6 +4,7 @@ package course
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -45,4 +46,62 @@ SELECT question_bank_enabled, qti_import_enabled FROM course.courses WHERE id = 
 		return false, false, nil
 	}
 	return questionBankEnabled, qtiImportEnabled, e
+}
+
+// TitleAndLanguage returns a display title and optional catalog language for a course.
+// On missing rows or errors, empty strings are returned (callers treat as soft context).
+func TitleAndLanguage(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (title, lang string) {
+	var t string
+	var l *string
+	err := pool.QueryRow(ctx, `
+SELECT COALESCE(title, course_code), NULLIF(TRIM(catalog_language), '')
+FROM course.courses WHERE id = $1
+`, courseID).Scan(&t, &l)
+	if err != nil {
+		return "", ""
+	}
+	title = t
+	if l != nil {
+		lang = *l
+	}
+	return title, lang
+}
+
+// WelcomeDraftContext is course metadata safe to send to the welcome-draft AI path (CC.10).
+type WelcomeDraftContext struct {
+	Title       string
+	Description string
+	StartDate   string // YYYY-MM-DD or empty
+	EndDate     string // YYYY-MM-DD or empty
+	Language    string
+}
+
+// GetWelcomeDraftContext loads title, description, term dates, and language for AI welcome drafts.
+// On missing rows or errors, a zero value is returned.
+func GetWelcomeDraftContext(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) WelcomeDraftContext {
+	var t string
+	var description *string
+	var language *string
+	var startAt, endAt *time.Time
+	err := pool.QueryRow(ctx, `
+SELECT COALESCE(title, course_code), description, starts_at, ends_at, NULLIF(TRIM(catalog_language), '')
+FROM course.courses WHERE id = $1
+`, courseID).Scan(&t, &description, &startAt, &endAt, &language)
+	if err != nil {
+		return WelcomeDraftContext{}
+	}
+	out := WelcomeDraftContext{Title: t}
+	if description != nil {
+		out.Description = *description
+	}
+	if language != nil {
+		out.Language = *language
+	}
+	if startAt != nil {
+		out.StartDate = startAt.UTC().Format("2006-01-02")
+	}
+	if endAt != nil {
+		out.EndDate = endAt.UTC().Format("2006-01-02")
+	}
+	return out
 }

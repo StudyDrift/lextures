@@ -1,6 +1,6 @@
 # CC.10 — Guidance, Assisted Fixes, Analytics & Rollout
 
-> Implementation plan. Source: Course Checklist product request. Folder overview: [README](README.md).
+> Implementation plan. Source: Course Checklist product request. Folder overview: [README](README.md). *(Completed.)*
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Course Checklist |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) per phase; M (2–4w) overall |
 | **Owner (proposed)** | Platform + web + instructional design |
 | **Depends on** | CC.2, CC.3, CC.4, CC.5, CC.6, CC.7 |
@@ -77,7 +77,7 @@ possible, and the plan for taking the checklist from "informational" to "badged"
 - **FR-3.** Item help MUST be reachable from the item row without leaving the page (a popover or side sheet
   on web, a sheet on mobile) and MUST also be a linkable URL for support.
 - **FR-4.** The **sources** chips (`QM 3.1`, `OSCQR 45`, `NSQ C`, `WCAG 1.1.1`) MUST link to
-  [course-design-research.md](course-design-research.md), which MUST carry the full rule-to-standard mapping
+  [research.md](../../help/course-checklist/research.md), which MUST carry the full rule-to-standard mapping
   for all four packs and short, non-infringing summaries with links to the canonical sources.
 
 ### Assisted fixes (action slot)
@@ -249,7 +249,7 @@ and MUST return proposals with a confidence and a rationale string for human rev
   announcement-composer paths, `server/internal/aidisclosure`, AI provider/budget plumbing,
   `server/internal/telemetry`, the product-analytics pipeline.
 - Clients: CC.7's action slot and help affordance; CC.9's equivalents.
-- Docs: `docs/plan/checklist/course-design-research.md`, `checklist-event-dictionary.md`,
+- Docs: `docs/help/course-checklist/research.md`, `checklist-event-dictionary.md`,
   `checklist-reporting.md`, `checklist-analytics-inventory.md`, `docs/runbooks/course-checklist.md`.
 
 ## 13. Dependencies & Sequencing
@@ -310,7 +310,7 @@ rule retirement, tier demotion, the link-check env kill switch (CC.6), and TTL t
 
 ## 17. Documentation & Training
 
-- [course-design-research.md](course-design-research.md) — completed rule-to-standard mapping for all packs.
+- [research.md](../../help/course-checklist/research.md) — completed rule-to-standard mapping for all packs.
 - `checklist-event-dictionary.md`, `checklist-reporting.md`, `checklist-analytics-inventory.md` — following
   the pinned-settings precedent.
 - `docs/runbooks/course-checklist.md` — retire a rule, demote a tier, force-refresh, disable link checking,
@@ -335,10 +335,10 @@ rule retirement, tier demotion, the link-check env kill switch (CC.6), and TTL t
 
 ## 19. References
 
-- Precedent: [PS.4 suggested pins, telemetry & rollout](../../completed/settings/PS.4-suggested-pins-telemetry-and-rollout.md)
-  and its companion [event dictionary](../../completed/settings/pinned-settings-event-dictionary.md),
-  [reporting](../../completed/settings/pinned-settings-reporting.md) and
-  [analytics inventory](../../completed/settings/pinned-settings-analytics-inventory.md) documents — CC.10
+- Precedent: [PS.4 suggested pins, telemetry & rollout](../settings/PS.4-suggested-pins-telemetry-and-rollout.md)
+  and its companion [event dictionary](../settings/pinned-settings-event-dictionary.md),
+  [reporting](../settings/pinned-settings-reporting.md) and
+  [analytics inventory](../settings/pinned-settings-analytics-inventory.md) documents — CC.10
   follows the same four-document shape.
 - Existing files this work touches: `server/internal/service/coursechecklist`,
   `server/internal/repos/courseoutcomes`, `server/internal/aidisclosure`, the rubric-generation and
@@ -346,7 +346,7 @@ rule retirement, tier demotion, the link-check env kill switch (CC.6), and TTL t
 - External standards: [Quality Matters](https://www.qualitymatters.org/qa-resources/rubric-standards),
   [OSCQR](https://oscqr.suny.edu/), [NSQ](https://nsqol.org/the-standards/quality-online-courses/),
   [CAST UDL 3.0](https://udlguidelines.cast.org/).
-- Related plans: all of [CC.1](../../completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md) –
+- Related plans: all of [CC.1](CC.1-checklist-registry-and-evaluation-engine.md) –
   [CC.9](CC.9-mobile-checklist-ios-and-android.md); AI provider plumbing in
-  [`docs/completed/ai-providers/`](../../completed/ai-providers/);
-  compliance evidence programme in [`../standards/`](../standards/).
+  [`docs/completed/ai-providers/`](../ai-providers/);
+  compliance evidence programme in [`../standards/`](../../plan/standards/).

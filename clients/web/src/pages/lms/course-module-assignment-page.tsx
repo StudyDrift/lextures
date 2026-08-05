@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { formatDateTime } from '../../lib/format'
+import { formatDateTime, formatDeadlineDisplay, isLearnerLocalTimezone } from '../../lib/format'
 import { formatEntityLabel } from '../../lib/format-entity-label'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import { Eye } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
@@ -29,6 +29,7 @@ import {
   type LateSubmissionPolicy,
   type OriginalityDetectionMode,
   type OriginalityStudentVisibility,
+  type CoursePublic,
   type RubricDefinition,
   type SyllabusSection,
 } from '../../lib/courses-api'
@@ -44,26 +45,16 @@ import { getJwtSubject } from '../../lib/auth'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { AssignmentPageActionsMenu } from '../../components/assignment/assignment-page-actions-menu'
 import { AssignmentPageSettingsPanel } from '../../components/assignment/assignment-page-settings-panel'
+import { AssignmentRubricViewerDialog } from '../../components/assignment/assignment-rubric-viewer-dialog'
 import { GraderAgentWorkflowModal } from '../../components/annotation/grader-agent/grader-agent-workflow-modal'
 import { AcademicIntegrityNotice } from '../../components/assignment/academic-integrity-notice'
 import { AssignmentAnnotationWorkbench } from '../../components/annotation/assignment-annotation-workbench'
 import { LmsPage } from './lms-page'
 
-function isoToDatetimeLocalValue(iso: string | null): string {
-  if (!iso) return ''
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-
-function datetimeLocalValueToIso(value: string): string | null {
-  const t = value.trim()
-  if (!t) return null
-  const d = new Date(t)
-  if (Number.isNaN(d.getTime())) return null
-  return d.toISOString()
-}
+import {
+  datetimeLocalValueToIso,
+  isoToDatetimeLocalValue,
+} from '../../lib/format/datetime-local'
 
 function assignmentDateTimeIsSet(iso: string | null): boolean {
   if (!iso) return false
@@ -71,10 +62,19 @@ function assignmentDateTimeIsSet(iso: string | null): boolean {
   return !Number.isNaN(d.getTime())
 }
 
-function formatOptionalDateTime(iso: string | null): string {
+function formatOptionalDateTime(iso: string | null, courseTimezone?: string | null): string {
   if (!iso) return 'Not set'
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return 'Not set'
+  if (isLearnerLocalTimezone(courseTimezone)) {
+    const formatted = formatDeadlineDisplay(d, {
+      displayTimeZone: 'UTC',
+      instructorTimeZone: 'LOCAL',
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+    return `${formatted.primary} ${formatted.abbrev}`
+  }
   return formatDateTime(d, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
@@ -167,6 +167,8 @@ export default function CourseModuleAssignmentPage() {
   const [searchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
   const { graderAgentEnabled, graderAgentReviewInboxEnabled } = usePlatformFeatures()
+  const outlet = useOutletContext<{ course?: CoursePublic | null } | null>()
+  const courseTimezone = outlet?.course?.courseTimezone ?? null
 
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
@@ -243,6 +245,7 @@ export default function CourseModuleAssignmentPage() {
   const [identitiesRevealedAt, setIdentitiesRevealedAt] = useState<string | null>(null)
   const [viewerCanRevealIdentities, setViewerCanRevealIdentities] = useState(false)
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
+  const [rubricViewerOpen, setRubricViewerOpen] = useState(false)
   const [gradingAgentOpen, setGradingAgentOpen] = useState(false)
   const [graderReviewCount, setGraderReviewCount] = useState(0)
   const [ungradedSubmissionCount, setUngradedSubmissionCount] = useState<number | null>(null)
@@ -326,7 +329,7 @@ export default function CourseModuleAssignmentPage() {
       setPostingPolicy(pp)
       setDraftPostingPolicy(pp)
       setReleaseAt(data.releaseAt ?? null)
-      setDraftReleaseLocal(isoToDatetimeLocalValue(data.releaseAt ?? null))
+      setDraftReleaseLocal(isoToDatetimeLocalValue(data.releaseAt ?? null, courseTimezone))
       setAssignmentGroupId(data.assignmentGroupId ?? null)
       const nd = data.neverDrop === true
       const rwf = data.replaceWithFinal === true
@@ -531,9 +534,9 @@ export default function CourseModuleAssignmentPage() {
   }
 
   function syncDraftsFromSaved() {
-    setDraftDueLocal(isoToDatetimeLocalValue(dueAt))
-    setDraftAvailableFromLocal(isoToDatetimeLocalValue(availableFromAt))
-    setDraftAvailableUntilLocal(isoToDatetimeLocalValue(availableUntilAt))
+    setDraftDueLocal(isoToDatetimeLocalValue(dueAt, courseTimezone))
+    setDraftAvailableFromLocal(isoToDatetimeLocalValue(availableFromAt, courseTimezone))
+    setDraftAvailableUntilLocal(isoToDatetimeLocalValue(availableUntilAt, courseTimezone))
     setDraftPointsWorth(pointsWorth)
     setDraftSubmissionAllowText(submissionAllowText)
     setDraftSubmissionAllowFileUpload(submissionAllowFileUpload)
@@ -551,7 +554,7 @@ export default function CourseModuleAssignmentPage() {
     setDraftOriginalityStudentVisibility(originalityStudentVisibility)
     setDraftGradingType(gradingType)
     setDraftPostingPolicy(postingPolicy)
-    setDraftReleaseLocal(isoToDatetimeLocalValue(releaseAt))
+    setDraftReleaseLocal(isoToDatetimeLocalValue(releaseAt, courseTimezone))
     setDraftNeverDrop(neverDrop)
     setDraftReplaceWithFinal(replaceWithFinal)
   }
@@ -597,10 +600,10 @@ export default function CourseModuleAssignmentPage() {
       await contentToolsFlushRef.current?.flush()
       const data = await patchModuleAssignment(courseCode, itemId, {
         markdown: body,
-        dueAt: datetimeLocalValueToIso(draftDueLocal),
+        dueAt: datetimeLocalValueToIso(draftDueLocal, courseTimezone),
         pointsWorth: draftPointsWorth,
-        availableFrom: datetimeLocalValueToIso(draftAvailableFromLocal),
-        availableUntil: datetimeLocalValueToIso(draftAvailableUntilLocal),
+        availableFrom: datetimeLocalValueToIso(draftAvailableFromLocal, courseTimezone),
+        availableUntil: datetimeLocalValueToIso(draftAvailableUntilLocal, courseTimezone),
         assignmentAccessCode: draftAssignmentAccessCode.trim() === '' ? null : draftAssignmentAccessCode.trim(),
         submissionAllowText: draftSubmissionAllowText,
         submissionAllowFileUpload: draftSubmissionAllowFileUpload,
@@ -617,7 +620,7 @@ export default function CourseModuleAssignmentPage() {
         originalityStudentVisibility: draftOriginalityStudentVisibility,
         gradingType: draftGradingType.trim() === '' ? null : draftGradingType.trim(),
         postingPolicy: draftPostingPolicy,
-        releaseAt: datetimeLocalValueToIso(draftReleaseLocal),
+        releaseAt: datetimeLocalValueToIso(draftReleaseLocal, courseTimezone),
         neverDrop: draftNeverDrop,
         replaceWithFinal: draftReplaceWithFinal,
       })
@@ -655,7 +658,7 @@ export default function CourseModuleAssignmentPage() {
       setPostingPolicy(ppa)
       setDraftPostingPolicy(ppa)
       setReleaseAt(data.releaseAt ?? null)
-      setDraftReleaseLocal(isoToDatetimeLocalValue(data.releaseAt ?? null))
+      setDraftReleaseLocal(isoToDatetimeLocalValue(data.releaseAt ?? null, courseTimezone))
       setRequiresAssignmentAccessCode(data.requiresAssignmentAccessCode)
       setAssignmentAccessCode(data.assignmentAccessCode ?? '')
       setAssignmentGroupId(data.assignmentGroupId ?? null)
@@ -800,7 +803,7 @@ export default function CourseModuleAssignmentPage() {
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Due date</dt>
                     <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
-                      {formatOptionalDateTime(dueAt)}
+                      {formatOptionalDateTime(dueAt, courseTimezone)}
                     </dd>
                   </div>
                 ) : null}
@@ -808,7 +811,7 @@ export default function CourseModuleAssignmentPage() {
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility start</dt>
                     <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
-                      {formatOptionalDateTime(availableFromAt)}
+                      {formatOptionalDateTime(availableFromAt, courseTimezone)}
                     </dd>
                   </div>
                 ) : null}
@@ -816,7 +819,7 @@ export default function CourseModuleAssignmentPage() {
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility end</dt>
                     <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
-                      {formatOptionalDateTime(availableUntilAt)}
+                      {formatOptionalDateTime(availableUntilAt, courseTimezone)}
                     </dd>
                   </div>
                 ) : null}
@@ -870,7 +873,16 @@ export default function CourseModuleAssignmentPage() {
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Rubric</dt>
                     <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
-                      {`${rubric.criteria.length} criteria`}
+                      <button
+                        type="button"
+                        onClick={() => setRubricViewerOpen(true)}
+                        className="font-medium text-indigo-600 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:text-indigo-400"
+                        aria-haspopup="dialog"
+                      >
+                        {rubric.criteria.length === 1
+                          ? '1 criterion'
+                          : `${rubric.criteria.length} criteria`}
+                      </button>
                     </dd>
                   </div>
                 ) : null}
@@ -1035,6 +1047,11 @@ export default function CourseModuleAssignmentPage() {
           </div>
         </div>
       )}
+      <AssignmentRubricViewerDialog
+        open={rubricViewerOpen}
+        rubric={rubric}
+        onClose={() => setRubricViewerOpen(false)}
+      />
       <GraderAgentWorkflowModal
         open={gradingAgentOpen}
         onClose={() => setGradingAgentOpen(false)}

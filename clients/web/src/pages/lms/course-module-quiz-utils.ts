@@ -1,3 +1,4 @@
+import { formatDeadlineDisplay, isLearnerLocalTimezone } from '../../lib/format'
 import { formatAbsoluteShort } from '../../lib/format-datetime'
 import { type BankQuestionDetail, type CourseStructureItem, type LockdownMode, type QuizQuestion } from '../../lib/courses-api'
 
@@ -20,21 +21,10 @@ export const QUESTION_TYPE_OPTIONS = [
 
 export type QuestionType = (typeof QUESTION_TYPE_OPTIONS)[number]['value']
 
-export function isoToDatetimeLocalValue(iso: string | null): string {
-  if (!iso) return ''
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-
-export function datetimeLocalValueToIso(value: string): string | null {
-  const t = value.trim()
-  if (!t) return null
-  const d = new Date(t)
-  if (Number.isNaN(d.getTime())) return null
-  return d.toISOString()
-}
+export {
+  datetimeLocalValueToIso,
+  isoToDatetimeLocalValue,
+} from '../../lib/format/datetime-local'
 
 export function quizDateTimeIsSet(iso: string | null): boolean {
   if (!iso) return false
@@ -42,8 +32,17 @@ export function quizDateTimeIsSet(iso: string | null): boolean {
   return !Number.isNaN(d.getTime())
 }
 
-export function formatQuizDateTime(iso: string | null): string {
+export function formatQuizDateTime(iso: string | null, courseTimezone?: string | null): string {
   if (!iso) return 'Not set'
+  if (isLearnerLocalTimezone(courseTimezone)) {
+    const d = formatDeadlineDisplay(iso, {
+      displayTimeZone: 'UTC',
+      instructorTimeZone: 'LOCAL',
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+    return `${d.primary} ${d.abbrev}`
+  }
   const s = formatAbsoluteShort(iso)
   return s === '—' ? 'Not set' : s
 }

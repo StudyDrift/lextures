@@ -1,7 +1,7 @@
 # CC.5 — Rule Pack C: Assessment, Grading, Feedback & Interaction
 
 > Implementation plan. Source: Course Checklist product request. Folder overview: [README](README.md).
-> Rubric mapping: [course-design-research.md](../../plan/checklist/course-design-research.md).
+> Rubric mapping: [research.md](../../help/course-checklist/research.md).
 
 ## Metadata
 
@@ -330,7 +330,7 @@ wires the checklist item's action button to it. No new model, prompt or cost bud
 
 ## 17. Documentation & Training
 
-- [course-design-research.md](../../plan/checklist/course-design-research.md) C-sections.
+- [research.md](../../help/course-checklist/research.md) C-sections.
 - Help-centre: "Why do my weights need to total 100%?", "Writing grading criteria students can use",
   "Formative checks: what counts".
 - Accommodations doc note explaining exactly what the checklist can and cannot see (privacy transparency).

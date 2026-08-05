@@ -37,7 +37,7 @@ func ruleGradingGroupWeights() ItemDescriptor {
 		Target: NavTarget{
 			Surface: "web",
 			Route:   "/courses/{courseCode}/settings/grading",
-			Anchor:  "grading.groups",
+			Anchor:  "course.grading.groups",
 		},
 	}
 }
@@ -82,7 +82,7 @@ func ruleGradingEmptyGroups() ItemDescriptor {
 		Target: NavTarget{
 			Surface: "web",
 			Route:   "/courses/{courseCode}/settings/grading",
-			Anchor:  "grading.groups",
+			Anchor:  "course.grading.groups",
 		},
 		EvidenceShape: &EvidenceShape{Columns: gradingEvidenceColumns},
 	}
@@ -136,7 +136,7 @@ func ruleGradingDropRules() ItemDescriptor {
 		Target: NavTarget{
 			Surface: "web",
 			Route:   "/courses/{courseCode}/settings/grading",
-			Anchor:  "grading.groups",
+			Anchor:  "course.grading.groups",
 		},
 		EvidenceShape: &EvidenceShape{Columns: gradingEvidenceColumns},
 	}

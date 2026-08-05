@@ -1,7 +1,7 @@
 # CC.6 — Rule Pack D: Accessibility, Inclusive Design & Launch Readiness
 
 > Implementation plan. Source: Course Checklist product request. Folder overview: [README](README.md).
-> Rubric mapping: [course-design-research.md](course-design-research.md).
+> Rubric mapping: [research.md](../../help/course-checklist/research.md).
 
 ## Metadata
 

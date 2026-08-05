@@ -1,4 +1,19 @@
-# API changelog — Course Checklist (CC.2)
+# API changelog — Course Checklist (CC.2 / CC.10)
+
+## 2026-08 — Assisted fixes & action slot (CC.10)
+
+Checklist items may include an optional `action` object (`kind`, `labelKey`, `label`, `endpoint`, `requiresAi`).
+Unknown `kind` values must be ignored by clients.
+
+| Verb | Path | Notes |
+|---|---|---|
+| POST | `/api/v1/courses/{course_code}/outcomes/suggest-links` | Read-only AI proposals for unmapped assessments; **no writes** |
+| POST | `/api/v1/courses/{course_code}/feed/draft-welcome` | Read-only welcome announcement draft; **never auto-posts** |
+
+Accepted outcome-mapping proposals still use the existing  
+`POST /outcomes/{outcome_id}/links` endpoint (one write per accepted proposal).
+
+AI assists honour opt-out / gateway policy. See [CC.10](completed/checklist/CC.10-analytics-guidance-and-rollout.md).
 
 ## 2026-08 — Checklist state API & dismissals
 

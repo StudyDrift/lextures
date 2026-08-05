@@ -52,7 +52,7 @@ func evalStructurePacingSignal(_ context.Context, snap CourseSnapshot) (Finding,
 			TargetOverride: &NavTarget{
 				Surface: "web",
 				Route:   "/courses/{courseCode}/modules",
-				Anchor:  "module:" + m.ID.String(),
+				Anchor:  "modules.module", EntityKey: m.ID.String(),
 			},
 		})
 	}
@@ -279,7 +279,7 @@ func evalStructureAttribution(_ context.Context, snap CourseSnapshot) (Finding, 
 			TargetOverride: &NavTarget{
 				Surface: "web",
 				Route:   itemEditorRoute(it.Kind),
-				Anchor:  "attribution:" + it.ID.String(),
+				Anchor:  "modules.item", EntityKey: it.ID.String(),
 			},
 		})
 	}
@@ -360,7 +360,7 @@ func evalStructureFileReferences(_ context.Context, snap CourseSnapshot) (Findin
 				TargetOverride: &NavTarget{
 					Surface:   "web",
 					Route:     "/courses/{courseCode}/modules/content/{itemId}",
-					Anchor:    "item:" + id.String(),
+					Anchor:    "modules.item",
 					EntityKey: id.String(),
 				},
 			})

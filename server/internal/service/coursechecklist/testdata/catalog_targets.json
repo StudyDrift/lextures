@@ -1,0 +1,427 @@
+[
+  {
+    "itemId": "a11y.color-contrast",
+    "route": "/courses/{courseCode}/settings/general"
+  },
+  {
+    "itemId": "a11y.document-accessibility",
+    "route": "/courses/{courseCode}/files"
+  },
+  {
+    "itemId": "a11y.enforcement-settings",
+    "route": "/courses/{courseCode}/settings/accessibility"
+  },
+  {
+    "itemId": "a11y.heading-structure",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "a11y.image-alt-text",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "a11y.link-text",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "a11y.media-alternatives",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "a11y.plain-language",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "a11y.table-headers",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "a11y.tables-for-layout",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "a11y.text-formatting",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "a11y.video-captions",
+    "route": "/courses/{courseCode}/settings/accessibility"
+  },
+  {
+    "itemId": "accommodations.honored",
+    "route": "/courses/{courseCode}/settings/accessibility"
+  },
+  {
+    "itemId": "accommodations.reviewed",
+    "route": "/courses/{courseCode}/settings/accessibility"
+  },
+  {
+    "itemId": "assessment.availability-windows",
+    "route": "/courses/{courseCode}/modules",
+    "anchor": "assignment.scheduling"
+  },
+  {
+    "itemId": "assessment.dates-within-term",
+    "route": "/courses/{courseCode}/modules",
+    "anchor": "assignment.scheduling"
+  },
+  {
+    "itemId": "assessment.due-dates",
+    "route": "/courses/{courseCode}/modules",
+    "anchor": "assignment.scheduling"
+  },
+  {
+    "itemId": "assessment.gradable-items",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "assessment.points",
+    "route": "/courses/{courseCode}/modules",
+    "anchor": "assignment.grading"
+  },
+  {
+    "itemId": "assessment.spread",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "course.dates",
+    "route": "/courses/{courseCode}/settings/general",
+    "anchor": "course.general.dates"
+  },
+  {
+    "itemId": "course.features-reviewed",
+    "route": "/courses/{courseCode}/settings/features"
+  },
+  {
+    "itemId": "course.grading-scheme",
+    "route": "/courses/{courseCode}/settings/grading"
+  },
+  {
+    "itemId": "course.hero-image",
+    "route": "/courses/{courseCode}/settings/general",
+    "anchor": "course.general.hero-image"
+  },
+  {
+    "itemId": "course.home-landing",
+    "route": "/courses/{courseCode}/settings/general",
+    "anchor": "course.general.home-landing"
+  },
+  {
+    "itemId": "course.language",
+    "route": "/courses/{courseCode}/settings/general",
+    "anchor": "course.general.language"
+  },
+  {
+    "itemId": "course.published",
+    "route": "/courses/{courseCode}/settings/general",
+    "anchor": "course.general.published"
+  },
+  {
+    "itemId": "course.relative-schedule",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "course.timezone",
+    "route": "/courses/{courseCode}/settings/general",
+    "anchor": "course.general.timezone"
+  },
+  {
+    "itemId": "course.title-and-description",
+    "route": "/courses/{courseCode}/settings/general",
+    "anchor": "course.general.description"
+  },
+  {
+    "itemId": "course.visibility-window",
+    "route": "/courses/{courseCode}/settings/general",
+    "anchor": "course.general.visibility"
+  },
+  {
+    "itemId": "feedback.attempts-policy",
+    "route": "/courses/{courseCode}/modules",
+    "anchor": "quiz.attempts-grading"
+  },
+  {
+    "itemId": "feedback.criteria-published",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "feedback.formative-per-module",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "feedback.peer-review-config",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "feedback.quiz-review-settings",
+    "route": "/courses/{courseCode}/modules",
+    "anchor": "quiz.scores-review"
+  },
+  {
+    "itemId": "feedback.rubrics-on-high-stakes",
+    "route": "/courses/{courseCode}/modules",
+    "anchor": "assignment.rubric"
+  },
+  {
+    "itemId": "grading.drop-rules",
+    "route": "/courses/{courseCode}/settings/grading",
+    "anchor": "course.grading.groups"
+  },
+  {
+    "itemId": "grading.empty-groups",
+    "route": "/courses/{courseCode}/settings/grading",
+    "anchor": "course.grading.groups"
+  },
+  {
+    "itemId": "grading.group-weights",
+    "route": "/courses/{courseCode}/settings/grading",
+    "anchor": "course.grading.groups"
+  },
+  {
+    "itemId": "grading.late-policy-configured",
+    "route": "/courses/{courseCode}/modules",
+    "anchor": "assignment.grading"
+  },
+  {
+    "itemId": "grading.posting-policy",
+    "route": "/courses/{courseCode}/settings/grading"
+  },
+  {
+    "itemId": "grading.scheme-coverage",
+    "route": "/courses/{courseCode}/settings/grading"
+  },
+  {
+    "itemId": "integrity.ai-policy-alignment",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "integrity.high-stakes-settings",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "interaction.discussion-exists",
+    "route": "/courses/{courseCode}/discussions"
+  },
+  {
+    "itemId": "interaction.groups-configured",
+    "route": "/courses/{courseCode}/groups"
+  },
+  {
+    "itemId": "interaction.instructor-presence-plan",
+    "route": "/courses/{courseCode}/feed"
+  },
+  {
+    "itemId": "interaction.office-hours",
+    "route": "/courses/{courseCode}/office-hours"
+  },
+  {
+    "itemId": "launch.backup-export",
+    "route": "/courses/{courseCode}/settings/import-export"
+  },
+  {
+    "itemId": "launch.calendar-sanity",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "launch.no-drafts-after-start",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "launch.student-preview",
+    "route": "/courses/{courseCode}"
+  },
+  {
+    "itemId": "links.external-health",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "orientation.instructor-contact",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "orientation.instructor-introduction",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "orientation.learner-introductions",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "orientation.netiquette",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "orientation.participation-expectations",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "orientation.response-time",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "orientation.start-here",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "orientation.support-resources",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "orientation.tech-requirements",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "orientation.welcome-message",
+    "route": "/courses/{courseCode}/feed",
+    "anchor": "feed.channel.announcements"
+  },
+  {
+    "itemId": "outcomes.assessment-mapping",
+    "route": "/courses/{courseCode}/settings/outcomes"
+  },
+  {
+    "itemId": "outcomes.coverage",
+    "route": "/courses/{courseCode}/settings/outcomes"
+  },
+  {
+    "itemId": "outcomes.defined",
+    "route": "/courses/{courseCode}/settings/outcomes"
+  },
+  {
+    "itemId": "outcomes.described",
+    "route": "/courses/{courseCode}/settings/outcomes"
+  },
+  {
+    "itemId": "outcomes.mastery-scale",
+    "route": "/courses/{courseCode}/settings/grading",
+    "anchor": "course.grading.sbg"
+  },
+  {
+    "itemId": "outcomes.measurable",
+    "route": "/courses/{courseCode}/settings/outcomes"
+  },
+  {
+    "itemId": "outcomes.module-alignment",
+    "route": "/courses/{courseCode}/settings/outcomes"
+  },
+  {
+    "itemId": "outcomes.standards-alignment",
+    "route": "/courses/{courseCode}/standards-coverage"
+  },
+  {
+    "itemId": "outcomes.summative-coverage",
+    "route": "/courses/{courseCode}/settings/outcomes"
+  },
+  {
+    "itemId": "outcomes.syllabus-published",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "people.guardian-links",
+    "route": "/courses/{courseCode}/enrollments"
+  },
+  {
+    "itemId": "people.sections",
+    "route": "/courses/{courseCode}/settings/sections"
+  },
+  {
+    "itemId": "people.staff-roles",
+    "route": "/courses/{courseCode}/enrollments"
+  },
+  {
+    "itemId": "people.stale-invitations",
+    "route": "/courses/{courseCode}/enrollments"
+  },
+  {
+    "itemId": "people.students-enrolled",
+    "route": "/courses/{courseCode}/enrollments"
+  },
+  {
+    "itemId": "structure.attribution",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.content-variety",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.empty-modules",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.file-references",
+    "route": "/courses/{courseCode}/files"
+  },
+  {
+    "itemId": "structure.gating-review",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.interactive-elements",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.module-overviews",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.modules-exist",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.orphan-items",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.pacing-signal",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.placeholder-titles",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "structure.unpublished-items",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "syllabus.academic-integrity",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "syllabus.acceptance-decision",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "syllabus.accessibility-statement",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "syllabus.exists",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "syllabus.grading-policy",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "syllabus.late-policy",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "syllabus.printable",
+    "route": "/courses/{courseCode}/syllabus"
+  },
+  {
+    "itemId": "udl.engagement-relevance",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "udl.expression-choice",
+    "route": "/courses/{courseCode}/modules"
+  },
+  {
+    "itemId": "udl.multiple-representations",
+    "route": "/courses/{courseCode}/modules"
+  }
+]

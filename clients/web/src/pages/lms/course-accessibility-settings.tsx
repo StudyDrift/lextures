@@ -81,9 +81,9 @@ export function CourseAccessibilitySettingsSection({
   if (!cov) return null
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4" data-focus-anchor="course.accessibility.settings">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100" data-focus-anchor="content.image-alt">
           Image alt-text coverage
         </h2>
         <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">

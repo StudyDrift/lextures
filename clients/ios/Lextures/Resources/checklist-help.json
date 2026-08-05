@@ -1,0 +1,1295 @@
+{
+  "version": 1,
+  "comment": "CC.10 per-item help catalog. HelpRef = course-checklist#\u003cslug\u003e. Support URL: /help/course-checklist#\u003cslug\u003e",
+  "items": {
+    "course-checklist#a11y-color-contrast": {
+      "itemId": "a11y.color-contrast",
+      "helpRef": "course-checklist#a11y-color-contrast",
+      "title": "Fix custom theme contrast",
+      "what": "This check looks at whether the course satisfies: Fix custom theme contrast. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Custom theme colors must meet WCAG contrast so text stays readable. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: WCAG 1.4.3, OSCQR 18.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "WCAG 1.4.3",
+        "OSCQR 18"
+      ]
+    },
+    "course-checklist#a11y-document-accessibility": {
+      "itemId": "a11y.document-accessibility",
+      "helpRef": "course-checklist#a11y-document-accessibility",
+      "title": "Replace image-only PDFs",
+      "what": "This check looks at whether the course satisfies: Replace image-only PDFs. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "PDFs without a text layer need a text alternative so they can be read aloud. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: WCAG 1.1.1, OSCQR 34.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "WCAG 1.1.1",
+        "OSCQR 34"
+      ]
+    },
+    "course-checklist#a11y-enforcement-settings": {
+      "itemId": "a11y.enforcement-settings",
+      "helpRef": "course-checklist#a11y-enforcement-settings",
+      "title": "Review accessibility settings",
+      "what": "This check looks at whether the course satisfies: Review accessibility settings. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Confirm alt-text enforcement and caption requirements for this course. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: QM 8.x.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "QM 8.x"
+      ]
+    },
+    "course-checklist#a11y-heading-structure": {
+      "itemId": "a11y.heading-structure",
+      "helpRef": "course-checklist#a11y-heading-structure",
+      "title": "Fix heading structure on pages",
+      "what": "This check looks at whether the course satisfies: Fix heading structure on pages. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Headings should start at H2 and never skip levels so assistive tech can navigate the page. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: WCAG 1.3.1, WCAG 2.4.6, OSCQR 21.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "WCAG 1.3.1",
+        "WCAG 2.4.6",
+        "OSCQR 21"
+      ]
+    },
+    "course-checklist#a11y-image-alt-text": {
+      "itemId": "a11y.image-alt-text",
+      "helpRef": "course-checklist#a11y-image-alt-text",
+      "title": "Add alt text to images",
+      "what": "This check looks at whether the course satisfies: Add alt text to images. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Every image needs a short description or a decorative mark so screen readers can skip or announce it. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: WCAG 1.1.1, QM 8.2, OSCQR 36.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "WCAG 1.1.1",
+        "QM 8.2",
+        "OSCQR 36"
+      ]
+    },
+    "course-checklist#a11y-link-text": {
+      "itemId": "a11y.link-text",
+      "helpRef": "course-checklist#a11y-link-text",
+      "title": "Rewrite vague or bare link text",
+      "what": "This check looks at whether the course satisfies: Rewrite vague or bare link text. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Link text should describe the destination — avoid “click here” and long bare URLs. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: WCAG 2.4.4, OSCQR 37.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "WCAG 2.4.4",
+        "OSCQR 37"
+      ]
+    },
+    "course-checklist#a11y-media-alternatives": {
+      "itemId": "a11y.media-alternatives",
+      "helpRef": "course-checklist#a11y-media-alternatives",
+      "title": "Add a text alternative beside video modules",
+      "what": "This check looks at whether the course satisfies: Add a text alternative beside video modules. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "When a module is primarily video, offer a transcript, notes, or text page in the same module. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: WCAG 1.2.x, UDL Representation.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "WCAG 1.2.x",
+        "UDL Representation"
+      ]
+    },
+    "course-checklist#a11y-plain-language": {
+      "itemId": "a11y.plain-language",
+      "helpRef": "course-checklist#a11y-plain-language",
+      "title": "Keep page reading level near the grade band",
+      "what": "This check looks at whether the course satisfies: Keep page reading level near the grade band. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Pages much harder than the course grade band can shut learners out — this is a readability estimate, not a judgment. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: QM 8.x.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "QM 8.x"
+      ]
+    },
+    "course-checklist#a11y-table-headers": {
+      "itemId": "a11y.table-headers",
+      "helpRef": "course-checklist#a11y-table-headers",
+      "title": "Add headers to data tables",
+      "what": "This check looks at whether the course satisfies: Add headers to data tables. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Data tables need a header row or column so screen readers can associate cells. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: WCAG 1.3.1, OSCQR 25, OSCQR 26.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "WCAG 1.3.1",
+        "OSCQR 25",
+        "OSCQR 26"
+      ]
+    },
+    "course-checklist#a11y-tables-for-layout": {
+      "itemId": "a11y.tables-for-layout",
+      "helpRef": "course-checklist#a11y-tables-for-layout",
+      "title": "Replace layout tables with structured content",
+      "what": "This check looks at whether the course satisfies: Replace layout tables with structured content. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Single-row or single-column tables without headers are usually layout — prefer headings and lists. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: OSCQR 24.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "OSCQR 24"
+      ]
+    },
+    "course-checklist#a11y-text-formatting": {
+      "itemId": "a11y.text-formatting",
+      "helpRef": "course-checklist#a11y-text-formatting",
+      "title": "Remove blinking text and all-caps blocks",
+      "what": "This check looks at whether the course satisfies: Remove blinking text and all-caps blocks. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Blinking/marquee and long all-caps blocks make content harder to read. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: OSCQR 22, OSCQR 23.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "OSCQR 22",
+        "OSCQR 23"
+      ]
+    },
+    "course-checklist#a11y-video-captions": {
+      "itemId": "a11y.video-captions",
+      "helpRef": "course-checklist#a11y-video-captions",
+      "title": "Add captions or transcripts to media",
+      "what": "This check looks at whether the course satisfies: Add captions or transcripts to media. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Time-based media needs captions or a transcript so learners can follow along without audio. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: WCAG 1.2.2, QM 8.3, OSCQR 35.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss only when the flagged content is non-instructional decorative media or when a human accessibility review supersedes this heuristic — never to skip genuine access barriers.",
+      "sources": [
+        "WCAG 1.2.2",
+        "QM 8.3",
+        "OSCQR 35"
+      ]
+    },
+    "course-checklist#accommodations-honored": {
+      "itemId": "accommodations.honored",
+      "helpRef": "course-checklist#accommodations-honored",
+      "title": "Check timed work against accommodations",
+      "what": "This check looks at whether the course satisfies: Check timed work against accommodations. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Timed quizzes may conflict with extended-time accommodations the platform cannot auto-apply. Sources: OSCQR 48, ADA/§504.",
+      "how": "Review accommodation workflows with your accessibility office. This check reports process readiness only — never student details.",
+      "whenToDismiss": "Dismiss only if your institution handles accommodations entirely outside this LMS and you have confirmed process coverage.",
+      "sources": [
+        "OSCQR 48",
+        "ADA/§504"
+      ]
+    },
+    "course-checklist#accommodations-reviewed": {
+      "itemId": "accommodations.reviewed",
+      "helpRef": "course-checklist#accommodations-reviewed",
+      "title": "Review new accommodations",
+      "what": "This check looks at whether the course satisfies: Review new accommodations. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Open the accommodations surface after new accommodations are added. Sources: OSCQR 48.",
+      "how": "Review accommodation workflows with your accessibility office. This check reports process readiness only — never student details.",
+      "whenToDismiss": "Dismiss only if your institution handles accommodations entirely outside this LMS and you have confirmed process coverage.",
+      "sources": [
+        "OSCQR 48"
+      ]
+    },
+    "course-checklist#assessment-availability-windows": {
+      "itemId": "assessment.availability-windows",
+      "helpRef": "course-checklist#assessment-availability-windows",
+      "title": "Fix contradictory availability windows",
+      "what": "This check looks at whether the course satisfies: Fix contradictory availability windows. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Available-from after due, or available-until before due, locks learners out. Sources: OSCQR 44.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#assessment-dates-within-term": {
+      "itemId": "assessment.dates-within-term",
+      "helpRef": "course-checklist#assessment-dates-within-term",
+      "title": "Move due dates inside the term",
+      "what": "This check looks at whether the course satisfies: Move due dates inside the term. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Due dates outside the term are a common copy-forward defect. Sources: OSCQR 7.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 7"
+      ]
+    },
+    "course-checklist#assessment-due-dates": {
+      "itemId": "assessment.due-dates",
+      "helpRef": "course-checklist#assessment-due-dates",
+      "title": "Give every assessment a due date",
+      "what": "This check looks at whether the course satisfies: Give every assessment a due date. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Due dates keep the gradebook predictable and help learners plan. Sources: QM 1.2, OSCQR 44.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.2",
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#assessment-gradable-items": {
+      "itemId": "assessment.gradable-items",
+      "helpRef": "course-checklist#assessment-gradable-items",
+      "title": "Add something to grade",
+      "what": "This check looks at whether the course satisfies: Add something to grade. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners need at least one graded activity so the gradebook has meaning. Sources: QM 3.1, OSCQR 45.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.1",
+        "OSCQR 45"
+      ]
+    },
+    "course-checklist#assessment-points": {
+      "itemId": "assessment.points",
+      "helpRef": "course-checklist#assessment-points",
+      "title": "Give every assessment points",
+      "what": "This check looks at whether the course satisfies: Give every assessment points. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Zero-point items in a weighted group silently distort the gradebook. Sources: OSCQR 44, OSCQR 46.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 44",
+        "OSCQR 46"
+      ]
+    },
+    "course-checklist#assessment-spread": {
+      "itemId": "assessment.spread",
+      "helpRef": "course-checklist#assessment-spread",
+      "title": "Spread assessments across the term",
+      "what": "This check looks at whether the course satisfies: Spread assessments across the term. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Stacking most points in one week overwhelms learners. Sources: QM 3.4, OSCQR 47.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.4",
+        "OSCQR 47"
+      ]
+    },
+    "course-checklist#course-dates": {
+      "itemId": "course.dates",
+      "helpRef": "course-checklist#course-dates",
+      "title": "Set course start and end dates",
+      "what": "This check looks at whether the course satisfies: Set course start and end dates. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners need clear term boundaries for planning and pacing. Sources: QM 1.2, OSCQR 7.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.2",
+        "OSCQR 7"
+      ]
+    },
+    "course-checklist#course-features-reviewed": {
+      "itemId": "course.features-reviewed",
+      "helpRef": "course-checklist#course-features-reviewed",
+      "title": "Review course feature switches",
+      "what": "This check looks at whether the course satisfies: Review course feature switches. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Feature switches turn tools on or off for learners; a deliberate review prevents silent gaps. Sources: Product.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "Product"
+      ]
+    },
+    "course-checklist#course-grading-scheme": {
+      "itemId": "course.grading-scheme",
+      "helpRef": "course-checklist#course-grading-scheme",
+      "title": "Choose a grading scheme",
+      "what": "This check looks at whether the course satisfies: Choose a grading scheme. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners need to know how letter grades or scores will be calculated. Sources: QM 3.2, OSCQR 44.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.2",
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#course-hero-image": {
+      "itemId": "course.hero-image",
+      "helpRef": "course-checklist#course-hero-image",
+      "title": "Add a course hero image",
+      "what": "This check looks at whether the course satisfies: Add a course hero image. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A hero image helps learners recognize the course in catalogs and on the home page. Sources: QM 8.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss if institutional branding or language defaults already cover this course.",
+      "sources": [
+        "QM 8"
+      ]
+    },
+    "course-checklist#course-home-landing": {
+      "itemId": "course.home-landing",
+      "helpRef": "course-checklist#course-home-landing",
+      "title": "Choose what students see first",
+      "what": "This check looks at whether the course satisfies: Choose what students see first. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "The home landing decides the first screen learners open — modules, feed, or a page. Sources: OSCQR 16.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 16"
+      ]
+    },
+    "course-checklist#course-language": {
+      "itemId": "course.language",
+      "helpRef": "course-checklist#course-language",
+      "title": "Set the course language",
+      "what": "This check looks at whether the course satisfies: Set the course language. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A declared language helps assistive tech and translation tools treat content correctly. Sources: WCAG 3.1.1, OSCQR 34.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss if institutional branding or language defaults already cover this course.",
+      "sources": [
+        "WCAG 3.1.1",
+        "OSCQR 34"
+      ]
+    },
+    "course-checklist#course-published": {
+      "itemId": "course.published",
+      "helpRef": "course-checklist#course-published",
+      "title": "Publish the course",
+      "what": "This check looks at whether the course satisfies: Publish the course. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Unpublished courses stay hidden from enrolled learners even when the term has started. Sources: OSCQR 7.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 7"
+      ]
+    },
+    "course-checklist#course-relative-schedule": {
+      "itemId": "course.relative-schedule",
+      "helpRef": "course-checklist#course-relative-schedule",
+      "title": "Set relative due dates for graded work",
+      "what": "This check looks at whether the course satisfies: Set relative due dates for graded work. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Self-paced courses still need due offsets so learners can pace graded work. Sources: OSCQR 7.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 7"
+      ]
+    },
+    "course-checklist#course-timezone": {
+      "itemId": "course.timezone",
+      "helpRef": "course-checklist#course-timezone",
+      "title": "Choose a course timezone",
+      "what": "This check looks at whether the course satisfies: Choose a course timezone. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Due dates need a clear timezone policy — a named zone, UTC, or learner-local time — so learners know when work is due. Sources: OSCQR 7.",
+      "how": "Open Course settings → Course time zone. Search and pick a zone, choose UTC for one global clock, or Learner local time if 11:59 PM should mean 11:59 PM in each learner’s own zone. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 7"
+      ]
+    },
+    "course-checklist#course-title-and-description": {
+      "itemId": "course.title-and-description",
+      "helpRef": "course-checklist#course-title-and-description",
+      "title": "Write a clear title and description",
+      "what": "This check looks at whether the course satisfies: Write a clear title and description. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners decide whether a course fits them from the title and short description. Sources: QM 1.1, OSCQR 2.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.1",
+        "OSCQR 2"
+      ]
+    },
+    "course-checklist#course-visibility-window": {
+      "itemId": "course.visibility-window",
+      "helpRef": "course-checklist#course-visibility-window",
+      "title": "Check the course visibility window",
+      "what": "This check looks at whether the course satisfies: Check the course visibility window. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A visibility window that closes during the term can hide the course from learners mid-way. Sources: OSCQR 7.",
+      "how": "Open Course settings and complete the field or control this check names. Save, then re-check the item from the checklist.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 7"
+      ]
+    },
+    "course-checklist#feedback-attempts-policy": {
+      "itemId": "feedback.attempts-policy",
+      "helpRef": "course-checklist#feedback-attempts-policy",
+      "title": "Make attempts and scoring consistent",
+      "what": "This check looks at whether the course satisfies: Make attempts and scoring consistent. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "One attempt cannot use highest-of-attempts scoring. Sources: OSCQR 45.",
+      "how": "Add rubrics, written criteria, review settings, or formative checks on the listed items so learners know how they will be evaluated.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 45"
+      ]
+    },
+    "course-checklist#feedback-criteria-published": {
+      "itemId": "feedback.criteria-published",
+      "helpRef": "course-checklist#feedback-criteria-published",
+      "title": "Write instructions for every assessment",
+      "what": "This check looks at whether the course satisfies: Write instructions for every assessment. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners need instructions before they can complete the work. Sources: QM 3.3, OSCQR 46.",
+      "how": "Add rubrics, written criteria, review settings, or formative checks on the listed items so learners know how they will be evaluated.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.3",
+        "OSCQR 46"
+      ]
+    },
+    "course-checklist#feedback-formative-per-module": {
+      "itemId": "feedback.formative-per-module",
+      "helpRef": "course-checklist#feedback-formative-per-module",
+      "title": "Add a low-stakes check to each module",
+      "what": "This check looks at whether the course satisfies: Add a low-stakes check to each module. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Formative checks keep courses from being all high-stakes finals. Sources: QM 3.4, OSCQR 47, NSQ D.",
+      "how": "Add rubrics, written criteria, review settings, or formative checks on the listed items so learners know how they will be evaluated.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.4",
+        "OSCQR 47",
+        "NSQ D"
+      ]
+    },
+    "course-checklist#feedback-peer-review-config": {
+      "itemId": "feedback.peer-review-config",
+      "helpRef": "course-checklist#feedback-peer-review-config",
+      "title": "Complete your peer-review setup",
+      "what": "This check looks at whether the course satisfies: Complete your peer-review setup. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Peer review needs an allocation strategy, a review window after the due date, and a rubric. Sources: QM 5.2.",
+      "how": "Add rubrics, written criteria, review settings, or formative checks on the listed items so learners know how they will be evaluated.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 5.2"
+      ]
+    },
+    "course-checklist#feedback-quiz-review-settings": {
+      "itemId": "feedback.quiz-review-settings",
+      "helpRef": "course-checklist#feedback-quiz-review-settings",
+      "title": "Review what quizzes reveal, and when",
+      "what": "This check looks at whether the course satisfies: Review what quizzes reveal, and when. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Revealing correct answers while others can still take the quiz is an integrity defect. Sources: QM 3.5, OSCQR 45.",
+      "how": "Add rubrics, written criteria, review settings, or formative checks on the listed items so learners know how they will be evaluated.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.5",
+        "OSCQR 45"
+      ]
+    },
+    "course-checklist#feedback-rubrics-on-high-stakes": {
+      "itemId": "feedback.rubrics-on-high-stakes",
+      "helpRef": "course-checklist#feedback-rubrics-on-high-stakes",
+      "title": "Add criteria to high-stakes work",
+      "what": "This check looks at whether the course satisfies: Add criteria to high-stakes work. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "High-stakes work needs published criteria so grading is defensible. Sources: QM 3.3, OSCQR 46.",
+      "how": "Add rubrics, written criteria, review settings, or formative checks on the listed items so learners know how they will be evaluated.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.3",
+        "OSCQR 46"
+      ]
+    },
+    "course-checklist#grading-drop-rules": {
+      "itemId": "grading.drop-rules",
+      "helpRef": "course-checklist#grading-drop-rules",
+      "title": "Fix impossible drop rules",
+      "what": "This check looks at whether the course satisfies: Fix impossible drop rules. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Dropping more items than a group contains cannot be applied. Sources: OSCQR 44.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#grading-empty-groups": {
+      "itemId": "grading.empty-groups",
+      "helpRef": "course-checklist#grading-empty-groups",
+      "title": "Fill or remove empty weighted groups",
+      "what": "This check looks at whether the course satisfies: Fill or remove empty weighted groups. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A weighted group with no items silently redistributes the grade. Sources: OSCQR 44.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#grading-group-weights": {
+      "itemId": "grading.group-weights",
+      "helpRef": "course-checklist#grading-group-weights",
+      "title": "Make weights total 100%",
+      "what": "This check looks at whether the course satisfies: Make weights total 100%. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Weights that do not sum to 100% silently produce the wrong final grade. Sources: QM 3.2, OSCQR 44.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.2",
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#grading-late-policy-configured": {
+      "itemId": "grading.late-policy-configured",
+      "helpRef": "course-checklist#grading-late-policy-configured",
+      "title": "Configure late-work handling",
+      "what": "This check looks at whether the course satisfies: Configure late-work handling. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Every graded item should say whether late work is allowed, penalized, or blocked. Sources: OSCQR 44.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#grading-posting-policy": {
+      "itemId": "grading.posting-policy",
+      "helpRef": "course-checklist#grading-posting-policy",
+      "title": "Choose when grades are posted",
+      "what": "This check looks at whether the course satisfies: Choose when grades are posted. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners should know whether grades appear automatically or after review. Sources: QM 3.5, OSCQR 38.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.5",
+        "OSCQR 38"
+      ]
+    },
+    "course-checklist#grading-scheme-coverage": {
+      "itemId": "grading.scheme-coverage",
+      "helpRef": "course-checklist#grading-scheme-coverage",
+      "title": "Close gaps in your grading scale",
+      "what": "This check looks at whether the course satisfies: Close gaps in your grading scale. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Letter bands should cover 0–100 with no gaps or overlaps. Sources: OSCQR 44.",
+      "how": "Open the assignment or quiz (or grading settings) linked from evidence and set dates, points, groups, or policies as required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#integrity-ai-policy-alignment": {
+      "itemId": "integrity.ai-policy-alignment",
+      "helpRef": "course-checklist#integrity-ai-policy-alignment",
+      "title": "Say how AI may be used",
+      "what": "This check looks at whether the course satisfies: Say how AI may be used. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "When AI features are on for learners, the syllabus should say how AI may be used. Sources: QM 1.3.",
+      "how": "Review high-stakes assessment integrity settings and course AI policy so they match institutional expectations.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.3"
+      ]
+    },
+    "course-checklist#integrity-high-stakes-settings": {
+      "itemId": "integrity.high-stakes-settings",
+      "helpRef": "course-checklist#integrity-high-stakes-settings",
+      "title": "Review integrity settings on major assessments",
+      "what": "This check looks at whether the course satisfies: Review integrity settings on major assessments. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Items worth 20% or more deserve an intentional integrity review. Sources: QM 3.x, OSCQR 45.",
+      "how": "Review high-stakes assessment integrity settings and course AI policy so they match institutional expectations.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.x",
+        "OSCQR 45"
+      ]
+    },
+    "course-checklist#interaction-discussion-exists": {
+      "itemId": "interaction.discussion-exists",
+      "helpRef": "course-checklist#interaction-discussion-exists",
+      "title": "Add a discussion or collaborative activity",
+      "what": "This check looks at whether the course satisfies: Add a discussion or collaborative activity. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Courses with multiple learners benefit from a structured discussion prompt. Sources: QM 5.2, OSCQR 39, OSCQR 42, NSQ C.",
+      "how": "Enable discussions, office hours, groups, or presence plans so learners have structured ways to engage.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 5.2",
+        "OSCQR 39",
+        "OSCQR 42",
+        "NSQ C"
+      ]
+    },
+    "course-checklist#interaction-groups-configured": {
+      "itemId": "interaction.groups-configured",
+      "helpRef": "course-checklist#interaction-groups-configured",
+      "title": "Put every student in a group",
+      "what": "This check looks at whether the course satisfies: Put every student in a group. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "When groups are enabled, every student should belong to a group. Sources: QM 5.2.",
+      "how": "Enable discussions, office hours, groups, or presence plans so learners have structured ways to engage.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 5.2"
+      ]
+    },
+    "course-checklist#interaction-instructor-presence-plan": {
+      "itemId": "interaction.instructor-presence-plan",
+      "helpRef": "course-checklist#interaction-instructor-presence-plan",
+      "title": "Plan your announcements",
+      "what": "This check looks at whether the course satisfies: Plan your announcements. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A steady announcement cadence signals instructor presence. Sources: QM 5.3, OSCQR 40.",
+      "how": "Enable discussions, office hours, groups, or presence plans so learners have structured ways to engage.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 5.3",
+        "OSCQR 40"
+      ]
+    },
+    "course-checklist#interaction-office-hours": {
+      "itemId": "interaction.office-hours",
+      "helpRef": "course-checklist#interaction-office-hours",
+      "title": "Publish office hours",
+      "what": "This check looks at whether the course satisfies: Publish office hours. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "When office hours are enabled, publish at least one upcoming slot. Sources: QM 1.7, OSCQR 40.",
+      "how": "Enable discussions, office hours, groups, or presence plans so learners have structured ways to engage.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.7",
+        "OSCQR 40"
+      ]
+    },
+    "course-checklist#launch-backup-export": {
+      "itemId": "launch.backup-export",
+      "helpRef": "course-checklist#launch-backup-export",
+      "title": "Export a fresh course backup",
+      "what": "This check looks at whether the course satisfies: Export a fresh course backup. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Keep an export newer than the last structural change (or wait until the course is a week old). Sources: operational.",
+      "how": "Complete the pre-term readiness step (preview as student, clear drafts after start, calendar sanity, or backup export).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "operational"
+      ]
+    },
+    "course-checklist#launch-calendar-sanity": {
+      "itemId": "launch.calendar-sanity",
+      "helpRef": "course-checklist#launch-calendar-sanity",
+      "title": "Move due dates off non-instructional days",
+      "what": "This check looks at whether the course satisfies: Move due dates off non-instructional days. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Due dates on institutional holidays or blackout days confuse learners. Sources: OSCQR.",
+      "how": "Complete the pre-term readiness step (preview as student, clear drafts after start, calendar sanity, or backup export).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR"
+      ]
+    },
+    "course-checklist#launch-no-drafts-after-start": {
+      "itemId": "launch.no-drafts-after-start",
+      "helpRef": "course-checklist#launch-no-drafts-after-start",
+      "title": "Publish near-term drafts after start",
+      "what": "This check looks at whether the course satisfies: Publish near-term drafts after start. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Once the course has started, gradable items due in the next 14 days should be published. Sources: OSCQR 7.",
+      "how": "Complete the pre-term readiness step (preview as student, clear drafts after start, calendar sanity, or backup export).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 7"
+      ]
+    },
+    "course-checklist#launch-student-preview": {
+      "itemId": "launch.student-preview",
+      "helpRef": "course-checklist#launch-student-preview",
+      "title": "Preview the course as a student",
+      "what": "This check looks at whether the course satisfies: Preview the course as a student. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Use View as: Student after structural changes so you see what learners see. Sources: OSCQR 16, QM 8.x.",
+      "how": "Complete the pre-term readiness step (preview as student, clear drafts after start, calendar sanity, or backup export).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 16",
+        "QM 8.x"
+      ]
+    },
+    "course-checklist#links-external-health": {
+      "itemId": "links.external-health",
+      "helpRef": "course-checklist#links-external-health",
+      "title": "Check external links",
+      "what": "This check looks at whether the course satisfies: Check external links. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Dead external links frustrate learners; this check runs in the background with a crawl budget. Sources: OSCQR 37.",
+      "how": "Replace or remove dead external links listed in evidence. Re-check after publishing fixes.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 37"
+      ]
+    },
+    "course-checklist#orientation-instructor-contact": {
+      "itemId": "orientation.instructor-contact",
+      "helpRef": "course-checklist#orientation-instructor-contact",
+      "title": "Publish instructor contact info",
+      "what": "This check looks at whether the course satisfies: Publish instructor contact info. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners need a clear way to reach course staff when they get stuck. Sources: QM 1.7, QM 1.8, OSCQR 10.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.7",
+        "QM 1.8",
+        "OSCQR 10"
+      ]
+    },
+    "course-checklist#orientation-instructor-introduction": {
+      "itemId": "orientation.instructor-introduction",
+      "helpRef": "course-checklist#orientation-instructor-introduction",
+      "title": "Introduce yourself to learners",
+      "what": "This check looks at whether the course satisfies: Introduce yourself to learners. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A short instructor introduction builds presence and trust early in the term. Sources: QM 1.8, OSCQR 40.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.8",
+        "OSCQR 40"
+      ]
+    },
+    "course-checklist#orientation-learner-introductions": {
+      "itemId": "orientation.learner-introductions",
+      "helpRef": "course-checklist#orientation-learner-introductions",
+      "title": "Create an introductions prompt",
+      "what": "This check looks at whether the course satisfies: Create an introductions prompt. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "An introductions discussion helps learners connect with peers early. Sources: QM 1.9, OSCQR 41.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.9",
+        "OSCQR 41"
+      ]
+    },
+    "course-checklist#orientation-netiquette": {
+      "itemId": "orientation.netiquette",
+      "helpRef": "course-checklist#orientation-netiquette",
+      "title": "Publish a community agreement",
+      "what": "This check looks at whether the course satisfies: Publish a community agreement. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A netiquette or code-of-conduct statement sets expectations for respectful interaction. Sources: QM 1.3, OSCQR 43.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.3",
+        "OSCQR 43"
+      ]
+    },
+    "course-checklist#orientation-participation": {
+      "itemId": "orientation.participation-expectations",
+      "helpRef": "course-checklist#orientation-participation",
+      "title": "State participation expectations",
+      "what": "This check looks at whether the course satisfies: State participation expectations. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Clear participation frequency helps learners plan weekly effort. Sources: QM 1.4, OSCQR 43.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.4",
+        "OSCQR 43"
+      ]
+    },
+    "course-checklist#orientation-response-time": {
+      "itemId": "orientation.response-time",
+      "helpRef": "course-checklist#orientation-response-time",
+      "title": "State response-time expectations",
+      "what": "This check looks at whether the course satisfies: State response-time expectations. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Publishing a turnaround commitment sets clear expectations for email and grading. Sources: QM 1.4, OSCQR 38.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.4",
+        "OSCQR 38"
+      ]
+    },
+    "course-checklist#orientation-start-here": {
+      "itemId": "orientation.start-here",
+      "helpRef": "course-checklist#orientation-start-here",
+      "title": "Add a Start Here page",
+      "what": "This check looks at whether the course satisfies: Add a Start Here page. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A Start Here page orients learners before week-1 content. Sources: QM 1.1, OSCQR 1.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.1",
+        "OSCQR 1"
+      ]
+    },
+    "course-checklist#orientation-support-resources": {
+      "itemId": "orientation.support-resources",
+      "helpRef": "course-checklist#orientation-support-resources",
+      "title": "Link to support resources",
+      "what": "This check looks at whether the course satisfies: Link to support resources. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Help desk, tutoring, library, and accessibility links give learners places to get help. Sources: QM 7.1, OSCQR 6.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 7.1",
+        "OSCQR 6"
+      ]
+    },
+    "course-checklist#orientation-tech-requirements": {
+      "itemId": "orientation.tech-requirements",
+      "helpRef": "course-checklist#orientation-tech-requirements",
+      "title": "List technical requirements",
+      "what": "This check looks at whether the course satisfies: List technical requirements. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners need to know required browsers, software, and technical skills up front. Sources: QM 1.5, QM 1.6, OSCQR 11.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.5",
+        "QM 1.6",
+        "OSCQR 11"
+      ]
+    },
+    "course-checklist#orientation-welcome-message": {
+      "itemId": "orientation.welcome-message",
+      "helpRef": "course-checklist#orientation-welcome-message",
+      "title": "Post a welcome announcement",
+      "what": "This check looks at whether the course satisfies: Post a welcome announcement. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Students who read a welcome post in week 1 are less likely to disengage. Sources: QM 1.1, OSCQR 1, NSQ A.",
+      "how": "Add the orientation content (welcome post, Start Here page, syllabus block, or course feed) so learners see it on day one. Use the checklist target link to jump to the control.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.1",
+        "OSCQR 1",
+        "NSQ A"
+      ]
+    },
+    "course-checklist#outcomes-assessment-mapping": {
+      "itemId": "outcomes.assessment-mapping",
+      "helpRef": "course-checklist#outcomes-assessment-mapping",
+      "title": "Map every assessment to an outcome",
+      "what": "This check looks at whether the course satisfies: Map every assessment to an outcome. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Alignment is what makes a grade mean something — every rubric asks that each assessment measure a stated outcome. Sources: QM 3.1, NSQ C, NSQ D, OSCQR 45.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "QM 3.1",
+        "NSQ C",
+        "NSQ D",
+        "OSCQR 45"
+      ]
+    },
+    "course-checklist#outcomes-coverage": {
+      "itemId": "outcomes.coverage",
+      "helpRef": "course-checklist#outcomes-coverage",
+      "title": "Assess every learning outcome",
+      "what": "This check looks at whether the course satisfies: Assess every learning outcome. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Outcomes that are never measured leave a gap in the assessment plan. Sources: QM 3.1, NSQ D.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "QM 3.1",
+        "NSQ D"
+      ]
+    },
+    "course-checklist#outcomes-defined": {
+      "itemId": "outcomes.defined",
+      "helpRef": "course-checklist#outcomes-defined",
+      "title": "Define at least three learning outcomes",
+      "what": "This check looks at whether the course satisfies: Define at least three learning outcomes. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Stated outcomes tell learners what success looks like before they start. Sources: QM 2.1, NSQ C, OSCQR 9.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "QM 2.1",
+        "NSQ C",
+        "OSCQR 9"
+      ]
+    },
+    "course-checklist#outcomes-described": {
+      "itemId": "outcomes.described",
+      "helpRef": "course-checklist#outcomes-described",
+      "title": "Add a description to every outcome",
+      "what": "This check looks at whether the course satisfies: Add a description to every outcome. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A short description clarifies scope beyond the title verb. Sources: QM 2.3.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "QM 2.3"
+      ]
+    },
+    "course-checklist#outcomes-mastery-scale": {
+      "itemId": "outcomes.mastery-scale",
+      "helpRef": "course-checklist#outcomes-mastery-scale",
+      "title": "Configure the mastery scale",
+      "what": "This check looks at whether the course satisfies: Configure the mastery scale. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Standards-based grading needs a proficiency scale and mastery threshold. Sources: Product.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "Product"
+      ]
+    },
+    "course-checklist#outcomes-measurable": {
+      "itemId": "outcomes.measurable",
+      "helpRef": "course-checklist#outcomes-measurable",
+      "title": "Start outcomes with measurable verbs",
+      "what": "This check looks at whether the course satisfies: Start outcomes with measurable verbs. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Measurable verbs make it clear how learners will demonstrate the outcome. Sources: QM 2.1, QM 2.4.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "QM 2.1",
+        "QM 2.4"
+      ]
+    },
+    "course-checklist#outcomes-module-alignment": {
+      "itemId": "outcomes.module-alignment",
+      "helpRef": "course-checklist#outcomes-module-alignment",
+      "title": "Map each module to an outcome",
+      "what": "This check looks at whether the course satisfies: Map each module to an outcome. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Every module should teach toward at least one stated outcome. Sources: QM 2.2, NSQ C.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "QM 2.2",
+        "NSQ C"
+      ]
+    },
+    "course-checklist#outcomes-standards-alignment": {
+      "itemId": "outcomes.standards-alignment",
+      "helpRef": "course-checklist#outcomes-standards-alignment",
+      "title": "Align assessments to standards",
+      "what": "This check looks at whether the course satisfies: Align assessments to standards. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "When standards alignment is on, every graded item should map to a standard. Sources: Product.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "Product"
+      ]
+    },
+    "course-checklist#outcomes-summative-coverage": {
+      "itemId": "outcomes.summative-coverage",
+      "helpRef": "course-checklist#outcomes-summative-coverage",
+      "title": "Include a summative check per outcome",
+      "what": "This check looks at whether the course satisfies: Include a summative check per outcome. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Formative practice alone is not enough — each outcome needs a summative measure. Sources: QM 3.1.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "QM 3.1"
+      ]
+    },
+    "course-checklist#outcomes-syllabus-published": {
+      "itemId": "outcomes.syllabus-published",
+      "helpRef": "course-checklist#outcomes-syllabus-published",
+      "title": "Publish outcomes in the syllabus",
+      "what": "This check looks at whether the course satisfies: Publish outcomes in the syllabus. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners should be able to read the course outcomes in the syllabus. Sources: QM 2.3, OSCQR 9.",
+      "how": "Define or edit learning outcomes under Course settings → Outcomes, then map assessments and modules as needed. Use assisted mapping when offered.",
+      "whenToDismiss": "Dismiss when outcomes live in an external system of record and this course only mirrors grades (document where mappings live in the note).",
+      "sources": [
+        "QM 2.3",
+        "OSCQR 9"
+      ]
+    },
+    "course-checklist#people-guardian-links": {
+      "itemId": "people.guardian-links",
+      "helpRef": "course-checklist#people-guardian-links",
+      "title": "Link a guardian for each student",
+      "what": "This check looks at whether the course satisfies: Link a guardian for each student. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "In K-12 orgs with the parent portal, every student needs a linked guardian. Sources: Product.",
+      "how": "Use People / enrollments / sections settings to fix the listed rows, or dismiss if the course intentionally has no students yet.",
+      "whenToDismiss": "Dismiss when the course is a template, not yet open for enrollment, or deliberately staff-only. Prefer “later” if enrollments are imminent.",
+      "sources": [
+        "Product"
+      ]
+    },
+    "course-checklist#people-sections": {
+      "itemId": "people.sections",
+      "helpRef": "course-checklist#people-sections",
+      "title": "Assign students to sections",
+      "what": "This check looks at whether the course satisfies: Assign students to sections. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "When sections are enabled, every student should belong to a section for roster accuracy. Sources: Product.",
+      "how": "Use People / enrollments / sections settings to fix the listed rows, or dismiss if the course intentionally has no students yet.",
+      "whenToDismiss": "Dismiss when the course is a template, not yet open for enrollment, or deliberately staff-only. Prefer “later” if enrollments are imminent.",
+      "sources": [
+        "Product"
+      ]
+    },
+    "course-checklist#people-staff-roles": {
+      "itemId": "people.staff-roles",
+      "helpRef": "course-checklist#people-staff-roles",
+      "title": "Add a co-teacher or TA",
+      "what": "This check looks at whether the course satisfies: Add a co-teacher or TA. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A second staff member provides coverage when the creator is unavailable. Sources: QM 1.8.",
+      "how": "Use People / enrollments / sections settings to fix the listed rows, or dismiss if the course intentionally has no students yet.",
+      "whenToDismiss": "Dismiss when the course is a template, not yet open for enrollment, or deliberately staff-only. Prefer “later” if enrollments are imminent.",
+      "sources": [
+        "QM 1.8"
+      ]
+    },
+    "course-checklist#people-stale-invitations": {
+      "itemId": "people.stale-invitations",
+      "helpRef": "course-checklist#people-stale-invitations",
+      "title": "Follow up on stale invitations",
+      "what": "This check looks at whether the course satisfies: Follow up on stale invitations. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Invitations older than two weeks usually need a resend or cleanup. Sources: Product.",
+      "how": "Use People / enrollments / sections settings to fix the listed rows, or dismiss if the course intentionally has no students yet.",
+      "whenToDismiss": "Dismiss when the course is a template, not yet open for enrollment, or deliberately staff-only. Prefer “later” if enrollments are imminent.",
+      "sources": [
+        "Product"
+      ]
+    },
+    "course-checklist#people-students-enrolled": {
+      "itemId": "people.students-enrolled",
+      "helpRef": "course-checklist#people-students-enrolled",
+      "title": "Enroll at least one student",
+      "what": "This check looks at whether the course satisfies: Enroll at least one student. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A course without active learners is not ready for day one. Sources: Product, OSCQR 7.",
+      "how": "Use People / enrollments / sections settings to fix the listed rows, or dismiss if the course intentionally has no students yet.",
+      "whenToDismiss": "Dismiss when the course is a template, not yet open for enrollment, or deliberately staff-only. Prefer “later” if enrollments are imminent.",
+      "sources": [
+        "Product",
+        "OSCQR 7"
+      ]
+    },
+    "course-checklist#structure-attribution": {
+      "itemId": "structure.attribution",
+      "helpRef": "course-checklist#structure-attribution",
+      "title": "Attribute external and library resources",
+      "what": "This check looks at whether the course satisfies: Attribute external and library resources. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Attribution keeps shared materials copyright-safe and transparent. Sources: OSCQR 32, OSCQR 33.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 32",
+        "OSCQR 33"
+      ]
+    },
+    "course-checklist#structure-content-variety": {
+      "itemId": "structure.content-variety",
+      "helpRef": "course-checklist#structure-content-variety",
+      "title": "Use more than one content type",
+      "what": "This check looks at whether the course satisfies: Use more than one content type. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A mix of activities supports different ways of learning. Sources: OSCQR 29, UDL Representation.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 29",
+        "UDL Representation"
+      ]
+    },
+    "course-checklist#structure-empty-modules": {
+      "itemId": "structure.empty-modules",
+      "helpRef": "course-checklist#structure-empty-modules",
+      "title": "Fill in or remove empty modules",
+      "what": "This check looks at whether the course satisfies: Fill in or remove empty modules. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Empty modules look unfinished and confuse learners on day one. Sources: OSCQR 16.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 16"
+      ]
+    },
+    "course-checklist#structure-file-references": {
+      "itemId": "structure.file-references",
+      "helpRef": "course-checklist#structure-file-references",
+      "title": "Fix broken file references",
+      "what": "This check looks at whether the course satisfies: Fix broken file references. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Broken file links inside pages leave learners stuck. Sources: OSCQR 37.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 37"
+      ]
+    },
+    "course-checklist#structure-gating-review": {
+      "itemId": "structure.gating-review",
+      "helpRef": "course-checklist#structure-gating-review",
+      "title": "Review module gating for dead ends",
+      "what": "This check looks at whether the course satisfies: Review module gating for dead ends. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Prerequisite cycles or unpublished gates can permanently lock learners out. Sources: Product.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "Product"
+      ]
+    },
+    "course-checklist#structure-interactive-elements": {
+      "itemId": "structure.interactive-elements",
+      "helpRef": "course-checklist#structure-interactive-elements",
+      "title": "Add interactive elements to pages",
+      "what": "This check looks at whether the course satisfies: Add interactive elements to pages. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Interactive tools keep learners engaged beyond static reading. Sources: OSCQR 30, OSCQR 31, UDL Engagement.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 30",
+        "OSCQR 31",
+        "UDL Engagement"
+      ]
+    },
+    "course-checklist#structure-module-overviews": {
+      "itemId": "structure.module-overviews",
+      "helpRef": "course-checklist#structure-module-overviews",
+      "title": "Add an overview to every module",
+      "what": "This check looks at whether the course satisfies: Add an overview to every module. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners need to know what a week is for before they start it. Sources: QM 1.2, OSCQR 2, NSQ A.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.2",
+        "OSCQR 2",
+        "NSQ A"
+      ]
+    },
+    "course-checklist#structure-modules-exist": {
+      "itemId": "structure.modules-exist",
+      "helpRef": "course-checklist#structure-modules-exist",
+      "title": "Add at least one module",
+      "what": "This check looks at whether the course satisfies: Add at least one module. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners need a module outline before they can navigate the course. Sources: QM 1.2, OSCQR 16, NSQ C.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.2",
+        "OSCQR 16",
+        "NSQ C"
+      ]
+    },
+    "course-checklist#structure-orphan-items": {
+      "itemId": "structure.orphan-items",
+      "helpRef": "course-checklist#structure-orphan-items",
+      "title": "Repair orphaned module items",
+      "what": "This check looks at whether the course satisfies: Repair orphaned module items. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Items whose parent module is gone or archived cannot be reached by learners. Sources: Product.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "Product"
+      ]
+    },
+    "course-checklist#structure-pacing-signal": {
+      "itemId": "structure.pacing-signal",
+      "helpRef": "course-checklist#structure-pacing-signal",
+      "title": "Add pacing signals to modules",
+      "what": "This check looks at whether the course satisfies: Add pacing signals to modules. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Date ranges or due dates help learners plan their week. Sources: QM 8.6, OSCQR 30.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 8.6",
+        "OSCQR 30"
+      ]
+    },
+    "course-checklist#structure-placeholder-titles": {
+      "itemId": "structure.placeholder-titles",
+      "helpRef": "course-checklist#structure-placeholder-titles",
+      "title": "Replace placeholder item titles",
+      "what": "This check looks at whether the course satisfies: Replace placeholder item titles. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Titles like Untitled page tell learners the course is unfinished. Sources: OSCQR 20.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 20"
+      ]
+    },
+    "course-checklist#structure-unpublished-items": {
+      "itemId": "structure.unpublished-items",
+      "helpRef": "course-checklist#structure-unpublished-items",
+      "title": "Publish items in live modules",
+      "what": "This check looks at whether the course satisfies: Publish items in live modules. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Unpublished items inside a live module look like broken links to learners. Sources: OSCQR 7.",
+      "how": "Open Modules and fix the modules or items listed in the evidence table (empty modules, placeholders, unpublished items, etc.).",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 7"
+      ]
+    },
+    "course-checklist#syllabus-academic-integrity": {
+      "itemId": "syllabus.academic-integrity",
+      "helpRef": "course-checklist#syllabus-academic-integrity",
+      "title": "State academic integrity expectations",
+      "what": "This check looks at whether the course satisfies: State academic integrity expectations. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "An integrity statement sets expectations for honesty, plagiarism, and AI use. Sources: QM 1.3, OSCQR 5.",
+      "how": "Edit the syllabus and include the missing policy or block. Keep a printable/exportable version when required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 1.3",
+        "OSCQR 5"
+      ]
+    },
+    "course-checklist#syllabus-acceptance-decision": {
+      "itemId": "syllabus.acceptance-decision",
+      "helpRef": "course-checklist#syllabus-acceptance-decision",
+      "title": "Decide on syllabus acceptance",
+      "what": "This check looks at whether the course satisfies: Decide on syllabus acceptance. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Choosing whether learners must accept the syllabus makes the policy intentional. Sources: Product.",
+      "how": "Edit the syllabus and include the missing policy or block. Keep a printable/exportable version when required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "Product"
+      ]
+    },
+    "course-checklist#syllabus-accessibility": {
+      "itemId": "syllabus.accessibility-statement",
+      "helpRef": "course-checklist#syllabus-accessibility",
+      "title": "Add an accessibility statement",
+      "what": "This check looks at whether the course satisfies: Add an accessibility statement. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "An accessibility or accommodations statement tells learners how to request support. Sources: QM 8.1, OSCQR 5.",
+      "how": "Edit the syllabus and include the missing policy or block. Keep a printable/exportable version when required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 8.1",
+        "OSCQR 5"
+      ]
+    },
+    "course-checklist#syllabus-exists": {
+      "itemId": "syllabus.exists",
+      "helpRef": "course-checklist#syllabus-exists",
+      "title": "Publish a course syllabus",
+      "what": "This check looks at whether the course satisfies: Publish a course syllabus. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A published syllabus is the first place learners look for policies and expectations. Sources: OSCQR 3, QM 1.2.",
+      "how": "Edit the syllabus and include the missing policy or block. Keep a printable/exportable version when required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 3",
+        "QM 1.2"
+      ]
+    },
+    "course-checklist#syllabus-grading-policy": {
+      "itemId": "syllabus.grading-policy",
+      "helpRef": "course-checklist#syllabus-grading-policy",
+      "title": "Explain how grades are calculated",
+      "what": "This check looks at whether the course satisfies: Explain how grades are calculated. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners need to know how weights, points, or scales produce a final grade. Sources: QM 3.2, OSCQR 44.",
+      "how": "Edit the syllabus and include the missing policy or block. Keep a printable/exportable version when required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.2",
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#syllabus-late-policy": {
+      "itemId": "syllabus.late-policy",
+      "helpRef": "course-checklist#syllabus-late-policy",
+      "title": "Publish a late-work policy",
+      "what": "This check looks at whether the course satisfies: Publish a late-work policy. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "A late-work policy reduces confusion when deadlines are missed. Sources: QM 3.2, OSCQR 44.",
+      "how": "Edit the syllabus and include the missing policy or block. Keep a printable/exportable version when required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "QM 3.2",
+        "OSCQR 44"
+      ]
+    },
+    "course-checklist#syllabus-printable": {
+      "itemId": "syllabus.printable",
+      "helpRef": "course-checklist#syllabus-printable",
+      "title": "Keep the syllabus printable",
+      "what": "This check looks at whether the course satisfies: Keep the syllabus printable. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Learners often print or export the syllabus; unsupported embeds break that path. Sources: OSCQR 4.",
+      "how": "Edit the syllabus and include the missing policy or block. Keep a printable/exportable version when required.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "OSCQR 4"
+      ]
+    },
+    "course-checklist#udl-engagement-relevance": {
+      "itemId": "udl.engagement-relevance",
+      "helpRef": "course-checklist#udl-engagement-relevance",
+      "title": "Include an authentic or applied activity",
+      "what": "This check looks at whether the course satisfies: Include an authentic or applied activity. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "At least one authentic activity (project, case study, portfolio, capstone) helps engagement. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: UDL Engagement, QM 4.x.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "UDL Engagement",
+        "QM 4.x"
+      ]
+    },
+    "course-checklist#udl-expression-choice": {
+      "itemId": "udl.expression-choice",
+      "helpRef": "course-checklist#udl-expression-choice",
+      "title": "Allow a choice of submission format",
+      "what": "This check looks at whether the course satisfies: Allow a choice of submission format. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "At least one assessment should let learners choose how to demonstrate learning. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: UDL Action \u0026 Expression, QM 3.4.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "UDL Action \u0026 Expression",
+        "QM 3.4"
+      ]
+    },
+    "course-checklist#udl-multiple-representations": {
+      "itemId": "udl.multiple-representations",
+      "helpRef": "course-checklist#udl-multiple-representations",
+      "title": "Offer multiple representations per module",
+      "what": "This check looks at whether the course satisfies: Offer multiple representations per module. It evaluates structured course data (settings, modules, syllabus, outcomes, assessments) using a deterministic rule — not an AI judgment.",
+      "why": "Most modules should mix modalities (text + media or interactive) so learners can choose a path. This automated check is partial and does not certify WCAG conformance; see docs/accessibility/course-checklist-scope.md for what still needs manual testing. Sources: UDL Representation, QM 4.5, OSCQR 29.",
+      "how": "Fix the listed content using the editor accessibility tools (alt text, headings, captions, contrast). Accessibility rules are machine-checkable heuristics, not a full WCAG audit.",
+      "whenToDismiss": "Dismiss when the check truly does not apply to this course design, the work is done outside the LMS, or you disagree with the heuristic — pick the matching reason and add a short note for co-teachers.",
+      "sources": [
+        "UDL Representation",
+        "QM 4.5",
+        "OSCQR 29"
+      ]
+    }
+  }
+}

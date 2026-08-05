@@ -38,13 +38,26 @@ type ChecklistItem struct {
 	HelpRef   *string             `json:"helpRef"`
 	Target    *ChecklistNavTarget `json:"target"`
 	Evidence  *ChecklistEvidence  `json:"evidence"`
+	// Action is an optional assisted-fix primary action (CC.10). Omitted when none.
+	Action    *ChecklistAction    `json:"action,omitempty"`
 	Dismissal *ChecklistDismissal `json:"dismissal"`
+}
+
+// ChecklistAction is the wire shape for an optional item action (CC.10 FR-5).
+type ChecklistAction struct {
+	Kind       string `json:"kind"`
+	LabelKey   string `json:"labelKey"`
+	Label      string `json:"label"`
+	Endpoint   string `json:"endpoint"`
+	RequiresAI bool   `json:"requiresAi"`
 }
 
 // ChecklistNavTarget is the client navigation target for an item.
 type ChecklistNavTarget struct {
 	Route  string  `json:"route"`
 	Anchor *string `json:"anchor,omitempty"`
+	// EntityKey is the entity id for entity-kind focus anchors (CC.8 ?focusEntity=).
+	EntityKey *string `json:"entityKey,omitempty"`
 }
 
 // ChecklistEvidence is the expandable evidence table.

@@ -38,14 +38,25 @@ struct CourseDrawer: View {
                     ForEach(groups) { group in
                         DrawerGroupHeader(title: group.title)
                         ForEach(group.sections, id: \.self) { section in
+                            let badgeCount: Int = {
+                                guard section == .checklist,
+                                      let code = shell.activeCourse?.courseCode else { return 0 }
+                                return CourseChecklistSummaryStore.shared.outstandingEssential(courseCode: code)
+                            }()
                             DrawerRow(
                                 label: section.label,
                                 systemImage: courseSectionIcon(section),
-                                selected: shell.activeCourseSection == section
+                                selected: shell.activeCourseSection == section,
+                                badge: badgeCount
                             ) {
                                 shell.activeCourseSection = section
                                 shell.closeDrawer()
                             }
+                            .accessibilityLabel(
+                                badgeCount > 0
+                                    ? "\(section.label), \(CourseChecklistLogic.badgePresentation(outstandingEssential: badgeCount).accessibilityLabel)"
+                                    : section.label
+                            )
                         }
                     }
                 }
@@ -78,6 +89,7 @@ struct CourseDrawer: View {
 func courseSectionIcon(_ section: CourseWorkspaceSection) -> String {
     switch section {
     case .overview: return "doc.text"
+    case .checklist: return "checklist"
     case .modules: return "square.stack.3d.up"
     case .files: return "folder"
     case .library: return "books.vertical"

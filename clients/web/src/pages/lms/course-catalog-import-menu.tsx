@@ -4,9 +4,14 @@ import { ChevronDown, Download } from 'lucide-react'
 type Props = {
   onImportCanvas: () => void
   onImportFromCourse: () => void
+  onImportFromJson: () => void
 }
 
-export function CourseCatalogImportMenu({ onImportCanvas, onImportFromCourse }: Props) {
+export function CourseCatalogImportMenu({
+  onImportCanvas,
+  onImportFromCourse,
+  onImportFromJson,
+}: Props) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
@@ -71,6 +76,20 @@ export function CourseCatalogImportMenu({ onImportCanvas, onImportFromCourse }: 
             <span className="font-semibold text-slate-950 dark:text-neutral-100">Canvas LMS</span>
             <span className="text-xs text-slate-500 dark:text-neutral-400">
               Import courses with a Canvas API token
+            </span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onImportFromJson()
+              setOpen(false)
+            }}
+            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
+          >
+            <span className="font-semibold text-slate-950 dark:text-neutral-100">From JSON</span>
+            <span className="text-xs text-slate-500 dark:text-neutral-400">
+              Create a course from a Lextures JSON export file
             </span>
           </button>
         </div>

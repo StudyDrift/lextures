@@ -196,6 +196,8 @@ func KnownAIFeatureIDs() map[string]struct{} {
 		"content_page_generation":        {},
 		"outcomes_extraction":            {},
 		"quiz_outcome_mapping":           {},
+		"assessment_outcome_mapping":     {},
+		"welcome_draft":                  {},
 		"badges_extraction":              {},
 		"translation":                    {},
 		"quiz_generation":                {},
