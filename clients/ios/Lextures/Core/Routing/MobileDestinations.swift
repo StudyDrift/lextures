@@ -774,16 +774,25 @@ enum MobileDestinations {
     // MARK: Course workspace
 
     static func courseWorkspaceSections(_ ctx: CourseWorkspaceContext) -> [CourseWorkspaceSection] {
-        let course = ctx.course
         var out: [CourseWorkspaceSection] = [.overview]
+        appendChecklistSection(to: &out, ctx: ctx)
+        out.append(.modules)
+        appendCoreCourseSections(to: &out, ctx: ctx)
+        appendStaffAndSignalSections(to: &out, ctx: ctx)
+        return out
+    }
+
+    private static func appendChecklistSection(to out: inout [CourseWorkspaceSection], ctx: CourseWorkspaceContext) {
         if CourseChecklistLogic.shouldShowWorkspaceSection(
-            viewerIsStaff: course.viewerIsStaff,
+            viewerIsStaff: ctx.course.viewerIsStaff,
             roleContext: ctx.roleContext
         ) {
             out.append(.checklist)
         }
-        out.append(.modules)
+    }
 
+    private static func appendCoreCourseSections(to out: inout [CourseWorkspaceSection], ctx: CourseWorkspaceContext) {
+        let course = ctx.course
         if course.isFilesEnabled { out.append(.files) }
         if course.viewerIsStudent { out.append(.grades) }
         if course.viewerIsStudent && course.isMasteryEnabled { out.append(.mastery) }
@@ -808,6 +817,10 @@ enum MobileDestinations {
         ) {
             out.append(.evaluations)
         }
+    }
+
+    private static func appendStaffAndSignalSections(to out: inout [CourseWorkspaceSection], ctx: CourseWorkspaceContext) {
+        let course = ctx.course
         if course.viewerIsStaff {
             out.append(.grading)
         }
@@ -837,7 +850,6 @@ enum MobileDestinations {
            ctx.hasLibraryResources {
             out.append(.library)
         }
-        return out
     }
 
     static func splitCourseChips(_ sections: [CourseWorkspaceSection]) -> (visible: [CourseWorkspaceSection], overflow: [CourseWorkspaceSection]) {
