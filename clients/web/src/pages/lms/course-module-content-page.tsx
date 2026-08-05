@@ -353,6 +353,7 @@ export default function CourseModuleContentPage() {
   function cancelEdit() {
     setSaveError(null)
     setBuildAiOpen(false)
+    simplifyDlg.setOpen(false)
     setEditing(false)
     setDraft([])
   }
@@ -450,6 +451,8 @@ export default function CourseModuleContentPage() {
           .catch(() => setReadingLevel(null))
       }
       setLastLocalAuthoringSave(new Date().toISOString())
+      setBuildAiOpen(false)
+      simplifyDlg.setOpen(false)
       setEditing(false)
       setDraft([])
       void loadMarkups()

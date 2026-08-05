@@ -145,8 +145,9 @@ type SyllabusBlockEditorProps = {
   /** Sidebar copy: syllabus vs module page / assignment body. */
   documentVariant?: 'syllabus' | 'page'
   /**
-   * With `documentVariant="page"`, replaces the default “Page” sidebar tab (stats + copy actions)
-   * and renames that tab to “Settings”.
+   * With `documentVariant="page"`, replaces the default “Page” sidebar stats/description
+   * and renames that tab to “Settings”. Clipboard Actions (copy markdown/HTML, paste)
+   * are still appended below this panel so quizzes and assignments match content pages.
    */
   pageDocumentPanel?: ReactNode
   /** Syllabus only: require first-visit acceptance from students. */
@@ -161,23 +162,17 @@ type SyllabusBlockEditorProps = {
 
 type ActiveField = { blockId: string; field: 'heading' | 'markdown' }
 
-function SyllabusDocumentPanel({
+/** Copy / paste document body actions shared by content pages, quizzes, and assignments. */
+function DocumentClipboardActions({
   sections,
   onChange,
-  documentVariant,
-  requireSyllabusAcceptance,
-  onRequireSyllabusAcceptanceChange,
+  className = 'border-t border-slate-100 pt-3 dark:border-neutral-700',
 }: {
   sections: SyllabusSection[]
   onChange: (next: SyllabusSection[]) => void
-  documentVariant: 'syllabus' | 'page'
-  requireSyllabusAcceptance?: boolean
-  onRequireSyllabusAcceptanceChange?: (next: boolean) => void
+  className?: string
 }) {
   const { disabled } = useBlockEditor()
-  const blocks = sections.length
-  const chars = sections.reduce((n, s) => n + s.markdown.length + s.heading.length, 0)
-
   const [markdownCopiedFlash, setMarkdownCopiedFlash] = useState(0)
   const [htmlCopiedFlash, setHtmlCopiedFlash] = useState(0)
   const [pastedFlash, setPastedFlash] = useState(0)
@@ -190,7 +185,7 @@ function SyllabusDocumentPanel({
     } catch {
       /* ignore */
     }
-  }, [sections, setMarkdownCopiedFlash])
+  }, [sections])
 
   const copyHtml = useCallback(async () => {
     const md = sectionsToMarkdown(sections)
@@ -201,7 +196,7 @@ function SyllabusDocumentPanel({
     } catch {
       /* ignore */
     }
-  }, [sections, setHtmlCopiedFlash])
+  }, [sections])
 
   const pasteFromClipboard = useCallback(async () => {
     try {
@@ -246,7 +241,96 @@ function SyllabusDocumentPanel({
         /* ignore */
       }
     }
-  }, [onChange, setPastedFlash])
+  }, [onChange])
+
+  return (
+    <div className={className}>
+      <h3 className="text-[13px] font-bold text-slate-900 dark:text-neutral-100">Actions</h3>
+      <div className="mt-2 flex flex-col gap-1" aria-live="polite">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => void copyMarkdown()}
+            className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition-[background-color,color,border-color] hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
+          >
+            Copy as Markdown
+          </button>
+          <span className="pointer-events-none flex h-5 min-w-[3.25rem] shrink-0 items-center justify-end text-[13px]">
+            {markdownCopiedFlash > 0 ? (
+              <span
+                key={markdownCopiedFlash}
+                className="copy-action-copied-fade font-medium text-emerald-600 dark:text-emerald-400"
+                onAnimationEnd={() => setMarkdownCopiedFlash(0)}
+              >
+                Copied
+              </span>
+            ) : null}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => void copyHtml()}
+            className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition-[background-color,color,border-color] hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
+          >
+            Copy as HTML
+          </button>
+          <span className="pointer-events-none flex h-5 min-w-[3.25rem] shrink-0 items-center justify-end text-[13px]">
+            {htmlCopiedFlash > 0 ? (
+              <span
+                key={htmlCopiedFlash}
+                className="copy-action-copied-fade font-medium text-emerald-600 dark:text-emerald-400"
+                onAnimationEnd={() => setHtmlCopiedFlash(0)}
+              >
+                Copied
+              </span>
+            ) : null}
+          </span>
+        </div>
+        <div className="mt-1 border-t border-slate-100 pt-1 dark:border-neutral-700/50">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => void pasteFromClipboard()}
+              disabled={disabled}
+              className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition-[background-color,color,border-color] hover:text-indigo-600 hover:underline disabled:no-underline disabled:opacity-40 dark:text-neutral-300 dark:hover:text-indigo-400"
+            >
+              Paste from Clipboard
+            </button>
+            <span className="pointer-events-none flex h-5 min-w-[3.25rem] shrink-0 items-center justify-end text-[13px]">
+              {pastedFlash > 0 ? (
+                <span
+                  key={pastedFlash}
+                  className="copy-action-copied-fade font-medium text-emerald-600 dark:text-emerald-400"
+                  onAnimationEnd={() => setPastedFlash(0)}
+                >
+                  Pasted
+                </span>
+              ) : null}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SyllabusDocumentPanel({
+  sections,
+  onChange,
+  documentVariant,
+  requireSyllabusAcceptance,
+  onRequireSyllabusAcceptanceChange,
+}: {
+  sections: SyllabusSection[]
+  onChange: (next: SyllabusSection[]) => void
+  documentVariant: 'syllabus' | 'page'
+  requireSyllabusAcceptance?: boolean
+  onRequireSyllabusAcceptanceChange?: (next: boolean) => void
+}) {
+  const { disabled } = useBlockEditor()
+  const blocks = sections.length
+  const chars = sections.reduce((n, s) => n + s.markdown.length + s.heading.length, 0)
 
   return (
     <div data-focus-anchor="syllabus.section" className="space-y-4">
@@ -281,74 +365,7 @@ function SyllabusDocumentPanel({
           <dd className="font-medium text-slate-900 dark:text-neutral-100">{formatNumber(chars)}</dd>
         </div>
       </dl>
-      <div className="border-t border-slate-100 pt-3 dark:border-neutral-700">
-        <h3 className="text-[13px] font-bold text-slate-900 dark:text-neutral-100">Actions</h3>
-        <div className="mt-2 flex flex-col gap-1" aria-live="polite">
-          <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={copyMarkdown}
-              className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition-[background-color,color,border-color] hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
-            >
-              Copy as Markdown
-            </button>
-            <span className="pointer-events-none flex h-5 min-w-[3.25rem] shrink-0 items-center justify-end text-[13px]">
-              {markdownCopiedFlash > 0 ? (
-                <span
-                  key={markdownCopiedFlash}
-                  className="copy-action-copied-fade font-medium text-emerald-600 dark:text-emerald-400"
-                  onAnimationEnd={() => setMarkdownCopiedFlash(0)}
-                >
-                  Copied
-                </span>
-              ) : null}
-            </span>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={copyHtml}
-              className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition-[background-color,color,border-color] hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
-            >
-              Copy as HTML
-            </button>
-            <span className="pointer-events-none flex h-5 min-w-[3.25rem] shrink-0 items-center justify-end text-[13px]">
-              {htmlCopiedFlash > 0 ? (
-                <span
-                  key={htmlCopiedFlash}
-                  className="copy-action-copied-fade font-medium text-emerald-600 dark:text-emerald-400"
-                  onAnimationEnd={() => setHtmlCopiedFlash(0)}
-                >
-                  Copied
-                </span>
-              ) : null}
-            </span>
-          </div>
-          <div className="mt-1 border-t border-slate-100 pt-1 dark:border-neutral-700/50">
-            <div className="flex items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={pasteFromClipboard}
-                disabled={disabled}
-                className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition-[background-color,color,border-color] hover:text-indigo-600 hover:underline disabled:no-underline disabled:opacity-40 dark:text-neutral-300 dark:hover:text-indigo-400"
-              >
-                Paste from Clipboard
-              </button>
-              <span className="pointer-events-none flex h-5 min-w-[3.25rem] shrink-0 items-center justify-end text-[13px]">
-                {pastedFlash > 0 ? (
-                  <span
-                    key={pastedFlash}
-                    className="copy-action-copied-fade font-medium text-emerald-600 dark:text-emerald-400"
-                    onAnimationEnd={() => setPastedFlash(0)}
-                  >
-                    Pasted
-                  </span>
-                ) : null}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DocumentClipboardActions sections={sections} onChange={onChange} />
     </div>
   )
 }
@@ -461,7 +478,14 @@ function SyllabusSidebar({
       blockLabel="Section"
       documentPanel={
         usePageSettings ? (
-          pageDocumentPanel
+          <div className="space-y-4">
+            {pageDocumentPanel}
+            <DocumentClipboardActions
+              sections={sections}
+              onChange={onChange}
+              className="border-t border-slate-100 pt-4 dark:border-neutral-700"
+            />
+          </div>
         ) : (
           <SyllabusDocumentPanel
             sections={sections}

@@ -52,8 +52,8 @@ test.describe('CourseModules — keyboard navigation', () => {
     await page.goto(`/courses/${seededCourse.courseCode}/modules`)
     await expect(page.getByText(seededCourse.moduleTitle)).toBeVisible({ timeout: 10000 })
 
-    // Child drag handles carry "Drag to reorder item" labels.
-    const handles = page.getByRole('button', { name: /drag to reorder item/i })
+    // Child drag handles carry "Drag to reorder … item" labels (may include move-to-module wording).
+    const handles = page.getByRole('button', { name: /drag to reorder(?: or move)? item/i })
     // There may be zero child items in the seeded course — just assert the locator pattern is valid.
     const count = await handles.count()
     if (count > 0) {

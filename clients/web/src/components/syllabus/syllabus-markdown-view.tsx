@@ -16,7 +16,7 @@ import type { ResolvedMarkdownTheme } from '../../lib/markdown-theme'
 import { resolveMarkdownTheme } from '../../lib/markdown-theme'
 import { useReducedData } from '../../context/reduced-data-context'
 import { isMathRenderingEnabled } from '../../lib/math'
-import { sectionsToMarkdown } from './syllabus-section-markdown'
+import { sectionsToMarkdown, stripEditorSectionBoundaries } from './syllabus-section-markdown'
 import { authorizedFetch } from '../../lib/api'
 import { createThemedMarkdownComponents } from '../markdown/markdown-themed-components'
 import type { PluggableList } from 'unified'
@@ -224,7 +224,7 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
     ref,
   ) {
     const reducedData = useReducedData()
-    const src = markdown.trim()
+    const src = stripEditorSectionBoundaries(markdown).trim()
     const hasMath = useMemo(() => markdownLooksLikeMath(src), [src])
     const [userForcedMath, setUserForcedMath] = useState(false)
     const deferMath = reducedData && hasMath && !userForcedMath
@@ -238,7 +238,10 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
       () => createMarkdownComponents(theme, { useCourseFileImages, contentToolsEnabled }),
       [theme, useCourseFileImages, contentToolsEnabled],
     )
-    const normalized = useMemo(() => normalizeMarkdownLists(markdown), [markdown])
+    const normalized = useMemo(
+      () => normalizeMarkdownLists(stripEditorSectionBoundaries(markdown)),
+      [markdown],
+    )
 
     if (!src) {
       return (
@@ -291,7 +294,7 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
 )
 
 export function SyllabusMarkdownView({ sections, theme = defaultResolved, courseCode }: SyllabusMarkdownViewProps) {
-  const src = sectionsToMarkdown(sections)
+  const src = stripEditorSectionBoundaries(sectionsToMarkdown(sections))
   const reducedData = useReducedData()
   const hasMath = useMemo(() => markdownLooksLikeMath(src), [src])
   const [userForcedMath, setUserForcedMath] = useState(false)

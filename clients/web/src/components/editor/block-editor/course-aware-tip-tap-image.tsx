@@ -36,6 +36,15 @@ function CourseImageNodeView(props: NodeViewProps) {
     aspect: number
   } | null>(null)
   const latestDragSize = useRef<{ w: number; h: number } | null>(null)
+  /** Clears window listeners if the node view unmounts mid-resize (e.g. host page save). */
+  const dragCleanupRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => {
+    return () => {
+      dragCleanupRef.current?.()
+      dragCleanupRef.current = null
+    }
+  }, [])
 
   const [url, setUrl] = useState<string | null>(() =>
     src && !needsAuthenticatedCourseImageSrc(src) ? src : null,
@@ -89,6 +98,10 @@ function CourseImageNodeView(props: NodeViewProps) {
       e.stopPropagation()
       const img = imgRef.current
       if (!img || !url) return
+      // End any prior drag before starting another.
+      dragCleanupRef.current?.()
+      dragCleanupRef.current = null
+
       const rect = img.getBoundingClientRect()
       const w0 = typeof widthAttr === 'number' && widthAttr > 0 ? widthAttr : rect.width
       const h0 = typeof heightAttr === 'number' && heightAttr > 0 ? heightAttr : rect.height
@@ -102,7 +115,8 @@ function CourseImageNodeView(props: NodeViewProps) {
       )
       dragRef.current = { startDist, baseW: w0, baseH: h0, aspect }
       latestDragSize.current = { w: w0, h: h0 }
-      ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+      const target = e.target as HTMLElement
+      target.setPointerCapture(e.pointerId)
 
       const onMove = (ev: PointerEvent) => {
         const d = dragRef.current
@@ -117,27 +131,37 @@ function CourseImageNodeView(props: NodeViewProps) {
         setDragSize(next)
       }
 
-      const onUp = (ev: PointerEvent) => {
+      const finish = (ev?: PointerEvent, commit = true) => {
         dragRef.current = null
         try {
-          ;(e.target as HTMLElement).releasePointerCapture(ev.pointerId)
+          if (ev) target.releasePointerCapture(ev.pointerId)
         } catch {
           /* ignore */
         }
         window.removeEventListener('pointermove', onMove)
         window.removeEventListener('pointerup', onUp)
-        window.removeEventListener('pointercancel', onUp)
+        window.removeEventListener('pointercancel', onCancel)
+        dragCleanupRef.current = null
         const fin = latestDragSize.current
         latestDragSize.current = null
-        if (fin) {
-          updateAttributes({ width: fin.w, height: fin.h })
+        if (commit && fin) {
+          try {
+            updateAttributes({ width: fin.w, height: fin.h })
+          } catch {
+            /* editor may already be destroyed (host save) */
+          }
         }
         setDragSize(null)
       }
 
+      const onUp = (ev: PointerEvent) => finish(ev, true)
+      const onCancel = (ev: PointerEvent) => finish(ev, false)
+
+      dragCleanupRef.current = () => finish(undefined, false)
+
       window.addEventListener('pointermove', onMove)
       window.addEventListener('pointerup', onUp)
-      window.addEventListener('pointercancel', onUp)
+      window.addEventListener('pointercancel', onCancel)
     },
     [heightAttr, updateAttributes, url, widthAttr],
   )

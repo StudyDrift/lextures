@@ -395,11 +395,14 @@ export function CommandPaletteDialog({
 
   if (!presence.mounted) return null
 
+  // Exit keeps the portal mounted at opacity 0 — do not block shell nav / Links.
+  const exiting = presence.phase === 'closing'
+
   const palette = (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-12 pb-[env(safe-area-inset-bottom)] sm:px-4 sm:pt-[min(12vh,8rem)]"
+      className={`fixed inset-0 z-[100] flex items-start justify-center px-3 pt-12 pb-[env(safe-area-inset-bottom)] sm:px-4 sm:pt-[min(12vh,8rem)] ${exiting ? 'pointer-events-none' : ''}`}
       role="dialog"
-      aria-modal="true"
+      aria-modal={!exiting}
       aria-label="Command Palette"
       ref={dialogRef}
       style={durationStyle}
@@ -410,7 +413,10 @@ export function CommandPaletteDialog({
         className={`absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md dark:bg-neutral-950/75 ${motion.scrim}`}
         aria-label="Close search"
         tabIndex={-1}
-        onClick={() => close()}
+        disabled={exiting}
+        onClick={() => {
+          if (!exiting) close()
+        }}
       />
       <div className={`relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/20 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/50 ${motion.panel}`}>
         <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">

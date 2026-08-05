@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { ConfirmDialog } from '../confirm-dialog'
@@ -9,6 +9,29 @@ describe('ConfirmDialog — accessibility', () => {
       <ConfirmDialog open={false} title="Delete?" onConfirm={() => {}} onClose={() => {}} />,
     )
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('disables pointer events while exit animation is in progress', async () => {
+    vi.useFakeTimers()
+    try {
+      const { rerender } = render(
+        <ConfirmDialog open title="Delete?" onConfirm={() => {}} onClose={() => {}} />,
+      )
+      const root = screen.getByTestId('confirm-dialog-root')
+      expect(root.className).not.toContain('pointer-events-none')
+
+      rerender(
+        <ConfirmDialog open={false} title="Delete?" onConfirm={() => {}} onClose={() => {}} />,
+      )
+      expect(screen.getByTestId('confirm-dialog-root').className).toContain('pointer-events-none')
+
+      await act(async () => {
+        vi.runAllTimers()
+      })
+      expect(screen.queryByTestId('confirm-dialog-root')).not.toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('renders dialog with title and focus-trapped cancel on open', async () => {
