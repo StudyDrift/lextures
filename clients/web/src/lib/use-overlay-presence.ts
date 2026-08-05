@@ -104,13 +104,15 @@ export function useOverlayPresence({
         enabled,
         reduceMotion: reducedMotion,
       })
-      if (ms <= 0) {
+      // Failsafe: never leave phase stuck on `closing` (invisible full-screen layer).
+      const exitMs = Number.isFinite(ms) && ms >= 0 ? ms : 0
+      if (exitMs <= 0) {
         setPhase((p) => transitionOverlay(p, 'exitComplete'))
       } else {
         timerRef.current = window.setTimeout(() => {
           timerRef.current = null
           setPhase((p) => transitionOverlay(p, 'exitComplete'))
-        }, ms)
+        }, exitMs)
       }
     }
     return clearTimer

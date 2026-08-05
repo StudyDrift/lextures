@@ -22,13 +22,18 @@ import {
 } from '@dnd-kit/core'
 import {
   SortableContext,
-  arrayMove,
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { KeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyboardSensorConfig'
 import { CSS, type Transform } from '@dnd-kit/utilities'
-import { structureReorderDropAction } from './course-modules-reorder'
+import {
+  buildModuleChildrenMap,
+  buildReorderPayloadFromItems,
+  moveChildInStructure,
+  reorderModulesInStructure,
+  structureReorderDropAction,
+} from './course-modules-reorder'
 import {
   AlertCircle,
   BookMarked,
@@ -140,119 +145,6 @@ const iconGhostPublished =
   'rounded-md p-2.5 text-indigo-600 transition-[background-color,color,border-color] hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
 const iconGhostDraft =
   'rounded-md p-2.5 text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
-
-function findModuleIdForChildItem(
-  childId: string,
-  moduleChildrenById: Map<string, CourseStructureItem[]>,
-): string | undefined {
-  for (const [mid, list] of moduleChildrenById) {
-    if (list.some((c) => c.id === childId)) return mid
-  }
-  return undefined
-}
-
-const STRUCTURE_CHILD_KINDS = new Set<CourseStructureItem['kind']>([
-  'heading',
-  'content_page',
-  'assignment',
-  'quiz',
-  'external_link',
-  'survey',
-  'lti_link',
-  'h5p',
-  'scorm',
-  'vibe_activity',
-  'library_resource',
-  'textbook_resource',
-])
-
-function buildModuleChildrenMap(items: CourseStructureItem[]): Map<string, CourseStructureItem[]> {
-  const m = new Map<string, CourseStructureItem[]>()
-  for (const i of items) {
-    if (STRUCTURE_CHILD_KINDS.has(i.kind) && i.parentId) {
-      const list = m.get(i.parentId) ?? []
-      list.push(i)
-      m.set(i.parentId, list)
-    }
-  }
-  for (const [, list] of m) {
-    list.sort((a, b) => a.sortOrder - b.sortOrder)
-  }
-  return m
-}
-
-function flattenOrderedStructure(
-  topLevelOrdered: CourseStructureItem[],
-  childrenByModule: Map<string, CourseStructureItem[]>,
-): CourseStructureItem[] {
-  let sortOrder = 0
-  const out: CourseStructureItem[] = []
-  for (const top of topLevelOrdered) {
-    out.push({ ...top, sortOrder: sortOrder++ })
-    if (top.kind === 'module') {
-      for (const child of childrenByModule.get(top.id) ?? []) {
-        out.push({ ...child, sortOrder: sortOrder++ })
-      }
-    }
-  }
-  return out
-}
-
-function reorderModulesInStructure(
-  items: CourseStructureItem[],
-  activeModuleId: string,
-  overModuleId: string,
-): CourseStructureItem[] | null {
-  const childrenByModule = buildModuleChildrenMap(items)
-  const topLevel = items
-    .filter((i) => !i.parentId)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-  const modules = topLevel.filter((i) => i.kind === 'module')
-  const oldIndex = modules.findIndex((m) => m.id === activeModuleId)
-  const newIndex = modules.findIndex((m) => m.id === overModuleId)
-  if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return null
-
-  const nonModules = topLevel.filter((i) => i.kind !== 'module')
-  const nextModules = arrayMove(modules, oldIndex, newIndex)
-  return flattenOrderedStructure([...nonModules, ...nextModules], childrenByModule)
-}
-
-function reorderChildrenInStructure(
-  items: CourseStructureItem[],
-  moduleId: string,
-  activeChildId: string,
-  overChildId: string,
-): CourseStructureItem[] | null {
-  const childrenByModule = buildModuleChildrenMap(items)
-  const children = [...(childrenByModule.get(moduleId) ?? [])]
-  const oldIndex = children.findIndex((c) => c.id === activeChildId)
-  const newIndex = children.findIndex((c) => c.id === overChildId)
-  if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return null
-
-  childrenByModule.set(moduleId, arrayMove(children, oldIndex, newIndex))
-  const topLevel = items
-    .filter((i) => !i.parentId)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-  return flattenOrderedStructure(topLevel, childrenByModule)
-}
-
-function buildReorderPayloadFromItems(items: CourseStructureItem[]): {
-  moduleOrder: string[]
-  childOrderByModule: Record<string, string[]>
-} {
-  const modules = items
-    .filter((i) => i.kind === 'module' && !i.parentId)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-  const moduleOrder = modules.map((m) => m.id)
-  const childOrderByModule: Record<string, string[]> = {}
-  for (const m of modules) {
-    childOrderByModule[m.id] = items
-      .filter((i) => i.parentId === m.id && STRUCTURE_CHILD_KINDS.has(i.kind))
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((c) => c.id)
-  }
-  return { moduleOrder, childOrderByModule }
-}
 
 function sortableDragStyle(
   transform: Transform | null,
@@ -1021,7 +913,7 @@ function SortableChildRow({
                   ? 'opacity-100'
                   : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
               }`}
-              aria-label="Drag to reorder item"
+              aria-label="Drag to reorder or move item to another module"
               {...listeners}
               {...attributes}
             >
@@ -1490,7 +1382,7 @@ function SortableModuleCard({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
     disabled: !canEditModules,
-    data: { type: 'module' as const },
+    data: { type: 'module' as const, moduleId: item.id },
   })
   const style = sortableDragStyle(transform, transition, isDragging)
 
@@ -1499,8 +1391,10 @@ function SortableModuleCard({
   /** Keep grips visible while a modal/overlay has focus (hover/focus-within on rows no longer applies). */
   const gripsPinned = dragHandlesVisible || anyModalBusy
 
+  // Always render a children SortableContext when expanded so items can be
+  // dropped into empty modules (not only onto the module card itself).
   const childrenList =
-    !minified && !collapsed && children.length > 0 ? (
+    !minified && !collapsed ? (
       <SortableContext
         id={`module-children-${item.id}`}
         items={childIds}
@@ -1508,7 +1402,14 @@ function SortableModuleCard({
       >
         <ul
           id={`module-items-${item.id}`}
-          className="mt-4 divide-y divide-slate-200/55 border-t border-slate-200/55 pt-4 dark:divide-neutral-700/80 dark:border-neutral-700/80"
+          className={`mt-4 border-t border-slate-200/55 pt-4 dark:border-neutral-700/80 ${
+            children.length > 0
+              ? 'divide-y divide-slate-200/55 dark:divide-neutral-700/80'
+              : 'min-h-10'
+          }`}
+          aria-label={
+            children.length === 0 ? `Drop items into ${item.title || 'module'}` : undefined
+          }
         >
           {children.map((child) => (
             <SortableChildRow
@@ -2445,32 +2346,7 @@ export default function CourseModules() {
     })
   }, [moduleIds])
 
-  const moduleChildrenById = useMemo(() => {
-    const m = new Map<string, CourseStructureItem[]>()
-    for (const i of items) {
-      if (
-        (i.kind === 'heading' ||
-          i.kind === 'content_page' ||
-          i.kind === 'assignment' ||
-          i.kind === 'quiz' ||
-          i.kind === 'external_link' ||
-          i.kind === 'survey' ||
-          i.kind === 'lti_link' ||
-          i.kind === 'h5p' ||
-          i.kind === 'scorm' ||
-          i.kind === 'vibe_activity') &&
-        i.parentId
-      ) {
-        const list = m.get(i.parentId) ?? []
-        list.push(i)
-        m.set(i.parentId, list)
-      }
-    }
-    for (const [, list] of m) {
-      list.sort((a, b) => a.sortOrder - b.sortOrder)
-    }
-    return m
-  }, [items])
+  const moduleChildrenById = useMemo(() => buildModuleChildrenMap(items), [items])
 
   const setModulePublishedState = useCallback(
     async (item: CourseStructureItem, published: boolean, includeChildren: boolean) => {
@@ -2556,8 +2432,10 @@ export default function CourseModules() {
     if (!over || active.id === over.id) return
 
     const activeType = active.data.current?.type as string | undefined
+    const overType = over.data.current?.type as 'module' | 'child' | undefined
+
     if (activeType === 'module') {
-      if (over.data.current?.type !== 'module') return
+      if (overType !== 'module') return
       setItems((prev) => {
         const next = reorderModulesInStructure(prev, String(active.id), String(over.id))
         if (!next) return prev
@@ -2568,14 +2446,30 @@ export default function CourseModules() {
     }
 
     if (activeType === 'child') {
-      const moduleId = active.data.current?.moduleId as string | undefined
-      if (!moduleId) return
+      const overModuleId =
+        (over.data.current?.moduleId as string | undefined) ??
+        (overType === 'module' ? String(over.id) : undefined)
+
+      // Expand a collapsed target module so the item can land in a visible list.
+      if (overModuleId) {
+        setCollapsedModuleIds((prev) => {
+          if (!prev.has(overModuleId)) return prev
+          const next = new Set(prev)
+          next.delete(overModuleId)
+          return next
+        })
+      }
+
+      const overIdForMove =
+        overType === 'module' ? (overModuleId ?? String(over.id)) : String(over.id)
+
       setItems((prev) => {
-        const overModuleId =
-          (over.data.current?.moduleId as string | undefined) ??
-          findModuleIdForChildItem(String(over.id), buildModuleChildrenMap(prev))
-        if (!overModuleId || moduleId !== overModuleId) return prev
-        const next = reorderChildrenInStructure(prev, moduleId, String(active.id), String(over.id))
+        const next = moveChildInStructure(
+          prev,
+          String(active.id),
+          overIdForMove,
+          overType === 'module' || overType === 'child' ? overType : undefined,
+        )
         if (!next) return prev
         dragReorderCommittedRef.current = true
         return next
@@ -2615,8 +2509,7 @@ export default function CourseModules() {
       // dropAction === 'apply-over' (over is defined)
       if (!over) return
       const overId = String(over.id)
-      const overType = over.data.current?.type as string | undefined
-      const overModuleIdFromData = over.data.current?.moduleId as string | undefined
+      const overType = over.data.current?.type as 'module' | 'child' | undefined
       const activeType = active.data.current?.type as string | undefined
       setItems((prev) => {
         let next = prev
@@ -2630,23 +2523,25 @@ export default function CourseModules() {
           const reordered = reorderModulesInStructure(prev, String(active.id), overId)
           if (reordered) next = reordered
         } else if (activeType === 'child') {
-          const moduleId = active.data.current?.moduleId as string | undefined
-          if (!moduleId) {
-            if (committedDuringDrag) {
-              void persistReorder(buildReorderPayloadFromItems(prev))
-            }
-            return prev
-          }
           const overModuleId =
-            overModuleIdFromData ?? findModuleIdForChildItem(overId, buildModuleChildrenMap(prev))
-          if (!overModuleId || moduleId !== overModuleId) {
-            if (committedDuringDrag) {
-              void persistReorder(buildReorderPayloadFromItems(prev))
-            }
+            (over.data.current?.moduleId as string | undefined) ??
+            (overType === 'module' ? overId : undefined)
+          const overIdForMove =
+            overType === 'module' ? (overModuleId ?? overId) : overId
+          const moved = moveChildInStructure(
+            prev,
+            String(active.id),
+            overIdForMove,
+            overType === 'module' || overType === 'child' ? overType : undefined,
+          )
+          if (moved) {
+            next = moved
+          } else if (committedDuringDrag) {
+            void persistReorder(buildReorderPayloadFromItems(prev))
+            return prev
+          } else {
             return prev
           }
-          const reordered = reorderChildrenInStructure(prev, moduleId, String(active.id), overId)
-          if (reordered) next = reordered
         } else {
           return prev
         }

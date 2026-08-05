@@ -908,6 +908,15 @@ export function MarkdownBodyEditor({
     if (editor) editor.setEditable(!disabled)
   }, [disabled, editor])
 
+  // Host page save disables the editor then unmounts it — clear floating UI so a
+  // portaled link popover cannot outlive the intentional close transition.
+  useEffect(() => {
+    if (!disabled) return
+    setLinkPopover(null)
+    setMentionUi(null)
+    setSlashUi(null)
+  }, [disabled])
+
   useEffect(() => {
     setNotebookTaskContext(notebookTaskContext)
     if (!editor) return

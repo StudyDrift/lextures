@@ -313,14 +313,19 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
     transitionTimingFunction: overlayMotionOn && !reducedMotion ? activeEase : 'linear',
   } as const
 
+  // While closing, `entered` is false so the scrim is invisible but still hit-tests
+  // unless we drop pointer events — that looks like “router links are dead”.
+  const closing = !open
+
   return createPortal(
     <div
-      className="fixed inset-0 z-[60] flex justify-end"
+      className={`fixed inset-0 z-[60] flex justify-end ${closing ? 'pointer-events-none' : ''}`}
       data-overlay-phase={entered ? (open ? 'open' : 'closing') : open ? 'opening' : 'closed'}
     >
       <button
         type="button"
         aria-label="Close notifications"
+        disabled={closing}
         style={{
           ...transitionStyle,
           transitionProperty: 'opacity',
@@ -330,7 +335,9 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
         className={`lex-btn-static absolute inset-0 bg-slate-900/45 backdrop-blur-[1px] ${
           entered ? 'opacity-100' : 'opacity-0'
         }`}
-        onClick={onClose}
+        onClick={() => {
+          if (!closing) onClose()
+        }}
       />
       <div
         role="dialog"

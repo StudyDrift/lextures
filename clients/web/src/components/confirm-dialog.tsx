@@ -94,9 +94,13 @@ export function ConfirmDialog({
     requireTypedPhrase == null || typedPhrase.trim() === requireTypedPhrase.trim()
   const disableConfirm = Boolean(busy || confirmDisabled || !phraseOk)
 
+  // While exiting, opacity goes to 0 but the layer stays mounted for the animation.
+  // Disable pointer events so an invisible scrim cannot swallow nav Link clicks.
+  const exiting = presence.phase === 'closing'
+
   return (
     <div
-      className="fixed inset-0 z-[400] flex items-center justify-center p-4"
+      className={`fixed inset-0 z-[400] flex items-center justify-center p-4 ${exiting ? 'pointer-events-none' : ''}`}
       role="presentation"
       style={durationStyle}
       data-overlay-phase={presence.phase}
@@ -105,15 +109,15 @@ export function ConfirmDialog({
       <button
         type="button"
         aria-label="Close dialog"
-        disabled={busy}
+        disabled={busy || exiting}
         className={`lex-btn-static absolute inset-0 cursor-default border-0 bg-black/45 p-0 disabled:cursor-not-allowed ${classes.scrim}`}
         onClick={() => {
-          if (!busy) onClose()
+          if (!busy && !exiting) onClose()
         }}
       />
       <div
         role="dialog"
-        aria-modal="true"
+        aria-modal={!exiting}
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         className={`relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900 ${classes.panel}`}

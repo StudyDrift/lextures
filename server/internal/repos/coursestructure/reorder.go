@@ -15,10 +15,11 @@ const reorderOffset = 10_000_000
 var ErrInvalidReorder = errors.New("coursestructure: invalid reorder")
 
 // ApplyModuleAndChildOrder reassigns sort_order for top-level modules and each module's children.
-// moduleIDsInOrder must list every non-archived top-level module id. For each such module,
-// childrenByModule must list every non-archived child id in the desired order; modules with no
-// children use an empty slice (or may be omitted from the map). Archived modules and children
-// are unchanged.
+// It also reparents children when the same child id appears under a different module than before
+// (move item between modules). moduleIDsInOrder must list every non-archived top-level module id.
+// The union of childrenByModule must equal every non-archived child id in the course (each child
+// appears under exactly one module). Modules with no children use an empty slice (or may be
+// omitted from the map). Archived modules and children are unchanged.
 func ApplyModuleAndChildOrder(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -84,6 +85,8 @@ func ApplyModuleAndChildOrder(
 		}
 	}
 
+	// Current non-archived children: childID → parent moduleID.
+	currentChildParent := make(map[uuid.UUID]uuid.UUID)
 	for _, mid := range visibleModules {
 		childRows, err := tx.Query(ctx, `
 			SELECT id, archived
@@ -94,7 +97,6 @@ func ApplyModuleAndChildOrder(
 		if err != nil {
 			return err
 		}
-		var visibleChildIDs []uuid.UUID
 		for childRows.Next() {
 			var id uuid.UUID
 			var archived bool
@@ -103,33 +105,36 @@ func ApplyModuleAndChildOrder(
 				return err
 			}
 			if !archived {
-				visibleChildIDs = append(visibleChildIDs, id)
+				currentChildParent[id] = mid
 			}
 		}
 		childRows.Close()
 		if err := childRows.Err(); err != nil {
 			return err
 		}
+	}
 
-		visibleChildSet := make(map[uuid.UUID]struct{}, len(visibleChildIDs))
-		for _, id := range visibleChildIDs {
-			visibleChildSet[id] = struct{}{}
-		}
-		specified := childrenByModule[mid]
-		if specified == nil {
-			specified = []uuid.UUID{}
-		}
-		specSet := make(map[uuid.UUID]struct{}, len(specified))
-		for _, id := range specified {
-			specSet[id] = struct{}{}
-		}
-		if len(visibleChildSet) != len(specSet) {
+	// Requested placement: childID → new parent moduleID. Each child may appear once.
+	requestedChildParent := make(map[uuid.UUID]uuid.UUID)
+	for mid, kids := range childrenByModule {
+		if _, ok := visibleModSet[mid]; !ok {
 			return ErrInvalidReorder
 		}
-		for id := range visibleChildSet {
-			if _, ok := specSet[id]; !ok {
+		for _, cid := range kids {
+			if _, dup := requestedChildParent[cid]; dup {
 				return ErrInvalidReorder
 			}
+			requestedChildParent[cid] = mid
+		}
+	}
+	// Modules omitted from the map are treated as empty (no children requested).
+
+	if len(requestedChildParent) != len(currentChildParent) {
+		return ErrInvalidReorder
+	}
+	for cid := range currentChildParent {
+		if _, ok := requestedChildParent[cid]; !ok {
+			return ErrInvalidReorder
 		}
 	}
 
@@ -151,30 +156,32 @@ func ApplyModuleAndChildOrder(
 		}
 	}
 
+	// Bump every child (including archived) so reparent + low sort_order values cannot
+	// collide with the unique (parent_id, sort_order) index mid-update.
+	if _, err := tx.Exec(ctx, `
+		UPDATE course.course_structure_items
+		SET sort_order = sort_order + $2
+		WHERE course_id = $1 AND parent_id IS NOT NULL
+	`, courseID, reorderOffset); err != nil {
+		return err
+	}
+
 	for _, mid := range visibleModules {
 		childIDs := childrenByModule[mid]
 		if childIDs == nil {
 			childIDs = []uuid.UUID{}
 		}
-		if len(childIDs) == 0 {
-			continue
-		}
-
-		if _, err := tx.Exec(ctx, `
-			UPDATE course.course_structure_items
-			SET sort_order = sort_order + $2
-			WHERE parent_id = $1
-		`, mid, reorderOffset); err != nil {
-			return err
-		}
-
 		for ord, cid := range childIDs {
-			if _, err := tx.Exec(ctx, `
+			tag, err := tx.Exec(ctx, `
 				UPDATE course.course_structure_items
-				SET sort_order = $3
-				WHERE id = $1 AND parent_id = $2
-			`, cid, mid, ord); err != nil {
+				SET parent_id = $2, sort_order = $3
+				WHERE id = $1 AND course_id = $4 AND parent_id IS NOT NULL AND NOT archived
+			`, cid, mid, ord, courseID)
+			if err != nil {
 				return err
+			}
+			if tag.RowsAffected() != 1 {
+				return ErrInvalidReorder
 			}
 		}
 	}

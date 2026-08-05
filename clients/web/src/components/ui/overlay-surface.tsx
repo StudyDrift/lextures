@@ -87,9 +87,12 @@ export function OverlaySurface({
     '--lx-overlay-duration': `${durationMs}ms`,
   } as CSSProperties
 
+  // Keep exit paint for motion, but never leave an invisible full-screen hit target.
+  const exiting = presence.phase === 'closing'
+
   const shell = (
     <div
-      className={`fixed inset-0 ${zClassName} flex items-center justify-center p-4 ${className}`.trim()}
+      className={`fixed inset-0 ${zClassName} flex items-center justify-center p-4 ${exiting ? 'pointer-events-none' : ''} ${className}`.trim()}
       role="presentation"
       style={durationStyle}
       data-overlay-phase={presence.phase}
@@ -99,8 +102,11 @@ export function OverlaySurface({
         <button
           type="button"
           aria-label={backdropLabel}
+          disabled={exiting}
           className={`lex-btn-static absolute inset-0 cursor-default border-0 bg-slate-950/55 p-0 backdrop-blur-[2px] dark:bg-black/80 ${scrim} ${scrimClassName}`.trim()}
-          onClick={onClose}
+          onClick={() => {
+            if (!exiting) onClose()
+          }}
           tabIndex={-1}
         />
       ) : (

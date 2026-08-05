@@ -50,9 +50,11 @@ export function FullScreenModalShell({
     '--lx-overlay-duration': `${classes.durationMs}ms`,
   } as CSSProperties
 
+  const exiting = presence.phase === 'closing'
+
   const shell = (
     <div
-      className="fixed inset-0 z-[500] flex items-center justify-center p-3 sm:p-6"
+      className={`fixed inset-0 z-[500] flex items-center justify-center p-3 sm:p-6 ${exiting ? 'pointer-events-none' : ''}`}
       role="presentation"
       style={durationStyle}
       data-overlay-phase={presence.phase}
@@ -61,8 +63,11 @@ export function FullScreenModalShell({
         <button
           type="button"
           aria-label={backdropLabel}
+          disabled={exiting}
           className={`absolute inset-0 cursor-default border-0 bg-slate-950/55 p-0 backdrop-blur-[2px] dark:bg-black/80 ${classes.scrim}`}
-          onClick={onClose}
+          onClick={() => {
+            if (!exiting) onClose()
+          }}
           tabIndex={-1}
         />
       ) : (
