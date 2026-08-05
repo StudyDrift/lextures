@@ -279,6 +279,7 @@ export const courseStructureItemSchema = z
       'vibe_activity',
       'library_resource',
       'textbook_resource',
+      'attendance',
     ]),
     title: z.string(),
     parentId: z.string().nullable(),

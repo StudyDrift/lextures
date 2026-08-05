@@ -69,13 +69,15 @@ func (d Deps) handleCourseSectionsCollection() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
 			return
 		}
-		if !pub.SectionsEnabled {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Sections are not enabled for this course.")
-			return
-		}
-
 		switch r.Method {
 		case http.MethodGet:
+			// Return empty list when sections are off so optional clients (assign-to, filters)
+			// do not log browser 404 noise for a disabled feature.
+			if !pub.SectionsEnabled {
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
+				_ = json.NewEncoder(w).Encode(map[string]any{"sections": []any{}})
+				return
+			}
 			list, err := coursesections.ListForCourse(r.Context(), d.Pool, *cid)
 			if err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list sections.")
@@ -90,6 +92,10 @@ func (d Deps) handleCourseSectionsCollection() http.HandlerFunc {
 			return
 
 		case http.MethodPost:
+			if !pub.SectionsEnabled {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Sections are not enabled for this course.")
+				return
+			}
 			can, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
 			if err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")

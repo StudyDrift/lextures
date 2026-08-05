@@ -278,8 +278,17 @@ func (d Deps) handleGetModulesProgress() http.HandlerFunc {
 			return
 		}
 		enrollmentID, err := enrollment.GetStudentEnrollmentID(r.Context(), d.Pool, *cid, viewer)
-		if err != nil || enrollmentID == nil {
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Student enrollment required.")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load enrollment.")
+			return
+		}
+		// Staff / "view as student" without a student enrollment: empty progress (not 403).
+		if enrollmentID == nil {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"enrollmentId": "00000000-0000-0000-0000-000000000000",
+				"modules":      []any{},
+			})
 			return
 		}
 		snap, err := d.gatingService().BuildStudentProgress(r.Context(), *cid, *enrollmentID, time.Now().UTC())

@@ -1,3 +1,3 @@
-// Package enrollmentgroup is a placeholder for a port of server/src/models/enrollmentgroup.rs.
-// Types and query helpers are added as handlers are implemented.
+// Package enrollmentgroup holds public JSON types for instructor-managed
+// enrollment group sets (see repos/enrollmentgroups and httpserver enrollment-groups routes).
 package enrollmentgroup

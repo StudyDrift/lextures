@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { authorizedFetch } from '../lib/api'
 import { closeWebSocket } from '../lib/close-websocket'
 import { getAccessToken } from '../lib/auth'
+import { wsReconnectDelayMs } from '../lib/ws-reconnect'
 import {
   notificationsWebSocketUrl,
   parseNotificationsWsMessage,
@@ -24,6 +25,7 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
   const wsRef = useRef<WebSocket | null>(null)
   const wsTokenRef = useRef<string | null>(null)
   const wsReconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const wsAttemptRef = useRef(0)
   const inboxHydratedRef = useRef(false)
   const toastedIdsRef = useRef<Set<string>>(loadNotificationToastedIds())
   const mountedRef = useRef(true)
@@ -108,11 +110,16 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
   // unexpected close or auth token change (not on every pathname change).
   useEffect(() => {
     let cancelled = false
+    let visibilityWait: (() => void) | null = null
 
     const clearReconnectTimer = () => {
       if (wsReconnectTimerRef.current) {
         clearTimeout(wsReconnectTimerRef.current)
         wsReconnectTimerRef.current = null
+      }
+      if (visibilityWait) {
+        document.removeEventListener('visibilitychange', visibilityWait)
+        visibilityWait = null
       }
     }
 
@@ -124,11 +131,25 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
     }
 
     const scheduleReconnect = () => {
-      if (cancelled || wsReconnectTimerRef.current) return
+      if (cancelled || wsReconnectTimerRef.current || visibilityWait) return
+      // Pause aggressive reconnect while the tab is backgrounded (origin 504 storms).
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+        const onVis = () => {
+          if (document.visibilityState !== 'visible') return
+          document.removeEventListener('visibilitychange', onVis)
+          visibilityWait = null
+          if (!cancelled) scheduleReconnect()
+        }
+        visibilityWait = onVis
+        document.addEventListener('visibilitychange', onVis)
+        return
+      }
+      const delay = wsReconnectDelayMs(wsAttemptRef.current)
+      wsAttemptRef.current += 1
       wsReconnectTimerRef.current = setTimeout(() => {
         wsReconnectTimerRef.current = null
         if (!cancelled) connect()
-      }, 2000)
+      }, delay)
     }
 
     const connect = () => {
@@ -149,16 +170,27 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
       closeWebSocket(wsRef.current)
       wsTokenRef.current = authToken
 
-      const ws = new WebSocket(url)
+      let ws: WebSocket
+      try {
+        ws = new WebSocket(url)
+      } catch {
+        scheduleReconnect()
+        return
+      }
       wsRef.current = ws
 
       ws.onopen = () => {
+        wsAttemptRef.current = 0
         const currentToken = getAccessToken()
         if (!currentToken) {
           closeWebSocket(ws)
           return
         }
-        ws.send(JSON.stringify({ authToken: currentToken }))
+        try {
+          ws.send(JSON.stringify({ authToken: currentToken }))
+        } catch {
+          /* socket may already be closing */
+        }
       }
 
       ws.onmessage = (ev) => {

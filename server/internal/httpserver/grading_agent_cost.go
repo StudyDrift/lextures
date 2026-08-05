@@ -56,8 +56,8 @@ func (d Deps) handleGetGraderAgentRunEstimate() http.HandlerFunc {
 			return
 		}
 		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
-		if err != nil || cfg == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent not found.")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grader agent.")
 			return
 		}
 		q := r.URL.Query()
@@ -97,10 +97,14 @@ func (d Deps) handleGetGraderAgentRunEstimate() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, resolveErr.Error())
 			return
 		}
-		sample, sampleErr := gradingagentrepo.GetLatestDryRunSample(r.Context(), d.Pool, cfg.ID)
-		if sampleErr != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load cost sample.")
-			return
+		var sample *gradingagentrepo.DryRunCostSample
+		if cfg != nil {
+			s, sampleErr := gradingagentrepo.GetLatestDryRunSample(r.Context(), d.Pool, cfg.ID)
+			if sampleErr != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load cost sample.")
+				return
+			}
+			sample = s
 		}
 		estimate := gradingagentrepo.EstimateRunCost(len(submissions), sample)
 		targetSummary := formatGraderAgentRunTargetSummary(runScope, filterMeta, len(submissions))

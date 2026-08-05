@@ -3771,6 +3771,7 @@ export type CourseStructureItem = {
     | 'vibe_activity'
     | 'library_resource'
     | 'textbook_resource'
+    | 'attendance'
   title: string
   /** Set when this row is nested under a module. */
   parentId: string | null

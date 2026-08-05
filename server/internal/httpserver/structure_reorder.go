@@ -3,16 +3,18 @@ package httpserver
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/lextures/lextures/server/internal/apierr"
-	"github.com/lextures/lextures/server/internal/models/coursestructure"
-	coursestructurerepo "github.com/lextures/lextures/server/internal/repos/coursestructure"
-	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/models/coursestructure"
+	"github.com/lextures/lextures/server/internal/repos/course"
+	coursestructurerepo "github.com/lextures/lextures/server/internal/repos/coursestructure"
 )
 
-// handleReorderCourseStructure is POST /api/v1/courses/{course_code}/structure/reorder.
+// handleReorderCourseStructure is POST /api/v1/courses/{course_code}/structure/reorder
+// (modules and nested module items).
 func (d Deps) handleReorderCourseStructure() http.HandlerFunc {
 	type resp struct {
 		Items []coursestructurerepo.ItemResponse `json:"items"`
@@ -65,10 +67,12 @@ func (d Deps) handleReorderCourseStructure() http.HandlerFunc {
 			return
 		}
 		if err != nil {
+			slog.Error("course structure reorder failed", "course_code", courseCode, "course_id", cid.String(), "err", err)
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to reorder course structure.")
 			return
 		}
 		d.invalidateCourseStructureCache(r.Context(), *cid)
+		broadcastStructureChanged(courseCode)
 		items, err := coursestructurerepo.ListForCourseWithEnrichment(r.Context(), d.Pool, *cid, true)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course structure.")

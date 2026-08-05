@@ -19,7 +19,8 @@ var ErrInvalidReorder = errors.New("coursestructure: invalid reorder")
 // (move item between modules). moduleIDsInOrder must list every non-archived top-level module id.
 // The union of childrenByModule must equal every non-archived child id in the course (each child
 // appears under exactly one module). Modules with no children use an empty slice (or may be
-// omitted from the map). Archived modules and children are unchanged.
+// omitted from the map). Archived modules and children are unchanged in membership; their
+// sort_order may be compacted to keep unique indexes free of collisions.
 func ApplyModuleAndChildOrder(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -138,10 +139,14 @@ func ApplyModuleAndChildOrder(
 		}
 	}
 
+	// Bump every top-level row (modules and any non-module top-level items such as
+	// attendance). Only bumping modules left other top-level sort_orders in place and
+	// reassigning modules to 0..n-1 collided with the unique (course_id, sort_order)
+	// index (idx_course_structure_items_top_level_order).
 	if _, err := tx.Exec(ctx, `
 		UPDATE course.course_structure_items
 		SET sort_order = sort_order + $2
-		WHERE course_id = $1 AND parent_id IS NULL AND kind = 'module'
+		WHERE course_id = $1 AND parent_id IS NULL
 	`, courseID, reorderOffset); err != nil {
 		return err
 	}
@@ -154,6 +159,26 @@ func ApplyModuleAndChildOrder(
 		`, id, courseID, ord); err != nil {
 			return err
 		}
+	}
+
+	// Compact remaining top-level rows (archived modules, attendance, etc.) after
+	// the visible module sequence so they keep unique sort_orders and do not
+	// accumulate unbounded offsets across reorders.
+	if _, err := tx.Exec(ctx, `
+		WITH remaining AS (
+			SELECT id,
+				$2::int + (ROW_NUMBER() OVER (ORDER BY sort_order, id) - 1)::int AS new_ord
+			FROM course.course_structure_items
+			WHERE course_id = $1
+			  AND parent_id IS NULL
+			  AND NOT (kind = 'module' AND NOT archived)
+		)
+		UPDATE course.course_structure_items AS c
+		SET sort_order = remaining.new_ord
+		FROM remaining
+		WHERE c.id = remaining.id
+	`, courseID, len(moduleIDsInOrder)); err != nil {
+		return err
 	}
 
 	// Bump every child (including archived) so reparent + low sort_order values cannot
@@ -183,6 +208,21 @@ func ApplyModuleAndChildOrder(
 			if tag.RowsAffected() != 1 {
 				return ErrInvalidReorder
 			}
+		}
+		// Compact archived children under this module after the live sequence.
+		if _, err := tx.Exec(ctx, `
+			WITH archived AS (
+				SELECT id,
+					$2::int + (ROW_NUMBER() OVER (ORDER BY sort_order, id) - 1)::int AS new_ord
+				FROM course.course_structure_items
+				WHERE parent_id = $1 AND archived
+			)
+			UPDATE course.course_structure_items AS c
+			SET sort_order = archived.new_ord
+			FROM archived
+			WHERE c.id = archived.id
+		`, mid, len(childIDs)); err != nil {
+			return err
 		}
 	}
 
