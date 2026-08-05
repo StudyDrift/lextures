@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePermissions } from '../../context/use-permissions'
+import { invalidateChecklist } from '../../lib/course-checklist-invalidate'
 import { toastSaveOk } from '../../lib/lms-toast'
 import { UnsavedChangesBanner } from '../../components/ui/unsaved-changes-banner'
 import {
@@ -349,6 +350,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
       await Promise.all(promises)
       await load()
       void refreshCourseNav()
+      invalidateChecklist(courseCode)
       setSaveStatus('saved')
       if (savedScheme) {
         toastSaveOk('Grading scheme saved.')

@@ -14,6 +14,8 @@ interface SideNavLinkProps extends NavLinkProps {
   children: ReactNode
   badge?: ReactNode
   nested?: boolean
+  /** Override collapsed-nav tooltip (defaults to string children). */
+  tooltip?: string
 }
 
 export function SideNavLink({
@@ -21,12 +23,13 @@ export function SideNavLink({
   children,
   badge,
   nested = false,
+  tooltip,
   className,
   ...props
 }: SideNavLinkProps) {
   const { sideNavCollapsed } = useShellNav()
 
-  const label = typeof children === 'string' ? children : ''
+  const label = tooltip ?? (typeof children === 'string' ? children : '')
 
   return (
     <SideNavTooltip content={label}>

@@ -503,6 +503,19 @@ describe('granular builders', () => {
     )).toBe(false)
   })
 
+  it('buildCoursePageItems includes Course checklist for item:create', () => {
+    const allowsCreate = (p: string) => p === courseItemCreatePermission('C')
+    const pages = buildCoursePageItems([{ courseCode: 'C', title: 'Chem' }], allowsCreate)
+    expect(pages.some((i) => i.path === '/courses/C/checklist' && i.title === 'Course checklist')).toBe(
+      true,
+    )
+    expect(
+      buildCoursePageItems([{ courseCode: 'C', title: 'Chem' }], allowsNone).some(
+        (i) => i.path === '/courses/C/checklist',
+      ),
+    ).toBe(false)
+  })
+
   it('buildCourseActionItems requires roster permission', () => {
     const allowsRoster = (p: string) => p === courseEnrollmentsReadPermission('Z')
     expect(buildCourseActionItems([{ courseCode: 'Z', title: 'W' }], allowsRoster).length).toBe(1)

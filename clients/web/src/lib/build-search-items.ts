@@ -456,6 +456,12 @@ type CoursePageDef = {
 const coursePageDefs: CoursePageDef[] = [
   { suffix: '', title: 'Course dashboard', hint: 'dashboard overview' },
   {
+    suffix: '/checklist',
+    title: 'Course checklist',
+    hint: 'checklist course quality outstanding items dismiss',
+    requiredPermission: courseItemCreatePermission,
+  },
+  {
     suffix: '/feed',
     title: 'Feed',
     hint: 'feed chat channels messages discussion',

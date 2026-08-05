@@ -8,5 +8,6 @@
 | **CC.4** | [Rule pack B — structure, content & outcome alignment](CC.4-rule-pack-structure-outcomes-alignment.md) |
 | **CC.5** | [Rule pack C — assessment, grading, feedback & interaction](CC.5-rule-pack-assessment-feedback-interaction.md) |
 | **CC.6** | [Rule pack D — accessibility, inclusive design & launch readiness](CC.6-rule-pack-accessibility-and-launch-readiness.md) |
+| **CC.7** | [Web: checklist page, nav entry & badge](CC.7-web-checklist-page-and-nav-badge.md) |
 
 Remaining plans live under [`docs/plan/checklist/`](../../plan/checklist/README.md).

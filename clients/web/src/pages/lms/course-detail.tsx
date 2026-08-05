@@ -50,6 +50,7 @@ import {
   GradingBacklogList,
   type GradingBacklogItem,
 } from '../../components/dashboard/grading-backlog-list'
+import { ChecklistDashboardCardContainer } from '../../components/checklist/checklist-dashboard-card-container'
 import { CourseHeroBanner } from '../../components/course-hero-banner'
 import { LeaderboardWidget } from './LeaderboardWidget'
 
@@ -825,6 +826,8 @@ export default function CourseDetail() {
                       </Link>
                     </div>
                   ) : null}
+
+                  {courseCode ? <ChecklistDashboardCardContainer courseCode={courseCode} /> : null}
 
                   {staff ? (
                     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 sm:col-span-2 lg:col-span-1">

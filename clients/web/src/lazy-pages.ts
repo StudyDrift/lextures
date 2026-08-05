@@ -26,6 +26,7 @@ export const CourseFilesPage = lazy(() => import('./pages/lms/course-files-page'
 export const CourseGroupsPage = lazy(() => import('./pages/lms/course-groups-page'))
 export const CourseGradebook = lazy(() => import('./pages/lms/course-gradebook'))
 export const CourseAtRiskPage = lazy(() => import('./pages/lms/course-at-risk'))
+export const CourseChecklistPage = lazy(() => import('./pages/lms/course-checklist'))
 export const StudentProgressPage = lazy(() => import('./pages/lms/student-progress-page'))
 export const CourseStudentReportsPage = lazy(() => import('./pages/lms/course-student-reports-page'))
 export const CourseMyGrades = lazy(() => import('./pages/lms/course-my-grades'))

@@ -497,9 +497,9 @@ FROM course.module_prerequisites mp
 INNER JOIN course.course_structure_items m ON m.id = mp.module_id
 WHERE m.course_id = $1
 UNION ALL
-SELECT 'rule'::text AS kind, r.structure_item_id, r.structure_item_id
+SELECT 'rule'::text AS kind, r.item_id, r.item_id
 FROM course.item_completion_rules r
-INNER JOIN course.course_structure_items i ON i.id = r.structure_item_id
+INNER JOIN course.course_structure_items i ON i.id = r.item_id
 WHERE i.course_id = $1
 LIMIT 5000
 `, courseID)
