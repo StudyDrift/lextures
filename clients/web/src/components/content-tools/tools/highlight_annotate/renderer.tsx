@@ -9,11 +9,12 @@ import {
 } from '../../../../lib/text-anchoring'
 import { AnnotationsPanel } from './annotations-panel'
 import { PassagePanel } from './passage-panel'
+import { HowToCoach, TaskPanel } from './task-panel'
+import { TagMenu } from './tag-menu'
 import {
   asAnnotations,
   asTags,
   newAnnotationId,
-  underlineStyle,
   type Anchor,
   type Annotation,
   type FilterNoteResult,
@@ -31,6 +32,7 @@ export default function HighlightAnnotateRenderer({
   const promptId = useId()
   const menuId = useId()
   const passageRef = useRef<HTMLDivElement | null>(null)
+  const menuRef = useRef<HTMLDivElement | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuUnitIndex, setMenuUnitIndex] = useState<number | null>(null)
   const [pendingQuote, setPendingQuote] = useState<{ quote: string; anchor: Anchor } | null>(
@@ -41,6 +43,7 @@ export default function HighlightAnnotateRenderer({
   const [error, setError] = useState<string | null>(null)
   const [focusedUnit, setFocusedUnit] = useState(0)
   const [unitMode, setUnitMode] = useState(true)
+  const [applying, setApplying] = useState(false)
 
   const prompt = typeof config.prompt === 'string' ? config.prompt : ''
   const passageMd = typeof config.passageMarkdown === 'string' ? config.passageMarkdown : ''
@@ -83,6 +86,11 @@ export default function HighlightAnnotateRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only when orphan resolution drifts
   }, [annotations, rawAnnotations, readOnly])
 
+  useEffect(() => {
+    if (!menuOpen) return
+    menuRef.current?.querySelector<HTMLElement>('button[role="menuitem"]')?.focus()
+  }, [menuOpen])
+
   const countsByTag = useMemo(() => {
     const m = new Map<string, number>()
     for (const a of active) m.set(a.tagId, (m.get(a.tagId) ?? 0) + 1)
@@ -116,6 +124,14 @@ export default function HighlightAnnotateRenderer({
     setError(null)
   }
 
+  function closeMenu() {
+    setMenuOpen(false)
+    setPendingQuote(null)
+    setMenuUnitIndex(null)
+    setNoteDraft('')
+    setError(null)
+  }
+
   function onPointerUp() {
     if (readOnly || unitMode || !passageRef.current) return
     const sel = window.getSelection()
@@ -138,6 +154,7 @@ export default function HighlightAnnotateRenderer({
     setMenuOpen(true)
     setNoteDraft('')
     setError(null)
+    sel.removeAllRanges()
   }
 
   async function screenNote(note: string): Promise<boolean> {
@@ -156,36 +173,40 @@ export default function HighlightAnnotateRenderer({
   }
 
   async function applyTag(tagId: string) {
-    if (!pendingQuote || readOnly) return
+    if (!pendingQuote || readOnly || applying) return
     if (annotations.length >= maxAnnotations) {
       setError(t('contentTools.tools.highlight_annotate.maxReached'))
       return
     }
     if (requireNote && !noteDraft.trim()) {
       setError(t('contentTools.tools.highlight_annotate.noteRequired'))
+      menuRef.current?.querySelector<HTMLTextAreaElement>('[data-testid="ha-note-input"]')?.focus()
       return
     }
-    const note = noteDraft.trim()
-    if (!(await screenNote(note))) return
-    const ann: Annotation = {
-      id: newAnnotationId(),
-      tagId,
-      quote: pendingQuote.quote,
-      anchor: pendingQuote.anchor,
-      createdAt: new Date().toISOString(),
-      ...(note ? { note } : {}),
+    setApplying(true)
+    try {
+      const note = noteDraft.trim()
+      if (!(await screenNote(note))) return
+      const ann: Annotation = {
+        id: newAnnotationId(),
+        tagId,
+        quote: pendingQuote.quote,
+        anchor: pendingQuote.anchor,
+        createdAt: new Date().toISOString(),
+        ...(note ? { note } : {}),
+      }
+      persist([...active, ...orphaned.filter((o) => o.id !== ann.id), ann])
+      const tag = tags.find((tg) => tg.id === tagId)
+      announce(
+        t('contentTools.tools.highlight_annotate.createdAnnounce', {
+          tag: tag?.label ?? tagId,
+        }),
+      )
+      closeMenu()
+      setNoteForId(null)
+    } finally {
+      setApplying(false)
     }
-    persist([...active, ...orphaned.filter((o) => o.id !== ann.id), ann])
-    const tag = tags.find((tg) => tg.id === tagId)
-    announce(
-      t('contentTools.tools.highlight_annotate.createdAnnounce', {
-        tag: tag?.label ?? tagId,
-      }),
-    )
-    setMenuOpen(false)
-    setPendingQuote(null)
-    setNoteDraft('')
-    setNoteForId(null)
   }
 
   function removeAnnotation(id: string) {
@@ -223,141 +244,116 @@ export default function HighlightAnnotateRenderer({
       e.preventDefault()
       openMenuForUnit(index)
     }
+    if (e.key === 'Escape' && menuOpen) {
+      e.preventDefault()
+      closeMenu()
+    }
   }
 
   const progress = Math.min(active.length, minAnnotations)
+  const remaining = Math.max(0, minAnnotations - active.length)
+  const complete = active.length >= minAnnotations
+  const progressPct = Math.min(100, Math.round((progress / Math.max(1, minAnnotations)) * 100))
+  const showCoach = !readOnly && !complete && !menuOpen
+  const unitWord =
+    granularity === 'paragraph'
+      ? t('contentTools.tools.highlight_annotate.unitWord.paragraph')
+      : granularity === 'line'
+        ? t('contentTools.tools.highlight_annotate.unitWord.line')
+        : t('contentTools.tools.highlight_annotate.unitWord.sentence')
 
   return (
     <div
-      className="space-y-3"
+      className="space-y-4"
       data-content-tool="highlight_annotate"
       data-testid="highlight-annotate-tool"
     >
-      <div
-        className="rounded border border-slate-200 bg-slate-50 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900/60"
-        data-testid="ha-prompt"
-      >
-        <p id={promptId} className="text-sm font-medium text-slate-900 dark:text-neutral-100">
-          {prompt}
-        </p>
-        <ul
-          className="mt-2 flex flex-wrap gap-2"
-          aria-label={t('contentTools.tools.highlight_annotate.tagLegend')}
-        >
-          {tags.map((tag, i) => (
-            <li
-              key={tag.id}
-              className="inline-flex items-center gap-1.5 rounded border border-slate-200 px-2 py-0.5 text-xs dark:border-neutral-600"
-            >
-              <span
-                aria-hidden
-                className="inline-block h-2.5 w-2.5 rounded-sm"
-                style={{ backgroundColor: tag.color, ...underlineStyle(tag.color, i) }}
-              />
-              <span>{tag.label}</span>
-              <span className="text-slate-500">({countsByTag.get(tag.id) ?? 0})</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <TaskPanel
+        promptId={promptId}
+        prompt={prompt}
+        tags={tags}
+        countsByTag={countsByTag}
+        progress={progress}
+        minAnnotations={minAnnotations}
+        activeCount={active.length}
+        remaining={remaining}
+        complete={complete}
+        progressPct={progressPct}
+        t={t}
+      />
 
-      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-neutral-300">
-        <p data-testid="ha-progress">
-          {t('contentTools.tools.highlight_annotate.progress', {
-            done: progress,
-            required: minAnnotations,
-          })}
-        </p>
-        {!readOnly ? (
-          <label className="inline-flex items-center gap-1">
-            <input
-              type="checkbox"
-              checked={unitMode}
-              onChange={(e) => setUnitMode(e.target.checked)}
-              data-testid="ha-unit-mode"
-            />
-            {t('contentTools.tools.highlight_annotate.unitMode')}
-          </label>
-        ) : null}
-      </div>
+      {showCoach ? <HowToCoach unitWord={unitWord} requireNote={requireNote} t={t} /> : null}
 
       {error ? (
-        <p className="text-sm text-rose-600" role="alert">
+        <p
+          className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
 
-      {!readOnly && annotations.length === 0 ? (
-        <p className="text-xs text-slate-500" data-testid="ha-empty-hint">
-          {t('contentTools.tools.highlight_annotate.emptyHint')}
-        </p>
-      ) : null}
-
-      <PassagePanel
-        passageRef={passageRef}
-        promptId={promptId}
-        units={units}
-        tags={tags}
-        active={active}
-        focusedUnit={focusedUnit}
-        unitMode={unitMode}
-        readOnly={readOnly}
-        t={t}
-        onFocusUnit={setFocusedUnit}
-        onOpenUnit={openMenuForUnit}
-        onUnitKeyDown={onUnitKeyDown}
-        onPointerUp={onPointerUp}
-      />
-
-      {menuOpen && pendingQuote && !readOnly ? (
-        <div
-          role="menu"
-          id={menuId}
-          aria-label={t('contentTools.tools.highlight_annotate.tagMenu')}
-          className="rounded border border-slate-300 bg-white p-2 shadow-sm dark:border-neutral-600 dark:bg-neutral-950"
-          data-testid="ha-tag-menu"
-        >
-          <p className="mb-2 line-clamp-2 text-xs text-slate-600 dark:text-neutral-300">
-            “{pendingQuote.quote}”
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <button
-                key={tag.id}
-                type="button"
-                role="menuitem"
-                className="rounded border border-slate-200 px-2 py-1 text-xs dark:border-neutral-600"
-                style={{ borderColor: tag.color }}
-                data-testid={`ha-tag-${tag.id}`}
-                onClick={() => void applyTag(tag.id)}
-              >
-                {tag.label}
-              </button>
-            ))}
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+              {t('contentTools.tools.highlight_annotate.passageTitle')}
+            </h3>
+            {!readOnly ? (
+              <p className="text-xs text-slate-500 dark:text-neutral-400">
+                {unitMode
+                  ? t('contentTools.tools.highlight_annotate.passageHintTap', { unit: unitWord })
+                  : t('contentTools.tools.highlight_annotate.passageHintSelect')}
+              </p>
+            ) : null}
           </div>
-          {requireNote || noteDraft || menuUnitIndex != null ? (
-            <label className="mt-2 block space-y-1 text-xs">
-              <span>{t('contentTools.tools.highlight_annotate.noteLabel')}</span>
-              <textarea
-                className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
-                rows={2}
-                value={noteDraft}
-                data-testid="ha-note-input"
-                onChange={(e) => setNoteDraft(e.target.value)}
+          {!readOnly ? (
+            <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-slate-600 dark:text-neutral-300">
+              <input
+                type="checkbox"
+                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                checked={!unitMode}
+                onChange={(e) => setUnitMode(!e.target.checked)}
+                data-testid="ha-unit-mode"
               />
+              {t('contentTools.tools.highlight_annotate.selectWordsInstead')}
             </label>
           ) : null}
-          <button
-            type="button"
-            className="mt-2 text-xs text-slate-600 underline dark:text-neutral-300"
-            onClick={() => {
-              setMenuOpen(false)
-              setPendingQuote(null)
-            }}
-          >
-            {t('contentTools.tools.highlight_annotate.cancel')}
-          </button>
         </div>
+
+        <PassagePanel
+          passageRef={passageRef}
+          promptId={promptId}
+          units={units}
+          tags={tags}
+          active={active}
+          focusedUnit={focusedUnit}
+          menuUnitIndex={menuUnitIndex}
+          unitMode={unitMode}
+          readOnly={readOnly}
+          showStartCue={!readOnly && unitMode && active.length === 0 && !menuOpen}
+          t={t}
+          onFocusUnit={setFocusedUnit}
+          onOpenUnit={openMenuForUnit}
+          onUnitKeyDown={onUnitKeyDown}
+          onPointerUp={onPointerUp}
+        />
+      </div>
+
+      {menuOpen && pendingQuote && !readOnly ? (
+        <TagMenu
+          menuRef={menuRef}
+          menuId={menuId}
+          quote={pendingQuote.quote}
+          tags={tags}
+          noteDraft={noteDraft}
+          requireNote={requireNote}
+          applying={applying}
+          t={t}
+          onNoteDraftChange={setNoteDraft}
+          onApplyTag={(tagId) => void applyTag(tagId)}
+          onClose={closeMenu}
+        />
       ) : null}
 
       <AnnotationsPanel
