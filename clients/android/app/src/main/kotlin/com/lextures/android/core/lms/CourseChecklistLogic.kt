@@ -7,7 +7,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.nio.charset.StandardCharsets
 
 /** Pure course-checklist helpers (CC.9 FR-23). No networking / disk I/O. */
 object CourseChecklistLogic {
