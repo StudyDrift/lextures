@@ -1007,8 +1007,14 @@ func (d Deps) handleListGraderAgentRuns() http.HandlerFunc {
 			return
 		}
 		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
-		if err != nil || cfg == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent not found.")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grader agent.")
+			return
+		}
+		// No workflow saved yet — empty history (avoid 404 noise when opening the modal).
+		if cfg == nil {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(map[string]any{"runs": []any{}})
 			return
 		}
 		runs, err := gradingagentrepo.ListRunsByConfig(r.Context(), d.Pool, cfg.ID, 50)
@@ -1083,8 +1089,18 @@ func (d Deps) handleGetGraderAgentReviewQueue() http.HandlerFunc {
 			return
 		}
 		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
-		if err != nil || cfg == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent not found.")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grader agent.")
+			return
+		}
+		// No workflow saved yet — empty queues (avoid 404 noise when opening the modal).
+		if cfg == nil {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"held":       []any{},
+				"flagged":    []any{},
+				"totalCount": 0,
+			})
 			return
 		}
 		held, flagged, err := gradingagentrepo.ListReviewQueueByConfig(r.Context(), d.Pool, cfg.ID, 100)

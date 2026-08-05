@@ -748,6 +748,15 @@ GET	/api/v1/courses/{course_code}/discussion-threads/{thread_id}	session
 PATCH	/api/v1/courses/{course_code}/discussion-threads/{thread_id}	session
 GET	/api/v1/courses/{course_code}/discussion-threads/{thread_id}/posts	session
 POST	/api/v1/courses/{course_code}/discussion-threads/{thread_id}/posts	session
+GET	/api/v1/courses/{course_code}/enrollment-groups	session
+POST	/api/v1/courses/{course_code}/enrollment-groups/enable	session
+DELETE	/api/v1/courses/{course_code}/enrollment-groups/groups/{group_id}	session
+PATCH	/api/v1/courses/{course_code}/enrollment-groups/groups/{group_id}	session
+PUT	/api/v1/courses/{course_code}/enrollment-groups/memberships	session
+POST	/api/v1/courses/{course_code}/enrollment-groups/sets	session
+DELETE	/api/v1/courses/{course_code}/enrollment-groups/sets/{set_id}	session
+PATCH	/api/v1/courses/{course_code}/enrollment-groups/sets/{set_id}	session
+POST	/api/v1/courses/{course_code}/enrollment-groups/sets/{set_id}/groups	session
 GET	/api/v1/courses/{course_code}/enrollments	session
 POST	/api/v1/courses/{course_code}/enrollments	session
 POST	/api/v1/courses/{course_code}/enrollments/self-as-student	session

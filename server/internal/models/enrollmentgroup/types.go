@@ -22,6 +22,7 @@ type EnrollmentGroupSetPublic struct {
 }
 
 type EnrollmentGroupsTreeResponse struct {
+	Enabled   bool                       `json:"enabled"`
 	GroupSets []EnrollmentGroupSetPublic `json:"groupSets"`
 }
 

@@ -40,6 +40,7 @@ export const STRUCTURE_CHILD_KINDS = new Set<CourseStructureItem['kind']>([
   'vibe_activity',
   'library_resource',
   'textbook_resource',
+  'attendance',
 ])
 
 export function buildModuleChildrenMap(
