@@ -110,8 +110,8 @@ final class CourseChecklistLogicTests: XCTestCase {
         let cases = try XCTUnwrap(try fixtureRoot()["notes"] as? [[String: Any]])
         for item in cases {
             if let repeatCount = item["repeat"] as? Int {
-                let ch = item["input"] as? String ?? "x"
-                let input = String(repeating: ch, count: repeatCount)
+                let unit = item["input"] as? String ?? "x"
+                let input = String(repeating: unit, count: repeatCount)
                 let out = CourseChecklistLogic.clampedNote(input)
                 XCTAssertEqual(out.count, item["expectedLength"] as? Int)
             } else if item["input"] is NSNull || item["input"] == nil {
@@ -130,14 +130,14 @@ final class CourseChecklistLogicTests: XCTestCase {
         let expected = try XCTUnwrap(root["expected"] as? [[String: Any]])
         XCTAssertEqual(presented.count, expected.count)
         for (idx, item) in expected.enumerated() {
-            let p = presented[idx]
-            XCTAssertEqual(p.id, item["id"] as? String)
-            XCTAssertEqual(p.title, item["title"] as? String)
-            XCTAssertEqual(p.status, item["status"] as? String)
-            XCTAssertEqual(p.accessibilityValue, item["accessibilityValue"] as? String)
-            XCTAssertEqual(p.isDone, item["isDone"] as? Bool)
-            XCTAssertEqual(p.isOutstanding, item["isOutstanding"] as? Bool)
-            XCTAssertEqual(p.targetKind, item["targetKind"] as? String)
+            let presentedItem = presented[idx]
+            XCTAssertEqual(presentedItem.id, item["id"] as? String)
+            XCTAssertEqual(presentedItem.title, item["title"] as? String)
+            XCTAssertEqual(presentedItem.status, item["status"] as? String)
+            XCTAssertEqual(presentedItem.accessibilityValue, item["accessibilityValue"] as? String)
+            XCTAssertEqual(presentedItem.isDone, item["isDone"] as? Bool)
+            XCTAssertEqual(presentedItem.isOutstanding, item["isOutstanding"] as? Bool)
+            XCTAssertEqual(presentedItem.targetKind, item["targetKind"] as? String)
         }
     }
 

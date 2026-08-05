@@ -1,11 +1,9 @@
 package httpserver
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
@@ -152,7 +150,7 @@ func (d Deps) handleSuggestCourseOutcomeLinks() http.HandlerFunc {
 			})
 		}
 
-		courseTitle, courseLang := courseTitleAndLanguage(ctx, d, *cid)
+		courseTitle, courseLang := course.TitleAndLanguage(ctx, d.Pool, *cid)
 
 		orgID := d.orgIDPtrForUser(ctx, viewer)
 		if !d.aiConfigured(ctx, orgID) {
@@ -250,8 +248,8 @@ func (d Deps) handleDraftWelcomeAnnouncement() http.HandlerFunc {
 			return
 		}
 
-		title, desc, start, end, lang := courseWelcomeContext(ctx, d, *cid)
-		if strings.TrimSpace(title) == "" {
+		wc := course.GetWelcomeDraftContext(ctx, d.Pool, *cid)
+		if strings.TrimSpace(wc.Title) == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Course title is required before drafting a welcome.")
 			return
 		}
@@ -265,7 +263,7 @@ func (d Deps) handleDraftWelcomeAnnouncement() http.HandlerFunc {
 		if err != nil {
 			model = userai.DefaultCourseSetupModelID
 		}
-		meterMaterial := title + "\n" + desc
+		meterMaterial := wc.Title + "\n" + wc.Description
 		if !d.enforceAIGateway(w, r, viewer, aigateway.FeatureWelcomeDraft, model, meterMaterial) {
 			return
 		}
@@ -276,11 +274,11 @@ func (d Deps) handleDraftWelcomeAnnouncement() http.HandlerFunc {
 
 		bound := aiprovider.BoundCompleter{Resolver: d.aiProviderResolver(), OrgID: orgID}
 		draft, callMeta, err := welcomedraft.Generate(ctx, bound, model, welcomedraft.DefaultSystemPrompt, welcomedraft.Input{
-			CourseTitle:       title,
-			CourseDescription: desc,
-			StartDate:         start,
-			EndDate:           end,
-			Language:          lang,
+			CourseTitle:       wc.Title,
+			CourseDescription: wc.Description,
+			StartDate:         wc.StartDate,
+			EndDate:           wc.EndDate,
+			Language:          wc.Language,
 		})
 		if err != nil {
 			msg := err.Error()
@@ -306,47 +304,3 @@ func (d Deps) handleDraftWelcomeAnnouncement() http.HandlerFunc {
 	}
 }
 
-func courseTitleAndLanguage(ctx context.Context, d Deps, courseID uuid.UUID) (title, lang string) {
-	var t string
-	var l *string
-	err := d.Pool.QueryRow(ctx, `
-SELECT COALESCE(title, course_code), NULLIF(TRIM(catalog_language), '')
-FROM course.courses WHERE id = $1
-`, courseID).Scan(&t, &l)
-	if err != nil {
-		return "", ""
-	}
-	title = t
-	if l != nil {
-		lang = *l
-	}
-	return title, lang
-}
-
-func courseWelcomeContext(ctx context.Context, d Deps, courseID uuid.UUID) (title, desc, start, end, lang string) {
-	var t string
-	var description *string
-	var language *string
-	var startAt, endAt *time.Time
-	err := d.Pool.QueryRow(ctx, `
-SELECT COALESCE(title, course_code), description, starts_at, ends_at, NULLIF(TRIM(catalog_language), '')
-FROM course.courses WHERE id = $1
-`, courseID).Scan(&t, &description, &startAt, &endAt, &language)
-	if err != nil {
-		return "", "", "", "", ""
-	}
-	title = t
-	if description != nil {
-		desc = *description
-	}
-	if language != nil {
-		lang = *language
-	}
-	if startAt != nil {
-		start = startAt.UTC().Format("2006-01-02")
-	}
-	if endAt != nil {
-		end = endAt.UTC().Format("2006-01-02")
-	}
-	return title, desc, start, end, lang
-}

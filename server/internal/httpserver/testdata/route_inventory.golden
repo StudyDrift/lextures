@@ -785,6 +785,7 @@ DELETE	/api/v1/courses/{course_code}/feed/channels/{channel_id}	session
 PATCH	/api/v1/courses/{course_code}/feed/channels/{channel_id}	session
 GET	/api/v1/courses/{course_code}/feed/channels/{channel_id}/messages	session
 POST	/api/v1/courses/{course_code}/feed/channels/{channel_id}/messages	session
+POST	/api/v1/courses/{course_code}/feed/draft-welcome	session
 DELETE	/api/v1/courses/{course_code}/feed/messages/{message_id}	session
 PATCH	/api/v1/courses/{course_code}/feed/messages/{message_id}	session
 DELETE	/api/v1/courses/{course_code}/feed/messages/{message_id}/like	session
@@ -933,6 +934,7 @@ GET	/api/v1/courses/{course_code}/my-progress	session
 GET	/api/v1/courses/{course_code}/outcomes	session
 POST	/api/v1/courses/{course_code}/outcomes	session
 POST	/api/v1/courses/{course_code}/outcomes/extract-from-syllabus	session
+POST	/api/v1/courses/{course_code}/outcomes/suggest-links	session
 DELETE	/api/v1/courses/{course_code}/outcomes/{outcome_id}	session
 PATCH	/api/v1/courses/{course_code}/outcomes/{outcome_id}	session
 POST	/api/v1/courses/{course_code}/outcomes/{outcome_id}/links	session
