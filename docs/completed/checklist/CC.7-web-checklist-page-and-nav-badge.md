@@ -393,7 +393,8 @@ with AI-assisted fixes (e.g. "Suggest mappings", "Build a rubric"); CC.7 ships t
 - Precedent: the unread-badge pattern in `side-nav-main-links.tsx`; the grading-backlog card in
   `components/dashboard/grading-backlog-list.tsx`.
 - Related plans: [CC.2](CC.2-checklist-state-api-and-dismissals.md),
-  [CC.8](CC.8-deep-link-and-highlight-targeting.md), [CC.9](CC.9-mobile-checklist-ios-and-android.md),
-  [CC.10](CC.10-analytics-guidance-and-rollout.md); motion tokens from
-  [`docs/completed/animations/`](../../completed/animations/); frontend structure direction from
+  [CC.8](CC.8-deep-link-and-highlight-targeting.md),
+  [CC.9](CC.9-mobile-checklist-ios-and-android.md),
+  [CC.10](../../plan/checklist/CC.10-analytics-guidance-and-rollout.md); motion tokens from
+  [`docs/completed/animations/`](../animations/); frontend structure direction from
   [TD.12](../tech_debt/TD.12-split-courses-api-module.md).

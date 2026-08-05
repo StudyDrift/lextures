@@ -34,6 +34,10 @@ const (
 	FeatureContentPageGeneration      = "content_page_generation"
 	FeatureOutcomesExtraction         = "outcomes_extraction"
 	FeatureQuizOutcomeMapping         = "quiz_outcome_mapping"
+	// FeatureAssessmentOutcomeMapping is course-level assessment→outcome proposals (CC.10 FR-6).
+	FeatureAssessmentOutcomeMapping = "assessment_outcome_mapping"
+	// FeatureWelcomeDraft is a draft welcome announcement body only (CC.10 FR-8).
+	FeatureWelcomeDraft = "welcome_draft"
 	FeatureBadgesExtraction           = "badges_extraction"
 	FeatureTranslation                = "translation"
 	FeatureQuizGeneration             = "quiz_generation"

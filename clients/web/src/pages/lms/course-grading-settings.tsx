@@ -433,7 +433,10 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
   return (
     <div className="space-y-8">
       <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-none">
+        <section
+          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-none"
+          data-focus-anchor="course.grading.scheme"
+        >
           <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Grading scale</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
             Choose how final grades are labeled for this course. This applies when displaying scores
@@ -483,7 +486,10 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-none">
+        <section
+          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-none"
+          data-focus-anchor="course.grading.posting-policy"
+        >
           <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Grade display scheme</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
             Controls how gradebook and My Grades show scores (letters, pass/fail, etc.). Stored scores stay as
@@ -559,7 +565,10 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-none">
+        <section
+          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-none"
+          data-focus-anchor="course.grading.sbg"
+        >
           <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Standards-based grading (K–12)</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
             When enabled, you can import course standards, align rubric criteria and quiz questions, and use the
@@ -614,7 +623,10 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-none">
+        <section
+          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-none"
+          data-focus-anchor="course.grading.groups"
+        >
           <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Assignment groups & weights</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
             Define categories (for example homework, exams, participation) and what percent of the

@@ -127,6 +127,11 @@ func TestCourseTitleDescriptionAndTimezone(t *testing.T) {
 	if f.Status != StatusDone {
 		t.Fatalf("tz=%s", f.Status)
 	}
+	local := "LOCAL"
+	f, _ = findRule(t, ItemCourseTimezone).Evaluate(context.Background(), CourseSnapshot{CourseTimezone: &local})
+	if f.Status != StatusDone {
+		t.Fatalf("local tz=%s", f.Status)
+	}
 }
 
 func TestCourseRelativeScheduleMissingDue(t *testing.T) {

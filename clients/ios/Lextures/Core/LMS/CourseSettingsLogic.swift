@@ -250,12 +250,27 @@ enum CourseSettingsLogic {
         return trimmed
     }
 
+    /// Sentinel: floating wall-clock due times in each learner's zone.
+    static let learnerLocalTimezone = "LOCAL"
+
     static func timezoneOptions() -> [String] {
-        TimeZone.knownTimeZoneIdentifiers.sorted()
+        let pinned = [learnerLocalTimezone, "UTC", defaultTimezone()]
+        let rest = TimeZone.knownTimeZoneIdentifiers.sorted().filter { !pinned.contains($0) }
+        // De-dupe while preserving order (UTC / device zone may already be in known list).
+        var seen = Set<String>()
+        return (pinned + rest).filter { seen.insert($0).inserted }
     }
 
     static func defaultTimezone() -> String {
         TimeZone.current.identifier
+    }
+
+    static func displayTimezoneLabel(_ id: String) -> String {
+        if id == learnerLocalTimezone {
+            return "Learner local time (11:59 PM each learner’s zone)"
+        }
+        if id == "UTC" { return "UTC (global clock)" }
+        return id
     }
 
     static func isGeneralFormDirty(form: CourseGeneralFormState, course: CourseSummary) -> Bool {
@@ -274,8 +289,7 @@ enum CourseSettingsLogic {
             return true
         }
         if (form.courseTimezone.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty)
-            != (course.courseTimezone?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
-                ?? defaultTimezone().nilIfEmpty) {
+            != (course.courseTimezone?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty) {
             return true
         }
         return false
@@ -328,8 +342,7 @@ enum CourseSettingsLogic {
             description: course.description,
             published: course.published ?? false,
             gradeLevel: course.gradeLevel ?? "",
-            courseTimezone: course.courseTimezone?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
-                ?? defaultTimezone(),
+            courseTimezone: course.courseTimezone?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
             courseHomeLanding: normalizeCourseHomeLanding(course.courseHomeLanding),
             courseHomeContentItemId: (course.courseHomeContentItemId ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
             scheduleMode: course.scheduleMode == ScheduleMode.relative.rawValue ? .relative : .fixed,
@@ -369,7 +382,8 @@ enum CourseSettingsLogic {
             courseHomeContentItemId: form.courseHomeLanding == .contentPage
                 ? form.courseHomeContentItemId.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
                 : nil,
-            courseTimezone: form.courseTimezone.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+            // Empty string clears on the API (nil would omit the field).
+            courseTimezone: form.courseTimezone.trimmingCharacters(in: .whitespacesAndNewlines),
             gradeLevel: form.gradeLevel.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
             termId: nil
         )
@@ -415,7 +429,7 @@ struct CourseGeneralFormState: Equatable {
     var description: String = ""
     var published: Bool = false
     var gradeLevel: String = ""
-    var courseTimezone: String = CourseSettingsLogic.defaultTimezone()
+    var courseTimezone: String = ""
     var courseHomeLanding: CourseSettingsLogic.CourseHomeLanding = .data
     var courseHomeContentItemId: String = ""
     var scheduleMode: CourseSettingsLogic.ScheduleMode = .fixed

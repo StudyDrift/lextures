@@ -954,7 +954,7 @@ export default function CourseEnrollments() {
     <LmsPage
       title="Enrollments"
       titleContent={
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1" data-focus-anchor="enrollments.list">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
               Enrollments
@@ -1018,6 +1018,10 @@ export default function CourseEnrollments() {
         </div>
       }
     >
+      <div data-focus-anchor="enrollments.invitations" className="sr-only" tabIndex={-1}>
+        Pending invitations
+      </div>
+
       {selfStudentMessage && (
         <p className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
           {selfStudentMessage}

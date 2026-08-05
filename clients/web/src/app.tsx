@@ -74,6 +74,13 @@ export default function App() {
             }
           >
             <Route path="/" element={<Pages.Dashboard />} />
+            <Route path="/help/course-checklist/research" element={<Pages.CourseDesignResearchPage />} />
+            <Route path="/help/course-checklist" element={<Pages.CourseChecklistHelpPage />} />
+            {/* Old plan-path URL; keep a redirect so bookmarked chips still work. */}
+            <Route
+              path="/docs/plan/checklist/course-design-research"
+              element={<Navigate to="/help/course-checklist/research" replace />}
+            />
             <Route path="/privacy-centre" element={<Pages.PrivacyCentrePage />} />
             <Route path="/me/study-insights" element={<Pages.StudyInsightsPage />} />
             <Route path="/me/profile" element={<Pages.MyProfilePage />} />

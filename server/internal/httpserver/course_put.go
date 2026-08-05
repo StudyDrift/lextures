@@ -215,14 +215,20 @@ func (d Deps) handlePutCourse() http.HandlerFunc {
 		if body.CourseTimezone != nil {
 			courseTZ = validation.NormalizeTimezone(body.CourseTimezone)
 			if courseTZ != nil {
-				valid, err := validation.ValidIANATimezone(r.Context(), d.Pool, *courseTZ)
-				if err != nil {
-					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to validate course timezone.")
-					return
-				}
-				if !valid {
-					apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeUnprocessableEntity, "Invalid IANA timezone identifier.")
-					return
+				// LOCAL = floating wall-clock due times in each learner's zone (not IANA).
+				if strings.EqualFold(*courseTZ, "LOCAL") {
+					local := "LOCAL"
+					courseTZ = &local
+				} else {
+					valid, err := validation.ValidIANATimezone(r.Context(), d.Pool, *courseTZ)
+					if err != nil {
+						apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to validate course timezone.")
+						return
+					}
+					if !valid {
+						apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeUnprocessableEntity, "Invalid IANA timezone identifier.")
+						return
+					}
 				}
 			}
 		}

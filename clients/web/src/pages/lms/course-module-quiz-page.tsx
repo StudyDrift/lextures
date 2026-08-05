@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatDateTime } from '../../lib/format'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import { Check, CheckCircle, ChevronDown, Download, Eye, FileText, Library, Loader2, BarChart3, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
 import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useOnlineStatus } from '../../hooks/use-online-status'
@@ -39,6 +39,7 @@ import {
   suggestQuizOutcomeLinks,
   type ContentPageMarkup,
   type CourseOutcome,
+  type CoursePublic,
   type CourseStructureItem,
   type BankQuestionRow,
   type DraftContentPageSection,
@@ -383,6 +384,8 @@ export default function CourseModuleQuizPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
+  const outlet = useOutletContext<{ course?: CoursePublic | null } | null>()
+  const courseTimezone = outlet?.course?.courseTimezone ?? null
   const canEdit = Boolean(courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)))
   const canEditQuizItems = Boolean(
     courseCode && itemId && !permLoading && allows(permCourseItemsCreate(courseCode)),
@@ -819,9 +822,9 @@ export default function CourseModuleQuizPage() {
     setAssignmentGroupPatchError(null)
     setDraft(markdownToSectionsForEditor(markdown, newLocalId))
     setDraftTitle(title)
-    setDraftDueLocal(isoToDatetimeLocalValue(dueAt))
-    setDraftAvailableFromLocal(isoToDatetimeLocalValue(availableFromAt))
-    setDraftAvailableUntilLocal(isoToDatetimeLocalValue(availableUntilAt))
+    setDraftDueLocal(isoToDatetimeLocalValue(dueAt, courseTimezone))
+    setDraftAvailableFromLocal(isoToDatetimeLocalValue(availableFromAt, courseTimezone))
+    setDraftAvailableUntilLocal(isoToDatetimeLocalValue(availableUntilAt, courseTimezone))
     setDraftUnlimitedAttempts(unlimitedAttempts)
     setDraftOneQuestionAtATime(oneQuestionAtATime)
     setDraftLockdownMode(lockdownMode)
@@ -840,9 +843,9 @@ export default function CourseModuleQuizPage() {
     setEditingContent(false)
     setDraft([])
     setDraftTitle(title)
-    setDraftDueLocal(isoToDatetimeLocalValue(dueAt))
-    setDraftAvailableFromLocal(isoToDatetimeLocalValue(availableFromAt))
-    setDraftAvailableUntilLocal(isoToDatetimeLocalValue(availableUntilAt))
+    setDraftDueLocal(isoToDatetimeLocalValue(dueAt, courseTimezone))
+    setDraftAvailableFromLocal(isoToDatetimeLocalValue(availableFromAt, courseTimezone))
+    setDraftAvailableUntilLocal(isoToDatetimeLocalValue(availableUntilAt, courseTimezone))
     setDraftUnlimitedAttempts(unlimitedAttempts)
     setDraftOneQuestionAtATime(oneQuestionAtATime)
     setDraftLockdownMode(lockdownMode)
@@ -905,9 +908,9 @@ export default function CourseModuleQuizPage() {
       const data = await patchModuleQuiz(courseCode, itemId, {
         title: trimmedTitle,
         markdown: body,
-        dueAt: datetimeLocalValueToIso(draftDueLocal),
-        availableFrom: datetimeLocalValueToIso(draftAvailableFromLocal),
-        availableUntil: datetimeLocalValueToIso(draftAvailableUntilLocal),
+        dueAt: datetimeLocalValueToIso(draftDueLocal, courseTimezone),
+        availableFrom: datetimeLocalValueToIso(draftAvailableFromLocal, courseTimezone),
+        availableUntil: datetimeLocalValueToIso(draftAvailableUntilLocal, courseTimezone),
         unlimitedAttempts: draftUnlimitedAttempts,
         oneQuestionAtATime: draftOneQuestionAtATime,
         maxAttempts: draftQuizAdvanced.maxAttempts,
@@ -1511,7 +1514,7 @@ export default function CourseModuleQuizPage() {
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Due date</dt>
                       <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
-                        {formatQuizDateTime(dueAt)}
+                        {formatQuizDateTime(dueAt, courseTimezone)}
                       </dd>
                     </div>
                   ) : null}
@@ -1519,7 +1522,7 @@ export default function CourseModuleQuizPage() {
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility start</dt>
                       <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
-                        {formatQuizDateTime(availableFromAt)}
+                        {formatQuizDateTime(availableFromAt, courseTimezone)}
                       </dd>
                     </div>
                   ) : null}
@@ -1527,7 +1530,7 @@ export default function CourseModuleQuizPage() {
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility end</dt>
                       <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
-                        {formatQuizDateTime(availableUntilAt)}
+                        {formatQuizDateTime(availableUntilAt, courseTimezone)}
                       </dd>
                     </div>
                   ) : null}

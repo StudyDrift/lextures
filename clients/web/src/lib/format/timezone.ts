@@ -21,7 +21,14 @@ export function isValidTimezoneId(id: string): boolean {
   }
 }
 
-/** User profile → course fallback → UTC. */
+/** Sentinel: floating wall-clock due times in each learner's zone. */
+export const COURSE_TIMEZONE_LOCAL = 'LOCAL'
+
+export function isLearnerLocalTimezone(tz?: string | null): boolean {
+  return (tz?.trim() || '').toUpperCase() === COURSE_TIMEZONE_LOCAL
+}
+
+/** User profile → course fallback → UTC. LOCAL is not a display zone. */
 export function resolveDisplayTimezone(
   userTimezone?: string | null,
   courseTimezone?: string | null,
@@ -29,7 +36,7 @@ export function resolveDisplayTimezone(
   const u = userTimezone?.trim()
   if (u && isValidTimezoneId(u)) return u
   const c = courseTimezone?.trim()
-  if (c && isValidTimezoneId(c)) return c
+  if (c && !isLearnerLocalTimezone(c) && isValidTimezoneId(c)) return c
   return 'UTC'
 }
 
@@ -104,6 +111,34 @@ export type DeadlineDisplay = {
   iso: string
 }
 
+/**
+ * Formats a floating (learner-local) wall clock stored as UTC components.
+ * Everyone sees the same clock numbers with a "local" label.
+ */
+function formatFloatingWallClock(
+  d: Date,
+  locale: string,
+  opts?: Pick<FormatDeadlineOptions, 'dateStyle' | 'timeStyle'>,
+): { primary: string; abbrev: string; ariaLabel: string } {
+  // Reconstruct wall-clock components as a "local" Date so Intl without timeZone
+  // prints the same Y-M-D H:M the instructor authored for LOCAL mode.
+  const wall = new Date(
+    d.getUTCFullYear(),
+    d.getUTCMonth(),
+    d.getUTCDate(),
+    d.getUTCHours(),
+    d.getUTCMinutes(),
+    d.getUTCSeconds(),
+  )
+  const primary = new Intl.DateTimeFormat(locale, {
+    dateStyle: opts?.dateStyle ?? 'long',
+    timeStyle: opts?.timeStyle ?? 'short',
+  }).format(wall)
+  const abbrev = 'local'
+  const ariaLabel = `${primary} local time (each learner’s time zone)`
+  return { primary, abbrev, ariaLabel }
+}
+
 /** Formats a UTC instant for the viewer with optional instructor-timezone tooltip text. */
 export function formatDeadlineDisplay(
   iso: string | Date,
@@ -111,6 +146,19 @@ export function formatDeadlineDisplay(
 ): DeadlineDisplay {
   const d = typeof iso === 'string' ? new Date(iso) : iso
   const locale = opts.locale ?? navigator.language
+  const isoOut = Number.isNaN(d.getTime()) ? '' : d.toISOString()
+
+  if (isLearnerLocalTimezone(opts.instructorTimeZone)) {
+    const floating = formatFloatingWallClock(d, locale, opts)
+    return {
+      primary: floating.primary,
+      abbrev: floating.abbrev,
+      ariaLabel: floating.ariaLabel,
+      instructorHint: 'Due at this clock time in each learner’s time zone',
+      iso: isoOut,
+    }
+  }
+
   const displayTz = isValidTimezoneId(opts.displayTimeZone) ? opts.displayTimeZone : 'UTC'
   const primary = formatDateTimeInZone(d, displayTz, locale, opts)
   const abbrev = timezoneAbbreviation(d, displayTz, locale)
@@ -125,7 +173,6 @@ export function formatDeadlineDisplay(
     instructorHint = `${instPrimary} ${instAbbrev} (instructor timezone)`
   }
 
-  const isoOut = d.toISOString()
   return { primary, abbrev, ariaLabel, instructorHint, iso: isoOut }
 }
 

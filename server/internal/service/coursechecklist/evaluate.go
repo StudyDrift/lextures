@@ -63,6 +63,10 @@ func Evaluate(ctx context.Context, snap CourseSnapshot, opt EvaluateOptions) Res
 
 	elapsed := time.Since(start).Seconds()
 	observeEvaluateDuration(mode, elapsed)
+	// FR-14: aggregate per-item status counts (no course ID on the hot path).
+	if mode == "full" {
+		observeItemStatusCounts(findings)
+	}
 	slog.Debug("coursechecklist evaluated",
 		"course_id", snap.CourseID.String(),
 		"catalog_version", res.CatalogVersion,
@@ -100,6 +104,7 @@ func evaluateOne(ctx context.Context, snap CourseSnapshot, it ItemDescriptor) It
 		Sources:       append([]string(nil), it.Sources...),
 		Target:        it.Target,
 		EvidenceShape: it.EvidenceShape,
+		Action:        it.Action,
 	}
 
 	applies := true

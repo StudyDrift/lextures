@@ -26,6 +26,8 @@ describe('isStandalonePublicRoute', () => {
   it('returns false for authenticated app routes', () => {
     expect(isStandalonePublicRoute('/')).toBe(false)
     expect(isStandalonePublicRoute('/courses')).toBe(false)
+    expect(isStandalonePublicRoute('/help/course-checklist')).toBe(false)
+    expect(isStandalonePublicRoute('/docs/plan/checklist/course-design-research')).toBe(false)
     expect(isStandalonePublicRoute('/privacy-centre')).toBe(false)
     expect(isStandalonePublicRoute('/privacy')).toBe(false)
     expect(isStandalonePublicRoute('/terms')).toBe(false)

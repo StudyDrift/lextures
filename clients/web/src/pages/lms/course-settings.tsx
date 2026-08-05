@@ -8,8 +8,10 @@ import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { UnsavedChangesBanner } from '../../components/ui/unsaved-changes-banner'
-import { TimezoneSelector } from '../../components/timezone/timezone-selector'
-import { detectBrowserTimezone } from '../../lib/format'
+import {
+  COURSE_TIMEZONE_LOCAL,
+  TimezoneSelector,
+} from '../../components/timezone/timezone-selector'
 import {
   courseAdaptiveContentReviewPermission,
   courseItemCreatePermission,
@@ -118,7 +120,8 @@ type SavePayload = {
   relativeHiddenAfter: string | null
   courseHomeLanding: CourseHomeLanding
   courseHomeContentItemId: string | null
-  courseTimezone: string | null
+  /** Empty string clears; null is not used on save (server treats null as omit). */
+  courseTimezone: string
   gradeLevels: string[]
 }
 
@@ -216,7 +219,7 @@ export default function CourseSettings() {
 
   const [courseHomeLanding, setCourseHomeLanding] = useState<CourseHomeLanding>('data')
   const [courseHomeContentItemId, setCourseHomeContentItemId] = useState('')
-  const [courseTimezone, setCourseTimezone] = useState(() => detectBrowserTimezone())
+  const [courseTimezone, setCourseTimezone] = useState<string | null>(null)
   const [gradeLevels, setGradeLevels] = useState<string[]>([])
   const [structureForHomePicker, setStructureForHomePicker] = useState<CourseStructureItem[]>([])
 
@@ -276,7 +279,7 @@ export default function CourseSettings() {
       applyScheduleStateFromCourse(c)
       setCourseHomeLanding(normalizeCourseHomeLanding(c.courseHomeLanding))
       setCourseHomeContentItemId((c.courseHomeContentItemId ?? '').trim())
-      setCourseTimezone(c.courseTimezone?.trim() || detectBrowserTimezone())
+      setCourseTimezone(c.courseTimezone?.trim() || null)
       setGradeLevels(gradeLevelsFromCourse(c))
       setMarkdownThemePreset(c.markdownThemePreset ?? 'default')
       try {
@@ -420,7 +423,8 @@ export default function CourseSettings() {
         courseHomeLanding === 'content_page' && courseHomeContentItemId.trim()
           ? courseHomeContentItemId.trim()
           : null,
-      courseTimezone: courseTimezone.trim() || null,
+      // Empty string clears the course timezone on the server (null omits the update).
+      courseTimezone: courseTimezone?.trim() ? courseTimezone.trim() : '',
       gradeLevels,
     }
   }
@@ -452,7 +456,7 @@ export default function CourseSettings() {
       !gradeLevelsEqual(gradeLevels, gradeLevelsFromCourse(course)) ||
       courseHomeLanding !== normalizeCourseHomeLanding(course.courseHomeLanding) ||
       (courseHomeLanding === 'content_page' && courseHomeContentItemId.trim() !== (course.courseHomeContentItemId ?? '').trim()) ||
-      (courseTimezone.trim() || null) !== (course.courseTimezone?.trim() || null) ||
+      (courseTimezone?.trim() || null) !== (course.courseTimezone?.trim() || null) ||
       (course.scheduleMode || 'fixed') !== scheduleMode ||
       (scheduleMode === 'fixed' && (
         datetimeLocalToIso(startsAt) !== normalizeIso(course.startsAt) ||
@@ -933,10 +937,13 @@ export default function CourseSettings() {
               }}
               className="space-y-6 pb-24"
             >
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
+              <section
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                data-focus-anchor="course.general.language"
+              >
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Basic information</h2>
                 <div className="mt-4 space-y-4">
-                  <label className="block">
+                  <label className="block" data-focus-anchor="course.general.title">
                     <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">Title</span>
                     <input
                       type="text"
@@ -946,7 +953,7 @@ export default function CourseSettings() {
                       className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-50"
                     />
                   </label>
-                  <label className="block">
+                  <label className="block" data-focus-anchor="course.general.description">
                     <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
                       Description
                     </span>
@@ -973,23 +980,46 @@ export default function CourseSettings() {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
+              <section
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                data-focus-anchor="course.general.timezone"
+              >
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Course time zone</h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-                  Deadlines you set are interpreted in this time zone. Learners see due dates in their own time zone
-                  with this zone shown as the instructor reference.
+                  Choose how due dates work for this course. With a named zone (or UTC), a deadline is one shared
+                  moment worldwide and learners see it converted to their own zone. Choose{' '}
+                  <span className="font-medium text-slate-700 dark:text-neutral-200">Learner local time</span> if
+                  you want “11:59 PM” to mean 11:59 PM in each learner’s time zone.
                 </p>
                 <div className="mt-4 max-w-md">
                   <TimezoneSelector
                     value={courseTimezone}
                     onChange={setCourseTimezone}
-                    label="Instructor time zone"
+                    label="Course time zone"
                     showDetectedHint={false}
+                    courseMode
+                    allowClear
+                    data-testid="course-timezone-selector"
                   />
                 </div>
+                {courseTimezone === COURSE_TIMEZONE_LOCAL && (
+                  <p className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+                    Learner local time: when you set a due date of 11:59 PM, each learner has until 11:59 PM in their
+                    own zone (not a single global instant).
+                  </p>
+                )}
+                {courseTimezone === 'UTC' && (
+                  <p className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+                    UTC is one global clock. 11:59 PM UTC falls at different local times for learners (for example
+                    afternoon in the US, late evening in Europe).
+                  </p>
+                )}
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
+              <section
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                data-focus-anchor="course.general.published"
+              >
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Publishing</h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
                   Published courses appear in the catalog. Drafts are only reachable by direct link.
@@ -1021,7 +1051,10 @@ export default function CourseSettings() {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
+              <section
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                data-focus-anchor="course.general.home-landing"
+              >
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Course home</h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
                   What learners and staff see first when they open this course (the course dashboard).
@@ -1155,24 +1188,28 @@ export default function CourseSettings() {
                       Clear a field to remove that date. Times use your local timezone.
                     </p>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                      <DateField
-                        label="Start"
-                        value={startsAt}
-                        onChange={setStartsAt}
-                        onClear={() => setStartsAt('')}
-                      />
+                      <div data-focus-anchor="course.general.dates">
+                        <DateField
+                          label="Start"
+                          value={startsAt}
+                          onChange={setStartsAt}
+                          onClear={() => setStartsAt('')}
+                        />
+                      </div>
                       <DateField
                         label="End"
                         value={endsAt}
                         onChange={setEndsAt}
                         onClear={() => setEndsAt('')}
                       />
-                      <DateField
-                        label="Visible from"
-                        value={visibleFrom}
-                        onChange={setVisibleFrom}
-                        onClear={() => setVisibleFrom('')}
-                      />
+                      <div data-focus-anchor="course.general.visibility">
+                        <DateField
+                          label="Visible from"
+                          value={visibleFrom}
+                          onChange={setVisibleFrom}
+                          onClear={() => setVisibleFrom('')}
+                        />
+                      </div>
                       <DateField
                         label="Hidden after"
                         value={hiddenAt}
@@ -1210,7 +1247,10 @@ export default function CourseSettings() {
                 )}
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
+              <section
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                data-focus-anchor="course.general.hero-image"
+              >
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Hero image</h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
                   Generate a cover image with AI or upload your own (PNG, JPEG, GIF, or WebP up to 10MB).
@@ -1486,7 +1526,7 @@ export default function CourseSettings() {
             )
           ) : null}
           {section === 'translations' && isTranslationMemoryEnabled() && courseCode ? (
-            <CourseTranslationsSettings />
+            <div data-focus-anchor="course.general.language"><CourseTranslationsSettings /></div>
           ) : null}
           {section === 'sections' &&
             (course.sectionsEnabled ? (

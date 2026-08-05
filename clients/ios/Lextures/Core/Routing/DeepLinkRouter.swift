@@ -40,6 +40,7 @@ enum ParentDeepLinkSection: Equatable {
 
 enum CourseDeepLinkSection: String, Equatable {
     case overview
+    case checklist
     case modules
     case grades
     case officeHours
@@ -267,6 +268,8 @@ enum DeepLinkRouter {
 
     private static func simpleCourseSection(for key: String) -> CourseDeepLinkSection {
         switch key {
+        case "checklist":
+            return .checklist
         case "grades":
             return .grades
         case "office-hours":

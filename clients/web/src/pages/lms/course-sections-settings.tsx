@@ -169,7 +169,7 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
   }
 
   return (
-    <div className="space-y-8">
+    <div data-focus-anchor="course.sections.list" className="space-y-8">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
         <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Sections</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">

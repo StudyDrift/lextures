@@ -121,7 +121,7 @@ func evalOutcomesMeasurable(_ context.Context, snap CourseSnapshot) (Finding, er
 			TargetOverride: &NavTarget{
 				Surface: "web",
 				Route:   "/courses/{courseCode}/settings/outcomes",
-				Anchor:  "outcome:" + o.ID.String(),
+				Anchor:  "course.outcomes.item", EntityKey: o.ID.String(),
 			},
 		})
 	}
@@ -180,7 +180,7 @@ func evalOutcomesDescribed(_ context.Context, snap CourseSnapshot) (Finding, err
 			TargetOverride: &NavTarget{
 				Surface: "web",
 				Route:   "/courses/{courseCode}/settings/outcomes",
-				Anchor:  "outcome:" + o.ID.String(),
+				Anchor:  "course.outcomes.item", EntityKey: o.ID.String(),
 			},
 		})
 	}
@@ -250,7 +250,7 @@ func evalOutcomesModuleAlignment(_ context.Context, snap CourseSnapshot) (Findin
 				TargetOverride: &NavTarget{
 					Surface: "web",
 					Route:   "/courses/{courseCode}/modules",
-					Anchor:  "module:" + m.ID.String(),
+					Anchor:  "modules.module", EntityKey: m.ID.String(),
 				},
 			})
 		}

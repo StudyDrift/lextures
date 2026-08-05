@@ -229,6 +229,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
 /// Course-scoped workspace chips (registry-driven; not hardcoded to four).
 enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
     case overview
+    case checklist
     case modules
     case grades
     case mastery
@@ -254,6 +255,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
     var label: String {
         switch self {
         case .overview: return L.text("mobile.ia.course.overview")
+        case .checklist: return L.text("mobile.ia.course.checklist")
         case .modules: return L.text("mobile.ia.course.modules")
         case .grades: return L.text("mobile.ia.course.grades")
         case .mastery: return L.text("mobile.ia.course.mastery")
@@ -282,6 +284,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
     var deepLinkSegment: String? {
         switch self {
         case .overview: return "overview"
+        case .checklist: return "checklist"
         case .modules: return "modules"
         case .grades: return "grades"
         case .mastery: return "mastery"
@@ -309,6 +312,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
     static func from(deepLink section: CourseDeepLinkSection) -> CourseWorkspaceSection? {
         switch section {
         case .overview: return .overview
+        case .checklist: return .checklist
         case .modules: return .modules
         case .grades: return .grades
         case .feed: return .feed
@@ -578,6 +582,8 @@ struct CourseWorkspaceContext: Equatable {
     var hasLibraryResources = false
     var evaluationStatus: EvaluationStatus?
     var platformFeatures = MobilePlatformFeatures()
+    /// Active app role context (Learning vs Teaching). Checklist is teaching-only (CC.9 FR-4).
+    var roleContext: MobileRoleContext = .learning
 }
 
 /// Registry: role-aware shell tabs, More hub, and course workspace chips.
@@ -645,7 +651,7 @@ enum MobileDestinations {
     /// Only sections already available for the viewer (from `courseWorkspaceSections`)
     /// appear, so per-role gating is inherited unchanged.
     static func courseDrawerGroups(_ sections: [CourseWorkspaceSection]) -> [CourseDrawerGroup] {
-        let content: [CourseWorkspaceSection] = [.overview, .modules, .files, .library]
+        let content: [CourseWorkspaceSection] = [.overview, .checklist, .modules, .files, .library]
         let collaboration: [CourseWorkspaceSection] = [
             .discussions, .feed, .groups, .collabDocs, .boards, .liveQuizzes, .live, .officeHours,
         ]
@@ -769,7 +775,14 @@ enum MobileDestinations {
 
     static func courseWorkspaceSections(_ ctx: CourseWorkspaceContext) -> [CourseWorkspaceSection] {
         let course = ctx.course
-        var out: [CourseWorkspaceSection] = [.overview, .modules]
+        var out: [CourseWorkspaceSection] = [.overview]
+        if CourseChecklistLogic.shouldShowWorkspaceSection(
+            viewerIsStaff: course.viewerIsStaff,
+            roleContext: ctx.roleContext
+        ) {
+            out.append(.checklist)
+        }
+        out.append(.modules)
 
         if course.isFilesEnabled { out.append(.files) }
         if course.viewerIsStudent { out.append(.grades) }

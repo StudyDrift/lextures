@@ -186,8 +186,10 @@ fun DrawerRow(
     onClick: () -> Unit,
     badge: Int = 0,
     uiMode: UIMode = UIMode.Standard,
+    contentDescription: String? = null,
 ) {
     val dark = isDarkTheme()
+    val a11y = contentDescription ?: label
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -195,7 +197,7 @@ fun DrawerRow(
             .clip(RoundedCornerShape(12.dp))
             .background(if (selected) LexturesColors.BrandTeal.copy(alpha = if (dark) 0.22f else 0.16f) else Color.Transparent)
             .clickable(onClick = onClick)
-            .semantics { contentDescription = label }
+            .semantics { this.contentDescription = a11y }
             .padding(horizontal = 12.dp, vertical = uiMode.drawerRowVerticalPadding)
             .heightIn(min = uiMode.minimumTapTarget),
         verticalAlignment = Alignment.CenterVertically,

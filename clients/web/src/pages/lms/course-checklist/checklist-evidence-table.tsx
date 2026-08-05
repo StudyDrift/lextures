@@ -5,6 +5,7 @@ import type {
   ChecklistNavTarget,
 } from '../../../lib/course-checklist-api-schemas'
 import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
+import { hrefForTarget } from '../../../lib/use-focus-anchor'
 
 const VIRTUALIZE_THRESHOLD = 100
 const ROW_HEIGHT = 44
@@ -13,19 +14,32 @@ const VIEWPORT_ROWS = 12
 type ChecklistEvidenceTableProps = {
   evidence: ChecklistEvidence
   fallbackTarget?: ChecklistNavTarget | null
+  courseCode?: string
   onRowNavigate?: (route: string) => void
 }
 
-function resolveRoute(
+function resolveHref(
   rowTarget: ChecklistNavTarget | null | undefined,
   fallback: ChecklistNavTarget | null | undefined,
+  courseCode?: string,
 ): string | null {
-  return rowTarget?.route || fallback?.route || null
+  const t = rowTarget ?? fallback
+  if (!t?.route) return null
+  const href = hrefForTarget(
+    {
+      route: t.route,
+      anchor: t.anchor,
+      entityKey: t.entityKey,
+    },
+    courseCode ? { courseCode } : undefined,
+  )
+  return href || null
 }
 
 export function ChecklistEvidenceTable({
   evidence,
   fallbackTarget,
+  courseCode,
   onRowNavigate,
 }: ChecklistEvidenceTableProps) {
   const rows = evidence.rows
@@ -75,7 +89,7 @@ export function ChecklistEvidenceTable({
       <tbody>
         {virtualize ? <tr style={{ height: windowed.offsetY }} aria-hidden><td colSpan={evidence.columns.length} /></tr> : null}
         {visibleRows.map((row, idx) => {
-          const route = resolveRoute(row.target, fallbackTarget)
+          const route = resolveHref(row.target, fallbackTarget, courseCode)
           const cells = [row.label, row.sublabel ?? '', row.status, '']
           const key = `${row.label}-${windowed.start + idx}`
           return (

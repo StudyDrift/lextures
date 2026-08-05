@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Folder
@@ -47,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -75,6 +78,7 @@ import com.lextures.android.core.lms.GradeFeedbackRoute
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.core.lms.ModuleItemDetail
+import com.lextures.android.core.lms.RubricDefinition
 import com.lextures.android.core.lms.SubmissionGrade
 import com.lextures.android.core.lms.SubmitAssignmentTextRequest
 import com.lextures.android.core.offline.OfflineService
@@ -139,6 +143,8 @@ fun AssignmentDetailScreen(
     var peerReviewEnabled by remember { mutableStateOf(false) }
     var openPreview by remember { mutableStateOf<FilePreviewTarget?>(null) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
+    var showRubric by remember { mutableStateOf(false) }
+    val rubric: RubricDefinition? = detail?.rubric?.takeIf { it.criteria.isNotEmpty() }
 
     BackHandler(onBack = onBack)
     ImmersiveReaderPreferencesSheet(readerState, accessToken)
@@ -527,7 +533,7 @@ fun AssignmentDetailScreen(
             }
 
             val rows = detailRows(item, detail)
-            if (rows.isNotEmpty()) {
+            if (rows.isNotEmpty() || rubric != null) {
                 item {
                     LmsCard {
                         Text(L.text(R.string.mobile_assignment_details), style = LexturesType.display(18))
@@ -535,11 +541,61 @@ fun AssignmentDetailScreen(
                         rows.forEach { (label, value) ->
                             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
                                 Text(label, fontSize = 14.sp, color = textSecondary(), modifier = Modifier.weight(1f))
-                                Text(value, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textPrimary(), textAlign = TextAlign.End)
+                                Text(
+                                    value,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = textPrimary(),
+                                    textAlign = TextAlign.End,
+                                )
+                            }
+                        }
+                        rubric?.let { r ->
+                            val criteriaLabel = if (r.criteria.size == 1) {
+                                L.format(R.string.mobile_assignment_rubricCriterionCount, r.criteria.size)
+                            } else {
+                                L.format(R.string.mobile_assignment_rubricCriteriaCount, r.criteria.size)
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(
+                                        role = Role.Button,
+                                        onClickLabel = L.text(R.string.mobile_assignment_viewRubricHint),
+                                    ) { showRubric = true }
+                                    .padding(vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    L.text(R.string.mobile_assignment_rubricTitle),
+                                    fontSize = 14.sp,
+                                    color = textSecondary(),
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Text(
+                                    criteriaLabel,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = LexturesColors.Primary,
+                                )
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = null,
+                                    tint = LexturesColors.Primary,
+                                )
                             }
                         }
                     }
                 }
+            }
+        }
+
+        if (showRubric) {
+            rubric?.let {
+                AssignmentRubricViewerSheet(
+                    rubric = it,
+                    onDismiss = { showRubric = false },
+                )
             }
         }
     }

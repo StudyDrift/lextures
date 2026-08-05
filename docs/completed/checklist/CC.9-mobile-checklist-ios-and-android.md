@@ -11,7 +11,7 @@
 | **Section** | Course Checklist |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Mobile team (iOS + Android) |
 | **Depends on** | CC.2 (API), CC.7 (IA + copy), CC.8 (target table) |
@@ -382,4 +382,4 @@ renders nothing there in this plan.
   and the motion tokens in [`docs/completed/animations/`](../../completed/animations/).
 - Related plans: [CC.2](CC.2-checklist-state-api-and-dismissals.md),
   [CC.7](CC.7-web-checklist-page-and-nav-badge.md), [CC.8](CC.8-deep-link-and-highlight-targeting.md),
-  [CC.10](CC.10-analytics-guidance-and-rollout.md).
+  [CC.10](../plan/checklist/CC.10-analytics-guidance-and-rollout.md).

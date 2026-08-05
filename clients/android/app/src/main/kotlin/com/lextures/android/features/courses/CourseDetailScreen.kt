@@ -91,10 +91,16 @@ import com.lextures.android.features.groups.CourseGroupsSection
 import com.lextures.android.features.evaluations.CourseEvaluationsSection
 import com.lextures.android.core.lms.EvaluationLogic
 import com.lextures.android.core.lms.EvaluationStatus
+import com.lextures.android.core.lms.ChecklistApi
+import com.lextures.android.core.lms.CourseChecklistLogic
+import com.lextures.android.core.lms.CourseChecklistSummaryStore
 import com.lextures.android.core.navigation.CourseWorkspaceContext
 import com.lextures.android.core.navigation.CourseWorkspaceSection
 import com.lextures.android.core.navigation.MobileDestinations
 import com.lextures.android.core.navigation.MobilePlatformFeatures
+import com.lextures.android.core.navigation.MobileRoleContext
+import com.lextures.android.core.network.ApiError
+import com.lextures.android.features.checklist.CourseChecklistSection
 import com.lextures.android.features.live.CourseLiveSection
 import com.lextures.android.features.home.HomeShellState
 import androidx.compose.material3.AlertDialog
@@ -309,6 +315,20 @@ fun CourseDetailScreen(
             val cached = result.second
             cacheLabel = if (cached != null && cached.isStale(isOnline)) cached.lastUpdatedLabel() else null
             refreshProgress(accessToken, course, offline) { progress = it }
+            // CC.9 FR-8: badge summary (in-memory only).
+            val roleCtx = shell?.activeRoleContext ?: MobileRoleContext.Learning
+            if (CourseChecklistLogic.shouldShowWorkspaceSection(course.viewerIsStaff, roleCtx) &&
+                CourseChecklistSummaryStore.cached(course.courseCode) == null
+            ) {
+                try {
+                    val summary = ChecklistApi.fetchChecklistSummary(course.courseCode, token)
+                    CourseChecklistSummaryStore.put(course.courseCode, summary)
+                } catch (e: ApiError.HttpStatus) {
+                    if (e.code == 403) CourseChecklistSummaryStore.markForbidden(course.courseCode)
+                } catch (_: Exception) {
+                    // Badge is non-blocking.
+                }
+            }
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
         } finally {
@@ -323,6 +343,7 @@ fun CourseDetailScreen(
         hasLibraryResources = LibraryResourceLogic.hasLibraryResources(items),
         evaluationStatus = evaluationStatus,
         platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
+        roleContext = shell?.activeRoleContext ?: MobileRoleContext.Learning,
     )
     val allSections = MobileDestinations.courseWorkspaceSections(workspaceContext)
     val selectedSection = shell?.activeCourseSection
@@ -450,6 +471,19 @@ fun CourseDetailScreen(
                 when (selectedSection) {
                     CourseWorkspaceSection.Overview -> item {
                         CourseSyllabusSection(session = session, course = course)
+                    }
+                    CourseWorkspaceSection.Checklist -> item {
+                        CourseChecklistSection(
+                            session = session,
+                            course = course,
+                            shell = shell,
+                            isOnline = isOnline,
+                            initialFocus = if (initialSection == CourseWorkspaceSection.Checklist) {
+                                deepLinkThreadId
+                            } else {
+                                null
+                            },
+                        )
                     }
                     CourseWorkspaceSection.Grades -> item {
                         CourseGradesSection(

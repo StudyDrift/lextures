@@ -1,0 +1,211 @@
+{
+  "comment": "CC.8 native target table \u2014 anchor ID \u2192 iOS / Android destination (or web-only). Consumed by CC.9.",
+  "version": 1,
+  "targets": [
+    {
+      "id": "course.general.title",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.general.description",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.general.dates",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.general.timezone",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.general.published",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.general.visibility",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.general.home-landing",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.general.hero-image",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.general.language",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.features.grid",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "course.grading.scheme",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.grading.groups",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.grading.posting-policy",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.grading.sbg",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.outcomes.list",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.outcomes.item",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.sections.list",
+      "ios": "CourseSettings",
+      "android": "CourseSettings"
+    },
+    {
+      "id": "course.accessibility.settings",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "course.import-export.export",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "syllabus.editor",
+      "ios": "Syllabus",
+      "android": "Syllabus"
+    },
+    {
+      "id": "syllabus.section",
+      "ios": "Syllabus",
+      "android": "Syllabus"
+    },
+    {
+      "id": "modules.list",
+      "ios": "Modules",
+      "android": "Modules"
+    },
+    {
+      "id": "modules.module",
+      "ios": "Modules",
+      "android": "Modules"
+    },
+    {
+      "id": "modules.item",
+      "ios": "Modules",
+      "android": "Modules"
+    },
+    {
+      "id": "feed.channel.announcements",
+      "ios": "CourseFeed",
+      "android": "CourseFeed"
+    },
+    {
+      "id": "enrollments.list",
+      "ios": "Enrollments",
+      "android": "Enrollments"
+    },
+    {
+      "id": "enrollments.invitations",
+      "ios": "Enrollments",
+      "android": "Enrollments"
+    },
+    {
+      "id": "discussions.list",
+      "ios": "Discussions",
+      "android": "Discussions"
+    },
+    {
+      "id": "office.hours.slots",
+      "ios": "OfficeHours",
+      "android": "OfficeHours"
+    },
+    {
+      "id": "groups.sets",
+      "ios": "Groups",
+      "android": "Groups"
+    },
+    {
+      "id": "standards.coverage.grid",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "files.item",
+      "ios": "Files",
+      "android": "Files"
+    },
+    {
+      "id": "content.image-alt",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "assignment.scheduling",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "assignment.grading",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "assignment.rubric",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "assignment.outcomes-mapping",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "quiz.scheduling",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "quiz.attempts-grading",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "quiz.scores-review",
+      "ios": "web-only",
+      "android": "web-only"
+    },
+    {
+      "id": "quiz.outcomes",
+      "ios": "web-only",
+      "android": "web-only"
+    }
+  ]
+}

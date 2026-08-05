@@ -32,6 +32,7 @@ import { BookOpen, Eye, EyeOff, Plus } from 'lucide-react'
 import { KeyboardSensor as SharedKeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyboardSensorConfig'
 import { useCanvasImport } from '../../context/canvas-import-context'
 import { CourseCatalogImportFromCourseModal } from './course-catalog-import-from-course-modal'
+import { CourseCatalogImportFromJsonModal } from './course-catalog-import-from-json-modal'
 import { CourseCatalogImportMenu } from './course-catalog-import-menu'
 import {
   CourseCatalogViewMenu,
@@ -1089,6 +1090,7 @@ export default function Courses() {
   const bumpCoursesRevision = useBumpCoursesRevision()
   const { open: openCanvasImport } = useCanvasImport()
   const [importFromCourseOpen, setImportFromCourseOpen] = useState(false)
+  const [importFromJsonOpen, setImportFromJsonOpen] = useState(false)
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [termFilter, setTermFilter] = useState<string>('')
@@ -1471,6 +1473,7 @@ export default function Courses() {
             <CourseCatalogImportMenu
               onImportCanvas={openCanvasImport}
               onImportFromCourse={() => setImportFromCourseOpen(true)}
+              onImportFromJson={() => setImportFromJsonOpen(true)}
             />
           ) : null}
           <CourseCatalogViewMenu value={catalogView} onChange={handleCatalogViewChange} />
@@ -1711,6 +1714,13 @@ export default function Courses() {
         open={importFromCourseOpen}
         courses={courses ?? []}
         onClose={() => setImportFromCourseOpen(false)}
+        onImported={() => {
+          bumpCoursesRevision()
+        }}
+      />
+      <CourseCatalogImportFromJsonModal
+        open={importFromJsonOpen}
+        onClose={() => setImportFromJsonOpen(false)}
         onImported={() => {
           bumpCoursesRevision()
         }}

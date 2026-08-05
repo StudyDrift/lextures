@@ -88,6 +88,11 @@ func ApplyImport(
 		return err
 	}
 
+	// Cross-course import (catalog "import from JSON", Canvas into a new course, etc.):
+	// entity ids are global PKs — remap so we do not collide with or steal the source course.
+	// Same-course restore keeps ids so content URLs and lex-tool fences stay stable.
+	remapBundleIDsForCrossCourseImport(ex, targetCourseCode)
+
 	// Rewrite embedded file URLs when importing into a different course code.
 	rewriteCourseFileURLsInBundle(ex, ex.CourseCode, targetCourseCode)
 

@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react'
 import { RefreshCw } from 'lucide-react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ChecklistProgressBar } from '../../../components/checklist/checklist-progress'
+import type { ChecklistItem } from '../../../lib/course-checklist-api-schemas'
+import { isDoneStatus } from '../../../lib/course-checklist-api-schemas'
 import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
+import { draftWelcomeAnnouncement } from '../../../lib/course-checklist-api'
+import { emitChecklistTelemetry } from '../../../lib/checklist-telemetry'
 import { formatTimeAgoFromIso } from '../../../lib/format-time-ago'
+import { hrefForTarget } from '../../../lib/use-focus-anchor'
 import { LmsPage } from '../lms-page'
 import { ChecklistCategorySection } from './checklist-category-section'
 import { ChecklistDismissDialog } from './checklist-dismiss-dialog'
 import { ChecklistDismissedSection } from './checklist-dismissed-section'
+import { ChecklistMappingAssistDialog } from './checklist-mapping-assist-dialog'
 import { useChecklistPage } from './use-checklist-page'
 
 function ChecklistSkeleton() {
@@ -28,27 +34,115 @@ export default function CourseChecklistPage() {
   const { courseCode: raw } = useParams<{ courseCode: string }>()
   const courseCode = raw ? decodeURIComponent(raw) : undefined
   const location = useLocation()
+  const navigate = useNavigate()
   const [highlightItemId, setHighlightItemId] = useState<string | null>(null)
+  const [assistError, setAssistError] = useState<string | null>(null)
   const page = useChecklistPage(courseCode)
+
+  const handleAssist = async (item: ChecklistItem) => {
+    if (!courseCode || !item.action) return
+    setAssistError(null)
+    const kind = item.action.kind
+    emitChecklistTelemetry('checklist_assist_started', { itemId: item.id, actionKind: kind })
+
+    const manualHref = hrefForTarget(
+      {
+        route: item.target?.route,
+        anchor: item.target?.anchor,
+        entityKey: item.target?.entityKey,
+      },
+      { courseCode },
+    )
+
+    try {
+      switch (kind) {
+        case 'suggest_outcome_mappings':
+          page.setMappingAssistItem(item)
+          return
+        case 'build_rubric_ai': {
+          // Route to first high-stakes evidence row or the item target (existing generate-rubric flow).
+          const row = item.evidence?.rows?.[0]
+          const href =
+            hrefForTarget(
+              {
+                route: row?.target?.route ?? item.target?.route,
+                anchor: row?.target?.anchor ?? item.target?.anchor ?? 'assignment.rubric',
+                entityKey: row?.target?.entityKey ?? item.target?.entityKey,
+              },
+              { courseCode },
+            ) ?? manualHref
+          if (href) navigate(href)
+          else setAssistError(courseChecklistI18n.assistFailed)
+          return
+        }
+        case 'draft_welcome': {
+          const draft = await draftWelcomeAnnouncement(courseCode)
+          const q = new URLSearchParams({
+            draftSubject: draft.subject,
+            draftBody: draft.body,
+            channel: 'announcements',
+          })
+          navigate(`/courses/${encodeURIComponent(courseCode)}/feed?${q.toString()}`)
+          return
+        }
+        case 'suggest_alt_text': {
+          const href =
+            hrefForTarget(
+              {
+                route: item.target?.route,
+                anchor: item.target?.anchor,
+                entityKey: item.target?.entityKey,
+              },
+              { courseCode },
+            ) ?? manualHref
+          if (href) navigate(href)
+          else setAssistError(courseChecklistI18n.assistFailed)
+          return
+        }
+        default:
+          // Unknown action kind: render nothing / degrade to manual (FR-12).
+          if (manualHref) navigate(manualHref)
+          return
+      }
+    } catch (e) {
+      setAssistError(e instanceof Error ? e.message : courseChecklistI18n.assistFailed)
+      if (manualHref) {
+        // degrade to manual path
+      }
+    }
+  }
 
   useEffect(() => {
     const hash = location.hash.replace(/^#/, '')
     if (!hash.startsWith('item-') || !page.data) return
     const itemId = hash.slice('item-'.length)
     for (const cat of page.data.categories) {
-      if (cat.items.some((i) => i.id === itemId)) {
+      const match = cat.items.find((i) => i.id === itemId)
+      if (match) {
+        // Done items are hidden by default; reveal them so the deep link can land.
+        if (isDoneStatus(match.status) && !page.showCompleted) {
+          page.setShowCompleted(true)
+        }
         page.ensureCategoryExpanded(cat.id)
         setHighlightItemId(itemId)
         break
       }
     }
-    const t = window.setTimeout(() => {
-      document.getElementById(`item-${itemId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }, 50)
-    return () => window.clearTimeout(t)
     // intentionally only when data/hash change
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ensureCategoryExpanded identity changes often
   }, [location.hash, page.data])
+
+  // Scroll after layout so revealing completed items has time to mount the target.
+  useEffect(() => {
+    if (!highlightItemId) return
+    const t = window.setTimeout(() => {
+      document.getElementById(`item-${highlightItemId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }, 50)
+    return () => window.clearTimeout(t)
+  }, [highlightItemId, page.showCompleted, page.data])
 
   if (page.loadState === 'forbidden') {
     return (
@@ -119,30 +213,57 @@ export default function CourseChecklistPage() {
               <p className="mt-1 text-sm text-emerald-800 dark:text-emerald-200">
                 {courseChecklistI18n.allDoneBody}
               </p>
+              {summary.done > 0 ? (
+                <button
+                  type="button"
+                  className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-emerald-900 underline-offset-2 hover:underline dark:text-emerald-200"
+                  onClick={() => page.setShowCompleted((v) => !v)}
+                >
+                  {page.showCompleted
+                    ? courseChecklistI18n.hideCompleted
+                    : courseChecklistI18n.showCompleted}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* When work remains, still offer a way to review crossed-off items. */}
+          {!page.allDone && summary.done > 0 ? (
+            <div className="mb-4 flex justify-end">
               <button
                 type="button"
-                className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-emerald-900 underline-offset-2 hover:underline dark:text-emerald-200"
-                onClick={() => page.setShowCompletedWhenAllDone((v) => !v)}
+                className="inline-flex min-h-11 items-center text-sm font-semibold text-slate-700 underline-offset-2 hover:underline dark:text-neutral-300"
+                onClick={() => page.setShowCompleted((v) => !v)}
+                aria-pressed={page.showCompleted}
               >
-                {page.showCompletedWhenAllDone
+                {page.showCompleted
                   ? courseChecklistI18n.hideCompleted
                   : courseChecklistI18n.showCompleted}
               </button>
             </div>
           ) : null}
 
-          {(!page.allDone || page.showCompletedWhenAllDone) &&
+          {assistError ? (
+            <p className="mb-4 text-sm text-red-600 dark:text-red-400" role="alert">
+              {assistError}
+            </p>
+          ) : null}
+
+          {(!page.allDone || page.showCompleted) &&
             page.data.categories.map((cat) => (
               <ChecklistCategorySection
                 key={cat.id}
                 category={cat}
                 expanded={!page.collapsed[cat.id]}
                 onToggle={() => page.toggleCategory(cat.id)}
+                showCompleted={page.showCompleted}
                 itemErrors={page.itemErrors}
                 busyItemId={page.busyItemId}
                 highlightItemId={highlightItemId}
                 onDismiss={(item) => page.setDismissTarget(item)}
                 onRecheck={(item) => void page.onRecheck(item)}
+                onAssist={(item) => void handleAssist(item)}
+                hideAiActions={page.hideAiActions}
               />
             ))}
 
@@ -165,6 +286,28 @@ export default function CourseChecklistPage() {
         onClose={() => page.setDismissTarget(null)}
         onConfirm={(body) => void page.onDismissConfirm(body)}
       />
+
+      {courseCode && page.mappingAssistItem ? (
+        <ChecklistMappingAssistDialog
+          courseCode={courseCode}
+          itemId={page.mappingAssistItem.id}
+          open={!!page.mappingAssistItem}
+          onClose={() => page.setMappingAssistItem(null)}
+          onApplied={() => {
+            void page.onRefresh()
+          }}
+          manualHref={
+            hrefForTarget(
+              {
+                route: page.mappingAssistItem.target?.route,
+                anchor: page.mappingAssistItem.target?.anchor,
+                entityKey: page.mappingAssistItem.target?.entityKey,
+              },
+              { courseCode },
+            ) ?? null
+          }
+        />
+      ) : null}
     </LmsPage>
   )
 }

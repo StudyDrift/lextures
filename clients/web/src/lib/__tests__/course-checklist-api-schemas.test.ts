@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   checklistResponseSchema,
   checklistSummarySchema,
+  isDoneStatus,
   isOutstandingStatus,
   normalizeChecklistStatus,
+  visibleChecklistItems,
 } from '../course-checklist-api-schemas'
 
 describe('course-checklist-api-schemas', () => {
@@ -17,6 +19,23 @@ describe('course-checklist-api-schemas', () => {
     expect(isOutstandingStatus('in_progress')).toBe(true)
     expect(isOutstandingStatus('unknown')).toBe(true)
     expect(isOutstandingStatus('done')).toBe(false)
+  })
+
+  it('detects done status', () => {
+    expect(isDoneStatus('done')).toBe(true)
+    expect(isDoneStatus('todo')).toBe(false)
+    expect(isDoneStatus('not_applicable')).toBe(false)
+  })
+
+  it('filters visible items when completed are hidden', () => {
+    const items = [
+      { id: 'a', status: 'done' },
+      { id: 'b', status: 'todo' },
+      { id: 'c', status: 'in_progress' },
+      { id: 'd', status: 'not_applicable' },
+    ]
+    expect(visibleChecklistItems(items, false).map((i) => i.id)).toEqual(['b', 'c', 'd'])
+    expect(visibleChecklistItems(items, true).map((i) => i.id)).toEqual(['a', 'b', 'c', 'd'])
   })
 
   it('parses a summary payload', () => {

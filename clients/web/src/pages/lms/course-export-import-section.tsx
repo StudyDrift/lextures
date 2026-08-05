@@ -182,7 +182,10 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900/40">
+      <section
+        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900/40"
+        data-focus-anchor="course.import-export.export"
+      >
         <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Export</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
           Download the full course bundle as one JSON file: syllabus, modules, pages,

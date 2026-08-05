@@ -55,6 +55,10 @@ func validIANATimezone(tz *string) (string, bool) {
 	if tz == nil {
 		return "", false
 	}
+	// Course-level sentinel: floating wall-clock times in each learner's zone.
+	if strings.EqualFold(strings.TrimSpace(*tz), "LOCAL") {
+		return "LOCAL", true
+	}
 	norm, err := l10n.NormalizeTimezone(*tz)
 	if err != nil {
 		return "", false

@@ -35,12 +35,41 @@ var (
 		Help:      "Course checklist snapshot load duration.",
 		Buckets:   []float64{0.01, 0.05, 0.1, 0.25, 0.4, 0.5, 0.9, 1, 2.5, 5},
 	})
+
+	// CC.10 FR-14: per-item status counts aggregated across evaluations (no course label).
+	// Accommodations rules are excluded (FR-16 / AC-8).
+	itemStatusTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "lextures",
+		Name:      "coursechecklist_item_status_total",
+		Help:      "Checklist item evaluation status counts by item_id and status (aggregated; no course id).",
+	}, []string{"item_id", "status"})
 )
+
+// accommodationItemIDs must never appear on analytics counters that could carry counts (FR-16).
+var accommodationItemIDs = map[ItemID]struct{}{
+	ItemAccommodationsHonored:  {},
+	ItemAccommodationsReviewed: {},
+}
 
 func registerMetrics() {
 	metricsOnce.Do(func() {
-		prometheus.MustRegister(evaluateDuration, ruleDuration, ruleErrors, snapshotQueryDuration)
+		prometheus.MustRegister(evaluateDuration, ruleDuration, ruleErrors, snapshotQueryDuration, itemStatusTotal)
 	})
+}
+
+// observeItemStatusCounts increments aggregated pass/todo metrics (CC.10 FR-14).
+func observeItemStatusCounts(findings []ItemResult) {
+	registerMetrics()
+	for _, fr := range findings {
+		if _, skip := accommodationItemIDs[fr.ID]; skip {
+			continue
+		}
+		status := string(fr.Finding.Status)
+		if status == "" {
+			status = "unknown"
+		}
+		itemStatusTotal.WithLabelValues(string(fr.ID), status).Inc()
+	}
 }
 
 func observeEvaluateDuration(mode string, seconds float64) {

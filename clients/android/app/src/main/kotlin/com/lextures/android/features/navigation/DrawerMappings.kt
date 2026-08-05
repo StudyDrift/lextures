@@ -65,6 +65,7 @@ fun rootDestinationIcon(dest: RootDestination): ImageVector = when (dest) {
 
 fun courseSectionIcon(section: CourseWorkspaceSection): ImageVector = when (section) {
     CourseWorkspaceSection.Overview -> Icons.Filled.Description
+    CourseWorkspaceSection.Checklist -> Icons.Filled.Checklist
     CourseWorkspaceSection.Modules -> Icons.Filled.ViewModule
     CourseWorkspaceSection.Files -> Icons.Filled.Folder
     CourseWorkspaceSection.Library -> Icons.AutoMirrored.Filled.MenuBook
@@ -91,6 +92,7 @@ fun courseSectionIcon(section: CourseWorkspaceSection): ImageVector = when (sect
 /** R.string id for a course section label (reuses the existing `mobile_ia_course_*` keys). */
 fun courseSectionLabelRes(section: CourseWorkspaceSection): Int = when (section) {
     CourseWorkspaceSection.Overview -> R.string.mobile_ia_course_overview
+    CourseWorkspaceSection.Checklist -> R.string.mobile_ia_course_checklist
     CourseWorkspaceSection.Modules -> R.string.mobile_ia_course_modules
     CourseWorkspaceSection.Grades -> R.string.mobile_ia_course_grades
     CourseWorkspaceSection.Mastery -> R.string.mobile_ia_course_mastery

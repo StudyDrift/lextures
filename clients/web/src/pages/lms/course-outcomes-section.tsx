@@ -396,7 +396,7 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
             </div>
           )}
 
-          <div className="space-y-6">
+          <div className="space-y-6" data-focus-anchor="course.outcomes.list">
             {outcomes.map((o) => (
               <OutcomeCard
                 key={o.id}
@@ -692,7 +692,11 @@ function OutcomeCard({
   const rollup = outcome.rollupAvgScorePercent
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+    <section
+      className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950"
+      data-focus-anchor="course.outcomes.item"
+      data-focus-entity={outcome.id}
+    >
       <div className="border-b border-slate-100 bg-slate-50/60 px-5 py-4 dark:border-neutral-800 dark:bg-neutral-900/40">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-start gap-2.5">

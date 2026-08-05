@@ -133,9 +133,22 @@ object CourseSettingsLogic {
         Description: $description
         """.trimIndent()
 
+    /** Sentinel: floating wall-clock due times in each learner's zone. */
+    const val LEARNER_LOCAL_TIMEZONE = "LOCAL"
+
     fun defaultTimezone(): String = TimeZone.getDefault().id
 
-    fun timezoneOptions(): List<String> = TimeZone.getAvailableIDs().sorted()
+    fun timezoneOptions(): List<String> {
+        val pinned = listOf(LEARNER_LOCAL_TIMEZONE, "UTC", defaultTimezone())
+        val rest = TimeZone.getAvailableIDs().sorted().filterNot { it in pinned }
+        return (pinned + rest).distinct()
+    }
+
+    fun displayTimezoneLabel(id: String): String = when (id) {
+        LEARNER_LOCAL_TIMEZONE -> "Learner local time (11:59 PM each learner’s zone)"
+        "UTC" -> "UTC (global clock)"
+        else -> id
+    }
 
     fun contentPages(items: List<CourseStructureItem>): List<CourseStructureItem> =
         items.filter { it.kind == "content_page" }
@@ -150,7 +163,7 @@ object CourseSettingsLogic {
             description = course.description,
             published = course.published == true,
             gradeLevel = course.gradeLevel.orEmpty(),
-            courseTimezone = course.courseTimezone?.trim()?.takeIf { it.isNotEmpty() } ?: defaultTimezone(),
+            courseTimezone = course.courseTimezone?.trim().orEmpty(),
             courseHomeLanding = normalizeCourseHomeLanding(course.courseHomeLanding),
             courseHomeContentItemId = course.courseHomeContentItemId.orEmpty().trim(),
             scheduleMode = if (course.scheduleMode == ScheduleMode.relative.name) ScheduleMode.relative else ScheduleMode.fixed,
@@ -184,7 +197,8 @@ object CourseSettingsLogic {
             courseHomeContentItemId = if (form.courseHomeLanding == CourseHomeLanding.content_page) {
                 form.courseHomeContentItemId.trim().ifEmpty { null }
             } else null,
-            courseTimezone = form.courseTimezone.trim().ifEmpty { null },
+            // Empty string clears on the API (null would omit the field).
+            courseTimezone = form.courseTimezone.trim().ifEmpty { "" },
             gradeLevel = form.gradeLevel.trim().ifEmpty { null },
         )
     }
@@ -226,7 +240,7 @@ data class CourseGeneralFormState(
     val description: String = "",
     val published: Boolean = false,
     val gradeLevel: String = "",
-    val courseTimezone: String = CourseSettingsLogic.defaultTimezone(),
+    val courseTimezone: String = "",
     val courseHomeLanding: CourseSettingsLogic.CourseHomeLanding = CourseSettingsLogic.CourseHomeLanding.data,
     val courseHomeContentItemId: String = "",
     val scheduleMode: CourseSettingsLogic.ScheduleMode = CourseSettingsLogic.ScheduleMode.fixed,

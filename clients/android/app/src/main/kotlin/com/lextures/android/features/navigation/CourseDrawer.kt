@@ -27,6 +27,9 @@ import com.lextures.android.R
 import com.lextures.android.core.design.sceneBackground
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.i18n.L
+import com.lextures.android.core.lms.CourseChecklistLogic
+import com.lextures.android.core.lms.CourseChecklistSummaryStore
+import com.lextures.android.core.navigation.CourseWorkspaceSection
 import com.lextures.android.core.navigation.MobileDestinations
 import com.lextures.android.features.home.HomeShellState
 
@@ -89,14 +92,29 @@ fun CourseDrawer(shell: HomeShellState, modifier: Modifier = Modifier) {
             groups.forEach { group ->
                 DrawerGroupHeader(drawerString(group.titleRes))
                 group.sections.forEach { section ->
+                    val badge = if (section == CourseWorkspaceSection.Checklist) {
+                        shell.activeCourse?.courseCode?.let {
+                            CourseChecklistSummaryStore.outstandingEssential(it)
+                        } ?: 0
+                    } else {
+                        0
+                    }
+                    val baseLabel = L.text(courseSectionLabelRes(section))
+                    val a11y = if (badge > 0) {
+                        "$baseLabel, ${CourseChecklistLogic.badgePresentation(badge).accessibilityLabel}"
+                    } else {
+                        baseLabel
+                    }
                     DrawerRow(
-                        label = L.text(courseSectionLabelRes(section)),
+                        label = baseLabel,
                         icon = courseSectionIcon(section),
                         selected = shell.activeCourseSection == section,
+                        badge = badge,
                         onClick = {
                             shell.activeCourseSection = section
                             shell.closeDrawer()
                         },
+                        contentDescription = a11y,
                     )
                 }
             }

@@ -33,6 +33,7 @@ struct AssignmentDetailView: View {
     @State private var previewTarget: FilePreviewTarget?
     @State private var showCamera = false
     @State private var showFileImporter = false
+    @State private var showRubric = false
     @State private var photoPickerItem: PhotosPickerItem?
 
     private var status: AssignmentSubmissionStatus {
@@ -101,6 +102,11 @@ struct AssignmentDetailView: View {
         .sheet(isPresented: $showCamera) {
             CameraCaptureView { image in
                 attachImage(image)
+            }
+        }
+        .sheet(isPresented: $showRubric) {
+            if let rubric = detail?.rubric, !rubric.criteria.isEmpty {
+                AssignmentRubricViewerView(rubric: rubric)
             }
         }
         .fileImporter(
@@ -485,8 +491,11 @@ struct AssignmentDetailView: View {
 
     private var detailsCard: some View {
         let rows = ItemDetailRows.rows(for: item, detail: detail, pointsValue: detail?.pointsWorth ?? item.pointsWorth.map { Int($0) })
+        let rubric = detail?.rubric
+        let hasRubric = rubric.map { !$0.criteria.isEmpty } ?? false
+        let typeKeys = AssignmentLogic.submissionTypeLabelKeys(detail: detail)
         return Group {
-            if !rows.isEmpty {
+            if !rows.isEmpty || hasRubric || !typeKeys.isEmpty {
                 LMSCard {
                     Text(L.text("mobile.assignment.details"))
                         .font(LexturesTheme.displayFont(18))
@@ -503,7 +512,6 @@ struct AssignmentDetailView: View {
                         }
                         .padding(.vertical, 3)
                     }
-                    let typeKeys = AssignmentLogic.submissionTypeLabelKeys(detail: detail)
                     if !typeKeys.isEmpty {
                         HStack {
                             Text(L.text("mobile.assignment.allowedTypes"))
@@ -515,6 +523,32 @@ struct AssignmentDetailView: View {
                                 .multilineTextAlignment(.trailing)
                         }
                         .padding(.vertical, 3)
+                    }
+                    if hasRubric, let rubric {
+                        Button {
+                            showRubric = true
+                        } label: {
+                            HStack {
+                                Text(L.text("mobile.assignment.rubricTitle"))
+                                    .font(.subheadline)
+                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                                Spacer()
+                                Text(
+                                    rubric.criteria.count == 1
+                                        ? L.format("mobile.assignment.rubricCriterionCount", rubric.criteria.count)
+                                        : L.format("mobile.assignment.rubricCriteriaCount", rubric.criteria.count)
+                                )
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.primary)
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(LexturesTheme.primary)
+                            }
+                            .padding(.vertical, 3)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint(L.text("mobile.assignment.viewRubricHint"))
                     }
                 }
             }

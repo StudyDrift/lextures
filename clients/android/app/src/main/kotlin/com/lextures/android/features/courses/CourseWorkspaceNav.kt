@@ -72,6 +72,7 @@ private fun sectionLabel(
 ): String {
     val res = when (section) {
         CourseWorkspaceSection.Overview -> R.string.mobile_ia_course_overview
+        CourseWorkspaceSection.Checklist -> R.string.mobile_ia_course_checklist
         CourseWorkspaceSection.Modules -> R.string.mobile_ia_course_modules
         CourseWorkspaceSection.Grades -> R.string.mobile_ia_course_grades
         CourseWorkspaceSection.Mastery -> R.string.mobile_ia_course_mastery

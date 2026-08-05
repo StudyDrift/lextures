@@ -44,6 +44,13 @@ func ruleA11yImageAltText() ItemDescriptor {
 			Route:   "/courses/{courseCode}/modules",
 		},
 		EvidenceShape: &EvidenceShape{Columns: a11yEvidenceColumns},
+		Action: &ItemAction{
+			Kind:       ActionKindSuggestAltText,
+			LabelKey:   "coursechecklist.action.suggest_alt_text",
+			Label:      "Suggest alt text",
+			Endpoint:   "/api/v1/courses/{courseCode}/alt-text/suggest",
+			RequiresAI: true,
+		},
 	}
 }
 

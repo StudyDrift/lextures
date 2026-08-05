@@ -1817,3 +1817,71 @@ html[data-motion-delight='off'] .lx-delight-particle {
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+/* ── CC.8 focus-anchor highlight ───────────────────────────────────────────
+ * Outline + offset ring (3:1 against adjacent colours in light/dark).
+ * Paired with a "Here" chip so the signal is not colour-only (WCAG 1.4.1).
+ * No pulsing / looping / flashing under any setting (WCAG 2.3.1).
+ */
+[data-focus-anchor],
+[data-setting-row] {
+  scroll-margin-top: 5rem;
+}
+
+.lx-focus-anchor-highlight {
+  outline: 2px solid var(--color-indigo-600, #4f46e5);
+  outline-offset: 4px;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-indigo-500, #6366f1) 35%, transparent);
+}
+
+.dark .lx-focus-anchor-highlight {
+  outline-color: var(--color-indigo-400, #818cf8);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-indigo-400, #818cf8) 40%, transparent);
+}
+
+.lx-focus-anchor-highlight--fading {
+  transition: outline-color 200ms var(--ease-standard, ease), box-shadow 200ms var(--ease-standard, ease);
+  outline-color: transparent;
+  box-shadow: none;
+}
+
+.lx-focus-anchor-chip {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  z-index: 20;
+  transform: translateY(calc(-100% - 0.25rem));
+  pointer-events: none;
+  border-radius: 9999px;
+  background: var(--color-indigo-600, #4f46e5);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.dark .lx-focus-anchor-chip {
+  background: var(--color-indigo-500, #6366f1);
+  color: #0a0a0a;
+}
+
+@media (max-width: 40rem) {
+  .lx-focus-anchor-chip {
+    /* Stack above the control rather than crowding the start edge. */
+    inset-inline-start: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-focus-anchor-highlight--fading {
+    transition: none;
+  }
+}
+
+html.reduced-motion .lx-focus-anchor-highlight--fading {
+  transition: none;
+}

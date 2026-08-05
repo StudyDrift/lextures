@@ -221,7 +221,7 @@ export default function CourseDiscussionsPage() {
     return (
       <LmsPage title="Discussions" description="">
         <p className="mt-6 text-sm text-slate-500">Invalid course.</p>
-      </LmsPage>
+    </LmsPage>
     )
   }
 
@@ -232,6 +232,7 @@ export default function CourseDiscussionsPage() {
       fillHeight
       omitHeader
     >
+      <div data-focus-anchor="discussions.list">
       <div
         className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row"
         data-discussions-root
@@ -606,6 +607,7 @@ export default function CourseDiscussionsPage() {
       </div>
       {ConfirmDialogHost}
       {InputDialogHost}
+          </div>
     </LmsPage>
   )
 }

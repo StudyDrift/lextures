@@ -19,6 +19,8 @@ import {
   type CategoryCollapseMap,
 } from '../../../lib/course-checklist-category-state'
 import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
+import { emitChecklistTelemetry } from '../../../lib/checklist-telemetry'
+import { fetchAiProcessingOptOut } from '../../../lib/study-buddy-api'
 import { useCourseChecklistSummary } from '../../../context/course-checklist-summary-context'
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error' | 'forbidden'
@@ -30,7 +32,8 @@ export function useChecklistPage(courseCode: string | undefined) {
   const [error, setError] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState<CategoryCollapseMap>({})
   const [dismissedOpen, setDismissedOpen] = useState(false)
-  const [showCompletedWhenAllDone, setShowCompletedWhenAllDone] = useState(false)
+  /** When false, done items are hidden (default). User can toggle to review them. */
+  const [showCompleted, setShowCompleted] = useState(false)
   const [busyItemId, setBusyItemId] = useState<string | null>(null)
   const [itemErrors, setItemErrors] = useState<Record<string, string>>({})
   const [liveMessage, setLiveMessage] = useState('')
@@ -38,6 +41,18 @@ export function useChecklistPage(courseCode: string | undefined) {
   const [dismissTarget, setDismissTarget] = useState<ChecklistItem | null>(null)
   const [dismissBusy, setDismissBusy] = useState(false)
   const [dismissError, setDismissError] = useState<string | null>(null)
+  const [aiOptOut, setAiOptOut] = useState(false)
+  const [mappingAssistItem, setMappingAssistItem] = useState<ChecklistItem | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void fetchAiProcessingOptOut().then((v) => {
+      if (!cancelled) setAiOptOut(v)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const load = useCallback(async () => {
     if (!courseCode) return
@@ -59,6 +74,7 @@ export function useChecklistPage(courseCode: string | undefined) {
         writeCategoryCollapseState(courseCode, res.catalogVersion, initial)
       }
       setLoadState('ready')
+      emitChecklistTelemetry('checklist_viewed')
     } catch (err) {
       if (err instanceof CourseChecklistApiError && err.status === 403) {
         setLoadState('forbidden')
@@ -114,6 +130,7 @@ export function useChecklistPage(courseCode: string | undefined) {
       setLoadState('ready')
       await refreshSummary()
       setLiveMessage(courseChecklistI18n.itemRecheckedLive)
+      emitChecklistTelemetry('checklist_refreshed')
     } catch (err) {
       setError(err instanceof Error ? err.message : courseChecklistI18n.loadError)
     } finally {
@@ -172,6 +189,10 @@ export function useChecklistPage(courseCode: string | undefined) {
         )
         setDismissTarget(null)
         setLiveMessage(courseChecklistI18n.itemDismissedLive)
+        emitChecklistTelemetry('checklist_item_dismissed', {
+          itemId: item.id,
+          reason: body.reason,
+        })
         await refreshSummary()
       } catch (err) {
         setData(prev)
@@ -209,6 +230,7 @@ export function useChecklistPage(courseCode: string | undefined) {
         const fresh = await fetchCourseChecklist(courseCode)
         setData(fresh)
         setLiveMessage(courseChecklistI18n.itemRestoredLive)
+        emitChecklistTelemetry('checklist_item_restored', { itemId: item.id })
         await refreshSummary()
       } catch (err) {
         setData(prev)
@@ -237,6 +259,7 @@ export function useChecklistPage(courseCode: string | undefined) {
           })),
         })
         setLiveMessage(courseChecklistI18n.itemRecheckedLive)
+        emitChecklistTelemetry('checklist_item_rechecked', { itemId: item.id })
         await refreshSummary()
       } catch (err) {
         setItemErrors((e) => ({
@@ -270,8 +293,8 @@ export function useChecklistPage(courseCode: string | undefined) {
     ensureCategoryExpanded,
     dismissedOpen,
     setDismissedOpen,
-    showCompletedWhenAllDone,
-    setShowCompletedWhenAllDone,
+    showCompleted,
+    setShowCompleted,
     busyItemId,
     itemErrors,
     liveMessage,
@@ -286,5 +309,9 @@ export function useChecklistPage(courseCode: string | undefined) {
     onRecheck,
     allDone,
     catalogEmpty,
+    aiOptOut,
+    hideAiActions: aiOptOut,
+    mappingAssistItem,
+    setMappingAssistItem,
   }
 }

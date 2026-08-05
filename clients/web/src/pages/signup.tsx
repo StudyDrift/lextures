@@ -229,7 +229,11 @@ export default function Signup() {
             </div>
 
             <div className="rounded-lg border border-stone-200 bg-stone-50/80 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-900/40">
-              <TimezoneSelector value={timezone} onChange={setTimezone} showDetectedHint />
+              <TimezoneSelector
+                value={timezone}
+                onChange={(v) => setTimezone(v ?? detectBrowserTimezone())}
+                showDetectedHint
+              />
             </div>
 
             <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-stone-50/80 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-900/40">

@@ -2,6 +2,7 @@ package com.lextures.android.core.navigation
 
 import com.lextures.android.core.design.UIMode
 import com.lextures.android.core.lms.AdvisingLogic
+import com.lextures.android.core.lms.CourseChecklistLogic
 import com.lextures.android.core.lms.CourseSettingsLogic
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LiveQuizLogic
@@ -105,6 +106,7 @@ enum class MoreDestination(val labelRes: String) {
 /** Course-scoped workspace chips (registry-driven). */
 enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: String?) {
     Overview("mobile_ia_course_overview", "overview"),
+    Checklist("mobile_ia_course_checklist", "checklist"),
     Modules("mobile_ia_course_modules", "modules"),
     Grades("mobile_ia_course_grades", "grades"),
     Mastery("mobile_ia_course_mastery", "mastery"),
@@ -131,6 +133,7 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
     companion object {
         fun from(section: CourseDeepLinkSection?): CourseWorkspaceSection? = when (section) {
             CourseDeepLinkSection.Overview -> Overview
+            CourseDeepLinkSection.Checklist -> Checklist
             CourseDeepLinkSection.Modules -> Modules
             CourseDeepLinkSection.Grades -> Grades
             CourseDeepLinkSection.Feed -> Feed
@@ -397,6 +400,8 @@ data class CourseWorkspaceContext(
     val hasLibraryResources: Boolean = false,
     val evaluationStatus: EvaluationStatus? = null,
     val platformFeatures: MobilePlatformFeatures = MobilePlatformFeatures(),
+    /** Active app role context. Checklist is teaching-only (CC.9 FR-4). */
+    val roleContext: MobileRoleContext = MobileRoleContext.Learning,
 )
 
 /** Registry: role-aware shell tabs, More hub, and course workspace chips. */
@@ -465,7 +470,7 @@ object MobileDestinations {
         fun filtered(group: List<CourseWorkspaceSection>) = group.filter { it in sections }
         return listOf(
             "mobile_drawer_course_content" to filtered(
-                listOf(CourseWorkspaceSection.Overview, CourseWorkspaceSection.Modules, CourseWorkspaceSection.Files, CourseWorkspaceSection.Library),
+                listOf(CourseWorkspaceSection.Overview, CourseWorkspaceSection.Checklist, CourseWorkspaceSection.Modules, CourseWorkspaceSection.Files, CourseWorkspaceSection.Library),
             ),
             "mobile_drawer_course_collaboration" to filtered(
                 listOf(
@@ -575,6 +580,9 @@ object MobileDestinations {
 
     fun courseWorkspaceSections(ctx: CourseWorkspaceContext): List<CourseWorkspaceSection> = buildList {
         add(CourseWorkspaceSection.Overview)
+        if (CourseChecklistLogic.shouldShowWorkspaceSection(ctx.course.viewerIsStaff, ctx.roleContext)) {
+            add(CourseWorkspaceSection.Checklist)
+        }
         add(CourseWorkspaceSection.Modules)
         if (ctx.course.isFilesEnabled) add(CourseWorkspaceSection.Files)
         if (ctx.course.viewerIsStudent) add(CourseWorkspaceSection.Grades)

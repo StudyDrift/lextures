@@ -67,6 +67,10 @@ def main() -> None:
     assets_ref = gen_id()
     localizable_ref = gen_id()
     privacy_manifest_ref = gen_id()
+    checklist_targets_ref = gen_id()
+    checklist_targets_build = gen_id()
+    checklist_help_ref = gen_id()
+    checklist_help_build = gen_id()
     info_plist_ref = gen_id()
     dev_xcconfig_ref = gen_id()
     config_group = gen_id()
@@ -117,6 +121,12 @@ def main() -> None:
     w(
         f"\t\t{privacy_manifest_build} /* PrivacyInfo.xcprivacy in Resources */ = {{isa = PBXBuildFile; fileRef = {privacy_manifest_ref} /* PrivacyInfo.xcprivacy */; }};"
     )
+    w(
+        f"\t\t{checklist_targets_build} /* checklist-targets.json in Resources */ = {{isa = PBXBuildFile; fileRef = {checklist_targets_ref} /* checklist-targets.json */; }};"
+    )
+    w(
+        f"\t\t{checklist_help_build} /* checklist-help.json in Resources */ = {{isa = PBXBuildFile; fileRef = {checklist_help_ref} /* checklist-help.json */; }};"
+    )
     w("/* End PBXBuildFile section */")
 
     w("\n/* Begin PBXFileReference section */")
@@ -140,6 +150,12 @@ def main() -> None:
     )
     w(
         f"\t\t{privacy_manifest_ref} /* PrivacyInfo.xcprivacy */ = {{isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = \"<group>\"; }};"
+    )
+    w(
+        f"\t\t{checklist_targets_ref} /* checklist-targets.json */ = {{isa = PBXFileReference; lastKnownFileType = text.json; path = \"checklist-targets.json\"; sourceTree = \"<group>\"; }};"
+    )
+    w(
+        f"\t\t{checklist_help_ref} /* checklist-help.json */ = {{isa = PBXFileReference; lastKnownFileType = text.json; path = \"checklist-help.json\"; sourceTree = \"<group>\"; }};"
     )
     w(
         f"\t\t{info_plist_ref} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = \"<group>\"; }};"
@@ -185,6 +201,8 @@ def main() -> None:
                 f"{assets_ref} /* Assets.xcassets */",
                 f"{localizable_ref} /* Localizable.xcstrings */",
                 f"{privacy_manifest_ref} /* PrivacyInfo.xcprivacy */",
+                f"{checklist_targets_ref} /* checklist-targets.json */",
+                f"{checklist_help_ref} /* checklist-help.json */",
                 f"{info_plist_ref} /* Info.plist */",
             ]
         else:
@@ -339,6 +357,8 @@ def main() -> None:
     w(f"\t\t\t\t{assets_build} /* Assets.xcassets in Resources */,")
     w(f"\t\t\t\t{localizable_build} /* Localizable.xcstrings in Resources */,")
     w(f"\t\t\t\t{privacy_manifest_build} /* PrivacyInfo.xcprivacy in Resources */,")
+    w(f"\t\t\t\t{checklist_targets_build} /* checklist-targets.json in Resources */,")
+    w(f"\t\t\t\t{checklist_help_build} /* checklist-help.json in Resources */,")
     w("\t\t\t);")
     w("\t\t};")
     w("/* End PBXResourcesBuildPhase section */")

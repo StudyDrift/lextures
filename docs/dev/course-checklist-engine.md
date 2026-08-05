@@ -18,7 +18,8 @@ There is **no feature flag**. Retire a bad rule via `RETIRED_ITEM_IDS` (server r
 2. Add the descriptor in the appropriate `rules_*.go` file (grouped by category; CC.3–CC.6 packs).
 3. Declare `DataNeeds` so Only-mode loads only what the rule needs.
 4. Implement `Applies` (or `nil` if always applicable) and `Evaluate` as pure functions of `CourseSnapshot`.
-5. Set `Target` to a route present in `testdata/web_routes.json`.
+5. Set `Target` to a route present in `testdata/web_routes.json`. Prefer an `Anchor` from the
+   [focus-anchors registry](focus-anchors.md) (CC.8) so the web client can highlight the control.
 6. If the evaluator can emit evidence rows, set `EvidenceShape` and keep evidence ≤ 200 rows
    (the engine truncates and sets `TruncatedAt`).
 7. Cite at least one `Sources` entry (`"QM 2.1"`, `"OSCQR 41"`, `"NSQ C"`, `"Product"`, …).

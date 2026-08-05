@@ -49,6 +49,7 @@ enum class ParentDeepLinkSection {
 
 enum class CourseDeepLinkSection {
     Overview,
+    Checklist,
     Modules,
     Grades,
     Feed,
@@ -182,6 +183,7 @@ object DeepLinkRouter {
         }
 
         return when (segments[2].lowercase()) {
+            "checklist" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Checklist)
             "grades" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Grades)
             "office-hours" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.OfficeHours)
             "feed" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Feed)

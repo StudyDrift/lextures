@@ -1,6 +1,9 @@
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import type { ChecklistCategory, ChecklistItem } from '../../../lib/course-checklist-api-schemas'
-import { isOutstandingStatus } from '../../../lib/course-checklist-api-schemas'
+import {
+  isOutstandingStatus,
+  visibleChecklistItems,
+} from '../../../lib/course-checklist-api-schemas'
 import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
 import { ChecklistItemRow } from './checklist-item-row'
 
@@ -8,25 +11,35 @@ type ChecklistCategorySectionProps = {
   category: ChecklistCategory
   expanded: boolean
   onToggle: () => void
+  showCompleted: boolean
   itemErrors: Record<string, string>
   busyItemId: string | null
   highlightItemId: string | null
   onDismiss: (item: ChecklistItem) => void
   onRecheck: (item: ChecklistItem) => void
+  onAssist?: (item: ChecklistItem) => void
+  hideAiActions?: boolean
 }
 
 export function ChecklistCategorySection({
   category,
   expanded,
   onToggle,
+  showCompleted,
   itemErrors,
   busyItemId,
   highlightItemId,
   onDismiss,
   onRecheck,
+  onAssist,
+  hideAiActions,
 }: ChecklistCategorySectionProps) {
   const outstanding = category.items.filter((i) => isOutstandingStatus(i.status)).length
+  const visibleItems = visibleChecklistItems(category.items, showCompleted)
   const panelId = `checklist-cat-${category.id}`
+
+  // Nothing to show in this category while completed are hidden.
+  if (visibleItems.length === 0) return null
 
   return (
     <section aria-labelledby={`${panelId}-heading`} className="border-b border-slate-200 py-4 last:border-0 dark:border-neutral-800">
@@ -56,7 +69,7 @@ export function ChecklistCategorySection({
       </h2>
       {expanded ? (
         <ul id={panelId} className="mt-2 divide-y divide-slate-100 dark:divide-neutral-800">
-          {category.items.map((item) => (
+          {visibleItems.map((item) => (
             <ChecklistItemRow
               key={item.id}
               item={item}
@@ -65,6 +78,8 @@ export function ChecklistCategorySection({
               highlighted={highlightItemId === item.id}
               onDismiss={onDismiss}
               onRecheck={onRecheck}
+              onAssist={onAssist}
+              hideAiActions={hideAiActions}
             />
           ))}
         </ul>

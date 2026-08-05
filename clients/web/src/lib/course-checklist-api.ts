@@ -54,6 +54,75 @@ export async function refreshCourseChecklist(courseCode: string): Promise<Checkl
   return parseApiResponse('refreshCourseChecklist', checklistResponseSchema, await res.json())
 }
 
+/** CC.10 FR-6: read-only outcome-mapping proposals (no writes). */
+export type OutcomeMappingProposal = {
+  structureItemId: string
+  itemTitle?: string
+  itemKind?: string
+  outcomeId: string
+  outcomeTitle?: string
+  measurementLevel: string
+  intensityLevel: string
+  confidence: number
+  rationale: string
+}
+
+export async function suggestOutcomeLinks(
+  courseCode: string,
+): Promise<OutcomeMappingProposal[]> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/outcomes/suggest-links`,
+    { method: 'POST' },
+  )
+  if (!res.ok) {
+    await throwApiError(res, 'Could not suggest outcome mappings.')
+  }
+  const body = (await res.json()) as { proposals?: OutcomeMappingProposal[] }
+  return body.proposals ?? []
+}
+
+/** Apply one accepted proposal via the existing link-create endpoint. */
+export async function createOutcomeLink(
+  courseCode: string,
+  outcomeId: string,
+  body: {
+    structureItemId: string
+    measurementLevel?: string
+    intensityLevel?: string
+    targetKind?: string
+  },
+): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/outcomes/${encodeURIComponent(outcomeId)}/links`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        structureItemId: body.structureItemId,
+        measurementLevel: body.measurementLevel ?? 'summative',
+        intensityLevel: body.intensityLevel ?? 'medium',
+        targetKind: body.targetKind === 'quiz' ? 'quiz' : 'assignment',
+      }),
+    },
+  )
+  if (!res.ok) {
+    await throwApiError(res, 'Could not create outcome link.')
+  }
+}
+
+export type WelcomeDraft = { subject: string; body: string }
+
+export async function draftWelcomeAnnouncement(courseCode: string): Promise<WelcomeDraft> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/feed/draft-welcome`,
+    { method: 'POST' },
+  )
+  if (!res.ok) {
+    await throwApiError(res, 'Could not draft a welcome announcement.')
+  }
+  return (await res.json()) as WelcomeDraft
+}
+
 export async function dismissChecklistItem(
   courseCode: string,
   itemId: string,

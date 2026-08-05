@@ -519,12 +519,17 @@
   ],
   "course-checklist-api.ts": [
     "CourseChecklistApiError",
+    "OutcomeMappingProposal",
+    "WelcomeDraft",
+    "createOutcomeLink",
     "dismissChecklistItem",
+    "draftWelcomeAnnouncement",
     "fetchCourseChecklist",
     "fetchCourseChecklistSummary",
     "recheckChecklistItem",
     "refreshCourseChecklist",
-    "restoreChecklistItem"
+    "restoreChecklistItem",
+    "suggestOutcomeLinks"
   ],
   "course-evaluations-api.ts": [
     "AdminReportRow",
