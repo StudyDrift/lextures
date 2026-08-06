@@ -9,7 +9,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const reorderOffset = 10_000_000
+// childTempBase is far above any legitimate dense sort_order (0..n). Children are
+// parked here with course-wide unique values before reparent / final assignment so
+// idx_course_structure_items_child_order cannot fire mid-update.
+const childTempBase = 1_000_000_000
 
 // ErrInvalidReorder is returned when module or child ids do not match the current structure.
 var ErrInvalidReorder = errors.New("coursestructure: invalid reorder")
@@ -21,6 +24,12 @@ var ErrInvalidReorder = errors.New("coursestructure: invalid reorder")
 // appears under exactly one module). Modules with no children use an empty slice (or may be
 // omitted from the map). Archived modules and children are unchanged in membership; their
 // sort_order may be compacted to keep unique indexes free of collisions.
+//
+// Implementation notes (idx_course_structure_items_child_order / top_level_order):
+// PostgreSQL checks non-deferrable unique indexes per row as each row is updated. Reordering
+// therefore parks every affected row on temporary sort_orders that cannot collide with final
+// 0..n values (and, for children, are unique across the whole course so reparent is safe),
+// then writes final orders and compacts archived / leftover rows.
 func ApplyModuleAndChildOrder(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -139,15 +148,15 @@ func ApplyModuleAndChildOrder(
 		}
 	}
 
-	// Bump every top-level row (modules and any non-module top-level items such as
-	// attendance). Only bumping modules left other top-level sort_orders in place and
-	// reassigning modules to 0..n-1 collided with the unique (course_id, sort_order)
-	// index (idx_course_structure_items_top_level_order).
+	// --- Top-level (unique index: course_id, sort_order WHERE parent_id IS NULL) ---
+	// 1) Mirror onto negatives (no collision with non-negative sources).
+	// 2) Assign final module order 0..n-1.
+	// 3) Compact remaining top-level rows after the module sequence.
 	if _, err := tx.Exec(ctx, `
 		UPDATE course.course_structure_items
-		SET sort_order = sort_order + $2
-		WHERE course_id = $1 AND parent_id IS NULL
-	`, courseID, reorderOffset); err != nil {
+		SET sort_order = -1 - sort_order
+		WHERE course_id = $1 AND parent_id IS NULL AND sort_order >= 0
+	`, courseID); err != nil {
 		return err
 	}
 
@@ -161,9 +170,6 @@ func ApplyModuleAndChildOrder(
 		}
 	}
 
-	// Compact remaining top-level rows (archived modules, attendance, etc.) after
-	// the visible module sequence so they keep unique sort_orders and do not
-	// accumulate unbounded offsets across reorders.
 	if _, err := tx.Exec(ctx, `
 		WITH remaining AS (
 			SELECT id,
@@ -181,14 +187,54 @@ func ApplyModuleAndChildOrder(
 		return err
 	}
 
-	// Bump every child (including archived) so reparent + low sort_order values cannot
-	// collide with the unique (parent_id, sort_order) index mid-update.
+	// --- Children (unique index: parent_id, sort_order WHERE parent_id IS NOT NULL) ---
+	// 1) Mirror onto negatives (safe vs current non-negative values).
+	// 2) Park every child on a course-wide unique high temp so reparent cannot collide.
+	// 3) Reparent live children to their target modules (temps unchanged).
+	// 4) Write final dense sort_orders 0..n-1 per module.
+	// 5) Compact archived (and any other leftovers) after the live sequence.
+	// 6) Compact children under non-visible parents (e.g. archived modules).
 	if _, err := tx.Exec(ctx, `
 		UPDATE course.course_structure_items
-		SET sort_order = sort_order + $2
-		WHERE course_id = $1 AND parent_id IS NOT NULL
-	`, courseID, reorderOffset); err != nil {
+		SET sort_order = -1 - sort_order
+		WHERE course_id = $1 AND parent_id IS NOT NULL AND sort_order >= 0
+	`, courseID); err != nil {
 		return err
+	}
+
+	if _, err := tx.Exec(ctx, `
+		WITH numbered AS (
+			SELECT id,
+				($2::int + ROW_NUMBER() OVER (ORDER BY parent_id, id))::int AS tmp_ord
+			FROM course.course_structure_items
+			WHERE course_id = $1 AND parent_id IS NOT NULL
+		)
+		UPDATE course.course_structure_items AS c
+		SET sort_order = numbered.tmp_ord
+		FROM numbered
+		WHERE c.id = numbered.id
+	`, courseID, childTempBase); err != nil {
+		return err
+	}
+
+	for _, mid := range visibleModules {
+		childIDs := childrenByModule[mid]
+		if childIDs == nil {
+			childIDs = []uuid.UUID{}
+		}
+		for _, cid := range childIDs {
+			tag, err := tx.Exec(ctx, `
+				UPDATE course.course_structure_items
+				SET parent_id = $2
+				WHERE id = $1 AND course_id = $3 AND parent_id IS NOT NULL AND NOT archived
+			`, cid, mid, courseID)
+			if err != nil {
+				return err
+			}
+			if tag.RowsAffected() != 1 {
+				return ErrInvalidReorder
+			}
+		}
 	}
 
 	for _, mid := range visibleModules {
@@ -199,9 +245,9 @@ func ApplyModuleAndChildOrder(
 		for ord, cid := range childIDs {
 			tag, err := tx.Exec(ctx, `
 				UPDATE course.course_structure_items
-				SET parent_id = $2, sort_order = $3
-				WHERE id = $1 AND course_id = $4 AND parent_id IS NOT NULL AND NOT archived
-			`, cid, mid, ord, courseID)
+				SET sort_order = $3
+				WHERE id = $1 AND course_id = $2 AND parent_id = $4 AND NOT archived
+			`, cid, courseID, ord, mid)
 			if err != nil {
 				return err
 			}
@@ -209,21 +255,46 @@ func ApplyModuleAndChildOrder(
 				return ErrInvalidReorder
 			}
 		}
-		// Compact archived children under this module after the live sequence.
+		// Archived children (and any unexpected leftovers) after the live sequence.
 		if _, err := tx.Exec(ctx, `
-			WITH archived AS (
+			WITH leftovers AS (
 				SELECT id,
 					$2::int + (ROW_NUMBER() OVER (ORDER BY sort_order, id) - 1)::int AS new_ord
 				FROM course.course_structure_items
 				WHERE parent_id = $1 AND archived
 			)
 			UPDATE course.course_structure_items AS c
-			SET sort_order = archived.new_ord
-			FROM archived
-			WHERE c.id = archived.id
+			SET sort_order = leftovers.new_ord
+			FROM leftovers
+			WHERE c.id = leftovers.id
 		`, mid, len(childIDs)); err != nil {
 			return err
 		}
+	}
+
+	if len(visibleModules) == 0 {
+		visibleModules = []uuid.UUID{}
+	}
+	if _, err := tx.Exec(ctx, `
+		WITH parents AS (
+			SELECT DISTINCT parent_id
+			FROM course.course_structure_items
+			WHERE course_id = $1
+			  AND parent_id IS NOT NULL
+			  AND NOT (parent_id = ANY($2::uuid[]))
+		),
+		numbered AS (
+			SELECT c.id,
+				(ROW_NUMBER() OVER (PARTITION BY c.parent_id ORDER BY c.sort_order, c.id) - 1)::int AS new_ord
+			FROM course.course_structure_items c
+			INNER JOIN parents p ON p.parent_id = c.parent_id
+		)
+		UPDATE course.course_structure_items AS c
+		SET sort_order = numbered.new_ord
+		FROM numbered
+		WHERE c.id = numbered.id
+	`, courseID, visibleModules); err != nil {
+		return err
 	}
 
 	return tx.Commit(ctx)
